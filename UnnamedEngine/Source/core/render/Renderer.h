@@ -1,0 +1,106 @@
+/*****************************************************************************
+ *
+ *   Copyright 2016 Joel Davies
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ *****************************************************************************/
+
+#ifndef CORE_RENDER_RENDERER_H_
+#define CORE_RENDER_RENDERER_H_
+
+#include "Camera.h"
+#include<iostream>
+#include "FBO.h"
+
+/*****************************************************************************
+ * The Renderer class contains everything need to render a Mesh
+ *****************************************************************************/
+
+class Renderer {
+private:
+	static std::vector<Camera*> cameras;
+	static std::vector<Texture*> boundTextures;
+	static std::map<std::string, RenderShader*> renderShaders;
+	static Texture* blank;
+
+	/* This mesh is used to render a FramebufferTexture to the screen - useful
+	 * for post processing effects */
+	static MeshRenderData* screenTextureMesh;
+
+	/* The size of the boundTextures array, at the moment saveTextures() is
+	 * called */
+	static unsigned int boundTexturesOldSize;
+public:
+	/* Methods used to add/remove a camera to use for rendering - the renderer
+	 * uses the last camera added when rendering */
+	static void addCamera(Camera* camera);
+	static void removeCamera();
+
+	/* Returns the current camera for rendering */
+	static Camera* getCamera();
+
+	/* Methods used to bind/unbind a texture */
+	static GLuint bindTexture(Texture* texture);
+	static void unbindTexture();
+	/* Unbinds all textures */
+	static inline void unbindTextures() {
+		while (boundTextures.size() > 0)
+			unbindTexture();
+	}
+
+	/* Used to store the current number of boundTextures so new textures
+	 * can be released later */
+	static inline void saveTextures() {
+		boundTexturesOldSize = boundTextures.size();
+	}
+
+	static inline unsigned int getNumBoundTextures() {
+		return boundTextures.size();
+	}
+
+	/* Releases extra textures so that the boundTextures size is the same
+	 * as it was when saveTextures() was called */
+	static inline void releaseNewTextures() {
+		while (boundTextures.size() > boundTexturesOldSize)
+			unbindTexture();
+		boundTexturesOldSize = boundTextures.size();
+	}
+
+	/* Method used to initialise the rendering system */
+	static void initialise();
+
+	/* Method used to render a Mesh */
+	static void render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderShader* shader);
+
+	/* Method used to render a FramebufferTexture */
+	static void render(FramebufferTexture* texture, Shader* shader = NULL);
+
+	/* Method use to destroy any objects that were created */
+	static void destroy();
+
+	/* Method used to add a RenderShader given a Shader - this method will also setup the shader
+	 * providing the id is recognised */
+	static void addRenderShader(std::string id, Shader* shader);
+
+	/* Method used to add a RenderShader */
+	static void addRenderShader(RenderShader* renderShader);
+
+	/* Returns the RenderShader with a specific id */
+	static RenderShader* getRenderShader(std::string id);
+
+	/* Returns the blank texture */
+	static inline Texture* getBlankTexture() { return blank; }
+};
+
+#endif /* CORE_RENDER_RENDERER_H_ */

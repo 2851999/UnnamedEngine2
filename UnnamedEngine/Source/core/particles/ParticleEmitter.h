@@ -1,0 +1,72 @@
+/*****************************************************************************
+ *
+ *   Copyright 2016 Joel Davies
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ *****************************************************************************/
+
+#ifndef CORE_PARTICLES_PARTICLEEMITTER_H_
+#define CORE_PARTICLES_PARTICLEEMITTER_H_
+
+#include "ParticleSystem.h"
+#include "../Object.h"
+
+/*****************************************************************************
+ * The ParticleEmitter class handles the creation of new particles in a
+ * ParticleSystem
+ *****************************************************************************/
+
+class ParticleEmitter : public GameObject3D {
+public:
+	/* The number of particles to spawn per second */
+	unsigned int particleSpawnRate = 100;
+
+	/* The size of the particles emitted - this covers the width/height as
+	 * particles are rendered as a square */
+	float particleSize = 0.1f;
+
+	/* The life span of a particle measured in seconds */
+	float particleLifeSpan = 2.0f;
+
+	/* The initial particle speed */
+	Vector3f particleInitialVelocity = Vector3f(0.0f, 1.0f, 0.0f);
+
+	/* The initial particle colour */
+	Colour particleColour = Colour::WHITE;
+
+	/* The constructor */
+	ParticleEmitter() {}
+
+	/* The method used to update this emitter and emit any required particles
+	 * given a particle system instance */
+	void update(ParticleSystem* system, float delta);
+
+	/* The overrideable method used to setup and emit a particle */
+	virtual void emitParticle(Particle& particle) {}
+};
+
+class SphericalParticleEmitter : public ParticleEmitter {
+public:
+	/* The max speed */
+	float particleMaxSpeed;
+
+	/* The constructor */
+	SphericalParticleEmitter(float particleMaxSpeed = 2.0f) : particleMaxSpeed(particleMaxSpeed) {}
+
+	/* The overrideable method used to setup and emit a particle */
+	virtual void emitParticle(Particle& particle) override;
+};
+
+
+#endif /* CORE_PARTICLES_PARTICLEEMITTER_H_ */
