@@ -1,0 +1,19 @@
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 0 | Experimental 2
+
+* Just some general clean up/organising for development on
+  two computers
+
+* Renamed Audio to AudioManager
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 0 | Experimental 1 (V0.0.1)
+
+'Well here we are again'. Another game engine attempt, worked
+on over summer to test things for a computer science project,
+although already a bit over the top.
+
+Already has quite a lot of features as before, although some
+major issues I didn't even realise the last 4 times including
+the fact OpenGL uses column major matrices, which explains
+a lot of difficulties in the past have been fixed. (facepalm)

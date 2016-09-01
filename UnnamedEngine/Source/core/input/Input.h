@@ -55,19 +55,16 @@ public:
 };
 
 /*****************************************************************************
- * The CursorData structure to keep track of the cursor
- *****************************************************************************/
-
-struct CursorData {
-	double lastX = -1;
-	double lastY = -1;
-};
-
-/*****************************************************************************
  * The InputManager class manages input for a window
  *****************************************************************************/
 
 class InputManager {
+public:
+	/* The CursorData structure to keep track of the cursor */
+	struct CursorData {
+		double lastX = -1;
+		double lastY = -1;
+	};
 private:
 	/* All of the input listeners */
 	std::vector<InputListener*> listeners;

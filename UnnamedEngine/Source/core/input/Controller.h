@@ -44,6 +44,9 @@ public:
 	/* The constructor */
 	Controller(int index);
 
+	/* The destructor */
+	virtual ~Controller() {}
+
 	/* The method used to check for any input from this controller */
 	void checkInput();
 

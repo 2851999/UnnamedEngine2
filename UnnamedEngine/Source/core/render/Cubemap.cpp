@@ -16,6 +16,7 @@
  *
  *****************************************************************************/
 
+#include <stb/stb_image.h>
 #include "Cubemap.h"
 
 /*****************************************************************************
@@ -48,6 +49,7 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 			GL_UNSIGNED_BYTE,
 			image
 		);
+		stbi_image_free(image);
 	}
 
 	applyParameters(false, true);

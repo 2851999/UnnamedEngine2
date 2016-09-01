@@ -149,6 +149,7 @@ public:
 	inline SkyBox* getSkyBox() { return skyBox; }
 	inline bool hasSkyBox() { return skyBox; }
 	inline bool isFlying() { return flying; }
+
 	inline Frustum& getFrustum() { return frustum; }
 };
 

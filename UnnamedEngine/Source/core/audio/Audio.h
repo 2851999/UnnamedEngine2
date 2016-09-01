@@ -232,10 +232,10 @@ public:
 };
 
 /***************************************************************************************************
- * The Audio class
+ * The AudioManager class
  ***************************************************************************************************/
 
-class Audio {
+class AudioManager {
 private:
 	/* All of the created audio sources */
 	static std::vector<AudioSource*> sources;

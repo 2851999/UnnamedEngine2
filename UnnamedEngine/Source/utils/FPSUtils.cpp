@@ -26,7 +26,9 @@ using namespace TimeUtils;
  *****************************************************************************/
 
 void FPSCalculator::start() {
+	//Ensure it hasn't already been started
 	if (! started) {
+		//Assign the last frame's time
 		lastFrame = getMilliseconds();
 		lastFPSCountUpdate = lastFrame;
 		started = true;
@@ -34,19 +36,31 @@ void FPSCalculator::start() {
 }
 
 void FPSCalculator::update() {
+	//Only calculate everything if necessary
 	if (mode != OFF) {
+		//Obtain the current time in milliseconds
 		long current = getMilliseconds();
 
+		//Calculate the current time in milliseconds
 		currentDelta = current - lastFrame;
+
+		//Assign the last frame time
 		lastFrame = current;
 
+		//Check the mode
 		if (mode == PER_FRAME) {
+			//Prevent divide by 0
 			if (currentDelta != 0)
+				//Calculate the FPS as the number of frames completed if the delta
+				//remained constant for 1000 milliseconds
 				currentFPS = (int) (1000.0f / currentDelta);
 		} else {
+			//Increment the frame counter
 			fpsCount++;
 
+			//Check whether it has been 1 second since the last FPS update
 			if (current - lastFPSCountUpdate >= 1000) {
+				//It has, so update the current FPS
 				lastFPSCountUpdate = current;
 				currentFPS = fpsCount;
 				fpsCount = 0;
@@ -56,6 +70,7 @@ void FPSCalculator::update() {
 }
 
 void FPSCalculator::reset() {
+	//Reset all of the variables
 	lastFrame = 0;
 	currentDelta = 0;
 	lastFPSCountUpdate = 0;
@@ -69,15 +84,21 @@ void FPSCalculator::reset() {
  *****************************************************************************/
 
 void FPSLimiter::setMaxFPS(unsigned int maxFPS) {
+	//Assign the maximum FPS
 	this->maxFPS = maxFPS;
+	//Prevent a divide by 0
 	if (maxFPS != 0)
+		//Calculate the target delta to achieve the desired frame rate
 		targetDelta = (long) (1000.0f / (float) maxFPS);
 }
 
 void FPSLimiter::update(long currentDelta) {
+	//Ensure there is a frame cap
 	if (maxFPS > 0) {
+		//Calculate the difference in the target delta, and the current one
 		long difference = targetDelta - currentDelta;
 
+		//Pause the thread for the time necessary
 		if (difference > 0)
 			sleep(difference);
 		else

@@ -52,10 +52,12 @@ public:
 	TextureParameters(GLuint target, GLuint filter, GLuint clamp) : target(target), filter(filter), clamp(clamp) { shouldClamp = true; }
 	TextureParameters(GLuint target, GLuint filter, GLuint clamp, bool shouldClamp) : target(target), filter(filter), clamp(clamp), shouldClamp(shouldClamp) {}
 
+	/* Methods used to apply the texture parameters to a texture */
 	void apply(GLuint texture, bool bind, bool unbind);
 	inline void apply(GLuint texture, bool unbind) { apply(texture, true, unbind); }
 	inline void apply(GLuint texture) { apply(texture, true, false); }
 
+	/* Setters and getters */
 	inline TextureParameters setTarget(GLuint target) { this->target = target; return (*this); }
 	inline TextureParameters setFilter(GLuint filter) { this->filter = filter; return (*this); }
 	inline TextureParameters setClamp(GLuint clamp)   { this->clamp  = clamp;  return (*this); }
@@ -73,28 +75,43 @@ public:
 
 class Texture : public Resource {
 private:
+	/* OpenGL handle to the texture */
 	GLuint texture = 0;
+
+	/* The width and height */
 	unsigned int width = 0;
 	unsigned int height = 0;
+
+	/* The number of colour components in this texture e.g.
+	 * 3 = RGB, 4 = RGBA */
 	unsigned int numComponents = 0;
 protected:
+	/* The texture parameters for this texture */
 	TextureParameters parameters;
 public:
+	/* Refers to the various positions of the texture, can be used in texture
+	 * atlas's to define the position of a sub texture */
 	float top    = 0.0f;
 	float bottom = 1.0f;
 	float left   = 0.0f;
 	float right  = 1.0f;
 
+	/* The constructors */
 	Texture(TextureParameters parameters = TextureParameters()) : parameters(parameters) { create(); }
 	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : texture(texture), parameters(parameters) {}
 	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : width(width), height(height), parameters(parameters) { create(); }
 	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : texture(texture), width(width), height(height), parameters(parameters) {}
+
+	/* The destructor */
 	virtual ~Texture() { destroy(); }
 
+	/* The create method simply obtains a handle for the texture from OpenGL */
 	inline void create() {
 		glGenTextures(1, &texture);
 	}
 
+	/* Various methods to apply the texture parameters, but will only do so if the
+	 * texture has been assigned */
 	inline void applyParameters() {
 		if (texture > 0)
 			parameters.apply(texture);
@@ -108,18 +125,23 @@ public:
 			parameters.apply(texture, bind, unbind);
 	}
 
+	/* Basic bind and unbind methods for OpenGL */
 	inline void bind()   { glBindTexture(parameters.getTarget(), texture); }
 	inline void unbind() { glBindTexture(parameters.getTarget(), 0);       }
 
+	/* Called to delete this texture */
 	virtual void destroy() override {
-		glDeleteTextures(1, &texture);
+		if (texture > 0)
+			glDeleteTextures(1, &texture);
 	}
 
+	/* The setters and getters */
 	inline void setParameters(TextureParameters& parameters) { this->parameters = parameters; }
 	inline void setWidth(unsigned int width) { this->width = width; }
 	inline void setHeight(unsigned int height) { this->height = height; }
 	inline void setSize(unsigned int width, unsigned int height) { this->width = width; this->height = height; }
 	inline void setNumComponents(unsigned int numComponents) { this->numComponents = numComponents; }
+
 	inline GLuint getHandle() { return texture; }
 	inline TextureParameters& getParameters() { return parameters; }
 	inline unsigned int getWidth() { return width; }
@@ -127,7 +149,8 @@ public:
 	inline int getNumComponents() { return numComponents; }
 	inline bool hasTexture() { return texture > 0; }
 
-	/* Returns the data necessary to load a texture */
+	/* Returns the data necessary to load a texture - note stbi_image_free should
+	 * be called once the image data is no longer needed */
 	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& format);
 
 	/* Returns a Texture instance after reading its data from a file */

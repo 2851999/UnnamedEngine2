@@ -96,7 +96,7 @@ public:
 	/* Various constructors */
 	GUIFill(float width, float height) : GUIComponentRenderer(width, height) {}
 	GUIFill(float width, float height, Colour colour) : GUIComponentRenderer(width, height, { colour }) {}
-	GUIFill(float width, float height, Texture* texture) : GUIComponentRenderer(width, height,{ texture }) {}
+	GUIFill(float width, float height, Texture* texture) : GUIComponentRenderer(width, height, { texture }) {}
 	GUIFill(float width, float height, Colour colour, Texture* texture) : GUIComponentRenderer(width, height, { colour }, { texture }) {}
 	GUIFill(float width, float height, std::vector<Colour> colours) : GUIComponentRenderer(width, height, colours) {}
 	GUIFill(float width, float height, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, textures) {}

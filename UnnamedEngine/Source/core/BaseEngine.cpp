@@ -46,7 +46,7 @@ void BaseEngine::create() {
 	Renderer::initialise();
 
 	//Initialise the Audio system
-	Audio::initialise();
+	AudioManager::initialise();
 
 	//Initialise the font system
 	Font::initialiseFreeType();
@@ -100,7 +100,7 @@ void BaseEngine::create() {
 
 	//Destroy all other engine resources
 	Font::destroyFreeType();
-	Audio::destroy();
+	AudioManager::destroy();
 	ResourceManager::destroyAll();
 
 	//Delete all of the objects required by the BaseEngine class

@@ -45,19 +45,31 @@ public:
 		PER_SECOND
 	};
 
+	/* The constructor */
 	FPSCalculator(Mode mode = PER_SECOND) { this->mode = mode; }
+
+	/* The destructor */
 	virtual ~FPSCalculator() {}
 
+	/* Method called to start - called to prevent initial delta being
+	 * high/fps being low because of loading at startup */
 	void start();
 
+	/* The method used to update everything and recalculate the delta/fps
+	 * if necessary */
 	void update();
+
+	/* Used to reset everything */
 	void reset();
 
+	/* Setters and getters */
 	void setMode(Mode mode) { this->mode = mode; }
+
 	Mode getMode() { return mode; }
 	long getDelta() { return currentDelta; }
 	unsigned int getFPS() { return currentFPS; }
 private:
+	/* The mode to use when calculating the FPS */
 	Mode mode;
 };
 
@@ -67,11 +79,16 @@ private:
 
 class FPSLimiter {
 private:
+	/* The maximum allowed FPS */
 	unsigned int maxFPS = 0;
-	long targetDelta = 0;
 
+	/* The delta when at the maximum FPS */
+	long targetDelta = 0;
 public:
+	/* The constructor */
 	FPSLimiter(unsigned int maxFPS = 0) { setMaxFPS(maxFPS); }
+
+	/* The destructor */
 	virtual ~FPSLimiter() {}
 
 	/* Assigns the maximum FPS */

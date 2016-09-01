@@ -95,6 +95,8 @@ public:
 
 	/* The destructor */
 	virtual ~FBO() {
+		for (unsigned int i = 0; i < textures.size(); i++)
+			delete textures[i];
 		textures.clear();
 	}
 

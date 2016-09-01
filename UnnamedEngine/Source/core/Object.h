@@ -39,6 +39,7 @@ private:
 	/* The RenderShader used when rendering */
 	RenderShader* renderShader;
 public:
+	/* The constructors */
 	GameObject(Mesh* mesh = NULL, RenderShader* shader = NULL) : renderShader(shader) {
 		if (mesh) {
 			mesh->setup(shader);
@@ -52,6 +53,7 @@ public:
 			meshes[i]->setup(shader);
 	}
 
+	/* The destructor */
 	virtual ~GameObject() {
 		if (hasMesh()) {
 			for (unsigned int i = 0; i < meshes.size(); i++)
@@ -60,6 +62,7 @@ public:
 		}
 	}
 
+	/* Overrideable methods to update and render the GameObject */
 	virtual void update() {}
 	virtual void render(bool overrideShader = false);
 
@@ -76,7 +79,7 @@ public:
 	inline void setRenderShader(RenderShader* renderShader) { this->renderShader = renderShader; }
 
 	bool hasMesh() { return meshes.size() > 0; }
-	std::vector<Mesh*> getMeshes() { return meshes; }
+	std::vector<Mesh*>& getMeshes() { return meshes; }
 
 	/* Returns the material a MeshRenderData has, should not be used unless
 	 * the object has a Material */
@@ -92,6 +95,7 @@ public:
 
 class GameObject2D : public GameObject {
 protected:
+	/* Various information about this object */
 	Vector2f position;
 	float    rotation;
 	Vector2f scale;
@@ -101,16 +105,19 @@ protected:
 	 * to each other */
 	GameObject2D* parent = NULL;
 public:
+	/* The constructor */
 	GameObject2D(Mesh* mesh = NULL, RenderShader* shader = NULL, float width = 0, float height = 0) : GameObject(mesh, shader) {
 		rotation = 0;
 		scale = Vector2f(1.0f, 1.0f);
 		size = Vector2f(width, height);
 	}
 
+	/* The destructor */
 	virtual ~GameObject2D() {}
 
 	virtual void update() override;
 
+	/* Setters and getters */
 	void setPosition(Vector2f position) { this->position = position; }
 	void setPosition(float x, float y) { position = Vector2f(x, y); }
 	void setRotation(float rotation) { this->rotation = rotation; }
@@ -167,6 +174,7 @@ public:
 
 class GameObject3D : public GameObject {
 protected:
+	/* Various information about this object */
 	Vector3f position;
 	Vector3f rotation;
 	Vector3f scale;
@@ -176,6 +184,7 @@ protected:
 	 * to each other */
 	GameObject3D* parent = NULL;
 public:
+	/* The constructors */
 	GameObject3D(Mesh* mesh = NULL, RenderShader* shader = NULL, float width = 0, float height = 0, float depth = 0) : GameObject(mesh, shader) {
 		rotation = 0;
 		scale = Vector3f(1.0f, 1.0f, 1.0f);
@@ -188,10 +197,12 @@ public:
 		size = Vector3f(width, height, depth);
 	}
 
+	/* The destructor */
 	virtual ~GameObject3D() {}
 
 	virtual void update() override;
 
+	/* Setters and getters */
 	void setPosition(Vector3f position) { this->position = position; }
 	void setPosition(float x, float y, float z) { position = Vector3f(x, y, z); }
 	void setRotation(Vector3f rotation) { this->rotation = rotation; }

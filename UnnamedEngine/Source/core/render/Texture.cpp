@@ -26,22 +26,28 @@
  * The TextureParameters class
  *****************************************************************************/
 
+/* Define the default parameters */
 GLuint TextureParameters::DEFAULT_TARGET = GL_TEXTURE_2D;
 GLuint TextureParameters::DEFAULT_FILTER = GL_NEAREST;
 GLuint TextureParameters::DEFAULT_CLAMP  = GL_CLAMP_TO_EDGE;
 bool   TextureParameters::DEFAULT_SHOULD_CLAMP = false;
 
 void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
+	//Bind the texture if necessary
 	if (bind)
 		glBindTexture(target, texture);
+	//Setup the filter
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
+	//Setup texture clamping if necessary
 	if (shouldClamp) {
 		glTexParameteri(target, GL_TEXTURE_WRAP_S, clamp);
 		glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp);
+		//One more value for cube maps
 		if (target == GL_TEXTURE_CUBE_MAP)
 			glTexParameteri(target, GL_TEXTURE_WRAP_R, clamp);
 	}
+	//Sets up mipmapping if requested
 	if (filter == GL_NEAREST_MIPMAP_NEAREST ||
 			filter == GL_NEAREST_MIPMAP_LINEAR ||
 			filter == GL_LINEAR_MIPMAP_NEAREST ||
@@ -49,6 +55,7 @@ void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
 		glGenerateMipmap(target);
 		glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, Window::getCurrentInstance()->getSettings().videoMaxAnisotropicSamples);
 	}
+	//Unbind the texture if necessary
 	if (unbind)
 		glBindTexture(target, 0);
 }
@@ -58,46 +65,55 @@ void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
  *****************************************************************************/
 
 unsigned char* Texture::loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei& height, GLint& format) {
-	int w, h, numC;
-	unsigned char* image = stbi_load(path.c_str(), &w, &h, &numC, 0);
+	//Load the data using stb_image
+	unsigned char* image = stbi_load(path.c_str(), &width, &height, &numComponents, 0);
+
+	//Check that the data was loaded
 	if (image == nullptr) {
+		//Log an error if not
 		Logger::log("Failed to load the image from the path '" + path + "'");
 		return NULL;
 	}
-	GLint colourMode = 0;
-	if (numC == 1)
-		colourMode = GL_RED;
-	else if (numC == 2)
-		colourMode = GL_RG;
-	else if (numC == 3)
-		colourMode = GL_RGB;
-	else if (numC == 4)
-		colourMode = GL_RGBA;
 
-	numComponents = numC;
-	width = w;
-	height = h;
-	format = colourMode;
+	//Check the number of components and assign the right OpenGL format
+	if (numComponents == 1)
+		format = GL_RED;
+	else if (numComponents == 2)
+		format = GL_RG;
+	else if (numComponents == 3)
+		format = GL_RGB;
+	else if (numComponents == 4)
+		format = GL_RGBA;
 
 	return image;
 }
 
 Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bool applyParameters) {
+	//The data needed for the texture
 	int numComponents, w, h, format;
+	//Obtain the texture data
 	unsigned char* image = loadTexture(path, numComponents, w, h, format);
 
+	//Create the Texture instance and set it up
 	Texture* texture = new Texture(parameters);
 	texture->setWidth(w);
 	texture->setHeight(h);
 	texture->setNumComponents(numComponents);
 
+	//Bind the texture and then pass the texture data to OpenGL
 	texture->bind();
 
 	glTexImage2D(parameters.getTarget(), 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, image);
 
+	//Apply the parameters if requested, but don't need to bind the texture again,
+	//and it doesn't need to unbind either
 	if (applyParameters)
-		texture->applyParameters(false, true);
+		texture->applyParameters(false, false);
 
+	texture->unbind();
+
+	//Free the image data as it is no longer needed
 	stbi_image_free(image);
+
 	return texture;
 }

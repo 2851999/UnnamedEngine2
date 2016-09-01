@@ -58,7 +58,10 @@ private:
 	void engineMouseButtonCallback(int button, int action, int mods);
 	void engineScrollCallback(double xoffset, double yoffset);
 public:
+	/* The constructor */
 	BaseEngine();
+
+	/* The destructor */
 	virtual ~BaseEngine() {}
 
 	/* This will create the window and start the game loop */

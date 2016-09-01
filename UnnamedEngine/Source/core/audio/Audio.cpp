@@ -54,7 +54,7 @@ AudioData* AudioLoader::loadWaveFile(std::string path) {
 	AudioData* data = NULL;
 
 	//Open the file
-	input.open(path, std::ios::binary);
+	input.open(path.c_str(), std::ios::binary);
 
 	//Read the RIFF data
 	input.read((char*) &waveRiff, sizeof(Wave_RIFF));
@@ -146,7 +146,7 @@ AudioData* AudioLoader::loadOggFile(std::string path) {
 
 AudioSource::AudioSource(AudioData* data, unsigned int type) {
 	//Ensure there is an audio context before attempting to setup the audio
-	if (Audio::hasContext()) {
+	if (AudioManager::hasContext()) {
 		this->type = type;
 		alGenSources(1, &sourceHandle);
 		alGenBuffers(1, &bufferHandle);
@@ -157,7 +157,7 @@ AudioSource::AudioSource(AudioData* data, unsigned int type) {
 		alBufferData(bufferHandle, data->format, (void*) data->data, data->size, data->frequency);
 		alSourcei(sourceHandle, AL_BUFFER, bufferHandle);
 
-		Audio::add(this);
+		AudioManager::add(this);
 	}
 }
 
@@ -172,7 +172,7 @@ void AudioSource::updateVolume() {
 }
 
 void AudioSource::update() {
-	if (Audio::hasContext()) {
+	if (AudioManager::hasContext()) {
 		//Get all of the needed values
 		Vector3f sourcePosition = getPosition();
 		//Vector3f sourceRotation = this.getRotation();
@@ -190,27 +190,27 @@ void AudioSource::update() {
 }
 
 void AudioSource::play() {
-	if (Audio::hasContext())
+	if (AudioManager::hasContext())
 		alSourcePlay(sourceHandle);
 }
 
 void AudioSource::stop() {
-	if (Audio::hasContext())
+	if (AudioManager::hasContext())
 		alSourceStop(sourceHandle);
 }
 
 void AudioSource::pause() {
-	if (Audio::hasContext())
+	if (AudioManager::hasContext())
 		alSourcePause(sourceHandle);
 }
 
 void AudioSource::resume() {
-	if (Audio::hasContext())
+	if (AudioManager::hasContext())
 		alSourcePlay(sourceHandle);
 }
 
 void AudioSource::destroy() {
-	if (Audio::hasContext()) {
+	if (AudioManager::hasContext()) {
 		if (isPlaying())
 			stop();
 
@@ -230,7 +230,7 @@ bool AudioSource::isPlaying() {
  ***************************************************************************************************/
 
 void AudioListener::update() {
-	if (Audio::hasContext()) {
+	if (AudioManager::hasContext()) {
 		//Get the needed values
 		Vector3f listenerPosition = getPosition();
 		Vector3f listenerRotation = getRotation();
@@ -249,17 +249,17 @@ void AudioListener::update() {
  * The Audio class
  ***************************************************************************************************/
 
-std::vector<AudioSource*> Audio::sources;
-ALCdevice* Audio::device;
-ALCcontext* Audio::context;
+std::vector<AudioSource*> AudioManager::sources;
+ALCdevice* AudioManager::device;
+ALCcontext* AudioManager::context;
 
-void Audio::initialise() {
+void AudioManager::initialise() {
 	device = alcOpenDevice(NULL);
 	context = alcCreateContext(device, NULL);
 	alcMakeContextCurrent(context);
 }
 
-void Audio::destroy() {
+void AudioManager::destroy() {
 	for (unsigned int a = 0; a < sources.size(); a++)
 		delete sources.at(a);
 	sources.clear();
@@ -268,7 +268,7 @@ void Audio::destroy() {
 	alcDestroyContext(context);
 }
 
-void Audio::updateVolume() {
+void AudioManager::updateVolume() {
 	for (unsigned int a = 0; a < sources.size(); a++)
 		sources.at(a)->updateVolume();
 }
