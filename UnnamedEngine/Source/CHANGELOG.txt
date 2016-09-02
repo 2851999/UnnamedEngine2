@@ -1,4 +1,27 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 1 (V0.0.1)
+
+'Well here we are again'. Another game engine attempt, worked
+on over summer to test things for a computer science project,
+although already a bit over the top.
+
+Already has quite a lot of features as before, although some
+major issues I didn't even realise the last 4 times including
+the fact OpenGL uses column major matrices, which explains
+a lot of difficulties in the past have been fixed. (facepalm)
+
+Since starting the experimental branch, here are the changes:
+
+* Added ResourceLoader
+* Added GUICheckBox
+* Added option for splash screen
+
+* Renamed Audio to AudioManager
+
+* Changed shadows so now change depending on the directional
+  light's direction
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 0 | Experimental 3
 
 * Added ResourceLoader
