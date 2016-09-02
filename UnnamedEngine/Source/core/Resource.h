@@ -50,5 +50,4 @@ public:
 	virtual void destroy() {}
 };
 
-
 #endif /* CORE_RESOURCE_H_ */

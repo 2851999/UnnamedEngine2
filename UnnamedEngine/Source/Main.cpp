@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "LightingTest3D.h"
+#include "GUITest.h"
 //#include "examples/asteroids/Asteroids.h"
 
 int main() {

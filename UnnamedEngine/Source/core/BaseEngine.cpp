@@ -62,18 +62,20 @@ void BaseEngine::create() {
 //	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 //	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 
-	Renderer::addCamera(debugCamera);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, Colour::WHITE, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
-	Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, Colour::WHITE, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
-	font->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);
-	font2->render(Engine::Build + " " + Engine::Version, getSettings().windowWidth / 2 - font2->getWidth(Engine::Build + " " + Engine::Version) / 2, (getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2) + 38.0f);
-	glDisable(GL_BLEND);
-	Renderer::removeCamera();
+	if (getSettings().engineSplashScreen) {
+		Renderer::addCamera(debugCamera);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, Colour::WHITE, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
+		Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, Colour::WHITE, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
+		font->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);
+		font2->render(Engine::Build + " " + Engine::Version, getSettings().windowWidth / 2 - font2->getWidth(Engine::Build + " " + Engine::Version) / 2, (getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2) + 38.0f);
+		glDisable(GL_BLEND);
+		Renderer::removeCamera();
 
-	glfwSwapBuffers(window->getInstance());
+		glfwSwapBuffers(window->getInstance());
+	}
 
 	//Notify the game that everything is ready to start creating game objects
 	//for rendering

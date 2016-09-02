@@ -80,15 +80,16 @@ public:
 				depthBuffer->setup();
 
 				lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 8.0f);
-//				lightView.initIdentity();
-//				lightView.transformR(Vector3f(0.0f, -4.0f, 0.0f), Vector3f(90.0f, 0.0f, 0.0f), Vector3f(1.0f, 1.0f, 1.0f));
-				lightView.initLookAt(Vector3f(0.0f, 4.0f, 0.0f), Vector3f(0.0f, -3.0f, 0.0f), Vector3f(0.0f, 0.0f, -1.0f));
 			}
 		}
 	}
 
 	/* The destructor */
 	virtual ~Light() { delete depthBuffer; }
+
+	/* The method used to update the view matrix for this light - should be
+	 * called when the light moves/after assigning the initial values */
+	void update();
 
 	/* The method called to assign the uniforms in a shader for this light */
 	virtual void setUniforms(Shader* shader, std::string suffix);

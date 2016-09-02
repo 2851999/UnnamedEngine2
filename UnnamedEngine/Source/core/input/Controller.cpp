@@ -28,8 +28,8 @@ Controller::Controller(int index) {
 	this->index = index;
 
 	//Get the current states
-	const float*         currentAxisValues   = glfwGetJoystickAxes(index, &axisCount);
-	const unsigned char* currentButtonValues = glfwGetJoystickButtons(index, &buttonCount);
+	currentAxisValues   = glfwGetJoystickAxes(index, &axisCount);
+	currentButtonValues = glfwGetJoystickButtons(index, &buttonCount);
 
 	//Assign the current states
 	for (int i = 0; i < axisCount; i++)
@@ -41,8 +41,8 @@ Controller::Controller(int index) {
 void Controller::checkInput() {
 	//Get the current states - seems to have an issue just using the pointer
 	//when initialised in the constructor - the states didn't change
-	const float*         currentAxisValues   = glfwGetJoystickAxes(index, &axisCount);
-	const unsigned char* currentButtonValues = glfwGetJoystickButtons(index, &buttonCount);
+	currentAxisValues   = glfwGetJoystickAxes(index, &axisCount);
+	currentButtonValues = glfwGetJoystickButtons(index, &buttonCount);
 
 	//Check for changes and then change any states necessary
 	for (int i = 0; i < axisCount; i++) {

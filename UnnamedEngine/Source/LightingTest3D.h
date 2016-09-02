@@ -110,39 +110,41 @@ void Test::created() {
 	camera->setFlying(true);
 	camera->update();
 
-//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
-//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
-//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
-//																	   .setDiffuseColour(Colour::RED)
-//																	   .setSpecularColour(Colour::WHITE));
-//
-//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
-//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
-//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
-//																	   .setDiffuseColour(Colour::RED)
-//																	   .setSpecularColour(Colour::WHITE));
-//
-//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
-//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
-//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
-//																	   .setDiffuseColour(Colour::RED)
-//																	   .setSpecularColour(Colour::WHITE));
-//
-//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
-//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
-//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
-//																	   .setDiffuseColour(Colour::RED)
-//																	   .setSpecularColour(Colour::WHITE));
-//
-//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
-//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
-//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
-//																	   .setDiffuseColour(Colour::RED)
-//																	   .setSpecularColour(Colour::WHITE));
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.00001f)
+																			   ->setDiffuseColour(Colour::WHITE)
+																			   ->setSpecularColour(Colour::WHITE);
+	light0->update();
+	scene->addLight(light0);
 
-	scene->addLight((new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.5f)
-																	   ->setDiffuseColour(Colour::WHITE)
-																	   ->setSpecularColour(Colour::WHITE));
+//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
+//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
+//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
+//																	   .setDiffuseColour(Colour::RED)
+//																	   .setSpecularColour(Colour::WHITE));
+//
+//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
+//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
+//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
+//																	   .setDiffuseColour(Colour::RED)
+//																	   .setSpecularColour(Colour::WHITE));
+//
+//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
+//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
+//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
+//																	   .setDiffuseColour(Colour::RED)
+//																	   .setSpecularColour(Colour::WHITE));
+//
+//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
+//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
+//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
+//																	   .setDiffuseColour(Colour::RED)
+//																	   .setSpecularColour(Colour::WHITE));
+//
+//	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
+//																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
+//																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))
+//																	   .setDiffuseColour(Colour::RED)
+//																	   .setSpecularColour(Colour::WHITE));
 
 //	scene->addLight(Light(Light::TYPE_POINT, Vector3f(0.0f, 0.8f, 0.5f)).setConstantAttenuation(1.0f)
 //																   .setLinearAttenuation(0.09f)

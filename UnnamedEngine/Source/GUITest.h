@@ -25,12 +25,14 @@
 #include "core/gui/Font.h"
 #include "core/gui/GUIButton.h"
 #include "core/gui/GUILoadingBar.h"
+#include "core/gui/GUICheckBox.h"
 
 class Test : public BaseEngine {
 private:
 	Camera2D* camera;
 	GUIButton* button;
 	GUILoadingBar* loadingBar;
+	GUICheckBox* checkBox;
 public:
 	virtual ~Test() {}
 
@@ -85,12 +87,17 @@ void Test::created() {
 	loadingBar->completedStage();
 	loadingBar->completedStage();
 
+	checkBox = new GUICheckBox("Check Box", 20, 20, { Colour::RED, Colour::GREEN, Colour::BLUE });
+	checkBox->setPosition(400, 400);
+	checkBox->setBorder(new GUIBorder(checkBox, 2, Colour::ORANGE));
+
 	Renderer::addCamera(camera);
 }
 
 void Test::update() {
 	button->update();
 	loadingBar->update();
+	checkBox->update();
 }
 
 void Test::render() {
@@ -102,6 +109,7 @@ void Test::render() {
 
 	button->render();
 	loadingBar->render();
+	checkBox->render();
 }
 
 void Test::destroy() {

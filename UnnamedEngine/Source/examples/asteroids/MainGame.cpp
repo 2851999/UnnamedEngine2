@@ -46,7 +46,7 @@ MainGame::MainGame(Asteroids* asteroids, float windowWidth, float windowHeight) 
 
 	//The asteroid mesh
 	//std::vector<Mesh*> asteroidMesh = Model::loadModel("C:/UnnamedEngine/examples/asteroids/", "asteroid.obj");
-	std::vector<Mesh*> asteroidMesh = Model::loadModel("H:/Storage/Users/Joel/Downloads/asteroid_model1/asteroid_model/", "asteroid_model.obj");
+	std::vector<Mesh*> asteroidMesh = Model::loadModel("C:/UnnamedEngine/examples/asteroids/", "asteroid_model.obj");
 
 	srand(time(NULL));
 

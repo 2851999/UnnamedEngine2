@@ -33,6 +33,7 @@
 #include "core/render/Scene.h"
 #include "core/physics/PhysicsScene.h"
 #include "core/input/Controller.h"
+#include "core/ResourceLoader.h"
 
 class Test : public BaseEngine {
 private:
@@ -90,7 +91,7 @@ public:
 void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
 	getSettings().videoVSync = true;
-	getSettings().videoMaxFPS = 0;
+	getSettings().videoMaxFPS = 60;
 	getSettings().videoSamples = 16;
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().windowFullscreen = false;
@@ -109,7 +110,7 @@ void Test::created() {
 	physicsScene = new PhysicsScene3D();
 	scene = new Scene();
 
-	object = new PhysicsObject3D(Model::loadModel("C:/UnnamedEngine/Models/", "teapot.obj"), Renderer::getRenderShader("Material"));
+	object = new PhysicsObject3D(ResourceLoader::sLoadModel("C:/UnnamedEngine/Models/", "teapot.obj"), Renderer::getRenderShader("Material"));
 
 	scene->add(object);
 	physicsScene->add(object);
@@ -149,9 +150,9 @@ void Test::created() {
 
 	soundSystem = new SoundSystem();
 	soundSystem->createListener(camera);
-	soundSystem->addSoundEffect("Sound1", AudioLoader::loadFile("C:/UnnamedEngine/Sound.wav"), particleEmitter);
-	soundSystem->addSoundEffect("Sound2", AudioLoader::loadFile("C:/UnnamedEngine/Sound2.wav"), object);
-	soundSystem->addMusic("Sound3", AudioLoader::loadFile("C:/UnnamedEngine/Sound.ogg"));
+	soundSystem->addSoundEffect("Sound1", ResourceLoader::sLoadAudio("C:/UnnamedEngine/Sound.wav"), particleEmitter);
+	soundSystem->addSoundEffect("Sound2", ResourceLoader::sLoadAudio("C:/UnnamedEngine/Sound2.wav"), object);
+	soundSystem->addMusic("Sound3", ResourceLoader::sLoadAudio("C:/UnnamedEngine/Sound.ogg"));
 	soundSystem->play("Sound1");
 
 	Renderer::addCamera(camera);
@@ -224,6 +225,9 @@ void Test::render() {
 
 	glEnable(GL_MULTISAMPLE_ARB);
 	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
+
+//	glEnable(GL_BLEND);
+//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	scene->render();
 

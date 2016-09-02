@@ -22,6 +22,16 @@
  * The Light class
  *****************************************************************************/
 
+void Light::update() {
+	//Check the type of light this is
+	if (type == TYPE_DIRECTIONAL) {
+		Vector3f right = direction.cross(Vector3f(0.0f, 1.0f, 0.0f)).normalise();
+		Vector3f up = right.cross(direction).normalise();
+
+		lightView.initLookAt(direction * -5, (direction * 5) + direction, up);
+	}
+}
+
 void Light::setUniforms(Shader* shader, std::string suffix) {
 	shader->setUniformi("Light_Type" + suffix, type);
 	shader->setUniformVector3("Light_Position" + suffix, getPosition());

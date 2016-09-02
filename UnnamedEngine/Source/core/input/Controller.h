@@ -40,6 +40,9 @@ private:
 	 * of buttons */
 	std::vector<unsigned char> buttonValues;
 	int                        buttonCount;
+
+	const float*         currentAxisValues;
+	const unsigned char* currentButtonValues;
 public:
 	/* The constructor */
 	Controller(int index);

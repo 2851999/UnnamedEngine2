@@ -67,6 +67,9 @@ struct Settings {
 	bool         inputRepeatKeyboardEvents = true;
 	bool         inputRepeatMouseEvents    = true;
 
+	/* Various engine settings */
+	bool         engineSplashScreen = false;
+
 	/* Various debugging settings */
 	bool         debuggingShowInformation = true;
 };

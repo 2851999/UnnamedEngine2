@@ -27,7 +27,13 @@
 #include "render/Camera.h"
 
 namespace Engine {
-	/* Various engine values */
+	/* Various engine values
+	 * Version     - Should change every development version
+	 *               first value  = release no.
+	 *               second value = beta no.
+	 *               third value  = development no.
+	 * DateCreated - Should change every development version
+	 */
 	const std::string Version     = "V0.0.1";
 	const std::string DateCreated = "31/08/2016";
 	const std::string Build       = "Experimental";
