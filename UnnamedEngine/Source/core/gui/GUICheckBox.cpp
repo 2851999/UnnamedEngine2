@@ -56,5 +56,6 @@ void GUICheckBox::onChangeState() {
 
 void GUICheckBox::render(bool overrideShader) {
 	GUIComponent::render();
-	renderText(text, Vector2f(-getFont()->getWidth(text) * 1.1f, getHeight() / 2 + getFont()->getHeight(text) / 2));
+	if (visible)
+		renderText(text, Vector2f(-getFont()->getWidth(text) * 1.1f, getHeight() / 2 + getFont()->getHeight(text) / 2));
 }

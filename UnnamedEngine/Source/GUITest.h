@@ -26,6 +26,8 @@
 #include "core/gui/GUIButton.h"
 #include "core/gui/GUILoadingBar.h"
 #include "core/gui/GUICheckBox.h"
+#include "core/gui/GUIDropDownMenu.h"
+#include "core/gui/GUIDropDownList.h"
 
 class Test : public BaseEngine {
 private:
@@ -33,6 +35,8 @@ private:
 	GUIButton* button;
 	GUILoadingBar* loadingBar;
 	GUICheckBox* checkBox;
+	GUIDropDownMenu* dropDownMenu;
+	GUIDropDownList* dropDownList;
 public:
 	virtual ~Test() {}
 
@@ -91,6 +95,19 @@ void Test::created() {
 	checkBox->setPosition(400, 400);
 	checkBox->setBorder(new GUIBorder(checkBox, 2, Colour::ORANGE));
 
+	GUIButton* dropDownMenuButton = new GUIButton("File", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE });
+	dropDownMenu = new GUIDropDownMenu(dropDownMenuButton);
+	dropDownMenu->addButton(new GUIButton("Save", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
+	dropDownMenu->addButton(new GUIButton("Save As", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
+	dropDownMenu->setPosition(400, 20);
+
+	GUIButton* dropDownListButton = new GUIButton("Select", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE });
+	dropDownList = new GUIDropDownList(dropDownListButton);
+	dropDownList->addButton(new GUIButton("800 x 600", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
+	dropDownList->addButton(new GUIButton("1280 x 720", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
+	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
+	dropDownList->setPosition(700, 20);
+
 	Renderer::addCamera(camera);
 }
 
@@ -98,6 +115,8 @@ void Test::update() {
 	button->update();
 	loadingBar->update();
 	checkBox->update();
+	dropDownMenu->update();
+	dropDownList->update();
 }
 
 void Test::render() {
@@ -110,6 +129,8 @@ void Test::render() {
 	button->render();
 	loadingBar->render();
 	checkBox->render();
+	dropDownMenu->render();
+	dropDownList->render();
 }
 
 void Test::destroy() {

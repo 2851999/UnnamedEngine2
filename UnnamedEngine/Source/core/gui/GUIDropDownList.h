@@ -16,40 +16,28 @@
  *
  *****************************************************************************/
 
-#include "GUIButton.h"
+#ifndef CORE_GUI_GUIDROPDOWNLIST_H_
+#define CORE_GUI_GUIDROPDOWNLIST_H_
+
+#include "GUIDropDownMenu.h"
 
 /*****************************************************************************
- * The GUIButton class
+ * The GUIDropDownList class
  *****************************************************************************/
 
-void GUIButton::onChangeState() {
-	unsigned int maxRenderIndex = getMaxRenderIndex();
-	if (mouseClicked) {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 1;
-		else if (maxRenderIndex == 3)
-			renderIndex = 2;
-	} else if (mouseHover) {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 1;
-		else if (maxRenderIndex == 3)
-			renderIndex = 1;
-	} else {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 0;
-		else if (maxRenderIndex == 3)
-			renderIndex = 0;
-	}
-}
+class GUIDropDownList : public GUIDropDownMenu {
+public:
+	/* The constructor */
+	GUIDropDownList(GUIButton* menuButton) : GUIDropDownMenu(menuButton) {}
 
-void GUIButton::render(bool overrideShader) {
-	GUIComponent::render();
-	if (visible)
-		renderTextAtCentre(text);
-}
+	/* The destructor */
+	virtual ~GUIDropDownList() {}
+
+	/* Called when a component is clicked */
+	virtual void onComponentClicked(GUIComponent* component) override;
+
+	/* Returns the selection (the text of the menu button) */
+	inline std::string getSelection() { return menuButton->getText(); }
+};
+
+#endif /* CORE_GUI_GUIDROPDOWNLIST_H_ */

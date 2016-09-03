@@ -16,40 +16,25 @@
  *
  *****************************************************************************/
 
-#include "GUIButton.h"
+#include "GUIDropDownList.h"
 
 /*****************************************************************************
- * The GUIButton class
+ * The GUIDropDownList class
  *****************************************************************************/
 
-void GUIButton::onChangeState() {
-	unsigned int maxRenderIndex = getMaxRenderIndex();
-	if (mouseClicked) {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 1;
-		else if (maxRenderIndex == 3)
-			renderIndex = 2;
-	} else if (mouseHover) {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 1;
-		else if (maxRenderIndex == 3)
-			renderIndex = 1;
-	} else {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 0;
-		else if (maxRenderIndex == 3)
-			renderIndex = 0;
+void GUIDropDownList::onComponentClicked(GUIComponent* component) {
+	//Check whether it is the menu button
+	if (component == menuButton) {
+		//Change the state of the menu
+		menuOpen = ! menuOpen;
+		//Setup the menu
+		setupMenu();
+	} else if (menuOpen && component != this) {
+		//Assign the text of the menu button
+		menuButton->setText(component->getText());
+		//Change the state of the menu (to close it)
+		menuOpen = false;
+		//Setup the menu
+		setupMenu();
 	}
-}
-
-void GUIButton::render(bool overrideShader) {
-	GUIComponent::render();
-	if (visible)
-		renderTextAtCentre(text);
 }
