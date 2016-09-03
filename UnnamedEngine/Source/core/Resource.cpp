@@ -17,13 +17,15 @@
  *****************************************************************************/
 
 #include <algorithm>
+
 #include "Resource.h"
+#include "../utils/Logging.h"
 
 /*****************************************************************************
  * The ResourceManager class
  *****************************************************************************/
 
-std::vector<Resource*> ResourceManager::resources;
+std::vector<ResourceManager*> ResourceManager::currentManagers;
 
 void ResourceManager::add(Resource* resource) {
 	resources.push_back(resource);
@@ -34,8 +36,28 @@ void ResourceManager::remove(Resource* resource) {
 }
 
 void ResourceManager::destroyAll() {
-	for (unsigned int i = 0; i < resources.size(); i++) {
-		delete resources.at(i);
-	}
+	for (unsigned int i = 0; i < resources.size(); i++)
+		delete resources[i];
 	resources.clear();
+}
+
+
+void ResourceManager::removeResourceManager() {
+	if (currentManagers.size() > 0)
+		currentManagers.pop_back();
+}
+
+void ResourceManager::destroyAllManagers() {
+	for (unsigned int i = 0; i < currentManagers.size(); i++)
+		delete currentManagers[i];
+	currentManagers.clear();
+}
+
+ResourceManager* ResourceManager::getCurrent() {
+	if (currentManagers.size() > 0)
+		return currentManagers[currentManagers.size() - 1];
+	else {
+		Logger::log("No ResourceManager's added", "ResourceManager", Logger::Error);
+		return NULL;
+	}
 }

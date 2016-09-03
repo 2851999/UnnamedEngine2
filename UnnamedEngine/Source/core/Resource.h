@@ -29,24 +29,52 @@ class Resource;
 
 class ResourceManager {
 private:
-	static std::vector<Resource*> resources;
-public:
-	static void add(Resource* resource);
-	static void remove(Resource* resource);
+	/* The current resource managers - the last one added will be the one new
+	 * resources will be added to */
+	static std::vector<ResourceManager*> currentManagers;
 
-	static void destroyAll();
+	/* All of the resources added to this resource manager */
+	std::vector<Resource*> resources;
+public:
+	/* The constructor */
+	ResourceManager() {}
+
+	/* The destructor */
+	virtual ~ResourceManager() { destroyAll(); }
+
+	/* Methods used to add/remove resources */
+	void add(Resource* resource);
+	void remove(Resource* resource);
+
+	/* Method used to delete all added resources */
+	void destroyAll();
+
+	/* Method used to add a resource manager */
+	static inline void addResourceManager(ResourceManager* manager) { currentManagers.push_back(manager); }
+
+	/* Method used to remove a resource manager */
+	static void removeResourceManager();
+
+	/* Method used to release destroy all of the resource managers */
+	static void destroyAllManagers();
+
+	/* Method used to get the active resource manager */
+	static ResourceManager* getCurrent();
 };
 
 /*****************************************************************************
- * The Resource class is inherited from to allow data to be managed and
- * deleted when the Engine stops
+ * The Resource class is inherited from to allow data to be managed
  *****************************************************************************/
 
 class Resource {
 public:
-	Resource() { ResourceManager::add(this); }
-	virtual ~Resource() { destroy(); }
+	/* The constructor */
+	Resource() { ResourceManager::getCurrent()->add(this); }
 
+	/* The destructor */
+	virtual ~Resource() { std::cout << "DESTROYED" << std::endl; destroy(); }
+
+	/* The method called when all resources being used should be released */
 	virtual void destroy() {}
 };
 
