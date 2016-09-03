@@ -22,6 +22,7 @@
 #include "core/BaseEngine.h"
 #include "core/render/Camera.h"
 #include "core/render/Renderer.h"
+#include "core/ResourceLoader.h"
 #include "core/gui/Font.h"
 #include "core/gui/GUIButton.h"
 #include "core/gui/GUILoadingBar.h"
@@ -102,7 +103,7 @@ void Test::created() {
 	dropDownMenu->setPosition(400, 20);
 
 	GUIButton* dropDownListButton = new GUIButton("Select", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE });
-	dropDownList = new GUIDropDownList(dropDownListButton);
+	dropDownList = new GUIDropDownList(dropDownListButton, ResourceLoader::sLoadTexture("C:/UnnamedEngine/GUIDropDownOverlayClosed.png"), ResourceLoader::sLoadTexture("C:/UnnamedEngine/GUIDropDownOverlayOpened.png"));
 	dropDownList->addButton(new GUIButton("800 x 600", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
 	dropDownList->addButton(new GUIButton("1280 x 720", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
 	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));

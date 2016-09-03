@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 1 | Experimental 3
+
+* Added InputBinding
+* Added InputBindingButton
+* Added InputBindingAxis
+* Added InputBindingsListener
+* Added InputBindings
+
+* Added overlay textures to GUIDropDownList
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 1 | Experimental 2
 
 * Changed ResourceManager so that it now has instances of

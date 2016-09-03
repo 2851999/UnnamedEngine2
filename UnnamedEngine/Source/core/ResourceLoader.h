@@ -19,6 +19,11 @@
 #ifndef CORE_RESOURCELOADER_H_
 #define CORE_RESOURCELOADER_H_
 
+#include "render/Texture.h"
+#include "audio/Audio.h"
+#include "render/Shader.h"
+#include "Model.h"
+
 /*****************************************************************************
  * The ResourceLoader class is used to help make loading resources easier
  * This has static methods to load things, as well as allowing an instance

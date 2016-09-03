@@ -26,12 +26,29 @@
  *****************************************************************************/
 
 class GUIDropDownList : public GUIDropDownMenu {
+private:
+	/* The overlay */
+	GameObject2D* overlay = NULL;
+
+	/* The overlay texture (when closed - or for both if the second one isn't
+	 * assigned) */
+	Texture* overlayClosedTexture = NULL;
+
+	/* The other texture (when open - if assigned) */
+	Texture* overlayOpenedTexture = NULL;
 public:
-	/* The constructor */
+	/* The constructors */
 	GUIDropDownList(GUIButton* menuButton) : GUIDropDownMenu(menuButton) {}
+	GUIDropDownList(GUIButton* menuButton, Texture* overlayClosedTexture, Texture* overlayOpenedTexture = NULL);
 
 	/* The destructor */
 	virtual ~GUIDropDownList() {}
+
+	/* The method used to update this component */
+	virtual void update() override;
+
+	/* The method used to render this component */
+	virtual void render(bool overrideShader = false) override;
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override;

@@ -22,6 +22,20 @@
  * The GUIDropDownList class
  *****************************************************************************/
 
+GUIDropDownList::GUIDropDownList(GUIButton* menuButton, Texture* overlayClosedTexture, Texture* overlayOpenedTexture) : GUIDropDownMenu(menuButton) {
+	overlay = new GameObject2D(new Mesh(MeshBuilder::createQuad(menuButton->getWidth(), menuButton->getHeight(), overlayClosedTexture)), Renderer::getRenderShader("Material"));
+	overlay->setParent(this);
+	overlay->setSize(menuButton->getSize());
+
+	this->overlayClosedTexture = overlayClosedTexture;
+	if (overlayOpenedTexture)
+		this->overlayOpenedTexture = overlayOpenedTexture;
+	else
+		this->overlayOpenedTexture = overlayClosedTexture;
+
+	overlay->getMaterial()->setDiffuseTexture(overlayClosedTexture);
+}
+
 void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 	//Check whether it is the menu button
 	if (component == menuButton) {
@@ -29,6 +43,13 @@ void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 		menuOpen = ! menuOpen;
 		//Setup the menu
 		setupMenu();
+
+		if (overlayClosedTexture) {
+			if (menuOpen)
+				overlay->getMaterial()->setDiffuseTexture(overlayOpenedTexture);
+			else
+				overlay->getMaterial()->setDiffuseTexture(overlayClosedTexture);
+		}
 	} else if (menuOpen && component != this) {
 		//Assign the text of the menu button
 		menuButton->setText(component->getText());
@@ -36,5 +57,22 @@ void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 		menuOpen = false;
 		//Setup the menu
 		setupMenu();
+
+		if (overlayClosedTexture)
+			overlay->getMaterial()->setDiffuseTexture(overlayClosedTexture);
 	}
+}
+
+void GUIDropDownList::update() {
+	GUIDropDownMenu::update();
+
+	if (active)
+		overlay->update();
+}
+
+void GUIDropDownList::render(bool overrideShader) {
+	GUIDropDownMenu::render(overrideShader);
+
+	if (visible && overlay)
+		overlay->render(overrideShader);
 }

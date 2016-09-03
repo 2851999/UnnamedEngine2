@@ -34,8 +34,9 @@
 #include "core/physics/PhysicsScene.h"
 #include "core/input/Controller.h"
 #include "core/ResourceLoader.h"
+#include "core/input/InputBindings.h"
 
-class Test : public BaseEngine {
+class Test : public BaseEngine, public InputBindingsListener {
 private:
 	SoundSystem* soundSystem;
 	Camera3D* camera;
@@ -45,6 +46,9 @@ private:
 	PhysicsScene3D* physicsScene;
 	Scene* scene;
 	Controller* controller;
+
+	InputBindings* bindings;
+	InputBindingAxis* axis0;
 
 	//Model* object2;
 public:
@@ -85,6 +89,14 @@ public:
 	}
 	virtual void onControllerButtonReleased(Controller* controller, int index) override {
 		std::cout << "BUTTON UP" << std::endl;
+	}
+
+	virtual void onButtonPressed(InputBindingButton* button) override {
+
+	}
+
+	virtual void onButtonReleased(InputBindingButton* button) override {
+
 	}
 };
 
@@ -145,8 +157,8 @@ void Test::created() {
 	//particleSystem->textureAtlas = new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/firetexture.png"), 8, 8, 32);
 	particleSystem->textureAtlas = new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/smoke.png"), 7, 7, 46);
 
-//	controller = new Controller(GLFW_JOYSTICK_3);
-//	getWindow()->getInputManager()->addController(controller);
+	controller = new Controller(GLFW_JOYSTICK_2);
+	getWindow()->getInputManager()->addController(controller);
 
 	soundSystem = new SoundSystem();
 	soundSystem->createListener(camera);
@@ -155,18 +167,18 @@ void Test::created() {
 	soundSystem->addMusic("Sound3", ResourceLoader::sLoadAudio("C:/UnnamedEngine/Sound.ogg"));
 	soundSystem->play("Sound1");
 
+	bindings = new InputBindings();
+	bindings->addListener(this);
+	axis0 = bindings->createAxisBinding("Axis0");
+	axis0->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
+	axis0->assignControllerAxis(controller, 1);
+
 	Renderer::addCamera(camera);
 }
 
 void Test::update() {
+	camera->moveForward(0.004f * axis0->getValue() * getDelta());
 	camera->update();
-	if (getWindow()->isKeyPressed(GLFW_KEY_W)) {
-		camera->moveForward(0.004f * getDelta());
-		camera->update();
-	} else if (getWindow()->isKeyPressed(GLFW_KEY_S)) {
-		camera->moveBackward(0.004f * getDelta());
-		camera->update();
-	}
 	if (getWindow()->isKeyPressed(GLFW_KEY_A)) {
 		camera->moveLeft(0.004f * getDelta());
 		camera->update();
@@ -241,6 +253,7 @@ void Test::destroy() {
 	delete physicsScene;
 	delete camera;
 	delete particleSystem;
+	delete bindings;
 }
 
 #endif /* UTILS_BASEENGINETEST3D_H_ */

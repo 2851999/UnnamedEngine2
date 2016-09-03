@@ -72,7 +72,7 @@ public:
 	Resource() { ResourceManager::getCurrent()->add(this); }
 
 	/* The destructor */
-	virtual ~Resource() { std::cout << "DESTROYED" << std::endl; destroy(); }
+	virtual ~Resource() {}
 
 	/* The method called when all resources being used should be released */
 	virtual void destroy() {}
