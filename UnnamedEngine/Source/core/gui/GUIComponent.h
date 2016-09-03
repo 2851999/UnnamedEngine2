@@ -54,6 +54,7 @@ public:
 	static Font* DEFAULT_FONT ;
 
 	/* The constructors */
+	GUIComponentRenderer() {}
 	GUIComponentRenderer(float width, float height) :
 		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)), Renderer::getRenderShader("Material"), width, height) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Colour> colours) :
@@ -137,10 +138,30 @@ public:
 };
 
 /*****************************************************************************
+ * The GUIComponentListener class is used to receive component events
+ *****************************************************************************/
+
+class GUIComponentListener {
+public:
+	GUIComponentListener() {}
+	virtual ~GUIComponentListener() {}
+
+	/* Called when a component is clicked - more specifically when the
+	 * component is released after the mouse is pressed. This is so that, in
+	 * the case of a button for something such as GUIDropDownMenu, the buttons
+	 * will get the change to change to their clicked colour before
+	 * disappearing  */
+	virtual void onComponentClicked(GUIComponent* component) {}
+};
+
+/*****************************************************************************
  * The GUIComponent class is used to create a component for a GUI
  *****************************************************************************/
 
 class GUIComponent : public GUIComponentRenderer, InputListener {
+private:
+	/* The component listeners */
+	std::vector<GUIComponentListener*> listeners;
 protected:
 	/* The name of this component */
 	std::string name;
@@ -159,8 +180,15 @@ protected:
 
 	/* Method called when this component changes state */
 	virtual void onChangeState() {}
+
+	/* Methods used to call component listener events */
+	inline void callOnComponentClicked(GUIComponent* component) {
+		for (unsigned int i = 0; i < listeners.size(); i++)
+			listeners[i]->onComponentClicked(component);
+	}
 public:
 	/* Various constructors */
+	GUIComponent() { Window::getCurrentInstance()->getInputManager()->addListener(this); }
 	GUIComponent(float width, float height) : GUIComponentRenderer(width, height) { Window::getCurrentInstance()->getInputManager()->addListener(this); }
 	GUIComponent(float width, float height, std::vector<Colour> colours) : GUIComponentRenderer(width, height, colours) { Window::getCurrentInstance()->getInputManager()->addListener(this); }
 	GUIComponent(float width, float height, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, textures) { Window::getCurrentInstance()->getInputManager()->addListener(this); }
@@ -170,6 +198,16 @@ public:
 	virtual ~GUIComponent() {
 		if (border)
 			delete border;
+		listeners.clear();
+	}
+
+	/* The methods used to add and remove a component listener */
+	inline void addListener(GUIComponentListener* listener) {
+		listeners.push_back(listener);
+	}
+
+	inline void removeListener(GUIComponentListener* listener) {
+		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 	}
 
 	/* The method used to update this component */

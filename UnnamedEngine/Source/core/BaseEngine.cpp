@@ -33,6 +33,9 @@ void BaseEngine::create() {
 	//Initialise the game, the settings should be set when this is called
 	initialise();
 
+	//Setup the default engine resource manager
+	ResourceManager::addResourceManager(new ResourceManager());
+
 	//Setup the input and create the window
 	window->getInputManager()->addListener(this);
 	window->create();
@@ -103,7 +106,7 @@ void BaseEngine::create() {
 	//Destroy all other engine resources
 	Font::destroyFreeType();
 	AudioManager::destroy();
-	ResourceManager::destroyAll();
+	ResourceManager::destroyAllManagers();
 
 	//Delete all of the objects required by the BaseEngine class
 	delete debugCamera;

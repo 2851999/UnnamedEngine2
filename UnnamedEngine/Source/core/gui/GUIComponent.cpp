@@ -163,6 +163,7 @@ void GUIComponent::onMouseReleased(int button) {
 		if (active && visible && mouseClicked) {
 			mouseClicked = ! mouseClicked;
 			onChangeState();
+			callOnComponentClicked(this);
 		}
 	}
 }

@@ -96,6 +96,9 @@ public:
 		controllers.push_back(controller);
 	}
 
+	/* Returns the CursorData structure */
+	CursorData& getCursorData() { return cursorData; }
+
 	/* Various window specific callbacks */
 	void keyCallback(int key, int scancode, int action, int mods);
 	void charCallback(unsigned int codepoint);

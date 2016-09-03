@@ -1,4 +1,55 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 2 (V0.0.2)
+
+* Added GUIComponentListener
+* Added GUIDropDownMenu
+* Added GUIDropDownList
+* Added InputBinding
+* Added InputBindingButton
+* Added InputBindingAxis
+* Added InputBindingsListener
+* Added InputBindings
+
+* Changed ResourceManager so that it now has instances of
+  resource manager allowing greater control of when resources
+  are released
+
+* Fixed bug: GUIButton still displayed it's text when its
+             visible property was set to false
+* Fixed bug: GUICheckBox still displayed it's text when its
+             visible property was set to false
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 1 | Experimental 3
+
+* Added InputBinding
+* Added InputBindingButton
+* Added InputBindingAxis
+* Added InputBindingsListener
+* Added InputBindings
+
+* Added overlay textures to GUIDropDownList
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 1 | Experimental 2
+
+* Changed ResourceManager so that it now has instances of
+  resource manager allowing greater control of when resources
+  are released
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 1 | Experimental 1
+
+* Added GUIComponentListener
+* Added GUIDropDownMenu
+* Added GUIDropDownList
+
+* Fixed bug: GUIButton still displayed it's text when its
+             visible property was set to false
+* Fixed bug: GUICheckBox still displayed it's text when its
+             visible property was set to false
+             
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 1 (V0.0.1)
 
 'Well here we are again'. Another game engine attempt, worked

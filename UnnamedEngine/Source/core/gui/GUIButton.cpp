@@ -50,5 +50,6 @@ void GUIButton::onChangeState() {
 
 void GUIButton::render(bool overrideShader) {
 	GUIComponent::render();
-	renderTextAtCentre(text);
+	if (visible)
+		renderTextAtCentre(text);
 }
