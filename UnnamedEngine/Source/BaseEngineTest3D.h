@@ -34,12 +34,12 @@
 #include "core/physics/PhysicsScene.h"
 #include "core/input/Controller.h"
 #include "core/ResourceLoader.h"
-#include "core/input/InputBindings.h"
+#include "utils/DebugCamera.h"
 
 class Test : public BaseEngine, public InputBindingsListener {
 private:
 	SoundSystem* soundSystem;
-	Camera3D* camera;
+	DebugCamera* camera;
 	PhysicsObject3D* object;
 	ParticleEmitter* particleEmitter;
 	ParticleSystem* particleSystem;
@@ -47,12 +47,7 @@ private:
 	Scene* scene;
 	Controller* controller;
 
-	InputBindings* bindings;
-	InputBindingAxis* axis0;
-	InputBindingAxis* axis1;
-
-	InputBindingAxis* axis2;
-	InputBindingAxis* axis3;
+	Font* test;
 
 	//Model* object2;
 public:
@@ -68,33 +63,6 @@ public:
 	virtual void onKeyPressed(int key) override {
 		if (key == GLFW_KEY_ESCAPE)
 			requestClose();
-	}
-	virtual void onKeyReleased(int key) override {}
-	virtual void onChar(int key, char character) override {}
-
-	virtual void onMousePressed(int button) override {}
-	virtual void onMouseReleased(int button) override {}
-	virtual void onMouseMoved(double x, double y, double dx, double dy) override {
-		camera->getRelRotation() += Vector3f(-dy, dx, 0) * getDelta() * 0.01f;
-		camera->getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89, 89));
-		camera->update();
-	}
-	virtual void onMouseDragged(double x, double y, double dx, double dy) override {}
-	virtual void onMouseEnter() override {}
-	virtual void onMouseLeave() override {}
-
-	virtual void onScroll(double dx, double dy) override {}
-
-	virtual void onControllerAxis(Controller* controller, int axis, float value) override {}
-	virtual void onControllerButtonPressed(Controller* controller, int index) override {}
-	virtual void onControllerButtonReleased(Controller* controller, int index) override {}
-
-	virtual void onButtonPressed(InputBindingButton* button) override {
-
-	}
-
-	virtual void onButtonReleased(InputBindingButton* button) override {
-
 	}
 };
 
@@ -112,10 +80,6 @@ void Test::created() {
 	getWindow()->toggleCursor();
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
-	//object = Model::loadModel("C:/UnnamedEngine/Models/earth2/", "earth1.obj");
-	//object->setScale(0.2f, 0.2f, 0.2f);
-	//object->setPosition(0, 0, 0);
-	//object->update();
 
 	physicsScene = new PhysicsScene3D();
 	scene = new Scene();
@@ -125,15 +89,9 @@ void Test::created() {
 	scene->add(object);
 	physicsScene->add(object);
 
-//	object2 = Model::loadModel("C:/UnnamedEngine/Models/earth2/", "earth2.obj");
-//	object2->setPosition(0, 0, 0);
-//	object2->update();
-
-	camera = new Camera3D(Matrix4f().initPerspective(110, ((float) getSettings().windowWidth) / ((float) getSettings().windowHeight), 0.1f, 100));
+	camera = new DebugCamera(Matrix4f().initPerspective(110, ((float) getSettings().windowWidth) / ((float) getSettings().windowHeight), 0.1f, 100));
 	camera->setSkyBox(new SkyBox("C:/UnnamedEngine/skybox1/", "skybox0.png", "skybox1.png", "skybox2.png", "skybox3.png", "skybox4.png", "skybox5.png", 100.0f));
 	camera->setFlying(true);
-	//camera->setPosition(0.0f, 0.0f, -500.0f);
-	camera->update();
 
 	Billboard* billboard = new Billboard(1.0f, 1.0f);
 	billboard->setPosition(0, 1.0f, 0);
@@ -157,6 +115,10 @@ void Test::created() {
 
 	controller = new Controller(GLFW_JOYSTICK_2);
 	getWindow()->getInputManager()->addController(controller);
+	camera->getForwardsAxis()->assignControllerAxis(controller, 1);
+	camera->getSidewaysAxis()->assignControllerAxis(controller, 0);
+	camera->getLookXAxis()->assignControllerAxis(controller, 4);
+	camera->getLookYAxis()->assignControllerAxis(controller, 3);
 
 	soundSystem = new SoundSystem();
 	soundSystem->createListener(camera);
@@ -165,31 +127,14 @@ void Test::created() {
 	soundSystem->addMusic("Sound3", ResourceLoader::sLoadAudio("C:/UnnamedEngine/Sound.ogg"));
 	soundSystem->play("Sound1");
 
-	bindings = new InputBindings();
-	bindings->addListener(this);
-	axis0 = bindings->createAxisBinding("Axis0");
-	axis0->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
-	axis0->assignControllerAxis(controller, 1);
-	axis1 = bindings->createAxisBinding("Axis1");
-	axis1->assignKeys(GLFW_KEY_A, GLFW_KEY_D);
-	axis1->assignControllerAxis(controller, 0);
-
-	axis2 = bindings->createAxisBinding("Axis2");
-	axis2->assignControllerAxis(controller, 4);
-	axis3 = bindings->createAxisBinding("Axis3");
-	axis3->assignControllerAxis(controller, 3);
+	test = new Font("resources/fonts/CONSOLA.TTF", 64, Colour::WHITE, true, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
+	test->update("Hello World!\nTest1\nTest2\nTest3", Vector3f(0.0f, 2.0f, 0.0f));
 
 	Renderer::addCamera(camera);
 }
 
 void Test::update() {
-	camera->moveForward(0.004f * axis0->getValue() * getDelta());
-	camera->moveLeft(0.004f * axis1->getValue() * getDelta());
-
-	camera->getRelRotation() += Vector3f(axis2->getValue(), -axis3->getValue(), 0) * getDelta() * 0.1f;
-	camera->getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89, 89));
-
-	camera->update();
+	camera->update(((float) getDelta() / 1000.0f));
 
 	if (getWindow()->isKeyPressed(GLFW_KEY_UP))
 		particleEmitter->getRelPosition() += Vector3f(0.0f, 0.0f, -0.008f * getDelta());
@@ -220,12 +165,11 @@ void Test::render() {
 	glEnable(GL_MULTISAMPLE_ARB);
 	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
 
-//	glEnable(GL_BLEND);
-//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	scene->render();
 
 	particleSystem->render();
+
+	test->render();
 
 	//object2->render();
 }
@@ -235,7 +179,6 @@ void Test::destroy() {
 	delete physicsScene;
 	delete camera;
 	delete particleSystem;
-	delete bindings;
 }
 
 #endif /* UTILS_BASEENGINETEST3D_H_ */

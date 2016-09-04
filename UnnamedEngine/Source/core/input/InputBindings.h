@@ -132,6 +132,10 @@ private:
 	int keyboardKeyPositive = -1;
 	int keyboardKeyNegative = -1;
 
+	/* States whether a keyboard key is currently pressed */
+	bool keyboardKeyPosDown = false;
+	bool keyboardKeyNegDown = false;
+
 	/* Controller axis */
 	Controller* controller = NULL;
 	int controllerAxis = -1;

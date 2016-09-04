@@ -87,6 +87,7 @@ void Renderer::initialise() {
 	addRenderShader("Framebuffer", Shader::loadShader("resources/shaders/FramebufferShader"));
 	addRenderShader("EnvironmentMap", Shader::loadShader("resources/shaders/EnvironmentMapShader"));
 	addRenderShader("ShadowMap", Shader::loadShader("resources/shaders/ShadowMapShader"));
+	addRenderShader("BillboardedFont", Shader::loadShader("resources/shaders/BillboardedFontShader"));
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);

@@ -96,9 +96,11 @@ void InputBindingAxis::onKeyPressed(int key) {
 	if (! waitingForInput) {
 		if (key == keyboardKeyPositive) {
 			value = 1.0f;
+			keyboardKeyPosDown = true;
 			bindings->callOnAxis(this);
 		} else if (key == keyboardKeyNegative) {
 			value = -1.0f;
+			keyboardKeyNegDown = true;
 			bindings->callOnAxis(this);
 		}
 	}
@@ -107,10 +109,20 @@ void InputBindingAxis::onKeyPressed(int key) {
 void InputBindingAxis::onKeyReleased(int key) {
 	if (! waitingForInput) {
 		if (key == keyboardKeyPositive) {
-			value = 0.0f;
+			//Check whether other direction's key down
+			if (keyboardKeyNegDown)
+				value = -1.0f;
+			else
+				value = 0.0f;
+			keyboardKeyPosDown = false;
 			bindings->callOnAxis(this);
 		} else if (key == keyboardKeyNegative) {
-			value = 0.0f;
+			//Check whether other direction's key down
+			if (keyboardKeyPosDown)
+				value = 1.0f;
+			else
+				value = 0.0f;
+			keyboardKeyNegDown = false;
 			bindings->callOnAxis(this);
 		}
 	}

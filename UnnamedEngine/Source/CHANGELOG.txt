@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 2 | Experimental 2
+
+* Added DebugCamera
+* Added billboarded font support
+
+* Fixed bug: Weird font glitch 
+* Fixed bug: InputBindingAxis could get stuck with a value
+             when using keyboard keys
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 2 | Experimental 1
 
 * Fixed bug: ParticleEmitter wouldn't spawn particles if the
