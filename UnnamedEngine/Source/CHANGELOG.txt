@@ -1,4 +1,33 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 2 | Experimental 1
+
+* Fixed bug: ParticleEmitter wouldn't spawn particles if the
+             delta * particleSpawnRate was < 1 in several
+             frame
+* Fixed bug: The VSync setting didn't have any effect
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 2 (V0.0.2)
+
+* Added GUIComponentListener
+* Added GUIDropDownMenu
+* Added GUIDropDownList
+* Added InputBinding
+* Added InputBindingButton
+* Added InputBindingAxis
+* Added InputBindingsListener
+* Added InputBindings
+
+* Changed ResourceManager so that it now has instances of
+  resource manager allowing greater control of when resources
+  are released
+
+* Fixed bug: GUIButton still displayed it's text when its
+             visible property was set to false
+* Fixed bug: GUICheckBox still displayed it's text when its
+             visible property was set to false
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 1 | Experimental 3
 
 * Added InputBinding

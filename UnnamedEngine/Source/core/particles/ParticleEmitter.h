@@ -28,6 +28,11 @@
  *****************************************************************************/
 
 class ParticleEmitter : public GameObject3D {
+private:
+	/* This is used to so that particles still spawn even if none are on the
+	 * current frame due the delta * particleSpawnRate being 0 when cast to an
+	 * integer */
+	float cumulativeDelta = 0;
 public:
 	/* The number of particles to spawn per second */
 	unsigned int particleSpawnRate = 100;

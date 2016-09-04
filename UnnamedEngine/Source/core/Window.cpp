@@ -45,7 +45,6 @@ bool Window::create() {
 	setResizable(settings.windowResizable);
 	setDecorated(settings.windowDecorated);
 	setSamples(settings.videoSamples);
-	setVSync(settings.videoVSync);
 	setRefreshRate(settings.videoRefreshRate);
 	setFloating(settings.windowFloating);
 
@@ -74,6 +73,9 @@ bool Window::create() {
 	}
 
 	makeCurrent();
+
+	//Set the VSync setting
+	setVSync(settings.videoVSync);
 
 	int width, height;
 	glfwGetFramebufferSize(instance, &width, &height);

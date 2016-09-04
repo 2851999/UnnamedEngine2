@@ -25,8 +25,15 @@
 void ParticleEmitter::update(ParticleSystem* system, float delta) {
 	GameObject3D::update();
 
+	//Cumulate the delta
+	cumulativeDelta += delta;
+
 	//Calculate the number of particles to spawn on this update
-	unsigned int newParticles = delta * particleSpawnRate;
+	unsigned int newParticles = cumulativeDelta * particleSpawnRate;
+
+	//Reset the cumulative delta if some particles are going to be 'spawned'
+	if (newParticles > 0)
+		cumulativeDelta = 0;
 
 	//Go through the new particles
 	for (unsigned int i = 0; i < newParticles; i++) {

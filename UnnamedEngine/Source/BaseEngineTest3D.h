@@ -49,6 +49,10 @@ private:
 
 	InputBindings* bindings;
 	InputBindingAxis* axis0;
+	InputBindingAxis* axis1;
+
+	InputBindingAxis* axis2;
+	InputBindingAxis* axis3;
 
 	//Model* object2;
 public:
@@ -81,15 +85,9 @@ public:
 
 	virtual void onScroll(double dx, double dy) override {}
 
-	virtual void onControllerAxis(Controller* controller, int axis, float value) override {
-		std::cout << "AXIS " + StrUtils::str(value) + "    " + StrUtils::str(axis) << std::endl;
-	}
-	virtual void onControllerButtonPressed(Controller* controller, int index) override {
-		std::cout << "BUTTON DOWN" << std::endl;
-	}
-	virtual void onControllerButtonReleased(Controller* controller, int index) override {
-		std::cout << "BUTTON UP" << std::endl;
-	}
+	virtual void onControllerAxis(Controller* controller, int axis, float value) override {}
+	virtual void onControllerButtonPressed(Controller* controller, int index) override {}
+	virtual void onControllerButtonReleased(Controller* controller, int index) override {}
 
 	virtual void onButtonPressed(InputBindingButton* button) override {
 
@@ -103,7 +101,7 @@ public:
 void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
 	getSettings().videoVSync = true;
-	getSettings().videoMaxFPS = 60;
+	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = 16;
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().windowFullscreen = false;
@@ -172,36 +170,26 @@ void Test::created() {
 	axis0 = bindings->createAxisBinding("Axis0");
 	axis0->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
 	axis0->assignControllerAxis(controller, 1);
+	axis1 = bindings->createAxisBinding("Axis1");
+	axis1->assignKeys(GLFW_KEY_A, GLFW_KEY_D);
+	axis1->assignControllerAxis(controller, 0);
+
+	axis2 = bindings->createAxisBinding("Axis2");
+	axis2->assignControllerAxis(controller, 4);
+	axis3 = bindings->createAxisBinding("Axis3");
+	axis3->assignControllerAxis(controller, 3);
 
 	Renderer::addCamera(camera);
 }
 
 void Test::update() {
 	camera->moveForward(0.004f * axis0->getValue() * getDelta());
-	camera->update();
-	if (getWindow()->isKeyPressed(GLFW_KEY_A)) {
-		camera->moveLeft(0.004f * getDelta());
-		camera->update();
-	} else if (getWindow()->isKeyPressed(GLFW_KEY_D)) {
-		camera->moveRight(0.004f * getDelta());
-		camera->update();
-	}
+	camera->moveLeft(0.004f * axis1->getValue() * getDelta());
 
-//	if (controller->getAxis(1) < 0) {
-//		camera->moveForward((controller->getAxis(1) * -1 / 400.0f) * getDelta());
-//		camera->update();
-//	} else if (controller->getAxis(1) > 0) {
-//		camera->moveBackward((controller->getAxis(1) / 400.0f) * getDelta());
-//		camera->update();
-//	}
-//
-//	if (controller->getAxis(0) < 0) {
-//		camera->moveLeft((controller->getAxis(0) * -1 / 400.0f) * getDelta());
-//		camera->update();
-//	} else if (controller->getAxis(0) > 0) {
-//		camera->moveRight((controller->getAxis(0) / 400.0f) * getDelta());
-//		camera->update();
-//	}
+	camera->getRelRotation() += Vector3f(axis2->getValue(), -axis3->getValue(), 0) * getDelta() * 0.1f;
+	camera->getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89, 89));
+
+	camera->update();
 
 	if (getWindow()->isKeyPressed(GLFW_KEY_UP))
 		particleEmitter->getRelPosition() += Vector3f(0.0f, 0.0f, -0.008f * getDelta());
@@ -211,12 +199,6 @@ void Test::update() {
 		particleEmitter->getRelPosition() += Vector3f(-0.008f * getDelta(), 0.0f, 0.0f);
 	else if (getWindow()->isKeyPressed(GLFW_KEY_RIGHT))
 		particleEmitter->getRelPosition() += Vector3f(0.008f * getDelta(), 0.0f, 0.0f);
-
-//	object->getRelRotation() += Vector3f(0.000001f * getDelta(), -0.0001f * getDelta(), 0);
-//	object->update();
-//
-//	object2->getRelRotation() += Vector3f(0, 0.0001f * getDelta(), 0);
-//	object2->update();
 
 	particleSystem->update(((float) getDelta() / 1000.0f), camera->getPosition());
 
