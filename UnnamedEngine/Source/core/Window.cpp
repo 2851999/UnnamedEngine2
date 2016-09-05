@@ -81,6 +81,7 @@ bool Window::create() {
 	glfwGetFramebufferSize(instance, &width, &height);
 	settings.windowWidth = width;
 	settings.windowHeight = height;
+	settings.windowAspectRatio = (float) width / (float) height;
 
 	if (! settings.windowFullscreen)
 		centre();

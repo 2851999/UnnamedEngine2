@@ -1,4 +1,18 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 2 | Experimental 3
+
+* Added windowAspectRatio in Settings that is assigned when
+  the Window is created
+* Added methods to directly obtain the current frame delta
+  in seconds
+  
+* Renamed Scene to RenderScene3D
+
+* Note: RenderScene3D doesn't have an update method, so objects
+        that move should always be updated manually/added
+        to a PhysicsScene3D instance
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 2 | Experimental 2
 
 * Added DebugCamera

@@ -30,13 +30,13 @@
 #include "experimental/Billboard.h"
 #include "core/particles/ParticleEmitter.h"
 #include "core/particles/ParticleEffect.h"
-#include "core/render/Scene.h"
 #include "core/physics/PhysicsScene.h"
 #include "core/input/Controller.h"
+#include "core/render/RenderScene.h"
 #include "core/ResourceLoader.h"
 #include "utils/DebugCamera.h"
 
-class Test : public BaseEngine, public InputBindingsListener {
+class Test : public BaseEngine {
 private:
 	SoundSystem* soundSystem;
 	DebugCamera* camera;
@@ -44,7 +44,7 @@ private:
 	ParticleEmitter* particleEmitter;
 	ParticleSystem* particleSystem;
 	PhysicsScene3D* physicsScene;
-	Scene* scene;
+	RenderScene3D* scene;
 	Controller* controller;
 
 	Font* test;
@@ -82,14 +82,14 @@ void Test::created() {
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 
 	physicsScene = new PhysicsScene3D();
-	scene = new Scene();
+	scene = new RenderScene3D();
 
 	object = new PhysicsObject3D(ResourceLoader::sLoadModel("C:/UnnamedEngine/Models/", "teapot.obj"), Renderer::getRenderShader("Material"));
 
 	scene->add(object);
 	physicsScene->add(object);
 
-	camera = new DebugCamera(Matrix4f().initPerspective(110, ((float) getSettings().windowWidth) / ((float) getSettings().windowHeight), 0.1f, 100));
+	camera = new DebugCamera(Matrix4f().initPerspective(110, getSettings().windowAspectRatio, 0.1f, 100));
 	camera->setSkyBox(new SkyBox("C:/UnnamedEngine/skybox1/", "skybox0.png", "skybox1.png", "skybox2.png", "skybox3.png", "skybox4.png", "skybox5.png", 100.0f));
 	camera->setFlying(true);
 
@@ -134,7 +134,7 @@ void Test::created() {
 }
 
 void Test::update() {
-	camera->update(((float) getDelta() / 1000.0f));
+	camera->update(getDeltaSeconds());
 
 	if (getWindow()->isKeyPressed(GLFW_KEY_UP))
 		particleEmitter->getRelPosition() += Vector3f(0.0f, 0.0f, -0.008f * getDelta());
@@ -145,12 +145,11 @@ void Test::update() {
 	else if (getWindow()->isKeyPressed(GLFW_KEY_RIGHT))
 		particleEmitter->getRelPosition() += Vector3f(0.008f * getDelta(), 0.0f, 0.0f);
 
-	particleSystem->update(((float) getDelta() / 1000.0f), camera->getPosition());
+	particleSystem->update(getDeltaSeconds(), camera->getPosition());
 
 	soundSystem->update();
 
-	physicsScene->update(((float) getDelta() / 1000.0f));
-	scene->update();
+	physicsScene->update(getDeltaSeconds());
 }
 
 void Test::render() {

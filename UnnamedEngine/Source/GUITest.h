@@ -69,12 +69,6 @@ void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
 }
 
-//template<class... A>
-//std::vector<A> toVector(A... args) {
-//	std::vector<A> values;
-//	return values;
-//}
-
 void Test::created() {
 	camera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
 	camera->update();

@@ -16,35 +16,34 @@
  *
  *****************************************************************************/
 
-#include "Scene.h"
-
 #include "Renderer.h"
 #include "../Window.h"
 
 #include "../../utils/Utils.h"
+#include "RenderScene.h"
 
 /*****************************************************************************
- * The Scene class
+ * The RenderScene3D class
  *****************************************************************************/
 
-Scene::~Scene() {
+RenderScene3D::RenderScene3D() {
+	//Get the required shaders
+	shadowMapShader = Renderer::getRenderShader("ShadowMap")->getShader();
+	lightingShader = Renderer::getRenderShader("Lighting")->getShader();
+}
+
+RenderScene3D::~RenderScene3D() {
 	for (unsigned int i = 0; i < objects.size(); i++)
 		delete objects[i];
 	objects.clear();
 }
 
-void Scene::update() {
-	for (unsigned int i = 0; i < objects.size(); i++)
-		objects[i]->update();
-}
-
-void Scene::render() {
+void RenderScene3D::render() {
 	//Check for lighting
 	if (lights.size() > 0) {
 		for (unsigned int i = 0; i < lights.size(); i++) {
 			if (lights[i]->hasDepthBuffer()) {
 				FBO* depthBuffer = lights[i]->getDepthBuffer();
-				Shader* shadowMapShader = Renderer::getRenderShader("ShadowMap")->getShader();
 
 				depthBuffer->bind();
 				glClear(GL_DEPTH_BUFFER_BIT);
@@ -65,8 +64,6 @@ void Scene::render() {
 
 		glViewport(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight);
 
-		//Setup for lighting
-		Shader* shader = Renderer::getRenderShader("Lighting")->getShader();
 		//MAKE SO ONLY OCCURS WHEN > 6 LIGHTS
 		/*
 		 * To try and make forward lighting more efficient, the shader is able to
@@ -76,13 +73,14 @@ void Scene::render() {
 		 * the shader
 		 */
 
-		shader->use();
-		shader->setUniformi("NumLights", 0);
-		shader->setUniformColourRGB("Light_Ambient", Colour(0.1f, 0.1f, 0.1f));
-		shader->setUniformVector3("Camera_Position", ((Camera3D*) Renderer::getCamera())->getPosition());
+		lightingShader->use();
+		lightingShader->setUniformi("NumLights", 0);
+		lightingShader->setUniformColourRGB("Light_Ambient", Colour(0.1f, 0.1f, 0.1f));
+		lightingShader->setUniformVector3("Camera_Position", ((Camera3D*) Renderer::getCamera())->getPosition());
 
-		shader->setUniformi("EnvironmentMap", Renderer::bindTexture(((Camera3D*) Renderer::getCamera())->getSkyBox()->getCubemap()));
-		shader->setUniformi("UseEnvironmentMap", 0);
+		lightingShader->setUniformi("EnvironmentMap", Renderer::bindTexture(((Camera3D*) Renderer::getCamera())->getSkyBox()->getCubemap()));
+		lightingShader->setUniformi("UseEnvironmentMap", 0);
+
 		for (unsigned int i = 0; i < objects.size(); i++) {
 			//if (((Camera3D*) Renderer::getCamera())->getFrustum().testSphere(((GameObject3D*) objects[i])->getPosition(), 1.0f))
 				objects[i]->render(true);
@@ -94,30 +92,30 @@ void Scene::render() {
 		glDepthMask(false);
 		glDepthFunc(GL_LEQUAL);
 
-		shader->setUniformColourRGB("Light_Ambient", Colour(0.0f, 0.0f, 0.0f));
+		lightingShader->setUniformColourRGB("Light_Ambient", Colour(0.0f, 0.0f, 0.0f));
 
 		//Go through each batch of lights
 		for (unsigned int b = 0; b < lights.size(); b += 6) {
-			shader->setUniformi("NumLights", MathsUtils::min(6u, lights.size() - b));
+			lightingShader->setUniformi("NumLights", MathsUtils::min(6u, lights.size() - b));
 
 			//Go through the lights in this batch
 			for (unsigned int l = b; (l < b + 6) && (l < lights.size()); l++)
-				lights[l]->setUniforms(shader, "[" + StrUtils::str(l - b) + "]");
+				lights[l]->setUniforms(lightingShader, "[" + StrUtils::str(l - b) + "]");
 
 			if (lights[b]->hasDepthBuffer()) {
-				shader->setUniformMatrix4("LightSpaceMatrix", lights[b]->getLightSpaceMatrix());
-				shader->setUniformi("ShadowMap", Renderer::bindTexture(lights[b]->getDepthBuffer()->getFramebufferTexture(0)));
-				shader->setUniformi("UseShadowMap", 1);
+				lightingShader->setUniformMatrix4("LightSpaceMatrix", lights[b]->getLightSpaceMatrix());
+				lightingShader->setUniformi("ShadowMap", Renderer::bindTexture(lights[b]->getDepthBuffer()->getFramebufferTexture(0)));
+				lightingShader->setUniformi("UseShadowMap", 1);
 			} else
-				shader->setUniformi("UseShadowMap", 0);
+				lightingShader->setUniformi("UseShadowMap", 0);
 
 			//Go through the objects in the scene
 			for (unsigned int o = 0; o < objects.size(); o++) {
 				//if (((Camera3D*) Renderer::getCamera())->getFrustum().testSphere(((GameObject3D*) objects[o])->getPosition(), 1.0f)) {
 					Matrix4f modelMatrix = objects[o]->getModelMatrix();
 
-					shader->setUniformMatrix4("ModelMatrix", modelMatrix);
-					shader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
+					lightingShader->setUniformMatrix4("ModelMatrix", modelMatrix);
+					lightingShader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
 
 					objects[o]->render(true);
 				//}
@@ -129,7 +127,7 @@ void Scene::render() {
 
 		Renderer::unbindTexture();
 
-		shader->stopUsing();
+		lightingShader->stopUsing();
 
 		//Disable blending
 		glDepthFunc(GL_LESS);
