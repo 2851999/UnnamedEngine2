@@ -29,12 +29,11 @@ PhysicsScene3D::~PhysicsScene3D() {
 }
 
 void PhysicsScene3D::update(float delta) {
-	bool collision = false;
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		objects[i]->updatePhysics(delta);
 
 		//Check for a collider
-		if (objects[i]->hasCollider() && ! collision) {
+		if (objects[i]->hasCollider()) {
 			//Go through all of the other objects after the current one,
 			//ensuring the same two objects are not collision tested twice
 			for (unsigned int j = i + 1; j < objects.size(); j++) {

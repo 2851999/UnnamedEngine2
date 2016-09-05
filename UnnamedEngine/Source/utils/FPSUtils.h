@@ -28,6 +28,7 @@ private:
 	/* Time data, measured in milliseconds */
 	long lastFrame = 0;
 	long currentDelta = 0;
+	float currentDeltaSeconds = 0;
 	long lastFPSCountUpdate = 0;
 	/* The current FPS count used in PER_SECOND */
 	unsigned int fpsCount = 0;
@@ -67,6 +68,7 @@ public:
 
 	Mode getMode() { return mode; }
 	long getDelta() { return currentDelta; }
+	float getDeltaSeconds() { return currentDeltaSeconds; }
 	unsigned int getFPS() { return currentFPS; }
 private:
 	/* The mode to use when calculating the FPS */

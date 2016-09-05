@@ -35,7 +35,7 @@ MainGame::MainGame(Asteroids* asteroids, float windowWidth, float windowHeight) 
 	player->setCollider(new SphereCollider(player, 1.0f));
 	player->setMass(10);
 
-	scene = new Scene();
+	scene = new RenderScene3D();
 
 	scene->addLight((new Light(Light::TYPE_DIRECTIONAL))->setDirection(0.0f, -1.0f, 0.5f)
 												  ->setDiffuseColour(Colour::WHITE)
@@ -78,7 +78,6 @@ void MainGame::startGame() {
 
 void MainGame::update() {
 	camera3D->update();
-	scene->update();
 	physicsScene->update((float) asteroids->getDelta() / 1000.0f);
 
 	if (asteroids->getWindow()->isKeyPressed(GLFW_KEY_W)) {

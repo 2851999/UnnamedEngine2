@@ -44,7 +44,7 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 
 	renderData = new RenderData(GL_TRIANGLE_STRIP, 4);
 
-	Shader* shader = Renderer::getRenderShader("Particle")->getShader();
+	shader = Renderer::getRenderShader("Particle")->getShader();
 
 	vboVertices = new VBO<GLfloat>(GL_ARRAY_BUFFER, sizeof(vertexBufferData), data, GL_STREAM_DRAW, true);
 	vboVertices->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
@@ -169,8 +169,7 @@ void ParticleSystem::render() {
 	vboColours->updateStream(particleCount * sizeof(GLfloat) * 4);
 	vboTextureData->updateStream(particleCount * sizeof(GLfloat) * 4);
 
-	//Get the correct shader
-	Shader* shader = Renderer::getRenderShader("Particle")->getShader();
+	//Use the shader
 	shader->use();
 
 	//Get the camera's view matrix used in getting the 'right' and 'up' vectors

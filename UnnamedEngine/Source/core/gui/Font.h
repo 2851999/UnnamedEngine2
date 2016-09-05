@@ -55,19 +55,31 @@ private:
 	unsigned int textureAtlasWidth  = 0;
 	unsigned int textureAtlasHeight = 0;
 
+	/* States whether this font is billboarded or not */
+	bool billboarded = false;
+
 	/* The GameObject2D instance for this font */
-	GameObject2D* object = NULL;
+	GameObject2D* object2D = NULL;
+
+	/* The GameObject3D instance for this font (For 3D billboarded text rendering) */
+	GameObject3D* object3D = NULL;
 
 	/* The method used to setup this Font instance given the font name and size */
 	void setup(std::string name, unsigned int size, Colour colour, TextureParameters parameters);
+
+	/* Methods used to update this font ready to render some text */
+	void update(std::string text);
 public:
 	/* The constructor */
 	Font(std::string name, unsigned int size = 18, Colour colour = Colour::WHITE, TextureParameters parameters = TextureParameters()) { setup(name, size, colour, parameters); }
+	Font(std::string name, unsigned int size, Colour colour, bool billboarded, TextureParameters parameters = TextureParameters()) : billboarded(billboarded) { setup(name, size, colour, parameters); }
 	virtual ~Font() { destroy(); }
 
 	/* Methods used to update this font ready to render some text */
 	void update(std::string text, Vector2f position);
 	inline void update(std::string text, float x, float y) { update(text, Vector2f(x, y)); }
+	void update(std::string text, Vector3f position);
+	inline void update(std::string text, float x, float y, float z) { update(text, Vector3f(x, y, z)); }
 
 	/* Method used to render the current text */
 	void render();

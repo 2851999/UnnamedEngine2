@@ -26,8 +26,8 @@
 #include "core/render/Mesh.h"
 #include "utils/Utils.h"
 #include "core/Model.h"
-#include "core/render/Scene.h"
 #include "core/physics/PhysicsScene.h"
+#include "core/render/RenderScene.h"
 
 class Test : public BaseEngine {
 private:

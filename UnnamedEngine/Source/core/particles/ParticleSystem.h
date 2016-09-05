@@ -78,6 +78,9 @@ private:
 	VBO<GLfloat>* vboColours;
 	VBO<GLfloat>* vboTextureData;
 
+	/* The shader used for rendering */
+	Shader* shader;
+
 	/* A list of the particle structures used to store the data */
 	std::vector<Particle> particles;
 

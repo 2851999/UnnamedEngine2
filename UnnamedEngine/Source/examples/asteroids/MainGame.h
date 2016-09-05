@@ -19,8 +19,8 @@
 #ifndef EXAMPLES_ASTEROIDS_MAINGAME_H_
 #define EXAMPLES_ASTEROIDS_MAINGAME_H_
 
-#include "../../core/render/Scene.h"
 #include "../../core/physics/PhysicsScene.h"
+#include "../../core/render/RenderScene.h"
 
 class Camera3D;
 
@@ -29,7 +29,7 @@ private:
 	Asteroids* asteroids;
 	Camera3D*  camera3D;
 
-	Scene* scene;
+	RenderScene3D* scene;
 	PhysicsObject3D* player;
 	PhysicsScene3D* physicsScene;
 public:

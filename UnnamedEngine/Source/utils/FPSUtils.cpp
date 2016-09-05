@@ -43,6 +43,7 @@ void FPSCalculator::update() {
 
 		//Calculate the current time in milliseconds
 		currentDelta = current - lastFrame;
+		currentDeltaSeconds = (float) currentDelta / 1000.0f;
 
 		//Assign the last frame time
 		lastFrame = current;

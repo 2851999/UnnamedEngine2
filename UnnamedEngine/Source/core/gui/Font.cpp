@@ -99,16 +99,30 @@ void Font::setup(std::string name, unsigned int size, Colour colour, TexturePara
 
 	FT_Done_Face(face);
 
-	//Create the Mesh instance and assign the texture
-	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader("Font"));
-	object->getMaterial()->setDiffuseColour(colour);
-	object->getMaterial()->setDiffuseTexture(textureAtlas);
-	object->update();
+	//Check whether this font is billboarded or not (i.e. Is it going to be used in the 3D world or not)
+	if (billboarded) {
+		//Create the GameObject3D instance and assign the texture
+		object3D = new GameObject3D(new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader("BillboardedFont"));
+		object3D->getMaterial()->setDiffuseColour(colour);
+		object3D->getMaterial()->setDiffuseTexture(textureAtlas);
+		object3D->update();
+	} else {
+		//Create the GameObject2D instance and assign the texture
+		object2D = new GameObject2D(new Mesh(MeshBuilder::createQuad(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader("Font"));
+		object2D->getMaterial()->setDiffuseColour(colour);
+		object2D->getMaterial()->setDiffuseTexture(textureAtlas);
+		object2D->update();
+	}
 }
 
-void Font::update(std::string text, Vector2f position) {
+void Font::update(std::string text) {
 	//The pointer to the MeshData instance in the object
-	MeshData* data = object->getMeshes()[0]->getData();
+	MeshData* data;
+
+	if (billboarded)
+		data = object3D->getMeshes()[0]->getData();
+	else
+		data = object2D->getMeshes()[0]->getData();
 
 	//Clear the previous data
 	data->clearPositions();
@@ -118,59 +132,119 @@ void Font::update(std::string text, Vector2f position) {
 	//The current x and y positions
 	float currentX = 0;
 	float currentY = 0;
+
+	if (billboarded) {
+		currentX = -getWidth(text) / 2;
+		currentY = getHeight(text) / 2;
+	}
+
+	unsigned int newLineCount = 0;
 	//Go through each character in the text
 	for (unsigned int i = 0; i < text.length(); i++) {
-		//Get the character data for the current character
-		CharInfo info = characters[((int) text.at(i)) - ASCII_START];
-
-		//The positions used for the vertices
-		float xPos = currentX + info.bitmapLeft;
-		float yPos = currentY - (info.bitmapHeight + (info.bitmapTop - info.bitmapHeight));
-
-		float width = info.bitmapWidth;
-		float height = info.bitmapHeight;
-
-		data->addPosition(Vector2f(xPos, yPos));
-		data->addPosition(Vector2f(xPos + width, yPos));
-		data->addPosition(Vector2f(xPos + width, yPos + height));
-		data->addPosition(Vector2f(xPos, yPos + height));
-
-		data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, 0.0f));
-		data->addTextureCoord(Vector2f((info.xOffset + info.bitmapWidth) / (float) textureAtlasWidth, 0.0f));
-		data->addTextureCoord(Vector2f((info.xOffset + info.bitmapWidth) / (float) textureAtlasWidth, info.bitmapHeight / (float) textureAtlasHeight));
-		data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, info.bitmapHeight / (float) textureAtlasHeight));
-
-		data->addIndex((i * 4) + 0);
-		data->addIndex((i * 4) + 1);
-		data->addIndex((i * 4) + 2);
-		data->addIndex((i * 4) + 3);
-		data->addIndex((i * 4) + 0);
-		data->addIndex((i * 4) + 2);
-
-		currentX += (info.advanceX / 64);
-
 		//Check for a new line escape character
 		if (text.compare(i, 1, "\n") == 0) {
+			newLineCount ++;
 			//Go to a new line
 			currentX = 0;
 			currentY += textureAtlasHeight;
+
+			if (billboarded)
+				currentX = -getWidth(text) / 2;
+		} else {
+			//Get the character data for the current character
+			CharInfo info = characters[((int) text.at(i)) - ASCII_START];
+
+			//The positions used for the vertices
+			float xPos = currentX + info.bitmapLeft;
+			float yPos = currentY - (info.bitmapHeight + (info.bitmapTop - info.bitmapHeight));
+
+			float width = info.bitmapWidth;
+			float height = info.bitmapHeight;
+
+			if (billboarded) {
+				data->addPosition(Vector3f(xPos, yPos, 0.0f));
+				data->addPosition(Vector3f(xPos + width, yPos, 0.0f));
+				data->addPosition(Vector3f(xPos + width, yPos + height, 0.0f));
+				data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
+			} else {
+				data->addPosition(Vector2f(xPos, yPos));
+				data->addPosition(Vector2f(xPos + width, yPos));
+				data->addPosition(Vector2f(xPos + width, yPos + height));
+				data->addPosition(Vector2f(xPos, yPos + height));
+			}
+
+			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, 0.0f));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.bitmapWidth) / (float) textureAtlasWidth), 0.0f));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.bitmapWidth) / (float) textureAtlasWidth), info.bitmapHeight / (float) textureAtlasHeight));
+			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, info.bitmapHeight / (float) textureAtlasHeight));
+
+			unsigned int ip = (i - newLineCount) * 4;
+
+			data->addIndex(ip + 0);
+			data->addIndex(ip + 1);
+			data->addIndex(ip + 2);
+			data->addIndex(ip + 3);
+			data->addIndex(ip + 0);
+			data->addIndex(ip + 2);
+
+			currentX += (info.advanceX / 64);
 		}
 	}
+	if (billboarded) {
+		object3D->getMeshes()[0]->getRenderData()->updatePositions(data);
+		object3D->getMeshes()[0]->getRenderData()->updateTextureCoords(data);
+		object3D->getMeshes()[0]->getRenderData()->updateIndices(data);
+	} else {
+		object2D->getMeshes()[0]->getRenderData()->updatePositions(data);
+		object2D->getMeshes()[0]->getRenderData()->updateTextureCoords(data);
+		object2D->getMeshes()[0]->getRenderData()->updateIndices(data);
+	}
+}
 
-	object->getMeshes()[0]->getRenderData()->updatePositions(data);
-	object->getMeshes()[0]->getRenderData()->updateTextureCoords(data);
-	object->getMeshes()[0]->getRenderData()->updateIndices(data);
+void Font::update(std::string text, Vector2f position) {
+	update(text);
 
-	object->setPosition(position);
-	object->update();
+	if (! billboarded) {
+		object2D->setPosition(position);
+		object2D->update();
+	}
+}
+
+void Font::update(std::string text, Vector3f position) {
+	update(text);
+
+	if (billboarded) {
+		object3D->setPosition(position);
+		object3D->update();
+	}
 }
 
 void Font::render() {
-	object->render();
+	if (billboarded) {
+		Shader* shader = object3D->getShader();
+		shader->use();
+
+		Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
+
+		shader->setUniformVector3("Camera_Right", Vector3f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2)));
+		shader->setUniformVector3("Camera_Up", Vector3f(-matrix.get(1, 0), -matrix.get(1, 1), -matrix.get(1, 2)));
+		shader->setUniformVector2("Billboard_Size", Vector2f(0.005f, 0.005f));
+		shader->setUniformVector3("Billboard_Centre", object3D->getPosition());
+
+		shader->setUniformMatrix4("ProjectionViewMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
+
+		object3D->render(true);
+
+		shader->stopUsing();
+	} else
+		object2D->render();
 }
 
 void Font::destroy() {
-	delete object;
+	if (billboarded)
+		delete object3D;
+	else
+		delete object2D;
 }
 
 float Font::getWidth(std::string text) {

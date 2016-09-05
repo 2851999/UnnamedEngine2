@@ -29,14 +29,11 @@
 namespace Engine {
 	/* Various engine values
 	 * Version     - Should change every development version
-	 *               first value  = release no.
-	 *               second value = beta no.
-	 *               third value  = development no.
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.0.2";
-	const std::string DateCreated = "03/09/2016";
-	const std::string Build       = "Development";
+	const std::string Version     = "V0.0.3";
+	const std::string DateCreated = "05/09/2016";
+	const std::string Build       = "Experimental";
 }
 
 /*****************************************************************************
@@ -99,6 +96,7 @@ public:
 
 	unsigned int getFPS() { return fpsCalculator->getFPS(); }
 	long getDelta() { return fpsCalculator->getDelta(); }
+	float getDeltaSeconds() { return fpsCalculator->getDeltaSeconds(); }
 
 	/* Input methods */
 	virtual void onKeyPressed(int key) override {}

@@ -23,7 +23,7 @@
 /*****************************************************************************
  * The Controller class
  *****************************************************************************/
-
+#include <iostream>
 Controller::Controller(int index) {
 	this->index = index;
 
@@ -39,10 +39,11 @@ Controller::Controller(int index) {
 }
 
 void Controller::checkInput() {
-	//Get the current states - seems to have an issue just using the pointer
-	//when initialised in the constructor - the states didn't change
-	currentAxisValues   = glfwGetJoystickAxes(index, &axisCount);
-	currentButtonValues = glfwGetJoystickButtons(index, &buttonCount);
+	//Get the current states - seems these methods actually fetch the values
+	//from the joystick and then puts it into the dynamic array assigned
+	//when the controller was created
+	glfwGetJoystickAxes(index, &axisCount);
+	glfwGetJoystickButtons(index, &buttonCount);
 
 	//Check for changes and then change any states necessary
 	for (int i = 0; i < axisCount; i++) {

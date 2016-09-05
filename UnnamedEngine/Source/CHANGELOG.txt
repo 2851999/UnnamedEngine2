@@ -1,4 +1,60 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 (V0.0.3)
+
+* Added DebugCamera
+* Added billboarded font support
+* Added windowAspectRatio in Settings that is assigned when
+  the Window is created
+* Added methods to directly obtain the current frame delta
+  in seconds
+  
+* Renamed Scene to RenderScene3D
+
+* Fixed bug: ParticleEmitter wouldn't spawn particles if the
+             delta * particleSpawnRate was < 1 in several
+             frame
+* Fixed bug: The VSync setting didn't have any effect
+* Fixed bug: Weird font glitch 
+* Fixed bug: InputBindingAxis could get stuck with a value
+             when using keyboard keys
+             
+* Note: RenderScene3D doesn't have an update method, so objects
+        that move should always be updated manually/added
+        to a PhysicsScene3D instance
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 2 | Experimental 3
+
+* Added windowAspectRatio in Settings that is assigned when
+  the Window is created
+* Added methods to directly obtain the current frame delta
+  in seconds
+  
+* Renamed Scene to RenderScene3D
+
+* Note: RenderScene3D doesn't have an update method, so objects
+        that move should always be updated manually/added
+        to a PhysicsScene3D instance
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 2 | Experimental 2
+
+* Added DebugCamera
+* Added billboarded font support
+
+* Fixed bug: Weird font glitch 
+* Fixed bug: InputBindingAxis could get stuck with a value
+             when using keyboard keys
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 2 | Experimental 1
+
+* Fixed bug: ParticleEmitter wouldn't spawn particles if the
+             delta * particleSpawnRate was < 1 in several
+             frame
+* Fixed bug: The VSync setting didn't have any effect
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 2 (V0.0.2)
 
 * Added GUIComponentListener

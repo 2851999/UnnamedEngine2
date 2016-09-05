@@ -45,6 +45,7 @@ struct Settings {
 	std::string  windowTitle      = "Unnamed Engine";
 	unsigned int windowWidth      = 0;
 	unsigned int windowHeight     = 0;
+	float        windowAspectRatio = 0.0;
 	bool         windowResizable  = false;
 	bool         windowDecorated  = true;
 	bool         windowBorderless = false;

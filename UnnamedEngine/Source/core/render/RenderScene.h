@@ -16,42 +16,43 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_SCENE_H_
-#define CORE_RENDER_SCENE_H_
+#ifndef CORE_RENDER_RENDERSCENE_H_
+#define CORE_RENDER_RENDERSCENE_H_
 
 #include "../Object.h"
 #include "Light.h"
 
 /*****************************************************************************
- * The Scene class is used to help to manage the rendering of a set of
- * GameObjects
+ * The RenderScene3D class is used to help to manage the rendering of a set
+ * of GameObject3D instances
  *****************************************************************************/
 
-class Scene {
+class RenderScene3D {
 private:
 	/* The GameObjects in this scene */
-	std::vector<GameObject*> objects;
+	std::vector<GameObject3D*> objects;
 
 	/* The lights in this scene */
 	std::vector<Light*> lights;
+
+	/* Various shaders that might be needed */
+	Shader* shadowMapShader;
+	Shader* lightingShader;
 public:
-	/* THe constructor */
-	Scene() {}
+	/* The constructor */
+	RenderScene3D();
 
 	/* The destructor */
-	virtual ~Scene();
-
-	/* The method used to update all of the objects */
-	void update();
+	virtual ~RenderScene3D();
 
 	/* The method used to render all of the objects */
 	void render();
 
 	/* Used to add an object to this scene */
-	inline void add(GameObject* object) { objects.push_back(object); }
+	inline void add(GameObject3D* object) { objects.push_back(object); }
 
 	/* Used to add a light to this scene */
 	inline void addLight(Light* light) { lights.push_back(light); }
 };
 
-#endif /* CORE_RENDER_SCENE_H_ */
+#endif /* CORE_RENDER_RENDERSCENE_H_ */

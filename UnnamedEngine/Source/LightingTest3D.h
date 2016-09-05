@@ -26,15 +26,15 @@
 #include "core/render/Mesh.h"
 #include "utils/Utils.h"
 #include "core/Model.h"
-#include "core/render/Scene.h"
+#include "core/render/RenderScene.h"
+#include "utils/DebugCamera.h"
 
 class Test : public BaseEngine {
 private:
-	Camera3D* camera;
+	DebugCamera* camera;
 	GameObject3D* object;
 	GameObject3D* object2;
 	Scene* scene;
-
 public:
 	virtual ~Test() {}
 
@@ -44,30 +44,11 @@ public:
 	virtual void render() override;
 	virtual void destroy() override;
 
-	void onCollision(unsigned int indexA, unsigned int indexB) {
-		std::cout << "COLLISION" << std::endl;
-	}
-
 	/* Input methods */
 	virtual void onKeyPressed(int key) override {
 		if (key == GLFW_KEY_ESCAPE)
 			requestClose();
 	}
-	virtual void onKeyReleased(int key) override {}
-	virtual void onChar(int key, char character) override {}
-
-	virtual void onMousePressed(int button) override {}
-	virtual void onMouseReleased(int button) override {}
-	virtual void onMouseMoved(double x, double y, double dx, double dy) override {
-		camera->getRelRotation() += Vector3f(-dy, dx, 0) * getDelta() * 0.01f;
-		camera->getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89, 89));
-		camera->update();
-	}
-	virtual void onMouseDragged(double x, double y, double dx, double dy) override {}
-	virtual void onMouseEnter() override {}
-	virtual void onMouseLeave() override {}
-
-	virtual void onScroll(double dx, double dy) override {}
 };
 
 void Test::initialise() {
@@ -104,11 +85,10 @@ void Test::created() {
 	scene->add(object);
 	scene->add(object2);
 
-	camera = new Camera3D(Matrix4f().initPerspective(110, ((float) getSettings().windowWidth) / ((float) getSettings().windowHeight), 0.1f, 100));
+	camera = new DebugCamera(Matrix4f().initPerspective(110, ((float) getSettings().windowWidth) / ((float) getSettings().windowHeight), 0.1f, 100));
 	//camera->setSkyBox(new SkyBox("C:/UnnamedEngine/skybox1/", "skybox0.png", "skybox1.png", "skybox2.png", "skybox3.png", "skybox4.png", "skybox5.png", 100));
 	camera->setSkyBox(new SkyBox("C:/UnnamedEngine/skybox2/", "front.jpg", "back.jpg", "left.jpg", "right.jpg", "top.jpg", "bottom.jpg", 100));
 	camera->setFlying(true);
-	camera->update();
 
 	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.00001f)
 																			   ->setDiffuseColour(Colour::WHITE)
@@ -156,20 +136,7 @@ void Test::created() {
 }
 
 void Test::update() {
-	if (getWindow()->isKeyPressed(GLFW_KEY_W)) {
-		camera->moveForward(0.004f * getDelta());
-		camera->update();
-	} else if (getWindow()->isKeyPressed(GLFW_KEY_S)) {
-		camera->moveBackward(0.004f * getDelta());
-		camera->update();
-	}
-	if (getWindow()->isKeyPressed(GLFW_KEY_A)) {
-		camera->moveLeft(0.004f * getDelta());
-		camera->update();
-	} else if (getWindow()->isKeyPressed(GLFW_KEY_D)) {
-		camera->moveRight(0.004f * getDelta());
-		camera->update();
-	}
+	camera->update(((float) getDelta() / 1000.0f));
 
 	scene->update();
 }
@@ -178,6 +145,7 @@ void Test::render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_FRAMEBUFFER_SRGB);
 
 	camera->useView();
 
