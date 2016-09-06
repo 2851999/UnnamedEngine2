@@ -16,28 +16,24 @@
  *
  *****************************************************************************/
 
-#include "AsteroidsRenderer.h"
 #include "../../core/render/Renderer.h"
+#include "LasersRenderer.h"
 
 /*****************************************************************************
- * The AsteroidsRenderer class
+ * The LasersRenderer class
  *****************************************************************************/
 
-AsteroidsRenderer::AsteroidsRenderer(ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
+LasersRenderer::LasersRenderer(ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
 	//Load the model mesh
-	mesh = loader.loadModel("asteroid_model.obj")[0];
+	mesh = loader.loadModel("laser.obj")[0];
 	MeshData* meshData = mesh->getData();
 	//Setup the shader
-	shader = loader.loadShader("AsteroidShader");
+	shader = loader.loadShader("LaserShader");
 	//Setup the render data
 	renderData = new RenderData(GL_TRIANGLES, meshData->getNumIndices());
 
 	vboVerticesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, meshData->getOthers().size() * sizeof(meshData->getOthers()[0]), meshData->getOthers(), GL_STATIC_DRAW, true);
 	vboVerticesData->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("Normal"), 3, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("Tangent"), 3, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("Bitangent"), 3, 0);
 	renderData->addVBO(vboVerticesData);
 
 	vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, meshData->getNumIndices() * sizeof(meshData->getIndices()[0]), meshData->getIndices(), GL_STATIC_DRAW);
@@ -46,17 +42,10 @@ AsteroidsRenderer::AsteroidsRenderer(ResourceLoader& loader, unsigned int numObj
 
 	for (unsigned int i = 0; i < numObjects; i++) {
 		matricesData.push_back(Matrix4f().initIdentity());
-		normalMatricesData.push_back(Matrix3f().initIdentity());
 
 		for (unsigned int x = 0; x < 4; x++) {
 			for (unsigned int y = 0; y < 4; y++) {
 				matricesDataRaw.push_back(matricesData[i].get(x, y));
-			}
-		}
-
-		for (unsigned int x = 0; x < 3; x++) {
-			for (unsigned int y = 0; y < 3; y++) {
-				normalMatricesDataRaw.push_back(0);
 			}
 		}
 
@@ -70,12 +59,6 @@ AsteroidsRenderer::AsteroidsRenderer(ResourceLoader& loader, unsigned int numObj
 	vboMatricesData->addAttribute(shader->getAttributeLocation("ModelMatrix") + 3, 4, 1);
 	renderData->addVBO(vboMatricesData);
 
-	vboNormalMatricesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * 9 * sizeof(GLfloat), normalMatricesDataRaw, GL_STREAM_DRAW, true);
-	vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix"), 3, 1);
-	vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 1, 3, 1);
-	vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 2, 3, 1);
-	renderData->addVBO(vboNormalMatricesData);
-
 	vboVisibleData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * sizeof(GLfloat), visibleData, GL_STREAM_DRAW, true);
 	vboVisibleData->addAttribute(shader->getAttributeLocation("Visible"), 1, 1);
 	renderData->addVBO(vboVisibleData);
@@ -84,12 +67,11 @@ AsteroidsRenderer::AsteroidsRenderer(ResourceLoader& loader, unsigned int numObj
 	renderData->setNumInstances(numObjects);
 }
 
-AsteroidsRenderer::~AsteroidsRenderer() {
+LasersRenderer::~LasersRenderer() {
 	delete renderData;
 	delete vboVerticesData;
 	delete vboIndices;
 	delete vboMatricesData;
-	delete vboNormalMatricesData;
 	delete mesh;
 
 	for (unsigned int i = 0; i < objects.size(); i++)
@@ -97,18 +79,16 @@ AsteroidsRenderer::~AsteroidsRenderer() {
 	objects.clear();
 }
 
-void AsteroidsRenderer::hideAsteroid(unsigned int index) {
+void LasersRenderer::hideLaser(unsigned int index) {
 	visibleData[index] = 0.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
-void AsteroidsRenderer::update() {
+void LasersRenderer::update() {
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		matricesData[i].initIdentity();
 		matricesData[i].translate(objects[i]->getPosition());
 		matricesData[i].rotate(objects[i]->getRotation());
-		matricesData[i].scale(objects[i]->getScale());
-		normalMatricesData[i] = matricesData[i].to3x3().inverse().transpose();
 
 		int pos = i * 16;
 
@@ -118,36 +98,22 @@ void AsteroidsRenderer::update() {
 				pos += 1;
 			}
 		}
-
-		pos = i * 9;
-		for (unsigned int x = 0; x < 3; x++) {
-			for (unsigned int y = 0; y < 3; y++) {
-				normalMatricesDataRaw[pos] = normalMatricesData[i].get(y, x);
-				pos += 1;
-			}
-		}
 	}
-
 	vboMatricesData->updateStream(numObjects * 16 * sizeof(GLfloat));
-	vboNormalMatricesData->updateStream(numObjects * 9 * sizeof(GLfloat));
 }
 
-void AsteroidsRenderer::render() {
+void LasersRenderer::render() {
 	//Use the shader
 	shader->use();
 	Renderer::saveTextures();
-	mesh->getMaterial()->setUniforms(shader, "Lighting");
+	mesh->getMaterial()->setUniforms(shader, "Material");
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
-	shader->setUniformVector3("Light_Direction", Vector3f(0.0f, 1.0f, 1.0f));
-	shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));
-	shader->setUniformColourRGB("Light_SpecularColour", Colour(1.0f, 1.0f, 1.0f));
-	shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
 
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CW);
-	glCullFace(GL_BACK);
+//	glEnable(GL_CULL_FACE);
+//	glFrontFace(GL_CW);
+//	glCullFace(GL_BACK);
 	renderData->render();
-	glDisable(GL_CULL_FACE);
+//	glDisable(GL_CULL_FACE);
 
 	Renderer::releaseNewTextures();
 	shader->stopUsing();

@@ -16,33 +16,30 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSRENDERER_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSRENDERER_H_
+#ifndef EXAMPLES_ASTEROIDS_LASERSRENDERER_H_
+#define EXAMPLES_ASTEROIDS_LASERSRENDERER_H_
 
 #include "../../core/Matrix.h"
 #include "../../core/ResourceLoader.h"
 #include "../../core/render/RenderData.h"
 
 /*****************************************************************************
- * The AsteroidsRenderer class attempts to instance render a lot of asteroids
+ * The LasersRenderer class attempts to instance render a lot of asteroids
  *****************************************************************************/
 
-class AsteroidsRenderer {
+class LasersRenderer {
 private:
 	/* The render data instance */
 	RenderData* renderData;
 
 	/* The various VBO's needed for rendering */
-	VBO<GLfloat>* vboVerticesData; //Vertices/TextureCoordinates/Normals/Tangents/Bitangents
+	VBO<GLfloat>* vboVerticesData;
 	VBO<GLfloat>* vboMatricesData;
-	VBO<GLfloat>* vboNormalMatricesData;
 	VBO<GLfloat>* vboVisibleData;
 	VBO<unsigned int>* vboIndices;
 
 	std::vector<Matrix4f> matricesData;
 	std::vector<GLfloat> matricesDataRaw;
-	std::vector<Matrix3f> normalMatricesData;
-	std::vector<GLfloat> normalMatricesDataRaw;
 	std::vector<GLfloat> visibleData;
 
 	/* The shader used for rendering */
@@ -58,21 +55,21 @@ private:
 	std::vector<GameObject3D*> objects;
 public:
 	/* The constructor */
-	AsteroidsRenderer(ResourceLoader& loader, unsigned int numObjects);
+	LasersRenderer(ResourceLoader& loader, unsigned int numObjects);
 
 	/* The destructor */
-	virtual ~AsteroidsRenderer();
+	virtual ~LasersRenderer();
 
-	/* The method used to add an asteroid */
-	inline void addAsteroid(GameObject3D* object) { objects.push_back(object); }
+	/* The method used to add a laser */
+	inline void addLaser(GameObject3D* object) { objects.push_back(object); }
 
-	/* The method used to hide an asteroid */
-	void hideAsteroid(unsigned int index);
+	/* The method used to hide an laser */
+	void hideLaser(unsigned int index);
 
-	/* Method called to update the asteroids */
+	/* Method called to update the lasers */
 	void update();
-	/* Method called to render the asteroids */
+	/* Method called to render the lasers */
 	void render();
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSRENDERER_H_ */
+#endif /* EXAMPLES_ASTEROIDS_LASERSRENDERER_H_ */

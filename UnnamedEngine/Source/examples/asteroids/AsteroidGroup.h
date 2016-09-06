@@ -16,49 +16,37 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
-
-class AsteroidsGame;
+#ifndef EXAMPLES_ASTEROIDS_ASTEROIDGROUP_H_
+#define EXAMPLES_ASTEROIDS_ASTEROIDGROUP_H_
 
 #include "AsteroidsRenderer.h"
-#include "AsteroidGroup.h"
-
-class Player;
 
 /*****************************************************************************
- * The AsteroidsMainGame class sets up and manages the main game
+ * The AsteroidGroup class manages a group of asteroids, allowing collision
+ * testing to occur only on the closest group to the player
  *****************************************************************************/
 
-class AsteroidsMainGame {
+class AsteroidGroup {
 private:
-	/* The instance of the game */
-	AsteroidsGame* game;
+	/* The position of this group */
+	Vector3f position;
 
-	/* The player */
-	Player* player;
-
-	/* The asteroid renderer */
-	AsteroidsRenderer* asteroidRenderer;
-
-	/* The asteroid groups */
-	std::vector<AsteroidGroup> asteroidGroups;
+	/* The asteroids in the group */
+	std::vector<GameObject3D*> objects;
 public:
 	/* The constructor */
-	AsteroidsMainGame(AsteroidsGame* game);
+	AsteroidGroup(Vector3f position);
 
 	/* The destructor */
-	virtual ~AsteroidsMainGame();
+	virtual ~AsteroidGroup();
 
-	/* The method used to start the game */
-	void start();
+	/* The method called to generate asteroids in this group */
+	void generateAsteroids(unsigned int number, AsteroidsRenderer* renderer);
 
-	/* The method used to stop the game */
-	void stop();
-
-	/* The update and render methods */
-	void update();
-	void render();
+	/* Setters and getters */
+	Vector3f getPosition() { return position; }
+	std::vector<GameObject3D*>& getObjects() { return objects; }
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_ */
+
+#endif /* EXAMPLES_ASTEROIDS_ASTEROIDGROUP_H_ */

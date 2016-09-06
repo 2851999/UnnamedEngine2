@@ -16,49 +16,54 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
+#ifndef EXAMPLES_ASTEROIDS_PLAYER_H_
+#define EXAMPLES_ASTEROIDS_PLAYER_H_
 
-class AsteroidsGame;
-
-#include "AsteroidsRenderer.h"
-#include "AsteroidGroup.h"
-
-class Player;
+#include "../../utils/DebugCamera.h"
+#include "../../core/physics/PhysicsObject.h"
+#include "AsteroidsGame.h"
+#include "LasersRenderer.h"
 
 /*****************************************************************************
- * The AsteroidsMainGame class sets up and manages the main game
+ * The Player class handles player movement and shooting
  *****************************************************************************/
 
-class AsteroidsMainGame {
+class Player : public InputListener {
 private:
-	/* The instance of the game */
+	/* The player camera */
+	DebugCamera* camera;
+
+	/* The game instance */
 	AsteroidsGame* game;
 
-	/* The player */
-	Player* player;
+	/* The lasers */
+	std::vector<PhysicsObject3D*> lasers;
 
-	/* The asteroid renderer */
-	AsteroidsRenderer* asteroidRenderer;
+	/* The lasers renderer */
+	LasersRenderer* lasersRenderer;
 
-	/* The asteroid groups */
-	std::vector<AsteroidGroup> asteroidGroups;
+	unsigned int nextLaser;
 public:
 	/* The constructor */
-	AsteroidsMainGame(AsteroidsGame* game);
+	Player(AsteroidsGame* mainGame);
 
 	/* The destructor */
-	virtual ~AsteroidsMainGame();
+	virtual ~Player();
 
-	/* The method used to start the game */
-	void start();
-
-	/* The method used to stop the game */
-	void stop();
-
-	/* The update and render methods */
+	/* Method used to update the player */
 	void update();
-	void render();
+
+	/* Method to use the player's view */
+	void useView();
+
+	/* Input methods */
+	virtual void onMousePressed(int button) override;
+
+	/* Setters and getters */
+	inline DebugCamera* getCamera() { return camera; }
+	inline std::vector<PhysicsObject3D*>& getLasers() { return lasers; }
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_ */
+
+
+#endif /* EXAMPLES_ASTEROIDS_PLAYER_H_ */

@@ -16,49 +16,32 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
-
-class AsteroidsGame;
-
-#include "AsteroidsRenderer.h"
 #include "AsteroidGroup.h"
 
-class Player;
-
 /*****************************************************************************
- * The AsteroidsMainGame class sets up and manages the main game
+ * The AsteroidGroup class
  *****************************************************************************/
 
-class AsteroidsMainGame {
-private:
-	/* The instance of the game */
-	AsteroidsGame* game;
+AsteroidGroup::AsteroidGroup(Vector3f position) : position(position) {
 
-	/* The player */
-	Player* player;
+}
 
-	/* The asteroid renderer */
-	AsteroidsRenderer* asteroidRenderer;
+AsteroidGroup::~AsteroidGroup() {
 
-	/* The asteroid groups */
-	std::vector<AsteroidGroup> asteroidGroups;
-public:
-	/* The constructor */
-	AsteroidsMainGame(AsteroidsGame* game);
+}
 
-	/* The destructor */
-	virtual ~AsteroidsMainGame();
+void AsteroidGroup::generateAsteroids(unsigned int number, AsteroidsRenderer* renderer) {
+	//Go through and generate the requested number of asteroids
+	for (unsigned int i = 0; i < number; i++) {
+		GameObject3D* asteroid = new GameObject3D();
 
-	/* The method used to start the game */
-	void start();
+		asteroid->setPosition(position + Vector3f(RandomUtils::randomFloat(-40, 40), RandomUtils::randomFloat(-40, 40), RandomUtils::randomFloat(-40, 40)));
+		float s = RandomUtils::randomFloat(0.4f, 2.0f);
+		asteroid->setScale(s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f));
+		asteroid->setRotation(RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360));
 
-	/* The method used to stop the game */
-	void stop();
+		objects.push_back(asteroid);
+		renderer->addAsteroid(asteroid);
+	}
+}
 
-	/* The update and render methods */
-	void update();
-	void render();
-};
-
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_ */

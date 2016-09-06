@@ -18,32 +18,45 @@
 
 #include "AsteroidsMainGame.h"
 #include "AsteroidsGame.h"
+#include "Player.h"
 
 /*****************************************************************************
  * The AsteroidsMainGame class
  *****************************************************************************/
 
 AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
-	//Setup the camera
-	camera = new DebugCamera(Matrix4f().initPerspective(110.0f, game->getSettings().windowAspectRatio, 0.1f, 100.0f));
-	camera->setSkyBox(new SkyBox(game->getResourceLoader().getPath() + "skybox/", "skyboxBK.png", "skyboxFT.png", "skyboxLF.png", "skyboxRT.png", "skyboxUP.png", "skyboxDN.png", 100.0f));
-	camera->setFlying(true);
+	//Setup the player
+	player = new Player(game);
 
-	asteroids = new AsteroidsRenderer(game->getResourceLoader());
-	asteroids->update();
+	//Setup the asteroid renderer
+	unsigned int numAsteroids = 1250;
+	asteroidRenderer = new AsteroidsRenderer(game->getResourceLoader(), numAsteroids);
+
+	//Add a group of asteroids
+	for (unsigned int x = 0; x < 5; x++) {
+		for (unsigned int y = 0; y < 5; y++) {
+			for (unsigned int z = 0; z < 5; z++) {
+				AsteroidGroup group(Vector3f(x * 200, y * 200, z * 200));
+				group.generateAsteroids(10, asteroidRenderer);
+				asteroidGroups.push_back(group);
+			}
+		}
+	}
+
+	asteroidRenderer->update();
 }
 
 AsteroidsMainGame::~AsteroidsMainGame() {
 	//Delete created resources
-	delete camera;
-	delete asteroids;
+	delete player;
+	delete asteroidRenderer;
 }
 
 void AsteroidsMainGame::start() {
 	//Hide the mouse
 	game->getWindow()->disableCursor();
 	//Add the camera
-	Renderer::addCamera(camera);
+	Renderer::addCamera(player->getCamera());
 }
 
 void AsteroidsMainGame::stop() {
@@ -55,7 +68,32 @@ void AsteroidsMainGame::stop() {
 
 void AsteroidsMainGame::update() {
 	//Update the camera
-	camera->update(game->getDeltaSeconds());
+	player->update();
+
+	unsigned int closestIndex = 0;
+	float distance = 0;
+
+	for (unsigned int i = 0; i < asteroidGroups.size(); i++) {
+		float current = (asteroidGroups[i].getPosition() - player->getCamera()->getPosition()).length();
+
+		if (current < distance) {
+			distance = current;
+			closestIndex = i;
+		}
+	}
+
+	std::vector<GameObject3D*> closestAsteroids = asteroidGroups[closestIndex].getObjects();
+	std::vector<PhysicsObject3D*> lasers = player->getLasers();
+	//Go through asteroids in the group
+	for (unsigned int i = 0; i < closestAsteroids.size(); i++) {
+		//NEED TO CHANGE
+
+		for (unsigned int j = 0; j < lasers.size(); j++) {
+			float distance = (lasers[j]->getPosition() - closestAsteroids[i]->getPosition()).length();
+			if (distance < 10.0f)
+				asteroidRenderer->hideAsteroid(i);
+		}
+	}
 }
 
 void AsteroidsMainGame::render() {
@@ -65,8 +103,8 @@ void AsteroidsMainGame::render() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//Use the camera's view
-	camera->useView();
+	//Use the player's view
+	player->useView();
 
-	asteroids->render();
+	asteroidRenderer->render();
 }
