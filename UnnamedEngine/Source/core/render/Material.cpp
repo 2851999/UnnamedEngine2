@@ -23,9 +23,7 @@
  * The Material class
  *****************************************************************************/
 
-void Material::setUniforms(RenderShader* renderShader) {
-	Shader* shader = renderShader->getShader();
-
+void Material::setUniforms(Shader* shader, std::string shaderName) {
 	shader->setUniformColourRGBA("Material_DiffuseColour", diffuseColour);
 
 	if (diffuseTexture)
@@ -34,7 +32,7 @@ void Material::setUniforms(RenderShader* renderShader) {
 		shader->setUniformi("Material_DiffuseTexture", Renderer::bindTexture(Renderer::getBlankTexture()));
 
 	//Check to see whether the shader is for lighting
-	if (renderShader->getName() == "Lighting") {
+	if (shaderName == "Lighting") {
 		//Assign other lighting specific properties
 		shader->setUniformColourRGB("Material_AmbientColour", ambientColour);
 		shader->setUniformColourRGB("Material_SpecularColour", specularColour);

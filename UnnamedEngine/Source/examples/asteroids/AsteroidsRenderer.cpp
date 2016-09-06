@@ -1,0 +1,162 @@
+/*****************************************************************************
+ *
+ *   Copyright 2016 Joel Davies
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ *****************************************************************************/
+
+#include "AsteroidsRenderer.h"
+#include "../../core/render/Renderer.h"
+
+#define NUM_ASTEROIDS 2000
+
+/*****************************************************************************
+ * The AsteroidsRenderer class
+ *****************************************************************************/
+
+AsteroidsRenderer::AsteroidsRenderer(ResourceLoader& loader) {
+	//Load the model mesh
+	mesh = loader.loadModel("asteroid_model.obj")[0];
+	MeshData* meshData = mesh->getData();
+	//Setup the shader
+	shader = loader.loadShader("AsteroidShader");
+	//Setup the render data
+	renderData = new RenderData(GL_TRIANGLES, meshData->getNumIndices());
+
+	vboVerticesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, meshData->getOthers().size() * sizeof(meshData->getOthers()[0]), meshData->getOthers(), GL_STATIC_DRAW, true);
+	vboVerticesData->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
+	vboVerticesData->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2, 0);
+	vboVerticesData->addAttribute(shader->getAttributeLocation("Normal"), 3, 0);
+	vboVerticesData->addAttribute(shader->getAttributeLocation("Tangent"), 3, 0);
+	vboVerticesData->addAttribute(shader->getAttributeLocation("Bitangent"), 3, 0);
+	renderData->addVBO(vboVerticesData);
+
+	vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, meshData->getNumIndices() * sizeof(meshData->getIndices()[0]), meshData->getIndices(), GL_STATIC_DRAW);
+	renderData->setIndicesVBO(vboIndices);
+
+
+	for (unsigned int i = 0; i < NUM_ASTEROIDS; i++) {
+		matricesData.push_back(Matrix4f().initIdentity());
+		normalMatricesData.push_back(Matrix3f().initIdentity());
+
+		for (unsigned int x = 0; x < 4; x++) {
+			for (unsigned int y = 0; y < 4; y++) {
+				matricesDataRaw.push_back(matricesData[i].get(x, y));
+			}
+		}
+
+		for (unsigned int x = 0; x < 3; x++) {
+			for (unsigned int y = 0; y < 3; y++) {
+				normalMatricesDataRaw.push_back(0);
+			}
+		}
+
+		GameObject3D* asteroid = new GameObject3D();
+
+		asteroid->setPosition(RandomUtils::randomFloat(-200, 200), RandomUtils::randomFloat(-400, 400), RandomUtils::randomFloat(-400, 400));
+		float s = RandomUtils::randomFloat(0.4f, 2.0f);
+		asteroid->setScale(s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f));
+		asteroid->setRotation(RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360));
+
+		objects.push_back(asteroid);
+	}
+
+	vboMatricesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, NUM_ASTEROIDS * 16 * sizeof(GLfloat), matricesDataRaw, GL_STREAM_DRAW, true);
+	vboMatricesData->addAttribute(shader->getAttributeLocation("ModelMatrix"), 4, 1);
+	vboMatricesData->addAttribute(shader->getAttributeLocation("ModelMatrix") + 1, 4, 1);
+	vboMatricesData->addAttribute(shader->getAttributeLocation("ModelMatrix") + 2, 4, 1);
+	vboMatricesData->addAttribute(shader->getAttributeLocation("ModelMatrix") + 3, 4, 1);
+	renderData->addVBO(vboMatricesData);
+
+	vboNormalMatricesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, NUM_ASTEROIDS * 9 * sizeof(GLfloat), normalMatricesDataRaw, GL_STREAM_DRAW, true);
+	vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix"), 3, 1);
+	vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 1, 3, 1);
+	vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 2, 3, 1);
+	renderData->addVBO(vboNormalMatricesData);
+
+	renderData->setup();
+	renderData->setNumInstances(NUM_ASTEROIDS);
+}
+
+AsteroidsRenderer::~AsteroidsRenderer() {
+	delete renderData;
+	delete vboVerticesData;
+	delete vboIndices;
+	delete vboMatricesData;
+	delete vboNormalMatricesData;
+	delete mesh;
+
+	for (unsigned int i = 0; i < objects.size(); i++)
+		delete objects[i];
+	objects.clear();
+}
+
+void AsteroidsRenderer::update() {
+	for (unsigned int i = 0; i < objects.size(); i++) {
+		matricesData[i].initIdentity();
+		matricesData[i].translate(objects[i]->getPosition());
+		matricesData[i].rotate(objects[i]->getRotation());
+		matricesData[i].scale(objects[i]->getScale());
+		normalMatricesData[i] = matricesData[i].to3x3().inverse().transpose();
+
+		int pos = i * 16;
+
+		for (unsigned int x = 0; x < 4; x++) {
+			for (unsigned int y = 0; y < 4; y++) {
+				matricesDataRaw[pos] = matricesData[i].get(y, x);
+				pos += 1;
+			}
+		}
+
+		pos = i * 9;
+		for (unsigned int x = 0; x < 3; x++) {
+			for (unsigned int y = 0; y < 3; y++) {
+				normalMatricesDataRaw[pos] = normalMatricesData[i].get(y, x);
+				pos += 1;
+			}
+		}
+	}
+}
+
+void AsteroidsRenderer::render() {
+	vboMatricesData->updateStream(NUM_ASTEROIDS * 16 * sizeof(GLfloat));
+	vboNormalMatricesData->updateStream(NUM_ASTEROIDS * 9 * sizeof(GLfloat));
+
+//	float length;
+//	for (unsigned int i = 0; i < NUM_ASTEROIDS; i++)
+//		length = (((Camera3D*) Renderer::getCamera())->getPosition() - objects[i]->getPosition()).length();
+//
+//	if (length > 10000)
+//		std::cout << "HELLO WORLD" << std::endl;
+
+
+	//Use the shader
+	shader->use();
+	Renderer::saveTextures();
+	mesh->getMaterial()->setUniforms(shader, "Lighting");
+	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
+	shader->setUniformVector3("Light_Direction", Vector3f(0.0f, 1.0f, 1.0f));
+	shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));
+	shader->setUniformColourRGB("Light_SpecularColour", Colour(1.0f, 1.0f, 1.0f));
+	shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);
+	glCullFace(GL_BACK);
+	renderData->render();
+	glDisable(GL_CULL_FACE);
+
+	Renderer::releaseNewTextures();
+	shader->stopUsing();
+}

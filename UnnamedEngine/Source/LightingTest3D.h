@@ -34,7 +34,7 @@ private:
 	DebugCamera* camera;
 	GameObject3D* object;
 	GameObject3D* object2;
-	Scene* scene;
+	RenderScene3D* scene;
 public:
 	virtual ~Test() {}
 
@@ -66,7 +66,7 @@ void Test::created() {
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 
-	scene = new Scene();
+	scene = new RenderScene3D();
 	//std::vector<Mesh*> meshes1 = Model::loadModel("C:/UnnamedEngine/Models/mitsuba/", "mitsuba-sphere-blue.obj");
 	//std::vector<Mesh*> meshes1 = Model::loadModel("C:/UnnamedEngine/Models/crytek-sponza/", "sponza.obj");
 	//std::vector<Mesh*> meshes1 = Model::loadModel("C:/UnnamedEngine/Models/nanosuit/", "nanosuit.obj");
@@ -78,9 +78,11 @@ void Test::created() {
 	//object->setRotationX(90.0f);
 	//object->getMaterial()->setShininess(128.0f);
 	object->setScale(0.5f, 0.5f, 0.5f);
+	object->update();
 
 	object2 = new GameObject3D(meshes2, Renderer::getRenderShader("Lighting"));
 	object2->setPosition(0.0f, -1.0f, 0.0f);
+	object2->update();
 
 	scene->add(object);
 	scene->add(object2);
@@ -137,8 +139,6 @@ void Test::created() {
 
 void Test::update() {
 	camera->update(((float) getDelta() / 1000.0f));
-
-	scene->update();
 }
 
 void Test::render() {

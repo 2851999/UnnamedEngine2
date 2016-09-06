@@ -23,6 +23,7 @@
 #include "audio/Audio.h"
 #include "render/Shader.h"
 #include "Model.h"
+#include "gui/Font.h"
 
 /*****************************************************************************
  * The ResourceLoader class is used to help make loading resources easier
@@ -62,17 +63,21 @@ public:
 	inline std::vector<Mesh*> loadModel(std::string fileName) { return sLoadModel(path + pathModels, fileName); }
 	inline std::vector<Mesh*> loadModel(std::string folder, std::string fileName) { return sLoadModel(path + pathModels + folder, fileName); }
 
+	inline Font* loadFont(std::string fileName, int size = 18, Colour colour = Colour::WHITE) { return sLoadFont(path + pathFonts + fileName, size, colour); }
+
 	/* Setters and getters */
 	inline void setPath(std::string path) { this->path = path; }
 	inline void setPathTextures(std::string path) { pathTextures = path; }
 	inline void setPathAudio(std::string path) { pathAudio = path; }
 	inline void setPathShaders(std::string path) { pathShaders = path; }
 	inline void setPathModels(std::string path) { pathModels = path; }
+	inline void setPathFonts(std::string path) { pathFonts = path; }
 
 	inline std::string getPath() { return path; }
 	inline std::string getPathTextures() { return pathTextures; }
 	inline std::string getPathShaders() { return pathShaders; }
 	inline std::string getPathModels() { return pathModels; }
+	inline std::string getPathFonts() { return pathFonts; }
 
 	/* Various static methods to load resources */
 	inline static Texture* sLoadTexture(std::string path) { return Texture::loadTexture(path); }

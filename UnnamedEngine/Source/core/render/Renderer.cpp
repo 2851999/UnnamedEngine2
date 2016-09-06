@@ -122,7 +122,7 @@ void Renderer::render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderS
 
 				saveTextures();
 
-				meshes[i]->getMaterial()->setUniforms(renderShader);
+				meshes[i]->getMaterial()->setUniforms(renderShader->getShader(), renderShader->getName());
 
 				meshes[i]->getRenderData()->render();
 

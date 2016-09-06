@@ -16,35 +16,43 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_MAINMENU_H_
-#define EXAMPLES_ASTEROIDS_MAINMENU_H_
+#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
+#define EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
 
-#include "../../core/gui/GUIButton.h"
+class AsteroidsGame;
 
-class Asteroids;
+#include "../../utils/DebugCamera.h"
+#include "AsteroidsRenderer.h"
 
-class MainMenu {
+/*****************************************************************************
+ * The AsteroidsMainGame class sets up and manages the main game
+ *****************************************************************************/
+
+class AsteroidsMainGame {
 private:
-	/* The font used for the title */
-	Font* font;
+	/* The instance of the game */
+	AsteroidsGame* game;
 
-	/* The play button */
-	GUIButton* buttonPlay;
+	/* The camera */
+	DebugCamera* camera;
 
-	/* The background */
-	GameObject2D* background;
+	AsteroidsRenderer* asteroids;
 public:
 	/* The constructor */
-	MainMenu(float windowWidth, float windowHeight);
+	AsteroidsMainGame(AsteroidsGame* game);
 
 	/* The destructor */
-	virtual ~MainMenu();
+	virtual ~AsteroidsMainGame();
+
+	/* The method used to start the game */
+	void start();
+
+	/* The method used to stop the game */
+	void stop();
 
 	/* The update and render methods */
-	void update(Asteroids* asteroids);
+	void update();
 	void render();
-
-	bool shouldStartGame();
 };
 
-#endif /* EXAMPLES_ASTEROIDS_MAINMENU_H_ */
+#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_ */

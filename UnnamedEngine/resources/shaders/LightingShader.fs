@@ -62,7 +62,7 @@ out vec4 FragColour;
 vec3 calculateDirectionalLight(Light light, vec3 diffuseColour, vec3 specularColour, vec3 normal) {
 	vec3 lightDirection = normalize(-light.direction);
 	
-	float diffuseStrength = max(dot(normal, lightDirection), 0.0); //When angle > 90 dot product gives negative value
+	float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
 	vec3 diffuseLight = diffuseStrength * (light.diffuseColour * diffuseColour);
 	
 	vec3 viewDirection = normalize(camera_position - frag_position);
@@ -79,7 +79,7 @@ vec3 calculatePointLight(Light light, vec3 diffuseColour, vec3 specularColour, v
 	
 	vec3 lightDirection = normalize(light.position - frag_position);
 	
-	float diffuseStrength = max(dot(normal, lightDirection), 0.0); //When angle > 90 dot product gives negative value
+	float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
 	vec3 diffuseLight = diffuseStrength * (light.diffuseColour * diffuseColour);
 	
 	vec3 viewDirection = normalize(camera_position - frag_position);
@@ -106,7 +106,7 @@ vec3 calculateSpotLight(Light light, vec3 diffuseColour, vec3 specularColour, ve
 		float e = light.cutoff - light.outerCutoff;
 		float intensity = clamp((theta - light.outerCutoff) / e, 0.0, 1.0);
 
-		float diffuseStrength = max(dot(normal, lightDirection), 0.0); //When angle > 90 dot product gives negative value
+		float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
 		vec3 diffuseLight = diffuseStrength * (light.diffuseColour * diffuseColour);
 		
 		vec3 viewDirection = normalize(camera_position - frag_position);

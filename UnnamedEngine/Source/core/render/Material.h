@@ -54,7 +54,7 @@ public:
 	virtual ~Material() {}
 
 	/* The method used to apply the material properties to a shader assuming it is already being used */
-	void setUniforms(RenderShader* shader);
+	void setUniforms(Shader* shader, std::string shaderName);
 
 	/* The setters and getters */
 	inline void setAmbientColour(Colour colour)  { ambientColour = colour;  }
