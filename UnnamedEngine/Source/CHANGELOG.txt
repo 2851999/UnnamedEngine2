@@ -1,4 +1,17 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 | Experimental 7
+
+* Added GUIPanelGroup
+* Added GUILabel
+
+* Fixed bug: ParticleSystem still a particle even though the
+             particle count was 0
+* Fixed bug: GUIComponent didn't check whether the mouse
+             was hovering over it when it entered the window
+             
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 3 | Experimental 6
 
 * Added GUIPanel

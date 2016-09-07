@@ -165,35 +165,37 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 }
 
 void ParticleSystem::render() {
-	vboPositionSizeData->updateStream(particleCount * sizeof(GLfloat) * 4);
-	vboColours->updateStream(particleCount * sizeof(GLfloat) * 4);
-	vboTextureData->updateStream(particleCount * sizeof(GLfloat) * 4);
+	if (particleCount > 0) {
+		vboPositionSizeData->updateStream(particleCount * sizeof(GLfloat) * 4);
+		vboColours->updateStream(particleCount * sizeof(GLfloat) * 4);
+		vboTextureData->updateStream(particleCount * sizeof(GLfloat) * 4);
 
-	//Use the shader
-	shader->use();
+		//Use the shader
+		shader->use();
 
-	//Get the camera's view matrix used in getting the 'right' and 'up' vectors
-	Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
+		//Get the camera's view matrix used in getting the 'right' and 'up' vectors
+		Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
 
-	//Assign the uniforms for the particle shader
-	shader->setUniformVector3("Camera_Right", Vector3f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2)));
-	shader->setUniformVector3("Camera_Up", Vector3f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2)));
+		//Assign the uniforms for the particle shader
+		shader->setUniformVector3("Camera_Right", Vector3f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2)));
+		shader->setUniformVector3("Camera_Up", Vector3f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2)));
 
-	shader->setUniformMatrix4("MVPMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
+		shader->setUniformMatrix4("MVPMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
 
-	if (textureAtlas)
-		shader->setUniformi("Texture", Renderer::bindTexture(textureAtlas->getTexture()));
-	else
-		shader->setUniformi("Texture", Renderer::bindTexture(Renderer::getBlankTexture()));
+		if (textureAtlas)
+			shader->setUniformi("Texture", Renderer::bindTexture(textureAtlas->getTexture()));
+		else
+			shader->setUniformi("Texture", Renderer::bindTexture(Renderer::getBlankTexture()));
 
-	//Draw the instances of the particles
-	renderData->setNumInstances(particleCount);
-	renderData->render();
+		//Draw the instances of the particles
+		renderData->setNumInstances(particleCount);
+		renderData->render();
 
-	Renderer::unbindTexture();
+		Renderer::unbindTexture();
 
-	//Finished with the shader
-	shader->stopUsing();
+		//Finished with the shader
+		shader->stopUsing();
+	}
 }
 
 unsigned int ParticleSystem::findUnusedParticle() {

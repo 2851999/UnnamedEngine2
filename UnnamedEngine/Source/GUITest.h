@@ -30,6 +30,7 @@
 #include "core/gui/GUIDropDownMenu.h"
 #include "core/gui/GUIDropDownList.h"
 #include "core/gui/GUIPanel.h"
+#include "core/gui/GUILabel.h"
 
 class Test : public BaseEngine {
 private:
@@ -40,6 +41,7 @@ private:
 	GUICheckBox* checkBox;
 	GUIDropDownMenu* dropDownMenu;
 	GUIDropDownList* dropDownList;
+	GUILabel* label;
 public:
 	virtual ~Test() {}
 
@@ -107,13 +109,15 @@ void Test::created() {
 	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
 	dropDownList->setPosition(700, 20);
 
+	label = new GUILabel("Hello World!");
+	label->setPosition(600, 600);
+
 	panel->add(button);
 	panel->add(loadingBar);
 	panel->add(checkBox);
 	panel->add(dropDownMenu);
 	panel->add(dropDownList);
-
-	panel->remove(button);
+	panel->add(label);
 
 	panel->show();
 
@@ -121,11 +125,7 @@ void Test::created() {
 }
 
 void Test::update() {
-	button->update();
-	loadingBar->update();
-	checkBox->update();
-	dropDownMenu->update();
-	dropDownList->update();
+	panel->update();
 }
 
 void Test::render() {
@@ -135,15 +135,12 @@ void Test::render() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	button->render();
-	loadingBar->render();
-	checkBox->render();
-	dropDownMenu->render();
-	dropDownList->render();
+	panel->render();
 }
 
 void Test::destroy() {
 	delete camera;
+	delete panel;
 }
 
 #endif /* BASEENGINETEST2D_H_ */

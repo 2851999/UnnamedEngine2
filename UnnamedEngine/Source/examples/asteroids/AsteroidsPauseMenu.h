@@ -22,7 +22,7 @@
 #include "../../core/render/Renderer.h"
 #include "../../core/render/Camera.h"
 #include "../../core/gui/Font.h"
-#include "../../core/gui/GUIButton.h"
+#include "../../core/gui/GUIPanel.h"
 
 /*****************************************************************************
  * The AsteroidsPauseMenu class sets up and manages the pause menu
@@ -30,19 +30,16 @@
 
 class AsteroidsGame;
 
-class AsteroidsPauseMenu : GUIComponentListener {
+class AsteroidsPauseMenu : public GUIPanel {
 private:
 	/* The instance of the game */
 	AsteroidsGame* game;
 
-	/* The camera used when rendering the main menu */
+	/* The camera used when rendering the menu */
 	Camera2D* camera;
 
-	/* The background for the main menu */
+	/* The background for the menu */
 	GameObject2D* background;
-
-	/* The title font */
-	Font* titleFont;
 
 	/* The buttons on the menu */
 	GUIButton* buttonContinue;
@@ -54,18 +51,17 @@ public:
 	/* The destructor */
 	virtual ~AsteroidsPauseMenu();
 
-	/* Method called to setup ready to show the main menu */
-	void show();
+	/* Method called to setup ready to show the menu */
+	virtual void show() override;
 
-	/* Method called to remove the camera and hide the main menu */
-	void hide();
+	/* Method called to remove the camera and hide the menu */
+	virtual void hide() override;
 
-	/* Methods used to update and render the main menu */
-	void update();
-	void render();
+	/* Methods used to render the menu */
+	virtual void render(bool overrideShader = false) override;
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override;
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINMENU_H_ */
+#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSPAUSEMENU_H_ */

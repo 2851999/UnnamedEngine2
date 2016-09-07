@@ -188,7 +188,7 @@ protected:
 	}
 public:
 	/* Various constructors */
-	GUIComponent() {}
+	GUIComponent() : GUIComponentRenderer() {}
 	GUIComponent(float width, float height) : GUIComponentRenderer(width, height) {}
 	GUIComponent(float width, float height, std::vector<Colour> colours) : GUIComponentRenderer(width, height, colours) {}
 	GUIComponent(float width, float height, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, textures) {}
@@ -229,7 +229,7 @@ public:
 	virtual void onMouseReleased(int button) override;
 	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
 	virtual void onMouseDragged(double x, double y, double dx, double dy) override {}
-	virtual void onMouseEnter() override {}
+	virtual void onMouseEnter() override;
 	virtual void onMouseLeave() override;
 
 	virtual void onScroll(double dx, double dy) override {}

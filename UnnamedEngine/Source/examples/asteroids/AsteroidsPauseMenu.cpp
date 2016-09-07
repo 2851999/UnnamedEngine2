@@ -19,6 +19,8 @@
 #include "AsteroidsPauseMenu.h"
 #include "AsteroidsGame.h"
 
+#include "../../core/gui/GUILabel.h"
+
 /*****************************************************************************
  * The AsteroidsPauseMenu class
  *****************************************************************************/
@@ -37,15 +39,6 @@ AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
 	background->getMaterial()->setDiffuseTexture(backgroundTexture);
 	background->getMaterial()->setDiffuseColour(Colour(1.0f, 1.0f, 1.0f, 0.4f));
 	background->update();
-	//Setup the title font
-	titleFont = game->getResourceLoader().loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
-	titleFont->update(
-			"Paused",
-			game->getSettings().windowWidth / 2 - titleFont->getWidth("Paused") / 2,
-			80.0f
-	);
-	//Setup the buttons
-	GUIComponentRenderer::DEFAULT_FONT = game->getResourceLoader().loadFont("TT1240M_.TTF", 24, Colour::WHITE);
 
 	Texture* normal = game->getResourceLoader().loadTexture("Button.png");
 	Texture* hover = game->getResourceLoader().loadTexture("Button_Hover.png");
@@ -58,43 +51,45 @@ AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
 	buttonExit = new GUIButton("Exit", 400, 30, { normal, hover, clicked });
 	buttonExit->setPosition(windowWidth / 2 - buttonExit->getWidth() / 2, windowHeight - 50);
 	buttonExit->addListener(this);
+
+	//Setup the title font
+	Font* titleFont = game->getResourceLoader().loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
+
+	//Create the title label
+	GUILabel* titleLabel = new GUILabel("Paused", titleFont);
+	titleLabel->setPosition(game->getSettings().windowWidth / 2 - titleFont->getWidth("Paused") / 2, 40.0f);
+
+	//Add the components to this panel
+	add(titleLabel);
+	add(buttonContinue);
+	add(buttonExit);
 }
 
 AsteroidsPauseMenu::~AsteroidsPauseMenu() {
 	//Delete created resources
 	delete camera;
 	delete background;
-	delete buttonContinue;
-	delete buttonExit;
 }
 
 void AsteroidsPauseMenu::show() {
 	game->getWindow()->enableCursor();
+	GUIPanel::show();
 }
 
 void AsteroidsPauseMenu::hide() {
 	game->getWindow()->disableCursor();
+	GUIPanel::hide();
 }
 
-void AsteroidsPauseMenu::update() {
-	//Update the buttons
-	buttonContinue->update();
-	buttonExit->update();
-}
-
-void AsteroidsPauseMenu::render() {
+void AsteroidsPauseMenu::render(bool overrideShader) {
 	//Add the camera
 	Renderer::addCamera(camera);
 
 	//Render the background
 	background->render();
 
-	//Render the font
-	titleFont->render();
-
-	//Render the buttons
-	buttonContinue->render();
-	buttonExit->render();
+	//Render the panel
+	GUIPanel::render();
 
 	//Remove the camera
 	Renderer::removeCamera();

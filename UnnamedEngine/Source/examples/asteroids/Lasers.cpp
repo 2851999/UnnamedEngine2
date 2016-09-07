@@ -104,7 +104,7 @@ void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 					else if (closestAsteroids[i]->getScale().getZ() > scale)
 						scale = closestAsteroids[i]->getScale().getZ();
 
-					if (distance < 9.21f * scale) {
+					if (distance < 9.21f / 2.0f * scale) {
 						//Hide the laser and the asteroid
 						renderer->hideLaser(j);
 						closestGroup.hideAsteroid(i);

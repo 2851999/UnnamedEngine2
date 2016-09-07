@@ -22,31 +22,84 @@
 #include "../../core/render/Renderer.h"
 #include "../../core/render/Camera.h"
 #include "../../core/gui/Font.h"
-#include "../../core/gui/GUIButton.h"
+#include "../../core/gui/GUIPanel.h"
+
+class AsteroidsGame;
+
+/*****************************************************************************
+ * The MainMenuMain class
+ *****************************************************************************/
+
+class MainMenuMain : public GUIPanel {
+private:
+	/* The instance of the game */
+	AsteroidsGame* game;
+
+	/* The buttons on the menu */
+	GUIButton* buttonPlay;
+	GUIButton* buttonHighscores;
+	GUIButton* buttonSettings;
+	GUIButton* buttonExit;
+public:
+	/* The constructor */
+	MainMenuMain(AsteroidsGame* game, GUIPanelGroup* panelGroup, std::vector<Texture*> buttonTextures);
+
+	/* The destructor */
+	virtual ~MainMenuMain() {}
+
+	/* Called when a component is clicked */
+	virtual void onComponentClicked(GUIComponent* component) override;
+};
+
+/*****************************************************************************
+ * The MainMenuHighScores class
+ *****************************************************************************/
+
+class MainMenuHighScores : public GUIPanel {
+private:
+	/* The buttons on the menu */
+	GUIButton* buttonBack;
+public:
+	/* The constructor */
+	MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panelGroup, std::vector<Texture*> buttonTextures);
+
+	/* The destructor */
+	virtual ~MainMenuHighScores() {}
+};
+
+/*****************************************************************************
+ * The MainMenuSettings class
+ *****************************************************************************/
+
+class MainMenuSettings : public GUIPanel {
+private:
+	/* The buttons on the menu */
+	GUIButton* buttonVideo;
+	GUIButton* buttonAudio;
+	GUIButton* buttonControls;
+	GUIButton* buttonBack;
+public:
+	/* The constructor */
+	MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGroup, std::vector<Texture*> buttonTextures);
+
+	/* The destructor */
+	virtual ~MainMenuSettings() {}
+};
 
 /*****************************************************************************
  * The AsteroidsMainMenu class sets up and manages the main menu GUI
  *****************************************************************************/
 
-class AsteroidsGame;
-
-class AsteroidsMainMenu : GUIComponentListener {
+class AsteroidsMainMenu {
 private:
-	/* The instance of the game */
-	AsteroidsGame* game;
-
 	/* The camera used when rendering the main menu */
 	Camera2D* camera;
 
 	/* The background for the main menu */
 	GameObject2D* background;
 
-	/* The title font */
-	Font* titleFont;
-
-	/* The buttons on the menu */
-	GUIButton* buttonPlay;
-	GUIButton* buttonExit;
+	/* The GUIPanelGroup instance */
+	GUIPanelGroup* panelGroup;
 public:
 	/* The constructor */
 	AsteroidsMainMenu(AsteroidsGame* game);
@@ -63,9 +116,6 @@ public:
 	/* Methods used to update and render the main menu */
 	void update();
 	void render();
-
-	/* Called when a component is clicked */
-	virtual void onComponentClicked(GUIComponent* component) override;
 };
 
 #endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINMENU_H_ */

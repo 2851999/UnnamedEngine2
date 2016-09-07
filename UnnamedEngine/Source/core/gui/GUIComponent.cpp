@@ -183,6 +183,15 @@ void GUIComponent::onMouseMoved(double x, double y, double dx, double dy) {
 	}
 }
 
+void GUIComponent::onMouseEnter() {
+	if (active && visible) {
+		if (mouseHover != (getBounds().contains(Window::getCurrentInstance()->getInputManager()->getCursorData().lastX, Window::getCurrentInstance()->getInputManager()->getCursorData().lastY))) {
+			mouseHover = ! mouseHover;
+			onChangeState();
+		}
+	}
+}
+
 void GUIComponent::onMouseLeave() {
 	if (active && visible && (mouseClicked || mouseHover)) {
 		mouseClicked = false;
