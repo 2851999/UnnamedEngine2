@@ -1,4 +1,95 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 4 (V0.0.4)
+
+* Added GUIPanel
+* Added GUIPanelGroup
+* Added GUILabel
+* Added loadFont method in ResourceLoader
+* Added 'active' value in ParticleEmitter
+* Added emitParticles() method in Particle emitter to
+  activate a particle emitter to emit a specified number of
+  particles
+* Added methods to get input bindings given their name
+* Added methods in SoundSystem to allow the listener to be
+  moved after being created
+
+* Fixed bug: Sorting order for particles was wrong
+* Fixed bug: ParticleSystem still a particle even though the
+             particle count was 0
+* Fixed bug: GUIComponent didn't check whether the mouse
+             was hovering over it when it entered the window
+
+* NOTE: GUIComponents now have an enable/disable method which
+        adds/removes their input listener from the current
+        input manager, by default they are disabled, so
+        enable() should be called on all objects that need
+        to receive input once created
+
+* NOTE: Writing game using engine in the examples
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 | Experimental 7
+
+* Added GUIPanelGroup
+* Added GUILabel
+
+* Fixed bug: ParticleSystem still a particle even though the
+             particle count was 0
+* Fixed bug: GUIComponent didn't check whether the mouse
+             was hovering over it when it entered the window
+             
+* More asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 | Experimental 6
+
+* Added GUIPanel
+* Added methods in SoundSystem to allow the listener to be
+  moved after being created
+
+* More asteroids development
+
+* NOTE: GUIComponents now have an enable/disable method which
+        adds/removes their input listener from the current
+        input manager, by default they are disabled, so
+        enable() should be called on all objects that need
+        to receive input once created
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 | Experimental 5
+
+* Added 'active' value in ParticleEmitter
+* Added emitParticles() method in Particle emitter to
+  activate a particle emitter to emit a specified number of
+  particles
+* Added methods to get input bindings given their name
+
+* Fixed bug: Sorting order for particles was wrong
+
+* More asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 | Experimental 4
+
+* More asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 | Experimental 3
+
+* More asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 | Experimental 2
+
+* More asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 | Experimental 1
+
+* Added loadFont method in ResourceLoader
+* Writing game using engine in the examples
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 3 (V0.0.3)
 
 * Added DebugCamera

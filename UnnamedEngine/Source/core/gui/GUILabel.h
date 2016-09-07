@@ -16,15 +16,26 @@
  *
  *****************************************************************************/
 
-//#include "GUITest.h"
-#include "examples/asteroids/AsteroidsGame.h"
-//#include "examples/asteroids-old/Asteroids.h"
 
-int main() {
-//	Test test;
-//	test.create();
-	AsteroidsGame asteroids;
-	asteroids.create();
+#ifndef CORE_GUI_GUILABEL_H_
+#define CORE_GUI_GUILABEL_H_
 
-	return 0;
-}
+#include "GUIComponent.h"
+
+/*****************************************************************************
+ * The GUILabel class
+ *****************************************************************************/
+
+class GUILabel : public GUIComponent {
+public:
+	/* The constructors */
+	GUILabel(std::string text, Font* font = NULL);
+
+	/* The destructor */
+	virtual ~GUILabel() {}
+
+	/* The method called to render this component */
+	virtual void render(bool overrideShader = false) override;
+};
+
+#endif /* CORE_GUI_GUILABEL_H_ */

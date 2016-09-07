@@ -222,6 +222,12 @@ public:
 	/* Method used to create and return an axis binding */
 	InputBindingAxis* createAxisBinding(std::string name);
 
+	/* Method used to get a button binding given its name */
+	InputBindingButton* getButtonBinding(std::string name) { return buttonBindings.at(name); }
+
+	/* Method used to get an axis binding given its name */
+	InputBindingAxis* getAxisBinding(std::string name) { return axisBindings.at(name); }
+
 	/* Method used to add a listener */
 	inline void addListener(InputBindingsListener* listener) { listeners.push_back(listener); }
 

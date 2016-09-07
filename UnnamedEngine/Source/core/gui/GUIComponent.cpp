@@ -131,6 +131,14 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colou
  * The GUIComponent class
  *****************************************************************************/
 
+void GUIComponent::enable() {
+	Window::getCurrentInstance()->getInputManager()->addListener(this);
+}
+
+void GUIComponent::disable() {
+	Window::getCurrentInstance()->getInputManager()->removeListener(this);
+}
+
 void GUIComponent::update() {
 	if (active) {
 		GUIComponentRenderer::update();
@@ -172,6 +180,15 @@ void GUIComponent::onMouseMoved(double x, double y, double dx, double dy) {
 	if (mouseHover != (active && visible && getBounds().contains(x, y))) {
 		mouseHover = ! mouseHover;
 		onChangeState();
+	}
+}
+
+void GUIComponent::onMouseEnter() {
+	if (active && visible) {
+		if (mouseHover != (getBounds().contains(Window::getCurrentInstance()->getInputManager()->getCursorData().lastX, Window::getCurrentInstance()->getInputManager()->getCursorData().lastY))) {
+			mouseHover = ! mouseHover;
+			onChangeState();
+		}
 	}
 }
 

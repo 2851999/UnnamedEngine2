@@ -16,15 +16,29 @@
  *
  *****************************************************************************/
 
-//#include "GUITest.h"
-#include "examples/asteroids/AsteroidsGame.h"
-//#include "examples/asteroids-old/Asteroids.h"
+#include "Ship.h"
 
-int main() {
-//	Test test;
-//	test.create();
-	AsteroidsGame asteroids;
-	asteroids.create();
+/*****************************************************************************
+ * The Ship class
+ *****************************************************************************/
 
-	return 0;
+Ship::Ship(SoundSystem* soundSystem, const ResourceLoader& loader) : PhysicsObject3D(NULL) {
+	//Setup the lasers
+	lasers = new Lasers(soundSystem, loader);
+}
+
+Ship::~Ship() {
+	//Destroy created resources
+	delete lasers;
+}
+
+void Ship::update(float deltaSeconds, AsteroidGroup& closestGroup) {
+	PhysicsObject3D::updatePhysics(deltaSeconds);
+	//Update the lasers
+	lasers->update(deltaSeconds, closestGroup);
+}
+
+void Ship::render() {
+	//Render the lasers
+	lasers->render();
 }

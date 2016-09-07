@@ -16,15 +16,20 @@
  *
  *****************************************************************************/
 
-//#include "GUITest.h"
-#include "examples/asteroids/AsteroidsGame.h"
-//#include "examples/asteroids-old/Asteroids.h"
+#include "GUILabel.h"
 
-int main() {
-//	Test test;
-//	test.create();
-	AsteroidsGame asteroids;
-	asteroids.create();
+GUILabel::GUILabel(std::string text, Font* font) : GUIComponent() {
+	//Assign the text
+	setText(text);
+	//Assign the font if given
+	if (font)
+		setFont(font);
+	//Assign the size
+	setSize(getFont()->getWidth(text), getFont()->getHeight(text));
+}
 
-	return 0;
+void GUILabel::render(bool overrideShader) {
+	GUIComponent::render();
+	if (visible)
+		renderTextAtCentre(text);
 }

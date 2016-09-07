@@ -94,6 +94,24 @@ void GUIDropDownMenu::addButton(GUIButton* button) {
 	buttons.push_back(button);
 }
 
+void GUIDropDownMenu::enable() {
+	GUIComponent::enable();
+	//Enable the menu button
+	menuButton->enable();
+	//Enable all of the buttons
+	for (unsigned int i = 0; i < buttons.size(); i++)
+		buttons[i]->enable();
+}
+
+void GUIDropDownMenu::disable() {
+	GUIComponent::disable();
+	//Disable the menu button
+	menuButton->disable();
+	//Disable all of the buttons
+	for (unsigned int i = 0; i < buttons.size(); i++)
+		buttons[i]->disable();
+}
+
 void GUIDropDownMenu::update() {
 	GUIComponent::update();
 

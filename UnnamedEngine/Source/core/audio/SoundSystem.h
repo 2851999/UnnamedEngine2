@@ -47,6 +47,11 @@ public:
 	inline void createListener(Vector2f position) { listener = new AudioListener(position); }
 	inline void createListener(Vector3f position) { listener = new AudioListener(position); }
 
+	/* Methods used to assign the audio listener position */
+	inline void setListener(GameObject3D* parent) { listener->setParent(parent); }
+	inline void setListener(Vector2f position) { listener->setPosition(position); }
+	inline void setListener(Vector3f position) { listener->setPosition(position); }
+
 	/* The methods used to add an audio source */
 	inline void addSource(std::string key, AudioSource* source) { sources.insert(std::pair<std::string, AudioSource*>(key, source)); }
 	inline void addSource(std::string key, AudioData* data, unsigned int type) { addSource(key, new AudioSource(data, type)); }

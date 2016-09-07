@@ -39,8 +39,8 @@ void Camera3D::update() {
 		sin(MathsUtils::toRadians(getRotation().getX())),
 		sin(MathsUtils::toRadians(getRotation().getY() - 90)) * cos(MathsUtils::toRadians(getRotation().getX()))
 	).normalise();
-	Vector3f right = cameraFront.cross(cameraUp).normalise();
-	Vector3f up = right.cross(cameraFront).normalise();
+	cameraRight = cameraFront.cross(cameraUp).normalise();
+	Vector3f up = cameraRight.cross(cameraFront).normalise();
 
 	getViewMatrix().initLookAt(getPosition(), getPosition() + cameraFront, up);
 
