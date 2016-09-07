@@ -52,6 +52,12 @@ Lasers::Lasers(ResourceLoader& loader) {
 	//particleSystem->acceleration = Vector3f(0.0f, 5.0f, 0.0f);
 	particleSystem->effect = new ParticleEffectColourChange(Colour::WHITE, Colour(0.3f, 0.3f, 0.3f, 0.8f));
 	particleSystem->textureAtlas = new TextureAtlas(loader.loadTexture("ParticleAtlas.png"), 8, 8, 64);
+
+	//Assign the laser cooldown time
+	cooldown = 0.5;
+
+	//Assign the last laser fired time
+	timeLastLaserFired = 0.0;
 }
 
 Lasers::~Lasers() {
@@ -96,6 +102,9 @@ void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 						closestGroup.hideAsteroid(i);
 						//Move the particle emitter
 						particleEmitter->setPosition(closestAsteroids[i]->getPosition());
+						//Activate the particle emitter
+						particleEmitter->emitParticles(100);
+						particleEmitter->particleMaxSpeed = 2.0f * scale;
 					}
 				}
 			}
@@ -114,14 +123,19 @@ void Lasers::render() {
 }
 
 void Lasers::fire(Player* player) {
-	//Assign the object's properties
-	objects[nextIndex]->setPosition(player->getCamera()->getPosition());
-	objects[nextIndex]->setVelocity(player->getCamera()->getFront() * 10.0f);
-	objects[nextIndex]->setRotation(player->getCamera()->getRotation() * Vector3f(0.0f, -1.0f, 0.0f));
-	//Make the laser visible
-	renderer->showLaser(nextIndex);
-	//Increment the index, and then ensure it is within the bounds of the objects array
-	nextIndex++;
-	if (nextIndex >= objects.size())
-		nextIndex = 0;
+	//Ensure the lasers can fire
+	if (canFire()) {
+		//Assign the new time the last laser was fired
+		timeLastLaserFired = TimeUtils::getSeconds();
+		//Assign the object's properties
+		objects[nextIndex]->setPosition(player->getCamera()->getPosition());
+		objects[nextIndex]->setVelocity(player->getCamera()->getFront() * 10.0f);
+		objects[nextIndex]->setRotation(player->getCamera()->getRotation() * Vector3f(0.0f, -1.0f, 0.0f));
+		//Make the laser visible
+		renderer->showLaser(nextIndex);
+		//Increment the index, and then ensure it is within the bounds of the objects array
+		nextIndex++;
+		if (nextIndex >= objects.size())
+			nextIndex = 0;
+	}
 }

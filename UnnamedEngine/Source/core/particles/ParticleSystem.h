@@ -52,7 +52,7 @@ struct Particle {
 	/* Used when sorting to place the particles closer to the camera/ones
 	 * with -1.0, to the front */
 	bool operator<(Particle& other) {
-	    return this->cameraDistance < other.cameraDistance;
+	    return this->cameraDistance > other.cameraDistance;
 	}
 };
 

@@ -23,35 +23,53 @@
  *****************************************************************************/
 
 void ParticleEmitter::update(ParticleSystem* system, float delta) {
-	GameObject3D::update();
+	//Check whether this emitter is active
+	if (active) {
+		//Cumulate the delta
+		cumulativeDelta += delta;
 
-	//Cumulate the delta
-	cumulativeDelta += delta;
+		//Calculate the number of particles to spawn on this update
+		unsigned int newParticles = cumulativeDelta * particleSpawnRate;
 
-	//Calculate the number of particles to spawn on this update
-	unsigned int newParticles = cumulativeDelta * particleSpawnRate;
+		//Reset the cumulative delta if some particles are going to be 'spawned'
+		if (newParticles > 0) {
+			cumulativeDelta = 0;
 
-	//Reset the cumulative delta if some particles are going to be 'spawned'
-	if (newParticles > 0)
-		cumulativeDelta = 0;
+			//Check whether a set number of particles is being emitted
+			if (particlesToEmit > 0) {
+				//Subtract from the number of particles left to be emitted
+				particlesToEmit -= newParticles;
+				//Check whether this emitter should be deactivated again
+				if (particlesToEmit <= 0)
+					active = false;
+			}
+		}
 
-	//Go through the new particles
-	for (unsigned int i = 0; i < newParticles; i++) {
-		//Get the index of an unused particle
-		unsigned int index = system->findUnusedParticle();
+		//Go through the new particles
+		for (unsigned int i = 0; i < newParticles; i++) {
+			//Get the index of an unused particle
+			unsigned int index = system->findUnusedParticle();
 
-		//Emit the particle
-		Particle& particle = system->getParticle(index);
-		particle.position = getPosition() + Vector3f(0, 0, 0);
-		particle.colour = particleColour;
-		//particle.colour = Colour(RandomUtils::randomFloat(), RandomUtils::randomFloat(), RandomUtils::randomFloat(), RandomUtils::randomFloat());
-		particle.size = particleSize;
-		particle.life = particleLifeSpan;
-		particle.velocity = particleInitialVelocity;
-		particle.textureIndex = 0;
+			//Emit the particle
+			Particle& particle = system->getParticle(index);
+			particle.position = getPosition() + Vector3f(0, 0, 0);
+			particle.colour = particleColour;
+			//particle.colour = Colour(RandomUtils::randomFloat(), RandomUtils::randomFloat(), RandomUtils::randomFloat(), RandomUtils::randomFloat());
+			particle.size = particleSize;
+			particle.life = particleLifeSpan;
+			particle.velocity = particleInitialVelocity;
+			particle.textureIndex = 0;
 
-		emitParticle(particle);
+			emitParticle(particle);
+		}
 	}
+}
+
+void ParticleEmitter::emitParticles(unsigned int count) {
+	//Assign the number of particles to emit
+	particlesToEmit = count;
+	//Make this emitter active
+	active = true;
 }
 
 void SphericalParticleEmitter::emitParticle(Particle& particle) {

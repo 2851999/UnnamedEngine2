@@ -30,8 +30,16 @@
 
 class Player : public InputListener {
 private:
+	/* Input axis/buttons */
+	InputBindingAxis* axisForward;
+	InputBindingAxis* axisSideways;
+	InputBindingButton* buttonShoot;
+
+	/* The current game delta */
+	float currentDelta;
+
 	/* The player camera */
-	DebugCamera* camera;
+	Camera3D* camera;
 
 	/* The game instance */
 	AsteroidsGame* game;
@@ -52,10 +60,10 @@ public:
 	void render();
 
 	/* Input methods */
-	virtual void onMousePressed(int button) override;
+	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
 
 	/* Setters and getters */
-	inline DebugCamera* getCamera() { return camera; }
+	inline Camera3D* getCamera() { return camera; }
 	inline std::vector<PhysicsObject3D*>& getLasers() { return lasers->getObjects(); }
 };
 

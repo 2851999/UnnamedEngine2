@@ -51,6 +51,18 @@ void AsteroidsGame::initialise() {
 }
 
 void AsteroidsGame::created() {
+	//Create the InputBindings instance
+	inputBindings = new InputBindings();
+	//Create the axis bindings
+	InputBindingAxis* axisForward = inputBindings->createAxisBinding("Forward");
+	InputBindingAxis* axisSideways = inputBindings->createAxisBinding("Sideways");
+	//Create the button bindings
+	InputBindingButton* buttonShoot = inputBindings->createButtonBinding("Shoot");
+	//Setup default keys
+	axisForward->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
+	axisSideways->assignKeys(GLFW_KEY_A, GLFW_KEY_D);
+	buttonShoot->assignKey(GLFW_KEY_SPACE);
+
 	//Setup the main menu
 	mainMenu = new AsteroidsMainMenu(this);
 	mainMenu->show();

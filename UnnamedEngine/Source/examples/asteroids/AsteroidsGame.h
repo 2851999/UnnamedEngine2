@@ -21,6 +21,7 @@
 
 #include "../../core/BaseEngine.h"
 #include "../../core/ResourceLoader.h"
+#include "../../core/input/InputBindings.h"
 
 #include "AsteroidsMainMenu.h"
 #include "AsteroidsMainGame.h"
@@ -42,6 +43,9 @@ private:
 
 	/* The current game state */
 	GameState currentState;
+
+	/* Input bindings for the game */
+	InputBindings* inputBindings = NULL;
 
 	/* The main menu */
 	AsteroidsMainMenu* mainMenu = NULL;
@@ -67,6 +71,7 @@ public:
 
 	/* Setters and getters */
 	ResourceLoader& getResourceLoader() { return resourceLoader; }
+	InputBindings* getInputBindings() { return inputBindings; }
 };
 
 

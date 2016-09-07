@@ -51,8 +51,14 @@ private:
 	unsigned int nextIndex;
 
 	/* Particle emitter and particle system for explosion effects */
-	ParticleEmitter* particleEmitter;
+	SphericalParticleEmitter* particleEmitter;
 	ParticleSystem*  particleSystem;
+
+	/* The cooldown time for the lasers (in seconds) */
+	double cooldown;
+
+	/* The last time a laser was fired (in seconds) */
+	double timeLastLaserFired;
 public:
 	/* The constructor */
 	Lasers(ResourceLoader& loader);
@@ -68,6 +74,9 @@ public:
 
 	/* The method used to fire this set of lasers */
 	void fire(Player* player);
+
+	/* Returns whether the lasers can fire */
+	inline bool canFire() { return TimeUtils::getSeconds() - timeLastLaserFired > cooldown; }
 
 	std::vector<PhysicsObject3D*>& getObjects() { return objects; }
 };

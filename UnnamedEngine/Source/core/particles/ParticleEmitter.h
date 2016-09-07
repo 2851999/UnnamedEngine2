@@ -33,7 +33,17 @@ private:
 	 * current frame due the delta * particleSpawnRate being 0 when cast to an
 	 * integer */
 	float cumulativeDelta = 0;
+
+	/* Used to emit a set number of particles - assigned using emitParticles()
+	 * (<= 0 means the method has not been called */
+	int particlesToEmit = 0;
+protected:
+	/* The overrideable method used to setup and emit a particle */
+	virtual void emitParticle(Particle& particle) {}
 public:
+	/* Determines whether this particle emitter is active */
+	bool active = false;
+
 	/* The number of particles to spawn per second */
 	unsigned int particleSpawnRate = 100;
 
@@ -57,20 +67,20 @@ public:
 	 * given a particle system instance */
 	void update(ParticleSystem* system, float delta);
 
-	/* The overrideable method used to setup and emit a particle */
-	virtual void emitParticle(Particle& particle) {}
+	/* Method used to emit a set number of particles before becoming no longer active */
+	void emitParticles(unsigned int count);
 };
 
 class SphericalParticleEmitter : public ParticleEmitter {
+protected:
+	/* The overrideable method used to setup and emit a particle */
+	virtual void emitParticle(Particle& particle) override;
 public:
 	/* The max speed */
 	float particleMaxSpeed;
 
 	/* The constructor */
 	SphericalParticleEmitter(float particleMaxSpeed = 2.0f) : particleMaxSpeed(particleMaxSpeed) {}
-
-	/* The overrideable method used to setup and emit a particle */
-	virtual void emitParticle(Particle& particle) override;
 };
 
 
