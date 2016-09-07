@@ -58,7 +58,7 @@ private:
 	std::vector<GameObject3D*> objects;
 public:
 	/* The constructor */
-	AsteroidsRenderer(ResourceLoader& loader, unsigned int numObjects);
+	AsteroidsRenderer(const ResourceLoader& loader, unsigned int numObjects);
 
 	/* The destructor */
 	virtual ~AsteroidsRenderer();

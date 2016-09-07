@@ -83,7 +83,10 @@ public:
 	/* The constructor - Takes the GameObject that this will be controlling, once
 	 * this is done, the position/rotation of the child object should only be
 	 * modified by changing the value in this instance */
-	PhysicsObject2D(GameObject2D* child) { child->setParent(this); }
+	PhysicsObject2D(GameObject2D* child) {
+		if (child)
+			child->setParent(this);
+	}
 
 	/* The destructor */
 	virtual ~PhysicsObject2D() {}
@@ -102,7 +105,9 @@ public:
 	inline void setCollider(Collider2D* collider) { this->collider = collider; }
 
 	Vector2f getVelocity() { return velocity; }
+	Vector2f& getRelVelocity() { return velocity; }
 	Vector2f getAcceleration() { return acceleration; }
+	Vector2f& getRelAcceleration() { return acceleration; }
 	float getAngularVelocity() { return angularVelocity; }
 	float getAngularAcceleration() { return angularAcceleration; }
 
@@ -135,7 +140,10 @@ public:
 	/* The constructor - Takes the GameObject that this will be controlling, once
 	 * this is done, the position/rotation of the child object should only be
 	 * modified by changing the value in this instance */
-	PhysicsObject3D(GameObject3D* child) { child->setParent(this); }
+	PhysicsObject3D(GameObject3D* child) {
+		if (child)
+			child->setParent(this);
+	}
 	PhysicsObject3D(std::vector<Mesh*> meshes, RenderShader* shader) : GameObject3D(meshes, shader) {}
 
 	/* The destructor */
@@ -157,7 +165,9 @@ public:
 	inline void setCollider(Collider3D* collider) { this->collider = collider; }
 
 	Vector3f getVelocity() { return velocity; }
+	Vector3f& getRelVelocity() { return velocity; }
 	Vector3f getAcceleration() { return acceleration; }
+	Vector3f& getRelAcceleration() { return acceleration; }
 	Vector3f getAngularVelocity() { return angularVelocity; }
 	Vector3f getAngularAcceleration() { return angularAcceleration; }
 

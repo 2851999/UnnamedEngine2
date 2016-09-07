@@ -188,11 +188,11 @@ protected:
 	}
 public:
 	/* Various constructors */
-	GUIComponent() { Window::getCurrentInstance()->getInputManager()->addListener(this); }
-	GUIComponent(float width, float height) : GUIComponentRenderer(width, height) { Window::getCurrentInstance()->getInputManager()->addListener(this); }
-	GUIComponent(float width, float height, std::vector<Colour> colours) : GUIComponentRenderer(width, height, colours) { Window::getCurrentInstance()->getInputManager()->addListener(this); }
-	GUIComponent(float width, float height, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, textures) { Window::getCurrentInstance()->getInputManager()->addListener(this); }
-	GUIComponent(float width, float height, std::vector<Colour> colours, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, colours, textures) { Window::getCurrentInstance()->getInputManager()->addListener(this); }
+	GUIComponent() {}
+	GUIComponent(float width, float height) : GUIComponentRenderer(width, height) {}
+	GUIComponent(float width, float height, std::vector<Colour> colours) : GUIComponentRenderer(width, height, colours) {}
+	GUIComponent(float width, float height, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, textures) {}
+	GUIComponent(float width, float height, std::vector<Colour> colours, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, colours, textures) {}
 
 	/* Destructor */
 	virtual ~GUIComponent() {
@@ -209,6 +209,10 @@ public:
 	inline void removeListener(GUIComponentListener* listener) {
 		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 	}
+
+	/* Methods used to enable/disable this component (Adds/Removes the input listener instance */
+	virtual void enable();
+	virtual void disable();
 
 	/* The method used to update this component */
 	virtual void update() override;

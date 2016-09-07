@@ -23,7 +23,7 @@
  * The AsteroidsRenderer class
  *****************************************************************************/
 
-AsteroidsRenderer::AsteroidsRenderer(ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
+AsteroidsRenderer::AsteroidsRenderer(const ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
 	//Load the model mesh
 	mesh = loader.loadModel("asteroid_model.obj")[0];
 	MeshData* meshData = mesh->getData();

@@ -23,6 +23,7 @@
 #include "../../core/particles/ParticleSystem.h"
 #include "../../core/particles/ParticleEmitter.h"
 #include "../../core/particles/ParticleEffect.h"
+#include "../../core/audio/SoundSystem.h"
 
 #include "AsteroidGroup.h"
 #include "LasersRenderer.h"
@@ -36,6 +37,9 @@ class Player;
 
 class Lasers {
 private:
+	/* Pointer to the sound system */
+	SoundSystem* soundSystem;
+
 	/* The maximum number of lasers */
 	unsigned int maxLasers;
 
@@ -44,6 +48,9 @@ private:
 
 	/* The physics objects representing the lasers */
 	std::vector<PhysicsObject3D*> objects;
+
+	/* Corresponds to the life left of lasers in vector above */
+	std::vector<float>            timesLeft;
 
 	/* The index of the next object, that should be used
 	 * to determine which physics object to move when
@@ -61,7 +68,7 @@ private:
 	double timeLastLaserFired;
 public:
 	/* The constructor */
-	Lasers(ResourceLoader& loader);
+	Lasers(SoundSystem* soundSystem, const ResourceLoader& loader);
 
 	/* The destructor */
 	virtual ~Lasers();
@@ -73,7 +80,7 @@ public:
 	void render();
 
 	/* The method used to fire this set of lasers */
-	void fire(Player* player);
+	void fire(Vector3f position, Vector3f rotation, Vector3f front);
 
 	/* Returns whether the lasers can fire */
 	inline bool canFire() { return TimeUtils::getSeconds() - timeLastLaserFired > cooldown; }

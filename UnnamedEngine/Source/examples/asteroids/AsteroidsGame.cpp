@@ -29,6 +29,7 @@ AsteroidsGame::AsteroidsGame() {
 	resourceLoader.setPathFonts("fonts/");
 	resourceLoader.setPathModels("models/");
 	resourceLoader.setPathShaders("shaders/");
+	resourceLoader.setPathAudio("audio/");
 	//Assign the current game state
 	currentState = MAIN_MENU;
 }
@@ -51,6 +52,14 @@ void AsteroidsGame::initialise() {
 }
 
 void AsteroidsGame::created() {
+	//Setup the sound system
+	soundSystem = new SoundSystem();
+
+	//Load the sounds
+	soundSystem->addSoundEffect("Laser", resourceLoader.loadAudio("laser.wav"));
+	soundSystem->addSoundEffect("Explosion", resourceLoader.loadAudio("explosion.wav"));
+	soundSystem->createListener();
+
 	//Create the InputBindings instance
 	inputBindings = new InputBindings();
 	//Create the axis bindings
@@ -58,10 +67,12 @@ void AsteroidsGame::created() {
 	InputBindingAxis* axisSideways = inputBindings->createAxisBinding("Sideways");
 	//Create the button bindings
 	InputBindingButton* buttonShoot = inputBindings->createButtonBinding("Shoot");
+	InputBindingButton* buttonPause = inputBindings->createButtonBinding("Pause");
 	//Setup default keys
 	axisForward->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
 	axisSideways->assignKeys(GLFW_KEY_A, GLFW_KEY_D);
 	buttonShoot->assignKey(GLFW_KEY_SPACE);
+	buttonPause->assignKey(GLFW_KEY_ESCAPE);
 
 	//Setup the main menu
 	mainMenu = new AsteroidsMainMenu(this);
@@ -69,14 +80,21 @@ void AsteroidsGame::created() {
 
 	//Setup the main game
 	mainGame = new AsteroidsMainGame(this);
+
+	//Setup the pause menu
+	pauseMenu = new AsteroidsPauseMenu(this);
 }
 
 void AsteroidsGame::update() {
+	//Update the sound system
+	soundSystem->update();
 	//Check the current state
 	if (currentState == MAIN_MENU)
 		mainMenu->update();
 	else if (currentState == GAME_PLAYING)
 		mainGame->update();
+	else if (currentState == GAME_PAUSED)
+		pauseMenu->update();
 }
 
 void AsteroidsGame::render() {
@@ -85,10 +103,15 @@ void AsteroidsGame::render() {
 		mainMenu->render();
 	else if (currentState == GAME_PLAYING)
 		mainGame->render();
+	else if (currentState == GAME_PAUSED) {
+		mainGame->render();
+		pauseMenu->render();
+	}
 }
 
 void AsteroidsGame::destroy() {
 	//Delete all created resources
+	delete soundSystem;
 	delete mainMenu;
 	delete mainGame;
 }
@@ -100,8 +123,10 @@ void AsteroidsGame::changeState(GameState newState) {
 		if (currentState == MAIN_MENU)
 			//Hide the main menu
 			mainMenu->hide();
-		else if (currentState == GAME_PLAYING)
+		else if (currentState == GAME_PLAYING && newState != GAME_PAUSED)
 			mainGame->stop();
+		else if (currentState == GAME_PAUSED)
+			pauseMenu->hide();
 
 		//Check the new state
 		if (newState == MAIN_MENU)
@@ -109,6 +134,8 @@ void AsteroidsGame::changeState(GameState newState) {
 			mainMenu->show();
 		else if (newState == GAME_PLAYING)
 			mainGame->start();
+		else if (newState == GAME_PAUSED)
+			pauseMenu->show();
 
 		//Assign the state
 		currentState = newState;

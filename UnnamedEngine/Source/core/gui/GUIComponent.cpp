@@ -131,6 +131,14 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colou
  * The GUIComponent class
  *****************************************************************************/
 
+void GUIComponent::enable() {
+	Window::getCurrentInstance()->getInputManager()->addListener(this);
+}
+
+void GUIComponent::disable() {
+	Window::getCurrentInstance()->getInputManager()->removeListener(this);
+}
+
 void GUIComponent::update() {
 	if (active) {
 		GUIComponentRenderer::update();

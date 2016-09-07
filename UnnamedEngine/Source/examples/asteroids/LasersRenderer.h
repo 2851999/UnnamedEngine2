@@ -55,7 +55,7 @@ private:
 	std::vector<GameObject3D*> objects;
 public:
 	/* The constructor */
-	LasersRenderer(ResourceLoader& loader, unsigned int numObjects);
+	LasersRenderer(const ResourceLoader& loader, unsigned int numObjects);
 
 	/* The destructor */
 	virtual ~LasersRenderer();

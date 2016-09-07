@@ -38,7 +38,7 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	for (int x = -2; x < 3; x++) {
 		for (int y = -2; y < 3; y++) {
 			for (int z = -2; z < 3; z++) {
-				AsteroidGroup group(asteroidRenderer, currentNumAsteroids, Vector3f(x * 200, y * 200, z * 200));
+				AsteroidGroup group(asteroidRenderer, currentNumAsteroids, Vector3f(x * 100, y * 100, z * 100));
 				group.generateAsteroids(10, asteroidRenderer);
 				asteroidGroups.push_back(group);
 
@@ -51,6 +51,10 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	asteroidRenderer->update();
 	//Hiding 0 seems to break with transparency glitch - fixed by discarding fragment
 	//asteroidRenderer->hideAsteroid(0);
+
+	//Setup the pause button
+	game->getInputBindings()->addListener(this);
+	pauseButton = game->getInputBindings()->getButtonBinding("Pause");
 }
 
 AsteroidsMainGame::~AsteroidsMainGame() {
@@ -62,13 +66,17 @@ AsteroidsMainGame::~AsteroidsMainGame() {
 void AsteroidsMainGame::start() {
 	//Hide the mouse
 	game->getWindow()->disableCursor();
+	//Setup the sound system
+	game->getSoundSystem()->setListener(player);
 	//Add the camera
 	Renderer::addCamera(player->getCamera());
 }
 
 void AsteroidsMainGame::stop() {
 	//Show the mouse
-	game->getWindow()->disableCursor();
+	game->getWindow()->enableCursor();
+	//Setup the sound system
+	game->getSoundSystem()->setListener(Vector2f());
 	//Remove the camera
 	Renderer::removeCamera();
 }
@@ -110,4 +118,13 @@ void AsteroidsMainGame::render() {
 	player->render();
 
 	asteroidRenderer->render();
+}
+
+void AsteroidsMainGame::onButtonReleased(InputBindingButton* button) {
+	if (button == pauseButton) {
+		if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING)
+			game->changeState(AsteroidsGame::GAME_PAUSED);
+		else if (game->getCurrentState() == AsteroidsGame::GAME_PAUSED)
+			game->changeState(AsteroidsGame::GAME_PLAYING);
+	}
 }

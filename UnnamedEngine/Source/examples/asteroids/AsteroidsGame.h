@@ -22,9 +22,11 @@
 #include "../../core/BaseEngine.h"
 #include "../../core/ResourceLoader.h"
 #include "../../core/input/InputBindings.h"
+#include "../../core/audio/SoundSystem.h"
 
 #include "AsteroidsMainMenu.h"
 #include "AsteroidsMainGame.h"
+#include "AsteroidsPauseMenu.h"
 
 /*****************************************************************************
  * The AsteroidsGame class sets up and manages the game
@@ -35,7 +37,8 @@ public:
 	/* The current game state */
 	enum GameState {
 		MAIN_MENU,
-		GAME_PLAYING
+		GAME_PLAYING,
+		GAME_PAUSED
 	};
 private:
 	/* The resource loader instance used for loading resources */
@@ -43,6 +46,9 @@ private:
 
 	/* The current game state */
 	GameState currentState;
+
+	/* The sound system managing all of the sounds */
+	SoundSystem* soundSystem = NULL;
 
 	/* Input bindings for the game */
 	InputBindings* inputBindings = NULL;
@@ -52,6 +58,9 @@ private:
 
 	/* The main game */
 	AsteroidsMainGame* mainGame = NULL;
+
+	/* The pause menu */
+	AsteroidsPauseMenu* pauseMenu = NULL;
 public:
 	/* The constructor */
 	AsteroidsGame();
@@ -71,6 +80,8 @@ public:
 
 	/* Setters and getters */
 	ResourceLoader& getResourceLoader() { return resourceLoader; }
+	GameState getCurrentState() { return currentState; }
+	SoundSystem* getSoundSystem() { return soundSystem; }
 	InputBindings* getInputBindings() { return inputBindings; }
 };
 

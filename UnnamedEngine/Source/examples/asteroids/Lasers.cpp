@@ -23,7 +23,7 @@
  * The Lasers class
  *****************************************************************************/
 
-Lasers::Lasers(ResourceLoader& loader) {
+Lasers::Lasers(SoundSystem* soundSystem, const ResourceLoader& loader) : soundSystem(soundSystem) {
 	//Assign the maximum number of lasers
 	maxLasers = 20;
 
@@ -34,6 +34,7 @@ Lasers::Lasers(ResourceLoader& loader) {
 		GameObject3D* object = new GameObject3D();
 
 		objects.push_back(new PhysicsObject3D(object));
+		timesLeft.push_back(0);
 		renderer->addLaser(object);
 	}
 
@@ -70,8 +71,15 @@ void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	//Go through each laser object and update its physics
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		//Ensure the laser is visible
-		if (renderer->isLaserVisible(i))
-			objects[i]->updatePhysics(deltaSeconds);
+		if (renderer->isLaserVisible(i)) {
+			//Subtract time from the laser's life
+			timesLeft[i] -= deltaSeconds;
+			//Check whether the laser should be hidden
+			if (timesLeft[i] <= 0) {
+				renderer->hideLaser(i);
+			} else
+				objects[i]->updatePhysics(deltaSeconds);
+		}
 	}
 
 	//Update the renderer
@@ -105,6 +113,9 @@ void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 						//Activate the particle emitter
 						particleEmitter->emitParticles(100);
 						particleEmitter->particleMaxSpeed = 2.0f * scale;
+						//Play the explosion sound effect at the position of the asteroid
+						soundSystem->getSource("Explosion")->setParent(closestAsteroids[i]);
+						soundSystem->play("Explosion");
 					}
 				}
 			}
@@ -122,20 +133,23 @@ void Lasers::render() {
 	particleSystem->render();
 }
 
-void Lasers::fire(Player* player) {
+void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front) {
 	//Ensure the lasers can fire
 	if (canFire()) {
 		//Assign the new time the last laser was fired
 		timeLastLaserFired = TimeUtils::getSeconds();
 		//Assign the object's properties
-		objects[nextIndex]->setPosition(player->getCamera()->getPosition());
-		objects[nextIndex]->setVelocity(player->getCamera()->getFront() * 10.0f);
-		objects[nextIndex]->setRotation(player->getCamera()->getRotation() * Vector3f(0.0f, -1.0f, 0.0f));
+		objects[nextIndex]->setPosition(position);
+		objects[nextIndex]->setVelocity(front * 20.0f);
+		objects[nextIndex]->setRotation(rotation * Vector3f(0.0f, -1.0f, 0.0f));
+		timesLeft[nextIndex] = 3.0f;
 		//Make the laser visible
 		renderer->showLaser(nextIndex);
 		//Increment the index, and then ensure it is within the bounds of the objects array
 		nextIndex++;
 		if (nextIndex >= objects.size())
 			nextIndex = 0;
+		//Play the sound effect
+		soundSystem->play("Laser");
 	}
 }

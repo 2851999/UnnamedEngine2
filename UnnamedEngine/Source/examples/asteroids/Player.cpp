@@ -23,7 +23,7 @@
  * The Player class
  *****************************************************************************/
 
-Player::Player(AsteroidsGame* game) : game(game) {
+Player::Player(AsteroidsGame* game) : Ship(game->getSoundSystem(), game->getResourceLoader()), game(game) {
 	//Setup input
 	InputBindings* inputBindings = game->getInputBindings();
 	axisForward = inputBindings->getAxisBinding("Forward");
@@ -36,9 +36,7 @@ Player::Player(AsteroidsGame* game) : game(game) {
 	camera = new Camera3D(Matrix4f().initPerspective(110.0f, game->getSettings().windowAspectRatio, 0.1f, 100.0f));
 	camera->setSkyBox(new SkyBox(game->getResourceLoader().getPath() + "skybox/", "skyboxBK.png", "skyboxFT.png", "skyboxLF.png", "skyboxRT.png", "skyboxUP.png", "skyboxDN.png", 100.0f));
 	camera->setFlying(true);
-
-	//Setup the lasers
-	lasers = new Lasers(game->getResourceLoader());
+	camera->setParent(this);
 
 	game->getWindow()->getInputManager()->addListener(this);
 }
@@ -46,25 +44,26 @@ Player::Player(AsteroidsGame* game) : game(game) {
 Player::~Player() {
 	//Destroy created resources
 	delete camera;
-	delete lasers;
 }
 
 void Player::update(AsteroidGroup& closestAsteroids) {
 	//Get the current delta
 	currentDelta = game->getDeltaSeconds();
 	//Update the camera
-	camera->moveForward(axisForward->getValue() * 5.0f * currentDelta);
-	camera->moveLeft(axisSideways->getValue() * 5.0f * currentDelta);
+	setVelocity(camera->getFront() * (axisForward->getValue() * 10.0f));
+	//getRelRotation().setZ(getRelRotation().getZ() + axisSideways->getValue() * 5.0f * currentDelta);
+
+	//std::cout << getRelRotation().toString() << std::endl;
 
 	camera->update();
 
 	//Check whether the player is shooting
 	if (buttonShoot->isPressed()) {
 		//FIRE THE LASERS!!!
-		lasers->fire(this);
+		fireLasers(camera->getFront());
 	}
 	//Update the lasers
-	lasers->update(currentDelta, closestAsteroids);
+	Ship::update(currentDelta, closestAsteroids);
 }
 
 void Player::render() {
@@ -72,11 +71,13 @@ void Player::render() {
 	camera->useView();
 
 	//Render the lasers
-	lasers->render();
+	Ship::render();
 }
 
 void Player::onMouseMoved(double x, double y, double dx, double dy) {
-	//Orientate the camera
-	camera->getRelRotation() += Vector3f(-dy * 10.0f, dx * 10.0f, 0) * currentDelta;
-	camera->getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
+	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING) {
+		//Orientate the camera
+		getRelRotation() += Vector3f(-dy * 10.0f, dx * 10.0f, 0) * currentDelta;
+		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
+	}
 }

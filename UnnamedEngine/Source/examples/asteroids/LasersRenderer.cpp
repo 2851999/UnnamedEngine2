@@ -23,9 +23,10 @@
  * The LasersRenderer class
  *****************************************************************************/
 
-LasersRenderer::LasersRenderer(ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
+LasersRenderer::LasersRenderer(const ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
 	//Load the model mesh
 	mesh = loader.loadModel("laser.obj")[0];
+	//mesh->getMaterial()->setDiffuseColour(Colour(mesh->getMaterial()->getDiffuseColour(), 0.5f));
 	MeshData* meshData = mesh->getData();
 	//Setup the shader
 	shader = loader.loadShader("LaserShader");

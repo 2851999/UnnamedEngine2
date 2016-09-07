@@ -41,6 +41,10 @@ public:
 	/* The method used to remove a button */
 	inline void removeButton(GUIButton* button) { buttons.erase(std::remove(buttons.begin(), buttons.end(), button), buttons.end()); }
 
+	/* Methods used to enable/disable this component (Adds/Removes the input listener instance */
+	virtual void enable() override;
+	virtual void disable() override;
+
 	/* The method used to update this component */
 	virtual void update() override;
 

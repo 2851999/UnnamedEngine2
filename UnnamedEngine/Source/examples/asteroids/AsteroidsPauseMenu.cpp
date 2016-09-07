@@ -16,14 +16,14 @@
  *
  *****************************************************************************/
 
-#include "AsteroidsMainMenu.h"
+#include "AsteroidsPauseMenu.h"
 #include "AsteroidsGame.h"
 
 /*****************************************************************************
- * The AsteroidsMainMenu class
+ * The AsteroidsPauseMenu class
  *****************************************************************************/
 
-AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) : game(game) {
+AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
@@ -35,12 +35,13 @@ AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) : game(game) {
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D(new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)), Renderer::getRenderShader("Material"));
 	background->getMaterial()->setDiffuseTexture(backgroundTexture);
+	background->getMaterial()->setDiffuseColour(Colour(1.0f, 1.0f, 1.0f, 0.4f));
 	background->update();
 	//Setup the title font
 	titleFont = game->getResourceLoader().loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
 	titleFont->update(
-			"Asteroids",
-			game->getSettings().windowWidth / 2 - titleFont->getWidth("Asteroids") / 2,
+			"Paused",
+			game->getSettings().windowWidth / 2 - titleFont->getWidth("Paused") / 2,
 			80.0f
 	);
 	//Setup the buttons
@@ -50,54 +51,40 @@ AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) : game(game) {
 	Texture* hover = game->getResourceLoader().loadTexture("Button_Hover.png");
 	Texture* clicked = game->getResourceLoader().loadTexture("Button_Clicked.png");
 
-	buttonPlay = new GUIButton("Play", 400, 30, { normal, hover, clicked });
-	buttonPlay->setPosition(windowWidth / 2 - buttonPlay->getWidth() / 2, 140);
-	buttonPlay->addListener(this);
+	buttonContinue = new GUIButton("Continue", 400, 30, { normal, hover, clicked });
+	buttonContinue->setPosition(windowWidth / 2 - buttonContinue->getWidth() / 2, 140);
+	buttonContinue->addListener(this);
 
 	buttonExit = new GUIButton("Exit", 400, 30, { normal, hover, clicked });
 	buttonExit->setPosition(windowWidth / 2 - buttonExit->getWidth() / 2, windowHeight - 50);
 	buttonExit->addListener(this);
 }
 
-AsteroidsMainMenu::~AsteroidsMainMenu() {
+AsteroidsPauseMenu::~AsteroidsPauseMenu() {
 	//Delete created resources
 	delete camera;
 	delete background;
-	delete buttonPlay;
+	delete buttonContinue;
 	delete buttonExit;
 }
 
-void AsteroidsMainMenu::show() {
-	//Add the camera
-	Renderer::addCamera(camera);
-
-	buttonPlay->setActive(true);
-	buttonPlay->setVisible(true);
-	buttonExit->setActive(true);
-	buttonExit->setVisible(true);
+void AsteroidsPauseMenu::show() {
+	game->getWindow()->enableCursor();
 }
 
-void AsteroidsMainMenu::hide() {
-	//Remove the camera
-	Renderer::removeCamera();
-
-	buttonPlay->setActive(false);
-	buttonPlay->setVisible(false);
-	buttonExit->setActive(false);
-	buttonExit->setVisible(false);
+void AsteroidsPauseMenu::hide() {
+	game->getWindow()->disableCursor();
 }
 
-void AsteroidsMainMenu::update() {
+void AsteroidsPauseMenu::update() {
 	//Update the buttons
-	buttonPlay->update();
+	buttonContinue->update();
 	buttonExit->update();
 }
 
-void AsteroidsMainMenu::render() {
-	//Setup for rendering
-	glClear(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+void AsteroidsPauseMenu::render() {
+	//Add the camera
+	Renderer::addCamera(camera);
 
 	//Render the background
 	background->render();
@@ -106,16 +93,21 @@ void AsteroidsMainMenu::render() {
 	titleFont->render();
 
 	//Render the buttons
-	buttonPlay->render();
+	buttonContinue->render();
 	buttonExit->render();
+
+	//Remove the camera
+	Renderer::removeCamera();
 }
 
-void AsteroidsMainMenu::onComponentClicked(GUIComponent* component) {
+void AsteroidsPauseMenu::onComponentClicked(GUIComponent* component) {
 	//Check whether any buttons were clicked
-	if (component == buttonPlay)
+	if (component == buttonContinue)
 		//Change the game state to start the game
 		game->changeState(AsteroidsGame::GAME_PLAYING);
-	else if (component == buttonExit)
-		//Exit the game
-		game->requestClose();
+	else if (component == buttonExit) {
+		//Go to the main menu
+		game->changeState(AsteroidsGame::GAME_PLAYING);
+		game->changeState(AsteroidsGame::MAIN_MENU);
+	}
 }

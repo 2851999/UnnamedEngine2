@@ -16,54 +16,33 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_PLAYER_H_
-#define EXAMPLES_ASTEROIDS_PLAYER_H_
+#ifndef EXAMPLES_ASTEROIDS_SHIP_H_
+#define EXAMPLES_ASTEROIDS_SHIP_H_
 
-#include "../../utils/DebugCamera.h"
-#include "../../core/physics/PhysicsObject.h"
-#include "AsteroidsGame.h"
 #include "Lasers.h"
-#include "Ship.h"
 
 /*****************************************************************************
- * The Player class handles player movement and shooting
+ * The Ship class provides the basis for any ship
  *****************************************************************************/
 
-class Player : public Ship, public InputListener {
+class Ship : public PhysicsObject3D {
 private:
-	/* Input axis/buttons */
-	InputBindingAxis* axisForward;
-	InputBindingAxis* axisSideways;
-	InputBindingButton* buttonShoot;
-
-	/* The current game delta */
-	float currentDelta;
-
-	/* The player camera */
-	Camera3D* camera;
-
-	/* The game instance */
-	AsteroidsGame* game;
+	/* The lasers for this ship */
+	Lasers* lasers;
 public:
 	/* The constructor */
-	Player(AsteroidsGame* mainGame);
+	Ship(SoundSystem* soundSystem, const ResourceLoader& loader);
 
 	/* The destructor */
-	virtual ~Player();
+	virtual ~Ship();
 
-	/* Method used to update the player and their lasers */
-	void update(AsteroidGroup& closestAsteroids);
-
-	/* Method to use the player's view and render the lasers */
+	/* Update and render methods */
+	void update(float deltaSeconds, AsteroidGroup& closestGroup);
 	void render();
 
-	/* Input methods */
-	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
-
-	/* Setters and getters */
-	inline Camera3D* getCamera() { return camera; }
+	/* Method called to fire this ship's lasers */
+	inline void fireLasers(Vector3f front) { lasers->fire(getPosition(), getRotation(), front); }
 };
 
 
-
-#endif /* EXAMPLES_ASTEROIDS_PLAYER_H_ */
+#endif /* EXAMPLES_ASTEROIDS_SHIP_H_ */

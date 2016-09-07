@@ -16,56 +16,56 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
+#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSPAUSEMENU_H_
+#define EXAMPLES_ASTEROIDS_ASTEROIDSPAUSEMENU_H_
+
+#include "../../core/render/Renderer.h"
+#include "../../core/render/Camera.h"
+#include "../../core/gui/Font.h"
+#include "../../core/gui/GUIButton.h"
+
+/*****************************************************************************
+ * The AsteroidsPauseMenu class sets up and manages the pause menu
+ *****************************************************************************/
 
 class AsteroidsGame;
 
-#include "../../core/input/InputBindings.h"
-#include "AsteroidsRenderer.h"
-#include "AsteroidGroup.h"
-
-class Player;
-
-/*****************************************************************************
- * The AsteroidsMainGame class sets up and manages the main game
- *****************************************************************************/
-
-class AsteroidsMainGame : public InputBindingsListener {
+class AsteroidsPauseMenu : GUIComponentListener {
 private:
 	/* The instance of the game */
 	AsteroidsGame* game;
 
-	/* The player */
-	Player* player;
+	/* The camera used when rendering the main menu */
+	Camera2D* camera;
 
-	/* The asteroid renderer */
-	AsteroidsRenderer* asteroidRenderer;
+	/* The background for the main menu */
+	GameObject2D* background;
 
-	/* The asteroid groups */
-	std::vector<AsteroidGroup> asteroidGroups;
+	/* The title font */
+	Font* titleFont;
 
-	/* The pause button */
-	InputBindingButton* pauseButton;
+	/* The buttons on the menu */
+	GUIButton* buttonContinue;
+	GUIButton* buttonExit;
 public:
 	/* The constructor */
-	AsteroidsMainGame(AsteroidsGame* game);
+	AsteroidsPauseMenu(AsteroidsGame* game);
 
 	/* The destructor */
-	virtual ~AsteroidsMainGame();
+	virtual ~AsteroidsPauseMenu();
 
-	/* The method used to start the game */
-	void start();
+	/* Method called to setup ready to show the main menu */
+	void show();
 
-	/* The method used to stop the game */
-	void stop();
+	/* Method called to remove the camera and hide the main menu */
+	void hide();
 
-	/* The update and render methods */
+	/* Methods used to update and render the main menu */
 	void update();
 	void render();
 
-	/* InputBindingListener methods */
-	virtual void onButtonReleased(InputBindingButton* button) override;
+	/* Called when a component is clicked */
+	virtual void onComponentClicked(GUIComponent* component) override;
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_ */
+#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINMENU_H_ */

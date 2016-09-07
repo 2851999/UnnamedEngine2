@@ -90,6 +90,7 @@ private:
 
 	Vector3f cameraFront = Vector3f(0.0f, 0.0f, -1.0f);
 	Vector3f cameraUp    = Vector3f(0.0f, 1.0f, 0.0f);
+	Vector3f cameraRight = Vector3f(1.0f, 0.0f, 0.0f);
 
 	Frustum frustum;
 public:
@@ -146,6 +147,8 @@ public:
 	inline void setFlying(bool flying) { this->flying = flying; }
 	inline void toggleFlying() { flying = !flying; }
 	inline Vector3f getFront() { return cameraFront; }
+	inline Vector3f getUp() { return cameraUp; }
+	inline Vector3f getRight() { return cameraRight; }
 	inline SkyBox* getSkyBox() { return skyBox; }
 	inline bool hasSkyBox() { return skyBox; }
 	inline bool isFlying() { return flying; }

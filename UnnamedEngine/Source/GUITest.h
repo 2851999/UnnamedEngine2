@@ -29,10 +29,12 @@
 #include "core/gui/GUICheckBox.h"
 #include "core/gui/GUIDropDownMenu.h"
 #include "core/gui/GUIDropDownList.h"
+#include "core/gui/GUIPanel.h"
 
 class Test : public BaseEngine {
 private:
 	Camera2D* camera;
+	GUIPanel* panel;
 	GUIButton* button;
 	GUILoadingBar* loadingBar;
 	GUICheckBox* checkBox;
@@ -75,6 +77,8 @@ void Test::created() {
 
 	GUIComponentRenderer::DEFAULT_FONT = new Font("resources/fonts/ARIAL.TTF", 22, Colour::WHITE, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
 
+	panel = new GUIPanel();
+
 	button = new GUIButton("Hello World!", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE });
 	button->setPosition(400, 200);
 	button->setBorder(new GUIBorder(button, 1, Colour::ORANGE));
@@ -102,6 +106,16 @@ void Test::created() {
 	dropDownList->addButton(new GUIButton("1280 x 720", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
 	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
 	dropDownList->setPosition(700, 20);
+
+	panel->add(button);
+	panel->add(loadingBar);
+	panel->add(checkBox);
+	panel->add(dropDownMenu);
+	panel->add(dropDownList);
+
+	panel->remove(button);
+
+	panel->show();
 
 	Renderer::addCamera(camera);
 }

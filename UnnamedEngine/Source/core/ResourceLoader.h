@@ -52,18 +52,18 @@ public:
 	virtual ~ResourceLoader() {}
 
 	/* Various methods to load resources using the paths assigned */
-	inline Texture* loadTexture(std::string fileName) { return sLoadTexture(path + pathTextures + fileName); }
-	inline Texture* loadTexture(std::string fileName, TextureParameters parameters) { return sLoadTexture(path + pathTextures + fileName, parameters); }
-	inline Texture* loadTexture(std::string fileName, TextureParameters parameters, bool applyParameters) { return sLoadTexture(path + pathTextures + fileName, parameters, applyParameters); }
+	inline Texture* loadTexture(std::string fileName) const { return sLoadTexture(path + pathTextures + fileName); }
+	inline Texture* loadTexture(std::string fileName, TextureParameters parameters) const { return sLoadTexture(path + pathTextures + fileName, parameters); }
+	inline Texture* loadTexture(std::string fileName, TextureParameters parameters, bool applyParameters) const { return sLoadTexture(path + pathTextures + fileName, parameters, applyParameters); }
 
-	inline AudioData* loadAudio(std::string fileName) { return sLoadAudio(path + pathAudio + fileName); }
+	inline AudioData* loadAudio(std::string fileName) const { return sLoadAudio(path + pathAudio + fileName); }
 
-	inline Shader* loadShader(std::string fileName) { return sLoadShader(path + pathShaders + fileName); }
+	inline Shader* loadShader(std::string fileName) const { return sLoadShader(path + pathShaders + fileName); }
 
-	inline std::vector<Mesh*> loadModel(std::string fileName) { return sLoadModel(path + pathModels, fileName); }
-	inline std::vector<Mesh*> loadModel(std::string folder, std::string fileName) { return sLoadModel(path + pathModels + folder, fileName); }
+	inline std::vector<Mesh*> loadModel(std::string fileName) const { return sLoadModel(path + pathModels, fileName); }
+	inline std::vector<Mesh*> loadModel(std::string folder, std::string fileName) const { return sLoadModel(path + pathModels + folder, fileName); }
 
-	inline Font* loadFont(std::string fileName, int size = 18, Colour colour = Colour::WHITE) { return sLoadFont(path + pathFonts + fileName, size, colour); }
+	inline Font* loadFont(std::string fileName, int size = 18, Colour colour = Colour::WHITE) const { return sLoadFont(path + pathFonts + fileName, size, colour); }
 
 	/* Setters and getters */
 	inline void setPath(std::string path) { this->path = path; }
@@ -73,11 +73,11 @@ public:
 	inline void setPathModels(std::string path) { pathModels = path; }
 	inline void setPathFonts(std::string path) { pathFonts = path; }
 
-	inline std::string getPath() { return path; }
-	inline std::string getPathTextures() { return pathTextures; }
-	inline std::string getPathShaders() { return pathShaders; }
-	inline std::string getPathModels() { return pathModels; }
-	inline std::string getPathFonts() { return pathFonts; }
+	inline std::string getPath() const { return path; }
+	inline std::string getPathTextures() const { return pathTextures; }
+	inline std::string getPathShaders() const { return pathShaders; }
+	inline std::string getPathModels() const { return pathModels; }
+	inline std::string getPathFonts() const { return pathFonts; }
 
 	/* Various static methods to load resources */
 	inline static Texture* sLoadTexture(std::string path) { return Texture::loadTexture(path); }
