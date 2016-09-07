@@ -44,6 +44,8 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	}
 
 	asteroidRenderer->update();
+	//Hiding 0 seems to break with transparency glitch - fixed by discarding fragment
+	//asteroidRenderer->hideAsteroid(0);
 }
 
 AsteroidsMainGame::~AsteroidsMainGame() {
@@ -71,7 +73,7 @@ void AsteroidsMainGame::update() {
 	player->update();
 
 	unsigned int closestIndex = 0;
-	float distance = 0;
+	float distance = 10000000;
 
 	for (unsigned int i = 0; i < asteroidGroups.size(); i++) {
 		float current = (asteroidGroups[i].getPosition() - player->getCamera()->getPosition()).length();
@@ -90,8 +92,9 @@ void AsteroidsMainGame::update() {
 
 		for (unsigned int j = 0; j < lasers.size(); j++) {
 			float distance = (lasers[j]->getPosition() - closestAsteroids[i]->getPosition()).length();
-			if (distance < 10.0f)
-				asteroidRenderer->hideAsteroid(i);
+			if (distance < 10.0f) {
+				asteroidRenderer->hideAsteroid((closestIndex * 10) + i);
+			}
 		}
 	}
 }
@@ -102,6 +105,9 @@ void AsteroidsMainGame::render() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+//	glEnable(GL_MULTISAMPLE_ARB);
+//	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
 
 	//Use the player's view
 	player->useView();

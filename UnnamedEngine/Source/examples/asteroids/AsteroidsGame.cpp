@@ -44,6 +44,10 @@ void AsteroidsGame::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().videoVSync = true;
 	getSettings().videoMaxFPS = 0;
+	//getSettings().windowFullscreen = true;
+	//getSettings().videoResolution = VideoResolution::RES_1080P;
+
+	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 }
 
 void AsteroidsGame::created() {

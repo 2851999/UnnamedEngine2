@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 3 | Experimental 3
+
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 3 | Experimental 2
 
 * More asteroids development

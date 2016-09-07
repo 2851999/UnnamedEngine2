@@ -109,11 +109,11 @@ void LasersRenderer::render() {
 	mesh->getMaterial()->setUniforms(shader, "Material");
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
 
-//	glEnable(GL_CULL_FACE);
-//	glFrontFace(GL_CW);
-//	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);
+	glCullFace(GL_BACK);
 	renderData->render();
-//	glDisable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 
 	Renderer::releaseNewTextures();
 	shader->stopUsing();
