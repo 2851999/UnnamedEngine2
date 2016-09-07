@@ -22,7 +22,7 @@
 #include "../../utils/DebugCamera.h"
 #include "../../core/physics/PhysicsObject.h"
 #include "AsteroidsGame.h"
-#include "LasersRenderer.h"
+#include "Lasers.h"
 
 /*****************************************************************************
  * The Player class handles player movement and shooting
@@ -37,12 +37,7 @@ private:
 	AsteroidsGame* game;
 
 	/* The lasers */
-	std::vector<PhysicsObject3D*> lasers;
-
-	/* The lasers renderer */
-	LasersRenderer* lasersRenderer;
-
-	unsigned int nextLaser;
+	Lasers* lasers;
 public:
 	/* The constructor */
 	Player(AsteroidsGame* mainGame);
@@ -50,18 +45,18 @@ public:
 	/* The destructor */
 	virtual ~Player();
 
-	/* Method used to update the player */
-	void update();
+	/* Method used to update the player and their lasers */
+	void update(AsteroidGroup& closestAsteroids);
 
-	/* Method to use the player's view */
-	void useView();
+	/* Method to use the player's view and render the lasers */
+	void render();
 
 	/* Input methods */
 	virtual void onMousePressed(int button) override;
 
 	/* Setters and getters */
 	inline DebugCamera* getCamera() { return camera; }
-	inline std::vector<PhysicsObject3D*>& getLasers() { return lasers; }
+	inline std::vector<PhysicsObject3D*>& getLasers() { return lasers->getObjects(); }
 };
 
 

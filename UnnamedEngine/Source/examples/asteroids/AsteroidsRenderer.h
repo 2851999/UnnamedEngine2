@@ -69,6 +69,9 @@ public:
 	/* The method used to hide an asteroid */
 	void hideAsteroid(unsigned int index);
 
+	/* Method used to check whether an asteroid is visible */
+	inline bool isAsteroidVisible(unsigned int index) { return visibleData[index] > 0.5f; }
+
 	/* Method called to update the asteroids */
 	void update();
 	/* Method called to render the asteroids */

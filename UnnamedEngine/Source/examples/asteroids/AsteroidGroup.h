@@ -28,6 +28,12 @@
 
 class AsteroidGroup {
 private:
+	/* Pointer to the renderer of this group (And others) */
+	AsteroidsRenderer* renderer;
+
+	/* The index of the start of this groups asteroids in the renderer */
+	unsigned int rendererStartIndex;
+
 	/* The position of this group */
 	Vector3f position;
 
@@ -35,13 +41,20 @@ private:
 	std::vector<GameObject3D*> objects;
 public:
 	/* The constructor */
-	AsteroidGroup(Vector3f position);
+	AsteroidGroup(AsteroidsRenderer* renderer, unsigned int rendererStartIndex, Vector3f position);
 
 	/* The destructor */
 	virtual ~AsteroidGroup();
 
 	/* The method called to generate asteroids in this group */
 	void generateAsteroids(unsigned int number, AsteroidsRenderer* renderer);
+
+	/* Method called to hide an asteroid in this group, given its index within
+	 * the objects */
+	inline void hideAsteroid(unsigned int index) { renderer->hideAsteroid(rendererStartIndex + index); }
+
+	/* Method called to check whether an asteroid is currently visible */
+	inline bool isAsteroidVisible(unsigned int index) { return renderer->isAsteroidVisible(rendererStartIndex + index); }
 
 	/* Setters and getters */
 	Vector3f getPosition() { return position; }

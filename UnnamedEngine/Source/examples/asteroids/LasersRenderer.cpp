@@ -49,7 +49,7 @@ LasersRenderer::LasersRenderer(ResourceLoader& loader, unsigned int numObjects) 
 			}
 		}
 
-		visibleData.push_back(1);
+		visibleData.push_back(0);
 	}
 
 	vboMatricesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * 16 * sizeof(GLfloat), matricesDataRaw, GL_STREAM_DRAW, true);
@@ -79,9 +79,20 @@ LasersRenderer::~LasersRenderer() {
 	objects.clear();
 }
 
+void LasersRenderer::showLaser(unsigned int index) {
+	//Ensure the laser is currently showing
+	if (visibleData[index] < 0.5f) {
+		visibleData[index] = 1.0f;
+		vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
+	}
+}
+
 void LasersRenderer::hideLaser(unsigned int index) {
-	visibleData[index] = 0.0f;
-	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
+	//Ensure the laser is currently showing
+	if (visibleData[index] > 0.5f) {
+		visibleData[index] = 0.0f;
+		vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
+	}
 }
 
 void LasersRenderer::update() {

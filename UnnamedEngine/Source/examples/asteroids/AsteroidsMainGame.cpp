@@ -32,13 +32,18 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	unsigned int numAsteroids = 1250;
 	asteroidRenderer = new AsteroidsRenderer(game->getResourceLoader(), numAsteroids);
 
+	//The current number of asteroids generated
+	unsigned int currentNumAsteroids = 0;
 	//Add a group of asteroids
-	for (unsigned int x = 0; x < 5; x++) {
-		for (unsigned int y = 0; y < 5; y++) {
-			for (unsigned int z = 0; z < 5; z++) {
-				AsteroidGroup group(Vector3f(x * 200, y * 200, z * 200));
+	for (int x = -2; x < 3; x++) {
+		for (int y = -2; y < 3; y++) {
+			for (int z = -2; z < 3; z++) {
+				AsteroidGroup group(asteroidRenderer, currentNumAsteroids, Vector3f(x * 200, y * 200, z * 200));
 				group.generateAsteroids(10, asteroidRenderer);
 				asteroidGroups.push_back(group);
+
+				//Add to the current number of asteroids
+				currentNumAsteroids += 10;
 			}
 		}
 	}
@@ -69,48 +74,40 @@ void AsteroidsMainGame::stop() {
 }
 
 void AsteroidsMainGame::update() {
-	//Update the camera
-	player->update();
-
+	//The index of the closest asteroid group
 	unsigned int closestIndex = 0;
+	//The current smallest distance to an asteroid group
 	float distance = 10000000;
 
+	//Go though each group
 	for (unsigned int i = 0; i < asteroidGroups.size(); i++) {
+		//Calculate the distance to the current group
 		float current = (asteroidGroups[i].getPosition() - player->getCamera()->getPosition()).length();
 
+		//Check whether the current distance is smaller than the current smallest distance
 		if (current < distance) {
+			//It is, so assign the new smallest distance and the index of the closest asteroid group
 			distance = current;
 			closestIndex = i;
 		}
 	}
 
-	std::vector<GameObject3D*> closestAsteroids = asteroidGroups[closestIndex].getObjects();
-	std::vector<PhysicsObject3D*> lasers = player->getLasers();
-	//Go through asteroids in the group
-	for (unsigned int i = 0; i < closestAsteroids.size(); i++) {
-		//NEED TO CHANGE
-
-		for (unsigned int j = 0; j < lasers.size(); j++) {
-			float distance = (lasers[j]->getPosition() - closestAsteroids[i]->getPosition()).length();
-			if (distance < 10.0f) {
-				asteroidRenderer->hideAsteroid((closestIndex * 10) + i);
-			}
-		}
-	}
+	//Update the player
+	player->update(asteroidGroups[closestIndex]);
 }
 
 void AsteroidsMainGame::render() {
 	//Setup for rendering
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//	glEnable(GL_BLEND);
+//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-//	glEnable(GL_MULTISAMPLE_ARB);
-//	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
+	glEnable(GL_MULTISAMPLE_ARB);
+	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
 
-	//Use the player's view
-	player->useView();
+	//Render the player
+	player->render();
 
 	asteroidRenderer->render();
 }

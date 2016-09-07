@@ -29,48 +29,35 @@ Player::Player(AsteroidsGame* game) : game(game) {
 	camera->setSkyBox(new SkyBox(game->getResourceLoader().getPath() + "skybox/", "skyboxBK.png", "skyboxFT.png", "skyboxLF.png", "skyboxRT.png", "skyboxUP.png", "skyboxDN.png", 100.0f));
 	camera->setFlying(true);
 
-	//Setup the lasers renderer
-	lasersRenderer = new LasersRenderer(game->getResourceLoader(), 20);
-
-	for (unsigned int i = 0; i < 20; i++) {
-		GameObject3D* laser = new GameObject3D();
-
-		lasers.push_back(new PhysicsObject3D(laser));
-		lasersRenderer->addLaser(laser);
-	}
-
-	lasersRenderer->update();
+	//Setup the lasers
+	lasers = new Lasers(game->getResourceLoader());
 
 	game->getWindow()->getInputManager()->addListener(this);
-	nextLaser = 0;
 }
 
 Player::~Player() {
+	//Destroy created resources
 	delete camera;
+	delete lasers;
 }
 
-void Player::update() {
+void Player::update(AsteroidGroup& closestAsteroids) {
+	//Update the camera
 	camera->update(game->getDeltaSeconds());
-	lasersRenderer->update();
-
-	for (unsigned int i = 0; i < lasers.size(); i++)
-		lasers[i]->updatePhysics(game->getDeltaSeconds());
+	//Update the lasers
+	lasers->update(game->getDeltaSeconds(), closestAsteroids);
 }
 
-void Player::useView() {
+void Player::render() {
+	//Use then camera's view
 	camera->useView();
 
-	lasersRenderer->render();
+	//Render the lasers
+	lasers->render();
 }
 
 void Player::onMousePressed(int button) {
-	if (button == GLFW_MOUSE_BUTTON_LEFT) {
-		lasers[nextLaser]->setPosition(camera->getPosition());
-		lasers[nextLaser]->setVelocity(camera->getFront() * 10.0f);
-		lasers[nextLaser]->setRotation(camera->getRotation() * Vector3f(0.0f, -1.0f, 0.0f));
-		//std::cout << lasers[nextLaser]->getRotation().toString() << std::endl;
-		nextLaser++;
-		if (nextLaser >= lasers.size())
-			nextLaser = 0;
-	}
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+		//Fire the laser
+		lasers->fire(this);
 }

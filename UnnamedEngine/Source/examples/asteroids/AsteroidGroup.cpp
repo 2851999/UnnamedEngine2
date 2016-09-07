@@ -22,7 +22,8 @@
  * The AsteroidGroup class
  *****************************************************************************/
 
-AsteroidGroup::AsteroidGroup(Vector3f position) : position(position) {
+AsteroidGroup::AsteroidGroup(AsteroidsRenderer* renderer, unsigned int rendererStartIndex, Vector3f position) :
+	renderer(renderer), rendererStartIndex(rendererStartIndex), position(position) {
 
 }
 

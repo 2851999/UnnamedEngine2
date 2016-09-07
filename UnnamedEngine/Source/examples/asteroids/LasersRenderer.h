@@ -63,8 +63,12 @@ public:
 	/* The method used to add a laser */
 	inline void addLaser(GameObject3D* object) { objects.push_back(object); }
 
-	/* The method used to hide an laser */
+	/* The method used to show/hide a laser */
+	void showLaser(unsigned int index);
 	void hideLaser(unsigned int index);
+
+	/* Method used to check whether a laser is visible */
+	inline bool isLaserVisible(unsigned int index) { return visibleData[index] > 0.5f; }
 
 	/* Method called to update the lasers */
 	void update();
