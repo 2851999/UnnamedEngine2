@@ -42,28 +42,28 @@ protected:
 public:
 	/* The constructors */
 	GUILoadingBar(float width, float height, unsigned int totalStages) :
-		GUIComponent(width, height, { Colour::WHITE }), totalStages(totalStages) {
+		GUIComponent(width, height, std::vector<Colour> { Colour::WHITE }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, Colour::YELLOW);
 		fill->setParent(this);
 	}
 
 	GUILoadingBar(float width, float height, unsigned int totalStages, Colour backgroundColour, Colour fillColour) :
-		GUIComponent(width, height, { backgroundColour }), totalStages(totalStages) {
+		GUIComponent(width, height, std::vector<Colour> { backgroundColour }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, fillColour);
 		fill->setParent(this);
 	}
 
 	GUILoadingBar(float width, float height, unsigned int totalStages, Texture* backgroundTexture, Texture* fillTexture) :
-		GUIComponent(width, height, { backgroundTexture }), totalStages(totalStages) {
+		GUIComponent(width, height, std::vector<Texture*> { backgroundTexture }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, fillTexture);
 		fill->setParent(this);
 	}
 
 	GUILoadingBar(float width, float height, unsigned int totalStages, Colour backgroundColour, Texture* backgroundTexture, Colour fillColour, Texture* fillTexture) :
-		GUIComponent(width, height, { backgroundColour }, { backgroundTexture }), totalStages(totalStages) {
+		GUIComponent(width, height, std::vector<Colour> { backgroundColour }, std::vector<Texture*> { backgroundTexture }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, fillColour, fillTexture);
 		fill->setParent(this);

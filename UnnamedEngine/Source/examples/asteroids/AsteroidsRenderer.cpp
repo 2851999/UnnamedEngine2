@@ -152,3 +152,17 @@ void AsteroidsRenderer::render() {
 	Renderer::releaseNewTextures();
 	shader->stopUsing();
 }
+
+void AsteroidsRenderer::showAll() {
+	//Go through all of the visible data
+	for (unsigned int i = 0; i < visibleData.size(); i++)
+		visibleData[i] = 1.0f;
+	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
+}
+
+void AsteroidsRenderer::hideAll() {
+	//Go through all of the visible data
+	for (unsigned int i = 0; i < visibleData.size(); i++)
+		visibleData[i] = 0.0f;
+	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
+}

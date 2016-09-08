@@ -67,6 +67,18 @@ Lasers::~Lasers() {
 	delete particleSystem;
 }
 
+void Lasers::reset() {
+	//Reset the renderer
+	renderer->hideAll();
+	renderer->update();
+	//Assign the next index (to point to the start of the objects array)
+	nextIndex = 0;
+	//Assign the last laser fired time
+	timeLastLaserFired = 0.0;
+	//Reset the particle system
+	particleSystem->reset();
+}
+
 void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	//Go through each laser object and update its physics
 	for (unsigned int i = 0; i < objects.size(); i++) {

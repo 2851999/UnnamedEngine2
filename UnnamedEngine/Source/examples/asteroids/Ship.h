@@ -36,6 +36,9 @@ public:
 	/* The destructor */
 	virtual ~Ship();
 
+	/* Method called to reset this ship */
+	void reset();
+
 	/* Update and render methods */
 	void update(float deltaSeconds, AsteroidGroup& closestGroup);
 	void render();

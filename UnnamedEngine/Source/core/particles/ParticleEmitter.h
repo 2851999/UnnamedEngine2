@@ -63,6 +63,9 @@ public:
 	/* The constructor */
 	ParticleEmitter() {}
 
+	/* Method used to reset this emitter */
+	void reset();
+
 	/* The method used to update this emitter and emit any required particles
 	 * given a particle system instance */
 	void update(ParticleSystem* system, float delta);

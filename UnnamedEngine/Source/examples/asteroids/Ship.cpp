@@ -32,6 +32,16 @@ Ship::~Ship() {
 	delete lasers;
 }
 
+void Ship::reset() {
+	setPosition(0, 0, 0);
+	setRotation(0, 0, 0);
+	setVelocity(0, 0, 0);
+	setAcceleration(0, 0, 0);
+	setAngularVelocity(0, 0, 0);
+	setAngularAcceleration(0, 0, 0);
+	lasers->reset();
+}
+
 void Ship::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	PhysicsObject3D::updatePhysics(deltaSeconds);
 	//Update the lasers

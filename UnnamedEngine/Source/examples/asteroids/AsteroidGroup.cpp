@@ -36,13 +36,19 @@ void AsteroidGroup::generateAsteroids(unsigned int number, AsteroidsRenderer* re
 	for (unsigned int i = 0; i < number; i++) {
 		GameObject3D* asteroid = new GameObject3D();
 
-		asteroid->setPosition(position + Vector3f(RandomUtils::randomFloat(-20, 20), RandomUtils::randomFloat(-20, 20), RandomUtils::randomFloat(-20, 20)));
-		float s = RandomUtils::randomFloat(0.2f, 1.0f);
-		asteroid->setScale(s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f));
-		asteroid->setRotation(RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360));
-
 		objects.push_back(asteroid);
 		renderer->addAsteroid(asteroid);
+	}
+}
+
+void AsteroidGroup::setup() {
+	//Go through all of the asteroids
+	for (unsigned int i = 0; i < objects.size(); i++) {
+		//Setup the current asteroid
+		objects[i]->setPosition(position + Vector3f(RandomUtils::randomFloat(-20, 20), RandomUtils::randomFloat(-20, 20), RandomUtils::randomFloat(-20, 20)));
+		float s = RandomUtils::randomFloat(0.2f, 1.0f);
+		objects[i]->setScale(s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f));
+		objects[i]->setRotation(RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360));
 	}
 }
 

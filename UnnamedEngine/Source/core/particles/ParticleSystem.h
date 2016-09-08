@@ -111,6 +111,9 @@ public:
 	/* The destructor */
 	virtual ~ParticleSystem();
 
+	/* The method used to reset and hide all particles in this system */
+	void reset();
+
 	/* The method used to update the system */
 	void update(float delta, Vector3f cameraPosition);
 

@@ -23,21 +23,21 @@
  *****************************************************************************/
 
 GUISlider::GUISlider(GUIButton* button, Direction direction, float width, float height, Colour colour) :
-	GUIComponent(width, height, { colour }), button(button), direction(direction) {
+	GUIComponent(width, height, std::vector<Colour> { colour }), button(button), direction(direction) {
 	value = 0;
 	dragging = false;
 	button->setParent(this);
 }
 
 GUISlider::GUISlider(GUIButton* button, Direction direction, float width, float height, Texture* texture) :
-	GUIComponent(width, height, { texture }), button(button), direction(direction) {
+	GUIComponent(width, height, std::vector<Texture*> { texture }), button(button), direction(direction) {
 	value = 0;
 	dragging = false;
 	button->setParent(this);
 }
 
 GUISlider::GUISlider(GUIButton* button, Direction direction, float width, float height, Colour colour, Texture* texture) :
-	GUIComponent(width, height, { colour }, { texture }), button(button), direction(direction) {
+	GUIComponent(width, height, std::vector<Colour> { colour }, std::vector<Texture*> { texture }), button(button), direction(direction) {
 	value = 0;
 	dragging = false;
 	button->setParent(this);

@@ -112,7 +112,7 @@ public:
 		size = Vector2f(width, height);
 	}
 
-	GameObject2D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0) : GameObject(mesh, shader) {
+	GameObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0) : GameObject(meshes, shader) {
 		rotation = 0;
 		scale = Vector2f(1.0f, 1.0f);
 		size = Vector2f(width, height);
@@ -192,12 +192,6 @@ protected:
 public:
 	/* The constructors */
 	GameObject3D(float width = 0, float height = 0, float depth = 0) : GameObject(NULL, NULL) {
-		rotation = 0;
-		scale = Vector3f(1.0f, 1.0f, 1.0f);
-		size = Vector3f(width, height, depth);
-	}
-
-	GameObject3D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject(mesh, shader) {
 		rotation = 0;
 		scale = Vector3f(1.0f, 1.0f, 1.0f);
 		size = Vector3f(width, height, depth);

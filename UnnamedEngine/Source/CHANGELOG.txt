@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 4 | Experimental 2
+
+* Added methods to pause/resume/stop all currently playing
+  audio in SoundSystem
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 4 | Experimental 1
 
 * Added GUISlider

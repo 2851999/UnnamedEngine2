@@ -225,6 +225,12 @@ bool AudioSource::isPlaying() {
 	return value == AL_PLAYING;
 }
 
+bool AudioSource::isPaused() {
+	int value = 0;
+	alGetSourcei(sourceHandle, AL_SOURCE_STATE, &value);
+	return value == AL_PAUSED;
+}
+
 /***************************************************************************************************
  * The AudioListener class
  ***************************************************************************************************/

@@ -36,7 +36,7 @@ namespace FileUtils {
 		std::string   line;
 		std::string   output;
 
-		input.open(path);
+		input.open(path.c_str());
 
 		if (input.is_open()) {
 			while (getline(input, line))
@@ -52,7 +52,7 @@ namespace FileUtils {
 		std::string              line;
 		std::vector<std::string> output;
 
-		input.open(path);
+		input.open(path.c_str());
 
 		if (input.is_open()) {
 			while (getline(input, line))
@@ -67,7 +67,7 @@ namespace FileUtils {
 	void writeFile(std::string path, std::string text) {
 		std::ofstream output;
 
-		output.open(path);
+		output.open(path.c_str());
 
 		if (output.is_open()) {
 			output << text;
@@ -79,7 +79,7 @@ namespace FileUtils {
 	void writeFile(std::string path, std::vector<std::string> text) {
 		std::ofstream output;
 
-		output.open(path);
+		output.open(path.c_str());
 
 		if (output.is_open()) {
 			for (unsigned int i = 0; i < text.size(); i++) {

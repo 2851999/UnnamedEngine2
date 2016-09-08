@@ -48,7 +48,7 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 		}
 	}
 
-	asteroidRenderer->update();
+	//asteroidRenderer->update();
 	//Hiding 0 seems to break with transparency glitch - fixed by discarding fragment
 	//asteroidRenderer->hideAsteroid(0);
 
@@ -64,6 +64,17 @@ AsteroidsMainGame::~AsteroidsMainGame() {
 }
 
 void AsteroidsMainGame::start() {
+	//Go through the asteroid groups
+	for (unsigned int i = 0; i < asteroidGroups.size(); i++)
+		//Setup the current group
+		asteroidGroups[i].setup();
+	//Ensure all of the asteroids can be seen
+	asteroidRenderer->showAll();
+	asteroidRenderer->update();
+
+	//Reset the player ship
+	player->reset();
+
 	//Hide the mouse
 	game->getWindow()->disableCursor();
 	//Setup the sound system

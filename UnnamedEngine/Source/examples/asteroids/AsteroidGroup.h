@@ -49,6 +49,9 @@ public:
 	/* The method called to generate asteroids in this group */
 	void generateAsteroids(unsigned int number, AsteroidsRenderer* renderer);
 
+	/* Method called to setup the asteroids */
+	void setup();
+
 	/* Method called to hide an asteroid in this group, given its index within
 	 * the objects */
 	inline void hideAsteroid(unsigned int index) { renderer->hideAsteroid(rendererStartIndex + index); }

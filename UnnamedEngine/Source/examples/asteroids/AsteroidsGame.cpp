@@ -126,19 +126,24 @@ void AsteroidsGame::changeState(GameState newState) {
 		if (currentState == MAIN_MENU)
 			//Hide the main menu
 			mainMenu->hide();
-		else if (currentState == GAME_PLAYING && newState != GAME_PAUSED)
+		else if (currentState == GAME_PLAYING && newState != GAME_PAUSED) {
 			mainGame->stop();
-		else if (currentState == GAME_PAUSED)
+			soundSystem->stopAll();
+		} else if (currentState == GAME_PAUSED)
 			pauseMenu->hide();
 
 		//Check the new state
 		if (newState == MAIN_MENU)
 			//Show the main menu
 			mainMenu->show();
-		else if (newState == GAME_PLAYING)
+		else if (newState == GAME_PLAYING && currentState != GAME_PAUSED)
 			mainGame->start();
-		else if (newState == GAME_PAUSED)
+		else if (newState == GAME_PLAYING && currentState == GAME_PAUSED)
+			soundSystem->resumeAll();
+		else if (newState == GAME_PAUSED) {
 			pauseMenu->show();
+			soundSystem->pauseAll();
+		}
 
 		//Assign the state
 		currentState = newState;
