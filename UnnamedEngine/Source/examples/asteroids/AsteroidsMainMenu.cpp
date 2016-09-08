@@ -156,7 +156,7 @@ MainMenuSettings::MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGrou
  * The MainMenuSettingsVideo class
  *****************************************************************************/
 
-MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup* panelGroup) {
+MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup* panelGroup) : game(game) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
@@ -179,7 +179,7 @@ MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup*
 	std::vector<Texture*> texturesButtons = game->getResources().getTexturesButtons();
 
 	//Setup the resolutions drop down list
-	GUIButton* dropDownListButton = new GUIButton(StrUtils::str(game->getSettings().videoResolution.getX()) + " x " + StrUtils::str(game->getSettings().videoResolution.getY()), 400, 30, texturesButtons);
+	GUIButton* dropDownListButton = new GUIButton(VideoResolution::toString(game->getSettings().videoResolution), 400, 30, texturesButtons);
 	dropDownListResolutions = new GUIDropDownList(dropDownListButton, game->getResourceLoader().loadTexture("DropDownOverlayClosed.png"), game->getResourceLoader().loadTexture("DropDownOverlayOpened.png"));
 	dropDownListResolutions->addButton(new GUIButton("800 x 600", 400, 30, texturesButtons));
 	dropDownListResolutions->addButton(new GUIButton("1280 x 720", 400, 30, texturesButtons));
@@ -215,6 +215,29 @@ MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup*
 	add(checkBoxVSync);
 	add(buttonApply);
 	add(buttonBack);
+}
+
+void MainMenuSettingsVideo::show() {
+	GUIPanel::show();
+
+	dropDownListResolutions->setSelection(VideoResolution::toString(game->getSettings().videoResolution));
+	checkBoxFullscreen->setChecked(game->getSettings().windowFullscreen);
+	checkBoxBorderless->setChecked(game->getSettings().windowBorderless);
+	checkBoxVSync->setChecked(game->getSettings().videoVSync);
+}
+
+void MainMenuSettingsVideo::onComponentClicked(GUIComponent* component) {
+	//Check which component was clicked
+	if (component == buttonApply) {
+		//Assign the resolution
+		game->getSettings().videoResolution = VideoResolution::toVector(dropDownListResolutions->getSelection());
+		game->getSettings().windowFullscreen = checkBoxFullscreen->isChecked();
+		game->getSettings().windowBorderless = checkBoxBorderless->isChecked();
+		game->getSettings().videoVSync = checkBoxVSync->isChecked();
+
+		//Save the new settings
+		SettingsUtils::writeToFile(game->getResourceLoader().getPath() + "settings/settings.txt", game->getSettings());
+	}
 }
 
 /*****************************************************************************

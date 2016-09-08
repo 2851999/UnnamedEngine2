@@ -53,6 +53,9 @@ public:
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override;
 
+	/* Assigns the selection (the text of the menu button) */
+	inline void setSelection(std::string text) { menuButton->setText(text); }
+
 	/* Returns the selection (the text of the menu button) */
 	inline std::string getSelection() { return menuButton->getText(); }
 };

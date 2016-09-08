@@ -94,6 +94,9 @@ Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bo
 	//Obtain the texture data
 	unsigned char* image = loadTexture(path, numComponents, w, h, format);
 
+	if (image == NULL)
+		return NULL;
+
 	//Create the Texture instance and set it up
 	Texture* texture = new Texture(parameters);
 	texture->setWidth(w);

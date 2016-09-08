@@ -1,8 +1,21 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 4 | Experimental 3
+
+* Added methods to save and load the Settings structure
+  to and from files
+  
+* Changed Texture::loadTexture() to return NULL instead of an
+  an empty Texture instance when an image can't be loaded
+  
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 4 | Experimental 2
 
 * Added methods to pause/resume/stop all currently playing
   audio in SoundSystem
+  
+* More asteroids development
 
 --------------------------------------------------------------
 Release 0 | Beta 0 | Development 4 | Experimental 1

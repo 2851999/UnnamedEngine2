@@ -40,6 +40,7 @@ AsteroidsGame::~AsteroidsGame() {
 
 void AsteroidsGame::initialise() {
 	//Setup the settings
+	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
 	getSettings().videoSamples = 16;
 	getSettings().videoMaxAnisotropicSamples = 16;
@@ -47,6 +48,7 @@ void AsteroidsGame::initialise() {
 	getSettings().videoMaxFPS = 0;
 	//getSettings().windowFullscreen = true;
 	//getSettings().videoResolution = VideoResolution::RES_1080P;
+	//SettingsUtils::writeToFile("H:/Storage/Users/Joel/Desktop/settingstest.txt", getSettings());
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 }

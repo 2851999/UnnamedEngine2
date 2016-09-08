@@ -34,6 +34,12 @@ namespace VideoResolution {
 	const Vector2i RES_720P       = RES_1280x720;
 	const Vector2i RES_1080P      = RES_1920x1080;
 	const Vector2i RES_4K         = RES_3840x2160;
+
+	/* Used to convert a Vector2i into a string representing a resolution */
+	std::string toString(Vector2i resolution);
+
+	/* Used to convert a string into a Vector2i representing a resolution */
+	Vector2i toVector(std::string);
 }
 
 /*****************************************************************************

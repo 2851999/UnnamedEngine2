@@ -94,6 +94,8 @@ public:
 
 class MainMenuSettingsVideo : public GUIPanel {
 private:
+	/* The game instance */
+	AsteroidsGame* game;
 	/* Various other GUIComponents */
 	GUIDropDownList* dropDownListResolutions;
 	GUICheckBox* checkBoxFullscreen;
@@ -108,6 +110,12 @@ public:
 
 	/* The destructor */
 	virtual ~MainMenuSettingsVideo() {}
+
+	/* Method used to show this GUIPanel */
+	virtual void show() override;
+
+	/* Called when a component is clicked */
+	virtual void onComponentClicked(GUIComponent* component) override;
 };
 
 /*****************************************************************************
