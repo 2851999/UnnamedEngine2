@@ -1,4 +1,17 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 4 | Experimental 4
+
+* Added way for GUIPanel to figure out whether a component
+  is occluded and prevent its state from being changed -
+  to do this enable() should be called on the panel
+
+* Fixed bug: GUIComponents placed right next to each other
+             could be selected at the same time
+* Fixed bug: GUIDropDownList didn't assign the closed overlay
+             texture when closed due to the mouse being
+             pressed outside of its bounds
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 4 | Experimental 3
 
 * Added methods to save and load the Settings structure

@@ -29,6 +29,10 @@ class GUIPanel : public GUIComponent, public GUIComponentListener {
 private:
 	/* The GUIComponents within this panel */
 	std::vector<GUIComponent*> components;
+
+	/* Method used to get the top most component that contains a certain
+	 * point */
+	GUIComponent* getTop(double x, double y);
 public:
 	/* The constructor */
 	GUIPanel() {}
@@ -55,6 +59,9 @@ public:
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override {}
+
+	/* Called when the mouse moves */
+	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
 };
 
 /*****************************************************************************

@@ -88,6 +88,44 @@ void GUIPanel::render(bool overrideShader) {
 	}
 }
 
+GUIComponent* GUIPanel::getTop(double x, double y) {
+	//The current top-most component
+	GUIComponent* top = NULL;
+
+	//Go through each component
+	for (unsigned int i = 0; i < components.size(); i++) {
+		//Check whether the current component contains the point
+		if (components[i]->contains(x, y))
+			//Assign the top-most component (As the components are
+			//rendered in descending order)
+			top = components[i];
+	}
+
+	//Return the component
+	return top;
+}
+
+void GUIPanel::onMouseMoved(double x, double y, double dx, double dy) {
+	//Ensure this panel is active
+	if (active) {
+		bool first = true;
+		//Go through each component
+		for (int i = components.size() - 1; i >= 0; i--) {
+			//Check whether the current component contains the cursor
+			if (components[i]->contains(x, y)) {
+				//Check whether this is the first one found
+				if (first) {
+					//Make sure it isn't occluded
+					components[i]->setOccluded(false);
+					first = false;
+				} else
+					components[i]->setOccluded(true);
+			} else
+				components[i]->setOccluded(false);
+		}
+	}
+}
+
 /*****************************************************************************
  * The GUIPanelGroup class
  *****************************************************************************/

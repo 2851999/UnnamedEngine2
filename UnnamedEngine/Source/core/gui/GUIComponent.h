@@ -174,6 +174,7 @@ protected:
 	/* Various states of this component */
 	bool active       = true;
 	bool visible      = true;
+	bool occluded     = false;
 	bool mouseHover   = false;
 	bool mouseClicked = false;
 
@@ -220,6 +221,9 @@ public:
 		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 	}
 
+	/* Method used to check whether a position is within the component */
+	bool contains(double x, double y);
+
 	/* Methods used to enable/disable this component (Adds/Removes the input listener instance */
 	virtual void enable();
 	virtual void disable();
@@ -249,12 +253,14 @@ public:
 	inline void setText(std::string text) { this->text = text;       }
 	inline void setActive(bool active)    { this->active = active;   }
 	inline void setVisible(bool visible)  { this->visible = visible; }
+	inline void setOccluded(bool occluded) { this->occluded = occluded; }
 	inline void setBorder(GUIBorder* border) { this->border = border; }
 
 	inline std::string getName() { return name;    }
 	inline std::string getText() { return text;    }
 	inline bool isActive()       { return active;  }
 	inline bool isVisible()      { return visible; }
+	inline bool isOccluded()     { return occluded; }
 	inline GUIBorder* getBorder() { return border; }
 	inline bool isMouseHovering() { return mouseHover; }
 	inline bool isClicked() { return mouseClicked; }

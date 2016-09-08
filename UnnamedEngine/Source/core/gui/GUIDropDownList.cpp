@@ -76,3 +76,18 @@ void GUIDropDownList::onComponentRender() {
 	if (overlay)
 		overlay->render();
 }
+
+void GUIDropDownList::onMousePressed(int button) {
+	GUIComponent::onMousePressed(button);
+
+	if (active && menuOpen) {
+		InputManager::CursorData& data = Window::getCurrentInstance()->getInputManager()->getCursorData();
+
+		if (! contains(data.lastX, data.lastY)) {
+			menuOpen = false;
+			if (overlayClosedTexture)
+				overlay->getMaterial()->setDiffuseTexture(overlayClosedTexture);
+			setupMenu();
+		}
+	}
+}

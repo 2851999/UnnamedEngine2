@@ -188,13 +188,17 @@ MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup*
 
 	//Setup the checkboxes
 	checkBoxFullscreen = new GUICheckBox("Fullscreen", 20, 20, texturesButtons);
-	checkBoxFullscreen->setPosition(dropDownListResolutions->getPosition().getX() + checkBoxFullscreen->getFont()->getWidth("Fullscreen") * 1.1f, 280.0f);
+	checkBoxFullscreen->setPosition(dropDownListResolutions->getPosition().getX() + checkBoxFullscreen->getFont()->getWidth("Fullscreen") * 1.1f, 180.0f);
 
 	checkBoxBorderless = new GUICheckBox("Borderless", 20, 20, texturesButtons);
-	checkBoxBorderless->setPosition(dropDownListResolutions->getPosition().getX() + dropDownListResolutions->getWidth() - checkBoxBorderless->getWidth(), 280.0f);
+	checkBoxBorderless->setPosition(dropDownListResolutions->getPosition().getX() + dropDownListResolutions->getWidth() - checkBoxBorderless->getWidth(), 180.0f);
 
 	checkBoxVSync = new GUICheckBox("VSync", 20, 20, texturesButtons);
-	checkBoxVSync->setPosition(dropDownListResolutions->getPosition().getX() + checkBoxFullscreen->getFont()->getWidth("Fullscreen") * 1.1f, 310.0f);
+	checkBoxVSync->setPosition(dropDownListResolutions->getPosition().getX() + checkBoxFullscreen->getFont()->getWidth("Fullscreen") * 1.1f, 210.0f);
+
+	//Setup the notice label
+	GUILabel* noticeLabel = new GUILabel("Note: Changes require restart", headingFont);
+	noticeLabel->setPosition(windowWidth / 2 - noticeLabel->getWidth() / 2, windowHeight - 90);
 
 	//Setup the buttons
 	buttonApply = new GUIButton("Apply", 195, 30, texturesButtons);
@@ -209,12 +213,15 @@ MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup*
 	//Add the components to this panel
 	add(titleLabel);
 	add(headerResolution);
-	add(dropDownListResolutions);
 	add(checkBoxFullscreen);
 	add(checkBoxBorderless);
 	add(checkBoxVSync);
+	add(dropDownListResolutions);
+	add(noticeLabel);
 	add(buttonApply);
 	add(buttonBack);
+
+	enable();
 }
 
 void MainMenuSettingsVideo::show() {

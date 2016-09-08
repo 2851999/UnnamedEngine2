@@ -136,6 +136,8 @@ void Test::created() {
 
 	panel->show();
 
+	panel->enable();
+
 	Renderer::addCamera(camera);
 }
 

@@ -153,7 +153,7 @@ void GUIDropDownMenu::onMousePressed(int button) {
 	if (active && menuOpen) {
 		InputManager::CursorData& data = Window::getCurrentInstance()->getInputManager()->getCursorData();
 
-		if (! getBounds().contains(data.lastX, data.lastY)) {
+		if (! contains(data.lastX, data.lastY)) {
 			menuOpen = false;
 			setupMenu();
 		}
