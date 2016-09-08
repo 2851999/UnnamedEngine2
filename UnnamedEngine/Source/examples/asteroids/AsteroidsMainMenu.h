@@ -23,6 +23,8 @@
 #include "../../core/render/Camera.h"
 #include "../../core/gui/Font.h"
 #include "../../core/gui/GUIPanel.h"
+#include "../../core/gui/GUIDropDownList.h"
+#include "../../core/gui/GUICheckBox.h"
 
 class AsteroidsGame;
 
@@ -42,7 +44,7 @@ private:
 	GUIButton* buttonExit;
 public:
 	/* The constructor */
-	MainMenuMain(AsteroidsGame* game, GUIPanelGroup* panelGroup, std::vector<Texture*> buttonTextures);
+	MainMenuMain(AsteroidsGame* game, GUIPanelGroup* panelGroup);
 
 	/* The destructor */
 	virtual ~MainMenuMain() {}
@@ -61,7 +63,7 @@ private:
 	GUIButton* buttonBack;
 public:
 	/* The constructor */
-	MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panelGroup, std::vector<Texture*> buttonTextures);
+	MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panelGroup);
 
 	/* The destructor */
 	virtual ~MainMenuHighScores() {}
@@ -80,10 +82,32 @@ private:
 	GUIButton* buttonBack;
 public:
 	/* The constructor */
-	MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGroup, std::vector<Texture*> buttonTextures);
+	MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGroup);
 
 	/* The destructor */
 	virtual ~MainMenuSettings() {}
+};
+
+/*****************************************************************************
+ * The MainMenuVideo class
+ *****************************************************************************/
+
+class MainMenuSettingsVideo : public GUIPanel {
+private:
+	/* Various other GUIComponents */
+	GUIDropDownList* dropDownListResolutions;
+	GUICheckBox* checkBoxFullscreen;
+	GUICheckBox* checkBoxBorderless;
+	GUICheckBox* checkBoxVSync;
+	/* The buttons on the menu */
+	GUIButton* buttonApply;
+	GUIButton* buttonBack;
+public:
+	/* The constructor */
+	MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup* panelGroup);
+
+	/* The destructor */
+	virtual ~MainMenuSettingsVideo() {}
 };
 
 /*****************************************************************************

@@ -178,6 +178,14 @@ protected:
 	/* The border of this component (Can be NULL) */
 	GUIBorder* border = NULL;
 
+	/* Method called to update this component (useful when no need to override
+	 * the default component update method */
+	virtual void onComponentUpdate() {}
+
+	/* Method called to render this component (useful when no need to override
+	 * the default component render method */
+	virtual void onComponentRender() {}
+
 	/* Method called when this component changes state */
 	virtual void onChangeState() {}
 
@@ -246,6 +254,7 @@ public:
 	inline bool isActive()       { return active;  }
 	inline bool isVisible()      { return visible; }
 	inline GUIBorder* getBorder() { return border; }
+	inline bool isMouseHovering() { return mouseHover; }
 	inline bool isClicked() { return mouseClicked; }
 };
 

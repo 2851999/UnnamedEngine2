@@ -16,44 +16,21 @@
  *
  *****************************************************************************/
 
-#include "GUICheckBox.h"
+#include "AsteroidsResources.h"
 
 /*****************************************************************************
- * The GUICheckBox class
+ * The AsteroidsResources class
  *****************************************************************************/
 
-void GUICheckBox::updateRenderIndex() {
-	unsigned int maxRenderIndex = getMaxRenderIndex();
-	if (checked) {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 1;
-		else if (maxRenderIndex == 3)
-			renderIndex = 2;
-	} else if (mouseHover) {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 1;
-		else if (maxRenderIndex == 3)
-			renderIndex = 1;
-	} else {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 0;
-		else if (maxRenderIndex == 3)
-			renderIndex = 0;
-	}
-}
+AsteroidsResources::AsteroidsResources() {}
 
-void GUICheckBox::onChangeState() {
-	if (mouseClicked)
-		checked = ! checked;
-	updateRenderIndex();
-}
+AsteroidsResources::~AsteroidsResources() {}
 
-void GUICheckBox::onComponentRender() {
-	renderText(text, Vector2f(-getFont()->getWidth(text) * 1.1f, getHeight() / 2 + getFont()->getHeight(text) / 2));
+void AsteroidsResources::setup(ResourceLoader& loader) {
+	//Create the resources
+	fontTitle = loader.loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
+	fontGUI = loader.loadFont("TT1240M_.TTF", 24.0f, Colour::WHITE);
+	fontHeading = loader.loadFont("TT1240M_.ttf", 24.0f, Colour::WHITE);
+
+	texturesButtons = { loader.loadTexture("Button.png"), loader.loadTexture("Button_Hover.png"), loader.loadTexture("Button_Clicked.png") };
 }

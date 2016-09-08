@@ -145,6 +145,9 @@ void GUIComponent::update() {
 
 		if (border)
 			border->update();
+
+		//Update this component
+		onComponentUpdate();
 	}
 }
 
@@ -153,7 +156,9 @@ void GUIComponent::render(bool overrideShader) {
 		if (border)
 			border->render();
 
+		//Render this component
 		GUIComponentRenderer::render();
+		onComponentRender();
 	}
 }
 

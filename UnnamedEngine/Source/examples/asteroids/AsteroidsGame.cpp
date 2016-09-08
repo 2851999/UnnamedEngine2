@@ -52,6 +52,9 @@ void AsteroidsGame::initialise() {
 }
 
 void AsteroidsGame::created() {
+	//Setup the resources
+	resources.setup(resourceLoader);
+
 	//Setup the sound system
 	soundSystem = new SoundSystem();
 

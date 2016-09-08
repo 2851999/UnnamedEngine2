@@ -31,6 +31,7 @@
 #include "core/gui/GUIDropDownList.h"
 #include "core/gui/GUIPanel.h"
 #include "core/gui/GUILabel.h"
+#include "core/gui/GUISlider.h"
 
 class Test : public BaseEngine {
 private:
@@ -42,6 +43,8 @@ private:
 	GUIDropDownMenu* dropDownMenu;
 	GUIDropDownList* dropDownList;
 	GUILabel* label;
+	GUISlider* verticalSlider;
+	GUISlider* horizontalSlider;
 public:
 	virtual ~Test() {}
 
@@ -81,7 +84,9 @@ void Test::created() {
 
 	panel = new GUIPanel();
 
-	button = new GUIButton("Hello World!", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE });
+	std::vector<Colour> colours = { Colour::RED, Colour::GREEN, Colour::BLUE };
+
+	button = new GUIButton("Hello World!", 200, 20, colours);
 	button->setPosition(400, 200);
 	button->setBorder(new GUIBorder(button, 1, Colour::ORANGE));
 
@@ -92,25 +97,33 @@ void Test::created() {
 	loadingBar->completedStage();
 	loadingBar->completedStage();
 
-	checkBox = new GUICheckBox("Check Box", 20, 20, { Colour::RED, Colour::GREEN, Colour::BLUE });
+	checkBox = new GUICheckBox("Check Box", 20, 20, colours);
 	checkBox->setPosition(400, 400);
 	checkBox->setBorder(new GUIBorder(checkBox, 2, Colour::ORANGE));
 
-	GUIButton* dropDownMenuButton = new GUIButton("File", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE });
+	GUIButton* dropDownMenuButton = new GUIButton("File", 200, 20, colours);
 	dropDownMenu = new GUIDropDownMenu(dropDownMenuButton);
-	dropDownMenu->addButton(new GUIButton("Save", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
-	dropDownMenu->addButton(new GUIButton("Save As", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
+	dropDownMenu->addButton(new GUIButton("Save", 200, 20, colours));
+	dropDownMenu->addButton(new GUIButton("Save As", 200, 20, colours));
 	dropDownMenu->setPosition(400, 20);
 
-	GUIButton* dropDownListButton = new GUIButton("Select", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE });
+	GUIButton* dropDownListButton = new GUIButton("Select", 200, 20, colours);
 	dropDownList = new GUIDropDownList(dropDownListButton, ResourceLoader::sLoadTexture("C:/UnnamedEngine/GUIDropDownOverlayClosed.png"), ResourceLoader::sLoadTexture("C:/UnnamedEngine/GUIDropDownOverlayOpened.png"));
-	dropDownList->addButton(new GUIButton("800 x 600", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
-	dropDownList->addButton(new GUIButton("1280 x 720", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
-	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, { Colour::RED, Colour::GREEN, Colour::BLUE }));
+	dropDownList->addButton(new GUIButton("800 x 600", 200, 20, colours));
+	dropDownList->addButton(new GUIButton("1280 x 720", 200, 20, colours));
+	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, colours));
 	dropDownList->setPosition(700, 20);
 
 	label = new GUILabel("Hello World!");
 	label->setPosition(600, 600);
+
+	GUIButton* verticalSliderButton = new GUIButton("", 26, 10, colours);
+	verticalSlider = new GUISlider(verticalSliderButton, GUISlider::VERTICAL, 4, 100, Colour::WHITE);
+	verticalSlider->setPosition(20, 400);
+
+	GUIButton* horizontalSliderButton = new GUIButton("", 10, 26, colours);
+	horizontalSlider = new GUISlider(horizontalSliderButton, GUISlider::HORIZONTAL, 100, 4, Colour::WHITE);
+	horizontalSlider->setPosition(100, 400);
 
 	panel->add(button);
 	panel->add(loadingBar);
@@ -118,6 +131,8 @@ void Test::created() {
 	panel->add(dropDownMenu);
 	panel->add(dropDownList);
 	panel->add(label);
+	panel->add(verticalSlider);
+	panel->add(horizontalSlider);
 
 	panel->show();
 

@@ -33,6 +33,12 @@ private:
 	/* The total number of stages and current number that are completed */
 	unsigned int totalStages;
 	unsigned int currentStage = 0;
+protected:
+	/* The method called to update this component */
+	virtual void onComponentUpdate() override;
+
+	/* The method called to render this component */
+	virtual void onComponentRender() override;
 public:
 	/* The constructors */
 	GUILoadingBar(float width, float height, unsigned int totalStages) :
@@ -65,12 +71,6 @@ public:
 
 	/* The destructor */
 	virtual ~GUILoadingBar() { delete fill; }
-
-	/* The method called to update this component */
-	virtual void update() override;
-
-	/* The method called to render this component */
-	virtual void render(bool overrideShader = false) override;
 
 	/* The method called to change the loading bar as a stage has been completed */
 	void completedStage();

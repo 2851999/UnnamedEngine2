@@ -63,16 +63,16 @@ void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 	}
 }
 
-void GUIDropDownList::update() {
-	GUIDropDownMenu::update();
+void GUIDropDownList::onComponentUpdate() {
+	GUIDropDownMenu::onComponentUpdate();
 
-	if (active)
+	if (overlay)
 		overlay->update();
 }
 
-void GUIDropDownList::render(bool overrideShader) {
-	GUIDropDownMenu::render(overrideShader);
+void GUIDropDownList::onComponentRender() {
+	GUIDropDownMenu::onComponentRender();
 
-	if (visible && overlay)
-		overlay->render(overrideShader);
+	if (overlay)
+		overlay->render();
 }

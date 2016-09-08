@@ -24,7 +24,7 @@
 class Resource;
 
 /*****************************************************************************
- * The ResourceManager class is used to manage the resources defined below
+ * The Resources class is used to manage the resources defined below
  *****************************************************************************/
 
 class ResourceManager {
