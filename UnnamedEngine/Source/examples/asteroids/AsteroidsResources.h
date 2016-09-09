@@ -36,6 +36,10 @@ private:
 
 	/* Various textures */
 	std::vector<Texture*> texturesButtons;
+
+	/* Various sounds */
+	AudioData* audioLaser = NULL;
+	AudioData* audioExplosion = NULL;
 public:
 	/* The constructor */
 	AsteroidsResources();
@@ -52,6 +56,9 @@ public:
 	inline Font* getFontHeading() const { return fontHeading; }
 
 	inline const std::vector<Texture*>& getTexturesButtons() const { return texturesButtons; }
+
+	inline AudioData* getAudioLaser() const { return audioLaser; }
+	inline AudioData* getAudioExplosion() const { return audioExplosion; }
 };
 
 #endif /* EXAMPLES_ASTEROIDS_ASTEROIDSRESOURCES_H_ */

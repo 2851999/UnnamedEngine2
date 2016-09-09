@@ -22,9 +22,14 @@
  * The Ship class
  *****************************************************************************/
 
-Ship::Ship(SoundSystem* soundSystem, const ResourceLoader& loader) : PhysicsObject3D(NULL) {
+Ship::Ship(AsteroidsGame* game) : PhysicsObject3D(NULL) {
 	//Setup the lasers
-	lasers = new Lasers(soundSystem, loader);
+	lasers = new Lasers(game, this);
+	//Set the default health
+	health = 1;
+	//Setup the movement speed
+	movementSpeed = 10.0f;
+	maximumSpeed = 15.0f;
 }
 
 Ship::~Ship() {
@@ -40,10 +45,16 @@ void Ship::reset() {
 	setAngularVelocity(0, 0, 0);
 	setAngularAcceleration(0, 0, 0);
 	lasers->reset();
+	health = 1;
 }
 
 void Ship::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	PhysicsObject3D::updatePhysics(deltaSeconds);
+	//Get the speed
+	float speed = getVelocity().length();
+	//Clamp the speed
+	if (speed > maximumSpeed)
+		getRelVelocity() *= (maximumSpeed / speed);
 	//Update the lasers
 	lasers->update(deltaSeconds, closestGroup);
 }
@@ -51,4 +62,12 @@ void Ship::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 void Ship::render() {
 	//Render the lasers
 	lasers->render();
+}
+
+void Ship::removeHealth(unsigned int amount) {
+	//Remove health if possible
+	if (health > amount)
+		health -= amount;
+	else
+		health = 0;
 }

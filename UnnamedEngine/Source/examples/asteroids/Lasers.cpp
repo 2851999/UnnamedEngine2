@@ -23,12 +23,24 @@
  * The Lasers class
  *****************************************************************************/
 
-Lasers::Lasers(SoundSystem* soundSystem, const ResourceLoader& loader) : soundSystem(soundSystem) {
+unsigned int Lasers::numInstances = 0;
+
+Lasers::Lasers(AsteroidsGame* game, Ship* ship) : soundSystem(game->getSoundSystem()), ship(ship) {
+	//Increment the instance number
+	numInstances ++;
+
+	//Assign the instance number
+	instanceNumber = numInstances;
+
+	//Add audio source's for this set of lasers
+	soundSystem->addSoundEffect("Laser" + StrUtils::str(instanceNumber), game->getResources().getAudioLaser());
+	soundSystem->addSoundEffect("Explosion" + StrUtils::str(instanceNumber), game->getResources().getAudioExplosion());
+
 	//Assign the maximum number of lasers
 	maxLasers = 20;
 
 	//Setup the lasers renderer
-	renderer = new LasersRenderer(loader, maxLasers);
+	renderer = new LasersRenderer(game->getResourceLoader(), maxLasers);
 
 	for (unsigned int i = 0; i < maxLasers; i++) {
 		GameObject3D* object = new GameObject3D();
@@ -52,7 +64,7 @@ Lasers::Lasers(SoundSystem* soundSystem, const ResourceLoader& loader) : soundSy
 	particleSystem = new ParticleSystem(particleEmitter, 500);
 	//particleSystem->acceleration = Vector3f(0.0f, 5.0f, 0.0f);
 	particleSystem->effect = new ParticleEffectColourChange(Colour::WHITE, Colour(0.3f, 0.3f, 0.3f, 0.8f));
-	particleSystem->textureAtlas = new TextureAtlas(loader.loadTexture("ParticleAtlas.png"), 8, 8, 64);
+	particleSystem->textureAtlas = new TextureAtlas(game->getResourceLoader().loadTexture("ParticleAtlas.png"), 8, 8, 64);
 
 	//Assign the laser cooldown time
 	cooldown = 0.5;
@@ -80,6 +92,9 @@ void Lasers::reset() {
 }
 
 void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
+	//Get the closest asteroids
+	std::vector<GameObject3D*>& closestAsteroids = closestGroup.getObjects();
+
 	//Go through each laser object and update its physics
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		//Ensure the laser is visible
@@ -87,52 +102,48 @@ void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 			//Subtract time from the laser's life
 			timesLeft[i] -= deltaSeconds;
 			//Check whether the laser should be hidden
-			if (timesLeft[i] <= 0) {
+			if (timesLeft[i] <= 0)
 				renderer->hideLaser(i);
-			} else
+			else
 				objects[i]->updatePhysics(deltaSeconds);
+
+			//States whether the laser has hit something
+			bool hitSomething = false;
+
+			//Check other objects before asteroids
+			hitSomething = ship->checkCollision(objects[i]);
+
+			//Check asteroids if the laser hasn't hit anything yet
+			if (! hitSomething) {
+
+				//Go through asteroids in the group
+				for (unsigned int j = 0; j < closestAsteroids.size(); j++) {
+					//Ensure the current asteroid is visible
+					if (closestGroup.isAsteroidVisible(j)) {
+						//Get the distance between the current laser object and the current asteroid object
+						float distance = (objects[i]->getPosition() - closestAsteroids[j]->getPosition()).length();
+
+						//Get the biggest scale component
+						float scale = closestAsteroids[j]->getScale().max();
+
+						//Check for an intersection with the asteroid
+						if (distance < 9.21f / 2.0f * scale) {
+							//Hide the laser and the asteroid
+							renderer->hideLaser(i);
+							closestGroup.hideAsteroid(j);
+							//Create an explosion
+							explode(closestAsteroids[j]->getPosition(), 2.0f * scale);
+						}
+					}
+				}
+			} else
+				//Hide the laser
+				renderer->hideLaser(i);
 		}
 	}
 
 	//Update the renderer
 	renderer->update();
-
-	//Get the closest asteroids
-	std::vector<GameObject3D*>& closestAsteroids = closestGroup.getObjects();
-	//Go through asteroids in the group
-	for (unsigned int i = 0; i < closestAsteroids.size(); i++) {
-		//Ensure the current asteroid is visible
-		if (closestGroup.isAsteroidVisible(i)) {
-			//Go through the laser objects
-			for (unsigned int j = 0; j < objects.size(); j++) {
-				//Ensure the current laser is also visible
-				if (renderer->isLaserVisible(j)) {
-					//Get the distance between the current laser object and the current asteroid object
-					float distance = (objects[j]->getPosition() - closestAsteroids[i]->getPosition()).length();
-
-					float scale = closestAsteroids[i]->getScale().getX();
-					if (closestAsteroids[i]->getScale().getY() > scale)
-						scale = closestAsteroids[i]->getScale().getY();
-					else if (closestAsteroids[i]->getScale().getZ() > scale)
-						scale = closestAsteroids[i]->getScale().getZ();
-
-					if (distance < 9.21f / 2.0f * scale) {
-						//Hide the laser and the asteroid
-						renderer->hideLaser(j);
-						closestGroup.hideAsteroid(i);
-						//Move the particle emitter
-						particleEmitter->setPosition(closestAsteroids[i]->getPosition());
-						//Activate the particle emitter
-						particleEmitter->emitParticles(100);
-						particleEmitter->particleMaxSpeed = 2.0f * scale;
-						//Play the explosion sound effect at the position of the asteroid
-						soundSystem->getSource("Explosion")->setParent(closestAsteroids[i]);
-						soundSystem->play("Explosion");
-					}
-				}
-			}
-		}
-	}
 
 	//Update the particle system
 	particleSystem->update(deltaSeconds, ((Camera3D*) Renderer::getCamera())->getPosition());
@@ -145,20 +156,32 @@ void Lasers::render() {
 	particleSystem->render();
 }
 
-void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front) {
+void Lasers::explode(Vector3f position, float maxSpeed) {
+	//Move the particle emitter
+	particleEmitter->setPosition(position);
+	//Activate the particle emitter
+	particleEmitter->emitParticles(100);
+	particleEmitter->particleMaxSpeed = maxSpeed;
+	//Play the explosion sound effect at the position of the asteroid
+	soundSystem->getSource("Explosion" + StrUtils::str(instanceNumber))->setPosition(position);
+	soundSystem->play("Explosion" + StrUtils::str(instanceNumber));
+}
+
+void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f currentVelocity) {
 	//Ensure the lasers can fire
 	if (canFire()) {
 		//Assign the new time the last laser was fired
 		timeLastLaserFired = TimeUtils::getSeconds();
 		//Assign the object's properties
 		objects[nextIndex]->setPosition(position);
-		objects[nextIndex]->setVelocity(front * 20.0f);
+		objects[nextIndex]->setVelocity(currentVelocity + (front * 20.0f));
 		objects[nextIndex]->setRotation(rotation * Vector3f(0.0f, -1.0f, 0.0f));
 		timesLeft[nextIndex] = 3.0f;
 
 		//Play the sound effect
-		soundSystem->getSource("Laser")->setParent(objects[nextIndex]);
-		soundSystem->play("Laser");
+		soundSystem->getSource("Laser" + StrUtils::str(instanceNumber))->setParent(objects[nextIndex]);
+		if (! soundSystem->getSource("Laser" + StrUtils::str(instanceNumber))->isPlaying())
+			soundSystem->play("Laser" + StrUtils::str(instanceNumber));
 
 		//Make the laser visible
 		renderer->showLaser(nextIndex);

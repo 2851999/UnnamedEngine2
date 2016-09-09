@@ -61,8 +61,6 @@ void AsteroidsGame::created() {
 	soundSystem = new SoundSystem();
 
 	//Load the sounds
-	soundSystem->addSoundEffect("Laser", resourceLoader.loadAudio("laser.wav"));
-	soundSystem->addSoundEffect("Explosion", resourceLoader.loadAudio("explosion.wav"));
 	soundSystem->createListener();
 
 	//Create the InputBindings instance

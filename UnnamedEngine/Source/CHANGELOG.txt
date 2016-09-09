@@ -1,4 +1,40 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 5 | Experimental 1
+
+* Added min() and max() to Vectors
+
+* More asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 5 (V0.0.5)
+
+* Added GUISlider
+* Added methods to pause/resume/stop all currently playing
+  audio in SoundSystem
+* Added methods to save and load the Settings structure
+  to and from files
+* Added way for GUIPanel to figure out whether a component
+  is occluded and prevent its state from being changed -
+  to do this enable() should be called on the panel
+  
+* Changed Texture::loadTexture() to return NULL instead of an
+  an empty Texture instance when an image can't be loaded
+
+* Fixed bug: GUILoadingBar still rendered it's fill even
+             when visible was set to false
+* Fixed bug: GUIDropDownList caused a crash when the overlay
+             wasn't assigned
+* Fixed bug: GUIComponents placed right next to each other
+             could be selected at the same time
+* Fixed bug: GUIDropDownList didn't assign the closed overlay
+             texture when closed due to the mouse being
+             pressed outside of its bounds
+* Fixed bug: The length() method in vectors didn't stop a
+             divide by 0
+             
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 4 | Experimental 5
 
 * Fixed bug: The length() method in vectors didn't stop a

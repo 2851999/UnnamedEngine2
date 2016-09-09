@@ -22,23 +22,39 @@
  * The Enemy class
  *****************************************************************************/
 
-Enemy::Enemy(AsteroidsGame* game, Player* player) : Ship(game->getSoundSystem(), game->getResourceLoader()), player(player) {
-
+Enemy::Enemy(AsteroidsGame* game, Player* player) : Ship(game), player(player) {
+	setMovementSpeed(RandomUtils::randomFloat(4.0f, 8.0f));
 }
 
 Enemy::~Enemy() {
 
 }
 
+void Enemy::reset() {
+	//Reset this ship
+	Ship::reset();
+
+	//Assign a random position
+	setPosition(RandomUtils::randomFloat(-10, 10), RandomUtils::randomFloat(-10, 10), RandomUtils::randomFloat(-10, 10));
+}
+
 void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	Ship::update(deltaSeconds, closestGroup);
 
-	//AI stuff
-	Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
+	if (isAlive()) {
+		//AI stuff
+		Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
 
-	setVelocity(directionToPlayer);
+		thrust(directionToPlayer);
 
-	fireLasers(directionToPlayer);
+		float laserSpeed = 20.0f;
+		float currentDistance = (player->getPosition() - getPosition()).length();
+		float timeToReach = currentDistance / laserSpeed;
 
-	//Since rotation is a bit hard without quaternions at the moment, enemies are SPHERES OF DEATH
+		Vector3f newPosition = player->getPosition() + ((player->getVelocity() - getVelocity()) * timeToReach);
+
+		fireLasers((newPosition - getPosition()).normalise());
+
+		//Since rotation is a bit hard without quaternions at the moment, enemies are SPHERES OF DEATH
+	}
 }

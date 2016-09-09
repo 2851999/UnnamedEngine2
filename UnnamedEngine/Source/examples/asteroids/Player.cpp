@@ -18,12 +18,13 @@
 
 #include "Player.h"
 #include "AsteroidsGame.h"
+#include "Enemy.h"
 
 /*****************************************************************************
  * The Player class
  *****************************************************************************/
 
-Player::Player(AsteroidsGame* game) : Ship(game->getSoundSystem(), game->getResourceLoader()), game(game) {
+Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), game(game), enemies(enemies) {
 	//Setup input
 	InputBindings* inputBindings = game->getInputBindings();
 	axisForward = inputBindings->getAxisBinding("Forward");
@@ -46,14 +47,12 @@ Player::~Player() {
 	delete camera;
 }
 
-void Player::update(AsteroidGroup& closestAsteroids) {
+void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 	//Get the current delta
-	currentDelta = game->getDeltaSeconds();
-	//Update the camera
-	setVelocity(camera->getFront() * (axisForward->getValue() * 10.0f));
+	currentDelta = deltaSeconds;
+	//Move the player
+	thrust(camera->getFront() * axisForward->getValue());
 	//getRelRotation().setZ(getRelRotation().getZ() + axisSideways->getValue() * 5.0f * currentDelta);
-
-	//std::cout << getRelRotation().toString() << std::endl;
 
 	camera->update();
 
@@ -72,6 +71,28 @@ void Player::render() {
 
 	//Render the lasers
 	Ship::render();
+}
+
+/* Method used to check whether a laser has collided with anything */
+bool Player::checkCollision(PhysicsObject3D* laser) {
+	//Go through the enemies
+	for (unsigned int i = 0; i < enemies.size(); i++) {
+		if (enemies[i]->isAlive()) {
+			//Get the distance between the current laser object and the current enemy object
+			float distance = (laser->getPosition() - enemies[i]->getPosition()).length();
+
+			//Check for an intersection with the asteroid
+			if (distance < 1.0f) {
+				//Remove health
+				enemies[i]->removeHealth(1);
+				if (! enemies[i]->isAlive())
+					//Create an explosion
+					getLasers()->explode(enemies[i]->getPosition(), 2.0f);
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void Player::onMouseMoved(double x, double y, double dx, double dy) {

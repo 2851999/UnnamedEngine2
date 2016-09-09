@@ -37,6 +37,9 @@ public:
 	/* The destructor */
 	virtual ~Enemy();
 
+	/* Method called to reset this ship/enemy */
+	void reset() override;
+
 	/* Method used to update this enemy */
 	void update(float deltaSeconds, AsteroidGroup& closestGroup) override;
 };
