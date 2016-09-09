@@ -54,6 +54,9 @@ public:
 	/* The destructor */
 	virtual ~Player();
 
+	/* Called to reset the player */
+	virtual void reset() override;
+
 	/* Method used to update the player and their lasers */
 	void update(float deltaSeconds, AsteroidGroup& closestAsteroids) override;
 

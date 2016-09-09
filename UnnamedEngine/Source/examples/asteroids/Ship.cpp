@@ -49,12 +49,15 @@ void Ship::reset() {
 }
 
 void Ship::update(float deltaSeconds, AsteroidGroup& closestGroup) {
-	PhysicsObject3D::updatePhysics(deltaSeconds);
-	//Get the speed
-	float speed = getVelocity().length();
-	//Clamp the speed
-	if (speed > maximumSpeed)
-		getRelVelocity() *= (maximumSpeed / speed);
+	//Ensure this ship is alive
+	if (isAlive()) {
+		PhysicsObject3D::updatePhysics(deltaSeconds);
+		//Get the speed
+		float speed = getVelocity().length();
+		//Clamp the speed
+		if (speed > maximumSpeed)
+			getRelVelocity() *= (maximumSpeed / speed);
+	}
 	//Update the lasers
 	lasers->update(deltaSeconds, closestGroup);
 }

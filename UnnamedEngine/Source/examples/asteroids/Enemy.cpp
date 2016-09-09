@@ -39,8 +39,6 @@ void Enemy::reset() {
 }
 
 void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {
-	Ship::update(deltaSeconds, closestGroup);
-
 	if (isAlive()) {
 		//AI stuff
 		Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
@@ -57,4 +55,27 @@ void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 
 		//Since rotation is a bit hard without quaternions at the moment, enemies are SPHERES OF DEATH
 	}
+
+	//Update the ship afterwards as the lasers renderer should be updated after firing
+	Ship::update(deltaSeconds, closestGroup);
+}
+
+/* Method used to check whether a laser has collided with anything */
+bool Enemy::checkCollision(PhysicsObject3D* laser) {
+	//Check the player
+	if (player->isAlive()) {
+		//Get the distance between the current laser object and the current enemy object
+		float distance = (laser->getPosition() - player->getPosition()).length();
+
+		//Check for an intersection with the asteroid
+		if (distance < 1.0f) {
+			//Remove health
+			player->removeHealth(1);
+			if (! player->isAlive())
+				//Create an explosion
+				getLasers()->explode(player->getPosition(), 2.0f);
+			return true;
+		}
+	}
+	return false;
 }

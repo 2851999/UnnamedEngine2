@@ -180,8 +180,7 @@ void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f
 
 		//Play the sound effect
 		soundSystem->getSource("Laser" + StrUtils::str(instanceNumber))->setParent(objects[nextIndex]);
-		if (! soundSystem->getSource("Laser" + StrUtils::str(instanceNumber))->isPlaying())
-			soundSystem->play("Laser" + StrUtils::str(instanceNumber));
+		soundSystem->play("Laser" + StrUtils::str(instanceNumber));
 
 		//Make the laser visible
 		renderer->showLaser(nextIndex);

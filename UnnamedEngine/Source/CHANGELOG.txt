@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 5 | Experimental 2
+
+* Added setCurrentStage() method in GUILoadingBar
+
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 5 | Experimental 1
 
 * Added min() and max() to Vectors

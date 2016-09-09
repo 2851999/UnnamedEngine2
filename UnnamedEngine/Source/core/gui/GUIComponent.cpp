@@ -68,11 +68,11 @@ unsigned int GUIComponentRenderer::getMaxRenderIndex() {
  *****************************************************************************/
 
 void GUIFill::updateWidth(float width) {
-	getRelScale().setX(width / (getWidth() / getScale().getX()));
+	getRelScale().setX(width / getRelWidth());
 }
 
 void GUIFill::updateHeight(float height) {
-	getRelScale().setY(height / (getHeight() / getScale().getY()));
+	getRelScale().setY(height / getRelHeight());
 }
 
 /*****************************************************************************

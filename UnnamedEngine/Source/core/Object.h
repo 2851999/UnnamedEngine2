@@ -163,8 +163,12 @@ public:
 		return size * getScale();
 	}
 
+	Vector2f& getRelSize() { return size; }
+
 	float getWidth() { return size.getX() * getScale().getX(); }
+	float getRelWidth() { return size.getX(); }
 	float getHeight() { return size.getY() * getScale().getY(); }
+	float getRelHeight() { return size.getY(); }
 
 	/* Returns the bounds of this object in the form of a Rectangle */
 	Rect getBounds() { return Rect(getPosition(), getSize()); }
@@ -250,9 +254,14 @@ public:
 		return size * getScale();
 	}
 
+	Vector3f& getRelSize() { return size; }
+
 	float getWidth() { return size.getX() * getScale().getX(); }
+	float getRelWidth() { return size.getX(); }
 	float getHeight() { return size.getY() * getScale().getY(); }
+	float getRelHeight() { return size.getY(); }
 	float getDepth() { return size.getZ() * getScale().getZ(); }
+	float getRelDepth() { return size.getZ(); }
 
 	void setParent(GameObject3D* parent) { this->parent = parent; }
 	bool hasParent() { return parent; }

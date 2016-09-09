@@ -40,6 +40,8 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 	camera->setParent(this);
 
 	game->getWindow()->getInputManager()->addListener(this);
+
+	setHealth(10);
 }
 
 Player::~Player() {
@@ -47,19 +49,26 @@ Player::~Player() {
 	delete camera;
 }
 
+void Player::reset() {
+	Ship::reset();
+
+	setHealth(10);
+}
+
 void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
-	//Get the current delta
-	currentDelta = deltaSeconds;
-	//Move the player
-	thrust(camera->getFront() * axisForward->getValue());
-	//getRelRotation().setZ(getRelRotation().getZ() + axisSideways->getValue() * 5.0f * currentDelta);
+	if (isAlive()) {
+		//Get the current delta
+		currentDelta = deltaSeconds;
+		//Move the player
+		thrust(camera->getFront() * axisForward->getValue());
 
-	camera->update();
+		camera->update();
 
-	//Check whether the player is shooting
-	if (buttonShoot->isPressed()) {
-		//FIRE THE LASERS!!!
-		fireLasers(camera->getFront());
+		//Check whether the player is shooting
+		if (buttonShoot->isPressed()) {
+			//FIRE THE LASERS!!!
+			fireLasers(camera->getFront());
+		}
 	}
 	//Update the lasers
 	Ship::update(currentDelta, closestAsteroids);
