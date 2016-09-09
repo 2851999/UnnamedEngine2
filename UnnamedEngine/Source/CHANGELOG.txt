@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 4 | Experimental 5
+
+* Fixed bug: The length() method in vectors didn't stop a
+             divide by 0
+
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 4 | Experimental 4
 
 * Added way for GUIPanel to figure out whether a component
@@ -10,6 +18,8 @@ Release 0 | Beta 0 | Development 4 | Experimental 4
 * Fixed bug: GUIDropDownList didn't assign the closed overlay
              texture when closed due to the mouse being
              pressed outside of its bounds
+             
+* More asteroids development
 
 --------------------------------------------------------------
 Release 0 | Beta 0 | Development 4 | Experimental 3

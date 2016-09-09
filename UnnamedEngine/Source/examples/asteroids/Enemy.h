@@ -16,36 +16,29 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_SHIP_H_
-#define EXAMPLES_ASTEROIDS_SHIP_H_
+#ifndef EXAMPLES_ASTEROIDS_ENEMY_H_
+#define EXAMPLES_ASTEROIDS_ENEMY_H_
 
-#include "Lasers.h"
+#include "Ship.h"
+#include "Player.h"
 
 /*****************************************************************************
- * The Ship class provides the basis for any ship
+ * The Enemy class handles enemy movement and shooting
  *****************************************************************************/
 
-class Ship : public PhysicsObject3D {
+class Enemy : public Ship {
 private:
-	/* The lasers for this ship */
-	Lasers* lasers;
+	/* The player instance to target */
+	Player* player;
 public:
 	/* The constructor */
-	Ship(SoundSystem* soundSystem, const ResourceLoader& loader);
+	Enemy(AsteroidsGame* game, Player* player);
 
 	/* The destructor */
-	virtual ~Ship();
+	virtual ~Enemy();
 
-	/* Method called to reset this ship */
-	void reset();
-
-	/* Update and render methods */
-	virtual void update(float deltaSeconds, AsteroidGroup& closestGroup);
-	void render();
-
-	/* Method called to fire this ship's lasers */
-	inline void fireLasers(Vector3f front) { lasers->fire(getPosition(), getRotation(), front); }
+	/* Method used to update this enemy */
+	void update(float deltaSeconds, AsteroidGroup& closestGroup) override;
 };
 
-
-#endif /* EXAMPLES_ASTEROIDS_SHIP_H_ */
+#endif /* EXAMPLES_ASTEROIDS_ENEMY_H_ */

@@ -135,8 +135,10 @@ public:
 	/* Returns the unit vector */
 	inline Vector<T, N> normalise() {
 		T length = this->length();
-		for (unsigned int i = 0; i < N; i++)
-			values[i] /= length;
+		if (length != 0) {
+			for (unsigned int i = 0; i < N; i++)
+				values[i] /= length;
+		}
 		return (*this);
 	}
 

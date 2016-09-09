@@ -35,7 +35,6 @@ private:
 
 	/* The list of audio sources currently playing */
 	std::vector<AudioSource*> playing;
-
 public:
 	/* The default constructor */
 	SoundSystem() {}

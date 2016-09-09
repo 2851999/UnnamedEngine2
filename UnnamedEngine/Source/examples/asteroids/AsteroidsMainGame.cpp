@@ -19,6 +19,7 @@
 #include "AsteroidsMainGame.h"
 #include "AsteroidsGame.h"
 #include "Player.h"
+#include "Enemy.h"
 
 /*****************************************************************************
  * The AsteroidsMainGame class
@@ -48,6 +49,17 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 		}
 	}
 
+	enemiesRenderer = new EnemiesRenderer(game->getResourceLoader(), 1);
+
+	//Go through the enemies
+	for (unsigned int i = 0; i < 1; i++) {
+		//Create an enemy instance
+		Enemy* enemy = new Enemy(game, player);
+		//Add the enemy
+		enemiesRenderer->addEnemy(enemy);
+		enemies.push_back(enemy);
+	}
+
 	//asteroidRenderer->update();
 	//Hiding 0 seems to break with transparency glitch - fixed by discarding fragment
 	//asteroidRenderer->hideAsteroid(0);
@@ -61,6 +73,10 @@ AsteroidsMainGame::~AsteroidsMainGame() {
 	//Delete created resources
 	delete player;
 	delete asteroidRenderer;
+	//Go through and delete the enemy objects
+	for (unsigned int i = 0; i < enemies.size(); i++)
+		delete enemies[i];
+	enemies.clear();
 }
 
 void AsteroidsMainGame::start() {
@@ -71,6 +87,10 @@ void AsteroidsMainGame::start() {
 	//Ensure all of the asteroids can be seen
 	asteroidRenderer->showAll();
 	asteroidRenderer->update();
+
+	//Setup the enemies
+	enemiesRenderer->showAll();
+	enemiesRenderer->update();
 
 	//Reset the player ship
 	player->reset();
@@ -92,7 +112,7 @@ void AsteroidsMainGame::stop() {
 	Renderer::removeCamera();
 }
 
-void AsteroidsMainGame::update() {
+AsteroidGroup& AsteroidsMainGame::findClosestAsteroids(Vector3f position) {
 	//The index of the closest asteroid group
 	unsigned int closestIndex = 0;
 	//The current smallest distance to an asteroid group
@@ -101,7 +121,7 @@ void AsteroidsMainGame::update() {
 	//Go though each group
 	for (unsigned int i = 0; i < asteroidGroups.size(); i++) {
 		//Calculate the distance to the current group
-		float current = (asteroidGroups[i].getPosition() - player->getCamera()->getPosition()).length();
+		float current = (asteroidGroups[i].getPosition() - position).length();
 
 		//Check whether the current distance is smaller than the current smallest distance
 		if (current < distance) {
@@ -110,9 +130,18 @@ void AsteroidsMainGame::update() {
 			closestIndex = i;
 		}
 	}
+	//Return the closest group
+	return asteroidGroups[closestIndex];
+}
 
+void AsteroidsMainGame::update() {
 	//Update the player
-	player->update(asteroidGroups[closestIndex]);
+	player->update(findClosestAsteroids(player->getCamera()->getPosition()));
+
+	//Update the enemies
+	for (unsigned int i = 0; i < enemies.size(); i++)
+		enemies[i]->update(game->getDeltaSeconds(), findClosestAsteroids(enemies[i]->getPosition()));
+	enemiesRenderer->update();
 }
 
 void AsteroidsMainGame::render() {
@@ -128,7 +157,13 @@ void AsteroidsMainGame::render() {
 	//Render the player
 	player->render();
 
+	//Render the asteroids
 	asteroidRenderer->render();
+
+	//Render the enemies
+	enemiesRenderer->render();
+	for (unsigned int i = 0; i < enemies.size(); i++)
+		enemies[i]->render();
 }
 
 void AsteroidsMainGame::onButtonReleased(InputBindingButton* button) {

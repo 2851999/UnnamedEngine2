@@ -169,7 +169,9 @@ public:
 	Vector3f getAcceleration() { return acceleration; }
 	Vector3f& getRelAcceleration() { return acceleration; }
 	Vector3f getAngularVelocity() { return angularVelocity; }
+	Vector3f& getRelAngularVelocity() { return angularVelocity; }
 	Vector3f getAngularAcceleration() { return angularAcceleration; }
+	Vector3f& getRelAngularAcceleration() { return angularAcceleration; }
 
 	inline Collider3D* getCollider() { return collider; }
 	inline bool hasCollider() { return collider; }

@@ -152,7 +152,11 @@ void Test::render() {
 	glEnable(GL_MULTISAMPLE_ARB);
 	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
 
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
 	scene->render();
+	glDisable(GL_CULL_FACE);
 }
 
 void Test::destroy() {

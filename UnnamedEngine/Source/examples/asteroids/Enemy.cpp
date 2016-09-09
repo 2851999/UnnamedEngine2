@@ -16,36 +16,29 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_SHIP_H_
-#define EXAMPLES_ASTEROIDS_SHIP_H_
-
-#include "Lasers.h"
+#include "Enemy.h"
 
 /*****************************************************************************
- * The Ship class provides the basis for any ship
+ * The Enemy class
  *****************************************************************************/
 
-class Ship : public PhysicsObject3D {
-private:
-	/* The lasers for this ship */
-	Lasers* lasers;
-public:
-	/* The constructor */
-	Ship(SoundSystem* soundSystem, const ResourceLoader& loader);
+Enemy::Enemy(AsteroidsGame* game, Player* player) : Ship(game->getSoundSystem(), game->getResourceLoader()), player(player) {
 
-	/* The destructor */
-	virtual ~Ship();
+}
 
-	/* Method called to reset this ship */
-	void reset();
+Enemy::~Enemy() {
 
-	/* Update and render methods */
-	virtual void update(float deltaSeconds, AsteroidGroup& closestGroup);
-	void render();
+}
 
-	/* Method called to fire this ship's lasers */
-	inline void fireLasers(Vector3f front) { lasers->fire(getPosition(), getRotation(), front); }
-};
+void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {
+	Ship::update(deltaSeconds, closestGroup);
 
+	//AI stuff
+	Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
 
-#endif /* EXAMPLES_ASTEROIDS_SHIP_H_ */
+	setVelocity(directionToPlayer);
+
+	fireLasers(directionToPlayer);
+
+	//Since rotation is a bit hard without quaternions at the moment, enemies are SPHERES OF DEATH
+}

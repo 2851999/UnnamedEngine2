@@ -16,28 +16,25 @@
  *
  *****************************************************************************/
 
-#include "AsteroidsRenderer.h"
+#include "EnemiesRenderer.h"
 #include "../../core/render/Renderer.h"
 
 /*****************************************************************************
- * The AsteroidsRenderer class
+ * The EnemiesRenderer class
  *****************************************************************************/
 
-AsteroidsRenderer::AsteroidsRenderer(const ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
+EnemiesRenderer::EnemiesRenderer(const ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
 	//Load the model mesh
-	mesh = loader.loadModel("asteroid_model.obj")[0];
+	mesh = loader.loadModel("enemyship.obj")[0];
 	MeshData* meshData = mesh->getData();
 	//Setup the shader
-	shader = loader.loadShader("AsteroidShader");
+	shader = loader.loadShader("EnemyShader");
 	//Setup the render data
 	renderData = new RenderData(GL_TRIANGLES, meshData->getNumIndices());
 
 	vboVerticesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, meshData->getOthers().size() * sizeof(meshData->getOthers()[0]), meshData->getOthers(), GL_STATIC_DRAW, true);
 	vboVerticesData->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2, 0);
 	vboVerticesData->addAttribute(shader->getAttributeLocation("Normal"), 3, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("Tangent"), 3, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("Bitangent"), 3, 0);
 	renderData->addVBO(vboVerticesData);
 
 	vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, meshData->getNumIndices() * sizeof(meshData->getIndices()[0]), meshData->getIndices(), GL_STATIC_DRAW);
@@ -84,7 +81,7 @@ AsteroidsRenderer::AsteroidsRenderer(const ResourceLoader& loader, unsigned int 
 	renderData->setNumInstances(numObjects);
 }
 
-AsteroidsRenderer::~AsteroidsRenderer() {
+EnemiesRenderer::~EnemiesRenderer() {
 	delete renderData;
 	delete vboVerticesData;
 	delete vboIndices;
@@ -97,12 +94,12 @@ AsteroidsRenderer::~AsteroidsRenderer() {
 	objects.clear();
 }
 
-void AsteroidsRenderer::hideAsteroid(unsigned int index) {
+void EnemiesRenderer::hideEnemy(unsigned int index) {
 	visibleData[index] = 0.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
-void AsteroidsRenderer::update() {
+void EnemiesRenderer::update() {
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		matricesData[i].initIdentity();
 		matricesData[i].translate(objects[i]->getPosition());
@@ -132,7 +129,7 @@ void AsteroidsRenderer::update() {
 	vboNormalMatricesData->updateStream(numObjects * 9 * sizeof(GLfloat));
 }
 
-void AsteroidsRenderer::render() {
+void EnemiesRenderer::render() {
 	//Use the shader
 	shader->use();
 	Renderer::saveTextures();
@@ -153,14 +150,14 @@ void AsteroidsRenderer::render() {
 	shader->stopUsing();
 }
 
-void AsteroidsRenderer::showAll() {
+void EnemiesRenderer::showAll() {
 	//Go through all of the visible data
 	for (unsigned int i = 0; i < visibleData.size(); i++)
 		visibleData[i] = 1.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
-void AsteroidsRenderer::hideAll() {
+void EnemiesRenderer::hideAll() {
 	//Go through all of the visible data
 	for (unsigned int i = 0; i < visibleData.size(); i++)
 		visibleData[i] = 0.0f;

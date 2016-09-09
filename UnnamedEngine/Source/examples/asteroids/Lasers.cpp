@@ -155,13 +155,16 @@ void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front) {
 		objects[nextIndex]->setVelocity(front * 20.0f);
 		objects[nextIndex]->setRotation(rotation * Vector3f(0.0f, -1.0f, 0.0f));
 		timesLeft[nextIndex] = 3.0f;
+
+		//Play the sound effect
+		soundSystem->getSource("Laser")->setParent(objects[nextIndex]);
+		soundSystem->play("Laser");
+
 		//Make the laser visible
 		renderer->showLaser(nextIndex);
 		//Increment the index, and then ensure it is within the bounds of the objects array
 		nextIndex++;
 		if (nextIndex >= objects.size())
 			nextIndex = 0;
-		//Play the sound effect
-		soundSystem->play("Laser");
 	}
 }
