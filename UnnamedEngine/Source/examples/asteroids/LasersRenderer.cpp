@@ -25,7 +25,7 @@
 
 LasersRenderer::LasersRenderer(const ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
 	//Load the model mesh
-	mesh = loader.loadModel("laser.obj")[0];
+	mesh = loader.loadModel("lasernew.obj")[0];
 	//mesh->getMaterial()->setDiffuseColour(Colour(mesh->getMaterial()->getDiffuseColour(), 0.5f));
 	MeshData* meshData = mesh->getData();
 	//Setup the shader
@@ -122,11 +122,25 @@ void LasersRenderer::render() {
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
 
 	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CW);
+	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
 	renderData->render();
 	glDisable(GL_CULL_FACE);
 
 	Renderer::releaseNewTextures();
 	shader->stopUsing();
+}
+
+void LasersRenderer::showAll() {
+	//Go through all of the visible data
+	for (unsigned int i = 0; i < visibleData.size(); i++)
+		visibleData[i] = 1.0f;
+	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
+}
+
+void LasersRenderer::hideAll() {
+	//Go through all of the visible data
+	for (unsigned int i = 0; i < visibleData.size(); i++)
+		visibleData[i] = 0.0f;
+	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }

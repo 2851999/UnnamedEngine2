@@ -36,6 +36,11 @@ namespace StrUtils {
 		return ss.str();
 	}
 
+	unsigned int strToUInt(const std::string& string);
+	int strToInt(const std::string& string);
+	float strToFloat(const std::string& string);
+	bool strToBool(const std::string& string);
+
 	inline bool strStartsWith(std::string value, std::string prefix) {
 		return value.length() >= prefix.length() && value.compare(0, prefix.length(), prefix) == 0;
 	}
@@ -52,6 +57,8 @@ namespace StrUtils {
 			split.push_back(item);
 		return split;
 	}
+
+	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter);
 };
 
 #include <cmath>
@@ -161,6 +168,19 @@ namespace RandomUtils {
 
 	/* Returns a random floating point number between 0 and 1 */
 	inline float randomFloat() { return ((float) rand()) / RAND_MAX; }
+}
+
+/*****************************************************************************
+ * Various settings utilities
+ *****************************************************************************/
+
+class Settings;
+
+namespace SettingsUtils {
+	/* Writes settings to a file */
+	void writeToFile(std::string path, Settings& settings);
+	/* Returns settings loaded from a file */
+	Settings readFromFile(std::string path);
 }
 
 #endif /* UTILS_UTILS_H_ */

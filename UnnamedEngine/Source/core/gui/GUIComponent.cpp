@@ -131,6 +131,17 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colou
  * The GUIComponent class
  *****************************************************************************/
 
+bool GUIComponent::contains(double x, double y) {
+	Vector2f position = getPosition();
+	Vector2f size = getSize();
+	float px = position.getX();
+	float py = position.getY();
+	float width = size.getX();
+	float height = size.getY();
+
+	return (x >= px && x < px + width && y >= py && y < py + height);
+}
+
 void GUIComponent::enable() {
 	Window::getCurrentInstance()->getInputManager()->addListener(this);
 }
@@ -145,6 +156,9 @@ void GUIComponent::update() {
 
 		if (border)
 			border->update();
+
+		//Update this component
+		onComponentUpdate();
 	}
 }
 
@@ -153,13 +167,15 @@ void GUIComponent::render(bool overrideShader) {
 		if (border)
 			border->render();
 
+		//Render this component
 		GUIComponentRenderer::render();
+		onComponentRender();
 	}
 }
 
 void GUIComponent::onMousePressed(int button) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
-		if (mouseClicked != (active && visible && mouseHover)) {
+		if (active && visible && ! occluded && mouseHover) {
 			mouseClicked = ! mouseClicked;
 			onChangeState();
 		}
@@ -169,24 +185,41 @@ void GUIComponent::onMousePressed(int button) {
 void GUIComponent::onMouseReleased(int button) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		if (active && visible && mouseClicked) {
-			mouseClicked = ! mouseClicked;
+			mouseClicked = false;
 			onChangeState();
-			callOnComponentClicked(this);
+			if (! occluded)
+				callOnComponentClicked(this);
 		}
 	}
 }
 
 void GUIComponent::onMouseMoved(double x, double y, double dx, double dy) {
-	if (mouseHover != (active && visible && getBounds().contains(x, y))) {
-		mouseHover = ! mouseHover;
-		onChangeState();
+	if (active && visible) {
+		if (contains(x, y)) {
+			if (! occluded) {
+				if (! mouseHover) {
+					mouseHover = true;
+					onChangeState();
+				}
+			} else {
+				if (mouseHover) {
+					mouseHover = false;
+					onChangeState();
+				}
+			}
+		} else {
+			if (mouseHover) {
+				mouseHover = false;
+				onChangeState();
+			}
+		}
 	}
 }
 
 void GUIComponent::onMouseEnter() {
 	if (active && visible) {
-		if (mouseHover != (getBounds().contains(Window::getCurrentInstance()->getInputManager()->getCursorData().lastX, Window::getCurrentInstance()->getInputManager()->getCursorData().lastY))) {
-			mouseHover = ! mouseHover;
+		if (! occluded && ! mouseHover && contains(Window::getCurrentInstance()->getInputManager()->getCursorData().lastX, Window::getCurrentInstance()->getInputManager()->getCursorData().lastY)) {
+			mouseHover = true;
 			onChangeState();
 		}
 	}

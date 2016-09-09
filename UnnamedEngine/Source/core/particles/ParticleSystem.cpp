@@ -95,6 +95,19 @@ ParticleSystem::~ParticleSystem() {
 	delete vboVertices;
 }
 
+void ParticleSystem::reset() {
+	//Go through all of the particles
+	for (unsigned int i = 0; i < particles.size(); i++) {
+		//Assign their life and camera distance
+		particles[i].life = -1;
+		particles[i].cameraDistance = -1;
+	}
+	//Sort the particles
+	std::sort(&particles.front(), &particles.back());
+	//Reset the emitter
+	emitter->reset();
+}
+
 void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 	//Update the particle emitter
 	emitter->update(this, delta);

@@ -42,13 +42,13 @@ public:
 	/* The destructor */
 	virtual ~GUICheckBox() {}
 
-	/* The method called to render this component */
-	virtual void render(bool overrideShader = false) override;
-
 	/* Setters and getters */
 	inline void setChecked(bool checked) { this->checked = checked; updateRenderIndex(); }
 	inline bool isChecked() { return checked; }
 protected:
+	/* The method called to render this component */
+	virtual void onComponentRender() override;
+
 	/* The method called when the component state has changed */
 	virtual void onChangeState() override;
 };

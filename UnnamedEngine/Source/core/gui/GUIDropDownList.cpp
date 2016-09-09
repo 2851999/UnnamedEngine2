@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 GUIDropDownList::GUIDropDownList(GUIButton* menuButton, Texture* overlayClosedTexture, Texture* overlayOpenedTexture) : GUIDropDownMenu(menuButton) {
-	overlay = new GameObject2D(new Mesh(MeshBuilder::createQuad(menuButton->getWidth(), menuButton->getHeight(), overlayClosedTexture)), Renderer::getRenderShader("Material"));
+	overlay = new GameObject2D({ new Mesh(MeshBuilder::createQuad(menuButton->getWidth(), menuButton->getHeight(), overlayClosedTexture)) }, Renderer::getRenderShader("Material"));
 	overlay->setParent(this);
 	overlay->setSize(menuButton->getSize());
 
@@ -63,16 +63,31 @@ void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 	}
 }
 
-void GUIDropDownList::update() {
-	GUIDropDownMenu::update();
+void GUIDropDownList::onComponentUpdate() {
+	GUIDropDownMenu::onComponentUpdate();
 
-	if (active)
+	if (overlay)
 		overlay->update();
 }
 
-void GUIDropDownList::render(bool overrideShader) {
-	GUIDropDownMenu::render(overrideShader);
+void GUIDropDownList::onComponentRender() {
+	GUIDropDownMenu::onComponentRender();
 
-	if (visible && overlay)
-		overlay->render(overrideShader);
+	if (overlay)
+		overlay->render();
+}
+
+void GUIDropDownList::onMousePressed(int button) {
+	GUIComponent::onMousePressed(button);
+
+	if (active && menuOpen) {
+		InputManager::CursorData& data = Window::getCurrentInstance()->getInputManager()->getCursorData();
+
+		if (! contains(data.lastX, data.lastY)) {
+			menuOpen = false;
+			if (overlayClosedTexture)
+				overlay->getMaterial()->setDiffuseTexture(overlayClosedTexture);
+			setupMenu();
+		}
+	}
 }

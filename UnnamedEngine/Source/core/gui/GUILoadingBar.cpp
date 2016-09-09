@@ -22,13 +22,11 @@
  * The GUILoadingBar class
  *****************************************************************************/
 
-void GUILoadingBar::update() {
-	GUIComponent::update();
+void GUILoadingBar::onComponentUpdate() {
 	fill->update();
 }
 
-void GUILoadingBar::render(bool overrideShader) {
-	GUIComponent::render();
+void GUILoadingBar::onComponentRender() {
 	fill->render();
 }
 

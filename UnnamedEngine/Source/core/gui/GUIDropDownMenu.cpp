@@ -112,31 +112,23 @@ void GUIDropDownMenu::disable() {
 		buttons[i]->disable();
 }
 
-void GUIDropDownMenu::update() {
-	GUIComponent::update();
+void GUIDropDownMenu::onComponentUpdate() {
+	//Update all of the buttons
+	menuButton->update();
 
-	if (active) {
-		//Update all of the buttons
-		menuButton->update();
-
-		if (menuOpen) {
-			for (unsigned int i = 0; i < buttons.size(); i++)
-				buttons[i]->update();
-		}
+	if (menuOpen) {
+		for (unsigned int i = 0; i < buttons.size(); i++)
+			buttons[i]->update();
 	}
 }
 
-void GUIDropDownMenu::render(bool overrideShader) {
-	GUIComponent::render(overrideShader);
+void GUIDropDownMenu::onComponentRender() {
+	//Render all of the buttons
+	menuButton->render();
 
-	if (visible) {
-		//Render all of the buttons
-		menuButton->render();
-
-		if (menuOpen) {
-			for (unsigned int i = 0; i < buttons.size(); i++)
-				buttons[i]->render();
-		}
+	if (menuOpen) {
+		for (unsigned int i = 0; i < buttons.size(); i++)
+			buttons[i]->render();
 	}
 }
 
@@ -161,7 +153,7 @@ void GUIDropDownMenu::onMousePressed(int button) {
 	if (active && menuOpen) {
 		InputManager::CursorData& data = Window::getCurrentInstance()->getInputManager()->getCursorData();
 
-		if (! getBounds().contains(data.lastX, data.lastY)) {
+		if (! contains(data.lastX, data.lastY)) {
 			menuOpen = false;
 			setupMenu();
 		}

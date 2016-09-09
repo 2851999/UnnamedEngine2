@@ -74,6 +74,12 @@ public:
 	void update();
 	/* Method called to render the lasers */
 	void render();
+
+	/* Method called to show all of the asteroids */
+	void showAll();
+
+	/* Method called to hide all of the asteroids */
+	void hideAll();
 };
 
 #endif /* EXAMPLES_ASTEROIDS_LASERSRENDERER_H_ */

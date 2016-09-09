@@ -19,6 +19,8 @@
 #ifndef CORE_GUI_GUICOMPONENT_H_
 #define CORE_GUI_GUICOMPONENT_H_
 
+#include <initializer_list>
+
 #include "../Object.h"
 #include "../render/Colour.h"
 #include "../render/Texture.h"
@@ -56,13 +58,13 @@ public:
 	/* The constructors */
 	GUIComponentRenderer() {}
 	GUIComponentRenderer(float width, float height) :
-		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)), Renderer::getRenderShader("Material"), width, height) { setup(); }
+		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)) }, Renderer::getRenderShader("Material"), width, height) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Colour> colours) :
-		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)), Renderer::getRenderShader("Material"), width, height), colours(colours) { setup(); }
+		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)) }, Renderer::getRenderShader("Material"), width, height), colours(colours) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Texture*> textures) :
-		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)), Renderer::getRenderShader("Material"), width, height), textures(textures) { setup(); }
+		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)) }, Renderer::getRenderShader("Material"), width, height), textures(textures) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Colour> colours, std::vector<Texture*> textures) :
-		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)), Renderer::getRenderShader("Material"), width, height), colours(colours), textures(textures) { setup(); }
+		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)) }, Renderer::getRenderShader("Material"), width, height), colours(colours), textures(textures) { setup(); }
 
 	/* Destructor */
 	virtual ~GUIComponentRenderer() {}
@@ -96,9 +98,9 @@ class GUIFill : public GUIComponentRenderer {
 public:
 	/* Various constructors */
 	GUIFill(float width, float height) : GUIComponentRenderer(width, height) {}
-	GUIFill(float width, float height, Colour colour) : GUIComponentRenderer(width, height, { colour }) {}
-	GUIFill(float width, float height, Texture* texture) : GUIComponentRenderer(width, height, { texture }) {}
-	GUIFill(float width, float height, Colour colour, Texture* texture) : GUIComponentRenderer(width, height, { colour }, { texture }) {}
+	GUIFill(float width, float height, Colour colour) : GUIComponentRenderer(width, height, std::vector<Colour> { colour }) {}
+	GUIFill(float width, float height, Texture* texture) : GUIComponentRenderer(width, height, std::vector<Texture*> { texture }) {}
+	GUIFill(float width, float height, Colour colour, Texture* texture) : GUIComponentRenderer(width, height, std::vector<Colour> { colour }, std::vector<Texture*> { texture }) {}
 	GUIFill(float width, float height, std::vector<Colour> colours) : GUIComponentRenderer(width, height, colours) {}
 	GUIFill(float width, float height, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, textures) {}
 	GUIFill(float width, float height, std::vector<Colour> colours, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, colours, textures) {}
@@ -172,11 +174,20 @@ protected:
 	/* Various states of this component */
 	bool active       = true;
 	bool visible      = true;
+	bool occluded     = false;
 	bool mouseHover   = false;
 	bool mouseClicked = false;
 
 	/* The border of this component (Can be NULL) */
 	GUIBorder* border = NULL;
+
+	/* Method called to update this component (useful when no need to override
+	 * the default component update method */
+	virtual void onComponentUpdate() {}
+
+	/* Method called to render this component (useful when no need to override
+	 * the default component render method */
+	virtual void onComponentRender() {}
 
 	/* Method called when this component changes state */
 	virtual void onChangeState() {}
@@ -210,6 +221,9 @@ public:
 		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 	}
 
+	/* Method used to check whether a position is within the component */
+	bool contains(double x, double y);
+
 	/* Methods used to enable/disable this component (Adds/Removes the input listener instance */
 	virtual void enable();
 	virtual void disable();
@@ -239,13 +253,16 @@ public:
 	inline void setText(std::string text) { this->text = text;       }
 	inline void setActive(bool active)    { this->active = active;   }
 	inline void setVisible(bool visible)  { this->visible = visible; }
+	inline void setOccluded(bool occluded) { this->occluded = occluded; }
 	inline void setBorder(GUIBorder* border) { this->border = border; }
 
 	inline std::string getName() { return name;    }
 	inline std::string getText() { return text;    }
 	inline bool isActive()       { return active;  }
 	inline bool isVisible()      { return visible; }
+	inline bool isOccluded()     { return occluded; }
 	inline GUIBorder* getBorder() { return border; }
+	inline bool isMouseHovering() { return mouseHover; }
 	inline bool isClicked() { return mouseClicked; }
 };
 

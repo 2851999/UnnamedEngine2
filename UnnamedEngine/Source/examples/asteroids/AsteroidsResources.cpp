@@ -16,38 +16,21 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_MAINGAME_H_
-#define EXAMPLES_ASTEROIDS_MAINGAME_H_
+#include "AsteroidsResources.h"
 
-#include "../../core/physics/PhysicsScene.h"
-#include "../../core/render/RenderScene.h"
+/*****************************************************************************
+ * The AsteroidsResources class
+ *****************************************************************************/
 
-class Camera3D;
+AsteroidsResources::AsteroidsResources() {}
 
-class MainGame : public InputListener {
-private:
-	Asteroids* asteroids;
-	Camera3D*  camera3D;
+AsteroidsResources::~AsteroidsResources() {}
 
-	RenderScene3D* scene;
-	PhysicsObject3D* player;
-	PhysicsScene3D* physicsScene;
-public:
-	/* The constructor */
-	MainGame(Asteroids* asteroids, float windowWidth, float windowHeight);
+void AsteroidsResources::setup(ResourceLoader& loader) {
+	//Create the resources
+	fontTitle = loader.loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
+	fontGUI = loader.loadFont("TT1240M_.TTF", 24.0f, Colour::WHITE);
+	fontHeading = loader.loadFont("TT1240M_.ttf", 24.0f, Colour::WHITE);
 
-	/* The destructor */
-	virtual ~MainGame();
-
-	void startGame();
-
-	/* Update and render methods */
-	void update();
-	void render();
-
-	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
-};
-
-
-
-#endif /* EXAMPLES_ASTEROIDS_MAINGAME_H_ */
+	texturesButtons = { loader.loadTexture("Button.png"), loader.loadTexture("Button_Hover.png"), loader.loadTexture("Button_Clicked.png") };
+}

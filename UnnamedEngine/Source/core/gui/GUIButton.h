@@ -35,10 +35,10 @@ public:
 
 	/* The destructor */
 	virtual ~GUIButton() {}
-
-	/* The method called to render this component */
-	virtual void render(bool overrideShader = false) override;
 protected:
+	/* The method called to render this component */
+	virtual void onComponentRender() override;
+
 	/* The method called when the component state has changed */
 	virtual void onChangeState() override;
 };

@@ -16,35 +16,19 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_MAINMENU_H_
-#define EXAMPLES_ASTEROIDS_MAINMENU_H_
+#include "Settings.h"
 
-#include "../../core/gui/GUIButton.h"
+namespace VideoResolution {
+	/* Used to convert a Vector2i into a string representing a resolution */
+	std::string toString(Vector2i resolution) {
+		return StrUtils::str(StrUtils::str(resolution.getX()) + " x " + StrUtils::str(resolution.getY()));
+	}
 
-class Asteroids;
+	/* Used to convert a string into a Vector2i representing a resolution */
+	Vector2i toVector(std::string resolution) {
+		std::vector<std::string> split = StrUtils::strSplit(resolution, " x ");
+		return Vector2i(StrUtils::strToInt(split[0]), StrUtils::strToInt(split[1]));
+	}
+}
 
-class MainMenu {
-private:
-	/* The font used for the title */
-	Font* font;
 
-	/* The play button */
-	GUIButton* buttonPlay;
-
-	/* The background */
-	GameObject2D* background;
-public:
-	/* The constructor */
-	MainMenu(float windowWidth, float windowHeight);
-
-	/* The destructor */
-	virtual ~MainMenu();
-
-	/* The update and render methods */
-	void update(Asteroids* asteroids);
-	void render();
-
-	bool shouldStartGame();
-};
-
-#endif /* EXAMPLES_ASTEROIDS_MAINMENU_H_ */

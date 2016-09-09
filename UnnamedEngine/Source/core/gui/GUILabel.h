@@ -27,15 +27,15 @@
  *****************************************************************************/
 
 class GUILabel : public GUIComponent {
+protected:
+	/* The method called to render this component */
+	virtual void onComponentRender() override;
 public:
 	/* The constructors */
 	GUILabel(std::string text, Font* font = NULL);
 
 	/* The destructor */
 	virtual ~GUILabel() {}
-
-	/* The method called to render this component */
-	virtual void render(bool overrideShader = false) override;
 };
 
 #endif /* CORE_GUI_GUILABEL_H_ */

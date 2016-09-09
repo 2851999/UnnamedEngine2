@@ -24,7 +24,7 @@
  *****************************************************************************/
 
 SkyBox::SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom, float size) {
-	box = new GameObject3D(new Mesh(MeshBuilder::createCube(size, size, size)), Renderer::getRenderShader("SkyBox"));
+	box = new GameObject3D({ new Mesh(MeshBuilder::createCube(size, size, size)) }, Renderer::getRenderShader("SkyBox"));
 	cubemap = new Cubemap(path, { right, left, top, bottom, back, front });
 	box->getMaterial()->setDiffuseTexture(cubemap);
 }

@@ -25,31 +25,35 @@
  * The MainMenuMain class
  *****************************************************************************/
 
-MainMenuMain::MainMenuMain(AsteroidsGame* game, GUIPanelGroup* panelGroup, std::vector<Texture*> buttonTextures) : game(game) {
+MainMenuMain::MainMenuMain(AsteroidsGame* game, GUIPanelGroup* panelGroup) : game(game) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	buttonPlay = new GUIButton("Play", 400, 30, buttonTextures);
+	//Get the button textures
+	std::vector<Texture*> texturesButtons = game->getResources().getTexturesButtons();
+
+	//Create the buttons
+	buttonPlay = new GUIButton("Play", 400, 30, texturesButtons);
 	buttonPlay->setPosition(windowWidth / 2 - buttonPlay->getWidth() / 2, 140);
 	buttonPlay->addListener(this);
 
-	buttonHighscores = new GUIButton("Highscores", 400, 30, buttonTextures);
+	buttonHighscores = new GUIButton("Highscores", 400, 30, texturesButtons);
 	buttonHighscores->setPosition(windowWidth / 2 - buttonHighscores->getWidth() / 2, 180);
 	buttonHighscores->addListener(this);
 	panelGroup->assignButton(buttonHighscores, "Highscores");
 
-	buttonSettings = new GUIButton("Settings", 400, 30, buttonTextures);
+	buttonSettings = new GUIButton("Settings", 400, 30, texturesButtons);
 	buttonSettings->setPosition(windowWidth / 2 - buttonSettings->getWidth() / 2, 220);
 	buttonSettings->addListener(this);
 	panelGroup->assignButton(buttonSettings, "Settings");
 
-	buttonExit = new GUIButton("Exit", 400, 30, buttonTextures);
+	buttonExit = new GUIButton("Exit", 400, 30, texturesButtons);
 	buttonExit->setPosition(windowWidth / 2 - buttonExit->getWidth() / 2, windowHeight - 50);
 	buttonExit->addListener(this);
 
-	//Setup the title font
-	Font* titleFont = game->getResourceLoader().loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
+	//Get the title font
+	Font* titleFont = game->getResources().getFontTitle();
 
 	//Create the title label
 	GUILabel* titleLabel = new GUILabel("Asteroids", titleFont);
@@ -77,18 +81,21 @@ void MainMenuMain::onComponentClicked(GUIComponent* component) {
  * The MainMenuHighScores class
  *****************************************************************************/
 
-MainMenuHighScores::MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panelGroup, std::vector<Texture*> buttonTextures) {
+MainMenuHighScores::MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panelGroup) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	buttonBack = new GUIButton("Back", 400, 30, buttonTextures);
+	//Get the button textures
+	std::vector<Texture*> texturesButtons = game->getResources().getTexturesButtons();
+
+	buttonBack = new GUIButton("Back", 400, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 - buttonBack->getWidth() / 2, windowHeight - 50);
 	buttonBack->addListener(this);
 	panelGroup->assignButton(buttonBack, "Main");
 
-	//Setup the title font
-	Font* titleFont = game->getResourceLoader().loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
+	//Get the title font
+	Font* titleFont = game->getResources().getFontTitle();
 
 	//Create the title label
 	GUILabel* titleLabel = new GUILabel("Highscores", titleFont);
@@ -103,30 +110,35 @@ MainMenuHighScores::MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panel
  * The MainMenuSettings class
  *****************************************************************************/
 
-MainMenuSettings::MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGroup, std::vector<Texture*> buttonTextures) {
+MainMenuSettings::MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGroup) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	buttonVideo = new GUIButton("Video", 400, 30, buttonTextures);
+	//Get the button textures
+	std::vector<Texture*> texturesButtons = game->getResources().getTexturesButtons();
+
+	//Create the buttons
+	buttonVideo = new GUIButton("Video", 400, 30, texturesButtons);
 	buttonVideo->setPosition(windowWidth / 2 - buttonVideo->getWidth() / 2, 140);
 	buttonVideo->addListener(this);
+	panelGroup->assignButton(buttonVideo, "SettingsVideo");
 
-	buttonAudio = new GUIButton("Audio", 400, 30, buttonTextures);
+	buttonAudio = new GUIButton("Audio", 400, 30, texturesButtons);
 	buttonAudio->setPosition(windowWidth / 2 - buttonAudio->getWidth() / 2, 180);
 	buttonAudio->addListener(this);
 
-	buttonControls = new GUIButton("Controls", 400, 30, buttonTextures);
+	buttonControls = new GUIButton("Controls", 400, 30, texturesButtons);
 	buttonControls->setPosition(windowWidth / 2 - buttonControls->getWidth() / 2, 220);
 	buttonControls->addListener(this);
 
-	buttonBack = new GUIButton("Back", 400, 30, buttonTextures);
+	buttonBack = new GUIButton("Back", 400, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 - buttonBack->getWidth() / 2, windowHeight - 50);
 	buttonBack->addListener(this);
 	panelGroup->assignButton(buttonBack, "Main");
 
-	//Setup the title font
-	Font* titleFont = game->getResourceLoader().loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
+	//Get the title font
+	Font* titleFont = game->getResources().getFontTitle();
 
 	//Create the title label
 	GUILabel* titleLabel = new GUILabel("Settings", titleFont);
@@ -138,6 +150,101 @@ MainMenuSettings::MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGrou
 	add(buttonAudio);
 	add(buttonControls);
 	add(buttonBack);
+}
+
+/*****************************************************************************
+ * The MainMenuSettingsVideo class
+ *****************************************************************************/
+
+MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup* panelGroup) : game(game) {
+	//The window width/height
+	float windowWidth = game->getSettings().windowWidth;
+	float windowHeight = game->getSettings().windowHeight;
+
+	//Get the title font
+	Font* titleFont = game->getResources().getFontTitle();
+
+	//Create the title label
+	GUILabel* titleLabel = new GUILabel("Video", titleFont);
+	titleLabel->setPosition(windowWidth / 2 - titleFont->getWidth("Video") / 2, 40.0f);
+
+	//Get the heading font
+	Font* headingFont = game->getResources().getFontHeading();
+
+	//Setup the resolution header
+	GUILabel* headerResolution = new GUILabel("Resolution", headingFont);
+	headerResolution->setPosition(windowWidth / 2 - headerResolution->getWidth() / 2, 110.0f);
+
+	//Get the button textures
+	std::vector<Texture*> texturesButtons = game->getResources().getTexturesButtons();
+
+	//Setup the resolutions drop down list
+	GUIButton* dropDownListButton = new GUIButton(VideoResolution::toString(game->getSettings().videoResolution), 400, 30, texturesButtons);
+	dropDownListResolutions = new GUIDropDownList(dropDownListButton, game->getResourceLoader().loadTexture("DropDownOverlayClosed.png"), game->getResourceLoader().loadTexture("DropDownOverlayOpened.png"));
+	dropDownListResolutions->addButton(new GUIButton("800 x 600", 400, 30, texturesButtons));
+	dropDownListResolutions->addButton(new GUIButton("1280 x 720", 400, 30, texturesButtons));
+	dropDownListResolutions->addButton(new GUIButton("1920 x 1080", 400, 30, texturesButtons));
+	dropDownListResolutions->setPosition(windowWidth / 2 - dropDownListResolutions->getWidth() / 2, 140.0f);
+
+	//Setup the checkboxes
+	checkBoxFullscreen = new GUICheckBox("Fullscreen", 20, 20, texturesButtons);
+	checkBoxFullscreen->setPosition(dropDownListResolutions->getPosition().getX() + checkBoxFullscreen->getFont()->getWidth("Fullscreen") * 1.1f, 180.0f);
+
+	checkBoxBorderless = new GUICheckBox("Borderless", 20, 20, texturesButtons);
+	checkBoxBorderless->setPosition(dropDownListResolutions->getPosition().getX() + dropDownListResolutions->getWidth() - checkBoxBorderless->getWidth(), 180.0f);
+
+	checkBoxVSync = new GUICheckBox("VSync", 20, 20, texturesButtons);
+	checkBoxVSync->setPosition(dropDownListResolutions->getPosition().getX() + checkBoxFullscreen->getFont()->getWidth("Fullscreen") * 1.1f, 210.0f);
+
+	//Setup the notice label
+	GUILabel* noticeLabel = new GUILabel("Note: Changes require restart", headingFont);
+	noticeLabel->setPosition(windowWidth / 2 - noticeLabel->getWidth() / 2, windowHeight - 90);
+
+	//Setup the buttons
+	buttonApply = new GUIButton("Apply", 195, 30, texturesButtons);
+	buttonApply->setPosition(windowWidth / 2 - 200, windowHeight - 50);
+	buttonApply->addListener(this);
+
+	buttonBack = new GUIButton("Back", 195, 30, texturesButtons);
+	buttonBack->setPosition(windowWidth / 2 + 5, windowHeight - 50);
+	buttonBack->addListener(this);
+	panelGroup->assignButton(buttonBack, "Settings");
+
+	//Add the components to this panel
+	add(titleLabel);
+	add(headerResolution);
+	add(checkBoxFullscreen);
+	add(checkBoxBorderless);
+	add(checkBoxVSync);
+	add(dropDownListResolutions);
+	add(noticeLabel);
+	add(buttonApply);
+	add(buttonBack);
+
+	enable();
+}
+
+void MainMenuSettingsVideo::show() {
+	GUIPanel::show();
+
+	dropDownListResolutions->setSelection(VideoResolution::toString(game->getSettings().videoResolution));
+	checkBoxFullscreen->setChecked(game->getSettings().windowFullscreen);
+	checkBoxBorderless->setChecked(game->getSettings().windowBorderless);
+	checkBoxVSync->setChecked(game->getSettings().videoVSync);
+}
+
+void MainMenuSettingsVideo::onComponentClicked(GUIComponent* component) {
+	//Check which component was clicked
+	if (component == buttonApply) {
+		//Assign the resolution
+		game->getSettings().videoResolution = VideoResolution::toVector(dropDownListResolutions->getSelection());
+		game->getSettings().windowFullscreen = checkBoxFullscreen->isChecked();
+		game->getSettings().windowBorderless = checkBoxBorderless->isChecked();
+		game->getSettings().videoVSync = checkBoxVSync->isChecked();
+
+		//Save the new settings
+		SettingsUtils::writeToFile(game->getResourceLoader().getPath() + "settings/settings.txt", game->getSettings());
+	}
 }
 
 /*****************************************************************************
@@ -154,23 +261,20 @@ AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) {
 	camera->update();
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
-	background = new GameObject2D(new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)), Renderer::getRenderShader("Material"));
+	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, Renderer::getRenderShader("Material"));
 	background->getMaterial()->setDiffuseTexture(backgroundTexture);
 	background->update();
 
 	//Setup the buttons
-	GUIComponentRenderer::DEFAULT_FONT = game->getResourceLoader().loadFont("TT1240M_.TTF", 24, Colour::WHITE);
-
-	Texture* normal = game->getResourceLoader().loadTexture("Button.png");
-	Texture* hover = game->getResourceLoader().loadTexture("Button_Hover.png");
-	Texture* clicked = game->getResourceLoader().loadTexture("Button_Clicked.png");
+	GUIComponentRenderer::DEFAULT_FONT = game->getResources().getFontGUI();
 
 	//Setup the GUIPanelGroup instance
 	panelGroup = new GUIPanelGroup();
 	//Add the panels to the panel group
-	panelGroup->add("Main", new MainMenuMain(game, panelGroup, { normal, hover, clicked }));
-	panelGroup->add("Highscores", new MainMenuHighScores(game, panelGroup, { normal, hover, clicked }));
-	panelGroup->add("Settings", new MainMenuSettings(game, panelGroup, { normal, hover, clicked }));
+	panelGroup->add("Main", new MainMenuMain(game, panelGroup));
+	panelGroup->add("Highscores", new MainMenuHighScores(game, panelGroup));
+	panelGroup->add("Settings", new MainMenuSettings(game, panelGroup));
+	panelGroup->add("SettingsVideo", new MainMenuSettingsVideo(game, panelGroup));
 }
 
 AsteroidsMainMenu::~AsteroidsMainMenu() {

@@ -28,8 +28,6 @@ GUILabel::GUILabel(std::string text, Font* font) : GUIComponent() {
 	setSize(getFont()->getWidth(text), getFont()->getHeight(text));
 }
 
-void GUILabel::render(bool overrideShader) {
-	GUIComponent::render();
-	if (visible)
-		renderTextAtCentre(text);
+void GUILabel::onComponentRender() {
+	renderTextAtCentre(text);
 }

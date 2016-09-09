@@ -16,38 +16,29 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDS_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDS_H_
+#include "Enemy.h"
 
-#include "../../core/BaseEngine.h"
+/*****************************************************************************
+ * The Enemy class
+ *****************************************************************************/
 
-#include "MainMenu.h"
-#include "MainGame.h"
+Enemy::Enemy(AsteroidsGame* game, Player* player) : Ship(game->getSoundSystem(), game->getResourceLoader()), player(player) {
 
-class Asteroids : public BaseEngine {
-private:
-	MainMenu* mainMenu = NULL;
-	MainGame* mainGame = NULL;
+}
 
-	Camera2D* camera2D = NULL;
-public:
-	enum GameState {
-		MAIN_MENU,
-		PLAYING
-	};
+Enemy::~Enemy() {
 
-	Asteroids() { currentState = MAIN_MENU; }
-	virtual ~Asteroids();
+}
 
-	virtual void initialise() override;
-	virtual void created() override;
-	virtual void update() override;
-	virtual void render() override;
-	virtual void destroy() override;
+void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {
+	Ship::update(deltaSeconds, closestGroup);
 
-	void startGame();
-private:
-	GameState currentState;
-};
+	//AI stuff
+	Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDS_H_ */
+	setVelocity(directionToPlayer);
+
+	fireLasers(directionToPlayer);
+
+	//Since rotation is a bit hard without quaternions at the moment, enemies are SPHERES OF DEATH
+}

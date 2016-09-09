@@ -40,6 +40,7 @@ AsteroidsGame::~AsteroidsGame() {
 
 void AsteroidsGame::initialise() {
 	//Setup the settings
+	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
 	getSettings().videoSamples = 16;
 	getSettings().videoMaxAnisotropicSamples = 16;
@@ -47,11 +48,15 @@ void AsteroidsGame::initialise() {
 	getSettings().videoMaxFPS = 0;
 	//getSettings().windowFullscreen = true;
 	//getSettings().videoResolution = VideoResolution::RES_1080P;
+	//SettingsUtils::writeToFile("H:/Storage/Users/Joel/Desktop/settingstest.txt", getSettings());
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 }
 
 void AsteroidsGame::created() {
+	//Setup the resources
+	resources.setup(resourceLoader);
+
 	//Setup the sound system
 	soundSystem = new SoundSystem();
 
@@ -123,19 +128,24 @@ void AsteroidsGame::changeState(GameState newState) {
 		if (currentState == MAIN_MENU)
 			//Hide the main menu
 			mainMenu->hide();
-		else if (currentState == GAME_PLAYING && newState != GAME_PAUSED)
+		else if (currentState == GAME_PLAYING && newState != GAME_PAUSED) {
 			mainGame->stop();
-		else if (currentState == GAME_PAUSED)
+			soundSystem->stopAll();
+		} else if (currentState == GAME_PAUSED)
 			pauseMenu->hide();
 
 		//Check the new state
 		if (newState == MAIN_MENU)
 			//Show the main menu
 			mainMenu->show();
-		else if (newState == GAME_PLAYING)
+		else if (newState == GAME_PLAYING && currentState != GAME_PAUSED)
 			mainGame->start();
-		else if (newState == GAME_PAUSED)
+		else if (newState == GAME_PLAYING && currentState == GAME_PAUSED)
+			soundSystem->resumeAll();
+		else if (newState == GAME_PAUSED) {
 			pauseMenu->show();
+			soundSystem->pauseAll();
+		}
 
 		//Assign the state
 		currentState = newState;

@@ -211,6 +211,7 @@ public:
 	inline float getGain() { return gain; }
 	inline bool doesLoop() { return loop; }
 	bool isPlaying();
+	bool isPaused();
 };
 
 /***************************************************************************************************

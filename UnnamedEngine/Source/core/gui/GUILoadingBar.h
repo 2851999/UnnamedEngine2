@@ -33,31 +33,37 @@ private:
 	/* The total number of stages and current number that are completed */
 	unsigned int totalStages;
 	unsigned int currentStage = 0;
+protected:
+	/* The method called to update this component */
+	virtual void onComponentUpdate() override;
+
+	/* The method called to render this component */
+	virtual void onComponentRender() override;
 public:
 	/* The constructors */
 	GUILoadingBar(float width, float height, unsigned int totalStages) :
-		GUIComponent(width, height, { Colour::WHITE }), totalStages(totalStages) {
+		GUIComponent(width, height, std::vector<Colour> { Colour::WHITE }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, Colour::YELLOW);
 		fill->setParent(this);
 	}
 
 	GUILoadingBar(float width, float height, unsigned int totalStages, Colour backgroundColour, Colour fillColour) :
-		GUIComponent(width, height, { backgroundColour }), totalStages(totalStages) {
+		GUIComponent(width, height, std::vector<Colour> { backgroundColour }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, fillColour);
 		fill->setParent(this);
 	}
 
 	GUILoadingBar(float width, float height, unsigned int totalStages, Texture* backgroundTexture, Texture* fillTexture) :
-		GUIComponent(width, height, { backgroundTexture }), totalStages(totalStages) {
+		GUIComponent(width, height, std::vector<Texture*> { backgroundTexture }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, fillTexture);
 		fill->setParent(this);
 	}
 
 	GUILoadingBar(float width, float height, unsigned int totalStages, Colour backgroundColour, Texture* backgroundTexture, Colour fillColour, Texture* fillTexture) :
-		GUIComponent(width, height, { backgroundColour }, { backgroundTexture }), totalStages(totalStages) {
+		GUIComponent(width, height, std::vector<Colour> { backgroundColour }, std::vector<Texture*> { backgroundTexture }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, fillColour, fillTexture);
 		fill->setParent(this);
@@ -65,12 +71,6 @@ public:
 
 	/* The destructor */
 	virtual ~GUILoadingBar() { delete fill; }
-
-	/* The method called to update this component */
-	virtual void update() override;
-
-	/* The method called to render this component */
-	virtual void render(bool overrideShader = false) override;
 
 	/* The method called to change the loading bar as a stage has been completed */
 	void completedStage();

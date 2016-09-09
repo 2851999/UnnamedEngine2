@@ -35,21 +35,26 @@ public:
 	Rect(float x, float y, float width, float height) : x(x), y(y), width(width), height(height) {}
 	Rect(Vector2f position, Vector2f size) : x(position.getX()), y(position.getY()), width(size.getX()), height(size.getY()) {}
 
-	/* Returns whether a point lies within/on the boundary of this rectangle */
+	/* Returns whether a point lies within the boundary of this rectangle */
 	inline bool contains(float x, float y) {
+		return (x > this->x && y > this->y && x < this->x + this->width && y < this->y + this->height);
+	}
+
+	/* Returns whether a point lies within/on the boundary of this rectangle */
+	inline bool intersects(float x, float y) {
 		return (x >= this->x && y >= this->y && x <= this->x + this->width && y <= this->y + this->height);
 	}
 
 	/* Returns whether another rectangle intersects this one */
 	inline bool intersects(Rect other) {
-		return  contains(other.x, other.y)                              ||
-				contains(other.x + other.width, other.y)                ||
-				contains(other.x + other.width, other.y + other.height) ||
-				contains(other.x, other.y + other.height)               ||
-				other.contains(x, y)                                    ||
-				other.contains(x + width, y)                            ||
-				other.contains(x + width, y + height)                   ||
-				other.contains(x, y + height);
+		return  intersects(other.x, other.y)                              ||
+				intersects(other.x + other.width, other.y)                ||
+				intersects(other.x + other.width, other.y + other.height) ||
+				intersects(other.x, other.y + other.height)               ||
+				other.intersects(x, y)                                    ||
+				other.intersects(x + width, y)                            ||
+				other.intersects(x + width, y + height)                   ||
+				other.intersects(x, y + height);
 	}
 };
 

@@ -28,6 +28,12 @@ protected:
 	/* Method called to setup the bounds of the menu, and the button's
 	 * active and visible properties */
 	void setupMenu();
+
+	/* The method called to render this component */
+	virtual void onComponentUpdate() override;
+
+	/* The method called to render this component */
+	virtual void onComponentRender() override;
 public:
 	/* The constructor */
 	GUIDropDownMenu(GUIButton* menuButton);
@@ -44,12 +50,6 @@ public:
 	/* Methods used to enable/disable this component (Adds/Removes the input listener instance */
 	virtual void enable() override;
 	virtual void disable() override;
-
-	/* The method used to update this component */
-	virtual void update() override;
-
-	/* The method used to render this component */
-	virtual void render(bool overrideShader = false) override;
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override;

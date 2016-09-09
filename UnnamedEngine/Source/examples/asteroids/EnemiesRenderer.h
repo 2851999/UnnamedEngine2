@@ -16,18 +16,18 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSRENDERER_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSRENDERER_H_
+#ifndef EXAMPLES_ASTEROIDS_ENEMIESRENDERER_H_
+#define EXAMPLES_ASTEROIDS_ENEMIESRENDERER_H_
 
 #include "../../core/Matrix.h"
 #include "../../core/ResourceLoader.h"
 #include "../../core/render/RenderData.h"
 
 /*****************************************************************************
- * The AsteroidsRenderer class attempts to instance render a lot of asteroids
+ * The EnemiesRenderer class attempts to instance render a lot of enemies
  *****************************************************************************/
 
-class AsteroidsRenderer {
+class EnemiesRenderer {
 private:
 	/* The render data instance */
 	RenderData* renderData;
@@ -58,30 +58,31 @@ private:
 	std::vector<GameObject3D*> objects;
 public:
 	/* The constructor */
-	AsteroidsRenderer(const ResourceLoader& loader, unsigned int numObjects);
+	EnemiesRenderer(const ResourceLoader& loader, unsigned int numObjects);
 
 	/* The destructor */
-	virtual ~AsteroidsRenderer();
+	virtual ~EnemiesRenderer();
 
 	/* The method used to add an asteroid */
-	inline void addAsteroid(GameObject3D* object) { objects.push_back(object); }
+	inline void addEnemy(GameObject3D* object) { objects.push_back(object); }
 
 	/* The method used to hide an asteroid */
-	void hideAsteroid(unsigned int index);
+	void hideEnemy(unsigned int index);
 
 	/* Method used to check whether an asteroid is visible */
-	inline bool isAsteroidVisible(unsigned int index) { return visibleData[index] > 0.5f; }
+	inline bool isEnemyVisible(unsigned int index) { return visibleData[index] > 0.5f; }
 
-	/* Method called to update the asteroids */
+	/* Method called to update the enemies */
 	void update();
-	/* Method called to render the asteroids */
+
+	/* Method called to render the enemies */
 	void render();
 
-	/* Method called to show all of the asteroids */
+	/* Method called to show all of the enemies */
 	void showAll();
 
-	/* Method called to hide all of the asteroids */
+	/* Method called to hide all of the enemies */
 	void hideAll();
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSRENDERER_H_ */
+#endif /* EXAMPLES_ASTEROIDS_ENEMIESRENDERER_H_ */

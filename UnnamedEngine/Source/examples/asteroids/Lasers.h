@@ -73,6 +73,9 @@ public:
 	/* The destructor */
 	virtual ~Lasers();
 
+	/* Method called to reset the lasers */
+	void reset();
+
 	/* The method used to update the lasers */
 	void update(float deltaSeconds, AsteroidGroup& closestGroup);
 

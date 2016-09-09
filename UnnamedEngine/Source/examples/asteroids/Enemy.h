@@ -16,44 +16,29 @@
  *
  *****************************************************************************/
 
-#include "GUICheckBox.h"
+#ifndef EXAMPLES_ASTEROIDS_ENEMY_H_
+#define EXAMPLES_ASTEROIDS_ENEMY_H_
+
+#include "Ship.h"
+#include "Player.h"
 
 /*****************************************************************************
- * The GUICheckBox class
+ * The Enemy class handles enemy movement and shooting
  *****************************************************************************/
 
-void GUICheckBox::updateRenderIndex() {
-	unsigned int maxRenderIndex = getMaxRenderIndex();
-	if (checked) {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 1;
-		else if (maxRenderIndex == 3)
-			renderIndex = 2;
-	} else if (mouseHover) {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 1;
-		else if (maxRenderIndex == 3)
-			renderIndex = 1;
-	} else {
-		if (maxRenderIndex == 1)
-			renderIndex = 0;
-		else if (maxRenderIndex == 2)
-			renderIndex = 0;
-		else if (maxRenderIndex == 3)
-			renderIndex = 0;
-	}
-}
+class Enemy : public Ship {
+private:
+	/* The player instance to target */
+	Player* player;
+public:
+	/* The constructor */
+	Enemy(AsteroidsGame* game, Player* player);
 
-void GUICheckBox::onChangeState() {
-	if (mouseClicked)
-		checked = ! checked;
-	updateRenderIndex();
-}
+	/* The destructor */
+	virtual ~Enemy();
 
-void GUICheckBox::onComponentRender() {
-	renderText(text, Vector2f(-getFont()->getWidth(text) * 1.1f, getHeight() / 2 + getFont()->getHeight(text) / 2));
-}
+	/* Method used to update this enemy */
+	void update(float deltaSeconds, AsteroidGroup& closestGroup) override;
+};
+
+#endif /* EXAMPLES_ASTEROIDS_ENEMY_H_ */

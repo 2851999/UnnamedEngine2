@@ -24,7 +24,9 @@ class AsteroidsGame;
 #include "../../core/input/InputBindings.h"
 #include "AsteroidsRenderer.h"
 #include "AsteroidGroup.h"
+#include "EnemiesRenderer.h"
 
+class Enemy;
 class Player;
 
 /*****************************************************************************
@@ -45,6 +47,12 @@ private:
 	/* The asteroid groups */
 	std::vector<AsteroidGroup> asteroidGroups;
 
+	/* The enemies */
+	std::vector<Enemy*> enemies;
+
+	/* The enemies renderer */
+	EnemiesRenderer* enemiesRenderer;
+
 	/* The pause button */
 	InputBindingButton* pauseButton;
 public:
@@ -59,6 +67,10 @@ public:
 
 	/* The method used to stop the game */
 	void stop();
+
+	/* Method that finds and returns a reference to the closest asteroid
+	 * group to a position */
+	AsteroidGroup& findClosestAsteroids(Vector3f position);
 
 	/* The update and render methods */
 	void update();

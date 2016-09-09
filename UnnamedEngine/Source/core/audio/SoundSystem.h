@@ -35,7 +35,6 @@ private:
 
 	/* The list of audio sources currently playing */
 	std::vector<AudioSource*> playing;
-
 public:
 	/* The default constructor */
 	SoundSystem() {}
@@ -73,6 +72,13 @@ public:
 	void pause(std::string key);
 	void resume(std::string key);
 	void stop(std::string key);
+
+	/* Methods used to pause and resume all playing audio */
+	void pauseAll();
+	void resumeAll();
+
+	/* Method used to stop all playing audio */
+	void stopAll();
 
 	inline void playAsSoundEffect(std::string key, AudioData* data) {
 		addSoundEffect(key, data);

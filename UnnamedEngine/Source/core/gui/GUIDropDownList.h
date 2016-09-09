@@ -36,6 +36,12 @@ private:
 
 	/* The other texture (when open - if assigned) */
 	Texture* overlayOpenedTexture = NULL;
+protected:
+	/* The method called to render this component */
+	virtual void onComponentUpdate() override;
+
+	/* The method called to render this component */
+	virtual void onComponentRender() override;
 public:
 	/* The constructors */
 	GUIDropDownList(GUIButton* menuButton) : GUIDropDownMenu(menuButton) {}
@@ -44,14 +50,14 @@ public:
 	/* The destructor */
 	virtual ~GUIDropDownList() {}
 
-	/* The method used to update this component */
-	virtual void update() override;
-
-	/* The method used to render this component */
-	virtual void render(bool overrideShader = false) override;
-
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override;
+
+	/* Called when the mouse is pressed */
+	virtual void onMousePressed(int button) override;
+
+	/* Assigns the selection (the text of the menu button) */
+	inline void setSelection(std::string text) { menuButton->setText(text); }
 
 	/* Returns the selection (the text of the menu button) */
 	inline std::string getSelection() { return menuButton->getText(); }

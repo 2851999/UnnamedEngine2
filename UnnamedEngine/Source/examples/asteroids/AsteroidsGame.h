@@ -27,6 +27,7 @@
 #include "AsteroidsMainMenu.h"
 #include "AsteroidsMainGame.h"
 #include "AsteroidsPauseMenu.h"
+#include "AsteroidsResources.h"
 
 /*****************************************************************************
  * The AsteroidsGame class sets up and manages the game
@@ -43,6 +44,9 @@ public:
 private:
 	/* The resource loader instance used for loading resources */
 	ResourceLoader resourceLoader;
+
+	/* The commonly used resources */
+	AsteroidsResources resources;
 
 	/* The current game state */
 	GameState currentState;
@@ -80,6 +84,7 @@ public:
 
 	/* Setters and getters */
 	ResourceLoader& getResourceLoader() { return resourceLoader; }
+	const AsteroidsResources& getResources() { return resources; }
 	GameState getCurrentState() { return currentState; }
 	SoundSystem* getSoundSystem() { return soundSystem; }
 	InputBindings* getInputBindings() { return inputBindings; }

@@ -17,7 +17,7 @@
  *****************************************************************************/
 
 #include "SoundSystem.h"
-
+#include <iostream>
 /***************************************************************************************************
  * The SoundSystem class
  ***************************************************************************************************/
@@ -42,6 +42,25 @@ void SoundSystem::stop(std::string key) {
 	playing.erase(std::remove(playing.begin(), playing.end(), source));
 }
 
+void SoundSystem::pauseAll() {
+	//Go through all playing audio
+	for (unsigned int i = 0; i < playing.size(); i++)
+		playing[i]->pause();
+}
+
+void SoundSystem::resumeAll() {
+	//Go through all playing audio
+	for (unsigned int i = 0; i < playing.size(); i++)
+		playing[i]->resume();
+}
+
+void SoundSystem::stopAll() {
+	//Go through all playing audio
+	for (unsigned int i = 0; i < playing.size(); i++)
+		playing[i]->stop();
+	playing.clear();
+}
+
 void SoundSystem::update() {
 	//Update the listener
 	if (listener != NULL)
@@ -52,7 +71,7 @@ void SoundSystem::update() {
 		if (playing.at(a)->isPlaying())
 			//Update the source
 			playing.at(a)->update();
-		else
+		else if (! playing[a]->isPaused())
 			playing.erase(playing.begin() + a);
 	}
 }

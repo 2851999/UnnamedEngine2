@@ -22,6 +22,12 @@
  * The ParticleEmitter class
  *****************************************************************************/
 
+void ParticleEmitter::reset() {
+	active = false;
+	cumulativeDelta = 0;
+	particlesToEmit = 0;
+}
+
 void ParticleEmitter::update(ParticleSystem* system, float delta) {
 	//Check whether this emitter is active
 	if (active) {

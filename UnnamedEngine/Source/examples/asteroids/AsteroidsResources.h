@@ -16,36 +16,42 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_SHIP_H_
-#define EXAMPLES_ASTEROIDS_SHIP_H_
+#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSRESOURCES_H_
+#define EXAMPLES_ASTEROIDS_ASTEROIDSRESOURCES_H_
 
-#include "Lasers.h"
+#include "../../core/gui/Font.h"
+#include "../../core/render/Texture.h"
+#include "../../core/ResourceLoader.h"
 
 /*****************************************************************************
- * The Ship class provides the basis for any ship
+ * The AsteroidsResources class stores some of the commonly used resources
  *****************************************************************************/
 
-class Ship : public PhysicsObject3D {
+class AsteroidsResources {
 private:
-	/* The lasers for this ship */
-	Lasers* lasers;
+	/* Various fonts */
+	Font* fontTitle = NULL;
+	Font* fontGUI = NULL;
+	Font* fontHeading = NULL;
+
+	/* Various textures */
+	std::vector<Texture*> texturesButtons;
 public:
 	/* The constructor */
-	Ship(SoundSystem* soundSystem, const ResourceLoader& loader);
+	AsteroidsResources();
 
 	/* The destructor */
-	virtual ~Ship();
+	virtual ~AsteroidsResources();
 
-	/* Method called to reset this ship */
-	void reset();
+	/* Method called to create the resources */
+	void setup(ResourceLoader& loader);
 
-	/* Update and render methods */
-	virtual void update(float deltaSeconds, AsteroidGroup& closestGroup);
-	void render();
+	/* Various getter methods */
+	inline Font* getFontTitle() const { return fontTitle; }
+	inline Font* getFontGUI() const { return fontGUI; }
+	inline Font* getFontHeading() const { return fontHeading; }
 
-	/* Method called to fire this ship's lasers */
-	inline void fireLasers(Vector3f front) { lasers->fire(getPosition(), getRotation(), front); }
+	inline const std::vector<Texture*>& getTexturesButtons() const { return texturesButtons; }
 };
 
-
-#endif /* EXAMPLES_ASTEROIDS_SHIP_H_ */
+#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSRESOURCES_H_ */
