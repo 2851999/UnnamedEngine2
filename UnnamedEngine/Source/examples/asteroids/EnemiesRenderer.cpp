@@ -57,7 +57,7 @@ EnemiesRenderer::EnemiesRenderer(const ResourceLoader& loader, unsigned int numO
 			}
 		}
 
-		visibleData.push_back(1);
+		visibleData.push_back(0);
 	}
 
 	vboMatricesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * 16 * sizeof(GLfloat), matricesDataRaw, GL_STREAM_DRAW, true);
@@ -92,6 +92,11 @@ EnemiesRenderer::~EnemiesRenderer() {
 	for (unsigned int i = 0; i < objects.size(); i++)
 		delete objects[i];
 	objects.clear();
+}
+
+void EnemiesRenderer::showEnemy(unsigned int index) {
+	visibleData[index] = 1.0f;
+	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
 void EnemiesRenderer::hideEnemy(unsigned int index) {

@@ -63,13 +63,16 @@ public:
 	/* The destructor */
 	virtual ~EnemiesRenderer();
 
-	/* The method used to add an asteroid */
+	/* The method used to add an enemy */
 	inline void addEnemy(GameObject3D* object) { objects.push_back(object); }
 
-	/* The method used to hide an asteroid */
+	/* The method used to show an enemy */
+	void showEnemy(unsigned int index);
+
+	/* The method used to hide an enemy */
 	void hideEnemy(unsigned int index);
 
-	/* Method used to check whether an asteroid is visible */
+	/* Method used to check whether an enemy is visible */
 	inline bool isEnemyVisible(unsigned int index) { return visibleData[index] > 0.5f; }
 
 	/* Method called to update the enemies */

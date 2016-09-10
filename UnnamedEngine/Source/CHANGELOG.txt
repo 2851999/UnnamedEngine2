@@ -1,4 +1,29 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 6 | Experimental 1
+
+* More asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 6 (V0.0.6)
+
+* Added Timer
+* Added KeyboardShortcuts
+* Added GUITextBox
+* Added GUITextBoxCursor
+* Added GUITextBoxSelection
+* Added min() and max() to Vectors
+* Added setCurrentStage() method in GUILoadingBar
+
+* Fixed bug: GUILabel didn't render with the position as
+             its top-left corner
+* Fixed bug: GUILabel didn't update it's size when setText()
+             was used to change the text
+* Fixed bug: Font getHeight() didn't take into account new
+             lines
+
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 5 | Experimental 5
 
 * Fixed bug: Font getHeight() didn't take into account new
