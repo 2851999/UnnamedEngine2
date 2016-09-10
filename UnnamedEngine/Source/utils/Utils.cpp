@@ -25,6 +25,7 @@
 #include <cstdarg>
 #include "Utils.h"
 #include "Logging.h"
+#include "../core/Window.h"
 
 /*****************************************************************************
  * Various string utilities
@@ -263,5 +264,19 @@ namespace SettingsUtils {
 		}
 
 		return settings;
+	}
+}
+
+/*****************************************************************************
+ * Various clipboard utilities
+ *****************************************************************************/
+
+namespace ClipboardUtils {
+	void setText(std::string text) {
+		glfwSetClipboardString(Window::getCurrentInstance()->getInstance(), text.c_str());
+	}
+
+	std::string getText() {
+		return std::string(glfwGetClipboardString(Window::getCurrentInstance()->getInstance()));
 	}
 }

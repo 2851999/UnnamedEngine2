@@ -32,6 +32,7 @@
 #include "core/gui/GUIPanel.h"
 #include "core/gui/GUILabel.h"
 #include "core/gui/GUISlider.h"
+#include "core/gui/GUITextBox.h"
 
 class Test : public BaseEngine {
 private:
@@ -45,6 +46,7 @@ private:
 	GUILabel* label;
 	GUISlider* verticalSlider;
 	GUISlider* horizontalSlider;
+	GUITextBox* textBox;
 public:
 	virtual ~Test() {}
 
@@ -125,6 +127,15 @@ void Test::created() {
 	horizontalSlider = new GUISlider(horizontalSliderButton, GUISlider::HORIZONTAL, 100, 4, Colour::WHITE);
 	horizontalSlider->setPosition(100, 400);
 
+	textBox = new GUITextBox(Colour::WHITE, 200, 20);
+	textBox->setFont(new Font("resources/fonts/ARIAL.TTF", 22, Colour::BLACK, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST)));
+	textBox->setDefaultTextFont(new Font("resources/fonts/ARIAL.TTF", 22, Colour::GREY, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST)));
+	textBox->setPosition(20, 300);
+	textBox->setDefaultText("Enter something");
+	textBox->setBorder(new GUIBorder(textBox, 1.0f, Colour::LIGHT_BLUE));
+	//textBox->borderEnabled = true;
+	textBox->selection->setColour(Colour(Colour::LIGHT_BLUE, 0.2f));
+
 	panel->add(button);
 	panel->add(loadingBar);
 	panel->add(checkBox);
@@ -133,10 +144,11 @@ void Test::created() {
 	panel->add(label);
 	panel->add(verticalSlider);
 	panel->add(horizontalSlider);
+	panel->add(textBox);
 
 	panel->show();
 
-	panel->enable();
+	//panel->enable();
 
 	Renderer::addCamera(camera);
 }

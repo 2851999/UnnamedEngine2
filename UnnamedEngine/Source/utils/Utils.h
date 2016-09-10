@@ -59,6 +59,10 @@ namespace StrUtils {
 	}
 
 	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter);
+
+	inline std::string substring(const std::string &s, int begin, int end) {
+		return s.substr(begin, end - begin);
+	}
 };
 
 #include <cmath>
@@ -181,6 +185,15 @@ namespace SettingsUtils {
 	void writeToFile(std::string path, Settings& settings);
 	/* Returns settings loaded from a file */
 	Settings readFromFile(std::string path);
+}
+
+/*****************************************************************************
+ * Various clipboard utilities
+ *****************************************************************************/
+
+namespace ClipboardUtils {
+	void setText(std::string text);
+	std::string getText();
 }
 
 #endif /* UTILS_UTILS_H_ */

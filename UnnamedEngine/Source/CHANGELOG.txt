@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 5 | Experimental 4
+
+* Added Timer
+* Added KeyboardShortcuts
+* Added GUITextBox
+* Added GUITextBoxCursor
+* Added GUITextBoxSelection
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 5 | Experimental 3
 
 * Fixed bug: GUILabel didn't render with the position as

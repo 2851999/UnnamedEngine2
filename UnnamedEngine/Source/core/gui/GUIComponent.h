@@ -79,11 +79,17 @@ public:
 	/* Method used to get the max render index */
 	unsigned int getMaxRenderIndex();
 
+	/* Methods used to set the colours/textures */
+	inline void setColour(Colour colour) { colours.clear(); colours.push_back(colour); }
+	inline void setTexture(Texture* texture) { textures.clear(); textures.push_back(texture); }
+
 	/* Setters and getters */
 	inline void setFont(Font* font) { this->font = font; }
 	inline bool hasFont() { return font; }
 	inline Font* getFont() { return font; }
 
+	inline std::vector<Colour>& getColours() { return colours; }
+	inline std::vector<Texture*>& getTextures() { return textures; }
 	inline bool hasColours() { return colours.size() > 0; }
 	inline bool hasTextures() { return textures.size() > 0; }
 };
@@ -189,11 +195,15 @@ protected:
 	 * the default component render method */
 	virtual void onComponentRender() {}
 
+	/* Method called to notify this component it has been clicked */
+	virtual void onComponentClicked() {}
+
 	/* Method called when this component changes state */
 	virtual void onChangeState() {}
 
 	/* Methods used to call component listener events */
 	inline void callOnComponentClicked(GUIComponent* component) {
+		onComponentClicked();
 		for (unsigned int i = 0; i < listeners.size(); i++)
 			listeners[i]->onComponentClicked(component);
 	}
