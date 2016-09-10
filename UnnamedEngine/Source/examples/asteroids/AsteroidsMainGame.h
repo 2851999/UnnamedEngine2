@@ -26,6 +26,7 @@ class AsteroidsGame;
 #include "AsteroidGroup.h"
 #include "EnemiesRenderer.h"
 #include "HUD.h"
+#include "GameOverMenu.h"
 
 class Enemy;
 class Player;
@@ -44,6 +45,9 @@ private:
 
 	/* The HUD */
 	HUD* hud;
+
+	/* The game over menu */
+	GameOverMenu* gameOverMenu;
 
 	/* The asteroid renderer */
 	AsteroidsRenderer* asteroidRenderer;

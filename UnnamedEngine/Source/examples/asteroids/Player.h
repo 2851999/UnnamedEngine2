@@ -36,6 +36,9 @@ private:
 	InputBindingAxis* axisSideways;
 	InputBindingButton* buttonShoot;
 
+	/* The player's score */
+	unsigned int score;
+
 	/* The current game delta */
 	float currentDelta;
 
@@ -63,6 +66,9 @@ public:
 	/* Method to use the player's view and render the lasers */
 	void render();
 
+	/* Called when an asteroid has been destroyed by this ship's lasers */
+	virtual void onAsteroidDestroyed(GameObject3D* asteroid) override;
+
 	/* Method used to check whether a laser has collided with anything */
 	virtual bool checkCollision(PhysicsObject3D* laser) override;
 
@@ -70,6 +76,8 @@ public:
 	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
 
 	/* Setters and getters */
+	inline void addPoints(unsigned int points) { score += points; }
+	inline unsigned int getScore() { return score; }
 	inline Camera3D* getCamera() { return camera; }
 };
 

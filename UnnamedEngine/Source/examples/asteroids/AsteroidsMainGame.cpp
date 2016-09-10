@@ -32,6 +32,9 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	//Setup the HUD
 	hud = new HUD(game, player);
 
+	//Setup the game over menu
+	gameOverMenu = new GameOverMenu(game, player);
+
 	//Setup the asteroid renderer
 	unsigned int numAsteroids = 1250;
 	asteroidRenderer = new AsteroidsRenderer(game->getResourceLoader(), numAsteroids);
@@ -102,7 +105,10 @@ void AsteroidsMainGame::start() {
 	//Reset the player ship
 	player->reset();
 
+	//Show the HUD
 	hud->show();
+	//Hide the game over menu
+	gameOverMenu->hide();
 
 	//Hide the mouse
 	game->getWindow()->disableCursor();
@@ -113,6 +119,7 @@ void AsteroidsMainGame::start() {
 }
 
 void AsteroidsMainGame::stop() {
+	//Hide the HUD
 	hud->hide();
 
 	//Show the mouse
@@ -163,6 +170,12 @@ void AsteroidsMainGame::update() {
 
 	//Update the enemies renderer
 	enemiesRenderer->update();
+
+	if (! player->isAlive()) {
+		if (! gameOverMenu->isVisible())
+			gameOverMenu->show();
+		gameOverMenu->update();
+	}
 }
 
 void AsteroidsMainGame::render() {
@@ -188,6 +201,10 @@ void AsteroidsMainGame::render() {
 
 	//Render the HUD
 	hud->render();
+
+	if (! player->isAlive()) {
+		gameOverMenu->render();
+	}
 }
 
 void AsteroidsMainGame::onButtonReleased(InputBindingButton* button) {

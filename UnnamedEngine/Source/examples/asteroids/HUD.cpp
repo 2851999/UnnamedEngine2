@@ -32,12 +32,25 @@ HUD::HUD(AsteroidsGame* game, Player* player) : player(player) {
 	camera = new Camera2D(Matrix4f().initOrthographic(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f));
 	camera->update();
 
-	//Setup the health bar
-	barPlayerHealth = new GUILoadingBar(400, 20, player->getHealth());
-	barPlayerHealth->setPosition(windowWidth - barPlayerHealth->getWidth() - 10, 10);
-	barPlayerHealth->setBorder(new GUIBorder(barPlayerHealth, 1, Colour::ORANGE));
+	//Get the heading font
+	Font* headingFont = game->getResources().getFontHeading();
 
+	//Setup the health bar
+	barPlayerHealth = new GUILoadingBar(400, 20, player->getHealth(), game->getResources().getTexturesButtons()[0], game->getResources().getTexturesButtons()[1]);
+	barPlayerHealth->setPosition(windowWidth - barPlayerHealth->getWidth() - 10, 40.0f);
+
+	//Setup the health label
+	GUILabel* labelHealth = new GUILabel("Health:", headingFont);
+	labelHealth->setPosition(barPlayerHealth->getPosition().getX() - labelHealth->getWidth() - 10.0f, 40.0f);
+
+	//Setup the score label
+	labelScore = new GUILabel("Score: ", headingFont);
+	labelScore->setPosition(barPlayerHealth->getPosition().getX(), 10.0f);
+
+	//Add the components
 	add(barPlayerHealth);
+	add(labelHealth);
+	add(labelScore);
 }
 
 HUD::~HUD() {
@@ -47,8 +60,10 @@ HUD::~HUD() {
 
 void HUD::update() {
 	GUIPanel::update();
-	//Update the health bar
-	barPlayerHealth->setCurrentStage(player->getHealth());
+	//Update the health bar if necessary
+	if (barPlayerHealth->getCurrentStage() != player->getHealth())
+		barPlayerHealth->setCurrentStage(player->getHealth());
+	labelScore->setText("Score: " + StrUtils::str(player->getScore()));
 }
 
 void HUD::render(bool overrideShader) {

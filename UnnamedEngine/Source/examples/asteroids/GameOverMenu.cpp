@@ -16,16 +16,15 @@
  *
  *****************************************************************************/
 
-#include "AsteroidsPauseMenu.h"
+#include "GameOverMenu.h"
 #include "AsteroidsGame.h"
-
-#include "../../core/gui/GUILabel.h"
+#include "Player.h"
 
 /*****************************************************************************
- * The AsteroidsPauseMenu class
+ * The GameOverMenu class
  *****************************************************************************/
 
-AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
+GameOverMenu::GameOverMenu(AsteroidsGame* game, Player* player) : game(game), player(player) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
@@ -40,44 +39,46 @@ AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
 	background->getMaterial()->setDiffuseColour(Colour(1.0f, 1.0f, 1.0f, 0.8f));
 	background->update();
 
-	buttonContinue = new GUIButton("Continue", 400, 30, game->getResources().getTexturesButtons());
-	buttonContinue->setPosition(windowWidth / 2 - buttonContinue->getWidth() / 2, 140);
-	buttonContinue->addListener(this);
-
 	buttonExit = new GUIButton("Exit", 400, 30, game->getResources().getTexturesButtons());
 	buttonExit->setPosition(windowWidth / 2 - buttonExit->getWidth() / 2, windowHeight - 50);
 	buttonExit->addListener(this);
 
 	//Setup the title font
-	Font* titleFont = game->getResourceLoader().loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
+	Font* titleFont = game->getResources().getFontTitle();
 
-	//Create the title label
-	GUILabel* titleLabel = new GUILabel("Paused", titleFont);
-	titleLabel->setPosition(game->getSettings().windowWidth / 2 - titleFont->getWidth("Paused") / 2, 40.0f);
+	//Create the label's
+	labelGameOver = new GUILabel("Game Over", titleFont);
+	labelGameOver->setPosition(windowWidth / 2 - labelGameOver->getWidth() / 2, windowHeight / 2 - labelGameOver->getHeight());
+
+	Font* headerFont = game->getResources().getFontHeading();
+
+	labelScore = new GUILabel("", headerFont);
 
 	//Add the components to this panel
-	add(titleLabel);
-	add(buttonContinue);
+	add(labelGameOver);
+	add(labelScore);
 	add(buttonExit);
 }
 
-AsteroidsPauseMenu::~AsteroidsPauseMenu() {
+GameOverMenu::~GameOverMenu() {
 	//Delete created resources
 	delete camera;
 	delete background;
 }
 
-void AsteroidsPauseMenu::show() {
+void GameOverMenu::show() {
 	game->getWindow()->enableCursor();
+	labelScore->setText("You scored " + StrUtils::str(player->getScore()) + "!");
+	labelScore->setPosition(game->getSettings().windowWidth / 2 - labelScore->getWidth() / 2, labelGameOver->getPosition().getY() + labelGameOver->getHeight() + 10.0f);
 	GUIPanel::show();
 }
 
-void AsteroidsPauseMenu::hide() {
+void GameOverMenu::hide() {
 	game->getWindow()->disableCursor();
 	GUIPanel::hide();
 }
 
-void AsteroidsPauseMenu::render(bool overrideShader) {
+void GameOverMenu::render(bool overrideShader) {
 	glDisable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);
@@ -96,14 +97,9 @@ void AsteroidsPauseMenu::render(bool overrideShader) {
 	Renderer::removeCamera();
 }
 
-void AsteroidsPauseMenu::onComponentClicked(GUIComponent* component) {
+void GameOverMenu::onComponentClicked(GUIComponent* component) {
 	//Check whether any buttons were clicked
-	if (component == buttonContinue)
-		//Change the game state to start the game
-		game->changeState(AsteroidsGame::GAME_PLAYING);
-	else if (component == buttonExit) {
+	if (component == buttonExit)
 		//Go to the main menu
-		game->changeState(AsteroidsGame::GAME_PLAYING);
 		game->changeState(AsteroidsGame::MAIN_MENU);
-	}
 }

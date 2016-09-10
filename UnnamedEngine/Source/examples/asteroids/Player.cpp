@@ -31,6 +31,7 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 	axisSideways = inputBindings->getAxisBinding("Sideways");
 	buttonShoot = inputBindings->getButtonBinding("Shoot");
 
+	score = 0;
 	currentDelta = 0.0f;
 
 	//Setup the camera
@@ -52,6 +53,7 @@ Player::~Player() {
 void Player::reset() {
 	Ship::reset();
 
+	score = 0;
 	setHealth(10);
 }
 
@@ -60,7 +62,31 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		//Get the current delta
 		currentDelta = deltaSeconds;
 		//Move the player
-		thrust(camera->getFront() * axisForward->getValue());
+		if (axisForward->getValue() != 0)
+			thrust(camera->getFront() * axisForward->getValue());
+		else {
+//			Vector3f& vel = getRelVelocity();
+//			float amount = deltaSeconds * 12.0f;
+//
+//			std::cout << vel.toString() << std::endl;
+//
+//			if (vel.getX() > 0.0f)
+//				vel.setX(vel.getX() - amount);
+//			else if (vel.getX() < 0.0f)
+//				vel.setX(vel.getX() + amount);
+//
+//			if (vel.getY() > 0.0f)
+//				vel.setY(vel.getY() - amount);
+//			else if (vel.getY() < 0.0f)
+//				vel.setY(vel.getY() + amount);
+//
+//			if (vel.getZ() > 0.0f)
+//				vel.setZ(vel.getZ() - amount);
+//			else if (vel.getZ() < 0.0f)
+//				vel.setZ(vel.getZ() + amount);
+
+			setAcceleration(getVelocity() * -12.0f * deltaSeconds);
+		}
 
 		camera->update();
 
@@ -82,6 +108,11 @@ void Player::render() {
 	Ship::render();
 }
 
+/* Called when an asteroid has been destroyed by this ship's lasers */
+void Player::onAsteroidDestroyed(GameObject3D* asteroid) {
+	addPoints(10 * asteroid->getScale().max());
+}
+
 /* Method used to check whether a laser has collided with anything */
 bool Player::checkCollision(PhysicsObject3D* laser) {
 	//Go through the enemies
@@ -94,9 +125,12 @@ bool Player::checkCollision(PhysicsObject3D* laser) {
 			if (distance < 1.0f) {
 				//Remove health
 				enemies[i]->removeHealth(1);
-				if (! enemies[i]->isAlive())
+				if (! enemies[i]->isAlive()) {
 					//Create an explosion
 					getLasers()->explode(enemies[i]->getPosition(), 2.0f);
+					//Add to the score
+					addPoints(200);
+				}
 				return true;
 			}
 		}

@@ -55,6 +55,9 @@ public:
 	/* Method used to remove health from this ship */
 	void removeHealth(unsigned int amount);
 
+	/* Called when an asteroid has been destroyed by this ship's lasers */
+	virtual void onAsteroidDestroyed(GameObject3D* asteroid) {}
+
 	/* Method used to check whether a laser has collided with anything */
 	virtual bool checkCollision(PhysicsObject3D* laser) { return false; }
 

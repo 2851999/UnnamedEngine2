@@ -36,6 +36,13 @@ public:
 
 	/* The destructor */
 	virtual ~GUILabel() {}
+
+	/* Override the setText() method to assign the label size as well */
+	inline void setText(std::string text) {
+		GUIComponent::setText(text);
+		//Assign the size
+		setSize(getFont()->getWidth(text), getFont()->getHeight(text));
+	}
 };
 
 #endif /* CORE_GUI_GUILABEL_H_ */

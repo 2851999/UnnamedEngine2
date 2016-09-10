@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 5 | Experimental 3
+
+* Fixed bug: GUILabel didn't render with the position as
+             its top-left corner
+* Fixed bug: GUILabel didn't update it's size when setText()
+             was used to change the text
+
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 5 | Experimental 2
 
 * Added setCurrentStage() method in GUILoadingBar

@@ -133,6 +133,8 @@ void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 							closestGroup.hideAsteroid(j);
 							//Create an explosion
 							explode(closestAsteroids[j]->getPosition(), 2.0f * scale);
+							//Notify the ship
+							ship->onAsteroidDestroyed(closestAsteroids[j]);
 						}
 					}
 				}

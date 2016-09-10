@@ -16,45 +16,60 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_HUD_H_
-#define EXAMPLES_ASTEROIDS_HUD_H_
+#ifndef EXAMPLES_ASTEROIDS_GAMEOVERMENU_H_
+#define EXAMPLES_ASTEROIDS_GAMEOVERMENU_H_
 
-#include "../../core/gui/GUILoadingBar.h"
+#include "../../core/render/Renderer.h"
+#include "../../core/render/Camera.h"
+#include "../../core/gui/Font.h"
 #include "../../core/gui/GUIPanel.h"
 #include "../../core/gui/GUILabel.h"
+
+/*****************************************************************************
+ * The GameOverMenu class sets up and manages the pause menu
+ *****************************************************************************/
 
 class AsteroidsGame;
 class Player;
 
-/*****************************************************************************
- * The HUD class sets up and manages the player HUD
- *****************************************************************************/
-
-class HUD : public GUIPanel {
+class GameOverMenu : public GUIPanel {
 private:
-	/* Camera used for rendering the HUD */
+	/* The instance of the game */
+	AsteroidsGame* game;
+
+	/* The camera used when rendering the menu */
 	Camera2D* camera;
 
-	/* The label displaying the player's score */
-	GUILabel* labelScore;
-
-	/* Loading bar for the player's health */
-	GUILoadingBar* barPlayerHealth;
+	/* The background for the menu */
+	GameObject2D* background;
 
 	/* The player instance */
 	Player* player;
+
+	/* The labels */
+	GUILabel* labelGameOver;
+	GUILabel* labelScore;
+
+	/* The buttons on the menu */
+	GUIButton* buttonExit;
 public:
 	/* The constructor */
-	HUD(AsteroidsGame* game, Player* player);
+	GameOverMenu(AsteroidsGame* game, Player* player);
 
 	/* The destructor */
-	virtual ~HUD();
+	virtual ~GameOverMenu();
 
-	/* Method used to update the HUD */
-	virtual void update() override;
+	/* Method called to setup ready to show the menu */
+	virtual void show() override;
 
-	/* Method used to render the HUD*/
+	/* Method called to remove the camera and hide the menu */
+	virtual void hide() override;
+
+	/* Methods used to render the menu */
 	virtual void render(bool overrideShader = false) override;
+
+	/* Called when a component is clicked */
+	virtual void onComponentClicked(GUIComponent* component) override;
 };
 
-#endif /* EXAMPLES_ASTEROIDS_HUD_H_ */
+#endif /* EXAMPLES_ASTEROIDS_GAMEOVERMENU_H_ */

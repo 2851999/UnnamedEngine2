@@ -19,15 +19,13 @@
 #include "GUILabel.h"
 
 GUILabel::GUILabel(std::string text, Font* font) : GUIComponent() {
-	//Assign the text
-	setText(text);
 	//Assign the font if given
 	if (font)
 		setFont(font);
-	//Assign the size
-	setSize(getFont()->getWidth(text), getFont()->getHeight(text));
+	//Assign the text
+	setText(text);
 }
 
 void GUILabel::onComponentRender() {
-	renderTextAtCentre(text);
+	renderText(text, Vector2f(0.0f, getFont()->getHeight(text)));
 }
