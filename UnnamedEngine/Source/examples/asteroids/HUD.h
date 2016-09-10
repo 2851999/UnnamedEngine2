@@ -16,26 +16,45 @@
  *
  *****************************************************************************/
 
-#include "GUILoadingBar.h"
+#ifndef EXAMPLES_ASTEROIDS_HUD_H_
+#define EXAMPLES_ASTEROIDS_HUD_H_
+
+#include "../../core/gui/GUILoadingBar.h"
+#include "../../core/gui/GUIPanel.h"
+#include "../../core/gui/GUILabel.h"
+
+class AsteroidsGame;
+class Player;
 
 /*****************************************************************************
- * The GUILoadingBar class
+ * The HUD class sets up and manages the player HUD
  *****************************************************************************/
 
-void GUILoadingBar::onComponentUpdate() {
-	fill->update();
-}
+class HUD : public GUIPanel {
+private:
+	/* Camera used for rendering the HUD */
+	Camera2D* camera;
 
-void GUILoadingBar::onComponentRender() {
-	fill->render();
-}
+	/* The label displaying the player's score */
+	GUILabel* labelScore;
 
-void GUILoadingBar::completedStage() {
-	currentStage++;
-	fill->updateWidth((getWidth() / (float) totalStages) * (float) currentStage);
-}
+	/* Loading bar for the player's health */
+	GUILoadingBar* barPlayerHealth;
 
-void GUILoadingBar::setCurrentStage(unsigned int stage) {
-	currentStage = stage;
-	fill->updateWidth((getWidth() / (float) totalStages) * (float) currentStage);
-}
+	/* The player instance */
+	Player* player;
+public:
+	/* The constructor */
+	HUD(AsteroidsGame* game, Player* player);
+
+	/* The destructor */
+	virtual ~HUD();
+
+	/* Method used to update the HUD */
+	virtual void update() override;
+
+	/* Method used to render the HUD*/
+	virtual void render(bool overrideShader = false) override;
+};
+
+#endif /* EXAMPLES_ASTEROIDS_HUD_H_ */

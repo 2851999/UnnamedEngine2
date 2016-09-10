@@ -274,13 +274,22 @@ float Font::getWidth(std::string text) {
 float Font::getHeight(std::string text) {
 	//The height
 	float height = 0;
+	float lineHeight = 0;
 	//Go through each character in the text
 	for (unsigned int i = 0; i < text.length(); i++) {
-		//Get the character data for the current character
-		CharInfo info = characters[((int) text.at(i)) - ASCII_START];
-		//Assign the height
-		height = MathsUtils::max(height, info.bitmapHeight + (info.bitmapTop - info.bitmapHeight));
+		//Check for a new line escape character
+		if (text.compare(i, 1, "\n") == 0) {
+			lineHeight = 0;
+			height += lineHeight;
+		} else {
+			//Get the character data for the current character
+			CharInfo info = characters[((int) text.at(i)) - ASCII_START];
+			//Assign the height
+			lineHeight = MathsUtils::max(lineHeight, info.bitmapHeight + (info.bitmapTop - info.bitmapHeight));
+		}
 	}
+	if (height == 0)
+		height = lineHeight;
 	//Return the height
 	return height;
 }

@@ -25,9 +25,11 @@
 #include "../../core/particles/ParticleEffect.h"
 #include "../../core/audio/SoundSystem.h"
 
+#include "AsteroidsGame.h"
 #include "AsteroidGroup.h"
 #include "LasersRenderer.h"
 
+class Ship;
 class Player;
 
 /*****************************************************************************
@@ -37,8 +39,17 @@ class Player;
 
 class Lasers {
 private:
+	/* The current number of instances of this class */
+	static unsigned int numInstances;
+
+	/* The number of this instance */
+	unsigned int instanceNumber;
+
 	/* Pointer to the sound system */
 	SoundSystem* soundSystem;
+
+	/* The ship instance this set of lasers is attached to */
+	Ship* ship;
 
 	/* The maximum number of lasers */
 	unsigned int maxLasers;
@@ -68,7 +79,7 @@ private:
 	double timeLastLaserFired;
 public:
 	/* The constructor */
-	Lasers(SoundSystem* soundSystem, const ResourceLoader& loader);
+	Lasers(AsteroidsGame* game, Ship* ship);
 
 	/* The destructor */
 	virtual ~Lasers();
@@ -82,8 +93,11 @@ public:
 	/* The method used to render the lasers */
 	void render();
 
+	/* Method called to explode something */
+	void explode(Vector3f position, float maxSpeed);
+
 	/* The method used to fire this set of lasers */
-	void fire(Vector3f position, Vector3f rotation, Vector3f front);
+	void fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f currentVelocity);
 
 	/* Returns whether the lasers can fire */
 	inline bool canFire() { return TimeUtils::getSeconds() - timeLastLaserFired > cooldown; }

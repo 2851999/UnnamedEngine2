@@ -27,7 +27,13 @@
 
 AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	//Setup the player
-	player = new Player(game);
+	player = new Player(game, enemies);
+
+	//Setup the HUD
+	hud = new HUD(game, player);
+
+	//Setup the game over menu
+	gameOverMenu = new GameOverMenu(game, player);
 
 	//Setup the asteroid renderer
 	unsigned int numAsteroids = 1250;
@@ -49,10 +55,11 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 		}
 	}
 
-	enemiesRenderer = new EnemiesRenderer(game->getResourceLoader(), 1);
+	unsigned int numEnemies = 1;
+	enemiesRenderer = new EnemiesRenderer(game->getResourceLoader(), numEnemies);
 
 	//Go through the enemies
-	for (unsigned int i = 0; i < 1; i++) {
+	for (unsigned int i = 0; i < numEnemies; i++) {
 		//Create an enemy instance
 		Enemy* enemy = new Enemy(game, player);
 		//Add the enemy
@@ -72,6 +79,7 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 AsteroidsMainGame::~AsteroidsMainGame() {
 	//Delete created resources
 	delete player;
+	delete hud;
 	delete asteroidRenderer;
 	//Go through and delete the enemy objects
 	for (unsigned int i = 0; i < enemies.size(); i++)
@@ -91,9 +99,16 @@ void AsteroidsMainGame::start() {
 	//Setup the enemies
 	enemiesRenderer->showAll();
 	enemiesRenderer->update();
+	for (unsigned int i = 0; i < enemies.size(); i++)
+		enemies[i]->reset();
 
 	//Reset the player ship
 	player->reset();
+
+	//Show the HUD
+	hud->show();
+	//Hide the game over menu
+	gameOverMenu->hide();
 
 	//Hide the mouse
 	game->getWindow()->disableCursor();
@@ -104,6 +119,11 @@ void AsteroidsMainGame::start() {
 }
 
 void AsteroidsMainGame::stop() {
+	//Hide the HUD
+	hud->hide();
+	//Hide the game over menu
+	gameOverMenu->hide();
+
 	//Show the mouse
 	game->getWindow()->enableCursor();
 	//Setup the sound system
@@ -112,7 +132,7 @@ void AsteroidsMainGame::stop() {
 	Renderer::removeCamera();
 }
 
-AsteroidGroup& AsteroidsMainGame::findClosestAsteroids(Vector3f position) {
+AsteroidGroup& AsteroidsMainGame::findClosestAsteroids(const Vector3f& position) {
 	//The index of the closest asteroid group
 	unsigned int closestIndex = 0;
 	//The current smallest distance to an asteroid group
@@ -136,12 +156,28 @@ AsteroidGroup& AsteroidsMainGame::findClosestAsteroids(Vector3f position) {
 
 void AsteroidsMainGame::update() {
 	//Update the player
-	player->update(findClosestAsteroids(player->getCamera()->getPosition()));
+	player->update(game->getDeltaSeconds(), findClosestAsteroids(player->getCamera()->getPosition()));
+
+	//Update the HUD
+	hud->update();
 
 	//Update the enemies
-	for (unsigned int i = 0; i < enemies.size(); i++)
+	for (unsigned int i = 0; i < enemies.size(); i++) {
 		enemies[i]->update(game->getDeltaSeconds(), findClosestAsteroids(enemies[i]->getPosition()));
+		//Check whether it is still alive
+		if (! enemies[i]->isAlive() && enemiesRenderer->isEnemyVisible(i))
+			//Hide the enemy if they are no longer alive
+			enemiesRenderer->hideEnemy(i);
+	}
+
+	//Update the enemies renderer
 	enemiesRenderer->update();
+
+	if (! player->isAlive()) {
+		if (! gameOverMenu->isVisible())
+			gameOverMenu->show();
+		gameOverMenu->update();
+	}
 }
 
 void AsteroidsMainGame::render() {
@@ -163,7 +199,14 @@ void AsteroidsMainGame::render() {
 	//Render the enemies
 	enemiesRenderer->render();
 	for (unsigned int i = 0; i < enemies.size(); i++)
-		enemies[i]->render();
+			enemies[i]->render();
+
+	//Render the HUD
+	hud->render();
+
+	if (! player->isAlive()) {
+		gameOverMenu->render();
+	}
 }
 
 void AsteroidsMainGame::onButtonReleased(InputBindingButton* button) {

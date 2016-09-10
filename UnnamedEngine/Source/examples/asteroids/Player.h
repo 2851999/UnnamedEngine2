@@ -36,6 +36,9 @@ private:
 	InputBindingAxis* axisSideways;
 	InputBindingButton* buttonShoot;
 
+	/* The player's score */
+	unsigned int score;
+
 	/* The current game delta */
 	float currentDelta;
 
@@ -44,23 +47,37 @@ private:
 
 	/* The game instance */
 	AsteroidsGame* game;
+
+	/* Reference to the list of enemies */
+	std::vector<Enemy*>& enemies;
 public:
 	/* The constructor */
-	Player(AsteroidsGame* mainGame);
+	Player(AsteroidsGame* mainGame, std::vector<Enemy*>& enemies);
 
 	/* The destructor */
 	virtual ~Player();
 
+	/* Called to reset the player */
+	virtual void reset() override;
+
 	/* Method used to update the player and their lasers */
-	void update(AsteroidGroup& closestAsteroids);
+	void update(float deltaSeconds, AsteroidGroup& closestAsteroids) override;
 
 	/* Method to use the player's view and render the lasers */
 	void render();
+
+	/* Called when an asteroid has been destroyed by this ship's lasers */
+	virtual void onAsteroidDestroyed(GameObject3D* asteroid) override;
+
+	/* Method used to check whether a laser has collided with anything */
+	virtual bool checkCollision(PhysicsObject3D* laser) override;
 
 	/* Input methods */
 	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
 
 	/* Setters and getters */
+	inline void addPoints(unsigned int points) { score += points; }
+	inline unsigned int getScore() { return score; }
 	inline Camera3D* getCamera() { return camera; }
 };
 

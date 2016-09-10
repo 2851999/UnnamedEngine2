@@ -37,18 +37,14 @@ AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, Renderer::getRenderShader("Material"));
 	background->getMaterial()->setDiffuseTexture(backgroundTexture);
-	background->getMaterial()->setDiffuseColour(Colour(1.0f, 1.0f, 1.0f, 0.4f));
+	background->getMaterial()->setDiffuseColour(Colour(1.0f, 1.0f, 1.0f, 0.8f));
 	background->update();
 
-	Texture* normal = game->getResourceLoader().loadTexture("Button.png");
-	Texture* hover = game->getResourceLoader().loadTexture("Button_Hover.png");
-	Texture* clicked = game->getResourceLoader().loadTexture("Button_Clicked.png");
-
-	buttonContinue = new GUIButton("Continue", 400, 30, { normal, hover, clicked });
+	buttonContinue = new GUIButton("Continue", 400, 30, game->getResources().getTexturesButtons());
 	buttonContinue->setPosition(windowWidth / 2 - buttonContinue->getWidth() / 2, 140);
 	buttonContinue->addListener(this);
 
-	buttonExit = new GUIButton("Exit", 400, 30, { normal, hover, clicked });
+	buttonExit = new GUIButton("Exit", 400, 30, game->getResources().getTexturesButtons());
 	buttonExit->setPosition(windowWidth / 2 - buttonExit->getWidth() / 2, windowHeight - 50);
 	buttonExit->addListener(this);
 
@@ -82,6 +78,11 @@ void AsteroidsPauseMenu::hide() {
 }
 
 void AsteroidsPauseMenu::render(bool overrideShader) {
+	glDisable(GL_DEPTH_TEST);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	//Add the camera
 	Renderer::addCamera(camera);
 

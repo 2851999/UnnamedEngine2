@@ -25,6 +25,8 @@ class AsteroidsGame;
 #include "AsteroidsRenderer.h"
 #include "AsteroidGroup.h"
 #include "EnemiesRenderer.h"
+#include "HUD.h"
+#include "GameOverMenu.h"
 
 class Enemy;
 class Player;
@@ -40,6 +42,12 @@ private:
 
 	/* The player */
 	Player* player;
+
+	/* The HUD */
+	HUD* hud;
+
+	/* The game over menu */
+	GameOverMenu* gameOverMenu;
 
 	/* The asteroid renderer */
 	AsteroidsRenderer* asteroidRenderer;
@@ -70,7 +78,7 @@ public:
 
 	/* Method that finds and returns a reference to the closest asteroid
 	 * group to a position */
-	AsteroidGroup& findClosestAsteroids(Vector3f position);
+	AsteroidGroup& findClosestAsteroids(const Vector3f& position);
 
 	/* The update and render methods */
 	void update();

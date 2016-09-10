@@ -74,6 +74,12 @@ public:
 
 	/* The method called to change the loading bar as a stage has been completed */
 	void completedStage();
+
+	/* Method used to set the current stage of this loading bar manually */
+	void setCurrentStage(unsigned int stage);
+
+	/* Getters */
+	inline unsigned int getCurrentStage() { return currentStage; }
 };
 
 #endif /* CORE_GUI_GUILOADINGBAR_H_ */

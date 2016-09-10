@@ -25,6 +25,7 @@
 #include "../../core/gui/GUIPanel.h"
 #include "../../core/gui/GUIDropDownList.h"
 #include "../../core/gui/GUICheckBox.h"
+#include "../../core/gui/GUILabel.h"
 
 class AsteroidsGame;
 
@@ -59,6 +60,12 @@ public:
 
 class MainMenuHighScores : public GUIPanel {
 private:
+	/* The game instance */
+	AsteroidsGame* game;
+
+	/* The highscores label */
+	GUILabel* highscoresLabel;
+
 	/* The buttons on the menu */
 	GUIButton* buttonBack;
 public:
@@ -67,6 +74,9 @@ public:
 
 	/* The destructor */
 	virtual ~MainMenuHighScores() {}
+
+	/* Method used to show this GUIPanel */
+	virtual void show() override;
 };
 
 /*****************************************************************************

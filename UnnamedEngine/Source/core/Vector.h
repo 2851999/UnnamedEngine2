@@ -142,6 +142,32 @@ public:
 		return (*this);
 	}
 
+	/* Finds and returns the smallest component of this vector */
+	inline T min() {
+		if (N > 0) {
+			T current = values[0];
+			for (unsigned int i = 1; i < N; i++) {
+				if (values[i] < current)
+					current = values[i];
+			}
+			return current;
+		} else
+			return 0;
+	}
+
+	/* Finds and returns the biggest component of this vector */
+	inline T max() {
+		if (N > 0) {
+			T current = values[0];
+			for (unsigned int i = 1; i < N; i++) {
+				if (values[i] > current)
+					current = values[i];
+			}
+			return current;
+		} else
+			return 0;
+	}
+
 	/* Returns the dot product of this, and another vector */
 	inline T dot(Vector<T, N> other) {
 		T dotProduct = 0;

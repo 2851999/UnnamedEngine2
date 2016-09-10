@@ -22,23 +22,60 @@
  * The Enemy class
  *****************************************************************************/
 
-Enemy::Enemy(AsteroidsGame* game, Player* player) : Ship(game->getSoundSystem(), game->getResourceLoader()), player(player) {
-
+Enemy::Enemy(AsteroidsGame* game, Player* player) : Ship(game), player(player) {
+	setMovementSpeed(RandomUtils::randomFloat(4.0f, 8.0f));
 }
 
 Enemy::~Enemy() {
 
 }
 
+void Enemy::reset() {
+	//Reset this ship
+	Ship::reset();
+
+	//Assign a random position
+	setPosition(RandomUtils::randomFloat(-10, 10), RandomUtils::randomFloat(-10, 10), RandomUtils::randomFloat(-10, 10));
+}
+
 void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {
+	if (isAlive()) {
+		//AI stuff
+		Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
+
+		thrust(directionToPlayer);
+
+		float laserSpeed = 20.0f;
+		float currentDistance = (player->getPosition() - getPosition()).length();
+		float timeToReach = currentDistance / laserSpeed;
+
+		Vector3f newPosition = player->getPosition() + ((player->getVelocity() - getVelocity()) * timeToReach);
+
+		fireLasers((newPosition - getPosition()).normalise());
+
+		//Since rotation is a bit hard without quaternions at the moment, enemies are SPHERES OF DEATH
+	}
+
+	//Update the ship afterwards as the lasers renderer should be updated after firing
 	Ship::update(deltaSeconds, closestGroup);
+}
 
-	//AI stuff
-	Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
+/* Method used to check whether a laser has collided with anything */
+bool Enemy::checkCollision(PhysicsObject3D* laser) {
+	//Check the player
+	if (player->isAlive()) {
+		//Get the distance between the current laser object and the current enemy object
+		float distance = (laser->getPosition() - player->getPosition()).length();
 
-	setVelocity(directionToPlayer);
-
-	fireLasers(directionToPlayer);
-
-	//Since rotation is a bit hard without quaternions at the moment, enemies are SPHERES OF DEATH
+		//Check for an intersection with the asteroid
+		if (distance < 1.0f) {
+			//Remove health
+			player->removeHealth(1);
+			if (! player->isAlive())
+				//Create an explosion
+				getLasers()->explode(player->getPosition(), 2.0f);
+			return true;
+		}
+	}
+	return false;
 }

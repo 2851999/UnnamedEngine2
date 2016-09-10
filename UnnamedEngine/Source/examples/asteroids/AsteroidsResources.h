@@ -33,9 +33,14 @@ private:
 	Font* fontTitle = NULL;
 	Font* fontGUI = NULL;
 	Font* fontHeading = NULL;
+	Font* fontHeadingMono = NULL;
 
 	/* Various textures */
 	std::vector<Texture*> texturesButtons;
+
+	/* Various sounds */
+	AudioData* audioLaser = NULL;
+	AudioData* audioExplosion = NULL;
 public:
 	/* The constructor */
 	AsteroidsResources();
@@ -50,8 +55,12 @@ public:
 	inline Font* getFontTitle() const { return fontTitle; }
 	inline Font* getFontGUI() const { return fontGUI; }
 	inline Font* getFontHeading() const { return fontHeading; }
+	inline Font* getFontHeadingMono() const { return fontHeadingMono; }
 
 	inline const std::vector<Texture*>& getTexturesButtons() const { return texturesButtons; }
+
+	inline AudioData* getAudioLaser() const { return audioLaser; }
+	inline AudioData* getAudioExplosion() const { return audioExplosion; }
 };
 
 #endif /* EXAMPLES_ASTEROIDS_ASTEROIDSRESOURCES_H_ */

@@ -29,22 +29,53 @@ class Ship : public PhysicsObject3D {
 private:
 	/* The lasers for this ship */
 	Lasers* lasers;
+
+	/* States the health of this ship */
+	unsigned int health;
+
+	/* The movement speed for this ship */
+	float movementSpeed;
+
+	/* The maximum speed for this ship */
+	float maximumSpeed;
 public:
 	/* The constructor */
-	Ship(SoundSystem* soundSystem, const ResourceLoader& loader);
+	Ship(AsteroidsGame* game);
 
 	/* The destructor */
 	virtual ~Ship();
 
 	/* Method called to reset this ship */
-	void reset();
+	virtual void reset();
 
 	/* Update and render methods */
 	virtual void update(float deltaSeconds, AsteroidGroup& closestGroup);
 	void render();
 
+	/* Method used to remove health from this ship */
+	void removeHealth(unsigned int amount);
+
+	/* Called when an asteroid has been destroyed by this ship's lasers */
+	virtual void onAsteroidDestroyed(GameObject3D* asteroid) {}
+
+	/* Method used to check whether a laser has collided with anything */
+	virtual bool checkCollision(PhysicsObject3D* laser) { return false; }
+
 	/* Method called to fire this ship's lasers */
-	inline void fireLasers(Vector3f front) { lasers->fire(getPosition(), getRotation(), front); }
+	inline void fireLasers(Vector3f front) { lasers->fire(getPosition(), getRotation(), front, getVelocity()); }
+
+	/* Method called to thrust in a particular direction */
+	inline void thrust(Vector3f direction) { setAcceleration(direction * movementSpeed); }
+
+	/* Setters and getters */
+	inline void setHealth(unsigned int health) { this->health = health; }
+	inline void setMovementSpeed(float speed) { movementSpeed = speed; }
+	inline void setMaximumSpeed(float speed) { maximumSpeed = speed; }
+	inline Lasers* getLasers() { return lasers; }
+	inline unsigned int getHealth() { return health; }
+	inline bool isAlive() { return health > 0; }
+	inline float getMovementSpeed() { return movementSpeed; }
+	inline float getMaximumSpeed() { return maximumSpeed; }
 };
 
 

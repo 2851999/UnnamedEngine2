@@ -37,8 +37,14 @@ public:
 	/* The destructor */
 	virtual ~Enemy();
 
+	/* Method called to reset this ship/enemy */
+	void reset() override;
+
 	/* Method used to update this enemy */
 	void update(float deltaSeconds, AsteroidGroup& closestGroup) override;
+
+	/* Method used to check whether a laser has collided with anything */
+	virtual bool checkCollision(PhysicsObject3D* laser) override;
 };
 
 #endif /* EXAMPLES_ASTEROIDS_ENEMY_H_ */
