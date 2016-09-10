@@ -36,21 +36,17 @@ MainMenuMain::MainMenuMain(AsteroidsGame* game, GUIPanelGroup* panelGroup) : gam
 	//Create the buttons
 	buttonPlay = new GUIButton("Play", 400, 30, texturesButtons);
 	buttonPlay->setPosition(windowWidth / 2 - buttonPlay->getWidth() / 2, 140);
-	buttonPlay->addListener(this);
 
 	buttonHighscores = new GUIButton("Highscores", 400, 30, texturesButtons);
 	buttonHighscores->setPosition(windowWidth / 2 - buttonHighscores->getWidth() / 2, 180);
-	buttonHighscores->addListener(this);
 	panelGroup->assignButton(buttonHighscores, "Highscores");
 
 	buttonSettings = new GUIButton("Settings", 400, 30, texturesButtons);
 	buttonSettings->setPosition(windowWidth / 2 - buttonSettings->getWidth() / 2, 220);
-	buttonSettings->addListener(this);
 	panelGroup->assignButton(buttonSettings, "Settings");
 
 	buttonExit = new GUIButton("Exit", 400, 30, texturesButtons);
 	buttonExit->setPosition(windowWidth / 2 - buttonExit->getWidth() / 2, windowHeight - 50);
-	buttonExit->addListener(this);
 
 	//Get the title font
 	Font* titleFont = game->getResources().getFontTitle();
@@ -81,7 +77,7 @@ void MainMenuMain::onComponentClicked(GUIComponent* component) {
  * The MainMenuHighScores class
  *****************************************************************************/
 
-MainMenuHighScores::MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panelGroup) {
+MainMenuHighScores::MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panelGroup) : game(game) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
@@ -91,7 +87,6 @@ MainMenuHighScores::MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panel
 
 	buttonBack = new GUIButton("Back", 400, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 - buttonBack->getWidth() / 2, windowHeight - 50);
-	buttonBack->addListener(this);
 	panelGroup->assignButton(buttonBack, "Main");
 
 	//Get the title font
@@ -101,9 +96,56 @@ MainMenuHighScores::MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panel
 	GUILabel* titleLabel = new GUILabel("Highscores", titleFont);
 	titleLabel->setPosition(game->getSettings().windowWidth / 2 - titleFont->getWidth("Highscores") / 2, 40.0f);
 
+	//Get the header font
+	Font* headerFont = game->getResources().getFontHeadingMono();
+
+	//Create the highscores label
+	highscoresLabel = new GUILabel("", headerFont);
+
 	//Add the components to this panel
 	add(titleLabel);
+	add(highscoresLabel);
 	add(buttonBack);
+}
+
+void MainMenuHighScores::show() {
+	//The text to display
+	std::string text;
+
+	//The maximum name length
+	unsigned int maxLength = 16;
+
+	//The length of the current/longest names
+	unsigned int currentNameLength = 0;
+
+	//Get a referene to the highscores
+	Highscores& highscores = game->getHighscores();
+
+	//Go through the highscores
+	for (unsigned int i = 0; i < highscores.getNumHighscores(); i++) {
+		//Add onto the text
+		text += StrUtils::str(i + 1) + ". ";
+		//Get the current name's length
+		currentNameLength = highscores.getName(i).length();
+		//Check the length
+		if (currentNameLength > maxLength - 3)
+			//Add only the first part of the name
+			text += highscores.getName(i).substr(0, maxLength - 3) + "...";
+		else {
+			//Add on the name
+			text += highscores.getName(i);
+			//Add some spaces
+			for (unsigned int j = 0; j < maxLength - currentNameLength; j++)
+				text += " ";
+		}
+		//Add the score
+		text += "    " + StrUtils::str(highscores.getScore(i)) + "\n";
+	}
+
+	highscoresLabel->setText(text);
+	highscoresLabel->setPosition(game->getSettings().windowWidth / 2 - highscoresLabel->getWidth() / 2, 160.0f);
+
+	GUIPanel::show();
 }
 
 /*****************************************************************************
@@ -121,20 +163,16 @@ MainMenuSettings::MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGrou
 	//Create the buttons
 	buttonVideo = new GUIButton("Video", 400, 30, texturesButtons);
 	buttonVideo->setPosition(windowWidth / 2 - buttonVideo->getWidth() / 2, 140);
-	buttonVideo->addListener(this);
 	panelGroup->assignButton(buttonVideo, "SettingsVideo");
 
 	buttonAudio = new GUIButton("Audio", 400, 30, texturesButtons);
 	buttonAudio->setPosition(windowWidth / 2 - buttonAudio->getWidth() / 2, 180);
-	buttonAudio->addListener(this);
 
 	buttonControls = new GUIButton("Controls", 400, 30, texturesButtons);
 	buttonControls->setPosition(windowWidth / 2 - buttonControls->getWidth() / 2, 220);
-	buttonControls->addListener(this);
 
 	buttonBack = new GUIButton("Back", 400, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 - buttonBack->getWidth() / 2, windowHeight - 50);
-	buttonBack->addListener(this);
 	panelGroup->assignButton(buttonBack, "Main");
 
 	//Get the title font

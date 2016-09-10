@@ -40,23 +40,32 @@ GameOverMenu::GameOverMenu(AsteroidsGame* game, Player* player) : game(game), pl
 	background->update();
 
 	buttonExit = new GUIButton("Exit", 400, 30, game->getResources().getTexturesButtons());
-	buttonExit->setPosition(windowWidth / 2 - buttonExit->getWidth() / 2, windowHeight - 50);
-	buttonExit->addListener(this);
+	buttonExit->setPosition(windowWidth / 2 - buttonExit->getWidth() / 2, windowHeight - 50.0f);
 
 	//Setup the title font
 	Font* titleFont = game->getResources().getFontTitle();
 
 	//Create the label's
 	labelGameOver = new GUILabel("Game Over", titleFont);
-	labelGameOver->setPosition(windowWidth / 2 - labelGameOver->getWidth() / 2, windowHeight / 2 - labelGameOver->getHeight());
+	labelGameOver->setPosition(windowWidth / 2 - labelGameOver->getWidth() / 2, windowHeight / 2 - labelGameOver->getHeight() - 100.0f);
 
 	Font* headerFont = game->getResources().getFontHeading();
 
 	labelScore = new GUILabel("", headerFont);
 
+	//Setup the name textbox
+	nameTextBox = new GUITextBox(game->getResources().getTexturesButtons()[0], 200, 30);
+	nameTextBox->setFont(headerFont);
+	nameTextBox->setDefaultTextFont(headerFont);
+	nameTextBox->setPosition(windowWidth / 2 - nameTextBox->getWidth() / 2, labelGameOver->getPosition().getY() + labelGameOver->getHeight() + 80.0f);
+	nameTextBox->setDefaultText("Enter your name");
+	nameTextBox->setBorder(new GUIBorder(nameTextBox, 1.0f, Colour(Colour::BLACK, 0.1f)));
+	nameTextBox->selection->setColour(Colour(Colour::LIGHT_BLUE, 0.2f));
+
 	//Add the components to this panel
 	add(labelGameOver);
 	add(labelScore);
+	add(nameTextBox);
 	add(buttonExit);
 }
 
@@ -68,9 +77,29 @@ GameOverMenu::~GameOverMenu() {
 
 void GameOverMenu::show() {
 	game->getWindow()->enableCursor();
-	labelScore->setText("You scored " + StrUtils::str(player->getScore()) + "!");
-	labelScore->setPosition(game->getSettings().windowWidth / 2 - labelScore->getWidth() / 2, labelGameOver->getPosition().getY() + labelGameOver->getHeight() + 10.0f);
+
 	GUIPanel::show();
+
+	//Get a reference to the highscores
+	Highscores& highscores = game->getHighscores();
+
+	if (highscores.isHighscore(player->getScore())) {
+		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - A new highscore! :)");
+		nameTextBox->setActive(true);
+		nameTextBox->setVisible(true);
+	} else if (highscores.isOnTable(player->getScore())) {
+		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - You're on the highscore table!");
+		nameTextBox->setActive(true);
+		nameTextBox->setVisible(true);
+	} else {
+		nameTextBox->disable();
+		nameTextBox->setActive(false);
+		nameTextBox->setVisible(false);
+
+		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " :(");
+	}
+
+	labelScore->setPosition(game->getSettings().windowWidth / 2 - labelScore->getWidth() / 2, labelGameOver->getPosition().getY() + labelGameOver->getHeight() + 10.0f);
 }
 
 void GameOverMenu::hide() {
@@ -99,7 +128,15 @@ void GameOverMenu::render(bool overrideShader) {
 
 void GameOverMenu::onComponentClicked(GUIComponent* component) {
 	//Check whether any buttons were clicked
-	if (component == buttonExit)
+	if (component == buttonExit) {
+		//Check whether a highscore should be added
+		if (nameTextBox->isActive() && nameTextBox->getText().length() > 0) {
+			//Add the score
+			game->getHighscores().add(nameTextBox->getText(), player->getScore());
+			//Save the highscores
+			game->getHighscores().save();
+		}
 		//Go to the main menu
 		game->changeState(AsteroidsGame::MAIN_MENU);
+	}
 }

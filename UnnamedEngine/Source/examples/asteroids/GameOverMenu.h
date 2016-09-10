@@ -24,6 +24,7 @@
 #include "../../core/gui/Font.h"
 #include "../../core/gui/GUIPanel.h"
 #include "../../core/gui/GUILabel.h"
+#include "../../core/gui/GUITextBox.h"
 
 /*****************************************************************************
  * The GameOverMenu class sets up and manages the pause menu
@@ -49,6 +50,9 @@ private:
 	/* The labels */
 	GUILabel* labelGameOver;
 	GUILabel* labelScore;
+
+	/* Name textbox */
+	GUITextBox* nameTextBox;
 
 	/* The buttons on the menu */
 	GUIButton* buttonExit;

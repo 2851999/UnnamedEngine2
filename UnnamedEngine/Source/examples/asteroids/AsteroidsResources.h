@@ -33,6 +33,7 @@ private:
 	Font* fontTitle = NULL;
 	Font* fontGUI = NULL;
 	Font* fontHeading = NULL;
+	Font* fontHeadingMono = NULL;
 
 	/* Various textures */
 	std::vector<Texture*> texturesButtons;
@@ -54,6 +55,7 @@ public:
 	inline Font* getFontTitle() const { return fontTitle; }
 	inline Font* getFontGUI() const { return fontGUI; }
 	inline Font* getFontHeading() const { return fontHeading; }
+	inline Font* getFontHeadingMono() const { return fontHeadingMono; }
 
 	inline const std::vector<Texture*>& getTexturesButtons() const { return texturesButtons; }
 

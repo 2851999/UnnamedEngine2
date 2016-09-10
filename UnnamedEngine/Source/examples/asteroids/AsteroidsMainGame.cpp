@@ -121,6 +121,8 @@ void AsteroidsMainGame::start() {
 void AsteroidsMainGame::stop() {
 	//Hide the HUD
 	hud->hide();
+	//Hide the game over menu
+	gameOverMenu->hide();
 
 	//Show the mouse
 	game->getWindow()->enableCursor();

@@ -23,13 +23,6 @@
  *****************************************************************************/
 
 AsteroidsGame::AsteroidsGame() {
-	//Setup the resource loader
-	resourceLoader.setPath("C:/UnnamedEngine/examples/asteroids/");
-	resourceLoader.setPathTextures("textures/");
-	resourceLoader.setPathFonts("fonts/");
-	resourceLoader.setPathModels("models/");
-	resourceLoader.setPathShaders("shaders/");
-	resourceLoader.setPathAudio("audio/");
 	//Assign the current game state
 	currentState = MAIN_MENU;
 }
@@ -39,6 +32,14 @@ AsteroidsGame::~AsteroidsGame() {
 }
 
 void AsteroidsGame::initialise() {
+	//Setup the resource loader
+	resourceLoader.setPath("C:/UnnamedEngine/examples/asteroids/");
+	resourceLoader.setPathTextures("textures/");
+	resourceLoader.setPathFonts("fonts/");
+	resourceLoader.setPathModels("models/");
+	resourceLoader.setPathShaders("shaders/");
+	resourceLoader.setPathAudio("audio/");
+
 	//Setup the settings
 	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
@@ -46,9 +47,11 @@ void AsteroidsGame::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().videoVSync = true;
 	getSettings().videoMaxFPS = 0;
-	//getSettings().windowFullscreen = true;
-	//getSettings().videoResolution = VideoResolution::RES_1080P;
-	//SettingsUtils::writeToFile("H:/Storage/Users/Joel/Desktop/settingstest.txt", getSettings());
+
+	//Setup the highscores
+	highscores.setPath(resourceLoader.getPath() + "highscores.txt");
+	//Load the highscores
+	highscores.load();
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 }
