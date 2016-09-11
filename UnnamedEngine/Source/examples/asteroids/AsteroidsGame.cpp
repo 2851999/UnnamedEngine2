@@ -33,7 +33,7 @@ AsteroidsGame::~AsteroidsGame() {
 
 void AsteroidsGame::initialise() {
 	//Setup the resource loader
-	resourceLoader.setPath("C:/UnnamedEngine/examples/asteroids/");
+	resourceLoader.setPath("resources/examples/asteroids/");
 	resourceLoader.setPathTextures("textures/");
 	resourceLoader.setPathFonts("fonts/");
 	resourceLoader.setPathModels("models/");
@@ -43,10 +43,6 @@ void AsteroidsGame::initialise() {
 	//Setup the settings
 	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
-	getSettings().videoSamples = 16;
-	getSettings().videoMaxAnisotropicSamples = 16;
-	getSettings().videoVSync = true;
-	getSettings().videoMaxFPS = 0;
 
 	//Setup the highscores
 	highscores.setPath(resourceLoader.getPath() + "highscores.txt");

@@ -21,69 +21,93 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "Input.h"
 #include "../Window.h"
 
-/***************************************************************************************************
+/*****************************************************************************
  * The KeyboardShortcut class
- ***************************************************************************************************/
+ *****************************************************************************/
 
 class KeyboardShortcuts;
 
 class KeyboardShortcut {
-public:
+private:
+	/* The name given to this keyboard shortcut */
 	std::string name;
-	std::vector<int> keys;
-	std::vector<bool> states;
+public:
+	/* The keys that make up this shortcut - made up of their key code and
+	 * whether they are currently pressed */
+	std::map<int, bool> keys;
 
-	KeyboardShortcuts* instance;
-
+	/* The constructor */
 	KeyboardShortcut(std::string name, std::vector<int> keys);
 
-	void check();
+	/* The destrutor */
+	virtual ~KeyboardShortcut();
 
+	/* Returns whether this shorcut's keys are all pressed */
 	bool hasCompleted();
 
+	/* Should be called when a key is pressed */
 	void onKeyPressed(int code);
+
+	/* Should be called when a key is released */
 	void onKeyReleased(int code);
+
+	/* Setters and getters */
+	inline const std::string& getName() { return name; }
 };
 
-/***************************************************************************************************/
-
-/***************************************************************************************************
+/*****************************************************************************
  * The KeyboardShortcutListener class
- ***************************************************************************************************/
+ *****************************************************************************/
 
 class KeyboardShortcutListener {
 public:
+	/* The constructor */
 	KeyboardShortcutListener() {}
+
+	/* The destructor */
 	virtual ~KeyboardShortcutListener() {}
+
+	/* Method called when a shortcut is completed */
 	virtual void onShortcut(KeyboardShortcut* e) {}
 };
 
-/***************************************************************************************************/
-
-/***************************************************************************************************
+/*****************************************************************************
  * The KeyboardShortcuts class
- ***************************************************************************************************/
+ *****************************************************************************/
 
 class KeyboardShortcuts : public InputListener {
-public:
+private:
+	/* The listeners */
 	std::vector<KeyboardShortcutListener*> listeners;
-	std::vector<KeyboardShortcut*> shortcuts;
 
+	/* The shortcuts */
+	std::vector<KeyboardShortcut*> shortcuts;
+public:
+	/* The constructor */
 	KeyboardShortcuts() {
 		Window::getCurrentInstance()->getInputManager()->addListener(this);
 	}
 
-	void add(KeyboardShortcut* instance);
+	/* The destructor */
+	virtual ~KeyboardShortcuts() {}
+
+	/* Method used to add a keyboard shortcut */
+	inline void add(KeyboardShortcut* shortcut) { shortcuts.push_back(shortcut); }
+
+	/* Method used to add a listener */
 	inline void addListener(KeyboardShortcutListener* listener) { listeners.push_back(listener); }
+
+	/* Method used to call the onShorcut() method in all of the listeners */
 	void callOnShortcut(KeyboardShortcut* e);
+
+	/* Overridden methods from InputListener */
 	void onKeyPressed(int code) override;
 	void onKeyReleased(int code) override;
 };
-
-/***************************************************************************************************/
 
 #endif /* CORE_INPUT_KEYBOARDSHORTCUTS_H_ */

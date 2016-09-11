@@ -19,57 +19,57 @@
 #include "Utils.h"
 #include "Timer.h"
 
-/***************************************************************************************************
+/*****************************************************************************
  * The Timer class
- ***************************************************************************************************/
+ *****************************************************************************/
 
 Timer::Timer() {
 	reset();
 }
 
 void Timer::start() {
-	m_startTime = TimeUtils::getMilliseconds();
-	m_running = true;
-	m_stopped = false;
+	startTime = TimeUtils::getMilliseconds();
+	running = true;
+	stopped = false;
 }
 
 void Timer::pause() {
-	m_pauseStart = TimeUtils::getMilliseconds();
-	m_paused = true;
+	pauseStart = TimeUtils::getMilliseconds();
+	paused = true;
 }
 
 void Timer::resume() {
-	m_pauseTotal += TimeUtils::getMilliseconds() - m_pauseStart;
-	m_paused = false;
+	pauseTotal += TimeUtils::getMilliseconds() - pauseStart;
+	paused = false;
 }
 
 void Timer::stop() {
-	m_endTime = TimeUtils::getMilliseconds();
-	m_running = false;
-	m_stopped = true;
+	endTime = TimeUtils::getMilliseconds();
+	running = false;
+	stopped = true;
 }
 
 void Timer::reset() {
-	m_running = false;
-	m_paused = false;
-	m_stopped = false;
-	m_startTime = 0;
-	m_endTime = 0;
-	m_pauseStart = 0;
-	m_pauseTotal = 0;
+	running = false;
+	paused = false;
+	stopped = false;
+	startTime = 0;
+	endTime = 0;
+	pauseStart = 0;
+	pauseTotal = 0;
 }
 
 long Timer::getTime() {
-	if (m_stopped)
-		return m_endTime - m_startTime - m_pauseTotal;
-	else if (m_paused)
-		return m_pauseStart - m_startTime - m_pauseTotal;
+	if (stopped)
+		return endTime - startTime - pauseTotal;
+	else if (paused)
+		return pauseStart - startTime - pauseTotal;
 	else
-		return TimeUtils::getMilliseconds() - m_startTime - m_pauseTotal;
+		return TimeUtils::getMilliseconds() - startTime - pauseTotal;
 }
 
 bool Timer::hasTimePassed(long time) {
-	if (m_running || m_paused || m_stopped)
+	if (running || paused || stopped)
 		return getTime() >= time;
 	else
 		return false;

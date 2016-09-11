@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 6 | Experimental 2
+
+* Started cleanup of GUITextBox
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 6 | Experimental 1
 
 * More asteroids development

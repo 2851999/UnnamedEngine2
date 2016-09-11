@@ -183,6 +183,7 @@ class Settings;
 namespace SettingsUtils {
 	/* Writes settings to a file */
 	void writeToFile(std::string path, Settings& settings);
+
 	/* Returns settings loaded from a file */
 	Settings readFromFile(std::string path);
 }
@@ -192,7 +193,10 @@ namespace SettingsUtils {
  *****************************************************************************/
 
 namespace ClipboardUtils {
+	/* Sets the clipboard text */
 	void setText(std::string text);
+
+	/* Returns the current clipboard text */
 	std::string getText();
 }
 
