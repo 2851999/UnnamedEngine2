@@ -58,38 +58,47 @@ void AsteroidGroup::setup() {
 void AsteroidGroup::update(float deltaSeconds, Player* player) {
 	//Go through and update all of the asteroids in this group
 	for (unsigned int i = 0; i < objects.size(); i++) {
-		//Calculate the relative position between the player and the current asteroid
-		Vector3f relPos = player->getPosition() - objects[i]->getPosition();
-		//Calculate the distance between them
-		float distance = relPos.length();
-		//Check for a collision
-		if (distance < (9.21f / 2.0f * objects[i]->getScale().max()) + 0.5f) {
-			//Calculate the normal of the collision
-			Vector3f normal = relPos.normalise();
+		//Only perform collision testing if the object is visible
+		if (renderer->isAsteroidVisible(rendererStartIndex + i)) {
+			//Calculate the relative position between the player and the current asteroid
+			Vector3f relPos = player->getPosition() - objects[i]->getPosition();
+			//Calculate the distance between them
+			float distance = relPos.length();
+			//Check for a collision
+			if (distance < (9.21f / 2.0f * objects[i]->getScale().max()) + 0.5f) {
+				//Calculate the normal of the collision
+				Vector3f normal = relPos.normalise();
 
-			Vector3f relativeVelocity = player->getVelocity() - objects[i]->getVelocity();
+				//Calculate the relative velocity between the player and the asteroid
+				Vector3f relativeVelocity = player->getVelocity() - objects[i]->getVelocity();
 
-			std::cout << player->getVelocity().toString() << std::endl;
+				//Calculate the relative velocity along the normal
+				float velAlongNormal = relativeVelocity.dot(normal);
 
-			float velAlongNormal = relativeVelocity.dot(normal);
+				if (velAlongNormal <= 0) {
+					//Get a value for the restitution of the collision
+					float e = MathsUtils::min(player->getRestitution(), objects[i]->getRestitution());
 
-			if (velAlongNormal > 0)
-				return;
+					//Calculate the value of the impulse
+					float j = (-(1.0f + e) * velAlongNormal) / (1.0f / player->getMass() + 1.0f / objects[i]->getMass());
 
-			float e = MathsUtils::min(player->getRestitution(), objects[i]->getRestitution());
+					//Calculate the impulse
+					Vector3f impulse = normal * j;
 
-			float j = (-(1.0f + e) * velAlongNormal) / (1.0f / player->getMass() + 1.0f / objects[i]->getMass());
+					//Apply the impulse to the player and the asteroid - the greater the object's mass
+					//the less the impulse should effect it, so multiply by the inverse of the mass
+					player->setVelocity(player->getVelocity() + impulse * (1.0f / player->getMass()));
+					objects[i]->setVelocity(objects[i]->getVelocity() - impulse * (1.0f / objects[i]->getMass()));
+				}
+			}
 
-			Vector3f impulse = normal * j;
-			player->setVelocity(player->getVelocity() + impulse * (1.0f / player->getMass()));
-			objects[i]->setVelocity(objects[i]->getVelocity() - impulse * (1.0f / objects[i]->getMass()));
-			//objects[i]->setAcceleration(normal * 5.0f);
+			//Update the physics of the asteroid
+			objects[i]->updatePhysics(deltaSeconds);
+
+			//If the velocity is not <= 0, slow it down by dividing by a value
+			if (objects[i]->getVelocity().length() > 0.0f)
+				objects[i]->setVelocity(objects[i]->getVelocity() / 1.01f);
 		}
-
-		objects[i]->updatePhysics(deltaSeconds);
-
-		if (objects[i]->getVelocity().length() > 0.0f)
-			objects[i]->setVelocity(objects[i]->getVelocity() / 1.01f);
 	}
 	//Update the renderer
 	renderer->update((*this));

@@ -55,7 +55,7 @@ public:
 	virtual void update() override;
 
 	/* Method used to render this panel */
-	virtual void render(bool overrideShader = false) override;
+	virtual void render() override;
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override {}

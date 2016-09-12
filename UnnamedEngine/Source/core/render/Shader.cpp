@@ -26,6 +26,8 @@
  * The Shader class
  *****************************************************************************/
 
+Shader* Shader::currentShader = NULL;
+
 Shader::Shader(GLint vertexShader, GLint fragmentShader) {
 	this->program = glCreateProgram();
 	this->vertexShader = vertexShader;
@@ -67,11 +69,15 @@ void Shader::detach(GLuint shader) {
 }
 
 void Shader::use() {
-	glUseProgram(program);
+	if (currentShader != this) {
+		glUseProgram(program);
+		currentShader = this;
+	}
 }
 
 void Shader::stopUsing() {
 	glUseProgram(0);
+	currentShader = NULL;
 }
 
 void Shader::destroy() {

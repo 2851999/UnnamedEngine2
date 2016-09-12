@@ -66,7 +66,7 @@ void HUD::update() {
 	labelScore->setText("Score: " + StrUtils::str(player->getScore()));
 }
 
-void HUD::render(bool overrideShader) {
+void HUD::render() {
 	glDisable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);

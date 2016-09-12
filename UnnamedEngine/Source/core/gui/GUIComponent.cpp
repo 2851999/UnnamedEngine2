@@ -162,7 +162,7 @@ void GUIComponent::update() {
 	}
 }
 
-void GUIComponent::render(bool overrideShader) {
+void GUIComponent::render() {
 	if (visible) {
 		if (border)
 			border->render();

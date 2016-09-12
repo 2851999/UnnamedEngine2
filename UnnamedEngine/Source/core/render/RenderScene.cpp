@@ -54,7 +54,7 @@ void RenderScene3D::render() {
 				for (unsigned int j = 0; j < objects.size(); j++) {
 					shadowMapShader->setUniformMatrix4("LightSpaceMatrix", (lights[i]->getLightSpaceMatrix() * objects[j]->getModelMatrix()));
 
-					objects[i]->render(true);
+					objects[i]->render();
 				}
 
 				shadowMapShader->stopUsing();
@@ -83,7 +83,7 @@ void RenderScene3D::render() {
 
 		for (unsigned int i = 0; i < objects.size(); i++) {
 			//if (((Camera3D*) Renderer::getCamera())->getFrustum().testSphere(((GameObject3D*) objects[i])->getPosition(), 1.0f))
-				objects[i]->render(true);
+				objects[i]->render();
 		}
 
 		//Setup blending
@@ -117,7 +117,7 @@ void RenderScene3D::render() {
 					lightingShader->setUniformMatrix4("ModelMatrix", modelMatrix);
 					lightingShader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
 
-					objects[o]->render(true);
+					objects[o]->render();
 				//}
 			}
 

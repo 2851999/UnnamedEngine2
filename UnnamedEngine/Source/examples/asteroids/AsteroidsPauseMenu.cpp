@@ -77,7 +77,7 @@ void AsteroidsPauseMenu::hide() {
 	GUIPanel::hide();
 }
 
-void AsteroidsPauseMenu::render(bool overrideShader) {
+void AsteroidsPauseMenu::render() {
 	glDisable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);

@@ -233,7 +233,7 @@ void Font::render() {
 
 		shader->setUniformMatrix4("ProjectionViewMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
 
-		object3D->render(true);
+		object3D->render();
 
 		shader->stopUsing();
 	} else

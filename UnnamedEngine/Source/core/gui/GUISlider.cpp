@@ -84,18 +84,20 @@ void GUISlider::onComponentRender() {
 
 void GUISlider::enable() {
 	GUIComponent::enable();
-	//Enable the slider button
-	button->enable();
 }
 
 void GUISlider::disable() {
 	GUIComponent::disable();
-	//Disable the slider button
-	button->disable();
+}
+
+void GUISlider::onMouseMoved(double x, double y, double dx, double dy) {
+	GUIComponent::onMouseMoved(x, y, dx, dy);
+	this->button->onMouseMoved(x, y, dx, dy);
 }
 
 void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 	GUIComponent::onMouseDragged(x, y, dx, dy);
+	this->button->onMouseDragged(x, y, dx, dy);
 	//Make sure this is visible and active
 	if (visible && active) {
 		float width = getWidth();
@@ -130,15 +132,17 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 
 void GUISlider::onMousePressed(int button) {
 	GUIComponent::onMousePressed(button);
+	this->button->onMousePressed(button);
 
 	if (visible && active) {
-		if (mouseClicked && ! dragging)
+		if (this->button->isClicked() && ! dragging)
 			dragging = true;
 	}
 }
 
 void GUISlider::onMouseReleased(int button) {
 	GUIComponent::onMouseReleased(button);
+	this->button->onMouseReleased(button);
 
 	if (visible && active) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && dragging)

@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 6 | Experimental 5
+
+* Changed Shader so the current shader is stored, and a new
+  one will only be used if necessary
+
+* Removed the overrideShader variable everywhere
+
+* Fixed bug: GUISlider only moved the button when it was
+             clicked as opposed to its button being clicked
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 6 | Experimental 4
 
 * More asteroids development

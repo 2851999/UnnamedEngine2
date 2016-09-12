@@ -54,7 +54,7 @@ public:
 	virtual void update() override;
 
 	/* Method used to render the HUD*/
-	virtual void render(bool overrideShader = false) override;
+	virtual void render() override;
 };
 
 #endif /* EXAMPLES_ASTEROIDS_HUD_H_ */
