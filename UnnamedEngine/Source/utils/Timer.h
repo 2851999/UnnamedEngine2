@@ -19,19 +19,19 @@
 #ifndef UTILS_TIMER_H_
 #define UTILS_TIMER_H_
 
-/***************************************************************************************************
+/*****************************************************************************
  * The Timer class
- ***************************************************************************************************/
+ *****************************************************************************/
 
 class Timer {
 private:
-	bool m_running;
-	bool m_paused;
-	bool m_stopped;
-	long m_startTime;
-	long m_endTime;
-	long m_pauseStart;
-	long m_pauseTotal;
+	bool running;
+	bool paused;
+	bool stopped;
+	long startTime;
+	long endTime;
+	long pauseStart;
+	long pauseTotal;
 public:
 	Timer();
 	void start();
@@ -48,9 +48,9 @@ public:
 	inline float getSeconds() { return ((float) getTime()) / 1000.0f; }
 	inline float getMinutes() { return ((float) getTime()) / 1000.0f / 60.0f; }
 	inline float getHours() { return ((float) getTime()) / 1000.0f / 60.0f / 60.0f; }
-	inline bool isRunning() { return m_running; }
-	inline bool isPaused() { return m_paused; }
-	inline bool isStopped() { return m_stopped; }
+	inline bool isRunning() { return running; }
+	inline bool isPaused() { return paused; }
+	inline bool isStopped() { return stopped; }
 };
 
 #endif /* UTILS_TIME_H_ */

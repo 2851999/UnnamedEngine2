@@ -23,13 +23,13 @@
 
 class Billboard : public GameObject3D {
 public:
-	Billboard(float width, float height) : GameObject3D(new Mesh(MeshBuilder::createQuad3D(width, height)), Renderer::getRenderShader("Billboard"), width, height) {
+	Billboard(float width, float height) : GameObject3D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad3D(width, height)) }, Renderer::getRenderShader("Billboard"), width, height) {
 		getMaterial()->setDiffuseColour(Colour::RED);
 	}
 
 	virtual void update() override {}
 
-	virtual void render(bool overrideShaders) override {
+	virtual void render() override {
 		Shader* shader = getShader();
 		shader->use();
 

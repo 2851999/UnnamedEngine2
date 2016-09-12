@@ -63,6 +63,12 @@ private:
 
 	/* The pause button */
 	InputBindingButton* pauseButton;
+
+	/* Timer for the game */
+	Timer* timer;
+
+	/* The time before the next enemy */
+	float timeForNextEnemy;
 public:
 	/* The constructor */
 	AsteroidsMainGame(AsteroidsGame* game);
@@ -79,6 +85,9 @@ public:
 	/* Method that finds and returns a reference to the closest asteroid
 	 * group to a position */
 	AsteroidGroup& findClosestAsteroids(const Vector3f& position);
+
+	/* Method used to spawn another enemy (if possible) */
+	void spawnEnemy();
 
 	/* The update and render methods */
 	void update();

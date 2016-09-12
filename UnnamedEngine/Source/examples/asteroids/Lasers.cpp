@@ -93,7 +93,7 @@ void Lasers::reset() {
 
 void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	//Get the closest asteroids
-	std::vector<GameObject3D*>& closestAsteroids = closestGroup.getObjects();
+	std::vector<PhysicsObject3D*>& closestAsteroids = closestGroup.getObjects();
 
 	//Go through each laser object and update its physics
 	for (unsigned int i = 0; i < objects.size(); i++) {

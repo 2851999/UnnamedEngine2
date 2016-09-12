@@ -70,7 +70,7 @@ public:
 	virtual void hide() override;
 
 	/* Methods used to render the menu */
-	virtual void render(bool overrideShader = false) override;
+	virtual void render() override;
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override;

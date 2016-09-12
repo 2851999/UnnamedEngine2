@@ -162,7 +162,7 @@ void GUIComponent::update() {
 	}
 }
 
-void GUIComponent::render(bool overrideShader) {
+void GUIComponent::render() {
 	if (visible) {
 		if (border)
 			border->render();
@@ -176,7 +176,7 @@ void GUIComponent::render(bool overrideShader) {
 void GUIComponent::onMousePressed(int button) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		if (active && visible && ! occluded && mouseHover) {
-			mouseClicked = ! mouseClicked;
+			mouseClicked = true;
 			onChangeState();
 		}
 	}
@@ -196,22 +196,16 @@ void GUIComponent::onMouseReleased(int button) {
 void GUIComponent::onMouseMoved(double x, double y, double dx, double dy) {
 	if (active && visible) {
 		if (contains(x, y)) {
-			if (! occluded) {
-				if (! mouseHover) {
-					mouseHover = true;
-					onChangeState();
-				}
-			} else {
-				if (mouseHover) {
-					mouseHover = false;
-					onChangeState();
-				}
-			}
-		} else {
-			if (mouseHover) {
+			if (! occluded && ! mouseHover) {
+				mouseHover = true;
+				onChangeState();
+			} else if (occluded && mouseHover) {
 				mouseHover = false;
 				onChangeState();
 			}
+		} else if (mouseHover) {
+			mouseHover = false;
+			onChangeState();
 		}
 	}
 }

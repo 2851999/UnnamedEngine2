@@ -84,18 +84,20 @@ void GUISlider::onComponentRender() {
 
 void GUISlider::enable() {
 	GUIComponent::enable();
-	//Enable the slider button
-	button->enable();
 }
 
 void GUISlider::disable() {
 	GUIComponent::disable();
-	//Disable the slider button
-	button->disable();
+}
+
+void GUISlider::onMouseMoved(double x, double y, double dx, double dy) {
+	GUIComponent::onMouseMoved(x, y, dx, dy);
+	this->button->onMouseMoved(x, y, dx, dy);
 }
 
 void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 	GUIComponent::onMouseDragged(x, y, dx, dy);
+	this->button->onMouseDragged(x, y, dx, dy);
 	//Make sure this is visible and active
 	if (visible && active) {
 		float width = getWidth();
@@ -104,8 +106,7 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 		Vector2f p = getPosition();
 		//Check the direction of this slider
 		if (direction == VERTICAL) {
-			if (button->isMouseHovering() || dragging) {
-				dragging = true;
+			if (dragging) {
 				if (y > p.getY() && y < p.getY() + height) {
 					button->getRelPosition().setY(button->getRelPosition().getY() + dy);
 					//Set the slider value
@@ -113,8 +114,7 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 				}
 			}
 		} else if (direction == HORIZONTAL) {
-			if (button->isMouseHovering() || dragging) {
-				dragging = true;
+			if (dragging) {
 				if (x > p.getX() && x < p.getX() + width) {
 					button->getRelPosition().setX(button->getRelPosition().getX() + dx);
 					//Set the slider value
@@ -130,8 +130,19 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 	}
 }
 
+void GUISlider::onMousePressed(int button) {
+	GUIComponent::onMousePressed(button);
+	this->button->onMousePressed(button);
+
+	if (visible && active) {
+		if (this->button->isClicked() && ! dragging)
+			dragging = true;
+	}
+}
+
 void GUISlider::onMouseReleased(int button) {
 	GUIComponent::onMouseReleased(button);
+	this->button->onMouseReleased(button);
 
 	if (visible && active) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && dragging)

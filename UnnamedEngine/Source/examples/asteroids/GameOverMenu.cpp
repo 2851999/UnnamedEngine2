@@ -107,7 +107,7 @@ void GameOverMenu::hide() {
 	GUIPanel::hide();
 }
 
-void GameOverMenu::render(bool overrideShader) {
+void GameOverMenu::render() {
 	glDisable(GL_DEPTH_TEST);
 
 	glEnable(GL_BLEND);

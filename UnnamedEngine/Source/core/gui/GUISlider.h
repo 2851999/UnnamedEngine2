@@ -63,7 +63,9 @@ public:
 	virtual void disable() override;
 
 	/* The needed input methods */
+	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
 	virtual void onMouseDragged(double x, double y, double dx, double dy) override;
+	virtual void onMousePressed(int button) override;
 	virtual void onMouseReleased(int button) override;
 };
 

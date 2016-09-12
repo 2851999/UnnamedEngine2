@@ -23,13 +23,10 @@
  * The GameObject class
  *****************************************************************************/
 
-void GameObject::render(bool overrideShader) {
+void GameObject::render() {
 	if (hasMesh()) {
-		if (! overrideShader)
-			renderShader->getShader()->use();
+		renderShader->getShader()->use();
 		Renderer::render(meshes, getModelMatrix(), renderShader);
-		if (! overrideShader)
-			renderShader->getShader()->stopUsing();
 	}
 }
 

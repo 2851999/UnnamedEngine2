@@ -32,6 +32,8 @@
 
 class Shader : public Resource {
 private:
+	static Shader* currentShader;
+
 	/* OpenGL shader stuff */
 	GLint program = -1;
 	GLint vertexShader = -1;

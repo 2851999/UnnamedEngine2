@@ -242,7 +242,7 @@ public:
 	virtual void update() override;
 
 	/* The method used to render this component */
-	virtual void render(bool overrideShader = false) override;
+	virtual void render() override;
 
 	/* The input methods */
 	virtual void onKeyPressed(int key) override {}

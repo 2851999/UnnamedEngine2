@@ -79,7 +79,7 @@ void GUIPanel::update() {
 	}
 }
 
-void GUIPanel::render(bool overrideShader) {
+void GUIPanel::render() {
 	//Ensure this panel is visible
 	if (visible) {
 		//Go through and render all of the components in this panel

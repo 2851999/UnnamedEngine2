@@ -64,7 +64,7 @@ public:
 
 	/* Overrideable methods to update and render the GameObject */
 	virtual void update() {}
-	virtual void render(bool overrideShader = false);
+	virtual void render();
 
 	/* Method used to add a mesh */
 	void addMesh(Mesh* mesh) {

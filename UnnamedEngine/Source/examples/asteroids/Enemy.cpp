@@ -34,8 +34,10 @@ void Enemy::reset() {
 	//Reset this ship
 	Ship::reset();
 
+	setHealth(1);
+
 	//Assign a random position
-	setPosition(RandomUtils::randomFloat(-10, 10), RandomUtils::randomFloat(-10, 10), RandomUtils::randomFloat(-10, 10));
+	setPosition(RandomUtils::randomFloat(-100, 100), RandomUtils::randomFloat(-100, 100), RandomUtils::randomFloat(-100, 100));
 }
 
 void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {

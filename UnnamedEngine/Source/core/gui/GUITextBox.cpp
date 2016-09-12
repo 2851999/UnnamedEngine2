@@ -19,33 +19,40 @@
 #include <cctype>
 #include "GUITextBox.h"
 
-/***************************************************************************************************
+/*****************************************************************************
  * The GUITextBoxCursor class
- ***************************************************************************************************/
+ *****************************************************************************/
 
 GUITextBoxCursor::GUITextBoxCursor(GUITextBox* textBox, float thickness) : GUIComponentRenderer(thickness, textBox->getHeight() - 2) {
-	colour = Colour(-1.0f, -1.0f, -1.0f, -1.0f);
+	//Set the width
 	setWidth(thickness);
+	//Setup this cursor
 	setup(textBox);
 }
 
+GUITextBoxCursor::~GUITextBoxCursor() {
+
+}
+
 void GUITextBoxCursor::setup(GUITextBox* textBox) {
+	//Assign the text box instance
 	this->textBox = textBox;
 	//setHeight(textBox->getFont()->getHeight("A"));
+	//Assign the default colour
 	setColour(Colour::BLACK);
+	//Create and start the timer
 	timer = new Timer();
 	timer->start();
+	//Assign the default time between blink
 	timeBetweenBlink = 600;
+	//Cursor starts off hidden
 	cursorShown = false;
-	if (colour.getR() != -1.0f)
-		setColour(colour);
-	if (texture != NULL)
-		setTexture(texture);
 }
 
 Colour GUITextBoxCursor::getColour() {
 	return getColours()[0];
 }
+
 Texture* GUITextBoxCursor::getTexture() {
 	return getTextures()[0];
 }
@@ -59,50 +66,65 @@ bool GUITextBoxCursor::hasTexture() {
 }
 
 void GUITextBoxCursor::render() {
+	//Check whether the required time has passed for the cursor to change
+	//state
 	if (timer->hasTimePassed(timeBetweenBlink)) {
+		//Change the cursor's current state
 		cursorShown = ! cursorShown;
+		//Restart the timer
 		timer->restart();
 	}
+	//Check whether the cursor is currently shown
 	if (cursorShown) {
+		//Get the text box's current position
 		Vector2f p = textBox->getPosition();
+		//Calculate the x and y position the cursor should be on the screen
 		float x = 1 + p.getX() + (textBox->getFont()->getWidth(StrUtils::substring(textBox->renderText, 0, textBox->cursorIndex - textBox->viewIndexStart)));
 		float y = (p.getY() + (textBox->getHeight() / 2)) - (getHeight() / 2);
+		//Assign the cursor position
 		setPosition(x, y);
+		//Update and render the cursor
 		GUIComponentRenderer::update();
 		GUIComponentRenderer::render();
 	}
 }
 
 void GUITextBoxCursor::showCursor() {
+	//Restart the timer and show the cursor
 	timer->restart();
 	cursorShown = true;
 }
 
-/***************************************************************************************************/
-
-/***************************************************************************************************
+/*****************************************************************************
  * The GUITextBoxSelection class
- ***************************************************************************************************/
+ *****************************************************************************/
 
 GUITextBoxSelection::GUITextBoxSelection(GUITextBox* textBox) : GUIFill(textBox->getWidth(), textBox->getHeight(), Colour::BLACK) {
-	colour = Colour(-1.0f, -1.0f, -1.0f, -1.0f);
+	//Setup this selecion
 	setup(textBox);
 }
 
+GUITextBoxSelection::~GUITextBoxSelection() {
+
+}
+
 void GUITextBoxSelection::setup(GUITextBox* textBox) {
+	//Assign the text box
 	this->textBox = textBox;
+	//Assign the maximum width/height
 	setSize(textBox->getWidth(), textBox->getHeight());
-	if (colour.getR() != -1.0f)
-		setColour(colour);
-	if (texture != NULL)
-		setTexture(texture);
 }
 
 void GUITextBoxSelection::render() {
+	//Check whether there is a selection within the text box
 	if (textBox->isSelection) {
+		//Get the position of the text box
 		Vector2f p = textBox->getPosition();
+		//The x position of the start of the selection
 		float selectionX = 0;
 		try {
+			//Check whether the start of the selection is before or after
+			//the end of the selection
 			if (textBox->selectionIndexStart < textBox->selectionIndexEnd)
 				selectionX = p.getX() + textBox->getFont()->getWidth(StrUtils::substring(textBox->renderText, 0, textBox->selectionIndexStart - textBox->viewIndexStart));
 			else
@@ -110,22 +132,27 @@ void GUITextBoxSelection::render() {
 		} catch (int e) {
 
 		}
+		//The y position of the selection is the same as the y position
+		//of the text box
 		float selectionY = p.getY();
+		//Get the width and height of the selection
 		float selectionWidth = textBox->getFont()->getWidth(textBox->getRenderTextSelection());
 		float selectionHeight = textBox->getHeight();
+		//Update this fill to the current dimensions of the selection
 		updateWidth(selectionWidth);
 		updateHeight(selectionHeight);
-		position = Vector2f(selectionX, selectionY);
+		//Assign the position
+		setPosition(selectionX, selectionY);
+
+		//Update and render this fill
 		GUIFill::update();
 		GUIFill::render();
 	}
 }
 
-/***************************************************************************************************/
-
-/***************************************************************************************************
+/*****************************************************************************
  * The GUITextBox class
- ***************************************************************************************************/
+ *****************************************************************************/
 
 GUITextBox::GUITextBox(float width, float height) :
 			GUIComponent(width, height) {
@@ -147,7 +174,15 @@ GUITextBox::GUITextBox(Texture* texture, Colour colour, float width, float heigh
 	setup();
 }
 
+GUITextBox::~GUITextBox() {
+	//Delete the created resources
+	delete cursor;
+	delete selection;
+	delete shortcuts;
+}
+
 void GUITextBox::setup() {
+	//Assign all of the default values
 	text = "";
 	renderText = "";
 	selected = false;
@@ -162,58 +197,24 @@ void GUITextBox::setup() {
 	selectionIndexStart = 0;
 	selectionIndexEnd = 0;
 	selection = new GUITextBoxSelection(this);
+	//Setup the keyboard shortcuts
 	shortcuts = new KeyboardShortcuts();
 	shortcuts->addListener(this);
 
-	std::vector<int> shiftLeftKeys1;
-	shiftLeftKeys1.push_back(GLFW_KEY_LEFT_SHIFT);
-	shiftLeftKeys1.push_back(GLFW_KEY_LEFT);
-	std::vector<int> shiftLeftKeys2;
-	shiftLeftKeys2.push_back(GLFW_KEY_RIGHT_SHIFT);
-	shiftLeftKeys2.push_back(GLFW_KEY_LEFT);
+	shortcuts->add(new KeyboardShortcut("Shift-Left", std::vector<int> { GLFW_KEY_LEFT_SHIFT, GLFW_KEY_LEFT }));
+	shortcuts->add(new KeyboardShortcut("Shift-Left", std::vector<int> { GLFW_KEY_RIGHT_SHIFT, GLFW_KEY_LEFT }));
 
-	std::vector<int> shiftRightKeys1;
-	shiftRightKeys1.push_back(GLFW_KEY_LEFT_SHIFT);
-	shiftRightKeys1.push_back(GLFW_KEY_RIGHT);
-	std::vector<int> shiftRightKeys2;
-	shiftRightKeys2.push_back(GLFW_KEY_RIGHT_SHIFT);
-	shiftRightKeys2.push_back(GLFW_KEY_RIGHT);
+	shortcuts->add(new KeyboardShortcut("Shift-Right", std::vector<int> { GLFW_KEY_LEFT_SHIFT, GLFW_KEY_RIGHT }));
+	shortcuts->add(new KeyboardShortcut("Shift-Right", std::vector<int> { GLFW_KEY_RIGHT_SHIFT, GLFW_KEY_RIGHT }));
 
-	std::vector<int> cutKeys1;
-	cutKeys1.push_back(GLFW_KEY_LEFT_CONTROL);
-	cutKeys1.push_back(GLFW_KEY_X);
-	std::vector<int> cutKeys2;
-	cutKeys2.push_back(GLFW_KEY_RIGHT_CONTROL);
-	cutKeys2.push_back(GLFW_KEY_X);
+	shortcuts->add(new KeyboardShortcut("Cut", std::vector<int> { GLFW_KEY_LEFT_CONTROL, GLFW_KEY_X }));
+	shortcuts->add(new KeyboardShortcut("Cut", std::vector<int> { GLFW_KEY_RIGHT_CONTROL, GLFW_KEY_X }));
 
-	std::vector<int> copyKeys1;
-	copyKeys1.push_back(GLFW_KEY_LEFT_CONTROL);
-	copyKeys1.push_back(GLFW_KEY_C);
-	std::vector<int> copyKeys2;
-	copyKeys2.push_back(GLFW_KEY_RIGHT_CONTROL);
-	copyKeys2.push_back(GLFW_KEY_C);
+	shortcuts->add(new KeyboardShortcut("Copy", std::vector<int> { GLFW_KEY_LEFT_CONTROL, GLFW_KEY_C }));
+	shortcuts->add(new KeyboardShortcut("Copy", std::vector<int> { GLFW_KEY_RIGHT_CONTROL, GLFW_KEY_C }));
 
-	std::vector<int> pasteKeys1;
-	pasteKeys1.push_back(GLFW_KEY_LEFT_CONTROL);
-	pasteKeys1.push_back(GLFW_KEY_V);
-	std::vector<int> pasteKeys2;
-	pasteKeys2.push_back(GLFW_KEY_RIGHT_CONTROL);
-	pasteKeys2.push_back(GLFW_KEY_V);
-
-	shortcuts->add(new KeyboardShortcut("Shift-Left", shiftLeftKeys1));
-	shortcuts->add(new KeyboardShortcut("Shift-Left", shiftLeftKeys2));
-
-	shortcuts->add(new KeyboardShortcut("Shift-Right", shiftRightKeys1));
-	shortcuts->add(new KeyboardShortcut("Shift-Right", shiftRightKeys2));
-
-	shortcuts->add(new KeyboardShortcut("Cut", cutKeys1));
-	shortcuts->add(new KeyboardShortcut("Cut", cutKeys2));
-
-	shortcuts->add(new KeyboardShortcut("Copy", copyKeys1));
-	shortcuts->add(new KeyboardShortcut("Copy", copyKeys2));
-
-	shortcuts->add(new KeyboardShortcut("Paste", pasteKeys1));
-	shortcuts->add(new KeyboardShortcut("Paste", pasteKeys2));
+	shortcuts->add(new KeyboardShortcut("Paste", std::vector<int> { GLFW_KEY_LEFT_CONTROL, GLFW_KEY_V }));
+	shortcuts->add(new KeyboardShortcut("Paste", std::vector<int> { GLFW_KEY_RIGHT_CONTROL, GLFW_KEY_V }));
 }
 
 void GUITextBox::onComponentUpdate() {}
@@ -232,7 +233,7 @@ void GUITextBox::onComponentRender() {
 	Vector2f p = getPosition();
 
 	float textX = p.getX() + 1;
-	float textY = (p.getY() + (getHeight() / 2) + (f->getHeight(renderText) / 2));
+	float textY = (p.getY() + (getHeight() / 2) + (f->getHeight("|") / 2));
 
 	f->render(renderText, textX, textY);
 
@@ -254,7 +255,7 @@ void GUITextBox::updateRenderText() {
 		renderText = maskStr(renderText, mask);
 }
 
-std::string GUITextBox::maskStr(std::string s, std::string mask) {
+std::string GUITextBox::maskStr(const std::string& s, const std::string& mask) {
 	std::string maskedString = "";
 	for (unsigned int a = 0; a < s.length(); a++)
 		maskedString += mask;
@@ -565,7 +566,7 @@ void GUITextBox::onMouseDragged(double x, double y, double dx, double dy) {
 }
 
 void GUITextBox::onShortcut(KeyboardShortcut* e) {
-	if (e->name == "Shift-Left") {
+	if (e->getName() == "Shift-Left") {
 		//Make sure the cursor's current index is more than 0
 		if (cursorIndex > 0) {
 			//Check the cursor index and viewing index
@@ -589,7 +590,7 @@ void GUITextBox::onShortcut(KeyboardShortcut* e) {
 		}
 		if (selectionIndexEnd > 0)
 			selectionIndexEnd--;
-	} else if (e->name == "Shift-Right") {
+	} else if (e->getName() == "Shift-Right") {
 		//Make sure the cursor's current index is less than the length of the text
 		if (cursorIndex < text.length()) {
 			//Check the cursor index and viewing index
@@ -613,12 +614,12 @@ void GUITextBox::onShortcut(KeyboardShortcut* e) {
 		}
 		if (selectionIndexEnd < text.length())
 			selectionIndexEnd++;
-	} else if (e->name == "Cut") {
+	} else if (e->getName() == "Cut") {
 		if (isSelection) {
 			ClipboardUtils::setText(getSelection());
 			deleteSelection();
 		}
-	} else if (e->name == "Paste") {
+	} else if (e->getName() == "Paste") {
 		if (isSelection)
 			deleteSelection();
 
@@ -629,7 +630,7 @@ void GUITextBox::onShortcut(KeyboardShortcut* e) {
 
 		cursorIndex = text.length() - back.length();
 		viewIndexEnd = text.length();
-	} else if (e->name == "Copy") {
+	} else if (e->getName() == "Copy") {
 		if (isSelection)
 			ClipboardUtils::setText(getSelection());
 	}
@@ -647,5 +648,3 @@ void GUITextBox::setText(std::string text) {
 	this->text = text;
 	viewIndexEnd = text.length();
 }
-
-/***************************************************************************************************/

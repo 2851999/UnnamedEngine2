@@ -76,6 +76,8 @@ public:
 
 void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
+	getSettings().videoVSync = false;
+	getSettings().videoMaxFPS = 0;
 }
 
 void Test::created() {

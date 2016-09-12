@@ -18,58 +18,54 @@
 
 #include "KeyboardShortcuts.h"
 
-/***************************************************************************************************
+/*****************************************************************************
  * The KeyboardShortcut class
- ***************************************************************************************************/
+ *****************************************************************************/
 
 KeyboardShortcut::KeyboardShortcut(std::string name, std::vector<int> keys) {
+	//Assign the name
 	this->name = name;
-	this->keys = keys;
+	//Go though each key provided and add them to the keys list
 	for (unsigned int a = 0; a < keys.size(); a++)
-		this->states.push_back(false);
-	instance = NULL;
+		this->keys.insert(std::pair<int, bool>(keys[a], false));
 }
 
-void KeyboardShortcut::check() {
-	if (hasCompleted()) {
-		if (instance != NULL) {
-			instance->callOnShortcut(this);
-		}
-	}
+KeyboardShortcut::~KeyboardShortcut() {
+
 }
 
 bool KeyboardShortcut::hasCompleted() {
 	bool completed = true;
-	for (unsigned int a = 0; a < keys.size(); a++)
-		completed = completed && states[a];
+	//Only make completed = true when all of the keys states are also true
+	for (auto& iterator : keys)
+		completed = completed && iterator.second;
 	return completed;
 }
 
 void KeyboardShortcut::onKeyPressed(int code) {
-	for (unsigned int a = 0; a < keys.size(); a++) {
-		if (code == keys[a]) {
-			states[a] = true;
-			check();
-		}
-	}
+	//Check whether one of the keys has the same key code
+	if (keys.count(code) > 0)
+		//Update it's state
+		keys.at(code) = true;
 }
 
 void KeyboardShortcut::onKeyReleased(int code) {
-	for (unsigned int a = 0; a < keys.size(); a++) {
-		if (code == keys[a])
-			states[a] = false;
-	}
+	//Check whether one of the keys has the same key code
+	if (keys.count(code) > 0)
+		//Update it's state
+		keys.at(code) = false;
 }
 
-/***************************************************************************************************/
-
-/***************************************************************************************************
+/*****************************************************************************
  * The KeyboardShortcuts class
- ***************************************************************************************************/
+ *****************************************************************************/
 
-void KeyboardShortcuts::add(KeyboardShortcut* shortcut) {
-	shortcut->instance = this;
-	shortcuts.push_back(shortcut);
+KeyboardShortcuts::KeyboardShortcuts() {
+	Window::getCurrentInstance()->getInputManager()->addListener(this);
+}
+
+KeyboardShortcuts::~KeyboardShortcuts() {
+
 }
 
 void KeyboardShortcuts::callOnShortcut(KeyboardShortcut* e) {
@@ -78,13 +74,17 @@ void KeyboardShortcuts::callOnShortcut(KeyboardShortcut* e) {
 }
 
 void KeyboardShortcuts::onKeyPressed(int code) {
-	for (unsigned int a = 0; a < shortcuts.size(); a++)
+	for (unsigned int a = 0; a < shortcuts.size(); a++) {
 		shortcuts[a]->onKeyPressed(code);
+
+		//Check whether the shortcut is now complete
+		if (shortcuts[a]->hasCompleted())
+			//Notify the listeners
+			callOnShortcut(shortcuts[a]);
+	}
 }
 
 void KeyboardShortcuts::onKeyReleased(int code) {
 	for (unsigned int a = 0; a < shortcuts.size(); a++)
 		shortcuts[a]->onKeyReleased(code);
 }
-
-/***************************************************************************************************/

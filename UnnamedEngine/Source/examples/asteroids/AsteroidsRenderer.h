@@ -23,6 +23,8 @@
 #include "../../core/ResourceLoader.h"
 #include "../../core/render/RenderData.h"
 
+class AsteroidGroup;
+
 /*****************************************************************************
  * The AsteroidsRenderer class attempts to instance render a lot of asteroids
  *****************************************************************************/
@@ -72,8 +74,10 @@ public:
 	/* Method used to check whether an asteroid is visible */
 	inline bool isAsteroidVisible(unsigned int index) { return visibleData[index] > 0.5f; }
 
-	/* Method called to update the asteroids */
-	void update();
+	/* Method called to update all of the asteroids */
+	void updateAll();
+	/* Method called to update a group of the asteroids */
+	void update(AsteroidGroup& group);
 	/* Method called to render the asteroids */
 	void render();
 

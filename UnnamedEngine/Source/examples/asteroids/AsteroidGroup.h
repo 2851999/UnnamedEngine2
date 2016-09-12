@@ -20,11 +20,14 @@
 #define EXAMPLES_ASTEROIDS_ASTEROIDGROUP_H_
 
 #include "AsteroidsRenderer.h"
+#include "../../core/physics/PhysicsObject.h"
 
 /*****************************************************************************
  * The AsteroidGroup class manages a group of asteroids, allowing collision
  * testing to occur only on the closest group to the player
  *****************************************************************************/
+
+class Player;
 
 class AsteroidGroup {
 private:
@@ -38,7 +41,7 @@ private:
 	Vector3f position;
 
 	/* The asteroids in the group */
-	std::vector<GameObject3D*> objects;
+	std::vector<PhysicsObject3D*> objects;
 public:
 	/* The constructor */
 	AsteroidGroup(AsteroidsRenderer* renderer, unsigned int rendererStartIndex, Vector3f position);
@@ -52,6 +55,9 @@ public:
 	/* Method called to setup the asteroids */
 	void setup();
 
+	/* Method called to update this group of asteroids */
+	void update(float deltaSeconds, Player* player);
+
 	/* Method called to hide an asteroid in this group, given its index within
 	 * the objects */
 	inline void hideAsteroid(unsigned int index) { renderer->hideAsteroid(rendererStartIndex + index); }
@@ -60,8 +66,10 @@ public:
 	inline bool isAsteroidVisible(unsigned int index) { return renderer->isAsteroidVisible(rendererStartIndex + index); }
 
 	/* Setters and getters */
-	Vector3f getPosition() { return position; }
-	std::vector<GameObject3D*>& getObjects() { return objects; }
+	inline unsigned int getRendererStartIndex() const  { return rendererStartIndex; }
+	inline unsigned int getRendererEndIndex() const { return rendererStartIndex + objects.size() - 1; }
+	inline Vector3f getPosition() { return position; }
+	inline std::vector<PhysicsObject3D*>& getObjects() { return objects; }
 };
 
 
