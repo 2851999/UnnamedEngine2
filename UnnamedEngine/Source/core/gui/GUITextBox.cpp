@@ -233,7 +233,7 @@ void GUITextBox::onComponentRender() {
 	Vector2f p = getPosition();
 
 	float textX = p.getX() + 1;
-	float textY = (p.getY() + (getHeight() / 2) + (f->getHeight(renderText) / 2));
+	float textY = (p.getY() + (getHeight() / 2) + (f->getHeight("|") / 2));
 
 	f->render(renderText, textX, textY);
 

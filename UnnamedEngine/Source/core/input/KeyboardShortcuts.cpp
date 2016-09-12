@@ -60,6 +60,14 @@ void KeyboardShortcut::onKeyReleased(int code) {
  * The KeyboardShortcuts class
  *****************************************************************************/
 
+KeyboardShortcuts::KeyboardShortcuts() {
+	Window::getCurrentInstance()->getInputManager()->addListener(this);
+}
+
+KeyboardShortcuts::~KeyboardShortcuts() {
+
+}
+
 void KeyboardShortcuts::callOnShortcut(KeyboardShortcut* e) {
 	for (unsigned int a = 0; a < listeners.size(); a++)
 		listeners[a]->onShortcut(e);

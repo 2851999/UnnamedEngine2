@@ -1,4 +1,17 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 6 | Experimental 3
+
+* Fixed bug: Text in a GUITextBox would move vertically when
+             a taller character was entered
+* Fixed bug: GUISlider could be dragged when the mouse was
+             clicked outside of the slider button
+* Fixed bug: Calling onMousePressed() in a GUIComponent
+             would have changed its clicked state to false if
+             called twice
+             
+* Some more cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 6 | Experimental 2
 
 * Started cleanup of GUITextBox

@@ -89,12 +89,10 @@ private:
 	std::vector<KeyboardShortcut*> shortcuts;
 public:
 	/* The constructor */
-	KeyboardShortcuts() {
-		Window::getCurrentInstance()->getInputManager()->addListener(this);
-	}
+	KeyboardShortcuts();
 
 	/* The destructor */
-	virtual ~KeyboardShortcuts() {}
+	virtual ~KeyboardShortcuts();
 
 	/* Method used to add a keyboard shortcut */
 	inline void add(KeyboardShortcut* shortcut) { shortcuts.push_back(shortcut); }

@@ -104,8 +104,7 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 		Vector2f p = getPosition();
 		//Check the direction of this slider
 		if (direction == VERTICAL) {
-			if (button->isMouseHovering() || dragging) {
-				dragging = true;
+			if (dragging) {
 				if (y > p.getY() && y < p.getY() + height) {
 					button->getRelPosition().setY(button->getRelPosition().getY() + dy);
 					//Set the slider value
@@ -113,8 +112,7 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 				}
 			}
 		} else if (direction == HORIZONTAL) {
-			if (button->isMouseHovering() || dragging) {
-				dragging = true;
+			if (dragging) {
 				if (x > p.getX() && x < p.getX() + width) {
 					button->getRelPosition().setX(button->getRelPosition().getX() + dx);
 					//Set the slider value
@@ -127,6 +125,15 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 			value = 0;
 		else if (value > 100)
 			value = 100;
+	}
+}
+
+void GUISlider::onMousePressed(int button) {
+	GUIComponent::onMousePressed(button);
+
+	if (visible && active) {
+		if (mouseClicked && ! dragging)
+			dragging = true;
 	}
 }
 
