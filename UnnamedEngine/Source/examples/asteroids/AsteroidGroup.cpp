@@ -17,6 +17,7 @@
  *****************************************************************************/
 
 #include "AsteroidGroup.h"
+#include "Player.h"
 
 /*****************************************************************************
  * The AsteroidGroup class
@@ -34,7 +35,7 @@ AsteroidGroup::~AsteroidGroup() {
 void AsteroidGroup::generateAsteroids(unsigned int number, AsteroidsRenderer* renderer) {
 	//Go through and generate the requested number of asteroids
 	for (unsigned int i = 0; i < number; i++) {
-		GameObject3D* asteroid = new GameObject3D();
+		PhysicsObject3D* asteroid = new PhysicsObject3D(NULL);
 
 		objects.push_back(asteroid);
 		renderer->addAsteroid(asteroid);
@@ -49,6 +50,48 @@ void AsteroidGroup::setup() {
 		float s = RandomUtils::randomFloat(0.2f, 1.0f);
 		objects[i]->setScale(s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f));
 		objects[i]->setRotation(RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360));
+		objects[i]->setMass(100.0f * s);
+		objects[i]->setRestitution(1.0f);
 	}
+}
+
+void AsteroidGroup::update(float deltaSeconds, Player* player) {
+	//Go through and update all of the asteroids in this group
+	for (unsigned int i = 0; i < objects.size(); i++) {
+		//Calculate the relative position between the player and the current asteroid
+		Vector3f relPos = player->getPosition() - objects[i]->getPosition();
+		//Calculate the distance between them
+		float distance = relPos.length();
+		//Check for a collision
+		if (distance < (9.21f / 2.0f * objects[i]->getScale().max()) + 0.5f) {
+			//Calculate the normal of the collision
+			Vector3f normal = relPos.normalise();
+
+			Vector3f relativeVelocity = player->getVelocity() - objects[i]->getVelocity();
+
+			std::cout << player->getVelocity().toString() << std::endl;
+
+			float velAlongNormal = relativeVelocity.dot(normal);
+
+			if (velAlongNormal > 0)
+				return;
+
+			float e = MathsUtils::min(player->getRestitution(), objects[i]->getRestitution());
+
+			float j = (-(1.0f + e) * velAlongNormal) / (1.0f / player->getMass() + 1.0f / objects[i]->getMass());
+
+			Vector3f impulse = normal * j;
+			player->setVelocity(player->getVelocity() + impulse * (1.0f / player->getMass()));
+			objects[i]->setVelocity(objects[i]->getVelocity() - impulse * (1.0f / objects[i]->getMass()));
+			//objects[i]->setAcceleration(normal * 5.0f);
+		}
+
+		objects[i]->updatePhysics(deltaSeconds);
+
+		if (objects[i]->getVelocity().length() > 0.0f)
+			objects[i]->setVelocity(objects[i]->getVelocity() / 1.01f);
+	}
+	//Update the renderer
+	renderer->update((*this));
 }
 

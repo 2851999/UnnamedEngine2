@@ -17,6 +17,7 @@
  *****************************************************************************/
 
 #include "AsteroidsRenderer.h"
+#include "AsteroidGroup.h"
 #include "../../core/render/Renderer.h"
 
 /*****************************************************************************
@@ -102,8 +103,38 @@ void AsteroidsRenderer::hideAsteroid(unsigned int index) {
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
-void AsteroidsRenderer::update() {
+void AsteroidsRenderer::updateAll() {
 	for (unsigned int i = 0; i < objects.size(); i++) {
+		matricesData[i].initIdentity();
+		matricesData[i].translate(objects[i]->getPosition());
+		matricesData[i].rotate(objects[i]->getRotation());
+		matricesData[i].scale(objects[i]->getScale());
+		normalMatricesData[i] = matricesData[i].to3x3().inverse().transpose();
+
+		int pos = i * 16;
+
+		for (unsigned int x = 0; x < 4; x++) {
+			for (unsigned int y = 0; y < 4; y++) {
+				matricesDataRaw[pos] = matricesData[i].get(y, x);
+				pos += 1;
+			}
+		}
+
+		pos = i * 9;
+		for (unsigned int x = 0; x < 3; x++) {
+			for (unsigned int y = 0; y < 3; y++) {
+				normalMatricesDataRaw[pos] = normalMatricesData[i].get(y, x);
+				pos += 1;
+			}
+		}
+	}
+
+	vboMatricesData->updateStream(numObjects * 16 * sizeof(GLfloat));
+	vboNormalMatricesData->updateStream(numObjects * 9 * sizeof(GLfloat));
+}
+
+void AsteroidsRenderer::update(AsteroidGroup& group) {
+	for (unsigned int i = group.getRendererStartIndex(); i < group.getRendererEndIndex(); i++) {
 		matricesData[i].initIdentity();
 		matricesData[i].translate(objects[i]->getPosition());
 		matricesData[i].rotate(objects[i]->getRotation());

@@ -98,7 +98,7 @@ void AsteroidsMainGame::start() {
 		asteroidGroups[i].setup();
 	//Ensure all of the asteroids can be seen
 	asteroidRenderer->showAll();
-	asteroidRenderer->update();
+	asteroidRenderer->updateAll();
 
 	//Setup the enemies
 	enemiesRenderer->hideAll();
@@ -165,8 +165,13 @@ AsteroidGroup& AsteroidsMainGame::findClosestAsteroids(const Vector3f& position)
 }
 
 void AsteroidsMainGame::update() {
+	//Get the closest asteroids to the player
+	AsteroidGroup& playerClosestAsteroids = findClosestAsteroids(player->getCamera()->getPosition());
 	//Update the player
-	player->update(game->getDeltaSeconds(), findClosestAsteroids(player->getCamera()->getPosition()));
+	player->update(game->getDeltaSeconds(), playerClosestAsteroids);
+
+	//Update the closest asteroids to the player
+	playerClosestAsteroids.update(game->getDeltaSeconds(), player);
 
 	//Update the HUD
 	hud->update();

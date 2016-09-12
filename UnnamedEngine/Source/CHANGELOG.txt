@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 6 | Experimental 4
+
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 6 | Experimental 3
 
 * Fixed bug: Text in a GUITextBox would move vertically when
