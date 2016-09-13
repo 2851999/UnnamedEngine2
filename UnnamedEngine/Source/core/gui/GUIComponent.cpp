@@ -131,6 +131,17 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colou
  * The GUIComponent class
  *****************************************************************************/
 
+GUIComponent::~GUIComponent() {
+	if (border)
+		delete border;
+	listeners.clear();
+
+	//Delete the attached components
+	for (unsigned int i = 0; i < attachedComponents.size(); i++)
+		delete attachedComponents[i];
+	attachedComponents.clear();
+}
+
 bool GUIComponent::contains(double x, double y) {
 	Vector2f position = getPosition();
 	Vector2f size = getSize();
@@ -157,6 +168,10 @@ void GUIComponent::update() {
 		if (border)
 			border->update();
 
+		//Update all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->update();
+
 		//Update this component
 		onComponentUpdate();
 	}
@@ -170,26 +185,65 @@ void GUIComponent::render() {
 		//Render this component
 		GUIComponentRenderer::render();
 		onComponentRender();
+
+		//Update all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->render();
+	}
+}
+
+void GUIComponent::onKeyPressed(int key) {
+	if (active && visible) {
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onKeyPressed(key);
+	}
+}
+
+void GUIComponent::onKeyReleased(int key) {
+	if (active && visible) {
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onKeyReleased(key);
+	}
+}
+
+void GUIComponent::onChar(int key, char character) {
+	if (active && visible) {
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onChar(key, character);
 	}
 }
 
 void GUIComponent::onMousePressed(int button) {
-	if (button == GLFW_MOUSE_BUTTON_LEFT) {
-		if (active && visible && ! occluded && mouseHover) {
-			mouseClicked = true;
-			onChangeState();
+	if (active && visible) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT) {
+			if (active && visible && ! occluded && mouseHover) {
+				mouseClicked = true;
+				onChangeState();
+			}
 		}
+
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onMousePressed(button);
 	}
 }
 
 void GUIComponent::onMouseReleased(int button) {
-	if (button == GLFW_MOUSE_BUTTON_LEFT) {
-		if (active && visible && mouseClicked) {
-			mouseClicked = false;
-			onChangeState();
-			if (! occluded)
-				callOnComponentClicked(this);
+	if (active && visible) {
+		if (button == GLFW_MOUSE_BUTTON_LEFT) {
+			if (active && visible && mouseClicked) {
+				mouseClicked = false;
+				onChangeState();
+				if (! occluded)
+					callOnComponentClicked(this);
+			}
 		}
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onMouseReleased(button);
 	}
 }
 
@@ -207,6 +261,17 @@ void GUIComponent::onMouseMoved(double x, double y, double dx, double dy) {
 			mouseHover = false;
 			onChangeState();
 		}
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onMouseMoved(x, y, dx, dy);
+	}
+}
+
+void GUIComponent::onMouseDragged(double x, double y, double dx, double dy) {
+	if (active && visible) {
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onMouseDragged(x, y, dx, dy);
 	}
 }
 
@@ -216,13 +281,54 @@ void GUIComponent::onMouseEnter() {
 			mouseHover = true;
 			onChangeState();
 		}
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onMouseEnter();
 	}
 }
 
 void GUIComponent::onMouseLeave() {
-	if (active && visible && (mouseClicked || mouseHover)) {
-		mouseClicked = false;
-		mouseHover = false;
-		onChangeState();
+	if (active && visible) {
+		if (mouseClicked || mouseHover) {
+			mouseClicked = false;
+			mouseHover = false;
+			onChangeState();
+		}
+
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onMouseLeave();
 	}
+}
+
+void GUIComponent::onScroll(double dx, double dy) {
+	if (active && visible) {
+		//Pass the event to all attached components
+		for (unsigned int i = 0; i < attachedComponents.size(); i++)
+			attachedComponents[i]->onScroll(dx, dy);
+	}
+}
+
+void GUIComponent::setActive(bool active) {
+	this->active = active;
+
+	//Assign the same thing in all attached components
+	for (unsigned int i = 0; i < attachedComponents.size(); i++)
+		attachedComponents[i]->setActive(active);
+}
+
+void GUIComponent::setVisible(bool visible) {
+	this->visible = visible;
+
+	//Assign the same thing in all attached components
+	for (unsigned int i = 0; i < attachedComponents.size(); i++)
+		attachedComponents[i]->setVisible(visible);
+}
+
+void GUIComponent::setOccluded(bool occluded) {
+	this->occluded = occluded;
+
+	//Assign the same thing in all attached components
+	for (unsigned int i = 0; i < attachedComponents.size(); i++)
+		attachedComponents[i]->setOccluded(occluded);
 }

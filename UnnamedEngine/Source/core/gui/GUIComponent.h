@@ -170,6 +170,9 @@ class GUIComponent : public GUIComponentRenderer, InputListener {
 private:
 	/* The component listeners */
 	std::vector<GUIComponentListener*> listeners;
+
+	/* Components that are attached to this one */
+	std::vector<GUIComponent*> attachedComponents;
 protected:
 	/* The name of this component */
 	std::string name;
@@ -216,11 +219,7 @@ public:
 	GUIComponent(float width, float height, std::vector<Colour> colours, std::vector<Texture*> textures) : GUIComponentRenderer(width, height, colours, textures) {}
 
 	/* Destructor */
-	virtual ~GUIComponent() {
-		if (border)
-			delete border;
-		listeners.clear();
-	}
+	virtual ~GUIComponent();
 
 	/* The methods used to add and remove a component listener */
 	inline void addListener(GUIComponentListener* listener) {
@@ -230,6 +229,9 @@ public:
 	inline void removeListener(GUIComponentListener* listener) {
 		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 	}
+
+	/* Method used to add a component to this one */
+	inline void add(GUIComponent* component) { component->setParent(this); attachedComponents.push_back(component); }
 
 	/* Method used to check whether a position is within the component */
 	bool contains(double x, double y);
@@ -245,25 +247,25 @@ public:
 	virtual void render() override;
 
 	/* The input methods */
-	virtual void onKeyPressed(int key) override {}
-	virtual void onKeyReleased(int key) override {}
-	virtual void onChar(int key, char character) override {}
+	virtual void onKeyPressed(int key) override;
+	virtual void onKeyReleased(int key) override;
+	virtual void onChar(int key, char character) override;
 
 	virtual void onMousePressed(int button) override;
 	virtual void onMouseReleased(int button) override;
 	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
-	virtual void onMouseDragged(double x, double y, double dx, double dy) override {}
+	virtual void onMouseDragged(double x, double y, double dx, double dy) override;
 	virtual void onMouseEnter() override;
 	virtual void onMouseLeave() override;
 
-	virtual void onScroll(double dx, double dy) override {}
+	virtual void onScroll(double dx, double dy) override;
 
 	/* Setters and getters */
 	inline void setName(std::string name) { this->name = name;       }
 	inline void setText(std::string text) { this->text = text;       }
-	inline void setActive(bool active)    { this->active = active;   }
-	inline void setVisible(bool visible)  { this->visible = visible; }
-	inline void setOccluded(bool occluded) { this->occluded = occluded; }
+	void setActive(bool active);
+	void setVisible(bool visible);
+	void setOccluded(bool occluded);
 	inline void setBorder(GUIBorder* border) { this->border = border; }
 
 	inline std::string getName() { return name;    }

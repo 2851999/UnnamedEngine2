@@ -76,8 +76,8 @@ public:
 
 void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
-	getSettings().videoVSync = false;
-	getSettings().videoMaxFPS = 0;
+//	getSettings().videoVSync = false;
+//	getSettings().videoMaxFPS = 0;
 }
 
 void Test::created() {
@@ -122,11 +122,12 @@ void Test::created() {
 	label->setPosition(600, 600);
 
 	GUIButton* verticalSliderButton = new GUIButton("", 26, 10, colours);
-	verticalSlider = new GUISlider(verticalSliderButton, GUISlider::VERTICAL, 4, 100, Colour::WHITE);
+	verticalSlider = new GUISlider(verticalSliderButton, GUISlider::VERTICAL, 4, 110, Colour::WHITE);
 	verticalSlider->setPosition(20, 400);
+	verticalSlider->setInterval(10.0f);
 
 	GUIButton* horizontalSliderButton = new GUIButton("", 10, 26, colours);
-	horizontalSlider = new GUISlider(horizontalSliderButton, GUISlider::HORIZONTAL, 100, 4, Colour::WHITE);
+	horizontalSlider = new GUISlider(horizontalSliderButton, GUISlider::HORIZONTAL, 110, 4, Colour::WHITE);
 	horizontalSlider->setPosition(100, 400);
 
 	textBox = new GUITextBox(Colour::WHITE, 200, 20);
@@ -157,6 +158,8 @@ void Test::created() {
 
 void Test::update() {
 	panel->update();
+
+	std::cout << verticalSlider->getValue() << std::endl;
 }
 
 void Test::render() {
