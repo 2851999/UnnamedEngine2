@@ -159,7 +159,7 @@ void Test::created() {
 void Test::update() {
 	panel->update();
 
-	std::cout << verticalSlider->getValue() << std::endl;
+	//std::cout << verticalSlider->getValue() << std::endl;
 }
 
 void Test::render() {
