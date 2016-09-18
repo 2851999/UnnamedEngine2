@@ -1,4 +1,40 @@
 --------------------------------------------------------------
+Release 0 | Beta 0 | Development 8 (V0.0.8)
+
+* Added ability to set an interval for a GUISlider
+* Added ability for GUIComponents to be attached to
+  GUIComponents
+  
+* Fixed bug: GUISlider would have an incorrect value if its
+             direction was horizontal
+* Fixed bug: A text box with a selection could not be used
+             after clicking else where
+* Fixed bug: GUITextBox would still accept keyboard
+             shortcuts even when not selected
+
+* Some more clean up
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 7 | Experimental 2
+
+* Fixed bug: A text box with a selection could not be used
+             after clicking else where
+* Fixed bug: GUITextBox would still accept keyboard
+             shortcuts even when not selected
+             
+* Some more clean up
+
+--------------------------------------------------------------
+Release 0 | Beta 0 | Development 7 | Experimental 1
+
+* Added ability to set an interval for a GUISlider
+* Added ability for GUIComponents to be attached to
+  GUIComponents
+  
+* Fixed bug: GUISlider would have an incorrect value if its
+             direction was horizontal
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 7 (V0.0.7)
 
 * Changed Shader so the current shader is stored, and a new

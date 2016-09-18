@@ -39,8 +39,15 @@ private:
 	/* The slider direction */
 	Direction direction;
 
+	/* The current position along the direction of this slider */
+	float position;
+
 	/* The current slider value */
 	float value;
+
+	/* The interval value - only values with this set interval are allowed,
+	 * unless it is set to 0 */
+	float interval;
 
 	/* States whether the slider is dragging the button */
 	bool dragging;
@@ -67,6 +74,14 @@ public:
 	virtual void onMouseDragged(double x, double y, double dx, double dy) override;
 	virtual void onMousePressed(int button) override;
 	virtual void onMouseReleased(int button) override;
+
+	/* Setters and getters */
+	inline void setInterval(float interval) { this->interval = interval; }
+
+	inline GUIButton* getButton() { return button; }
+	inline Direction getDirection() { return direction; }
+	inline float getValue() { return value; }
+	inline float getInterval() { return interval; }
 };
 
 #endif /* CORE_GUI_GUISLIDER_H_ */

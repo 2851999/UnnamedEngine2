@@ -100,6 +100,9 @@ public:
 	/* Method used to add a listener */
 	inline void addListener(KeyboardShortcutListener* listener) { listeners.push_back(listener); }
 
+	/* Method used to remove a listener */
+	inline void removeListener(KeyboardShortcutListener* listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
+
 	/* Method used to call the onShorcut() method in all of the listeners */
 	void callOnShortcut(KeyboardShortcut* e);
 

@@ -24,33 +24,37 @@
 
 GUISlider::GUISlider(GUIButton* button, Direction direction, float width, float height, Colour colour) :
 	GUIComponent(width, height, std::vector<Colour> { colour }), button(button), direction(direction) {
+	position = 0;
 	value = 0;
+	interval = 0;
 	dragging = false;
-	button->setParent(this);
+	add(button);
 }
 
 GUISlider::GUISlider(GUIButton* button, Direction direction, float width, float height, Texture* texture) :
 	GUIComponent(width, height, std::vector<Texture*> { texture }), button(button), direction(direction) {
+	position = 0;
 	value = 0;
+	interval = 0;
 	dragging = false;
-	button->setParent(this);
+	add(button);
 }
 
 GUISlider::GUISlider(GUIButton* button, Direction direction, float width, float height, Colour colour, Texture* texture) :
 	GUIComponent(width, height, std::vector<Colour> { colour }, std::vector<Texture*> { texture }), button(button), direction(direction) {
+	position = 0;
 	value = 0;
+	interval = 0;
 	dragging = false;
-	button->setParent(this);
+	add(button);
 }
 
 GUISlider::~GUISlider() {
-	//Destroy the created resources
-	delete button;
+
 }
 
 void GUISlider::onComponentUpdate() {
-	//Update the slider button
-	button->update();
+
 }
 
 void GUISlider::onComponentRender() {
@@ -61,25 +65,24 @@ void GUISlider::onComponentRender() {
 
 	//Check the slider direction
 	if (direction == VERTICAL) {
-		//Clamp the boundaries
-		if (button->getRelPosition().getY() < 0)
-			button->getRelPosition().setY(0);
-		else if (button->getRelPosition().getY() > height - buttonHeight)
-			button->getRelPosition().setY(height - buttonHeight);
+		//Assign the appropriate position in the correct direction
+		if (interval == 0.0f)
+			button->setPosition(0.0f, position);
+		else
+			button->setPosition(0.0f, (int) (position / interval) * interval);
+
 		//Make sure the button is in the middle
 		button->getRelPosition().setX(-buttonWidth / 2 + width / 2);
 	} else if (direction == HORIZONTAL) {
-		//Clamp the boundaries
-		if (button->getRelPosition().getX() < 0)
-			button->getRelPosition().setX(0);
-		else if (button->getRelPosition().getX() > width - buttonWidth)
-			button->getRelPosition().setX(width - buttonWidth);
+		//Assign the appropriate position in the correct direction
+		if (interval == 0.0f)
+			button->setPosition(position, 0.0f);
+		else
+			button->setPosition((int) (position / interval) * interval, 0.0f);
+
 		//Make sure the button is in the middle
 		button->getRelPosition().setY(-buttonHeight / 2 + height / 2);
 	}
-
-	//Render the button
-	button->render();
 }
 
 void GUISlider::enable() {
@@ -92,34 +95,35 @@ void GUISlider::disable() {
 
 void GUISlider::onMouseMoved(double x, double y, double dx, double dy) {
 	GUIComponent::onMouseMoved(x, y, dx, dy);
-	this->button->onMouseMoved(x, y, dx, dy);
 }
 
 void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 	GUIComponent::onMouseDragged(x, y, dx, dy);
-	this->button->onMouseDragged(x, y, dx, dy);
+
 	//Make sure this is visible and active
 	if (visible && active) {
 		float width = getWidth();
 		float height = getHeight();
-		//Get this sider's position
-		Vector2f p = getPosition();
 		//Check the direction of this slider
 		if (direction == VERTICAL) {
 			if (dragging) {
-				if (y > p.getY() && y < p.getY() + height) {
-					button->getRelPosition().setY(button->getRelPosition().getY() + dy);
-					//Set the slider value
-					value = (button->getRelPosition().getY() / (height - button->getHeight())) * 100;
-				}
+				position += dy;
+				position = MathsUtils::clamp(position, 0.0f, height - button->getHeight());
+				//Set the slider value
+				if (interval == 0.0f)
+					value = (button->getRelPosition().getY() / (height - button->getHeight())) * 100.0f;
+				else
+					value = (((int) ((int) position / (int) interval) * interval) / (int) (height - button->getHeight())) * 100.0f;
 			}
 		} else if (direction == HORIZONTAL) {
 			if (dragging) {
-				if (x > p.getX() && x < p.getX() + width) {
-					button->getRelPosition().setX(button->getRelPosition().getX() + dx);
-					//Set the slider value
-					value = (button->getRelPosition().getX() / (height - button->getWidth())) * 100;
-				}
+				position += dx;
+				position = MathsUtils::clamp(position, 0.0f, width - button->getWidth());
+				//Set the slider value
+				if (interval == 0.0f)
+					value = (button->getRelPosition().getX() / (width - button->getWidth())) * 100.0f;
+				else
+					value = (((int) ((int) position / (int) interval) * interval) / (int) (width - button->getWidth())) * 100.0f;
 			}
 		}
 		//Clamp the slider value
@@ -132,7 +136,6 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 
 void GUISlider::onMousePressed(int button) {
 	GUIComponent::onMousePressed(button);
-	this->button->onMousePressed(button);
 
 	if (visible && active) {
 		if (this->button->isClicked() && ! dragging)
@@ -142,7 +145,6 @@ void GUISlider::onMousePressed(int button) {
 
 void GUISlider::onMouseReleased(int button) {
 	GUIComponent::onMouseReleased(button);
-	this->button->onMouseReleased(button);
 
 	if (visible && active) {
 		if (button == GLFW_MOUSE_BUTTON_LEFT && dragging)

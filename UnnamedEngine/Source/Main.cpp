@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "BaseEngineTest3D.h"
+#include "GUITest.h"
 //#include "examples/asteroids/AsteroidsGame.h"
 //#include "examples/asteroids-old/Asteroids.h"
 

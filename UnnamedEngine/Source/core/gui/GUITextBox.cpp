@@ -220,25 +220,36 @@ void GUITextBox::setup() {
 void GUITextBox::onComponentUpdate() {}
 
 void GUITextBox::onComponentRender() {
+	//Get the current text box font
 	Font* f = getFont();
+	//Determine whether default text has been assigned
 	if (shouldUseDefaultText()) {
+		//If so, assing the render text to it
 		renderText = defaultText;
+		//Also assign the font to the one for the default text (if assigned)
 		if (defaultTextFont != NULL)
 			f = defaultTextFont;
 	} else {
+		//Otherwise the render text should updated and clipped within the boundaries
+		//of the text box
 		updateRenderText();
 		clipRenderText();
 	}
 
+	//Get the text box position - used to calculate the text position
 	Vector2f p = getPosition();
 
+	//Calculate the text position
 	float textX = p.getX() + 1;
 	float textY = (p.getY() + (getHeight() / 2) + (f->getHeight("|") / 2));
 
+	//Render the text within the text box
 	f->render(renderText, textX, textY);
 
+	//Render the cursor if the text box is selected
 	if (selected)
 		cursor->render();
+	//Render the selection
 	selection->render();
 }
 
@@ -249,25 +260,35 @@ void GUITextBox::updateRenderText() {
 	if (viewIndexEnd > text.length())
 		viewIndexEnd = text.length();
 
+	//Get the render text from the text using the view indices
 	renderText = StrUtils::substring(text, viewIndexStart, viewIndexEnd);
 
+	//Determine whether the render text should be masked
 	if (masked)
+		//It is so replace the render text with its masked version
 		renderText = maskStr(renderText, mask);
 }
 
 std::string GUITextBox::maskStr(const std::string& s, const std::string& mask) {
+	//The final masked string
 	std::string maskedString = "";
+	//Go through each character and add on the mask each time
 	for (unsigned int a = 0; a < s.length(); a++)
 		maskedString += mask;
 	return maskedString;
 }
 
 void GUITextBox::clipRenderText() {
+	//Get the width of the text box
 	float width = getWidth();
+	//Increment the view index start while the render text doesn't fit,
+	//and the cursor index is still visible
 	while (getFont()->getWidth(renderText) >= width - 2 && cursorIndex != viewIndexStart) {
 		viewIndexStart++;
 		updateRenderText();
 	}
+	//Decrement the view index end while the render text doesn't fit and the cursor
+	//index isn't visible (ensures the cursor position is visile within the text box)
 	while (getFont()->getWidth(renderText) >= width && cursorIndex <= viewIndexEnd) {
 		viewIndexEnd--;
 		updateRenderText();
@@ -275,18 +296,23 @@ void GUITextBox::clipRenderText() {
 }
 
 void GUITextBox::moveCursor(double x) {
+	//Get the new cursor position within the text
 	cursorIndex = getIndex(x);
+	//Show the cursor as it has just been moved
 	cursor->showCursor();
 }
 
 int GUITextBox::getIndex(double x) {
-	updateRenderText(); //Is this really necessary??
-	const char* textValue = renderText.c_str();
+	//updateRenderText(); //Is this really necessary?? - seems like no
+	//The current string used to check the width of
 	std::string currentString = "";
+	//The new x index
 	int newPlace = 0;
 
+	//Go through each letter in the render text
 	for (unsigned int a = 0; a < renderText.length(); a++) {
-		currentString += textValue[a];
+		//Add the current letter
+		currentString += renderText[a];
 
 		double lookX = 0;
 		double widthOfString = getFont()->getWidth(currentString);
@@ -294,19 +320,28 @@ int GUITextBox::getIndex(double x) {
 
 		//Add onto lookX the position this text box starts rendering the text
 		lookX += position.getX() + 1;
-		//Add onto lookX the width of the string - (the width of the last character / 2)
+		//Add onto lookX the width of the string - (the width of the last character / 2) - ensures
+		//the index of the new place ends up being before if it is less than half way through
+		//the character, or after if >= to half way through then current character
 		lookX += widthOfString - (widthOfLastCharacter / 2);
 
+		//Increment the new index if the current position is still less than
+		//the requested x position
 		if (lookX < x)
 			newPlace++;
 		else
+			//Now lookX >= x so the new index has been found - so no point going any further
 			break;
 	}
+	//Add on the view index start so that the index is in relation to the whole string and
+	//not just the render text
 	newPlace += viewIndexStart;
+	//Return the final index
 	return newPlace;
 }
 
 void GUITextBox::clear() {
+	//Reset everything
 	text = "";
 	cursorIndex = 0;
 	viewIndexStart = 0;
@@ -315,26 +350,35 @@ void GUITextBox::clear() {
 }
 
 void GUITextBox::resetSelection() {
+	//Reset the selection data
 	isSelection = false;
 	selectionIndexStart = 0;
 	selectionIndexEnd = 0;
 }
 
 std::string GUITextBox::getSelection() {
+	//Ensure there is a selection currently
 	if (isSelection) {
+		//Return the selection, although first check which way round the
+		//start and end indices are
 		if (selectionIndexStart < selectionIndexEnd)
 			return StrUtils::substring(text, selectionIndexStart, selectionIndexEnd);
 		else
 			return StrUtils::substring(text, selectionIndexEnd, selectionIndexStart);
 	} else
+		//There is no selection so just return an empty string
 		return "";
 }
 
 std::string GUITextBox::getRenderTextSelection() {
+	//Check whether there is currently a selection
 	if (isSelection) {
+		//Update and clip the text
 		updateRenderText();
 		clipRenderText();
 
+		//Clip the selection indices to within the bounds
+		//of the view indices
 		unsigned int sis = selectionIndexStart;
 		if (sis < viewIndexStart)
 			sis = viewIndexStart;
@@ -347,18 +391,23 @@ std::string GUITextBox::getRenderTextSelection() {
 		else if (sie > viewIndexEnd)
 			sie = viewIndexEnd;
 
+		//Return the selected text that is within view, being careful
+		//to ensure the start/end indices are the correct way round
 		if (selectionIndexStart <= selectionIndexEnd)
 			return StrUtils::substring(renderText, sis - viewIndexStart, sie - viewIndexStart);
 		else
 			return StrUtils::substring(renderText, sie - viewIndexStart, sis - viewIndexStart);
 	} else
+		//There is no selection, so return an empty string
 		return "";
 }
 
 void GUITextBox::deleteSelection() {
+	//Variables to store the front and back of the string
 	std::string front = "";
 	std::string back = "";
 
+	//Ensure the front and back are assigned correctly
 	if (selectionIndexStart < selectionIndexEnd) {
 		front = StrUtils::substring(text, 0, selectionIndexStart);
 		back = text.substr(selectionIndexEnd);
@@ -367,69 +416,91 @@ void GUITextBox::deleteSelection() {
 		back = text.substr(selectionIndexStart);
 	}
 
-	int amountRemoved = text.length() - (front + back).length();
+	//Calculate the amount of text that was removed
+	unsigned int amountRemoved = text.length() - (front + back).length();
 
-	int a = 0;
+	//Now reduce the view index start by the amount removed,
+	//ensuring it doesn't go below 0
+	viewIndexStart = (unsigned int) MathsUtils::max(0, (int) (viewIndexStart - amountRemoved));
 
-	while (a < amountRemoved) {
-		if (viewIndexStart > 0)
-			viewIndexStart--;
-		a++;
-	}
+	//Assign the text, ignoring the deleted text
 	text = front + back;
 
+	//Move the cursor if necessary
 	if (cursorIndex > text.length())
 		cursorIndex = text.length();
 
+	//Reset the selection
 	resetSelection();
 }
 
 void GUITextBox::onComponentClicked() {
-	if (! isSelection) {
+	//Ensure this text box currently isn't selected
+	if (! selected) {
+		//Make this text box selected
 		selected = true;
+		//Reset the selection
 		resetSelection();
+		//Show the cursor
 		cursor->showCursor();
 	}
 }
 
 void GUITextBox::onKeyPressed(int key) {
 	GUIComponent::onKeyPressed(key);
+	//Ensure this component should do something
 	if (visible && active && selected) {
+		//Check what key was pressed
 		if (key == GLFW_KEY_BACKSPACE) {
+			//Check whether there is a selection
 			if (isSelection)
+				//There is, so delete it
 				deleteSelection();
 			else {
+				//There isn't, so delete the previous character, but only
+				//if there is a character to delete before the cursor
 				if (text.length() > 0 && cursorIndex > 0) {
-					std::string front = StrUtils::substring(text, 0, cursorIndex);
+					//Get the start/end of the string
+					std::string front = StrUtils::substring(text, 0, cursorIndex - 1);
 					std::string back = text.substr(cursorIndex);
 
-					text = StrUtils::substring(front, 0, front.length() - 1) + back;
+					//Assign the text, but ignore the character being deleted
+					text = front + back;
 
+					//Check whether the cursor is currently at the start
+					//of the visible text
 					if (cursorIndex == viewIndexStart) {
+						//If so, decrement the cursor index
 						cursorIndex --;
+						//Then also decrement the view indices if possible
 						if (viewIndexStart > 0)
 							viewIndexStart--;
 						viewIndexEnd--;
 					} else {
+						//If not, then decrement the cursor index
 						cursorIndex--;
-						viewIndexEnd--;
 
-						if (viewIndexStart > 0)
+						//Then the view index start as well if possible
+						if (viewIndexStart > 0){
 							viewIndexStart--;
-						else
-							viewIndexEnd++;
+							//And the view index end
+							viewIndexEnd--;
+						}
 					}
 				}
 			}
 		} else if (key == GLFW_KEY_DELETE) {
+			//Check whether there is a selection
 			if (isSelection)
+				//If so, delete it
 				deleteSelection();
 			else {
+				//Otherwise delete the next character if possible
 				if (text.length() > 0 && cursorIndex < viewIndexEnd) {
 					std::string front = StrUtils::substring(text, 0, cursorIndex);
-					std::string back = text.substr(cursorIndex);
+					std::string back = text.substr(cursorIndex + 1);
 
-					text = front + back.substr(1);
+					text = front + back;
 
 					if (! (viewIndexEnd <= text.length())) {
 						//Decrement the view's end index
@@ -566,73 +637,76 @@ void GUITextBox::onMouseDragged(double x, double y, double dx, double dy) {
 }
 
 void GUITextBox::onShortcut(KeyboardShortcut* e) {
-	if (e->getName() == "Shift-Left") {
-		//Make sure the cursor's current index is more than 0
-		if (cursorIndex > 0) {
-			//Check the cursor index and viewing index
-			if (cursorIndex == viewIndexStart) {
-				//Check to see whether there is any unseen text
-				if (viewIndexStart > 0) {
+	//Ensure this text box is currently selected
+	if (selected) {
+		if (e->getName() == "Shift-Left") {
+			//Make sure the cursor's current index is more than 0
+			if (cursorIndex > 0) {
+				//Check the cursor index and viewing index
+				if (cursorIndex == viewIndexStart) {
+					//Check to see whether there is any unseen text
+					if (viewIndexStart > 0) {
+						//Decrement the cursor index
+						cursorIndex--;
+						//Decrement the start of the viewing index
+						viewIndexStart--;
+					}
+				} else {
 					//Decrement the cursor index
 					cursorIndex--;
-					//Decrement the start of the viewing index
-					viewIndexStart--;
 				}
-			} else {
-				//Decrement the cursor index
-				cursorIndex--;
 			}
-		}
-		if (! isSelection) {
-			isSelection = true;
-			selectionIndexStart = cursorIndex + 1;
-			selectionIndexEnd = selectionIndexStart;
-		}
-		if (selectionIndexEnd > 0)
-			selectionIndexEnd--;
-	} else if (e->getName() == "Shift-Right") {
-		//Make sure the cursor's current index is less than the length of the text
-		if (cursorIndex < text.length()) {
-			//Check the cursor index and viewing index
-			if (cursorIndex == viewIndexEnd) {
-				//Check to see whether there is any unseen text
-				if (viewIndexEnd > 0) {
+			if (! isSelection) {
+				isSelection = true;
+				selectionIndexStart = cursorIndex + 1;
+				selectionIndexEnd = selectionIndexStart;
+			}
+			if (selectionIndexEnd > 0)
+				selectionIndexEnd--;
+		} else if (e->getName() == "Shift-Right") {
+			//Make sure the cursor's current index is less than the length of the text
+			if (cursorIndex < text.length()) {
+				//Check the cursor index and viewing index
+				if (cursorIndex == viewIndexEnd) {
+					//Check to see whether there is any unseen text
+					if (viewIndexEnd > 0) {
+						//Increment the cursor index
+						cursorIndex++;
+						//Increment the end of the viewing index
+						viewIndexEnd++;
+					}
+				} else {
 					//Increment the cursor index
 					cursorIndex++;
-					//Increment the end of the viewing index
-					viewIndexEnd++;
 				}
-			} else {
-				//Increment the cursor index
-				cursorIndex++;
 			}
-		}
-		if (! isSelection) {
-			isSelection = true;
-			selectionIndexStart = cursorIndex - 1;
-			selectionIndexEnd = selectionIndexStart;
-		}
-		if (selectionIndexEnd < text.length())
-			selectionIndexEnd++;
-	} else if (e->getName() == "Cut") {
-		if (isSelection) {
-			ClipboardUtils::setText(getSelection());
-			deleteSelection();
-		}
-	} else if (e->getName() == "Paste") {
-		if (isSelection)
-			deleteSelection();
+			if (! isSelection) {
+				isSelection = true;
+				selectionIndexStart = cursorIndex - 1;
+				selectionIndexEnd = selectionIndexStart;
+			}
+			if (selectionIndexEnd < text.length())
+				selectionIndexEnd++;
+		} else if (e->getName() == "Cut") {
+			if (isSelection) {
+				ClipboardUtils::setText(getSelection());
+				deleteSelection();
+			}
+		} else if (e->getName() == "Paste") {
+			if (isSelection)
+				deleteSelection();
 
-		std::string front = StrUtils::substring(text, 0, cursorIndex);
-		std::string back = text.substr(cursorIndex);
+			std::string front = StrUtils::substring(text, 0, cursorIndex);
+			std::string back = text.substr(cursorIndex);
 
-		text = front + ClipboardUtils::getText() + back;
+			text = front + ClipboardUtils::getText() + back;
 
-		cursorIndex = text.length() - back.length();
-		viewIndexEnd = text.length();
-	} else if (e->getName() == "Copy") {
-		if (isSelection)
-			ClipboardUtils::setText(getSelection());
+			cursorIndex = text.length() - back.length();
+			viewIndexEnd = text.length();
+		} else if (e->getName() == "Copy") {
+			if (isSelection)
+				ClipboardUtils::setText(getSelection());
+		}
 	}
 }
 
