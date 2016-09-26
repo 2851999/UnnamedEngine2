@@ -25,8 +25,9 @@
 Ship::Ship(AsteroidsGame* game) : PhysicsObject3D(NULL) {
 	//Setup the lasers
 	lasers = new Lasers(game, this);
-	//Set the default health
+	//Set the default health and shield
 	health = 1;
+	shield = 1;
 	//Setup the movement speed
 	movementSpeed = 10.0f;
 	maximumSpeed = 15.0f;
@@ -69,8 +70,14 @@ void Ship::render() {
 
 void Ship::removeHealth(unsigned int amount) {
 	//Remove health if possible
-	if (health > amount)
-		health -= amount;
-	else
-		health = 0;
+	if (shield > 0) {
+		unsigned int old = shield;
+		shield = MathsUtils::max(shield - amount, 0u);
+		amount -= (old - shield);
+	} else if (amount > 0) {
+		if (health > amount)
+			health -= amount;
+		else
+			health = 0;
+	}
 }

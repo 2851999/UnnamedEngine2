@@ -34,6 +34,7 @@ void AsteroidsResources::setup(ResourceLoader& loader) {
 	fontHeadingMono = loader.loadFont("CONSOLA.ttf", 24.0f, Colour::WHITE);
 
 	texturesButtons = { loader.loadTexture("Button.png"), loader.loadTexture("Button_Hover.png"), loader.loadTexture("Button_Clicked.png") };
+	textureShieldBar = loader.loadTexture("ShieldBar.png");
 
 	audioLaser = loader.loadAudio("lasermono.wav");
 	audioExplosion = loader.loadAudio("explosion.wav");

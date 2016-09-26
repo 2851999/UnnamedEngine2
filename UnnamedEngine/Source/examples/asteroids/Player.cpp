@@ -43,6 +43,7 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 	game->getWindow()->getInputManager()->addListener(this);
 
 	setHealth(10);
+	setShield(10);
 
 	setMass(100.0f);
 	setRestitution(1.0f);
@@ -58,6 +59,7 @@ void Player::reset() {
 
 	score = 0;
 	setHealth(10);
+	setShield(10);
 }
 
 void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {

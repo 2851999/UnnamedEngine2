@@ -153,6 +153,7 @@ void Test::created() {
 
 	//panel->enable();
 
+	getWindow()->centreCursor();
 	Renderer::addCamera(camera);
 }
 
