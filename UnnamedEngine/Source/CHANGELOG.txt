@@ -1,4 +1,16 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 0 | Experimental 2
+
+* Changed Font so that it now creates a bigger bitmap font
+  than required and scales it down, improving quality
+* Changed GUIComponent so that setActive will now reset
+  the render index to 0
+* Changed setColour and setTexture methods in
+  GUIComponentRenderer
+
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 0 | Experimental 1
 
 * Added methods in Window to set the cursor position and

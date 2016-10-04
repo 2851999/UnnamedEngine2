@@ -35,12 +35,19 @@ private:
 
 	/* The (strength of the) shield left of this ship */
 	unsigned int shield;
+	unsigned int shieldMax;
+
+	/* The regeneration rate of the shield */
+	float shieldRegenRate;
 
 	/* The movement speed for this ship */
 	float movementSpeed;
 
 	/* The maximum speed for this ship */
 	float maximumSpeed;
+
+	/* Timer for regenerating the shield */
+	Timer shieldTimer;
 public:
 	/* The constructor */
 	Ship(AsteroidsGame* game);
@@ -73,11 +80,14 @@ public:
 	/* Setters and getters */
 	inline void setHealth(unsigned int health) { this->health = health; }
 	inline void setShield(unsigned int shield) { this->shield = shield; }
+	inline void setShieldMax(unsigned int shieldMax) { this->shieldMax = shieldMax; }
+	inline void setShieldRegenRate(float shieldRegenRate) { this->shieldRegenRate = shieldRegenRate; }
 	inline void setMovementSpeed(float speed) { movementSpeed = speed; }
 	inline void setMaximumSpeed(float speed) { maximumSpeed = speed; }
 	inline Lasers* getLasers() { return lasers; }
 	inline unsigned int getHealth() { return health; }
 	inline unsigned int getShield() { return shield; }
+	inline unsigned int getShieldMax() { return shieldMax; }
 	inline bool isAlive() { return health > 0; }
 	inline float getMovementSpeed() { return movementSpeed; }
 	inline float getMaximumSpeed() { return maximumSpeed; }

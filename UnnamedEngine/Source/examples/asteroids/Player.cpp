@@ -42,8 +42,8 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 
 	game->getWindow()->getInputManager()->addListener(this);
 
-	setHealth(10);
-	setShield(10);
+	setHealth(5);
+	setShield(2);
 
 	setMass(100.0f);
 	setRestitution(1.0f);
@@ -58,8 +58,12 @@ void Player::reset() {
 	Ship::reset();
 
 	score = 0;
-	setHealth(10);
-	setShield(10);
+	setHealth(5);
+	setShield(2);
+	setShieldMax(2);
+	setShieldRegenRate(4.0f);
+	setMaximumSpeed(10.0f);
+	getLasers()->setCooldown(2.0f);
 }
 
 void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
@@ -115,7 +119,7 @@ void Player::render() {
 
 /* Called when an asteroid has been destroyed by this ship's lasers */
 void Player::onAsteroidDestroyed(GameObject3D* asteroid) {
-	addPoints(10 * asteroid->getScale().max());
+	addPoints(100 * asteroid->getScale().max());
 }
 
 /* Method used to check whether a laser has collided with anything */
@@ -134,7 +138,7 @@ bool Player::checkCollision(PhysicsObject3D* laser) {
 					//Create an explosion
 					getLasers()->explode(enemies[i]->getPosition(), 2.0f);
 					//Add to the score
-					addPoints(200);
+					addPoints(2000);
 				}
 				return true;
 			}
@@ -144,9 +148,16 @@ bool Player::checkCollision(PhysicsObject3D* laser) {
 }
 
 void Player::onMouseMoved(double x, double y, double dx, double dy) {
-	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING) {
+	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING && ! game->getMainGame()->showingUpgrades()) {
 		//Orientate the camera
 		getRelRotation() += Vector3f(-dy * 10.0f, dx * 10.0f, 0) * currentDelta;
 		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
 	}
+}
+
+void Player::removeScore(unsigned int points) {
+	if (points > score)
+		score = 0;
+	else
+		score -= points;
 }

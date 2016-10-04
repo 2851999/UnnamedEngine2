@@ -77,6 +77,7 @@ public:
 
 	/* Setters and getters */
 	inline void addPoints(unsigned int points) { score += points; }
+	void removeScore(unsigned int points);
 	inline unsigned int getScore() { return score; }
 	inline Camera3D* getCamera() { return camera; }
 };

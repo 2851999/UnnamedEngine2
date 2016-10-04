@@ -63,6 +63,16 @@ unsigned int GUIComponentRenderer::getMaxRenderIndex() {
 	return MathsUtils::max(colours.size(), textures.size());
 }
 
+void GUIComponentRenderer::setColour(Colour colour) {
+	for (unsigned int i = 0; i < colours.size(); i++)
+		colours[i] = colour;
+}
+
+void GUIComponentRenderer::setTexture(Texture* texture) {
+	for (unsigned int i = 0; i < textures.size(); i++)
+		textures[i] = texture;
+}
+
 /*****************************************************************************
  * The GUIFill class
  *****************************************************************************/
@@ -162,12 +172,12 @@ void GUIComponent::disable() {
 }
 
 void GUIComponent::update() {
+	GUIComponentRenderer::update();
+
+	if (border)
+		border->update();
+
 	if (active) {
-		GUIComponentRenderer::update();
-
-		if (border)
-			border->update();
-
 		//Update all attached components
 		for (unsigned int i = 0; i < attachedComponents.size(); i++)
 			attachedComponents[i]->update();
@@ -311,6 +321,9 @@ void GUIComponent::onScroll(double dx, double dy) {
 
 void GUIComponent::setActive(bool active) {
 	this->active = active;
+
+	//Reset the render index
+	this->renderIndex = 0;
 
 	//Assign the same thing in all attached components
 	for (unsigned int i = 0; i < attachedComponents.size(); i++)

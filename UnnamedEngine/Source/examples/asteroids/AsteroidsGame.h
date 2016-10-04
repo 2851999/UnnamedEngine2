@@ -91,6 +91,7 @@ public:
 	Highscores& getHighscores() { return highscores; }
 	const AsteroidsResources& getResources() { return resources; }
 	GameState getCurrentState() { return currentState; }
+	AsteroidsMainGame* getMainGame() { return mainGame; }
 	SoundSystem* getSoundSystem() { return soundSystem; }
 	InputBindings* getInputBindings() { return inputBindings; }
 };

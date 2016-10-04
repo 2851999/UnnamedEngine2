@@ -80,8 +80,8 @@ public:
 	unsigned int getMaxRenderIndex();
 
 	/* Methods used to set the colours/textures */
-	inline void setColour(Colour colour) { colours.clear(); colours.push_back(colour); }
-	inline void setTexture(Texture* texture) { textures.clear(); textures.push_back(texture); }
+	void setColour(Colour colour);
+	void setTexture(Texture* texture);
 
 	/* Setters and getters */
 	inline void setFont(Font* font) { this->font = font; }
