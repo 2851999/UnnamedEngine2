@@ -102,6 +102,10 @@ public:
 	/* Returns whether the lasers can fire */
 	inline bool canFire() { return TimeUtils::getSeconds() - timeLastLaserFired > cooldown; }
 
+	/* Setters and getters */
+	inline double getCooldown() { return this->cooldown; }
+	inline void setCooldown(double cooldown) { this->cooldown = cooldown; }
+
 	std::vector<PhysicsObject3D*>& getObjects() { return objects; }
 };
 

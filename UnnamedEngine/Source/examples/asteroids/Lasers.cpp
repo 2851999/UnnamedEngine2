@@ -67,7 +67,7 @@ Lasers::Lasers(AsteroidsGame* game, Ship* ship) : soundSystem(game->getSoundSyst
 	particleSystem->textureAtlas = new TextureAtlas(game->getResourceLoader().loadTexture("ParticleAtlas.png"), 8, 8, 64);
 
 	//Assign the laser cooldown time
-	cooldown = 0.5;
+	cooldown = 2.0;
 
 	//Assign the last laser fired time
 	timeLastLaserFired = 0.0;

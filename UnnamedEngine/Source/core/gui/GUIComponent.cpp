@@ -37,12 +37,12 @@ void GUIComponentRenderer::update() {
 	GameObject2D::update();
 
 	//Check that there are colours and the render index is within its bounds
-	if (hasColours() && colours.size() > renderIndex)
+	if (colours.size() > renderIndex)
 		//Assign the colour
-		getMaterial()->setDiffuseColour(colours.at(renderIndex));
+		getMaterial()->setDiffuseColour(colours[renderIndex]);
 	//Now to do the same for the textures
-	if (hasTextures() && textures.size() > renderIndex)
-		getMaterial()->setDiffuseTexture(textures.at(renderIndex));
+	if (textures.size() > renderIndex)
+		getMaterial()->setDiffuseTexture(textures[renderIndex]);
 }
 
 void GUIComponentRenderer::renderText(std::string text, Vector2f relPos) {
@@ -61,6 +61,16 @@ void GUIComponentRenderer::renderTextAtCentre(std::string text) {
 
 unsigned int GUIComponentRenderer::getMaxRenderIndex() {
 	return MathsUtils::max(colours.size(), textures.size());
+}
+
+void GUIComponentRenderer::setColour(Colour colour) {
+	for (unsigned int i = 0; i < colours.size(); i++)
+		colours[i] = colour;
+}
+
+void GUIComponentRenderer::setTexture(Texture* texture) {
+	for (unsigned int i = 0; i < textures.size(); i++)
+		textures[i] = texture;
 }
 
 /*****************************************************************************
@@ -162,12 +172,12 @@ void GUIComponent::disable() {
 }
 
 void GUIComponent::update() {
+	GUIComponentRenderer::update();
+
+	if (border)
+		border->update();
+
 	if (active) {
-		GUIComponentRenderer::update();
-
-		if (border)
-			border->update();
-
 		//Update all attached components
 		for (unsigned int i = 0; i < attachedComponents.size(); i++)
 			attachedComponents[i]->update();
@@ -311,6 +321,9 @@ void GUIComponent::onScroll(double dx, double dy) {
 
 void GUIComponent::setActive(bool active) {
 	this->active = active;
+
+	//Reset the render index
+	this->renderIndex = 0;
 
 	//Assign the same thing in all attached components
 	for (unsigned int i = 0; i < attachedComponents.size(); i++)

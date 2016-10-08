@@ -1,4 +1,167 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 1 (V0.0.9)
+
+* Added MLAttribute
+* Added MLElement
+* Added MLDocument
+* Added MLParser
+* Added methods in Window to set the cursor position and
+  centre the cursor
+  
+* Changed Font so that it now creates a bigger bitmap font
+  than required and scales it down, improving quality
+* Changed GUIComponent so that setActive will now reset
+  the render index to 0
+* Changed setColour and setTexture methods in
+  GUIComponentRenderer
+* Changed writeToFile and readFromFile methods in
+  SettingsUtils to use ML
+  
+* Fixed bug: Shadows didn't work
+
+* More asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 0 | Experimental 4
+
+* Added toString() methods to MLAttribute, MLElement and
+  MLDocument
+* Added save method in MLDocument
+
+* Changed writeToFile and readFromFile methods in
+  SettingsUtils to use ML
+
+* Fixed bug: Data in an ML attribute was not parsed correctly
+             if it contained a space
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 0 | Experimental 3
+
+* Added MLAttribute
+* Added MLElement
+* Added MLDocument
+* Added MLParser
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 0 | Experimental 2
+
+* Changed Font so that it now creates a bigger bitmap font
+  than required and scales it down, improving quality
+* Changed GUIComponent so that setActive will now reset
+  the render index to 0
+* Changed setColour and setTexture methods in
+  GUIComponentRenderer
+
+* More asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 0 | Experimental 1
+
+* Added methods in Window to set the cursor position and
+  centre the cursor
+  
+* Fixed bug: Shadows didn't work
+
+* More asteroids development
+  
+--------------------------------------------------------------
+Release 0 | Beta 1 (V0.0.8)
+
+First beta commit. Since starting the development branch,
+here are the changes:
+
+* Added GUIComponentListener
+* Added GUIDropDownMenu
+* Added GUIDropDownList
+* Added GUIPanel
+* Added GUIPanelGroup
+* Added GUILabel
+* Added GUISlider
+* Added GUITextBox
+* Added GUITextBoxCursor
+* Added GUITextBoxSelection
+* Added InputBinding
+* Added InputBindingButton
+* Added InputBindingAxis
+* Added InputBindingsListener
+* Added InputBindings
+* Added DebugCamera
+* Added Timer
+* Added KeyboardShortcuts
+
+* Added billboarded font support
+* Added windowAspectRatio in Settings that is assigned when
+  the Window is created
+* Added methods to directly obtain the current frame delta
+  in seconds
+* Added loadFont method in ResourceLoader
+* Added 'active' value in ParticleEmitter
+* Added emitParticles() method in Particle emitter to
+  activate a particle emitter to emit a specified number of
+  particles
+* Added methods to get input bindings given their name
+* Added methods in SoundSystem to allow the listener to be
+  moved after being created
+* Added methods to pause/resume/stop all currently playing
+  audio in SoundSystem
+* Added methods to save and load the Settings structure
+  to and from files
+* Added min() and max() to Vectors
+* Added setCurrentStage() method in GUILoadingBar
+* Added ability for GUIComponents to be attached to
+  GUIComponents
+
+* Renamed Scene to RenderScene3D
+
+* Changed ResourceManager so that it now has instances of
+  resource manager allowing greater control of when resources
+  are released
+* Changed Texture::loadTexture() to return NULL instead of an
+  an empty Texture instance when an image can't be loaded
+* Changed Shader so the current shader is stored, and a new
+  one will only be used if necessary
+  
+* Removed the overrideShader variable everywhere
+
+* Fixed bug: GUIButton still displayed it's text when its
+             visible property was set to false
+* Fixed bug: GUICheckBox still displayed it's text when its
+             visible property was set to false
+* Fixed bug: ParticleEmitter wouldn't spawn particles if the
+             delta * particleSpawnRate was < 1 in several
+             frame
+* Fixed bug: The VSync setting didn't have any effect
+* Fixed bug: Weird font glitch 
+* Fixed bug: InputBindingAxis could get stuck with a value
+             when using keyboard keys
+* Fixed bug: Sorting order for particles was wrong
+* Fixed bug: ParticleSystem still a particle even though the
+             particle count was 0
+* Fixed bug: GUIComponent didn't check whether the mouse
+             was hovering over it when it entered the window
+* Fixed bug: GUILoadingBar still rendered it's fill even
+             when visible was set to false
+* Fixed bug: GUIComponents placed right next to each other
+             could be selected at the same time
+* Fixed bug: The length() method in vectors didn't stop a
+             divide by 0
+* Fixed bug: Font getHeight() didn't take into account new
+             lines
+* Fixed bug: Calling onMousePressed() in a GUIComponent
+             would have changed its clicked state to false if
+             called twice
+
+* Note: RenderScene3D doesn't have an update method, so objects
+        that move should always be updated manually/added
+        to a PhysicsScene3D instance
+* Note: GUIComponents now have an enable/disable method which
+        adds/removes their input listener from the current
+        input manager, by default they are disabled, so
+        enable() should be called on all objects that need
+        to receive input once created
+* Note: Writing game using engine in the examples
+
+--------------------------------------------------------------
 Release 0 | Beta 0 | Development 8 (V0.0.8)
 
 * Added ability to set an interval for a GUISlider

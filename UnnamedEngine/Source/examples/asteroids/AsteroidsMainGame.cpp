@@ -35,6 +35,10 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	//Setup the game over menu
 	gameOverMenu = new GameOverMenu(game, player);
 
+	//Setup the upgrades menu
+	upgradesMenu = new UpgradesMenu(game, this);
+	showUpgradesMenu = false;
+
 	//Setup the asteroid renderer
 	unsigned int numAsteroids = 1250;
 	asteroidRenderer = new AsteroidsRenderer(game->getResourceLoader(), numAsteroids);
@@ -78,10 +82,13 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	//Setup the pause button
 	game->getInputBindings()->addListener(this);
 	pauseButton = game->getInputBindings()->getButtonBinding("Pause");
+	upgradesButton = game->getInputBindings()->getButtonBinding("Upgrades");
 }
 
 AsteroidsMainGame::~AsteroidsMainGame() {
 	//Delete created resources
+	delete gameOverMenu;
+	delete upgradesMenu;
 	delete player;
 	delete hud;
 	delete asteroidRenderer;
@@ -165,40 +172,44 @@ AsteroidGroup& AsteroidsMainGame::findClosestAsteroids(const Vector3f& position)
 }
 
 void AsteroidsMainGame::update() {
-	//Get the closest asteroids to the player
-	AsteroidGroup& playerClosestAsteroids = findClosestAsteroids(player->getCamera()->getPosition());
-	//Update the player
-	player->update(game->getDeltaSeconds(), playerClosestAsteroids);
+	if (showUpgradesMenu)
+		upgradesMenu->update();
+	else {
+		//Get the closest asteroids to the player
+		AsteroidGroup& playerClosestAsteroids = findClosestAsteroids(player->getCamera()->getPosition());
+		//Update the player
+		player->update(game->getDeltaSeconds(), playerClosestAsteroids);
 
-	//Update the closest asteroids to the player
-	playerClosestAsteroids.update(game->getDeltaSeconds(), player);
+		//Update the closest asteroids to the player
+		playerClosestAsteroids.update(game->getDeltaSeconds(), player);
 
-	//Update the HUD
-	hud->update();
+		//Update the enemies
+		for (unsigned int i = 0; i < enemies.size(); i++) {
+			enemies[i]->update(game->getDeltaSeconds(), findClosestAsteroids(enemies[i]->getPosition()));
+			//Check whether it is still alive
+			if (! enemies[i]->isAlive() && enemiesRenderer->isEnemyVisible(i)) {
+				//Reset the enemy and move them somewhere else
+				enemies[i]->reset();
+			}
+		}
 
-	//Update the enemies
-	for (unsigned int i = 0; i < enemies.size(); i++) {
-		enemies[i]->update(game->getDeltaSeconds(), findClosestAsteroids(enemies[i]->getPosition()));
-		//Check whether it is still alive
-		if (! enemies[i]->isAlive() && enemiesRenderer->isEnemyVisible(i)) {
-			//Reset the enemy and move them somewhere else
-			enemies[i]->reset();
+		//Check whether another enemy should spawn
+		if (timer->hasTimePassedSeconds(timeForNextEnemy))
+			//Spawn a new enemy
+			spawnEnemy();
+
+		//Update the enemies renderer
+		enemiesRenderer->update();
+
+		if (! player->isAlive()) {
+			if (! gameOverMenu->isVisible())
+				gameOverMenu->show();
+			gameOverMenu->update();
 		}
 	}
 
-	//Check whether another enemy should spawn
-	if (timer->hasTimePassedSeconds(timeForNextEnemy))
-		//Spawn a new enemy
-		spawnEnemy();
-
-	//Update the enemies renderer
-	enemiesRenderer->update();
-
-	if (! player->isAlive()) {
-		if (! gameOverMenu->isVisible())
-			gameOverMenu->show();
-		gameOverMenu->update();
-	}
+	//Update the HUD
+	hud->update();
 }
 
 void AsteroidsMainGame::spawnEnemy() {
@@ -246,13 +257,33 @@ void AsteroidsMainGame::render() {
 	if (! player->isAlive()) {
 		gameOverMenu->render();
 	}
+
+	if (showUpgradesMenu)
+		upgradesMenu->render();
+}
+
+void AsteroidsMainGame::showUpgrades() {
+	upgradesMenu->show();
+	showUpgradesMenu = true;
+}
+
+void AsteroidsMainGame::hideUpgrades() {
+	showUpgradesMenu = false;
+	upgradesMenu->hide();
 }
 
 void AsteroidsMainGame::onButtonReleased(InputBindingButton* button) {
-	if (button == pauseButton) {
-		if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING)
-			game->changeState(AsteroidsGame::GAME_PAUSED);
-		else if (game->getCurrentState() == AsteroidsGame::GAME_PAUSED)
-			game->changeState(AsteroidsGame::GAME_PLAYING);
+	if (player->getHealth() > 0) {
+		if (button == pauseButton && ! showUpgradesMenu) {
+			if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING)
+				game->changeState(AsteroidsGame::GAME_PAUSED);
+			else if (game->getCurrentState() == AsteroidsGame::GAME_PAUSED)
+				game->changeState(AsteroidsGame::GAME_PLAYING);
+		} else if (button == upgradesButton && game->getCurrentState() == AsteroidsGame::GAME_PLAYING) {
+			if (showUpgradesMenu)
+				hideUpgrades();
+			else
+				showUpgrades();
+		}
 	}
 }

@@ -43,6 +43,14 @@ HUD::HUD(AsteroidsGame* game, Player* player) : player(player) {
 	GUILabel* labelHealth = new GUILabel("Health:", headingFont);
 	labelHealth->setPosition(barPlayerHealth->getPosition().getX() - labelHealth->getWidth() - 10.0f, 40.0f);
 
+	//Setup the shield bar
+	barPlayerShield = new GUILoadingBar(400, 20, player->getShield(), game->getResources().getTextureShieldBar(), game->getResources().getTextureShieldBar());
+	barPlayerShield->setPosition(windowWidth - barPlayerShield->getWidth() - 10, 70.0f);
+
+	//Setup the shield label
+	GUILabel* labelShield = new GUILabel("Shield:", headingFont);
+	labelShield->setPosition(barPlayerShield->getPosition().getX() - labelShield->getWidth() - 10.0f, 70.0f);
+
 	//Setup the score label
 	labelScore = new GUILabel("Score: ", headingFont);
 	labelScore->setPosition(barPlayerHealth->getPosition().getX(), 10.0f);
@@ -50,6 +58,8 @@ HUD::HUD(AsteroidsGame* game, Player* player) : player(player) {
 	//Add the components
 	add(barPlayerHealth);
 	add(labelHealth);
+	add(barPlayerShield);
+	add(labelShield);
 	add(labelScore);
 }
 
@@ -63,6 +73,8 @@ void HUD::update() {
 	//Update the health bar if necessary
 	if (barPlayerHealth->getCurrentStage() != player->getHealth())
 		barPlayerHealth->setCurrentStage(player->getHealth());
+	if (barPlayerShield->getCurrentStage() != player->getShield())
+		barPlayerShield->setCurrentStage(player->getShield());
 	labelScore->setText("Score: " + StrUtils::str(player->getScore()));
 }
 

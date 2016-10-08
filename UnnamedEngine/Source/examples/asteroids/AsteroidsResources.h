@@ -37,6 +37,7 @@ private:
 
 	/* Various textures */
 	std::vector<Texture*> texturesButtons;
+	Texture* textureShieldBar = NULL;
 
 	/* Various sounds */
 	AudioData* audioLaser = NULL;
@@ -58,6 +59,7 @@ public:
 	inline Font* getFontHeadingMono() const { return fontHeadingMono; }
 
 	inline const std::vector<Texture*>& getTexturesButtons() const { return texturesButtons; }
+	inline Texture* getTextureShieldBar() const { return textureShieldBar; }
 
 	inline AudioData* getAudioLaser() const { return audioLaser; }
 	inline AudioData* getAudioExplosion() const { return audioExplosion; }

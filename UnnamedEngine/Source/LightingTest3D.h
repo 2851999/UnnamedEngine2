@@ -98,6 +98,8 @@ void Test::created() {
 	light0->update();
 	scene->addLight(light0);
 
+	//object2->getMaterial()->setDiffuseTexture(light0->getDepthBuffer()->getFramebufferTexture(0));
+
 //	scene->addLight(Light(Light::TYPE_SPOT, Vector3f(2.0f, 0.8f, 0.5f)).setDirection(0.0f, -1.0f, 0.0f)
 //																	   .setCutoff(cos(MathsUtils::toRadians(30.0f)))
 //																	   .setOuterCutoff(cos(MathsUtils::toRadians(38.0f)))

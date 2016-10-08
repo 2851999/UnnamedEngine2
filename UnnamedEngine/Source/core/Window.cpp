@@ -129,6 +129,9 @@ void Window::toggleCursor() {
 		disableCursor();
 }
 
+void Window::setCursorPosition(double x, double y) {
+	glfwSetCursorPos(instance, x, y);
+}
 void Window::centre() {
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	setPosition(mode->width / 2 - settings.windowWidth / 2, mode->height / 2 - settings.windowHeight / 2);

@@ -25,8 +25,11 @@
 Ship::Ship(AsteroidsGame* game) : PhysicsObject3D(NULL) {
 	//Setup the lasers
 	lasers = new Lasers(game, this);
-	//Set the default health
+	//Set the default health and shield
 	health = 1;
+	shield = 1;
+	shieldMax = 1;
+	shieldRegenRate = 10;
 	//Setup the movement speed
 	movementSpeed = 10.0f;
 	maximumSpeed = 15.0f;
@@ -46,6 +49,7 @@ void Ship::reset() {
 	setAngularAcceleration(0, 0, 0);
 	lasers->reset();
 	health = 1;
+	shieldTimer.restart();
 }
 
 void Ship::update(float deltaSeconds, AsteroidGroup& closestGroup) {
@@ -60,6 +64,12 @@ void Ship::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	}
 	//Update the lasers
 	lasers->update(deltaSeconds, closestGroup);
+
+	//Check whether the shield should be increased
+	if (shieldMax > 0 && shield < shieldMax && shieldTimer.hasTimePassedSeconds(shieldRegenRate)) {
+		shield ++;
+		shieldTimer.restart();
+	}
 }
 
 void Ship::render() {
@@ -69,8 +79,15 @@ void Ship::render() {
 
 void Ship::removeHealth(unsigned int amount) {
 	//Remove health if possible
-	if (health > amount)
-		health -= amount;
-	else
-		health = 0;
+	if (shield > 0) {
+		unsigned int old = shield;
+		shield = MathsUtils::max(shield - amount, 0u);
+		amount -= (old - shield);
+	} else if (amount > 0) {
+		if (health > amount)
+			health -= amount;
+		else
+			health = 0;
+	}
+	shieldTimer.restart();
 }

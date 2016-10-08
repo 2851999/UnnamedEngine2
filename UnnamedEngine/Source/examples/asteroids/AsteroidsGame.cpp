@@ -70,11 +70,13 @@ void AsteroidsGame::created() {
 	//Create the button bindings
 	InputBindingButton* buttonShoot = inputBindings->createButtonBinding("Shoot");
 	InputBindingButton* buttonPause = inputBindings->createButtonBinding("Pause");
+	InputBindingButton* buttonUpgrades = inputBindings->createButtonBinding("Upgrades");
 	//Setup default keys
 	axisForward->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
 	axisSideways->assignKeys(GLFW_KEY_A, GLFW_KEY_D);
 	buttonShoot->assignKey(GLFW_KEY_SPACE);
 	buttonPause->assignKey(GLFW_KEY_ESCAPE);
+	buttonUpgrades->assignKey(GLFW_KEY_U);
 
 	//Setup the main menu
 	mainMenu = new AsteroidsMainMenu(this);
