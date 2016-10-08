@@ -184,7 +184,7 @@ namespace SettingsUtils {
 	/* Writes settings to a file */
 	void writeToFile(std::string path, Settings& settings);
 
-	/* Returns settings loaded from a file */
+	/* Returns settings read from a file */
 	Settings readFromFile(std::string path);
 }
 

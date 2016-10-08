@@ -36,6 +36,10 @@ MLAttribute::MLAttribute(std::string name, std::string data) {
 	this->data = data;
 }
 
+std::string MLAttribute::toString() {
+	return name + "=\"" + data + "\"";
+}
+
 /*****************************************************************************
  * The MLElement class
  *****************************************************************************/
@@ -46,6 +50,26 @@ MLElement::MLElement() {
 
 MLElement::MLElement(std::string name) {
 	this->name = name;
+}
+
+std::string MLElement::toString(std::string prefix) {
+	//The string representation
+	std::string text = prefix + "<" + name;
+
+	//Go through all of the attributes in this element
+	for (MLAttribute& attrib : attributes)
+		//Append the current attribute's string representation
+		text += " " + attrib.toString();
+	//Close the tag
+	text += ">\n";
+	//Go through all of the child elements
+	for (MLElement& child : children)
+		//Append the current child's string representation
+		text += child.toString(prefix + "\t") + "\n";
+	//Close this element
+	text += prefix + "</" + name + ">";
+	//Return the text
+	return text;
 }
 
 /*****************************************************************************
@@ -86,12 +110,12 @@ void MLDocument::load(std::string path) {
 		Logger::log("Couldn't open the file with the path '" + path + "'", "MLDocument", Logger::Error);
 }
 
-void MLDocument::printData(MLElement& element, std::string prefix) {
-	std::cout << prefix + "Element: " + element.getName() << std::endl;
-	for (MLAttribute& attrib : element.getAttributes())
-		std::cout << prefix + "\tAttribute: " + attrib.getName() + "     " + attrib.getData() << std::endl;
-	for (MLElement& child : element.getChildren())
-		printData(child, prefix + "\t");
+void MLDocument::save(std::string path) {
+	FileUtils::writeFile(path, toString());
+}
+
+std::string MLDocument::toString() {
+	return root.toString();
 }
 
 /*****************************************************************************
@@ -172,7 +196,11 @@ MLElement MLParser::parseElement(std::string line) {
 		//Go through each attribute
 		while (attributes.length() > 0) {
 			//Find the end of the current attribute
-			std::size_t endOfAttrib = attributes.find(" ");
+			std::size_t endOfAttrib = attributes.find("\" ");
+			//If there is any more attributes, there will be a
+			//space so need to increment by one more to ensure it is removed
+			if (endOfAttrib != std::string::npos)
+				endOfAttrib ++;
 			//Get the current attribute declaration
 			std::string currentAttrib = attributes.substr(0, endOfAttrib);
 

@@ -159,7 +159,7 @@ void Test::created() {
 
 	MLDocument document;
 	document.load("C:/Users/Joel/Desktop/Idea.xml");
-	document.printData();
+	//document.save("C:/Users/Joel/Desktop/Test.xml");
 }
 
 void Test::update() {

@@ -49,6 +49,9 @@ public:
 	inline void setData(std::string data) { this->data = data; }
 	inline std::string& getName() { return name; }
 	inline std::string& getData() { return data; }
+
+	/* Method used to generate the text representation of this attribute */
+	std::string toString();
 };
 
 /*****************************************************************************
@@ -72,14 +75,17 @@ public:
 	MLElement(std::string name);
 
 	/* Methods to add attributes/child tags */
-	inline void add(MLAttribute& attribute) { attributes.push_back(attribute); }
-	inline void add(MLElement& child) { children.push_back(child); }
+	inline void add(MLAttribute attribute) { attributes.push_back(attribute); }
+	inline void add(MLElement child) { children.push_back(child); }
 
 	/* Various setters and getters */
 	inline void setName(std::string name) { this->name = name; }
 	inline std::string& getName() { return name; }
 	inline std::vector<MLAttribute>& getAttributes() { return attributes; }
 	inline std::vector<MLElement>& getChildren() { return children; }
+
+	/* Method used to generate the text representation of this element */
+	std::string toString(std::string prefix = "");
 };
 
 /*****************************************************************************
@@ -90,9 +96,6 @@ class MLDocument {
 private:
 	/* The root element */
 	MLElement root;
-
-	/* Method used to print all data - used as a test */
-	void printData(MLElement& element, std::string prefix);
 public:
 	/* The constructor */
 	MLDocument();
@@ -102,13 +105,16 @@ public:
 	 * instance */
 	void load(std::string path);
 
-	/* Method used to print all of the data within this document - used as
-	 * a test */
-	inline void printData() { printData(root, ""); }
+	/* Method used to write the string representation of this document to a
+	 * file */
+	void save(std::string path);
 
 	/* Various setters and getters */
 	inline void setRoot(MLElement& root) { this->root = root; }
 	inline MLElement& getRoot() { return root; }
+
+	/* Method used to generate the text representation of this document */
+	std::string toString();
 };
 
 /*****************************************************************************
