@@ -80,6 +80,7 @@ UpgradesMenu::~UpgradesMenu() {
 
 void UpgradesMenu::show() {
 	game->getWindow()->enableCursor();
+	game->getWindow()->centreCursor();
 	updateButtons();
 	GUIPanel::show();
 }
@@ -110,12 +111,12 @@ void UpgradesMenu::render() {
 
 void UpgradesMenu::updateButtons() {
 	//Disable/Activate the buttons as required
-	buttonUpgradeFireSpeed->setActive(mainGame->getPlayer()->getLasers()->getCooldown() > 0.5f && mainGame->getPlayer()->getScore() > 2000);
+	buttonUpgradeFireSpeed->setActive(mainGame->getPlayer()->getLasers()->getCooldown() > 0.5f && mainGame->getPlayer()->getScore() >= 2000);
 	if (buttonUpgradeFireSpeed->isActive())
 		buttonUpgradeFireSpeed->setColour(Colour::WHITE);
 	else
 		buttonUpgradeFireSpeed->setColour(Colour(0.6f, 0.6f, 0.6f, 1.0f));
-	buttonUpgradeMovementSpeed->setActive(mainGame->getPlayer()->getMaximumSpeed() < 20.0f && mainGame->getPlayer()->getScore() > 2000);
+	buttonUpgradeMovementSpeed->setActive(mainGame->getPlayer()->getMaximumSpeed() < 20.0f && mainGame->getPlayer()->getScore() >= 2000);
 	if (buttonUpgradeMovementSpeed->isActive())
 		buttonUpgradeMovementSpeed->setColour(Colour::WHITE);
 	else

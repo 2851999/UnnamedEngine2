@@ -37,12 +37,12 @@ void GUIComponentRenderer::update() {
 	GameObject2D::update();
 
 	//Check that there are colours and the render index is within its bounds
-	if (hasColours() && colours.size() > renderIndex)
+	if (colours.size() > renderIndex)
 		//Assign the colour
-		getMaterial()->setDiffuseColour(colours.at(renderIndex));
+		getMaterial()->setDiffuseColour(colours[renderIndex]);
 	//Now to do the same for the textures
-	if (hasTextures() && textures.size() > renderIndex)
-		getMaterial()->setDiffuseTexture(textures.at(renderIndex));
+	if (textures.size() > renderIndex)
+		getMaterial()->setDiffuseTexture(textures[renderIndex]);
 }
 
 void GUIComponentRenderer::renderText(std::string text, Vector2f relPos) {

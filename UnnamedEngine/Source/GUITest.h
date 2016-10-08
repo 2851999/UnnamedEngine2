@@ -33,6 +33,7 @@
 #include "core/gui/GUILabel.h"
 #include "core/gui/GUISlider.h"
 #include "core/gui/GUITextBox.h"
+#include "core/ml/ML.h"
 
 class Test : public BaseEngine {
 private:
@@ -112,7 +113,7 @@ void Test::created() {
 	dropDownMenu->setPosition(400, 20);
 
 	GUIButton* dropDownListButton = new GUIButton("Select", 200, 20, colours);
-	dropDownList = new GUIDropDownList(dropDownListButton, ResourceLoader::sLoadTexture("C:/UnnamedEngine/GUIDropDownOverlayClosed.png"), ResourceLoader::sLoadTexture("C:/UnnamedEngine/GUIDropDownOverlayOpened.png"));
+	dropDownList = new GUIDropDownList(dropDownListButton, ResourceLoader::sLoadTexture("C:/UnnamedEngine/DropDownOverlayClosed.png"), ResourceLoader::sLoadTexture("C:/UnnamedEngine/DropDownOverlayOpened.png"));
 	dropDownList->addButton(new GUIButton("800 x 600", 200, 20, colours));
 	dropDownList->addButton(new GUIButton("1280 x 720", 200, 20, colours));
 	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, colours));
@@ -155,6 +156,10 @@ void Test::created() {
 
 	getWindow()->centreCursor();
 	Renderer::addCamera(camera);
+
+	MLDocument document;
+	document.load("C:/Users/Joel/Desktop/Idea.xml");
+	document.printData();
 }
 
 void Test::update() {
