@@ -54,7 +54,7 @@ private:
 	float currentDelta = 0;
 public:
 	/* The constructor */
-	DebugCamera(Matrix4f projectionMatrix);
+	DebugCamera(Matrix4f projectionMatrix, InputBindings* bindings = NULL);
 
 	/* The destructor */
 	virtual ~DebugCamera() { delete inputBindings; }
@@ -70,6 +70,7 @@ public:
 	InputBindingAxis* getSidewaysAxis() { return axis1; }
 	InputBindingAxis* getLookXAxis() { return axis2; }
 	InputBindingAxis* getLookYAxis() { return axis3; }
+	InputBindings* getInputBindings() { return inputBindings; }
 };
 
 #endif /* UTILS_DEBUGCAMERA_H_ */

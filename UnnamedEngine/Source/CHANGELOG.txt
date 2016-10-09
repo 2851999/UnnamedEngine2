@@ -1,4 +1,40 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 1 | Experimental 1
+
+* Added save and load methods in InputBindings to allow input
+  bindings to be saved/loaded from an ML file
+  
+* Changed DebugCamera's constructor to allow a custom
+  InputBindings instance to be provided
+
+* Fixed bug: InputBindings getButtonBinding and
+             getAxisBinding methods caused a crash if the
+             binding wasn't found
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 1 (V0.0.9)
+
+* Added MLAttribute
+* Added MLElement
+* Added MLDocument
+* Added MLParser
+* Added methods in Window to set the cursor position and
+  centre the cursor
+  
+* Changed Font so that it now creates a bigger bitmap font
+  than required and scales it down, improving quality
+* Changed GUIComponent so that setActive will now reset
+  the render index to 0
+* Changed setColour and setTexture methods in
+  GUIComponentRenderer
+* Changed writeToFile and readFromFile methods in
+  SettingsUtils to use ML
+  
+* Fixed bug: Shadows didn't work
+
+* More asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 0 | Experimental 4
 
 * Added toString() methods to MLAttribute, MLElement and

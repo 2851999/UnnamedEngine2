@@ -200,4 +200,18 @@ namespace ClipboardUtils {
 	std::string getText();
 }
 
+/*****************************************************************************
+ * Various controller utilities
+ *****************************************************************************/
+
+namespace ControllerUtils {
+	/* Returns the index of a controller given its name or -1 if not found */
+	int getControllerIndexByName(std::string name);
+
+	/* Return the index of a controller if it has the provided name, if not
+	 * it will search for a controller with that name and return that or -1
+	 * if still not found */
+	int findController(int index, std::string name);
+}
+
 #endif /* UTILS_UTILS_H_ */

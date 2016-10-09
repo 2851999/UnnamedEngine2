@@ -315,3 +315,35 @@ namespace ClipboardUtils {
 		return std::string(glfwGetClipboardString(Window::getCurrentInstance()->getInstance()));
 	}
 }
+
+/*****************************************************************************
+ * Various controller utilities
+ *****************************************************************************/
+
+namespace ControllerUtils {
+	/* Returns the index of a controller given its name or -1 if not found */
+	int getControllerIndexByName(std::string name) {
+		//Go through each possible index
+		for (unsigned int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_LAST; i++) {
+			//Check the name of the current controller
+			if (std::string(glfwGetJoystickName(i)) == name && name.length() > 0)
+				//Return the index
+				return i;
+		}
+		return -1;
+	}
+
+	/* Return the index of a controller if it has the provided name, if not
+	 * it will search for a controller with that name and return that or -1
+	 * if still not found */
+	int findController(int index, std::string name) {
+		//Get the name of the controller at the given index
+		if (std::string(glfwGetJoystickName(index)) == name)
+			//Return the index as it is correct
+			return index;
+		else
+			//Not the correct controller, so try and locate and return the
+			//controller's index
+			return getControllerIndexByName(name);
+	}
+}

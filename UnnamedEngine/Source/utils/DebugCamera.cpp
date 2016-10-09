@@ -22,18 +22,30 @@
  * The DebugCamera class
  *****************************************************************************/
 
-DebugCamera::DebugCamera(Matrix4f projectionMatrix) : Camera3D(projectionMatrix) {
-	//Create the InputBindings instance
-	inputBindings = new InputBindings();
-	//Create the axis bindings
-	axis0 = inputBindings->createAxisBinding("Axis0");
-	axis1 = inputBindings->createAxisBinding("Axis1");
-	axis2 = inputBindings->createAxisBinding("Axis2");
-	axis3 = inputBindings->createAxisBinding("Axis3");
+DebugCamera::DebugCamera(Matrix4f projectionMatrix, InputBindings* bindings) : Camera3D(projectionMatrix) {
+	//Check whether the bindings need to be created
+	if (! bindings) {
+		//Create the input bindings
+		inputBindings = new InputBindings();
+		//Create the axis bindings
+		axis0 = inputBindings->createAxisBinding("Axis0");
+		axis1 = inputBindings->createAxisBinding("Axis1");
+		axis2 = inputBindings->createAxisBinding("Axis2");
+		axis3 = inputBindings->createAxisBinding("Axis3");
 
-	//Setup default keys
-	axis0->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
-	axis1->assignKeys(GLFW_KEY_A, GLFW_KEY_D);
+		//Setup default keys
+		axis0->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
+		axis1->assignKeys(GLFW_KEY_A, GLFW_KEY_D);
+	} else {
+		//Use the existing one
+		inputBindings = bindings;
+
+		//Assign the axes
+		axis0 = inputBindings->getAxisBinding("Axis0");
+		axis1 = inputBindings->getAxisBinding("Axis1");
+		axis2 = inputBindings->getAxisBinding("Axis2");
+		axis3 = inputBindings->getAxisBinding("Axis3");
+	}
 
 	//Assign the default movement speed
 	movementSpeed = 5.0f;

@@ -17,6 +17,8 @@
  *****************************************************************************/
 
 #include "InputBindings.h"
+#include "../ml/ML.h"
+#include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The InputBindingButton class
@@ -167,4 +169,172 @@ InputBindingAxis* InputBindings::createAxisBinding(std::string name) {
 	axisBindings.insert(std::pair<std::string, InputBindingAxis*>(name, axis));
 	//Return the button binding
 	return axis;
+}
+
+InputBindingButton* InputBindings::getButtonBinding(std::string name) {
+	//Ensure that binding exists
+	if (buttonBindings.count(name) > 0)
+		//Return the binding
+		return buttonBindings.at(name);
+	else {
+		//Log an error
+		Logger::log("No button binding with the name '" + name + "'", "InputBindings", Logger::Error);
+		//Return
+		return NULL;
+	}
+}
+
+InputBindingAxis* InputBindings::getAxisBinding(std::string name) {
+	//Ensure that binding exists
+	if (axisBindings.count(name) > 0)
+		//Return the binding
+		return axisBindings.at(name);
+	else {
+		//Log an error
+		Logger::log("No axis binding with the name '" + name + "'", "InputBindings", Logger::Error);
+		//Return
+		return NULL;
+	}
+}
+
+void InputBindings::save(std::string path) {
+	//Create the root of the document
+	MLElement root("ml");
+
+	//Go though each button binding
+	for (auto& elem : buttonBindings) {
+		//Get the current button binding
+		InputBindingButton* button = elem.second;
+		//Create the button binding
+		MLElement buttonBinding("button");
+
+		//Add the required attributes
+		buttonBinding.add(MLAttribute("name", elem.first));
+		buttonBinding.add(MLAttribute("keyboardKey", StrUtils::str(button->getKeyboardKey())));
+		buttonBinding.add(MLAttribute("mouseButton", StrUtils::str(button->getMouseButton())));
+		buttonBinding.add(MLAttribute("controllerButton", StrUtils::str(button->getControllerButton())));
+
+		//Check whether a controller element is needed
+		if (button->hasController()) {
+			//Create the controller element
+			MLElement controller("controller");
+
+			//Add the required attributes
+			controller.add(MLAttribute("index", StrUtils::str(button->getController()->getIndex())));
+			controller.add(MLAttribute("name", button->getController()->getName()));
+
+			//Add the controller element to the button binding
+			buttonBinding.add(controller);
+		}
+		//Add the button binding to the root element
+		root.add(buttonBinding);
+	}
+
+	//Go though each axis binding
+	for (auto& elem : axisBindings) {
+		//Get the current button binding
+		InputBindingAxis* axis = elem.second;
+		//Create the button binding
+		MLElement axisBinding("axis");
+
+		//Add the required attributes
+		axisBinding.add(MLAttribute("name", elem.first));
+		axisBinding.add(MLAttribute("keyboardKeyPos", StrUtils::str(axis->getKeyboardKeyPos())));
+		axisBinding.add(MLAttribute("keyboardKeyNeg", StrUtils::str(axis->getKeyboardKeyNeg())));
+		axisBinding.add(MLAttribute("controllerAxis", StrUtils::str(axis->getControllerAxis())));
+
+		//Check whether a controller element is needed
+		if (axis->hasController()) {
+			//Create the controller element
+			MLElement controller("controller");
+
+			//Add the required attributes
+			controller.add(MLAttribute("index", StrUtils::str(axis->getController()->getIndex())));
+			controller.add(MLAttribute("name", axis->getController()->getName()));
+
+			//Add the controller element to the axis binding
+			axisBinding.add(controller);
+		}
+		//Add the axis binding to the root element
+		root.add(axisBinding);
+	}
+
+	//The document to store the data in
+	MLDocument document(root);
+	//Save the document
+	document.save(path);
+}
+#include <iostream>
+void InputBindings::load(std::string path, InputManager* inputManager) {
+	//Load the document
+	MLDocument document;
+	document.load(path);
+
+	//Get the root element
+	MLElement& root = document.getRoot();
+	//The currently loaded controllers
+	std::map<int, Controller*> controllers;
+	//Go through all of the child elements within the root
+	for (MLElement& child : root.getChildren()) {
+		//The current controller
+		Controller* currentController = NULL;
+
+		//Go through each element within the child
+		for (MLElement& elem : child.getChildren()) {
+			//Check the name
+			if (elem.getName() == "controller") {
+				int index = -1;
+				std::string name;
+
+				for (MLAttribute& attrib : elem.getAttributes()) {
+					if (attrib.getName() == "index")
+						index = attrib.getDataAsInt();
+					else if (attrib.getName() == "name")
+						name = attrib.getData();
+				}
+				//Add the controller if required
+				if (controllers.count(index) < 1) {
+					currentController = new Controller(ControllerUtils::findController(index, name));
+					controllers.insert(std::pair<int, Controller*>(index, currentController));
+					//Add the controller to the input manager if it was provided
+					if (inputManager)
+						inputManager->addController(currentController);
+				} else
+					currentController = controllers.at(index);
+			}
+		}
+
+		//Check the child's name
+		if (child.getName() == "button") {
+			//Create the button binding
+			InputBindingButton* buttonBinding = new InputBindingButton(this);
+
+			//Go through each attribute and assign the appropriate values
+			for (MLAttribute& attrib : child.getAttributes()) {
+				if (attrib.getName() == "name")
+					buttonBindings.insert(std::pair<std::string, InputBindingButton*>(attrib.getData(), buttonBinding));
+				else if (attrib.getName() == "keyboardKey")
+					buttonBinding->assignKey(attrib.getDataAsInt());
+				else if (attrib.getName() == "mouseButton")
+					buttonBinding->assignKey(attrib.getDataAsInt());
+				else if (attrib.getName() == "controllerButton" && currentController)
+					buttonBinding->assignControllerButton(currentController, attrib.getDataAsInt());
+			}
+		} else if (child.getName() == "axis") {
+			//Create the axis binding
+			InputBindingAxis* axisBinding = new InputBindingAxis(this);
+
+			//Go through each attribute and assign the appropriate values
+			for (MLAttribute& attrib : child.getAttributes()) {
+				if (attrib.getName() == "name")
+					axisBindings.insert(std::pair<std::string, InputBindingAxis*>(attrib.getData(), axisBinding));
+				else if (attrib.getName() == "keyboardKeyPos")
+					axisBinding->assignKeyPos(attrib.getDataAsInt());
+				else if (attrib.getName() == "keyboardKeyNeg")
+					axisBinding->assignKeyNeg(attrib.getDataAsInt());
+				else if (attrib.getName() == "controllerAxis" && currentController)
+					axisBinding->assignControllerAxis(currentController, attrib.getDataAsInt());
+			}
+		}
+	}
 }

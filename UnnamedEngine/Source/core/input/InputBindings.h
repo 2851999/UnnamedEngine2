@@ -101,7 +101,15 @@ public:
 	inline void assignControllerButton(Controller* controller, int button) { this->controller = controller; controllerButton = button; }
 
 	/* Getters */
-	bool isPressed() { return pressed; }
+	inline int getKeyboardKey() { return keyboardKey; }
+	inline bool hasKeyboardKey() { return keyboardKey != -1; }
+	inline int getMouseButton() { return mouseButton; }
+	inline bool hasMouseButton() { return mouseButton != -1; }
+	inline Controller* getController() { return controller; }
+	inline bool hasController() { return controller; }
+	inline int getControllerButton() { return controllerButton; }
+	inline bool hasControllerButton() { return controllerButton != -1; }
+	inline bool isPressed() { return pressed; }
 
 	/* Input methods */
 	virtual void onKeyPressed(int key) override;
@@ -150,11 +158,21 @@ public:
 	virtual ~InputBindingAxis() {}
 
 	/* Various methods to manually assign the triggers for this axis */
+	inline void assignKeyPos(int keyPositive) { keyboardKeyPositive = keyPositive; }
+	inline void assignKeyNeg(int keyNegative) { keyboardKeyNegative = keyNegative; }
 	inline void assignKeys(int keyPositive, int keyNegative) { keyboardKeyPositive = keyPositive; keyboardKeyNegative = keyNegative; }
 	inline void assignControllerAxis(Controller* controller, int axis) { this->controller = controller; controllerAxis = axis; }
 
 	/* Getters */
-	float getValue() { return value; }
+	inline int getKeyboardKeyPos() { return keyboardKeyPositive; }
+	inline bool hasKeyboardKeyPos() { return keyboardKeyPositive != -1; }
+	inline int getKeyboardKeyNeg() { return keyboardKeyNegative; }
+	inline bool hasKeyboardKeyNeg() { return keyboardKeyNegative != -1; }
+	inline Controller* getController() { return controller; }
+	inline bool hasController() { return controller; }
+	inline int getControllerAxis() { return controllerAxis; }
+	inline bool hasControllerAxis() { return controllerAxis != -1; }
+	inline float getValue() { return value; }
 
 	/* Input methods */
 	virtual void onKeyPressed(int key) override;
@@ -223,10 +241,17 @@ public:
 	InputBindingAxis* createAxisBinding(std::string name);
 
 	/* Method used to get a button binding given its name */
-	InputBindingButton* getButtonBinding(std::string name) { return buttonBindings.at(name); }
+	InputBindingButton* getButtonBinding(std::string name);
 
 	/* Method used to get an axis binding given its name */
-	InputBindingAxis* getAxisBinding(std::string name) { return axisBindings.at(name); }
+	InputBindingAxis* getAxisBinding(std::string name);
+
+	/* Method used to save these input bindings to a file */
+	void save(std::string path);
+
+	/* Method used to load input bindings from a file, an InputManager should be
+	 * provided if it is expected to have controller input */
+	void load(std::string path, InputManager* inputManager = NULL);
 
 	/* Method used to add a listener */
 	inline void addListener(InputBindingsListener* listener) { listeners.push_back(listener); }
