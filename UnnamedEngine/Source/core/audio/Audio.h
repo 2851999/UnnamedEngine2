@@ -244,11 +244,16 @@ private:
 	static ALCcontext* context;
 	static ALCdevice* device;
 public:
+	/* Method to add an audio source */
 	static void add(AudioSource* source) { sources.push_back(source); }
+	/* Method to remove an audio source */
 	static void remove(AudioSource* source) { sources.erase(std::remove(sources.begin(), sources.end(), source), sources.end()); }
 
+	/* Method to initialise OpenAL */
 	static void initialise();
+	/* Method to delete all sources and the OpenAL context */
 	static void destroy();
+	/* Method to update the volume of all audio sources */
 	static void updateVolume();
 
 	static inline bool hasContext() { return context != NULL; }

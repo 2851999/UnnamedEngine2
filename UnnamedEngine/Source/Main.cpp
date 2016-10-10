@@ -16,14 +16,14 @@
  *
  *****************************************************************************/
 
-#include "BaseEngineTest3D.h"
-//#include "examples/asteroids/AsteroidsGame.h"
+//#include "BaseEngineTest3D.h"
+#include "examples/asteroids/AsteroidsGame.h"
 
 int main() {
-	Test test;
-	test.create();
-//	AsteroidsGame asteroids;
-//	asteroids.create();
+//	Test test;
+//	test.create();
+	AsteroidsGame asteroids;
+	asteroids.create();
 
 	return 0;
 }

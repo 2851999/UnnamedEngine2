@@ -33,7 +33,7 @@ class Test : public BaseEngine {
 private:
 	Camera3D* camera;
 	GameObject3D* object;
-	Scene* scene;
+	RenderScene3D* scene;
 	PostProcessor* processor;
 public:
 	virtual ~Test() {}
@@ -81,7 +81,7 @@ void Test::created() {
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 
-	scene = new Scene();
+	scene = new RenderScene3D();
 
 	object = new GameObject3D(Model::loadModel("C:/UnnamedEngine/Models/", "teapot.obj"), Renderer::getRenderShader("Material"));
 

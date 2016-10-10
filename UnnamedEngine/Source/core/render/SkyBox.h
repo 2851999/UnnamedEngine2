@@ -28,17 +28,27 @@
 
 class SkyBox {
 private:
+	/* The skybox texture */
 	Cubemap* cubemap;
+
+	/* The skybox */
 	GameObject3D* box;
 public:
+	/* The constructor */
 	SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom, float size);
+
+	/* The destructor */
 	virtual ~SkyBox() { destroy(); }
 
+	/* Method to update this skybox's position */
 	void update(Vector3f cameraPosition);
+	/* Method to render this skybox */
 	void render();
 
+	/* Method to free up all resources used by this skybox */
 	void destroy();
 
+	/* Getters */
 	inline Cubemap* getCubemap() { return cubemap; }
 };
 

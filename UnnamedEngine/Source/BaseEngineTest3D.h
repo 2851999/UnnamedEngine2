@@ -106,6 +106,7 @@ void Test::created() {
 	particleEmitter->particleLifeSpan = 2.0f;
 	particleEmitter->particleColour = Colour::WHITE;
 	particleEmitter->particleSize = 2.0f;
+	particleEmitter->setActive(true);
 
 	particleSystem = new ParticleSystem(particleEmitter, 5000);
 	particleSystem->acceleration = Vector3f(0.0f, 5.0f, 0.0f);

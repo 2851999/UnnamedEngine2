@@ -264,7 +264,7 @@ void InputBindings::save(std::string path) {
 	//Save the document
 	document.save(path);
 }
-#include <iostream>
+
 void InputBindings::load(std::string path, InputManager* inputManager) {
 	//Load the document
 	MLDocument document;

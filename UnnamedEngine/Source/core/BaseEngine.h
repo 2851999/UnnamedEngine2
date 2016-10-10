@@ -42,9 +42,12 @@ namespace Engine {
 
 class BaseEngine : public InputListener {
 private:
+	/* The main window instance */
 	Window* window;
+	/* Used to request the game loop to stop */
 	bool   closeRequested = false;
 
+	/* Used to keep track of and limit the FPS */
 	FPSCalculator* fpsCalculator = NULL;
 	FPSLimiter*    fpsLimiter = NULL;
 
@@ -53,13 +56,6 @@ private:
 
 	/* Debug camera used when rendering debug information */
 	Camera2D* debugCamera = NULL;
-
-	void engineKeyCallback(int key, int scancode, int action, int mods);
-	void engineCharCallback(unsigned int codepoint);
-	void engineCursorPosCallback(double xpos, double ypos);
-	void engineCursorEnterCallback(int entered);
-	void engineMouseButtonCallback(int button, int action, int mods);
-	void engineScrollCallback(double xoffset, double yoffset);
 public:
 	/* The constructor */
 	BaseEngine();

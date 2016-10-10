@@ -35,7 +35,7 @@ private:
 	PhysicsObject3D* sphereA;
 	PhysicsObject3D* sphereB;
 	PhysicsScene3D* physicsScene;
-	Scene* scene;
+	RenderScene3D* scene;
 
 public:
 	virtual ~Test() {}
@@ -88,7 +88,7 @@ void Test::created() {
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 
 	physicsScene = new PhysicsScene3D();
-	scene = new Scene();
+	scene = new RenderScene3D();
 
 	std::vector<Mesh*> meshes1 = Model::loadModel("C:/UnnamedEngine/Models/", "sphere.obj");
 	std::vector<Mesh*> meshes2 = Model::loadModel("C:/UnnamedEngine/Models/", "sphere.obj");
@@ -143,7 +143,7 @@ void Test::update() {
 		sphereA->setAcceleration(1.0f, 0.0f, 0.0f);
 
 	physicsScene->update(((float) getDelta() / 1000.0f));
-	scene->update();
+	//scene->update();
 }
 
 void Test::render() {

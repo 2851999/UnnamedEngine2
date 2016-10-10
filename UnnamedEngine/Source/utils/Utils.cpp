@@ -326,7 +326,7 @@ namespace ControllerUtils {
 		//Go through each possible index
 		for (unsigned int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_LAST; i++) {
 			//Check the name of the current controller
-			if (std::string(glfwGetJoystickName(i)) == name && name.length() > 0)
+			if (glfwJoystickPresent(i) && std::string(glfwGetJoystickName(i)) == name && name.length() > 0)
 				//Return the index
 				return i;
 		}
@@ -338,7 +338,7 @@ namespace ControllerUtils {
 	 * if still not found */
 	int findController(int index, std::string name) {
 		//Get the name of the controller at the given index
-		if (std::string(glfwGetJoystickName(index)) == name)
+		if (glfwJoystickPresent(index) && std::string(glfwGetJoystickName(index)) == name)
 			//Return the index as it is correct
 			return index;
 		else

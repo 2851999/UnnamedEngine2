@@ -50,27 +50,27 @@ std::vector<Mesh*> Model::loadModel(std::string path, std::string fileName) {
 			//Go though all of the vertices
 			for (unsigned int i = 0; i < currentMesh->mNumVertices; i++) {
 				//Add all of the position data
-				aiVector3D position = currentMesh->mVertices[i];
+				aiVector3D& position = currentMesh->mVertices[i];
 				currentData->addPosition(Vector3f(position.x, position.y, position.z));
 				//Add the texture coordinates data if it exists
 				if (currentMesh->mTextureCoords[0] != NULL) {
-					aiVector3D textureCoord = currentMesh->mTextureCoords[0][i];
+					aiVector3D& textureCoord = currentMesh->mTextureCoords[0][i];
 					currentData->addTextureCoord(Vector2f(textureCoord.x, textureCoord.y));
 				}
 				//Add the normals data if it exists
 				if (currentMesh->mNormals != NULL) {
-					aiVector3D normal = currentMesh->mNormals[i];
+					aiVector3D& normal = currentMesh->mNormals[i];
 					currentData->addNormal(Vector3f(normal.x, normal.y, normal.z));
 
 					//Add the tangent data if it exists
 					if (currentMesh->mTangents != NULL) {
-						aiVector3D tangent = currentMesh->mTangents[i];
+						aiVector3D& tangent = currentMesh->mTangents[i];
 						currentData->addTangent(Vector3f(tangent.x, tangent.y, tangent.z));
 					}
 
 					//Add the bitangent data if it exists
 					if (currentMesh->mBitangents != NULL) {
-						aiVector3D bitangent = currentMesh->mBitangents[i];
+						aiVector3D& bitangent = currentMesh->mBitangents[i];
 						currentData->addBitangent(Vector3f(bitangent.x, bitangent.y, bitangent.z));
 					}
 				}
@@ -78,7 +78,7 @@ std::vector<Mesh*> Model::loadModel(std::string path, std::string fileName) {
 			//Go through each face in the current mesh
 			for (unsigned int b = 0; b < currentMesh->mNumFaces; b++) {
 				//Thee current face of the current mesh
-				struct aiFace currentFace = currentMesh->mFaces[b];
+				struct aiFace& currentFace = currentMesh->mFaces[b];
 
 				//Goes through each vertex of the face, this assumes the model is triangulated i.e. there are
 				//3 vertices per face in the mesh
