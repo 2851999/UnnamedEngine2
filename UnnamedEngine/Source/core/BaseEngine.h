@@ -48,8 +48,8 @@ private:
 	bool   closeRequested = false;
 
 	/* Used to keep track of and limit the FPS */
-	FPSCalculator* fpsCalculator = NULL;
-	FPSLimiter*    fpsLimiter = NULL;
+	FPSCalculator fpsCalculator;
+	FPSLimiter    fpsLimiter;
 
 	/* The default font */
 	Font* defaultFont = NULL;
@@ -90,9 +90,9 @@ public:
 	Settings& getSettings() { return window->getSettings(); }
 	Font* getDefaultFont() { return defaultFont; }
 
-	unsigned int getFPS() { return fpsCalculator->getFPS(); }
-	long getDelta() { return fpsCalculator->getDelta(); }
-	float getDeltaSeconds() { return fpsCalculator->getDeltaSeconds(); }
+	unsigned int getFPS() { return fpsCalculator.getFPS(); }
+	long getDelta() { return fpsCalculator.getDelta(); }
+	float getDeltaSeconds() { return fpsCalculator.getDeltaSeconds(); }
 
 	/* Input methods */
 	virtual void onKeyPressed(int key) override {}

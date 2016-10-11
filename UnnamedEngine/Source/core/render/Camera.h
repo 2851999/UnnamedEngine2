@@ -59,6 +59,9 @@ class Camera2D : public Camera, public GameObject2D {
 public:
 	/* Various constructors */
 	Camera2D() {}
+	Camera2D(float left, float right, float bottom, float top, float zNear, float zFar) :
+		Camera(Matrix4f().initOrthographic(left, right, bottom, top, zNear, zFar)) {}
+	Camera2D(float width, float height, float zNear, float zFar) : Camera2D(0, width, height, 0, zNear, zFar) {}
 	Camera2D(Matrix4f projectionMatrix) : Camera(projectionMatrix) {}
 	Camera2D(Matrix4f projectionMatrix, Vector2f position) : Camera(projectionMatrix) {
 		setPosition(position);
@@ -96,6 +99,8 @@ private:
 public:
 	/* Various constructors */
 	Camera3D() {}
+	Camera3D(float fovy, float aspect, float zNear, float zFar) :
+		Camera(Matrix4f().initPerspective(fovy, aspect, zNear, zFar)) {}
 	Camera3D(Matrix4f projectionMatrix) : Camera(projectionMatrix) {}
 	Camera3D(Matrix4f projectionMatrix, Vector3f position) : Camera(projectionMatrix) {
 		setPosition(position);

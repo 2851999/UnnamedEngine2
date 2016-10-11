@@ -40,46 +40,27 @@ private:
 	RenderShader* renderShader;
 public:
 	/* The constructors */
-	GameObject(Mesh* mesh = NULL, RenderShader* shader = NULL) : renderShader(shader) {
-		if (mesh) {
-			mesh->setup(shader);
-			meshes.push_back(mesh);
-		}
-	}
-	GameObject(std::vector<Mesh*> meshes, RenderShader* shader) : renderShader(shader) {
-		this->meshes = meshes;
-
-		for (unsigned int i = 0; i < meshes.size(); i++)
-			meshes[i]->setup(shader);
-	}
+	GameObject(Mesh* mesh = NULL, RenderShader* shader = NULL);
+	GameObject(std::vector<Mesh*> meshes, RenderShader* shader);
 
 	/* The destructor */
-	virtual ~GameObject() {
-		if (hasMesh()) {
-			for (unsigned int i = 0; i < meshes.size(); i++)
-				delete meshes[i];
-			meshes.clear();
-		}
-	}
+	virtual ~GameObject();
 
 	/* Overrideable methods to update and render the GameObject */
 	virtual void update() {}
 	virtual void render();
 
 	/* Method used to add a mesh */
-	void addMesh(Mesh* mesh) {
-		mesh->setup(renderShader);
-		meshes.push_back(mesh);
-	}
+	void addMesh(Mesh* mesh);
 
 	/* Setters and getters */
-	void setModelMatrix(Matrix4f modelMatrix) { this->modelMatrix = modelMatrix; }
-	Matrix4f& getModelMatrix() { return modelMatrix; }
+	inline void setModelMatrix(Matrix4f modelMatrix) { this->modelMatrix = modelMatrix; }
+	inline Matrix4f& getModelMatrix() { return modelMatrix; }
 
 	inline void setRenderShader(RenderShader* renderShader) { this->renderShader = renderShader; }
 
-	bool hasMesh() { return meshes.size() > 0; }
-	std::vector<Mesh*>& getMeshes() { return meshes; }
+	inline bool hasMesh() { return meshes.size() > 0; }
+	inline std::vector<Mesh*>& getMeshes() { return meshes; }
 
 	/* Returns the material a MeshRenderData has, should not be used unless
 	 * the object has a Material */
@@ -106,17 +87,8 @@ protected:
 	GameObject2D* parent = NULL;
 public:
 	/* The constructors */
-	GameObject2D(float width = 0, float height = 0) : GameObject(NULL, NULL) {
-		rotation = 0;
-		scale = Vector2f(1.0f, 1.0f);
-		size = Vector2f(width, height);
-	}
-
-	GameObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0) : GameObject(meshes, shader) {
-		rotation = 0;
-		scale = Vector2f(1.0f, 1.0f);
-		size = Vector2f(width, height);
-	}
+	GameObject2D(float width = 0, float height = 0);
+	GameObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0);
 
 	/* The destructor */
 	virtual ~GameObject2D() {}
@@ -124,58 +96,38 @@ public:
 	virtual void update() override;
 
 	/* Setters and getters */
-	void setPosition(Vector2f position) { this->position = position; }
-	void setPosition(float x, float y) { position = Vector2f(x, y); }
-	void setRotation(float rotation) { this->rotation = rotation; }
-	void setScale(Vector2f scale) { this->scale = scale; }
-	void setScale(float x, float y) { scale = Vector2f(x, y); }
-	void setSize(Vector2f size) { this->size = size; }
-	void setSize(float width, float height) { size = Vector2f(width, height); }
-	void setWidth(float width) { size.setX(width); }
-	void setHeight(float height) { size.setY(height); }
+	inline void setPosition(Vector2f position) { this->position = position; }
+	inline void setPosition(float x, float y) { position = Vector2f(x, y); }
+	inline void setRotation(float rotation) { this->rotation = rotation; }
+	inline void setScale(Vector2f scale) { this->scale = scale; }
+	inline void setScale(float x, float y) { scale = Vector2f(x, y); }
+	inline void setSize(Vector2f size) { this->size = size; }
+	inline void setSize(float width, float height) { size = Vector2f(width, height); }
+	inline void setWidth(float width) { size.setX(width); }
+	inline void setHeight(float height) { size.setY(height); }
 
-	Vector2f& getRelPosition() { return position; }
-	float& getRelRotation() { return rotation; }
-	Vector2f& getRelScale() { return scale; }
+	inline Vector2f& getRelPosition() { return position; }
+	inline float& getRelRotation() { return rotation; }
+	inline Vector2f& getRelScale() { return scale; }
 
-	Vector2f getPosition() {
-		if (parent)
-			return position + parent->getPosition();
-		else
-			return position;
-	}
+	Vector2f getPosition();
+	float getRotation();
+	Vector2f getScale();
+	Vector2f getSize();
 
-	float getRotation() {
-		if (parent)
-			return rotation + parent->getRotation();
-		else
-			return rotation;
-	}
+	inline Vector2f& getRelSize() { return size; }
 
-	Vector2f getScale() {
-		if (parent)
-			return scale * parent->getScale();
-		else
-			return scale;
-	}
-
-	Vector2f getSize() {
-		return size * getScale();
-	}
-
-	Vector2f& getRelSize() { return size; }
-
-	float getWidth() { return size.getX() * getScale().getX(); }
-	float getRelWidth() { return size.getX(); }
-	float getHeight() { return size.getY() * getScale().getY(); }
-	float getRelHeight() { return size.getY(); }
+	inline float getWidth() { return size.getX() * getScale().getX(); }
+	inline float getRelWidth() { return size.getX(); }
+	inline float getHeight() { return size.getY() * getScale().getY(); }
+	inline float getRelHeight() { return size.getY(); }
 
 	/* Returns the bounds of this object in the form of a Rectangle */
-	Rect getBounds() { return Rect(getPosition(), getSize()); }
+	inline Rect getBounds() { return Rect(getPosition(), getSize()); }
 
-	void setParent(GameObject2D* parent) { this->parent = parent; }
-	bool hasParent() { return parent; }
-	GameObject2D* getParent() { return parent; }
+	inline void setParent(GameObject2D* parent) { this->parent = parent; }
+	inline bool hasParent() { return parent; }
+	inline GameObject2D* getParent() { return parent; }
 };
 
 /*****************************************************************************
@@ -195,17 +147,8 @@ protected:
 	GameObject3D* parent = NULL;
 public:
 	/* The constructors */
-	GameObject3D(float width = 0, float height = 0, float depth = 0) : GameObject(NULL, NULL) {
-		rotation = 0;
-		scale = Vector3f(1.0f, 1.0f, 1.0f);
-		size = Vector3f(width, height, depth);
-	}
-
-	GameObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject(meshes, shader) {
-		rotation = 0;
-		scale = Vector3f(1.0f, 1.0f, 1.0f);
-		size = Vector3f(width, height, depth);
-	}
+	GameObject3D(float width = 0, float height = 0, float depth = 0);
+	GameObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0, float depth = 0);
 
 	/* The destructor */
 	virtual ~GameObject3D() {}
@@ -213,59 +156,39 @@ public:
 	virtual void update() override;
 
 	/* Setters and getters */
-	void setPosition(Vector3f position) { this->position = position; }
-	void setPosition(float x, float y, float z) { position = Vector3f(x, y, z); }
-	void setRotation(Vector3f rotation) { this->rotation = rotation; }
-	void setRotation(float x, float y, float z) { rotation = Vector3f(x, y, z); }
-	void setScale(Vector3f scale) { this->scale = scale; }
-	void setScale(float x, float y, float z) { scale = Vector3f(x, y, z); }
-	void setSize(Vector3f size) { this->size = size; }
-	void setSize(float width, float height, float depth) { size = Vector3f(width, height, depth); }
-	void setWidth(float width) { size.setX(width); }
-	void setHeight(float height) { size.setY(height); }
-	void setDepth(float depth) { size.setZ(depth); }
+	inline void setPosition(Vector3f position) { this->position = position; }
+	inline void setPosition(float x, float y, float z) { position = Vector3f(x, y, z); }
+	inline void setRotation(Vector3f rotation) { this->rotation = rotation; }
+	inline void setRotation(float x, float y, float z) { rotation = Vector3f(x, y, z); }
+	inline void setScale(Vector3f scale) { this->scale = scale; }
+	inline void setScale(float x, float y, float z) { scale = Vector3f(x, y, z); }
+	inline void setSize(Vector3f size) { this->size = size; }
+	inline void setSize(float width, float height, float depth) { size = Vector3f(width, height, depth); }
+	inline void setWidth(float width) { size.setX(width); }
+	inline void setHeight(float height) { size.setY(height); }
+	inline void setDepth(float depth) { size.setZ(depth); }
 
-	Vector3f& getRelPosition() { return position; }
-	Vector3f& getRelRotation() { return rotation; }
-	Vector3f& getRelScale() { return scale; }
+	inline Vector3f& getRelPosition() { return position; }
+	inline Vector3f& getRelRotation() { return rotation; }
+	inline Vector3f& getRelScale() { return scale; }
 
-	Vector3f getPosition() {
-		if (parent)
-			return position + parent->getPosition();
-		else
-			return position;
-	}
+	Vector3f getPosition();
+	Vector3f getRotation();
+	Vector3f getScale();
+	Vector3f getSize();
 
-	Vector3f getRotation() {
-		if (parent)
-			return rotation + parent->getRotation();
-		else
-			return rotation;
-	}
+	inline Vector3f& getRelSize() { return size; }
 
-	Vector3f getScale() {
-		if (parent)
-			return scale * parent->getScale();
-		else
-			return scale;
-	}
+	inline float getWidth() { return size.getX() * getScale().getX(); }
+	inline float getRelWidth() { return size.getX(); }
+	inline float getHeight() { return size.getY() * getScale().getY(); }
+	inline float getRelHeight() { return size.getY(); }
+	inline float getDepth() { return size.getZ() * getScale().getZ(); }
+	inline float getRelDepth() { return size.getZ(); }
 
-	Vector3f getSize() {
-		return size * getScale();
-	}
-
-	Vector3f& getRelSize() { return size; }
-
-	float getWidth() { return size.getX() * getScale().getX(); }
-	float getRelWidth() { return size.getX(); }
-	float getHeight() { return size.getY() * getScale().getY(); }
-	float getRelHeight() { return size.getY(); }
-	float getDepth() { return size.getZ() * getScale().getZ(); }
-	float getRelDepth() { return size.getZ(); }
-
-	void setParent(GameObject3D* parent) { this->parent = parent; }
-	bool hasParent() { return parent; }
-	GameObject3D* getParent() { return parent; }
+	inline void setParent(GameObject3D* parent) { this->parent = parent; }
+	inline bool hasParent() { return parent; }
+	inline GameObject3D* getParent() { return parent; }
 };
 
 #endif /* CORE_OBJECT_H_ */

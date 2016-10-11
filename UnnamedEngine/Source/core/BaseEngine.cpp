@@ -41,9 +41,8 @@ void BaseEngine::create() {
 	window->create();
 
 	//Setup the FPS utilities
-	fpsCalculator = new FPSCalculator();
-	fpsCalculator->start();
-	fpsLimiter = new FPSLimiter(window->getSettings().videoMaxFPS);
+	fpsCalculator.start();
+	fpsLimiter.setMaxFPS(getSettings().videoMaxFPS);
 
 	//Initialise the Renderer therefore loading engine shaders and textures
 	Renderer::initialise();
@@ -87,7 +86,7 @@ void BaseEngine::create() {
 	//The main game loop - continues until either the window is told to close,
 	//or the game requests it to stop
 	while ((! window->shouldClose()) && (! closeRequested)) {
-		fpsCalculator->update();
+		fpsCalculator.update();
 
 		update();
 		render();
@@ -97,7 +96,7 @@ void BaseEngine::create() {
 
 		window->update();
 
-		fpsLimiter->update(fpsCalculator->getDelta());
+		fpsLimiter.update(fpsCalculator.getDelta());
 	}
 
 	//Tell the game to destroy everything it created
@@ -110,8 +109,6 @@ void BaseEngine::create() {
 
 	//Delete all of the objects required by the BaseEngine class
 	delete debugCamera;
-	delete fpsCalculator;
-	delete fpsLimiter;
 
 	delete window;
 }

@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 1 | Experimental 3
+
+* Added Mouse
+* Added Keyboard
+* Added new Camera2D and 3D constructors
+* Added getCursorPosition in Window
+
+* More cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 1 | Experimental 2
 
 * Fixed bug: A high FPS meant that the delta would become 0,
