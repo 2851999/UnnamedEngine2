@@ -21,7 +21,6 @@
 
 #include "../Object.h"
 #include "SkyBox.h"
-#include "../../utils/Utils.h"
 #include "Frustum.h"
 
 /*****************************************************************************

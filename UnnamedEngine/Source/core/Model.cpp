@@ -23,7 +23,6 @@
 #include <assimp/vector3.h>
 
 #include "Model.h"
-#include "render/Renderer.h"
 #include "../utils/Logging.h"
 
 /*****************************************************************************

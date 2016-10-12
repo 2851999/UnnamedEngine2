@@ -18,7 +18,6 @@
 
 #include "Renderer.h"
 #include "../Window.h"
-
 #include "../../utils/Utils.h"
 #include "RenderScene.h"
 

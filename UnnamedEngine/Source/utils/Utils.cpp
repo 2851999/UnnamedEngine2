@@ -65,6 +65,15 @@ namespace StrUtils {
 		return value;
 	}
 
+	std::vector<std::string> strSplit(const std::string &s, char delimeter) {
+		std::stringstream ss(s);
+		std::string item;
+		std::vector<std::string> split;
+		while (std::getline(ss, item, delimeter))
+			split.push_back(item);
+		return split;
+	}
+
 	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter) {
 		std::vector<std::string> split;
 
@@ -86,6 +95,23 @@ namespace StrUtils {
 		split.push_back(text.substr(last));
 
 		return split;
+	}
+}
+
+/*****************************************************************************
+ * Various OpenGL utilities
+ *****************************************************************************/
+
+namespace GLUtils {
+	unsigned int glValue(bool value) {
+		if (value)
+			return GL_TRUE;
+		else
+			return GL_FALSE;
+	}
+
+	bool boolValue(int value) {
+		return value == GL_TRUE;
 	}
 }
 
@@ -170,6 +196,29 @@ namespace TimeUtils {
 	void sleep(long milliseconds) {
 		//For Windows
 		Sleep(milliseconds);
+	}
+}
+
+/*****************************************************************************
+ * Various random utilities
+ *****************************************************************************/
+
+#include <ctime>
+
+namespace RandomUtils {
+	/* Method used to initialise the random generator with the current time */
+	void initialise() {
+		std::srand(std::time(0));
+	}
+
+	/* Returns a random floating point number between the values specified */
+	float randomFloat(float min, float max) {
+		return min + ((float) rand()) / (RAND_MAX / (max - min));
+	}
+
+	/* Returns a random floating point number between 0 and 1 */
+	float randomFloat() {
+		return ((float) rand()) / RAND_MAX;
 	}
 }
 

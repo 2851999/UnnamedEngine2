@@ -16,7 +16,11 @@
  *
  *****************************************************************************/
 
+#include <algorithm>
+
 #include "KeyboardShortcuts.h"
+
+#include "../Window.h"
 
 /*****************************************************************************
  * The KeyboardShortcut class
@@ -66,6 +70,14 @@ KeyboardShortcuts::KeyboardShortcuts() {
 
 KeyboardShortcuts::~KeyboardShortcuts() {
 
+}
+
+void KeyboardShortcuts::addListener(KeyboardShortcutListener* listener) {
+	listeners.push_back(listener);
+}
+
+void KeyboardShortcuts::removeListener(KeyboardShortcutListener* listener) {
+	listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 }
 
 void KeyboardShortcuts::callOnShortcut(KeyboardShortcut* e) {

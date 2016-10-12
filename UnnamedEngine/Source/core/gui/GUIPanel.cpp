@@ -16,6 +16,8 @@
  *
  *****************************************************************************/
 
+#include <algorithm>
+
 #include "GUIPanel.h"
 #include "../../utils/Logging.h"
 

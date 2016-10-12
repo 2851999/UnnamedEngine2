@@ -23,8 +23,6 @@
 
 #include "Input.h"
 
-#include "../Window.h"
-
 /*****************************************************************************
  * The InputBinding class
  *****************************************************************************/
@@ -39,7 +37,7 @@ protected:
 	bool waitingForInput = false;
 public:
 	/* The constructor */
-	InputBinding(InputBindings* bindings) : bindings(bindings) { Window::getCurrentInstance()->getInputManager()->addListener(this); }
+	InputBinding(InputBindings* bindings);
 
 	/* The destructor */
 	virtual ~InputBinding() {}
@@ -254,10 +252,10 @@ public:
 	void load(std::string path, InputManager* inputManager = NULL);
 
 	/* Method used to add a listener */
-	inline void addListener(InputBindingsListener* listener) { listeners.push_back(listener); }
+	void addListener(InputBindingsListener* listener);
 
 	/* Method used to remove a listener */
-	inline void removeListener(InputBindingsListener* listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
+	void removeListener(InputBindingsListener* listener);
 
 	/* Methods used to call listener events */
 	inline void callOnButtonPressed(InputBindingButton* button) {

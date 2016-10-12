@@ -16,9 +16,20 @@
  *
  *****************************************************************************/
 
+#include <algorithm>
+
 #include "InputBindings.h"
 #include "../ml/ML.h"
 #include "../../utils/Logging.h"
+#include "../Window.h"
+
+/*****************************************************************************
+ * The InputBinding class
+ *****************************************************************************/
+
+InputBinding::InputBinding(InputBindings* bindings) : bindings(bindings) {
+	Window::getCurrentInstance()->getInputManager()->addListener(this);
+}
 
 /*****************************************************************************
  * The InputBindingButton class
@@ -294,11 +305,14 @@ void InputBindings::load(std::string path, InputManager* inputManager) {
 				}
 				//Add the controller if required
 				if (controllers.count(index) < 1) {
-					currentController = new Controller(ControllerUtils::findController(index, name));
-					controllers.insert(std::pair<int, Controller*>(index, currentController));
-					//Add the controller to the input manager if it was provided
-					if (inputManager)
-						inputManager->addController(currentController);
+					int index = ControllerUtils::findController(index, name);
+					if (index >= 0) {
+						currentController = new Controller(index);
+						controllers.insert(std::pair<int, Controller*>(index, currentController));
+						//Add the controller to the input manager if it was provided
+						if (inputManager)
+							inputManager->addController(currentController);
+					}
 				} else
 					currentController = controllers.at(index);
 			}
@@ -338,3 +352,12 @@ void InputBindings::load(std::string path, InputManager* inputManager) {
 		}
 	}
 }
+
+void InputBindings::addListener(InputBindingsListener* listener) {
+	listeners.push_back(listener);
+}
+
+void InputBindings::removeListener(InputBindingsListener* listener) {
+	listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
+}
+

@@ -20,8 +20,6 @@
 #define CORE_RENDER_VBO_H_
 
 #include <GL/glew.h>
-#include <string>
-#include <vector>
 
 #include "Shader.h"
 

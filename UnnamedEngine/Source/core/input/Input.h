@@ -20,7 +20,6 @@
 #define CORE_INPUT_INPUT_H_
 
 #include <vector>
-#include <algorithm>
 
 #include "Controller.h"
 #include "../Vector.h"
@@ -103,26 +102,24 @@ private:
 	/* All of the added controllers */
 	std::vector<Controller*> controllers;
 public:
+	/* The constructor */
 	InputManager(Window* window) { this->window = window; }
+
+	/* The destructor */
 	virtual ~InputManager() {}
 
 	/* Various input methods */
-	void addListener(InputListener* listener) { listeners.push_back(listener); }
-	void removeListener(InputListener* listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
+	void addListener(InputListener* listener);
+	void removeListener(InputListener* listener);
 
 	/* Updates the attached controllers */
-	void updateControllers() {
-		for (unsigned int i = 0; i < controllers.size(); i++)
-			controllers[i]->checkInput();
-	}
+	void updateControllers();
 
 	/* Used to add a controller */
-	void addController(Controller* controller) {
-		controllers.push_back(controller);
-	}
+	void addController(Controller* controller);
 
 	/* Returns the CursorData structure */
-	CursorData& getCursorData() { return cursorData; }
+	inline CursorData& getCursorData() { return cursorData; }
 
 	/* Various window specific callbacks */
 	void keyCallback(int key, int scancode, int action, int mods);

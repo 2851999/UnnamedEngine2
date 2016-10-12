@@ -16,6 +16,8 @@
  *
  *****************************************************************************/
 
+#include <algorithm>
+
 #include "../Window.h"
 #include "Input.h"
 
@@ -42,6 +44,24 @@ bool Keyboard::isPressed(int key) {
 /*****************************************************************************
  * The InputManager class
  *****************************************************************************/
+
+void InputManager::addListener(InputListener* listener) {
+	listeners.push_back(listener);
+}
+
+void InputManager::removeListener(InputListener* listener) {
+	listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
+}
+
+void InputManager::updateControllers() {
+	for (unsigned int i = 0; i < controllers.size(); i++)
+		controllers[i]->checkInput();
+}
+
+/* Used to add a controller */
+void InputManager::addController(Controller* controller) {
+	controllers.push_back(controller);
+}
 
 void InputManager::keyCallback(int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS || (action == GLFW_REPEAT && window->getSettings().inputRepeatKeyboardEvents))

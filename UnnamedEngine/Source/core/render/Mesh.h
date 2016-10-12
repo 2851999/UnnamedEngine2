@@ -19,7 +19,6 @@
 #ifndef CORE_RENDER_MESH_H_
 #define CORE_RENDER_MESH_H_
 
-#include "../Matrix.h"
 #include "Colour.h"
 #include "Shader.h"
 #include "Material.h"

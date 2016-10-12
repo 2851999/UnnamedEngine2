@@ -19,6 +19,8 @@
 #ifndef CORE_RENDER_FRUSTUM_H_
 #define CORE_RENDER_FRUSTUM_H_
 
+#include "../Vector.h"
+
 /*****************************************************************************
  * The FrustumPlane class helps represent the 6 planes of a Frustum
  *****************************************************************************/

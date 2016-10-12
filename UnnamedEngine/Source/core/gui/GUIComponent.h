@@ -19,14 +19,11 @@
 #ifndef CORE_GUI_GUICOMPONENT_H_
 #define CORE_GUI_GUICOMPONENT_H_
 
-#include <initializer_list>
-
 #include "../Object.h"
 #include "../render/Colour.h"
 #include "../render/Texture.h"
 #include "../render/Renderer.h"
 #include "../input/Input.h"
-#include "../Window.h"
 
 #include "Font.h"
 
@@ -222,13 +219,8 @@ public:
 	virtual ~GUIComponent();
 
 	/* The methods used to add and remove a component listener */
-	inline void addListener(GUIComponentListener* listener) {
-		listeners.push_back(listener);
-	}
-
-	inline void removeListener(GUIComponentListener* listener) {
-		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
-	}
+	void addListener(GUIComponentListener* listener);
+	void removeListener(GUIComponentListener* listener);
 
 	/* Method used to add a component to this one */
 	inline void add(GUIComponent* component) { component->setParent(this); attachedComponents.push_back(component); }

@@ -20,6 +20,7 @@
 #define EXPERIMENTAL_BILLBOARD_H_
 
 #include "../core/Object.h"
+#include "../core/render/Renderer.h"
 
 class Billboard : public GameObject3D {
 public:

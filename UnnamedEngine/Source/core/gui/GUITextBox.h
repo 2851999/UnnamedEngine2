@@ -19,10 +19,10 @@
 #ifndef CORE_GUI_GUITEXTBOX_H_
 #define CORE_GUI_GUITEXTBOX_H_
 
-#include "../input/Input.h"
+#include "GUIComponent.h"
+
 #include "../input/KeyboardShortcuts.h"
 #include "../../utils/Timer.h"
-#include "GUIComponent.h"
 
 /*****************************************************************************
  * The GUITextBoxCursor class
@@ -41,7 +41,7 @@ public:
 	/* The time between each cursor blink (in milliseconds) */
 	long timeBetweenBlink;
 
-	/* States whether the cursor is currenly shown */
+	/* States whether the cursor is currently shown */
 	bool cursorShown;
 
 	/* The constructor */
