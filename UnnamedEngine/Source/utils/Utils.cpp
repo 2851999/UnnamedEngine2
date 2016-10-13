@@ -16,6 +16,8 @@
  *
  *****************************************************************************/
 
+#include "Utils.h"
+
 #include <windows.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -23,7 +25,7 @@
 #include <stb/stb_image.h>
 #include <fstream>
 #include <cstdarg>
-#include "Utils.h"
+
 #include "Logging.h"
 #include "../core/Window.h"
 #include "../core/ml/ML.h"

@@ -16,13 +16,14 @@
  *
  *****************************************************************************/
 
+#include "Model.h"
+
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/mesh.h>
 #include <assimp/vector3.h>
 
-#include "Model.h"
 #include "../utils/Logging.h"
 
 /*****************************************************************************

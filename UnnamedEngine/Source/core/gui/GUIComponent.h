@@ -19,13 +19,13 @@
 #ifndef CORE_GUI_GUICOMPONENT_H_
 #define CORE_GUI_GUICOMPONENT_H_
 
+#include "Font.h"
+
 #include "../Object.h"
+#include "../input/Input.h"
 #include "../render/Colour.h"
 #include "../render/Texture.h"
 #include "../render/Renderer.h"
-#include "../input/Input.h"
-
-#include "Font.h"
 
 /*****************************************************************************
  * The GUIComponentRenderer class is used to render a GUIComponent

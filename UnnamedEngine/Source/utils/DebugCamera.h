@@ -19,8 +19,8 @@
 #ifndef UTILS_DEBUGCAMERA_H_
 #define UTILS_DEBUGCAMERA_H_
 
-#include "../core/render/Camera.h"
 #include "../core/input/InputBindings.h"
+#include "../core/render/Camera.h"
 
 /*****************************************************************************
  * The DebugCamera class helps to create a basic camera with free movement

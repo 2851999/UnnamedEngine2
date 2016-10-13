@@ -16,10 +16,11 @@
  *
  *****************************************************************************/
 
+#include "GUIDropDownMenu.h"
+
 #include <algorithm>
 
 #include "../Window.h"
-#include "GUIDropDownMenu.h"
 
 /*****************************************************************************
  * The GUIDropDownMenu class

@@ -20,9 +20,9 @@
 #define CORE_RENDER_MESH_H_
 
 #include "Colour.h"
-#include "Shader.h"
 #include "Material.h"
 #include "RenderData.h"
+#include "Shader.h"
 #include "VBO.h"
 
 /*****************************************************************************

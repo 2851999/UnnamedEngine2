@@ -22,9 +22,9 @@
 #include <string>
 
 #include "Window.h"
-#include "../utils/FPSUtils.h"
 #include "gui/Font.h"
 #include "render/Camera.h"
+#include "../utils/FPSUtils.h"
 
 namespace Engine {
 	/* Various engine values

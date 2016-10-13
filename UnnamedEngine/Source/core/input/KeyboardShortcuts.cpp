@@ -16,9 +16,9 @@
  *
  *****************************************************************************/
 
-#include <algorithm>
-
 #include "KeyboardShortcuts.h"
+
+#include <algorithm>
 
 #include "../Window.h"
 

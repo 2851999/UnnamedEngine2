@@ -19,8 +19,8 @@
 #ifndef CORE_OBJECT_H_
 #define CORE_OBJECT_H_
 
-#include "Vector.h"
 #include "Rectangle.h"
+#include "Vector.h"
 #include "render/Mesh.h"
 
 /*****************************************************************************

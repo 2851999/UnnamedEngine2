@@ -19,7 +19,7 @@
 #ifndef CORE_RENDER_SKYBOX_H_
 #define CORE_RENDER_SKYBOX_H_
 
-#include "Cubemap.h"
+#include "Texture.h"
 #include "../Object.h"
 
 /*****************************************************************************

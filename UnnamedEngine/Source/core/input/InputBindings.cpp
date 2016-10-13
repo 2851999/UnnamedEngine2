@@ -16,12 +16,13 @@
  *
  *****************************************************************************/
 
+#include "InputBindings.h"
+
 #include <algorithm>
 
-#include "InputBindings.h"
 #include "../ml/ML.h"
-#include "../../utils/Logging.h"
 #include "../Window.h"
+#include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The InputBinding class

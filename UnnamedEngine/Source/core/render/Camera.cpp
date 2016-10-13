@@ -45,8 +45,8 @@ void Camera3D::update() {
 
 	getViewMatrix().initLookAt(getPosition(), getPosition() + cameraFront, up);
 
-	frustum.setProjection(110, 1280.0f / 720.0f, 0.1f, 100.0f);
-	frustum.setView(getPosition(), getPosition() + cameraFront, up);
+//	frustum.setProjection(110, 1280.0f / 720.0f, 0.1f, 100.0f);
+//	frustum.setView(getPosition(), getPosition() + cameraFront, up);
 
 	//Update the SkyBox if there is one
 	if (skyBox)

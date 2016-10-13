@@ -16,10 +16,11 @@
  *
  *****************************************************************************/
 
+#include "RenderScene.h"
+
 #include "Renderer.h"
 #include "../Window.h"
 #include "../../utils/Utils.h"
-#include "RenderScene.h"
 
 /*****************************************************************************
  * The RenderScene3D class

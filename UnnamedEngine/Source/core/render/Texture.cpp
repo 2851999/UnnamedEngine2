@@ -18,9 +18,10 @@
 
 #include <stb/stb_image.h>
 
-#include "../../utils/Logging.h"
 #include "Texture.h"
+
 #include "../Window.h"
+#include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The TextureParameters class
@@ -119,4 +120,52 @@ Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bo
 	stbi_image_free(image);
 
 	return texture;
+}
+
+/*****************************************************************************
+ * The Cubemap class
+ *****************************************************************************/
+
+Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
+	//Ensure the correct number of textures are present
+	if (faces.size() == 6) {
+		//Assign the texture parameters
+		parameters.setTarget(GL_TEXTURE_CUBE_MAP);
+		parameters.setFilter(GL_LINEAR);
+		parameters.setClamp(GL_CLAMP_TO_EDGE);
+		parameters.setShouldClamp(true);
+		//Bind this cubemap
+		bind();
+
+		//Data required for setting up
+		int numComponents, width, height, format;
+		//The current texture
+		unsigned char* image;
+
+		//Go through each face
+		for (unsigned int i = 0; i < faces.size(); i++) {
+			//Load the image for the current face
+			image = Texture::loadTexture(path + faces[i], numComponents, width, height, format);
+			//Setup the texture
+			glTexImage2D(
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0,
+				format,
+				width,
+				height,
+				0,
+				format,
+				GL_UNSIGNED_BYTE,
+				image
+			);
+			//Free the loaded image
+			stbi_image_free(image);
+		}
+
+		//Now that the cubemap is fully loaded, apply the texture parameters
+		applyParameters(false, true);
+	} else {
+		//Log an error
+		Logger::log("Need 6 faces for a cubemap texture", "Cubemap", Logger::Error);
+	}
 }

@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 1 | Experimental 5
+
+* Removed Cubemap.h (Contents moved to Texture.h)
+* Removed Cubemap.cpp (Contents moved to Texture.cpp)
+* Removed the 'name' variable in PhysicsObject
+
+* Moved Frustum.h to the experimental folder
+
+* More cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 1 | Experimental 4
 
 * More cleanup
