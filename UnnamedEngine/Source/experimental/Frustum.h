@@ -19,6 +19,8 @@
 #ifndef CORE_RENDER_FRUSTUM_H_
 #define CORE_RENDER_FRUSTUM_H_
 
+#include "../core/Vector.h"
+
 /*****************************************************************************
  * The FrustumPlane class helps represent the 6 planes of a Frustum
  *****************************************************************************/
@@ -79,46 +81,35 @@ public:
 	}
 
 	void setView(Vector3f eye, Vector3f centre, Vector3f up) {
-		Vector3f dir,nc,fc,X,Y,Z;
+		Vector3f dir, nc, fc, X, Y, Z;
 
-		// compute the Z axis of camera
-		// this axis points in the opposite direction from
-		// the looking direction
 		Z = eye - centre;
 		Z.normalise();
 
-		// X axis of camera with given "up" vector and Z axis
 		X = up.cross(Z);
 		X.normalise();
 
-		// the real "up" vector is the cross product of Z and X
 		Y = Z.cross(X);
 
-		// compute the centers of the near and far planes
 		nc = eye - Z * zNear;
 		fc = eye - Z * zFar;
 
-		// compute the 4 corners of the frustum on the near plane
 		ntl = nc + Y * nh - X * nw;
 		ntr = nc + Y * nh + X * nw;
 		nbl = nc - Y * nh - X * nw;
 		nbr = nc - Y * nh + X * nw;
 
-		// compute the 4 corners of the frustum on the far plane
 		ftl = fc + Y * fh - X * fw;
 		ftr = fc + Y * fh + X * fw;
 		fbl = fc - Y * fh - X * fw;
 		fbr = fc - Y * fh + X * fw;
 
-		// compute the six planes
-		// the function set3Points assumes that the points
-		// are given in counter clockwise order
-		planes[0].init(ntr,ntl,ftl);
-		planes[1].init(nbl,nbr,fbr);
-		planes[2].init(ntl,nbl,fbl);
-		planes[3].init(nbr,ntr,fbr);
-		planes[4].init(ntl,ntr,nbr);
-		planes[5].init(ftr,ftl,fbl);
+		planes[0].init(ntr, ntl, ftl);
+		planes[1].init(nbl, nbr, fbr);
+		planes[2].init(ntl, nbl, fbl);
+		planes[3].init(nbr, ntr, fbr);
+		planes[4].init(ntl, ntr, nbr);
+		planes[5].init(ftr, ftl, fbl);
 	}
 
 	bool testSphere(Vector3f position, float radius) {

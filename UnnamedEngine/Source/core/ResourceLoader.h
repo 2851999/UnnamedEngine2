@@ -19,10 +19,10 @@
 #ifndef CORE_RESOURCELOADER_H_
 #define CORE_RESOURCELOADER_H_
 
-#include "render/Texture.h"
+#include "Model.h"
 #include "audio/Audio.h"
 #include "render/Shader.h"
-#include "Model.h"
+#include "render/Texture.h"
 #include "gui/Font.h"
 
 /*****************************************************************************

@@ -72,6 +72,10 @@ public:
 
 	/* Method used to emit a set number of particles before becoming no longer active */
 	void emitParticles(unsigned int count);
+
+	/* Setters and getters */
+	inline void setActive(bool active) { this->active = active; }
+	inline bool isActive() { return active; }
 };
 
 class SphericalParticleEmitter : public ParticleEmitter {

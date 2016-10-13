@@ -143,9 +143,25 @@ bool Window::isKeyPressed(int key)   {
 	int state = glfwGetKey(instance, key);
 	return state == GLFW_PRESS || state == GLFW_REPEAT;
 }
+
 bool Window::isMouseDown(int button) {
 	int state = glfwGetMouseButton(instance, button);
 	return state == GLFW_PRESS || state == GLFW_REPEAT;
+}
+
+Vector2d Window::getCursorPosition() {
+	//The x and y cursor positions
+	double x, y;
+	//Poll the current cursor position
+	glfwGetCursorPos(instance, &x, &y);
+	//Return the position
+	return Vector2d(x, y);
+}
+
+Window* Window::getCurrentInstance() {
+	if (currentInstance == NULL)
+		Logger::log("No window is current", "Window", Logger::Warning);
+	return currentInstance;
 }
 
 /* Various callbacks */

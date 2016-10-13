@@ -20,7 +20,6 @@
 #define CORE_MODEL_H_
 
 #include "render/Mesh.h"
-#include "Object.h"
 
 /*****************************************************************************
  * The Model class stores and manages everything needed to import and render

@@ -17,11 +17,11 @@
  *****************************************************************************/
 
 #include "ParticleSystem.h"
-#include "ParticleEmitter.h"
-#include "ParticleEffect.h"
 
 #include <algorithm>
 
+#include "ParticleEmitter.h"
+#include "ParticleEffect.h"
 #include "../render/Renderer.h"
 
 /*****************************************************************************

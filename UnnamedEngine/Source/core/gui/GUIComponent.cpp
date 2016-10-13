@@ -19,6 +19,9 @@
 #include "GUIComponent.h"
 
 #include <GLFW/glfw3.h>
+#include <algorithm>
+
+#include "../Window.h"
 
 /*****************************************************************************
  * The GUIComponentRenderer class
@@ -150,6 +153,14 @@ GUIComponent::~GUIComponent() {
 	for (unsigned int i = 0; i < attachedComponents.size(); i++)
 		delete attachedComponents[i];
 	attachedComponents.clear();
+}
+
+void GUIComponent::addListener(GUIComponentListener* listener) {
+	listeners.push_back(listener);
+}
+
+void GUIComponent::removeListener(GUIComponentListener* listener) {
+	listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 }
 
 bool GUIComponent::contains(double x, double y) {

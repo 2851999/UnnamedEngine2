@@ -49,15 +49,7 @@ namespace StrUtils {
 		return value.length() >= suffix.length() && value.compare(value.length() - suffix.length(), suffix.length(), suffix) == 0;
 	}
 
-	inline std::vector<std::string> strSplit(const std::string &s, char delimeter) {
-		std::stringstream ss(s);
-		std::string item;
-		std::vector<std::string> split;
-		while (std::getline(ss, item, delimeter))
-			split.push_back(item);
-		return split;
-	}
-
+	std::vector<std::string> strSplit(const std::string &s, char delimeter);
 	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter);
 
 	inline std::string substring(const std::string &s, int begin, int end) {
@@ -112,19 +104,9 @@ namespace MathsUtils {
  * Various OpenGL utilities
  *****************************************************************************/
 
-#include <GL/glew.h>
-
 namespace GLUtils {
-	inline unsigned int glValue(bool value) {
-		if (value)
-			return GL_TRUE;
-		else
-			return GL_FALSE;
-	}
-
-	inline bool boolValue(int value) {
-		return value == GL_TRUE;
-	}
+	unsigned int glValue(bool value);
+	bool boolValue(int value);
 }
 
 /*****************************************************************************
@@ -167,11 +149,14 @@ namespace TimeUtils {
  *****************************************************************************/
 
 namespace RandomUtils {
+	/* Method used to initialise the random generator with the current time */
+	void initialise();
+
 	/* Returns a random floating point number between the values specified */
-	inline float randomFloat(float min, float max) { return min + ((float) rand()) / (RAND_MAX / (max - min)); }
+	float randomFloat(float min, float max);
 
 	/* Returns a random floating point number between 0 and 1 */
-	inline float randomFloat() { return ((float) rand()) / RAND_MAX; }
+	float randomFloat();
 }
 
 /*****************************************************************************
@@ -198,6 +183,20 @@ namespace ClipboardUtils {
 
 	/* Returns the current clipboard text */
 	std::string getText();
+}
+
+/*****************************************************************************
+ * Various controller utilities
+ *****************************************************************************/
+
+namespace ControllerUtils {
+	/* Returns the index of a controller given its name or -1 if not found */
+	int getControllerIndexByName(std::string name);
+
+	/* Return the index of a controller if it has the provided name, if not
+	 * it will search for a controller with that name and return that or -1
+	 * if still not found */
+	int findController(int index, std::string name);
 }
 
 #endif /* UTILS_UTILS_H_ */

@@ -20,8 +20,8 @@
 #define CORE_RENDER_MATERIAL_H_
 
 #include "Colour.h"
-#include "Texture.h"
 #include "Shader.h"
+#include "Texture.h"
 
 /*****************************************************************************
  * The Material class stores data about a material and can apply them to a

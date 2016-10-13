@@ -22,9 +22,9 @@
 #include <GL/glew.h>
 #include <map>
 
-#include "../Resource.h"
-#include "../Matrix.h"
 #include "Colour.h"
+#include "../Matrix.h"
+#include "../Resource.h"
 
 /*****************************************************************************
  * The Shader class handles a shader program

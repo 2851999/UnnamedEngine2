@@ -97,13 +97,14 @@ public:
 	/* State driven input methods */
 	bool isKeyPressed(int key);
 	bool isMouseDown(int button);
+	Vector2d getCursorPosition();
 
 	/* Getters */
 	inline GLFWwindow*    getInstance() { return instance; }
 	inline Settings&      getSettings() { return settings; }
 	inline InputManager*  getInputManager() { return inputManager; }
 
-	static inline Window* getCurrentInstance() { return currentInstance; }
+	static Window* getCurrentInstance();
 };
 
 

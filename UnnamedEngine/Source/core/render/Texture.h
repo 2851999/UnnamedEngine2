@@ -157,4 +157,14 @@ public:
 	static Texture* loadTexture(std::string path, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
 };
 
+/*****************************************************************************
+ * The Cubemap class inherits from Texture to create a cubemap
+ *****************************************************************************/
+
+class Cubemap : public Texture {
+public:
+	/* The constructor */
+	Cubemap(std::string path, std::vector<std::string> faces);
+};
+
 #endif /* CORE_RENDER_TEXTURE_H_ */

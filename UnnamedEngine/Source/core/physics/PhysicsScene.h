@@ -46,7 +46,7 @@ public:
 	void update(float delta);
 
 	/* Resolves a collision between two physics objects */
-	void resolveCollision(CollisionData3D data, PhysicsObject3D* objectA, PhysicsObject3D* objectB);
+	void resolveCollision(CollisionData3D& data, PhysicsObject3D* objectA, PhysicsObject3D* objectB);
 
 	/* Used to assign the collision callback */
 	void setCollisionCallback(std::function<void(unsigned int, unsigned int)> callback) { collisionCallback = callback; }

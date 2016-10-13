@@ -45,10 +45,11 @@ public:
  *****************************************************************************/
 
 class ParticleEffectColourChange : public ParticleEffect {
-public:
+private:
 	/* The start colour and end colour */
 	Colour colourStart;
 	Colour colourEnd;
+public:
 
 	/* The constructor */
 	ParticleEffectColourChange(Colour colourStart, Colour colourEnd) : colourStart(colourStart), colourEnd(colourEnd) {}
@@ -58,6 +59,12 @@ public:
 
 	/* The method use to update this effect given a reference to a particle */
 	virtual void update(Particle& particle, ParticleEmitter* emitter) override;
+
+	/* Setters and getters */
+	inline void setColourStart(Colour colour) { colourStart = colour; }
+	inline void setColourEnd(Colour colour) { colourEnd = colour; }
+	inline Colour& getColourStart() { return colourStart; }
+	inline Colour& getColourEnd() { return colourEnd; }
 };
 
 

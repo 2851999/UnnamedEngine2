@@ -56,7 +56,7 @@ void PhysicsScene3D::update(float delta) {
 	}
 }
 
-void PhysicsScene3D::resolveCollision(CollisionData3D data, PhysicsObject3D* objectA, PhysicsObject3D* objectB) {
+void PhysicsScene3D::resolveCollision(CollisionData3D& data, PhysicsObject3D* objectA, PhysicsObject3D* objectB) {
 	Vector3f relativeVelocity = objectB->getVelocity() - objectA->getVelocity();
 
 	float velAlongNormal = relativeVelocity.dot(data.getNormal());

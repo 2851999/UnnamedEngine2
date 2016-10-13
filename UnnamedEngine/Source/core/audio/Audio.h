@@ -19,8 +19,6 @@
 #ifndef CORE_AUDIO_AUDIO_H_
 #define CORE_AUDIO_AUDIO_H_
 
-#include <string>
-#include <algorithm>
 #include <AL/al.h>
 #include <AL/alc.h>
 
@@ -244,11 +242,15 @@ private:
 	static ALCcontext* context;
 	static ALCdevice* device;
 public:
-	static void add(AudioSource* source) { sources.push_back(source); }
-	static void remove(AudioSource* source) { sources.erase(std::remove(sources.begin(), sources.end(), source), sources.end()); }
-
+	/* Method to add an audio source */
+	static void add(AudioSource* source);
+	/* Method to remove an audio source */
+	static void remove(AudioSource* source);
+	/* Method to initialise OpenAL */
 	static void initialise();
+	/* Method to delete all sources and the OpenAL context */
 	static void destroy();
+	/* Method to update the volume of all audio sources */
 	static void updateVolume();
 
 	static inline bool hasContext() { return context != NULL; }

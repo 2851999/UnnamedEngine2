@@ -89,7 +89,10 @@ void Test::created() {
 	scene->add(object);
 	physicsScene->add(object);
 
-	camera = new DebugCamera(Matrix4f().initPerspective(110, getSettings().windowAspectRatio, 0.1f, 100));
+	InputBindings* bindings = new InputBindings();
+	bindings->load("C:/Users/Joel/Desktop/Controller.xml", getWindow()->getInputManager());
+
+	camera = new DebugCamera(Matrix4f().initPerspective(110, getSettings().windowAspectRatio, 0.1f, 100), bindings);
 	camera->setSkyBox(new SkyBox("C:/UnnamedEngine/skybox1/", "skybox0.png", "skybox1.png", "skybox2.png", "skybox3.png", "skybox4.png", "skybox5.png", 100.0f));
 	camera->setFlying(true);
 
@@ -103,6 +106,7 @@ void Test::created() {
 	particleEmitter->particleLifeSpan = 2.0f;
 	particleEmitter->particleColour = Colour::WHITE;
 	particleEmitter->particleSize = 2.0f;
+	particleEmitter->setActive(true);
 
 	particleSystem = new ParticleSystem(particleEmitter, 5000);
 	particleSystem->acceleration = Vector3f(0.0f, 5.0f, 0.0f);
@@ -113,12 +117,15 @@ void Test::created() {
 	//particleSystem->textureAtlas = new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/firetexture.png"), 8, 8, 32);
 	particleSystem->textureAtlas = new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/smoke.png"), 7, 7, 46);
 
-	controller = new Controller(GLFW_JOYSTICK_2);
-	getWindow()->getInputManager()->addController(controller);
-	camera->getForwardsAxis()->assignControllerAxis(controller, 1);
-	camera->getSidewaysAxis()->assignControllerAxis(controller, 0);
-	camera->getLookXAxis()->assignControllerAxis(controller, 4);
-	camera->getLookYAxis()->assignControllerAxis(controller, 3);
+//	controller = new Controller(ControllerUtils::getControllerIndexByName("Generic   USB  Joystick  "));
+//	getWindow()->getInputManager()->addController(controller);
+//	camera->getForwardsAxis()->assignControllerAxis(controller, 1);
+//	camera->getSidewaysAxis()->assignControllerAxis(controller, 0);
+//	camera->getLookXAxis()->assignControllerAxis(controller, 4);
+//	camera->getLookYAxis()->assignControllerAxis(controller, 3);
+//	camera->getInputBindings()->save("C:/Users/Joel/Desktop/Controller.xml");
+
+	//camera->getInputBindings()->load("C:/Users/Joel/Desktop/Controller.xml");
 
 	soundSystem = new SoundSystem();
 	soundSystem->createListener(camera);

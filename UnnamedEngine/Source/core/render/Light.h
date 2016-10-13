@@ -19,8 +19,8 @@
 #ifndef CORE_RENDER_LIGHT_H_
 #define CORE_RENDER_LIGHT_H_
 
-#include "../Object.h"
 #include "FBO.h"
+#include "../Object.h"
 
 /*****************************************************************************
  * The Light class contains the information required to create a light

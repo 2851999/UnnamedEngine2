@@ -16,6 +16,8 @@
  *
  *****************************************************************************/
 
+#include "Utils.h"
+
 #include <windows.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -23,7 +25,7 @@
 #include <stb/stb_image.h>
 #include <fstream>
 #include <cstdarg>
-#include "Utils.h"
+
 #include "Logging.h"
 #include "../core/Window.h"
 #include "../core/ml/ML.h"
@@ -65,6 +67,15 @@ namespace StrUtils {
 		return value;
 	}
 
+	std::vector<std::string> strSplit(const std::string &s, char delimeter) {
+		std::stringstream ss(s);
+		std::string item;
+		std::vector<std::string> split;
+		while (std::getline(ss, item, delimeter))
+			split.push_back(item);
+		return split;
+	}
+
 	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter) {
 		std::vector<std::string> split;
 
@@ -86,6 +97,23 @@ namespace StrUtils {
 		split.push_back(text.substr(last));
 
 		return split;
+	}
+}
+
+/*****************************************************************************
+ * Various OpenGL utilities
+ *****************************************************************************/
+
+namespace GLUtils {
+	unsigned int glValue(bool value) {
+		if (value)
+			return GL_TRUE;
+		else
+			return GL_FALSE;
+	}
+
+	bool boolValue(int value) {
+		return value == GL_TRUE;
 	}
 }
 
@@ -170,6 +198,29 @@ namespace TimeUtils {
 	void sleep(long milliseconds) {
 		//For Windows
 		Sleep(milliseconds);
+	}
+}
+
+/*****************************************************************************
+ * Various random utilities
+ *****************************************************************************/
+
+#include <ctime>
+
+namespace RandomUtils {
+	/* Method used to initialise the random generator with the current time */
+	void initialise() {
+		std::srand(std::time(0));
+	}
+
+	/* Returns a random floating point number between the values specified */
+	float randomFloat(float min, float max) {
+		return min + ((float) rand()) / (RAND_MAX / (max - min));
+	}
+
+	/* Returns a random floating point number between 0 and 1 */
+	float randomFloat() {
+		return ((float) rand()) / RAND_MAX;
 	}
 }
 
@@ -313,5 +364,37 @@ namespace ClipboardUtils {
 
 	std::string getText() {
 		return std::string(glfwGetClipboardString(Window::getCurrentInstance()->getInstance()));
+	}
+}
+
+/*****************************************************************************
+ * Various controller utilities
+ *****************************************************************************/
+
+namespace ControllerUtils {
+	/* Returns the index of a controller given its name or -1 if not found */
+	int getControllerIndexByName(std::string name) {
+		//Go through each possible index
+		for (unsigned int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_LAST; i++) {
+			//Check the name of the current controller
+			if (glfwJoystickPresent(i) && std::string(glfwGetJoystickName(i)) == name && name.length() > 0)
+				//Return the index
+				return i;
+		}
+		return -1;
+	}
+
+	/* Return the index of a controller if it has the provided name, if not
+	 * it will search for a controller with that name and return that or -1
+	 * if still not found */
+	int findController(int index, std::string name) {
+		//Get the name of the controller at the given index
+		if (glfwJoystickPresent(index) && std::string(glfwGetJoystickName(index)) == name)
+			//Return the index as it is correct
+			return index;
+		else
+			//Not the correct controller, so try and locate and return the
+			//controller's index
+			return getControllerIndexByName(name);
 	}
 }

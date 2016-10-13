@@ -16,20 +16,24 @@
  *
  *****************************************************************************/
 
-#include "SkyBox.h"
 #include "Renderer.h"
+#include "SkyBox.h"
 
 /*****************************************************************************
  * The SkyBox class
  *****************************************************************************/
 
 SkyBox::SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom, float size) {
+	//Create the skybox
 	box = new GameObject3D({ new Mesh(MeshBuilder::createCube(size, size, size)) }, Renderer::getRenderShader("SkyBox"));
+	//Load the texture
 	cubemap = new Cubemap(path, { right, left, top, bottom, back, front });
+	//Assign the texture in the skybox
 	box->getMaterial()->setDiffuseTexture(cubemap);
 }
 
 void SkyBox::update(Vector3f cameraPosition) {
+	//Set the position of the box and update its model matrix
 	box->setPosition(cameraPosition);
 	box->update();
 }
@@ -42,5 +46,6 @@ void SkyBox::render() {
 }
 
 void SkyBox::destroy() {
+	//Destroy created resources
 	delete box;
 }

@@ -16,8 +16,11 @@
  *
  *****************************************************************************/
 
-#include "../Window.h"
 #include "GUIDropDownMenu.h"
+
+#include <algorithm>
+
+#include "../Window.h"
 
 /*****************************************************************************
  * The GUIDropDownMenu class
@@ -92,6 +95,10 @@ void GUIDropDownMenu::addButton(GUIButton* button) {
 	button->addListener(this);
 	//Add the button
 	buttons.push_back(button);
+}
+
+void GUIDropDownMenu::removeButton(GUIButton* button) {
+	buttons.erase(std::remove(buttons.begin(), buttons.end(), button), buttons.end());
 }
 
 void GUIDropDownMenu::enable() {

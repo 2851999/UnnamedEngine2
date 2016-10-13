@@ -24,7 +24,6 @@
 #include <map>
 
 #include "Input.h"
-#include "../Window.h"
 
 /*****************************************************************************
  * The KeyboardShortcut class
@@ -98,10 +97,10 @@ public:
 	inline void add(KeyboardShortcut* shortcut) { shortcuts.push_back(shortcut); }
 
 	/* Method used to add a listener */
-	inline void addListener(KeyboardShortcutListener* listener) { listeners.push_back(listener); }
+	void addListener(KeyboardShortcutListener* listener);
 
 	/* Method used to remove a listener */
-	inline void removeListener(KeyboardShortcutListener* listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
+	void removeListener(KeyboardShortcutListener* listener);
 
 	/* Method used to call the onShorcut() method in all of the listeners */
 	void callOnShortcut(KeyboardShortcut* e);
