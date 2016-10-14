@@ -18,9 +18,6 @@
 
 #include "Utils.h"
 
-#include <windows.h>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 #include <fstream>
@@ -97,23 +94,6 @@ namespace StrUtils {
 		split.push_back(text.substr(last));
 
 		return split;
-	}
-}
-
-/*****************************************************************************
- * Various OpenGL utilities
- *****************************************************************************/
-
-namespace GLUtils {
-	unsigned int glValue(bool value) {
-		if (value)
-			return GL_TRUE;
-		else
-			return GL_FALSE;
-	}
-
-	bool boolValue(int value) {
-		return value == GL_TRUE;
 	}
 }
 

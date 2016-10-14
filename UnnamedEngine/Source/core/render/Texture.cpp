@@ -62,7 +62,7 @@ void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
 }
 
 /*****************************************************************************
- * The Texture class stores the data required to render a texture
+ * The Texture class
  *****************************************************************************/
 
 unsigned char* Texture::loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei& height, GLint& format) {
@@ -87,6 +87,10 @@ unsigned char* Texture::loadTexture(std::string path, int& numComponents, GLsize
 		format = GL_RGBA;
 
 	return image;
+}
+
+void Texture::freeTexture(unsigned char* texture) {
+	stbi_image_free(texture);
 }
 
 Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bool applyParameters) {
@@ -158,8 +162,8 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 				GL_UNSIGNED_BYTE,
 				image
 			);
-			//Free the loaded image
-			stbi_image_free(image);
+			//Free the loaded image data
+			Texture::freeTexture(image);
 		}
 
 		//Now that the cubemap is fully loaded, apply the texture parameters

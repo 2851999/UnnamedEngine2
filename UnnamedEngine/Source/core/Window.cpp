@@ -16,9 +16,10 @@
  *
  *****************************************************************************/
 
-#include "../utils/Logging.h"
-#include "input/Input.h"
 #include "Window.h"
+#include "input/Input.h"
+#include "../utils/Logging.h"
+#include "../utils/GLUtils.h"
 
 /*****************************************************************************
  * The Window class
@@ -112,10 +113,10 @@ void Window::destroy() {
 	glfwTerminate();
 }
 
-void Window::setResizable(bool resizable)    { glfwWindowHint(GLFW_RESIZABLE, GLUtils::glValue(resizable)); }
-void Window::setDecorated(bool decorated)    { glfwWindowHint(GLFW_DECORATED, GLUtils::glValue(decorated)); }
+void Window::setResizable(bool resizable)    { glfwWindowHint(GLFW_RESIZABLE, resizable); }
+void Window::setDecorated(bool decorated)    { glfwWindowHint(GLFW_DECORATED, decorated); }
 void Window::setRefreshRate(int refreshRate) { glfwWindowHint(GLFW_REFRESH_RATE, refreshRate);              }
-void Window::setFloating(bool floating)      { glfwWindowHint(GLFW_FLOATING, GLUtils::glValue(floating));   }
+void Window::setFloating(bool floating)      { glfwWindowHint(GLFW_FLOATING, floating);   }
 void Window::setSamples(int samples)         { glfwWindowHint(GLFW_SAMPLES, samples);                       }
 void Window::setVSync(bool vSync)            { glfwSwapInterval(vSync);                                     }
 void Window::setPosition(int x, int y)       { glfwSetWindowPos(instance, x, y);                            }
@@ -137,7 +138,7 @@ void Window::centre() {
 	setPosition(mode->width / 2 - settings.windowWidth / 2, mode->height / 2 - settings.windowHeight / 2);
 }
 void Window::makeCurrent() { glfwMakeContextCurrent(instance); currentInstance = this;   }
-bool Window::shouldClose() { return GLUtils::boolValue(glfwWindowShouldClose(instance)); }
+bool Window::shouldClose() { return glfwWindowShouldClose(instance); }
 
 bool Window::isKeyPressed(int key)   {
 	int state = glfwGetKey(instance, key);

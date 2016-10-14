@@ -57,18 +57,30 @@ void PhysicsScene3D::update(float delta) {
 }
 
 void PhysicsScene3D::resolveCollision(CollisionData3D& data, PhysicsObject3D* objectA, PhysicsObject3D* objectB) {
+	//Calculate the relative velocity of the two objects
 	Vector3f relativeVelocity = objectB->getVelocity() - objectA->getVelocity();
 
+	//Now calculate the proportion of that velocity along the normal of the collision
 	float velAlongNormal = relativeVelocity.dot(data.getNormal());
 
+	//Return if nothing should happen
 	if (velAlongNormal > 0)
 		return;
 
+	//Pick the coefficient of restitution from one of the objects
 	float e = MathsUtils::min(objectA->getRestitution(), objectB->getRestitution());
 
-	float j = (-(1.0f + e) * velAlongNormal) / (1.0f / objectA->getMass() + 1.0f / objectB->getMass());
+	//Calculate the inverse of each mass
+	float invMassA = 1.0f / objectA->getMass();
+	float invMassB = 1.0f / objectB->getMass();
 
+	//Calculate the magnitude of the impulse
+	float j = (-(1.0f + e) * velAlongNormal) / (invMassA + invMassB);
+
+	//Calculate the impulse to be applied to both objects
 	Vector3f impulse = data.getNormal() * j;
-	objectA->setVelocity(objectA->getVelocity() - impulse * (1.0f / objectA->getMass()));
-	objectB->setVelocity(objectB->getVelocity() + impulse * (1.0f / objectB->getMass()));
+
+	//Apply the impulse depending on each object's mass
+	objectA->setVelocity(objectA->getVelocity() - impulse * invMassA);
+	objectB->setVelocity(objectB->getVelocity() + impulse * invMassB);
 }
