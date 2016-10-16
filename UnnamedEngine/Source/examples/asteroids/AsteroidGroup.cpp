@@ -50,6 +50,7 @@ void AsteroidGroup::setup() {
 		float s = RandomUtils::randomFloat(0.2f, 1.0f);
 		objects[i]->setScale(s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f));
 		objects[i]->setRotation(RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360));
+		objects[i]->setAngularVelocity(RandomUtils::randomFloat(0.0f, 20.0f), RandomUtils::randomFloat(0.0f, 20.0f), RandomUtils::randomFloat(0.0f, 20.0f));
 		objects[i]->setMass(100.0f * s);
 		objects[i]->setRestitution(1.0f);
 	}

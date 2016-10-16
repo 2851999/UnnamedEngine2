@@ -221,7 +221,6 @@ public:
 		this->renderData = new MeshRenderData(this->data, renderShader);
 	}
 
-
 	/* The setters and getters */
 	void setMaterial(Material* material) { this->material = material; }
 
