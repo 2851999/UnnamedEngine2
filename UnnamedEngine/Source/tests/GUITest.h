@@ -19,21 +19,21 @@
 #ifndef BASEENGINETEST2D_H_
 #define BASEENGINETEST2D_H_
 
-#include "core/BaseEngine.h"
-#include "core/render/Camera.h"
-#include "core/render/Renderer.h"
-#include "core/ResourceLoader.h"
-#include "core/gui/Font.h"
-#include "core/gui/GUIButton.h"
-#include "core/gui/GUILoadingBar.h"
-#include "core/gui/GUICheckBox.h"
-#include "core/gui/GUIDropDownMenu.h"
-#include "core/gui/GUIDropDownList.h"
-#include "core/gui/GUIPanel.h"
-#include "core/gui/GUILabel.h"
-#include "core/gui/GUISlider.h"
-#include "core/gui/GUITextBox.h"
-#include "core/ml/ML.h"
+#include "../core/BaseEngine.h"
+#include "../core/render/Camera.h"
+#include "../core/render/Renderer.h"
+#include "../core/ResourceLoader.h"
+#include "../core/gui/Font.h"
+#include "../core/gui/GUIButton.h"
+#include "../core/gui/GUILoadingBar.h"
+#include "../core/gui/GUICheckBox.h"
+#include "../core/gui/GUIDropDownMenu.h"
+#include "../core/gui/GUIDropDownList.h"
+#include "../core/gui/GUIPanel.h"
+#include "../core/gui/GUILabel.h"
+#include "../core/gui/GUISlider.h"
+#include "../core/gui/GUITextBox.h"
+#include "../core/ml/ML.h"
 
 class Test : public BaseEngine {
 private:
@@ -113,7 +113,7 @@ void Test::created() {
 	dropDownMenu->setPosition(400, 20);
 
 	GUIButton* dropDownListButton = new GUIButton("Select", 200, 20, colours);
-	dropDownList = new GUIDropDownList(dropDownListButton, ResourceLoader::sLoadTexture("C:/UnnamedEngine/DropDownOverlayClosed.png"), ResourceLoader::sLoadTexture("C:/UnnamedEngine/DropDownOverlayOpened.png"));
+	dropDownList = new GUIDropDownList(dropDownListButton, ResourceLoader::sLoadTexture("C:/UnnamedEngine/textures/DropDownOverlayClosed.png"), ResourceLoader::sLoadTexture("C:/UnnamedEngine/textures/DropDownOverlayOpened.png"));
 	dropDownList->addButton(new GUIButton("800 x 600", 200, 20, colours));
 	dropDownList->addButton(new GUIButton("1280 x 720", 200, 20, colours));
 	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, colours));
