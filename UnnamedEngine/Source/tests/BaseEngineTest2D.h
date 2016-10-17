@@ -19,10 +19,10 @@
 #ifndef BASEENGINETEST2D_H_
 #define BASEENGINETEST2D_H_
 
-#include "core/BaseEngine.h"
-#include "core/render/Camera.h"
-#include "core/render/Renderer.h"
-#include "core/gui/Font.h"
+#include "../core/BaseEngine.h"
+#include "../core/render/Camera.h"
+#include "../core/render/Renderer.h"
+#include "../core/gui/Font.h"
 
 class Test : public BaseEngine {
 private:
@@ -61,12 +61,12 @@ void Test::initialise() {
 }
 
 void Test::created() {
-	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/skybox1/skybox0.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));
-	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), Renderer::getRenderShader("Material"));
+	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));
+	object = new GameObject2D({ new Mesh(MeshBuilder::createQuad(200, 200, texture)) }, Renderer::getRenderShader("Material"));
 	object->setSize(200, 200);
 	object->setPosition(getSettings().windowWidth / 2 - 100, getSettings().windowHeight / 2 - 100);
 	object->getMaterial()->setDiffuseTexture(texture);
-	object->getMaterial()->setDiffuseColour(Colour::ORANGE);
+	object->getMaterial()->setDiffuseColour(Colour::WHITE);
 	object->update();
 
 	camera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));

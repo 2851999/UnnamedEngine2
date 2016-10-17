@@ -35,6 +35,9 @@ class KeyboardShortcut {
 private:
 	/* The name given to this keyboard shortcut */
 	std::string name;
+
+	/* States whether this shortcut has been completed */
+	bool completed;
 public:
 	/* The keys that make up this shortcut - made up of their key code and
 	 * whether they are currently pressed */
@@ -47,7 +50,7 @@ public:
 	virtual ~KeyboardShortcut();
 
 	/* Returns whether this shorcut's keys are all pressed */
-	bool hasCompleted();
+	inline bool hasCompleted() { return completed; }
 
 	/* Should be called when a key is pressed */
 	void onKeyPressed(int code);

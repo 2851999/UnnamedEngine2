@@ -82,5 +82,6 @@ void SoundSystem::destroy() {
 	sources.clear();
 	playing.clear();
 
-	delete listener;
+	if (listener)
+		delete listener;
 }

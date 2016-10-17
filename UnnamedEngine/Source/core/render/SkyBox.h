@@ -34,8 +34,9 @@ private:
 	/* The skybox */
 	GameObject3D* box;
 public:
-	/* The constructor */
+	/* The constructors */
 	SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom, float size);
+	SkyBox(std::string path, std::string fileExtension, float size) : SkyBox(path, "front" + fileExtension, "back" + fileExtension, "left" + fileExtension, "right" + fileExtension, "top" + fileExtension, "bottom" + fileExtension, size) {}
 
 	/* The destructor */
 	virtual ~SkyBox() { destroy(); }

@@ -88,6 +88,7 @@ protected:
 public:
 	/* The constructors */
 	GameObject2D(float width = 0, float height = 0);
+	GameObject2D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0) : GameObject2D(std::vector<Mesh*> { mesh }, shader, width, height) {}
 	GameObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0);
 
 	/* The destructor */
@@ -148,6 +149,7 @@ protected:
 public:
 	/* The constructors */
 	GameObject3D(float width = 0, float height = 0, float depth = 0);
+	GameObject3D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(std::vector<Mesh*> { mesh }, shader, width, height, depth) {}
 	GameObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0, float depth = 0);
 
 	/* The destructor */

@@ -35,8 +35,8 @@ private:
 	Vector3f direction;
 
 	/* The diffuse and specular colours */
-	Colour diffuseColour;
-	Colour specularColour;
+	Colour diffuseColour = Colour::WHITE;
+	Colour specularColour = Colour::WHITE;
 
 	/* The constant, linear and quadratic terms for point lights */
 	float constant = 0;

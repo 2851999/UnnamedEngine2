@@ -16,20 +16,12 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_MODEL_H_
-#define CORE_MODEL_H_
-
-#include "render/Mesh.h"
+#include "GLUtils.h"
 
 /*****************************************************************************
- * The Model class stores and manages everything needed to import and render
- * a model
+ * Various OpenGL utilities
  *****************************************************************************/
 
-class Model {
-public:
-	/* Returns a Model instance after reading its data from a file */
-	static std::vector<Mesh*> loadModel(std::string path, std::string fileName);
-};
+namespace GLUtils {
 
-#endif /* CORE_MODEL_H_ */
+}
