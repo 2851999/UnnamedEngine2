@@ -20,42 +20,27 @@
 #define CORE_GUI_GUIPANEL_H_
 
 #include "GUIButton.h"
+#include "GUIGroup.h"
 
 /*****************************************************************************
  * The GUIPanel class helps to manage a set of GUIComponent instances
  *****************************************************************************/
 
-class GUIPanel : public GUIComponent, public GUIComponentListener {
+class GUIPanel : public GUIGroup, public GUIComponentListener {
 private:
-	/* The GUIComponents within this panel */
-	std::vector<GUIComponent*> components;
-
 	/* Method used to get the top most component that contains a certain
 	 * point */
 	GUIComponent* getTop(double x, double y);
 public:
 	/* The constructor */
-	GUIPanel() {}
-	GUIPanel(std::vector<GUIComponent*> components) : components(components) {}
+	GUIPanel() : GUIGroup() {}
+	GUIPanel(std::vector<GUIComponent*> components) : GUIGroup(components) {}
 
 	/* The destructor */
-	virtual ~GUIPanel();
+	virtual ~GUIPanel() {}
 
 	/* Method used to add a component to this panel */
-	inline void add(GUIComponent* component) { component->setParent(this); component->addListener(this); components.push_back(component); }
-
-	/* Method used to remove a component from this panel */
-	void remove(GUIComponent* component);
-
-	/* Methods used to hide/show this panel */
-	virtual void show();
-	virtual void hide();
-
-	/* Method used to update this panel */
-	virtual void update() override;
-
-	/* Method used to render this panel */
-	virtual void render() override;
+	virtual void add(GUIComponent* component) override;
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override {}

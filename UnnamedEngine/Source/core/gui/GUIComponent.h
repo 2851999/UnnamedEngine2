@@ -163,6 +163,8 @@ public:
  * The GUIComponent class is used to create a component for a GUI
  *****************************************************************************/
 
+class GUIGroup;
+
 class GUIComponent : public GUIComponentRenderer, InputListener {
 private:
 	/* The component listeners */
@@ -186,6 +188,9 @@ protected:
 
 	/* The border of this component (Can be NULL) */
 	GUIBorder* border = NULL;
+
+	/* The group this component belongs to (Can be NULL) */
+	GUIGroup* group = NULL;
 
 	/* Method called to update this component (useful when no need to override
 	 * the default component update method */
@@ -259,6 +264,7 @@ public:
 	void setVisible(bool visible);
 	void setOccluded(bool occluded);
 	inline void setBorder(GUIBorder* border) { this->border = border; }
+	inline void setGroup(GUIGroup* group) { this->group = group; }
 
 	inline std::string getName() { return name;    }
 	inline std::string getText() { return text;    }
@@ -266,6 +272,9 @@ public:
 	inline bool isVisible()      { return visible; }
 	inline bool isOccluded()     { return occluded; }
 	inline GUIBorder* getBorder() { return border; }
+	inline bool hasBorder() { return border; }
+	inline GUIGroup* getGroup() { return group; }
+	inline GUIGroup* hasGroup() { return group; }
 	inline bool isMouseHovering() { return mouseHover; }
 	inline bool isClicked() { return mouseClicked; }
 };

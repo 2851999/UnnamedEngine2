@@ -1,4 +1,33 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 3 | Experimental 1
+
+* Added GUIGroup
+* Added GUIRadioCheckBox
+
+* Changed GUIPanel to inherit from GUIGroup
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 3 (V0.1.1)
+
+* Added re-written BaseEngineTest3D using a new BaseTest3D
+  class
+* Added new GameObject2D and GameObject3D constructors
+* Added some examples:
+	- BasicSetup
+	- BasicInput
+	- BasicRendering
+  
+* Changed Light so that it has its diffuse and specular
+  colours set to Colour::WHITE by default
+
+* Moved loadModel from Model to Mesh
+
+* Removed glValue and boolValue in GLUtils
+* Removed Model
+
+* More cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 2 | Experimental 4
 
 * Added new GameObject2D and GameObject3D constructors

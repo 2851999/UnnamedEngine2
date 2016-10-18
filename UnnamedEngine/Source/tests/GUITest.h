@@ -33,6 +33,8 @@
 #include "../core/gui/GUILabel.h"
 #include "../core/gui/GUISlider.h"
 #include "../core/gui/GUITextBox.h"
+#include "../core/gui/GUIGroup.h"
+#include "../core/gui/GUIRadioCheckBox.h"
 #include "../core/ml/ML.h"
 
 class Test : public BaseEngine {
@@ -48,6 +50,7 @@ private:
 	GUISlider* verticalSlider;
 	GUISlider* horizontalSlider;
 	GUITextBox* textBox;
+	GUIGroup* radioCheckBoxGroup;
 public:
 	virtual ~Test() {}
 
@@ -140,6 +143,22 @@ void Test::created() {
 	//textBox->borderEnabled = true;
 	textBox->selection->setColour(Colour(Colour::LIGHT_BLUE, 0.2f));
 
+	radioCheckBoxGroup = new GUIGroup();
+	GUIRadioCheckBox* box0 = new GUIRadioCheckBox("Box 0", 20, 20, colours);
+	box0->setPosition(0, 0);
+	box0->setBorder(new GUIBorder(box0, 2, Colour::ORANGE));
+	GUIRadioCheckBox* box1 = new GUIRadioCheckBox("Box 1", 20, 20, colours);
+	box1->setPosition(0, 25);
+	box1->setBorder(new GUIBorder(box1, 2, Colour::ORANGE));
+	GUIRadioCheckBox* box2 = new GUIRadioCheckBox("Box 2", 20, 20, colours);
+	box2->setPosition(0, 50);
+	box2->setBorder(new GUIBorder(box2, 2, Colour::ORANGE));
+	radioCheckBoxGroup->add(box0);
+	radioCheckBoxGroup->add(box1);
+	radioCheckBoxGroup->add(box2);
+	radioCheckBoxGroup->setPosition(700, 400);
+	radioCheckBoxGroup->show(); //Find a way to remove this
+
 	panel->add(button);
 	panel->add(loadingBar);
 	panel->add(checkBox);
@@ -149,6 +168,7 @@ void Test::created() {
 	panel->add(verticalSlider);
 	panel->add(horizontalSlider);
 	panel->add(textBox);
+	panel->add(radioCheckBoxGroup);
 
 	panel->show();
 

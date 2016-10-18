@@ -16,18 +16,18 @@
  *
  *****************************************************************************/
 
-//#include "tests/BaseEngineTest2D.h"
-#include "examples/basic/BasicRendering.h"
+#include "tests/GUITest.h"
+//#include "examples/basic/BasicRendering.h"
 //#include "examples/asteroids/AsteroidsGame.h"
 
 int main() {
-//	Test test;
-//	test.create();
+	Test test;
+	test.create();
 //	AsteroidsGame asteroids;
 //	asteroids.create();
 
-	Tutorial tutorial;
-	tutorial.create();
+//	Tutorial tutorial;
+//	tutorial.create();
 
 	return 0;
 }
