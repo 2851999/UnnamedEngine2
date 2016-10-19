@@ -44,6 +44,9 @@ public:
 	/* The method used to add a button */
 	void addButton(GUIButton* button);
 
+	/* Method used to create and add a button */
+	GUIButton* createButton(std::string text);
+
 	/* The method used to remove a button */
 	void removeButton(GUIButton* button);
 

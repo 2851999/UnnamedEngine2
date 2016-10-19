@@ -111,15 +111,15 @@ void Test::created() {
 
 	GUIButton* dropDownMenuButton = new GUIButton("File", 200, 20, colours);
 	dropDownMenu = new GUIDropDownMenu(dropDownMenuButton);
-	dropDownMenu->addButton(new GUIButton("Save", 200, 20, colours));
-	dropDownMenu->addButton(new GUIButton("Save As", 200, 20, colours));
+	dropDownMenu->createButton("Save");
+	dropDownMenu->createButton("Save As");
 	dropDownMenu->setPosition(400, 20);
 
 	GUIButton* dropDownListButton = new GUIButton("Select", 200, 20, colours);
 	dropDownList = new GUIDropDownList(dropDownListButton, ResourceLoader::sLoadTexture("C:/UnnamedEngine/textures/DropDownOverlayClosed.png"), ResourceLoader::sLoadTexture("C:/UnnamedEngine/textures/DropDownOverlayOpened.png"));
-	dropDownList->addButton(new GUIButton("800 x 600", 200, 20, colours));
-	dropDownList->addButton(new GUIButton("1280 x 720", 200, 20, colours));
-	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, colours));
+	dropDownList->createButton("800 x 600");
+	dropDownList->createButton("1280 x 720");
+	dropDownList->createButton("1920 x 1080");
 	dropDownList->setPosition(700, 20);
 
 	label = new GUILabel("Hello World!");

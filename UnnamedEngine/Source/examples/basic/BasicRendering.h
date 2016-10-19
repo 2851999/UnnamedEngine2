@@ -72,8 +72,8 @@ void Tutorial::created() {
 	mesh->getMaterial()->setDiffuseColour(Colour::ORANGE);
 
 	//Now create the object instance, passing the mesh, and the shader to
-	//use when rendering it
-	object = new GameObject2D(mesh, Renderer::getRenderShader("Material"), 100, 100);
+	//use when rendering it (in this case the 'Material' shader)
+	object = new GameObject2D(mesh, "Material", 100, 100);
 
 	//We can also change the material using the game object:
 	object->getMaterial()->setDiffuseColour(Colour::RED);

@@ -49,9 +49,9 @@ void Test::onCreated() {
 	std::vector<Mesh*> meshes1 = resourceLoader.loadModel("sphere.obj");
 	std::vector<Mesh*> meshes2 = resourceLoader.loadModel("sphere.obj");
 
-	sphereA = new PhysicsObject3D(meshes1, Renderer::getRenderShader("Material"));
+	sphereA = new PhysicsObject3D(meshes1, "Material");
 	sphereA->setCollider(new SphereCollider(sphereA, 1.0f));
-	sphereB = new PhysicsObject3D(meshes2, Renderer::getRenderShader("Material"));
+	sphereB = new PhysicsObject3D(meshes2, "Material");
 	sphereB->setCollider(new SphereCollider(sphereB, 1.0f));
 	sphereB->setPosition(3.0f, 0.0f, 0.0f);
 	sphereB->setVelocity(-0.2f, 0.0f, 0.0f);
