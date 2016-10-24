@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 3 | Experimental 3
+
+* Added geometry shader support
+* Added onButtonAssigned and onAxisAssigned methods in the
+  InputBindingListener class
+* Added waitForInputPos and waitForInputNeg methods in the
+  InputBindingAxis class
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 3 | Experimental 2
 
 * Added createButton in GUIDropDownMenu

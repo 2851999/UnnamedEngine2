@@ -46,10 +46,12 @@ void InputBindingButton::onKeyPressed(int key) {
 
 void InputBindingButton::onKeyReleased(int key) {
 	//Check whether waiting for input
-	if (waitingForInput)
+	if (waitingForInput) {
 		//Assign the key
 		assignKey(key);
-	else {
+		//Notify the listeners
+		bindings->callOnButtonAssigned(this);
+	} else {
 		//Check whether this binding button should be triggered
 		if (keyboardKey == key) {
 			pressed = false;
@@ -68,10 +70,12 @@ void InputBindingButton::onMousePressed(int button) {
 
 void InputBindingButton::onMouseReleased(int button) {
 	//Check whether waiting for input
-	if (waitingForInput)
+	if (waitingForInput) {
 		//Assign the button
 		assignMouseButton(button);
-	else {
+		//Notify the listeners
+		bindings->callOnButtonAssigned(this);
+	} else {
 		//Check whether this binding button should be triggered
 		if (mouseButton == button) {
 			pressed = false;
@@ -90,10 +94,12 @@ void InputBindingButton::onControllerButtonPressed(Controller* controller, int b
 
 void InputBindingButton::onControllerButtonReleased(Controller* controller, int button) {
 	//Check whether waiting for input
-	if (waitingForInput)
+	if (waitingForInput) {
 		//Assign the button
 		assignControllerButton(controller, button);
-	else {
+		//Notify the listeners
+		bindings->callOnButtonAssigned(this);
+	} else {
 		//Check whether this binding button should be triggered
 		if (this->controller == controller && controllerButton == button) {
 			pressed = false;
@@ -121,7 +127,16 @@ void InputBindingAxis::onKeyPressed(int key) {
 }
 
 void InputBindingAxis::onKeyReleased(int key) {
-	if (! waitingForInput) {
+	if (waitingForInput) {
+		//Check what we were waiting for and assign the correct key
+		if (waitingForPos)
+			keyboardKeyPositive = key;
+		else if (waitingForNeg)
+			keyboardKeyNegative = key;
+		//Notify the listeners
+		bindings->callOnAxisAssigned(this);
+
+	} else {
 		if (key == keyboardKeyPositive) {
 			//Check whether other direction's key down
 			if (keyboardKeyNegDown)
@@ -144,8 +159,11 @@ void InputBindingAxis::onKeyReleased(int key) {
 
 void InputBindingAxis::onControllerAxis(Controller* controller, int axis, float value) {
 	if (waitingForInput) {
+		//Assign the controller
 		this->controller = controller;
 		controllerAxis = axis;
+		//Notify the listeners
+		bindings->callOnAxisAssigned(this);
 	} else {
 		if (this->controller == controller && controllerAxis == axis) {
 			this->value = -value;

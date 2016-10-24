@@ -43,9 +43,8 @@ public:
 	virtual ~InputBinding() {}
 
 	/* Getters and setters */
-	inline void waitForInput() { waitingForInput = true; }
-	inline void cancelWaitForInput() { waitingForInput = false; }
 	inline bool isWaitingForInput() { return waitingForInput; }
+	virtual void cancelWaitForInput() { waitingForInput = false; }
 
 	/* Input methods */
 	virtual void onKeyPressed(int key) override {}
@@ -98,7 +97,9 @@ public:
 	inline void assignMouseButton(int button) { mouseButton = button; }
 	inline void assignControllerButton(Controller* controller, int button) { this->controller = controller; controllerButton = button; }
 
-	/* Getters */
+	/* Setters and getters */
+	inline void waitForInput() { waitingForInput = true; }
+
 	inline int getKeyboardKey() { return keyboardKey; }
 	inline bool hasKeyboardKey() { return keyboardKey != -1; }
 	inline int getMouseButton() { return mouseButton; }
@@ -148,6 +149,10 @@ private:
 
 	/* The current axis value */
 	float value = 0;
+
+	/* States whether waiting for a positive input, or a negative input (For keyboard key) */
+	bool waitingForPos = false;
+	bool waitingForNeg = false;
 public:
 	/* The constructor */
 	InputBindingAxis(InputBindings* bindings) : InputBinding(bindings) {}
@@ -161,7 +166,15 @@ public:
 	inline void assignKeys(int keyPositive, int keyNegative) { keyboardKeyPositive = keyPositive; keyboardKeyNegative = keyNegative; }
 	inline void assignControllerAxis(Controller* controller, int axis) { this->controller = controller; controllerAxis = axis; }
 
-	/* Getters */
+	/* Setters and getters */
+	inline void waitForInputPos() { waitingForInput = true; waitingForPos = true; }
+	inline void waitForInputNeg() { waitingForInput = true, waitingForNeg = true; }
+	virtual void cancelWaitForInput() override {
+		waitingForInput = false;
+		waitingForPos = false;
+		waitingForNeg = false;
+	}
+
 	inline int getKeyboardKeyPos() { return keyboardKeyPositive; }
 	inline bool hasKeyboardKeyPos() { return keyboardKeyPositive != -1; }
 	inline int getKeyboardKeyNeg() { return keyboardKeyNegative; }
@@ -209,6 +222,11 @@ public:
 
 	/* Called when an axis's value changes */
 	virtual void onAxis(InputBindingAxis* axis) {}
+
+	/* Called when a button/axis has been waiting for input and has now
+	 * received it */
+	virtual void onButtonAssigned(InputBindingButton* button) {}
+	virtual void onAxisAssigned(InputBindingAxis* axis) {}
 };
 
 /*****************************************************************************
@@ -271,6 +289,16 @@ public:
 	inline void callOnAxis(InputBindingAxis* axis) {
 		for (unsigned int i = 0; i < listeners.size(); i++)
 			listeners[i]->onAxis(axis);
+	}
+
+	inline void callOnButtonAssigned(InputBindingButton* button) {
+		for (unsigned int i = 0; i < listeners.size(); i++)
+			listeners[i]->onButtonAssigned(button);
+	}
+
+	inline void callOnAxisAssigned(InputBindingAxis* axis) {
+		for (unsigned int  i = 0; i < listeners.size(); i++)
+			listeners[i]->onAxisAssigned(axis);
 	}
 };
 

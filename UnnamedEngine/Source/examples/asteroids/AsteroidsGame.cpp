@@ -78,6 +78,15 @@ void AsteroidsGame::created() {
 	buttonPause->assignKey(GLFW_KEY_ESCAPE);
 	buttonUpgrades->assignKey(GLFW_KEY_U);
 
+	int controllerIndex = ControllerUtils::findController(0, "Generic   USB  Joystick  ");
+	if (controllerIndex != -1) {
+		Controller* controller = new Controller(controllerIndex);
+		axisForward->assignControllerAxis(controller, 1);
+		axisSideways->assignControllerAxis(controller, 0);
+		buttonShoot->assignControllerButton(controller, 0);
+		getWindow()->getInputManager()->addController(controller);
+	}
+
 	//Setup the main menu
 	mainMenu = new AsteroidsMainMenu(this);
 	mainMenu->show();
