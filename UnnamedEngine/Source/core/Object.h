@@ -90,6 +90,8 @@ public:
 	GameObject2D(float width = 0, float height = 0);
 	GameObject2D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0) : GameObject2D(std::vector<Mesh*> { mesh }, shader, width, height) {}
 	GameObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0);
+	GameObject2D(Mesh* mesh, std::string shaderId, float width = 0, float height = 0);
+	GameObject2D(std::vector<Mesh*> meshes, std::string shaderId, float width = 0, float height = 0);
 
 	/* The destructor */
 	virtual ~GameObject2D() {}
@@ -151,6 +153,8 @@ public:
 	GameObject3D(float width = 0, float height = 0, float depth = 0);
 	GameObject3D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(std::vector<Mesh*> { mesh }, shader, width, height, depth) {}
 	GameObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0, float depth = 0);
+	GameObject3D(Mesh* mesh, std::string shaderId, float width = 0, float height = 0, float depth = 0);
+	GameObject3D(std::vector<Mesh*> meshes, std::string shaderId, float width = 0, float height = 0, float depth = 0);
 
 	/* The destructor */
 	virtual ~GameObject3D() {}

@@ -24,9 +24,9 @@
  *
  * Tutorial Number: 3
  * Tutorial Name: Basic Rendering
- * Engine Version: V0.1.0 (0::1::2::3)
+ * Engine Version: V0.1.1 (0::1::3::2)
  * Date Created: 17/10/2016
- * Date Updated: 17/10/2016
+ * Date Updated: 19/10/2016
  *
  * Description: Demonstrates how to start rendering in 2D
  *****************************************************************************/
@@ -72,8 +72,8 @@ void Tutorial::created() {
 	mesh->getMaterial()->setDiffuseColour(Colour::ORANGE);
 
 	//Now create the object instance, passing the mesh, and the shader to
-	//use when rendering it
-	object = new GameObject2D(mesh, Renderer::getRenderShader("Material"), 100, 100);
+	//use when rendering it (in this case the 'Material' shader)
+	object = new GameObject2D(mesh, "Material", 100, 100);
 
 	//We can also change the material using the game object:
 	object->getMaterial()->setDiffuseColour(Colour::RED);

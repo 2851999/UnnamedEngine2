@@ -62,7 +62,7 @@ void Test::initialise() {
 
 void Test::created() {
 	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));
-	object = new GameObject2D({ new Mesh(MeshBuilder::createQuad(200, 200, texture)) }, Renderer::getRenderShader("Material"));
+	object = new GameObject2D({ new Mesh(MeshBuilder::createQuad(200, 200, texture)) }, "Material");
 	object->setSize(200, 200);
 	object->setPosition(getSettings().windowWidth / 2 - 100, getSettings().windowHeight / 2 - 100);
 	object->getMaterial()->setDiffuseTexture(texture);

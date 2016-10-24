@@ -1,4 +1,48 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 4 (V0.1.2)
+
+* Added GUIGroup
+* Added GUIRadioCheckBox
+* Added createButton in GUIDropDownMenu
+* Added new GameObject2D constructors
+* Added new GameObject3D constructors
+* Added new PhysicsObject2D constructors
+* Added new PhysicsObject3D constructors
+* Added geometry shader support
+* Added onButtonAssigned and onAxisAssigned methods in the
+  InputBindingListener class
+* Added waitForInputPos and waitForInputNeg methods in the
+  InputBindingAxis class
+
+* Changed GUIPanel to inherit from GUIGroup
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 3 | Experimental 3
+
+* Added geometry shader support
+* Added onButtonAssigned and onAxisAssigned methods in the
+  InputBindingListener class
+* Added waitForInputPos and waitForInputNeg methods in the
+  InputBindingAxis class
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 3 | Experimental 2
+
+* Added createButton in GUIDropDownMenu
+* Added new GameObject2D constructors
+* Added new GameObject3D constructors
+* Added new PhysicsObject2D constructors
+* Added new PhysicsObject3D constructors
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 3 | Experimental 1
+
+* Added GUIGroup
+* Added GUIRadioCheckBox
+
+* Changed GUIPanel to inherit from GUIGroup
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 3 (V0.1.1)
 
 * Added re-written BaseEngineTest3D using a new BaseTest3D

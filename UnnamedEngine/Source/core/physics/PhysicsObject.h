@@ -82,6 +82,11 @@ public:
 			child->setParent(this);
 	}
 
+	PhysicsObject2D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0) : GameObject2D(mesh, shader, width, height) {}
+	PhysicsObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0) : GameObject2D(meshes, shader, width, height) {}
+	PhysicsObject2D(Mesh* mesh, std::string shaderId, float width = 0, float height = 0) : GameObject2D(mesh, shaderId, width, height) {}
+	PhysicsObject2D(std::vector<Mesh*> meshes, std::string shaderId, float width = 0, float height = 0) : GameObject2D(meshes, shaderId, width, height) {}
+
 	/* The destructor */
 	virtual ~PhysicsObject2D() {}
 
@@ -138,7 +143,10 @@ public:
 		if (child)
 			child->setParent(this);
 	}
-	PhysicsObject3D(std::vector<Mesh*> meshes, RenderShader* shader) : GameObject3D(meshes, shader) {}
+	PhysicsObject3D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(mesh, shader, width, height, depth) {}
+	PhysicsObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(meshes, shader, width, height, depth) {}
+	PhysicsObject3D(Mesh* mesh, std::string shaderId, float width = 0, float height = 0, float depth = 0) : GameObject3D(mesh, shaderId, width, height, depth) {}
+	PhysicsObject3D(std::vector<Mesh*> meshes, std::string shaderId, float width = 0, float height = 0, float depth = 0) : GameObject3D(meshes, shaderId, width, height, depth) {}
 
 	/* The destructor */
 	virtual ~PhysicsObject3D() {}

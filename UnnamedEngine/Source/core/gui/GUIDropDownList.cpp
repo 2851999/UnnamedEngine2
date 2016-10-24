@@ -25,7 +25,7 @@
  *****************************************************************************/
 
 GUIDropDownList::GUIDropDownList(GUIButton* menuButton, Texture* overlayClosedTexture, Texture* overlayOpenedTexture) : GUIDropDownMenu(menuButton) {
-	overlay = new GameObject2D({ new Mesh(MeshBuilder::createQuad(menuButton->getWidth(), menuButton->getHeight(), overlayClosedTexture)) }, Renderer::getRenderShader("Material"));
+	overlay = new GameObject2D({ new Mesh(MeshBuilder::createQuad(menuButton->getWidth(), menuButton->getHeight(), overlayClosedTexture)) }, "Material");
 	overlay->setParent(this);
 	overlay->setSize(menuButton->getSize());
 

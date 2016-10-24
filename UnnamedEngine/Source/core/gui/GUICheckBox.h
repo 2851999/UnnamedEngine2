@@ -26,7 +26,7 @@
  *****************************************************************************/
 
 class GUICheckBox : public GUIComponent {
-private:
+protected:
 	/* Whether this checkbox is checked or not */
 	bool checked = false;
 

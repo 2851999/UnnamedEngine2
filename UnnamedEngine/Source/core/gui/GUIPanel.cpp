@@ -26,71 +26,6 @@
  * The GUIPanel class
  *****************************************************************************/
 
-GUIPanel::~GUIPanel() {
-	//Go through each component and delete it
-	for (unsigned int i = 0; i < components.size(); i++)
-		delete components[i];
-	components.clear();
-}
-
-void GUIPanel::remove(GUIComponent* component) {
-	//Ensure the component has been added
-	if (std::find(components.begin(), components.end(), component) != components.end()) {
-		//Remove the parent of the component
-		component->setParent(NULL);
-		//Remove the component
-		components.erase(std::remove(components.begin(), components.end(), component), components.end());
-	}
-}
-
-void GUIPanel::show() {
-	//Make this panel visible
-	setVisible(true);
-	//Go through each component
-	for (unsigned int i = 0; i < components.size(); i++) {
-		//Enable the current component
-		components[i]->enable();
-		//Ensure the component is visible
-		components[i]->setVisible(true);
-		//This is done to ensure the component is updated in case the mouse is currently
-		//hovering over them
-		components[i]->onMouseEnter();
-	}
-}
-
-void GUIPanel::hide() {
-	//Make this panel hidden
-	setVisible(false);
-	//Go through each component
-	for (unsigned int i = 0; i < components.size(); i++) {
-		//This is done to ensure the component is updated as if the mouse is leaving it
-		//so that if it is shown again, it has an updated state
-		components[i]->onMouseLeave();
-		//Disable the current component
-		components[i]->disable();
-		//Ensure the component is not visible
-		components[i]->setVisible(false);
-	}
-}
-
-void GUIPanel::update() {
-	//Ensure this panel is active
-	if (active) {
-		//Go through and update all of the components in this panel
-		for (unsigned int i = 0; i < components.size(); i++)
-			components[i]->update();
-	}
-}
-
-void GUIPanel::render() {
-	//Ensure this panel is visible
-	if (visible) {
-		//Go through and render all of the components in this panel
-		for (unsigned int i = 0; i < components.size(); i++)
-			components[i]->render();
-	}
-}
-
 GUIComponent* GUIPanel::getTop(double x, double y) {
 	//The current top-most component
 	GUIComponent* top = NULL;
@@ -106,6 +41,11 @@ GUIComponent* GUIPanel::getTop(double x, double y) {
 
 	//Return the component
 	return top;
+}
+
+void GUIPanel::add(GUIComponent* component) {
+	GUIGroup::add(component);
+	component->addListener(this);
 }
 
 void GUIPanel::onMouseMoved(double x, double y, double dx, double dy) {
