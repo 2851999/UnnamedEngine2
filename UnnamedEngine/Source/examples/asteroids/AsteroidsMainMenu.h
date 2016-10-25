@@ -99,7 +99,7 @@ public:
 };
 
 /*****************************************************************************
- * The MainMenuVideo class
+ * The MainMenuSettingsVideo class
  *****************************************************************************/
 
 class MainMenuSettingsVideo : public GUIPanel {
@@ -120,6 +120,38 @@ public:
 
 	/* The destructor */
 	virtual ~MainMenuSettingsVideo() {}
+
+	/* Method used to show this GUIPanel */
+	virtual void show() override;
+
+	/* Called when a component is clicked */
+	virtual void onComponentClicked(GUIComponent* component) override;
+};
+
+/*****************************************************************************
+ * The MainMenuSettingsControls class
+ *****************************************************************************/
+
+class MainMenuSettingsControls : public GUIPanel {
+private:
+	/* The game instance */
+	AsteroidsGame* game;
+	/* The buttons on the menu */
+	GUIButton* buttonForwardPos;
+	GUIButton* buttonForwardNeg;
+	GUIButton* buttonLookXPos;
+	GUIButton* buttonLookXNeg;
+	GUIButton* buttonLookYPos;
+	GUIButton* buttonLookYNeg;
+	GUIButton* buttonShoot;
+	GUIButton* buttonApply;
+	GUIButton* buttonBack;
+public:
+	/* The constructor */
+	MainMenuSettingsControls(AsteroidsGame* game, GUIPanelGroup* panelGroup);
+
+	/* The destructor */
+	virtual ~MainMenuSettingsControls() {}
 
 	/* Method used to show this GUIPanel */
 	virtual void show() override;

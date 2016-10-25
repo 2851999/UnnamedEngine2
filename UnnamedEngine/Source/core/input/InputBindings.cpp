@@ -349,7 +349,7 @@ void InputBindings::load(std::string path, InputManager* inputManager) {
 				else if (attrib.getName() == "keyboardKey")
 					buttonBinding->assignKey(attrib.getDataAsInt());
 				else if (attrib.getName() == "mouseButton")
-					buttonBinding->assignKey(attrib.getDataAsInt());
+					buttonBinding->assignMouseButton(attrib.getDataAsInt());
 				else if (attrib.getName() == "controllerButton" && currentController)
 					buttonBinding->assignControllerButton(currentController, attrib.getDataAsInt());
 			}

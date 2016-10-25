@@ -170,6 +170,7 @@ MainMenuSettings::MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGrou
 
 	buttonControls = new GUIButton("Controls", 400, 30, texturesButtons);
 	buttonControls->setPosition(windowWidth / 2 - buttonControls->getWidth() / 2, 220);
+	panelGroup->assignButton(buttonControls, "SettingsControls");
 
 	buttonBack = new GUIButton("Back", 400, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 - buttonBack->getWidth() / 2, windowHeight - 50);
@@ -286,6 +287,118 @@ void MainMenuSettingsVideo::onComponentClicked(GUIComponent* component) {
 }
 
 /*****************************************************************************
+ * The MainMenuSettingsControls class
+ *****************************************************************************/
+
+MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanelGroup* panelGroup) : game(game) {
+	//The window width/height
+	float windowWidth = game->getSettings().windowWidth;
+	float windowHeight = game->getSettings().windowHeight;
+
+	//Get the title font
+	Font* titleFont = game->getResources().getFontTitle();
+
+	//Create the title label
+	GUILabel* titleLabel = new GUILabel("Controls", titleFont);
+	titleLabel->setPosition(windowWidth / 2 - titleLabel->getWidth() / 2, 40.0f);
+
+	//Get the heading font
+	Font* headingFont = game->getResources().getFontHeading();
+
+	//Setup the headers
+	GUILabel* headerForwardAxis = new GUILabel("Forward Axis", headingFont);
+	headerForwardAxis->setPosition(windowWidth / 2 - headerForwardAxis->getWidth() / 2, 110.0f);
+
+	GUILabel* headerLookXAxis = new GUILabel("Look X Axis", headingFont);
+	headerLookXAxis->setPosition(windowWidth / 2 - headerLookXAxis->getWidth() / 2, 190.0f);
+
+	GUILabel* headerLookYAxis = new GUILabel("Look Y Axis", headingFont);
+	headerLookYAxis->setPosition(windowWidth / 2 - headerLookYAxis->getWidth() / 2, 270.0f);
+
+	GUILabel* headerShootButton = new GUILabel("Shoot Button", headingFont);
+	headerShootButton->setPosition(windowWidth / 2 - headerShootButton->getWidth() / 2, 350.0f);
+
+	//Get the button textures
+	std::vector<Texture*> texturesButtons = game->getResources().getTexturesButtons();
+
+	//Setup the buttons
+	buttonForwardPos = new GUIButton("", 200, 30, texturesButtons);
+	buttonForwardPos->setPosition(windowWidth / 2 - 210, 140);
+
+	buttonForwardNeg = new GUIButton("", 200, 30, texturesButtons);
+	buttonForwardNeg->setPosition(windowWidth / 2 + 10, 140);
+
+	buttonLookXPos = new GUIButton("", 200, 30, texturesButtons);
+	buttonLookXPos->setPosition(windowWidth / 2 - 210, 220);
+
+	buttonLookXNeg = new GUIButton("", 200, 30, texturesButtons);
+	buttonLookXNeg->setPosition(windowWidth / 2 + 10, 220);
+
+	buttonLookYPos = new GUIButton("", 200, 30, texturesButtons);
+	buttonLookYPos->setPosition(windowWidth / 2 - 210, 300);
+
+	buttonLookYNeg = new GUIButton("", 200, 30, texturesButtons);
+	buttonLookYNeg->setPosition(windowWidth / 2 + 10, 300);
+
+	buttonShoot = new GUIButton("", 200, 30, texturesButtons);
+	buttonShoot->setPosition(windowWidth / 2 + - buttonShoot->getWidth() / 2, 380);
+
+	buttonApply = new GUIButton("Apply", 195, 30, texturesButtons);
+	buttonApply->setPosition(windowWidth / 2 - 200, windowHeight - 50);
+	buttonApply->addListener(this);
+
+	buttonBack = new GUIButton("Back", 195, 30, texturesButtons);
+	buttonBack->setPosition(windowWidth / 2 + 5, windowHeight - 50);
+	buttonBack->addListener(this);
+	panelGroup->assignButton(buttonBack, "Settings");
+
+	//Add the components to this panel
+	add(titleLabel);
+	add(headerForwardAxis);
+	add(headerLookXAxis);
+	add(headerLookYAxis);
+	add(headerShootButton);
+	add(buttonForwardPos);
+	add(buttonForwardNeg);
+	add(buttonLookXPos);
+	add(buttonLookXNeg);
+	add(buttonLookYPos);
+	add(buttonLookYNeg);
+	add(buttonShoot);
+	add(buttonApply);
+	add(buttonBack);
+
+	enable();
+}
+
+void MainMenuSettingsControls::show() {
+	GUIPanel::show();
+
+	//Setup the buttons
+	InputBindingAxis* forwardAxis = game->getInputBindings()->getAxisBinding("Forward");
+	buttonForwardPos->setText("Key: '" + StrUtils::str((char) forwardAxis->getKeyboardKeyPos()) + "'");
+	buttonForwardNeg->setText("Key: '" + StrUtils::str((char) forwardAxis->getKeyboardKeyNeg()) + "'");
+
+//	InputBindingAxis* lookXAxis = game->getInputBindings()->getAxisBinding("LookX");
+//	buttonLookXPos->setText("Key: " + StrUtils::str((char) lookXAxis->getKeyboardKeyPos()));
+//	buttonLookXNeg->setText("Key: " + StrUtils::str((char) lookXAxis->getKeyboardKeyNeg()));
+
+//	InputBindingAxis* lookYAxis = game->getInputBindings()->getAxisBinding("LookY");
+//	buttonLookYPos->setText("Key: " + StrUtils::str((char) lookYAxis->getKeyboardKeyPos()));
+//	buttonLookYNeg->setText("Key: " + StrUtils::str((char) lookYAxis->getKeyboardKeyNeg()));
+
+	InputBindingButton* shootButton = game->getInputBindings()->getButtonBinding("Shoot");
+	buttonShoot->setText("Key: '" + StrUtils::str((char) shootButton->getKeyboardKey()) + "'");
+}
+
+void MainMenuSettingsControls::onComponentClicked(GUIComponent* component) {
+	//Check which component was clicked
+	if (component == buttonApply) {
+		//
+	}
+}
+
+/*****************************************************************************
  * The AsteroidsMainMenu class
  *****************************************************************************/
 
@@ -313,6 +426,7 @@ AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) {
 	panelGroup->add("Highscores", new MainMenuHighScores(game, panelGroup));
 	panelGroup->add("Settings", new MainMenuSettings(game, panelGroup));
 	panelGroup->add("SettingsVideo", new MainMenuSettingsVideo(game, panelGroup));
+	panelGroup->add("SettingsControls", new MainMenuSettingsControls(game, panelGroup));
 }
 
 AsteroidsMainMenu::~AsteroidsMainMenu() {
