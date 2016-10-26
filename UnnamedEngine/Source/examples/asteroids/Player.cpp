@@ -73,7 +73,7 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		currentDelta = deltaSeconds;
 
 		//Orientate the camera
-		getRelRotation() += Vector3f(lookY->getValue(), -lookX->getValue(), 0) * 60.0f * currentDelta;
+		getRelRotation() += Vector3f(lookY->getValue(), -lookX->getValue(), 0) * 80.0f * currentDelta;
 		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
 
 		//Move the player
@@ -85,10 +85,9 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		camera->update();
 
 		//Check whether the player is shooting
-		if (buttonShoot->isPressed()) {
+		if (buttonShoot->isPressed())
 			//FIRE THE LASERS!!!
 			fireLasers(camera->getFront());
-		}
 	}
 	//Update the lasers
 	Ship::update(currentDelta, closestAsteroids);
