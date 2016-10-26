@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 4 | Experimental 2
+
+* Added methods to remove a controller from an InputManager
+  as well as to release all controllers
+
+* Fixed bug: InputBinding's continued to wait for input even
+             after receiving it
+             
+* More Asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 4 | Experimental 1
 
 * Fixed bug: InputBindings assigned the keyboard key for an

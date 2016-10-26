@@ -290,7 +290,7 @@ void MainMenuSettingsVideo::onComponentClicked(GUIComponent* component) {
  * The MainMenuSettingsControls class
  *****************************************************************************/
 
-MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanelGroup* panelGroup) : game(game) {
+MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanelGroup* panelGroup) : game(game), bindings(game->getInputBindings()) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
@@ -343,9 +343,9 @@ MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanel
 	buttonShoot = new GUIButton("", 200, 30, texturesButtons);
 	buttonShoot->setPosition(windowWidth / 2 + - buttonShoot->getWidth() / 2, 380);
 
-	buttonApply = new GUIButton("Apply", 195, 30, texturesButtons);
-	buttonApply->setPosition(windowWidth / 2 - 200, windowHeight - 50);
-	buttonApply->addListener(this);
+	buttonSave = new GUIButton("Save", 195, 30, texturesButtons);
+	buttonSave->setPosition(windowWidth / 2 - 200, windowHeight - 50);
+	buttonSave->addListener(this);
 
 	buttonBack = new GUIButton("Back", 195, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 + 5, windowHeight - 50);
@@ -365,37 +365,68 @@ MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanel
 	add(buttonLookYPos);
 	add(buttonLookYNeg);
 	add(buttonShoot);
-	add(buttonApply);
+	add(buttonSave);
 	add(buttonBack);
 
 	enable();
+
+	bindings->addListener(this);
 }
 
 void MainMenuSettingsControls::show() {
 	GUIPanel::show();
 
+	//Update the GUI
+	updateGUI();
+}
+
+void MainMenuSettingsControls::updateGUI() {
 	//Setup the buttons
-	InputBindingAxis* forwardAxis = game->getInputBindings()->getAxisBinding("Forward");
-	buttonForwardPos->setText("Key: '" + StrUtils::str((char) forwardAxis->getKeyboardKeyPos()) + "'");
-	buttonForwardNeg->setText("Key: '" + StrUtils::str((char) forwardAxis->getKeyboardKeyNeg()) + "'");
+	InputBindingAxis* forwardAxis = bindings->getAxisBinding("Forward");
+	buttonForwardPos->setText("Key: '" + StrUtils::str((char) forwardAxis->getKeyboardKeyPos()) + "', Axis: " + StrUtils::str(forwardAxis->getControllerAxis()));
+	buttonForwardNeg->setText("Key: '" + StrUtils::str((char) forwardAxis->getKeyboardKeyNeg()) + "', Axis: " + StrUtils::str(forwardAxis->getControllerAxis()));
 
-//	InputBindingAxis* lookXAxis = game->getInputBindings()->getAxisBinding("LookX");
-//	buttonLookXPos->setText("Key: " + StrUtils::str((char) lookXAxis->getKeyboardKeyPos()));
-//	buttonLookXNeg->setText("Key: " + StrUtils::str((char) lookXAxis->getKeyboardKeyNeg()));
+	InputBindingAxis* lookXAxis = bindings->getAxisBinding("LookX");
+	buttonLookXPos->setText("Key: '" + StrUtils::str(lookXAxis->getKeyboardKeyPos()) + "', Axis: " + StrUtils::str(lookXAxis->getControllerAxis()));
+	buttonLookXNeg->setText("Key: '" + StrUtils::str(lookXAxis->getKeyboardKeyNeg()) + "', Axis: " + StrUtils::str(lookXAxis->getControllerAxis()));
 
-//	InputBindingAxis* lookYAxis = game->getInputBindings()->getAxisBinding("LookY");
-//	buttonLookYPos->setText("Key: " + StrUtils::str((char) lookYAxis->getKeyboardKeyPos()));
-//	buttonLookYNeg->setText("Key: " + StrUtils::str((char) lookYAxis->getKeyboardKeyNeg()));
+	InputBindingAxis* lookYAxis = bindings->getAxisBinding("LookY");
+	buttonLookYPos->setText("Key: '" + StrUtils::str(lookYAxis->getKeyboardKeyPos()) + "', Axis: " + StrUtils::str(lookYAxis->getControllerAxis()));
+	buttonLookYNeg->setText("Key: '" + StrUtils::str(lookYAxis->getKeyboardKeyNeg()) + "', Axis: " + StrUtils::str(lookYAxis->getControllerAxis()));
 
-	InputBindingButton* shootButton = game->getInputBindings()->getButtonBinding("Shoot");
-	buttonShoot->setText("Key: '" + StrUtils::str((char) shootButton->getKeyboardKey()) + "'");
+	InputBindingButton* shootButton = bindings->getButtonBinding("Shoot");
+	buttonShoot->setText("Key: '" + StrUtils::str((char) shootButton->getKeyboardKey()) + "', Button: " + StrUtils::str(shootButton->getControllerButton()));
 }
 
 void MainMenuSettingsControls::onComponentClicked(GUIComponent* component) {
 	//Check which component was clicked
-	if (component == buttonApply) {
-		//
-	}
+	if (component == buttonSave)
+		//Save the input bindings
+		bindings->save(game->getResourceLoader().getPath() + "settings/controls.txt");
+//	else if (component == buttonBack) {
+//		//Load the input bindings to reset any changes
+//		game->getWindow()->getInputManager()->releaseControllers();
+//		bindings->load(game->getResourceLoader().getPath() + "settings/controls.txt", game->getWindow()->getInputManager());
+	else if (component == buttonForwardPos)
+		bindings->getAxisBinding("Forward")->waitForInputPos();
+	else if (component == buttonForwardNeg)
+		bindings->getAxisBinding("Forward")->waitForInputNeg();
+	else if (component == buttonLookXPos)
+		bindings->getAxisBinding("LookX")->waitForInputPos();
+	else if (component == buttonLookXNeg)
+		bindings->getAxisBinding("LookX")->waitForInputNeg();
+	else if (component == buttonShoot)
+		bindings->getButtonBinding("Shoot")->waitForInput();
+}
+
+void MainMenuSettingsControls::onButtonAssigned(InputBindingButton* button) {
+	//Update the GUI
+	updateGUI();
+}
+
+void MainMenuSettingsControls::onAxisAssigned(InputBindingAxis* axis) {
+	//Update the GUI
+	updateGUI();
 }
 
 /*****************************************************************************

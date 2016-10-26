@@ -51,6 +51,8 @@ void InputBindingButton::onKeyReleased(int key) {
 		assignKey(key);
 		//Notify the listeners
 		bindings->callOnButtonAssigned(this);
+		//Stop waiting for input
+		waitingForInput = false;
 	} else {
 		//Check whether this binding button should be triggered
 		if (keyboardKey == key) {
@@ -75,6 +77,8 @@ void InputBindingButton::onMouseReleased(int button) {
 		assignMouseButton(button);
 		//Notify the listeners
 		bindings->callOnButtonAssigned(this);
+		//Stop waiting for input
+		waitingForInput = false;
 	} else {
 		//Check whether this binding button should be triggered
 		if (mouseButton == button) {
@@ -99,6 +103,8 @@ void InputBindingButton::onControllerButtonReleased(Controller* controller, int 
 		assignControllerButton(controller, button);
 		//Notify the listeners
 		bindings->callOnButtonAssigned(this);
+		//Stop waiting for input
+		waitingForInput = false;
 	} else {
 		//Check whether this binding button should be triggered
 		if (this->controller == controller && controllerButton == button) {
@@ -129,13 +135,17 @@ void InputBindingAxis::onKeyPressed(int key) {
 void InputBindingAxis::onKeyReleased(int key) {
 	if (waitingForInput) {
 		//Check what we were waiting for and assign the correct key
-		if (waitingForPos)
+		if (waitingForPos) {
 			keyboardKeyPositive = key;
-		else if (waitingForNeg)
+			waitingForPos = false;
+		} else if (waitingForNeg) {
 			keyboardKeyNegative = key;
+			waitingForNeg = false;
+		}
 		//Notify the listeners
 		bindings->callOnAxisAssigned(this);
-
+		//Stop waiting for input
+		waitingForInput = waitingForNeg || waitingForPos;
 	} else {
 		if (key == keyboardKeyPositive) {
 			//Check whether other direction's key down
@@ -164,6 +174,10 @@ void InputBindingAxis::onControllerAxis(Controller* controller, int axis, float 
 		controllerAxis = axis;
 		//Notify the listeners
 		bindings->callOnAxisAssigned(this);
+		//Stop waiting for input
+		waitingForPos = false;
+		waitingForNeg = false;
+		waitingForInput = false;
 	} else {
 		if (this->controller == controller && controllerAxis == axis) {
 			this->value = -value;
