@@ -31,6 +31,9 @@ private:
 	/* The index of this controller for GLFW */
 	int index;
 
+	/* The name of this controller */
+	std::string name;
+
 	/*  The last states of the axes on the controller, and the number of
 	 * axes */
 	std::vector<float> axisValues;
@@ -54,7 +57,7 @@ public:
 	void checkInput();
 
 	/* The getters */
-	std::string getName();
+	inline std::string getName() { return name; }
 	inline int getIndex() { return index; }
 	inline float getAxis(int index) { return axisValues[index]; }
 	inline float getAxisCount() { return axisCount; }

@@ -149,12 +149,25 @@ public:
 	inline int getNumComponents() { return numComponents; }
 	inline bool hasTexture() { return texture > 0; }
 
-	/* Returns the data necessary to load a texture - note stbi_image_free should
+	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */
 	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& format);
 
+	/* Calls sybi_image_free */
+	static void freeTexture(unsigned char* texture);
+
 	/* Returns a Texture instance after reading its data from a file */
 	static Texture* loadTexture(std::string path, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
+};
+
+/*****************************************************************************
+ * The Cubemap class inherits from Texture to create a cubemap
+ *****************************************************************************/
+
+class Cubemap : public Texture {
+public:
+	/* The constructor */
+	Cubemap(std::string path, std::vector<std::string> faces);
 };
 
 #endif /* CORE_RENDER_TEXTURE_H_ */

@@ -23,8 +23,6 @@
 
 #include "Input.h"
 
-#include "../Window.h"
-
 /*****************************************************************************
  * The InputBinding class
  *****************************************************************************/
@@ -39,15 +37,14 @@ protected:
 	bool waitingForInput = false;
 public:
 	/* The constructor */
-	InputBinding(InputBindings* bindings) : bindings(bindings) { Window::getCurrentInstance()->getInputManager()->addListener(this); }
+	InputBinding(InputBindings* bindings);
 
 	/* The destructor */
 	virtual ~InputBinding() {}
 
 	/* Getters and setters */
-	inline void waitForInput() { waitingForInput = true; }
-	inline void cancelWaitForInput() { waitingForInput = false; }
 	inline bool isWaitingForInput() { return waitingForInput; }
+	virtual void cancelWaitForInput() { waitingForInput = false; }
 
 	/* Input methods */
 	virtual void onKeyPressed(int key) override {}
@@ -100,8 +97,18 @@ public:
 	inline void assignMouseButton(int button) { mouseButton = button; }
 	inline void assignControllerButton(Controller* controller, int button) { this->controller = controller; controllerButton = button; }
 
-	/* Getters */
-	bool isPressed() { return pressed; }
+	/* Setters and getters */
+	inline void waitForInput() { waitingForInput = true; }
+
+	inline int getKeyboardKey() { return keyboardKey; }
+	inline bool hasKeyboardKey() { return keyboardKey != -1; }
+	inline int getMouseButton() { return mouseButton; }
+	inline bool hasMouseButton() { return mouseButton != -1; }
+	inline Controller* getController() { return controller; }
+	inline bool hasController() { return controller; }
+	inline int getControllerButton() { return controllerButton; }
+	inline bool hasControllerButton() { return controllerButton != -1; }
+	inline bool isPressed() { return pressed; }
 
 	/* Input methods */
 	virtual void onKeyPressed(int key) override;
@@ -142,6 +149,10 @@ private:
 
 	/* The current axis value */
 	float value = 0;
+
+	/* States whether waiting for a positive input, or a negative input (For keyboard key) */
+	bool waitingForPos = false;
+	bool waitingForNeg = false;
 public:
 	/* The constructor */
 	InputBindingAxis(InputBindings* bindings) : InputBinding(bindings) {}
@@ -150,11 +161,29 @@ public:
 	virtual ~InputBindingAxis() {}
 
 	/* Various methods to manually assign the triggers for this axis */
+	inline void assignKeyPos(int keyPositive) { keyboardKeyPositive = keyPositive; }
+	inline void assignKeyNeg(int keyNegative) { keyboardKeyNegative = keyNegative; }
 	inline void assignKeys(int keyPositive, int keyNegative) { keyboardKeyPositive = keyPositive; keyboardKeyNegative = keyNegative; }
 	inline void assignControllerAxis(Controller* controller, int axis) { this->controller = controller; controllerAxis = axis; }
 
-	/* Getters */
-	float getValue() { return value; }
+	/* Setters and getters */
+	inline void waitForInputPos() { waitingForInput = true; waitingForPos = true; }
+	inline void waitForInputNeg() { waitingForInput = true, waitingForNeg = true; }
+	virtual void cancelWaitForInput() override {
+		waitingForInput = false;
+		waitingForPos = false;
+		waitingForNeg = false;
+	}
+
+	inline int getKeyboardKeyPos() { return keyboardKeyPositive; }
+	inline bool hasKeyboardKeyPos() { return keyboardKeyPositive != -1; }
+	inline int getKeyboardKeyNeg() { return keyboardKeyNegative; }
+	inline bool hasKeyboardKeyNeg() { return keyboardKeyNegative != -1; }
+	inline Controller* getController() { return controller; }
+	inline bool hasController() { return controller; }
+	inline int getControllerAxis() { return controllerAxis; }
+	inline bool hasControllerAxis() { return controllerAxis != -1; }
+	inline float getValue() { return value; }
 
 	/* Input methods */
 	virtual void onKeyPressed(int key) override;
@@ -193,6 +222,11 @@ public:
 
 	/* Called when an axis's value changes */
 	virtual void onAxis(InputBindingAxis* axis) {}
+
+	/* Called when a button/axis has been waiting for input and has now
+	 * received it */
+	virtual void onButtonAssigned(InputBindingButton* button) {}
+	virtual void onAxisAssigned(InputBindingAxis* axis) {}
 };
 
 /*****************************************************************************
@@ -223,16 +257,23 @@ public:
 	InputBindingAxis* createAxisBinding(std::string name);
 
 	/* Method used to get a button binding given its name */
-	InputBindingButton* getButtonBinding(std::string name) { return buttonBindings.at(name); }
+	InputBindingButton* getButtonBinding(std::string name);
 
 	/* Method used to get an axis binding given its name */
-	InputBindingAxis* getAxisBinding(std::string name) { return axisBindings.at(name); }
+	InputBindingAxis* getAxisBinding(std::string name);
+
+	/* Method used to save these input bindings to a file */
+	void save(std::string path);
+
+	/* Method used to load input bindings from a file, an InputManager should be
+	 * provided if it is expected to have controller input */
+	void load(std::string path, InputManager* inputManager = NULL);
 
 	/* Method used to add a listener */
-	inline void addListener(InputBindingsListener* listener) { listeners.push_back(listener); }
+	void addListener(InputBindingsListener* listener);
 
 	/* Method used to remove a listener */
-	inline void removeListener(InputBindingsListener* listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
+	void removeListener(InputBindingsListener* listener);
 
 	/* Methods used to call listener events */
 	inline void callOnButtonPressed(InputBindingButton* button) {
@@ -248,6 +289,16 @@ public:
 	inline void callOnAxis(InputBindingAxis* axis) {
 		for (unsigned int i = 0; i < listeners.size(); i++)
 			listeners[i]->onAxis(axis);
+	}
+
+	inline void callOnButtonAssigned(InputBindingButton* button) {
+		for (unsigned int i = 0; i < listeners.size(); i++)
+			listeners[i]->onButtonAssigned(button);
+	}
+
+	inline void callOnAxisAssigned(InputBindingAxis* axis) {
+		for (unsigned int  i = 0; i < listeners.size(); i++)
+			listeners[i]->onAxisAssigned(axis);
 	}
 };
 

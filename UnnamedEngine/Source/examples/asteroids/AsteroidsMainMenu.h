@@ -26,6 +26,7 @@
 #include "../../core/gui/GUIDropDownList.h"
 #include "../../core/gui/GUICheckBox.h"
 #include "../../core/gui/GUILabel.h"
+#include "../../core/input/InputBindings.h"
 
 class AsteroidsGame;
 
@@ -99,7 +100,7 @@ public:
 };
 
 /*****************************************************************************
- * The MainMenuVideo class
+ * The MainMenuSettingsVideo class
  *****************************************************************************/
 
 class MainMenuSettingsVideo : public GUIPanel {
@@ -126,6 +127,48 @@ public:
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override;
+};
+
+/*****************************************************************************
+ * The MainMenuSettingsControls class
+ *****************************************************************************/
+
+class MainMenuSettingsControls : public GUIPanel, InputBindingsListener {
+private:
+	/* The game instance */
+	AsteroidsGame* game;
+	/* The game's input bindings */
+	InputBindings* bindings;
+	/* The buttons on the menu */
+	GUIButton* buttonForwardPos;
+	GUIButton* buttonForwardNeg;
+	GUIButton* buttonLookXPos;
+	GUIButton* buttonLookXNeg;
+	GUIButton* buttonLookYPos;
+	GUIButton* buttonLookYNeg;
+	GUIButton* buttonShoot;
+	GUIButton* buttonSave;
+	GUIButton* buttonBack;
+public:
+	/* The constructor */
+	MainMenuSettingsControls(AsteroidsGame* game, GUIPanelGroup* panelGroup);
+
+	/* The destructor */
+	virtual ~MainMenuSettingsControls() {}
+
+	/* Method used to show this GUIPanel */
+	virtual void show() override;
+
+	/* Method used to update the GUI */
+	void updateGUI();
+
+	/* Called when a component is clicked */
+	virtual void onComponentClicked(GUIComponent* component) override;
+
+	/* Called when a button/axis has been waiting for input and has now
+	 * received it */
+	virtual void onButtonAssigned(InputBindingButton* button) override;
+	virtual void onAxisAssigned(InputBindingAxis* axis) override;
 };
 
 /*****************************************************************************

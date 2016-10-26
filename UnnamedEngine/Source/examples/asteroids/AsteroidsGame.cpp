@@ -64,17 +64,33 @@ void AsteroidsGame::created() {
 
 	//Create the InputBindings instance
 	inputBindings = new InputBindings();
+	//Load the controls
+	inputBindings->load(resourceLoader.getPath() + "settings/controls.txt", getWindow()->getInputManager());
+
 	//Create the axis bindings
-	InputBindingAxis* axisForward = inputBindings->createAxisBinding("Forward");
-	InputBindingAxis* axisSideways = inputBindings->createAxisBinding("Sideways");
-	//Create the button bindings
-	InputBindingButton* buttonShoot = inputBindings->createButtonBinding("Shoot");
-	InputBindingButton* buttonPause = inputBindings->createButtonBinding("Pause");
-	//Setup default keys
-	axisForward->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
-	axisSideways->assignKeys(GLFW_KEY_A, GLFW_KEY_D);
-	buttonShoot->assignKey(GLFW_KEY_SPACE);
-	buttonPause->assignKey(GLFW_KEY_ESCAPE);
+//	InputBindingAxis* axisForward = inputBindings->createAxisBinding("Forward");
+//	InputBindingAxis* axisLookX = inputBindings->createAxisBinding("LookX");
+//	InputBindingAxis* axisLookY = inputBindings->createAxisBinding("LookY");
+//	//Create the button bindings
+//	InputBindingButton* buttonShoot = inputBindings->createButtonBinding("Shoot");
+//	InputBindingButton* buttonPause = inputBindings->createButtonBinding("Pause");
+//	InputBindingButton* buttonUpgrades = inputBindings->createButtonBinding("Upgrades");
+//	//Setup default keys
+//	axisForward->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
+//	buttonShoot->assignKey(GLFW_KEY_SPACE);
+//	buttonPause->assignKey(GLFW_KEY_ESCAPE);
+//	buttonUpgrades->assignKey(GLFW_KEY_U);
+//
+//	int controllerIndex = 1;
+//	if (controllerIndex != -1) {
+//		Controller* controller = new Controller(controllerIndex);
+//		axisForward->assignControllerAxis(controller, 1);
+//		axisLookX->assignControllerAxis(controller, 2);
+//		axisLookY->assignControllerAxis(controller, 3);
+//		buttonShoot->assignControllerButton(controller, 0);
+//		getWindow()->getInputManager()->addController(controller);
+//	}
+//	inputBindings->save(resourceLoader.getPath() + "settings/controls.txt");
 
 	//Setup the main menu
 	mainMenu = new AsteroidsMainMenu(this);

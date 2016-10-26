@@ -16,12 +16,34 @@
  *
  *****************************************************************************/
 
-#include "render/Renderer.h"
 #include "Object.h"
+#include "render/Renderer.h"
 
 /*****************************************************************************
  * The GameObject class
  *****************************************************************************/
+
+GameObject::GameObject(Mesh* mesh, RenderShader* shader) : renderShader(shader) {
+	if (mesh) {
+		mesh->setup(shader);
+		meshes.push_back(mesh);
+	}
+}
+
+GameObject::GameObject(std::vector<Mesh*> meshes, RenderShader* shader) : renderShader(shader) {
+	this->meshes = meshes;
+
+	for (unsigned int i = 0; i < meshes.size(); i++)
+		meshes[i]->setup(shader);
+}
+
+GameObject::~GameObject() {
+	if (hasMesh()) {
+		for (unsigned int i = 0; i < meshes.size(); i++)
+			delete meshes[i];
+		meshes.clear();
+	}
+}
 
 void GameObject::render() {
 	if (hasMesh()) {
@@ -30,9 +52,32 @@ void GameObject::render() {
 	}
 }
 
+void GameObject::addMesh(Mesh* mesh) {
+	mesh->setup(renderShader);
+	meshes.push_back(mesh);
+}
+
 /*****************************************************************************
  * The GameObject2D class
  *****************************************************************************/
+
+GameObject2D::GameObject2D(float width, float height) : GameObject(NULL, NULL) {
+	rotation = 0;
+	scale = Vector2f(1.0f, 1.0f);
+	size = Vector2f(width, height);
+}
+
+GameObject2D::GameObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width, float height) : GameObject(meshes, shader) {
+	rotation = 0;
+	scale = Vector2f(1.0f, 1.0f);
+	size = Vector2f(width, height);
+}
+
+GameObject2D::GameObject2D(Mesh* mesh, std::string shaderId, float width , float height) :
+		GameObject2D(mesh, Renderer::getRenderShader(shaderId), width, height) {}
+
+GameObject2D::GameObject2D(std::vector<Mesh*> meshes, std::string shaderId, float width, float height) :
+		GameObject2D(meshes, Renderer::getRenderShader(shaderId), width, height) {}
 
 void GameObject2D::update() {
 	//Check to make sure this object has a mesh
@@ -50,9 +95,52 @@ void GameObject2D::update() {
 	}
 }
 
+Vector2f GameObject2D::getPosition() {
+	if (parent)
+		return position + parent->getPosition();
+	else
+		return position;
+}
+
+float GameObject2D::getRotation() {
+	if (parent)
+		return rotation + parent->getRotation();
+	else
+		return rotation;
+}
+
+Vector2f GameObject2D::getScale() {
+	if (parent)
+		return scale * parent->getScale();
+	else
+		return scale;
+}
+
+Vector2f GameObject2D::getSize() {
+	return size * getScale();
+}
+
 /*****************************************************************************
  * The GameObject3D class
  *****************************************************************************/
+
+GameObject3D::GameObject3D(float width, float height, float depth) : GameObject(NULL, NULL) {
+	rotation = 0;
+	scale = Vector3f(1.0f, 1.0f, 1.0f);
+	size = Vector3f(width, height, depth);
+}
+
+GameObject3D::GameObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width, float height, float depth) : GameObject(meshes, shader) {
+	rotation = 0;
+	scale = Vector3f(1.0f, 1.0f, 1.0f);
+	size = Vector3f(width, height, depth);
+}
+
+GameObject3D::GameObject3D(Mesh* mesh, std::string shaderId, float width , float height, float depth) :
+		GameObject3D(mesh, Renderer::getRenderShader(shaderId), width, height, depth) {}
+
+GameObject3D::GameObject3D(std::vector<Mesh*> meshes, std::string shaderId, float width, float height, float depth) :
+		GameObject3D(meshes, Renderer::getRenderShader(shaderId), width, height, depth) {}
 
 void GameObject3D::update() {
 	//Check to make sure this object has a mesh
@@ -68,4 +156,29 @@ void GameObject3D::update() {
 		modelMatrix.translate(offset * -1);
 		modelMatrix.scale(getScale());
 	}
+}
+
+Vector3f GameObject3D::getPosition() {
+	if (parent)
+		return position + parent->getPosition();
+	else
+		return position;
+}
+
+Vector3f GameObject3D::getRotation() {
+	if (parent)
+		return rotation + parent->getRotation();
+	else
+		return rotation;
+}
+
+Vector3f GameObject3D::getScale() {
+	if (parent)
+		return scale * parent->getScale();
+	else
+		return scale;
+}
+
+Vector3f GameObject3D::getSize() {
+	return size * getScale();
 }

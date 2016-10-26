@@ -19,8 +19,8 @@
 #ifndef CORE_RENDER_RENDERSCENE_H_
 #define CORE_RENDER_RENDERSCENE_H_
 
-#include "../Object.h"
 #include "Light.h"
+#include "../Object.h"
 
 /*****************************************************************************
  * The RenderScene3D class is used to help to manage the rendering of a set

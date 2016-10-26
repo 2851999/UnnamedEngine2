@@ -16,20 +16,32 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_CUBEMAP_H_
-#define CORE_RENDER_CUBEMAP_H_
+#include "GUIRadioCheckBox.h"
 
-#include "Texture.h"
+#include "GUIGroup.h"
 
 /*****************************************************************************
- * The Cubemap class inherits from Texture to create a cubemap
+ * The GUIRadioCheckBox class
  *****************************************************************************/
 
-class Cubemap : public Texture {
-public:
-	/* The constructor */
-	Cubemap(std::string path, std::vector<std::string> faces);
-};
-
-
-#endif /* CORE_RENDER_CUBEMAP_H_ */
+void GUIRadioCheckBox::onChangeState() {
+	if (mouseClicked) {
+		//Check whether this check box is not current checked
+		if (! checked) {
+			//Check whether this is part of a group
+			if (hasGroup()) {
+				//Go through all of the other radio check boxes part of the group
+				for (GUIComponent* current : getGroup()->getComponents()) {
+					//Attempt to cast it to another radio check box
+					if (GUICheckBox* checkBox = dynamic_cast<GUICheckBox*>(current)) {
+						//Make sure that check box
+						checkBox->setChecked(false);
+					}
+				}
+			}
+			//Make this check box checked
+			checked = true;
+		}
+	}
+	updateRenderIndex();
+}

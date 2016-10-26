@@ -31,6 +31,7 @@ private:
 	T values[N][N];
 public:
 	Matrix() {
+		//Assign all values to 0
 		for (unsigned int col = 0; col < N; col++) {
 			for (unsigned int row = 0; row < N; row++)
 				values[col][row] = 0;
@@ -41,8 +42,10 @@ public:
 	inline void set(unsigned int row, unsigned int col, T value) { values[col][row] = value; } //COLUMN MAJOR ORDER!!!!!
 	inline T get(unsigned int row, unsigned int col)             { return values[col][row];  }
 
+	/* Returns the result of adding another matrix to this one */
 	inline Matrix<T, N> operator+(Matrix<T, N> other) {
 		Matrix<T, N> result;
+		//Go through each value and assign the result to the sum of the two
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				result.set(row, col, get(row, col) + other.get(row, col));
@@ -50,8 +53,10 @@ public:
 		return result;
 	}
 
+	/* Returns the result of subtracting another matrix from this one */
 	inline Matrix<T, N> operator-(Matrix<T, N> other) {
 		Matrix<T, N> result;
+		//Go through each value and assign the result to the subtraction of the two
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				result.set(row, col, get(row, col) - other.get(row, col));
@@ -59,8 +64,10 @@ public:
 		return result;
 	}
 
+	/* Returns the result of multiplying this matrix by a scalar */
 	inline Matrix<T, N> operator*(T value) {
 		Matrix<T, N> result;
+		//Go through each value and multiply it by the scalar value
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				result.set(row, col, get(row, col) * value);
@@ -68,8 +75,10 @@ public:
 		return result;
 	}
 
+	/* Returns the result of 'dividing' this matrix by a scalar */
 	inline Matrix<T, N> operator/(T value) {
 		Matrix<T, N> result;
+		//Go through each value and divide it by the scalar value
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				result.set(row, col, get(row, col) / value);
@@ -77,53 +86,62 @@ public:
 		return result;
 	}
 
+	/* Adds another matrix to this one */
 	inline void operator+=(Matrix<T, N> other) {
+		//Go through each value and set it to the sum of the two
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) + other.get(row, col));
 		}
 	}
 
+	/* Subtracts another matrix from this one */
 	inline void operator-=(Matrix<T, N> other) {
+		//Go through each value and set it to the subtraction of the two
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) - other.get(row, col));
 		}
 	}
 
+	/* Multiplies this matrix by a scalar */
 	inline void operator*=(T value) {
+		//Go through each value and multiply it by the scalar
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) * value);
 		}
 	}
 
+	/* Divides this matrix by a scalar */
 	inline void operator/=(T value) {
+		//Go through each value and divide it by the scalar
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) / value);
 		}
 	}
 
+	/* Returns the result of multiplying this matrix by another */
 	Matrix<T, N> operator*(Matrix<T, N> other) {
 		Matrix<T, N> result;
+		//Go through each row and column
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++) {
+				//Go through the required number of additions required
 				for (unsigned int i = 0; i < N; i++)
+					//Add onto the current value, to perform the matrix multiplication
 					result.set(row, col, result.get(row, col) + (get(row, i) * other.get(i, col)));
 			}
 		}
 		return result;
 	}
 
+	/* Multiplies this matrix by another */
 	void operator*=(Matrix<T, N> other) {
-		Matrix<T, N> result;
-		for (unsigned int row = 0; row < N; row++) {
-			for (unsigned int col = 0; col < N; col++) {
-				for (unsigned int i = 0; i < N; i++)
-					result.set(row, col, result.get(row, col) + (get(row, i) * other.get(i, col)));
-			}
-		}
+		//Calculate the result of multiplying this matrix by the other one
+		Matrix<T, N> result = (*this) * other;
+		//Assign all of the values within this matrix now that the data is no longer needed
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, result.get(row, col));
@@ -132,6 +150,8 @@ public:
 
 	/* Comparison operators */
 	inline bool operator==(Matrix<T, N> other) {
+		//Go through all of the data, and check whether the values in this matrix
+		//are the same as in the 'other' matrix
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				if (other.get(row, col) != get(row, col))
@@ -140,8 +160,10 @@ public:
 		return true;
 	}
 
+	/* Returns the transpose of this matrix */
 	inline Matrix<T, N> transpose() {
 		Matrix<T, N> result;
+		//Go through and flip the rows and columns
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				result.set(row, col, get(col, row));
@@ -149,9 +171,12 @@ public:
 		return result;
 	}
 
+	/* Sets this matrix to its identity */
 	inline void setIdentity() {
+		//Go through all of the values in this matrix
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++) {
+				//Assign the diagonal to 1, but all other values to 0
 				if (row == col)
 					set(row, col, 1);
 				else
@@ -160,28 +185,40 @@ public:
 		}
 	}
 
+	/* Set's this matrix to its identity and then returns itself */
 	inline Matrix<T, N>& initIdentity() {
 		setIdentity();
 		return (*this);
 	}
 
+	/* Returns a string representation of this matrix */
 	std::string toString() {
+		//The string to return
 		std::string value = "";
+		//Go through all of the values
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++) {
+				//Add the current value onto the string
 				value += StrUtils::str(get(row, col));
+				//Check whether a comma should be added, and if so, add one
 				if (col != N - 1)
 					value += ",";
-				else
-					value += "";
 			}
+			//Start a new line if at the end of this row
 			if (row != N - 1)
 				value += "\n";
 		}
+		//Return the string
 		return value;
 	}
 
-	const T* front() { return &values[0][0]; }
+	/* Returns a pointer to the front of the values stored in this matrix */
+	inline const T* front() { return &values[0][0]; }
+
+	/* Returns the number of values stored in this matrix */
+	inline int getNumElements() { return N * N; }
+	/* Returns the size of this matrix (in bytes) */
+	inline int getSize() { return N * N * sizeof(values[0][0]); }
 };
 
 /*****************************************************************************
@@ -352,9 +389,6 @@ public:
 
 	const Matrix4f& initPerspective(float fovy, float aspect, float zNear, float zFar) {
 		float scale = (tan(fovy / 2 * (MathsUtils::PI / 360)));
-//		float right = aspect * scale;
-//		float top = scale;
-//		return initFrustum(-right, right, -top, top, zNear, zFar);
 
 		set(0, 0, 1.0f / (aspect * scale)); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
 		set(1, 0, 0); set(1, 1, 1.0f / scale); set(1, 2, 0); set(1, 3, 0);

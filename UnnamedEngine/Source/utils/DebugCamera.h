@@ -19,8 +19,8 @@
 #ifndef UTILS_DEBUGCAMERA_H_
 #define UTILS_DEBUGCAMERA_H_
 
-#include "../core/render/Camera.h"
 #include "../core/input/InputBindings.h"
+#include "../core/render/Camera.h"
 
 /*****************************************************************************
  * The DebugCamera class helps to create a basic camera with free movement
@@ -29,12 +29,12 @@
 class DebugCamera : public Camera3D, public InputListener {
 private:
 	/* Input stuff */
-	InputBindings* inputBindings;
+	InputBindings* inputBindings = NULL;
 
-	InputBindingAxis* axis0; //Forwards/Backwards
-	InputBindingAxis* axis1; //Left/Right
-	InputBindingAxis* axis2; //Look X
-	InputBindingAxis* axis3; //Look Y
+	InputBindingAxis* axis0 = NULL; //Forwards/Backwards
+	InputBindingAxis* axis1 = NULL; //Left/Right
+	InputBindingAxis* axis2 = NULL; //Look X
+	InputBindingAxis* axis3 = NULL; //Look Y
 
 	/* Movement speed */
 	float movementSpeed;
@@ -53,8 +53,9 @@ private:
 	/* The current delta (When update() was last called) */
 	float currentDelta = 0;
 public:
-	/* The constructor */
-	DebugCamera(Matrix4f projectionMatrix);
+	/* The constructors */
+	DebugCamera(Matrix4f projectionMatrix, InputBindings* bindings = NULL);
+	DebugCamera(float fovy, float aspect, float zNear, float zFar, InputBindings* bindings = NULL) : DebugCamera(Matrix4f().initPerspective(fovy, aspect, zNear, zFar), bindings) {}
 
 	/* The destructor */
 	virtual ~DebugCamera() { delete inputBindings; }
@@ -70,6 +71,7 @@ public:
 	InputBindingAxis* getSidewaysAxis() { return axis1; }
 	InputBindingAxis* getLookXAxis() { return axis2; }
 	InputBindingAxis* getLookYAxis() { return axis3; }
+	InputBindings* getInputBindings() { return inputBindings; }
 };
 
 #endif /* UTILS_DEBUGCAMERA_H_ */

@@ -25,6 +25,8 @@
  * The Font class
  *****************************************************************************/
 
+#define FONT_SCALE 2
+
 FT_Library Font::ftLibrary;
 
 void Font::setup(std::string name, unsigned int size, Colour colour, TextureParameters parameters) {
@@ -35,7 +37,7 @@ void Font::setup(std::string name, unsigned int size, Colour colour, TexturePara
 		return;
 	}
 	//Assign the size
-	FT_Set_Pixel_Sizes(face, 0, size);
+	FT_Set_Pixel_Sizes(face, 0, size * FONT_SCALE);
 
 	//Get the GlyphSlot which stores information about a certain character that has been loaded
 	FT_GlyphSlot glyphSlot = face->glyph;
@@ -102,15 +104,17 @@ void Font::setup(std::string name, unsigned int size, Colour colour, TexturePara
 	//Check whether this font is billboarded or not (i.e. Is it going to be used in the 3D world or not)
 	if (billboarded) {
 		//Create the GameObject3D instance and assign the texture
-		object3D = new GameObject3D({ new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, Renderer::getRenderShader("BillboardedFont"));
+		object3D = new GameObject3D({ new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "BillboardedFont");
 		object3D->getMaterial()->setDiffuseColour(colour);
 		object3D->getMaterial()->setDiffuseTexture(textureAtlas);
+		object3D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE, 1.0f);
 		object3D->update();
 	} else {
 		//Create the GameObject2D instance and assign the texture
-		object2D = new GameObject2D({ new Mesh(MeshBuilder::createQuad(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, Renderer::getRenderShader("Font"));
+		object2D = new GameObject2D({ new Mesh(MeshBuilder::createQuad(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "Font");
 		object2D->getMaterial()->setDiffuseColour(colour);
 		object2D->getMaterial()->setDiffuseTexture(textureAtlas);
+		object2D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE);
 		object2D->update();
 	}
 }
@@ -268,7 +272,7 @@ float Font::getWidth(std::string text) {
 		width = MathsUtils::max(width, lineWidth);
 	}
 	//Return the width
-	return width;
+	return width * (1.0f / (float) FONT_SCALE);
 }
 
 float Font::getHeight(std::string text) {
@@ -291,7 +295,7 @@ float Font::getHeight(std::string text) {
 	if (height == 0)
 		height = lineHeight;
 	//Return the height
-	return height;
+	return height * (1.0f / (float) FONT_SCALE);
 }
 
 

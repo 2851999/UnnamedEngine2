@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 Enemy::Enemy(AsteroidsGame* game, Player* player) : Ship(game), player(player) {
-	setMovementSpeed(RandomUtils::randomFloat(4.0f, 8.0f));
+
 }
 
 Enemy::~Enemy() {
@@ -35,6 +35,10 @@ void Enemy::reset() {
 	Ship::reset();
 
 	setHealth(1);
+	setShield(0);
+	setShieldMax(0);
+	setMovementSpeed(RandomUtils::randomFloat(4.0f, 8.0f));
+	getLasers()->setCooldown(0.75f);
 
 	//Assign a random position
 	setPosition(RandomUtils::randomFloat(-100, 100), RandomUtils::randomFloat(-100, 100), RandomUtils::randomFloat(-100, 100));

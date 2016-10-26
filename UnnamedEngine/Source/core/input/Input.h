@@ -20,11 +20,35 @@
 #define CORE_INPUT_INPUT_H_
 
 #include <vector>
-#include <algorithm>
 
 #include "Controller.h"
+#include "../Vector.h"
 
 class Window;
+
+/*****************************************************************************
+ * The Mouse class
+ *****************************************************************************/
+
+class Mouse {
+public:
+	/* Returns whether a certain mouse button is pressed on the currently
+	 * active window */
+	static bool isPressed(int button);
+	/* Returns the mouse/cursor position on the currently active window */
+	static Vector2d getPosition();
+};
+
+/*****************************************************************************
+ * The Keyboard class
+ *****************************************************************************/
+
+class Keyboard {
+public:
+	/* Returns whether a certain key is pressed on the currently active
+	 * window */
+	static bool isPressed(int key);
+};
 
 /*****************************************************************************
  * The InputListener class
@@ -78,26 +102,30 @@ private:
 	/* All of the added controllers */
 	std::vector<Controller*> controllers;
 public:
+	/* The constructor */
 	InputManager(Window* window) { this->window = window; }
+
+	/* The destructor */
 	virtual ~InputManager() {}
 
 	/* Various input methods */
-	void addListener(InputListener* listener) { listeners.push_back(listener); }
-	void removeListener(InputListener* listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
+	void addListener(InputListener* listener);
+	void removeListener(InputListener* listener);
 
 	/* Updates the attached controllers */
-	void updateControllers() {
-		for (unsigned int i = 0; i < controllers.size(); i++)
-			controllers[i]->checkInput();
-	}
+	void updateControllers();
 
-	/* Used to add a controller */
-	void addController(Controller* controller) {
-		controllers.push_back(controller);
-	}
+	/* Method used to add a controller */
+	void addController(Controller* controller);
+
+	/* Method used to remove a controller */
+	void removeController(Controller* controller);
+
+	/* Method used to release all of the controllers */
+	void releaseControllers();
 
 	/* Returns the CursorData structure */
-	CursorData& getCursorData() { return cursorData; }
+	inline CursorData& getCursorData() { return cursorData; }
 
 	/* Various window specific callbacks */
 	void keyCallback(int key, int scancode, int action, int mods);
@@ -108,70 +136,19 @@ public:
 	void scrollCallback(double xoffset, double yoffset);
 
 	/* Methods used to call methods within InputListeners */
-	void callOnKeyPressed(int key) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onKeyPressed(key);
-	}
-
-	void callOnKeyReleased(int key) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onKeyReleased(key);
-	}
-
-	void callOnChar(int key, char character) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onChar(key, character);
-	}
-
-	void callOnMousePressed(int button) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onMousePressed(button);
-	}
-
-	void callOnMouseReleased(int button) {
-		for (unsigned int i = 0; i  < listeners.size(); i++)
-			listeners.at(i)->onMouseReleased(button);
-	}
-
-	void callOnMouseMoved(double x, double y, double dx, double dy) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onMouseMoved(x, y, dx, dy);
-	}
-
-	void callOnMouseDragged(double x, double y, double dx, double dy) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onMouseDragged(x, y, dx, dy);
-	}
-
-	void callOnMouseEnter() {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onMouseEnter();
-	}
-
-	void callOnMouseLeave() {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onMouseLeave();
-	}
-
-	void callOnScroll(double x, double y) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onScroll(x, y);
-	}
-
-	void callOnControllerAxis(Controller* controller, int axis, float value) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onControllerAxis(controller, axis, value);
-	}
-
-	void callOnControllerButtonPressed(Controller* controller, int button) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onControllerButtonPressed(controller, button);
-	}
-
-	void callOnControllerButtonReleased(Controller* controller, int button) {
-		for (unsigned int i = 0; i < listeners.size(); i++)
-			listeners.at(i)->onControllerButtonReleased(controller, button);
-	}
+	void callOnKeyPressed(int key);
+	void callOnKeyReleased(int key);
+	void callOnChar(int key, char character);
+	void callOnMousePressed(int button);
+	void callOnMouseReleased(int button);
+	void callOnMouseMoved(double x, double y, double dx, double dy);
+	void callOnMouseDragged(double x, double y, double dx, double dy);
+	void callOnMouseEnter();
+	void callOnMouseLeave();
+	void callOnScroll(double x, double y);
+	void callOnControllerAxis(Controller* controller, int axis, float value);
+	void callOnControllerButtonPressed(Controller* controller, int button);
+	void callOnControllerButtonReleased(Controller* controller, int button);
 };
 
 

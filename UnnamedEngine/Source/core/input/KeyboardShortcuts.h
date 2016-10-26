@@ -24,7 +24,6 @@
 #include <map>
 
 #include "Input.h"
-#include "../Window.h"
 
 /*****************************************************************************
  * The KeyboardShortcut class
@@ -36,6 +35,9 @@ class KeyboardShortcut {
 private:
 	/* The name given to this keyboard shortcut */
 	std::string name;
+
+	/* States whether this shortcut has been completed */
+	bool completed;
 public:
 	/* The keys that make up this shortcut - made up of their key code and
 	 * whether they are currently pressed */
@@ -48,7 +50,7 @@ public:
 	virtual ~KeyboardShortcut();
 
 	/* Returns whether this shorcut's keys are all pressed */
-	bool hasCompleted();
+	inline bool hasCompleted() { return completed; }
 
 	/* Should be called when a key is pressed */
 	void onKeyPressed(int code);
@@ -98,10 +100,10 @@ public:
 	inline void add(KeyboardShortcut* shortcut) { shortcuts.push_back(shortcut); }
 
 	/* Method used to add a listener */
-	inline void addListener(KeyboardShortcutListener* listener) { listeners.push_back(listener); }
+	void addListener(KeyboardShortcutListener* listener);
 
 	/* Method used to remove a listener */
-	inline void removeListener(KeyboardShortcutListener* listener) { listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end()); }
+	void removeListener(KeyboardShortcutListener* listener);
 
 	/* Method used to call the onShorcut() method in all of the listeners */
 	void callOnShortcut(KeyboardShortcut* e);

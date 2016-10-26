@@ -18,6 +18,7 @@
 
 #include "Audio.h"
 
+#include <algorithm>
 #include <fstream>
 
 #include <stb/stb_vorbis.h>
@@ -258,6 +259,15 @@ void AudioListener::update() {
 std::vector<AudioSource*> AudioManager::sources;
 ALCdevice* AudioManager::device;
 ALCcontext* AudioManager::context;
+
+void AudioManager::add(AudioSource* source) {
+	sources.push_back(source);
+}
+
+void AudioManager::remove(AudioSource* source) {
+	sources.erase(std::remove(sources.begin(), sources.end(), source), sources.end());
+}
+
 
 void AudioManager::initialise() {
 	device = alcOpenDevice(NULL);

@@ -33,7 +33,8 @@ class Player : public Ship, public InputListener {
 private:
 	/* Input axis/buttons */
 	InputBindingAxis* axisForward;
-	InputBindingAxis* axisSideways;
+	InputBindingAxis* lookX;
+	InputBindingAxis* lookY;
 	InputBindingButton* buttonShoot;
 
 	/* The player's score */
@@ -77,6 +78,7 @@ public:
 
 	/* Setters and getters */
 	inline void addPoints(unsigned int points) { score += points; }
+	void removeScore(unsigned int points);
 	inline unsigned int getScore() { return score; }
 	inline Camera3D* getCamera() { return camera; }
 };

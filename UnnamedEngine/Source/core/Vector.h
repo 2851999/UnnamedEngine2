@@ -37,6 +37,7 @@ public:
 	inline T operator[](int i) const { return values[i]; }
 	inline T& operator[](int i) { return values[i]; }
 
+	/* Returns the result of adding another vector to this one */
 	inline Vector<T, N> operator+(Vector<T, N> other) {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
@@ -44,6 +45,7 @@ public:
 		return result;
 	}
 
+	/* Returns the result of subtracting another vector from this one */
 	inline Vector<T, N> operator-(Vector<T, N> other) {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
@@ -51,6 +53,7 @@ public:
 		return result;
 	}
 
+	/* Returns the result of multiplying this vector by another */
 	inline Vector<T, N> operator*(Vector<T, N> other) {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
@@ -58,6 +61,7 @@ public:
 		return result;
 	}
 
+	/* Returns the result of dividing this vector by another */
 	inline Vector<T, N> operator/(Vector<T, N> other) {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
@@ -65,26 +69,31 @@ public:
 		return result;
 	}
 
+	/* Adds another vector to this one */
 	inline void operator+=(Vector<T, N> other) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] += other[i];
 	}
 
+	/* Subtracts another vector from this one */
 	inline void operator-=(Vector<T, N> other) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] -= other[i];
 	}
 
+	/* Multiplies this vector by another one */
 	inline void operator*=(Vector<T, N> other) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] *= other[i];
 	}
 
+	/* Divides this vector by another */
 	inline void operator/=(Vector<T, N> other) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] /= other[i];
 	}
 
+	/* Returns the result of multiplying this vector by a scalar */
 	inline Vector<T, N> operator*(T value) {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
@@ -92,6 +101,7 @@ public:
 		return result;
 	}
 
+	/* Returns the result of dividing this vector by a scalar */
 	inline Vector<T, N> operator/(T value) {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
@@ -99,25 +109,32 @@ public:
 		return result;
 	}
 
-	/* Various comparison operators */
+	/* Multiplies this vector by a scalar */
 	inline void operator*=(T value) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] *= value;
 	}
 
+	/* Divides this vector by a scalar */
 	inline void operator/=(T value) {
 		for (unsigned int i = 0; i < N; i++)
 			values /= value;
 	}
 
+	/* Compares this vector to another one and returns whether they are equal */
 	inline bool operator==(Vector<T, N> other) {
+		//Go through each value
 		for (unsigned int i = 0; i < N; i++) {
+			//Return false if it isn't equal
 			if (other[i] != values[i])
 				return false;
 		}
+		//Will only reach here and return true if every value compared were
+		//equal to each other
 		return true;
 	}
 
+	/* Various other comparison operators */
 	inline bool operator!=(Vector<T, N> other) { return ! ((*this) == other);       }
 	inline bool operator<(Vector<T, N> other)  { return length() < other.length();  }
 	inline bool operator<=(Vector<T, N> other) { return length() <= other.length(); }
@@ -127,15 +144,19 @@ public:
 	/* Finds the total length of the vector */
 	inline T length() {
 		double total = 0;
+		//Go through and add on the square of the current value to the total
 		for (unsigned int i = 0; i < N; i++)
 			total += (values[i] * values[i]);
+		//Square root the total to find the length
 		return sqrt(total);
 	}
 
 	/* Returns the unit vector */
 	inline Vector<T, N> normalise() {
+		//Calculate the length of this vector
 		T length = this->length();
 		if (length != 0) {
+			//Go through each value and divide it by the length of this vector
 			for (unsigned int i = 0; i < N; i++)
 				values[i] /= length;
 		}
@@ -145,11 +166,16 @@ public:
 	/* Finds and returns the smallest component of this vector */
 	inline T min() {
 		if (N > 0) {
+			//Get the first value
 			T current = values[0];
+			//Go through each value in this vector
 			for (unsigned int i = 1; i < N; i++) {
+				//Assign the current (lowest) value if it is less than the one
+				//already there
 				if (values[i] < current)
 					current = values[i];
 			}
+			//Return the result
 			return current;
 		} else
 			return 0;
@@ -158,11 +184,16 @@ public:
 	/* Finds and returns the biggest component of this vector */
 	inline T max() {
 		if (N > 0) {
+			//Get the first value
 			T current = values[0];
+			//Go through each value in this vector
 			for (unsigned int i = 1; i < N; i++) {
+				//Assign the current (highest) value if it is greater than the one
+				//already there
 				if (values[i] > current)
 					current = values[i];
 			}
+			//Return the result
 			return current;
 		} else
 			return 0;

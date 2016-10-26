@@ -28,21 +28,23 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 	//Setup input
 	InputBindings* inputBindings = game->getInputBindings();
 	axisForward = inputBindings->getAxisBinding("Forward");
-	axisSideways = inputBindings->getAxisBinding("Sideways");
+	lookX = inputBindings->getAxisBinding("LookX");
+	lookY = inputBindings->getAxisBinding("LookY");
 	buttonShoot = inputBindings->getButtonBinding("Shoot");
 
 	score = 0;
 	currentDelta = 0.0f;
 
 	//Setup the camera
-	camera = new Camera3D(Matrix4f().initPerspective(110.0f, game->getSettings().windowAspectRatio, 0.1f, 100.0f));
+	camera = new Camera3D(110.0f, game->getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setSkyBox(new SkyBox(game->getResourceLoader().getPath() + "skybox/", "skyboxBK.png", "skyboxFT.png", "skyboxLF.png", "skyboxRT.png", "skyboxUP.png", "skyboxDN.png", 100.0f));
 	camera->setFlying(true);
 	camera->setParent(this);
 
 	game->getWindow()->getInputManager()->addListener(this);
 
-	setHealth(10);
+	setHealth(5);
+	setShield(2);
 
 	setMass(100.0f);
 	setRestitution(1.0f);
@@ -57,47 +59,35 @@ void Player::reset() {
 	Ship::reset();
 
 	score = 0;
-	setHealth(10);
+	setHealth(5);
+	setShield(2);
+	setShieldMax(2);
+	setShieldRegenRate(4.0f);
+	setMaximumSpeed(10.0f);
+	getLasers()->setCooldown(2.0f);
 }
 
 void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 	if (isAlive()) {
 		//Get the current delta
 		currentDelta = deltaSeconds;
+
+		//Orientate the camera
+		getRelRotation() += Vector3f(lookY->getValue(), -lookX->getValue(), 0) * 80.0f * currentDelta;
+		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
+
 		//Move the player
 		if (axisForward->getValue() != 0)
 			thrust(camera->getFront() * axisForward->getValue());
-		else {
-//			Vector3f& vel = getRelVelocity();
-//			float amount = deltaSeconds * 12.0f;
-//
-//			std::cout << vel.toString() << std::endl;
-//
-//			if (vel.getX() > 0.0f)
-//				vel.setX(vel.getX() - amount);
-//			else if (vel.getX() < 0.0f)
-//				vel.setX(vel.getX() + amount);
-//
-//			if (vel.getY() > 0.0f)
-//				vel.setY(vel.getY() - amount);
-//			else if (vel.getY() < 0.0f)
-//				vel.setY(vel.getY() + amount);
-//
-//			if (vel.getZ() > 0.0f)
-//				vel.setZ(vel.getZ() - amount);
-//			else if (vel.getZ() < 0.0f)
-//				vel.setZ(vel.getZ() + amount);
-
-			setAcceleration(getVelocity() * -12.0f * deltaSeconds);
-		}
+		else
+			setAcceleration(getVelocity() * -12.0f * currentDelta);
 
 		camera->update();
 
 		//Check whether the player is shooting
-		if (buttonShoot->isPressed()) {
+		if (buttonShoot->isPressed())
 			//FIRE THE LASERS!!!
 			fireLasers(camera->getFront());
-		}
 	}
 	//Update the lasers
 	Ship::update(currentDelta, closestAsteroids);
@@ -113,7 +103,7 @@ void Player::render() {
 
 /* Called when an asteroid has been destroyed by this ship's lasers */
 void Player::onAsteroidDestroyed(GameObject3D* asteroid) {
-	addPoints(10 * asteroid->getScale().max());
+	addPoints(100 * asteroid->getScale().max());
 }
 
 /* Method used to check whether a laser has collided with anything */
@@ -132,7 +122,7 @@ bool Player::checkCollision(PhysicsObject3D* laser) {
 					//Create an explosion
 					getLasers()->explode(enemies[i]->getPosition(), 2.0f);
 					//Add to the score
-					addPoints(200);
+					addPoints(2000);
 				}
 				return true;
 			}
@@ -142,9 +132,16 @@ bool Player::checkCollision(PhysicsObject3D* laser) {
 }
 
 void Player::onMouseMoved(double x, double y, double dx, double dy) {
-	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING) {
+	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING && ! game->getMainGame()->showingUpgrades()) {
 		//Orientate the camera
-		getRelRotation() += Vector3f(-dy * 10.0f, dx * 10.0f, 0) * currentDelta;
+		getRelRotation() += Vector3f(-dy, dx, 0) * 10.0f * currentDelta;
 		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
 	}
+}
+
+void Player::removeScore(unsigned int points) {
+	if (points > score)
+		score = 0;
+	else
+		score -= points;
 }

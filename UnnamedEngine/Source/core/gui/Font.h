@@ -23,7 +23,6 @@
 #include FT_FREETYPE_H
 
 #include "../Object.h"
-#include "../render/Mesh.h"
 
 /*****************************************************************************
  * The Font class handles font rendering

@@ -16,11 +16,11 @@
  *
  *****************************************************************************/
 
+#include "RenderScene.h"
+
 #include "Renderer.h"
 #include "../Window.h"
-
 #include "../../utils/Utils.h"
-#include "RenderScene.h"
 
 /*****************************************************************************
  * The RenderScene3D class
@@ -51,10 +51,15 @@ void RenderScene3D::render() {
 
 				shadowMapShader->use();
 
+				Matrix4f lightSpaceMatrix = lights[i]->getLightSpaceMatrix();
+
 				for (unsigned int j = 0; j < objects.size(); j++) {
-					shadowMapShader->setUniformMatrix4("LightSpaceMatrix", (lights[i]->getLightSpaceMatrix() * objects[j]->getModelMatrix()));
+					shadowMapShader->setUniformMatrix4("LightSpaceMatrix", (lightSpaceMatrix * objects[j]->getModelMatrix()));
+					objects[i]->getRenderShader()->addForwardShader(shadowMapShader);
 
 					objects[i]->render();
+
+					objects[i]->getRenderShader()->removeForwardShader(shadowMapShader);
 				}
 
 				shadowMapShader->stopUsing();

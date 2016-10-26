@@ -27,6 +27,7 @@ class AsteroidsGame;
 #include "EnemiesRenderer.h"
 #include "HUD.h"
 #include "GameOverMenu.h"
+#include "UpgradesMenu.h"
 
 class Enemy;
 class Player;
@@ -49,6 +50,12 @@ private:
 	/* The game over menu */
 	GameOverMenu* gameOverMenu;
 
+	/* The upgrades menu */
+	UpgradesMenu* upgradesMenu;
+
+	/* States whether the upgrades menu is showing */
+	bool showUpgradesMenu = false;
+
 	/* The asteroid renderer */
 	AsteroidsRenderer* asteroidRenderer;
 
@@ -63,6 +70,9 @@ private:
 
 	/* The pause button */
 	InputBindingButton* pauseButton;
+
+	/* The upgrades button */
+	InputBindingButton* upgradesButton;
 
 	/* Timer for the game */
 	Timer* timer;
@@ -92,6 +102,14 @@ public:
 	/* The update and render methods */
 	void update();
 	void render();
+
+	/* Methods to show/hide the upgrades menu */
+	void showUpgrades();
+	void hideUpgrades();
+
+	inline bool showingUpgrades() { return showUpgradesMenu; }
+
+	inline Player* getPlayer() { return player; }
 
 	/* InputBindingListener methods */
 	virtual void onButtonReleased(InputBindingButton* button) override;

@@ -44,8 +44,11 @@ public:
 	/* The method used to add a button */
 	void addButton(GUIButton* button);
 
+	/* Method used to create and add a button */
+	GUIButton* createButton(std::string text);
+
 	/* The method used to remove a button */
-	inline void removeButton(GUIButton* button) { buttons.erase(std::remove(buttons.begin(), buttons.end(), button), buttons.end()); }
+	void removeButton(GUIButton* button);
 
 	/* Methods used to enable/disable this component (Adds/Removes the input listener instance */
 	virtual void enable() override;
@@ -58,9 +61,9 @@ public:
 	virtual void onMousePressed(int button) override;
 
 	/* Setters and getters */
-	bool isOpen() { return menuOpen; }
-	GUIButton* getMenuButton() { return menuButton; }
-	std::vector<GUIButton*>& getButtons() { return buttons; }
+	inline bool isOpen() { return menuOpen; }
+	inline GUIButton* getMenuButton() { return menuButton; }
+	inline std::vector<GUIButton*>& getButtons() { return buttons; }
 };
 
 #endif /* CORE_GUI_GUIDROPDOWNMENU_H_ */

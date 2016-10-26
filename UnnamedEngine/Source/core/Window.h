@@ -79,6 +79,14 @@ public:
 	void disableCursor();
 	void toggleCursor();
 
+	/* Assign various cursor values */
+	void setCursorPosition(double x, double y);
+
+	/* Method used to set the position of the cursor to the centre of the window */
+	inline void centreCursor() {
+		setCursorPosition(settings.windowWidth / 2, settings.windowHeight / 2);
+	}
+
 	/* Moves the window into the centre of the primary monitor */
 	void centre();
 	/* Makes this window instance the current one to receive input */
@@ -89,13 +97,14 @@ public:
 	/* State driven input methods */
 	bool isKeyPressed(int key);
 	bool isMouseDown(int button);
+	Vector2d getCursorPosition();
 
 	/* Getters */
 	inline GLFWwindow*    getInstance() { return instance; }
 	inline Settings&      getSettings() { return settings; }
 	inline InputManager*  getInputManager() { return inputManager; }
 
-	static inline Window* getCurrentInstance() { return currentInstance; }
+	static Window* getCurrentInstance();
 };
 
 

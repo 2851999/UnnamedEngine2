@@ -16,16 +16,16 @@
  *
  *****************************************************************************/
 
-#include <windows.h>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include "Utils.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 #include <fstream>
 #include <cstdarg>
-#include "Utils.h"
+
 #include "Logging.h"
 #include "../core/Window.h"
+#include "../core/ml/ML.h"
 
 /*****************************************************************************
  * Various string utilities
@@ -62,6 +62,15 @@ namespace StrUtils {
 		if (! (ss >> value))
 			Logger::log("String " + string + " cannot be converted to boolean", "StrUtils", Logger::Error);
 		return value;
+	}
+
+	std::vector<std::string> strSplit(const std::string &s, char delimeter) {
+		std::stringstream ss(s);
+		std::string item;
+		std::vector<std::string> split;
+		while (std::getline(ss, item, delimeter))
+			split.push_back(item);
+		return split;
 	}
 
 	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter) {
@@ -173,6 +182,29 @@ namespace TimeUtils {
 }
 
 /*****************************************************************************
+ * Various random utilities
+ *****************************************************************************/
+
+#include <ctime>
+
+namespace RandomUtils {
+	/* Method used to initialise the random generator with the current time */
+	void initialise() {
+		std::srand(std::time(0));
+	}
+
+	/* Returns a random floating point number between the values specified */
+	float randomFloat(float min, float max) {
+		return min + ((float) rand()) / (RAND_MAX / (max - min));
+	}
+
+	/* Returns a random floating point number between 0 and 1 */
+	float randomFloat() {
+		return ((float) rand()) / RAND_MAX;
+	}
+}
+
+/*****************************************************************************
  * Various settings utilities
  *****************************************************************************/
 
@@ -181,88 +213,122 @@ namespace TimeUtils {
 namespace SettingsUtils {
 	/* Writes settings to a file */
 	void writeToFile(std::string path, Settings& settings) {
-		FileUtils::writeFile(path, std::vector<std::string> {
-			"WindowTitle: "                + settings.windowTitle,
-			"WindowWidth: "                + StrUtils::str(settings.windowWidth),
-			"WindowHeight: "               + StrUtils::str(settings.windowHeight),
-			"WindowResizable: "            + StrUtils::str(settings.windowResizable),
-			"WindowDecorated: "            + StrUtils::str(settings.windowDecorated),
-			"WindowBorderless: "           + StrUtils::str(settings.windowBorderless),
-			"WindowFullscreen: "           + StrUtils::str(settings.windowFullscreen),
-			"WindowFloating: "             + StrUtils::str(settings.windowFloating),
-			"VideoVSync: "                 + StrUtils::str(settings.videoVSync),
-			"VideoSamples: "               + StrUtils::str(settings.videoSamples),
-			"VideoMaxAnisotropicSamples: " + StrUtils::str(settings.videoMaxAnisotropicSamples),
-			"VideoRefreshRate: "           + StrUtils::str(settings.videoRefreshRate),
-			"VideoResolution: "            + VideoResolution::toString(settings.videoResolution),
-			"VideoMaxFPS: "                + StrUtils::str(settings.videoMaxFPS),
-			"AudioSoundEffectVolume: "     + StrUtils::str(settings.audioSoundEffectVolume),
-			"AudioMusicVolume: "           + StrUtils::str(settings.audioMusicVolume),
-			"InputRepeatKeyboardEvents: "  + StrUtils::str(settings.inputRepeatKeyboardEvents),
-			"InputRepeatMouseEvents: "     + StrUtils::str(settings.inputRepeatMouseEvents),
-			"EngineSplashScreen: "         + StrUtils::str(settings.engineSplashScreen),
-			"DebuggingShowInformation: "   + StrUtils::str(settings.debuggingShowInformation)
-		});
+		//The root element
+		MLElement root("ml");
+
+		//Add all of the elements
+		MLElement window("window");
+		window.add(MLAttribute("title", settings.windowTitle));
+		window.add(MLAttribute("width", StrUtils::str(settings.windowWidth)));
+		window.add(MLAttribute("height", StrUtils::str(settings.windowHeight)));
+		window.add(MLAttribute("resizable", StrUtils::str(settings.windowResizable)));
+		window.add(MLAttribute("decorated", StrUtils::str(settings.windowDecorated)));
+		window.add(MLAttribute("borderless", StrUtils::str(settings.windowBorderless)));
+		window.add(MLAttribute("fullscreen", StrUtils::str(settings.windowFullscreen)));
+		window.add(MLAttribute("floating", StrUtils::str(settings.windowFloating)));
+		root.add(window);
+
+		MLElement video("video");
+		video.add(MLAttribute("vSync", StrUtils::str(settings.videoVSync)));
+		video.add(MLAttribute("samples", StrUtils::str(settings.videoSamples)));
+		video.add(MLAttribute("maxAnisotropicSamples", StrUtils::str(settings.videoMaxAnisotropicSamples)));
+		video.add(MLAttribute("refreshRate", StrUtils::str(settings.videoRefreshRate)));
+		video.add(MLAttribute("resolution", VideoResolution::toString(settings.videoResolution)));
+		video.add(MLAttribute("maxFPS", StrUtils::str(settings.videoMaxFPS)));
+		root.add(video);
+
+		MLElement audio("audio");
+		audio.add(MLAttribute("soundEffectVolume", StrUtils::str(settings.audioSoundEffectVolume)));
+		audio.add(MLAttribute("musicVolume", StrUtils::str(settings.audioMusicVolume)));
+		root.add(audio);
+
+		MLElement input("input");
+		input.add(MLAttribute("repeatKeyboardEvents", StrUtils::str(settings.inputRepeatKeyboardEvents)));
+		input.add(MLAttribute("repeatMouseEvents", StrUtils::str(settings.inputRepeatMouseEvents)));
+		root.add(input);
+
+		MLElement engine("engine");
+		engine.add(MLAttribute("splashScreen", StrUtils::str(settings.engineSplashScreen)));
+		root.add(engine);
+
+		MLElement debugging("debugging");
+		debugging.add(MLAttribute("showInformation", StrUtils::str(settings.debuggingShowInformation)));
+		root.add(debugging);
+
+		//Create the document and save it
+		MLDocument document(root);
+		document.save(path);
 	}
 
-	/* Returns settings loaded from a file */
+	/* Returns settings read from a file */
 	Settings readFromFile(std::string path) {
+		//The settings instance
 		Settings settings;
+		//Load the document
+		MLDocument document;
+		document.load(path);
 
-		std::vector<std::string> text = FileUtils::readFile(path);
-
-		//Go through the text
-		for (unsigned int i = 0; i < text.size(); i++) {
-			//Split up the current line
-			std::vector<std::string> line = StrUtils::strSplit(text[i], ": ");
-			//Ensure the right number of parameters
-			if (line.size() == 2) {
-				//Check the first value and assign the appropriate settings variable
-
-				if (line[0] == "WindowTitle")
-					settings.windowTitle = line[1];
-				else if (line[0] == "WindowWidth")
-					settings.windowWidth = StrUtils::strToUInt(line[1]);
-				else if (line[0] == "WindowHeight")
-					settings.windowHeight = StrUtils::strToUInt(line[1]);
-				else if (line[0] == "WindowResizable")
-					settings.windowResizable = StrUtils::strToBool(line[1]);
-				else if (line[0] == "WindowDecorated")
-					settings.windowDecorated = StrUtils::strToBool(line[1]);
-				else if (line[0] == "WindowBorderless")
-					settings.windowBorderless = StrUtils::strToBool(line[1]);
-				else if (line[0] == "WindowFullscreen")
-					settings.windowFullscreen = StrUtils::strToBool(line[1]);
-				else if (line[0] == "WindowFloating")
-					settings.windowFloating = StrUtils::strToBool(line[1]);
-				else if (line[0] == "VideoVSync")
-					settings.videoVSync = StrUtils::strToBool(line[1]);
-				else if (line[0] == "VideoSamples")
-					settings.videoSamples = StrUtils::strToUInt(line[1]);
-				else if (line[0] == "VideoMaxAnisotropicSamples")
-					settings.videoMaxAnisotropicSamples = StrUtils::strToUInt(line[1]);
-				else if (line[0] == "VideoRefreshRate")
-					settings.videoRefreshRate = StrUtils::strToUInt(line[1]);
-				else if (line[0] == "VideoResolution")
-					settings.videoResolution = VideoResolution::toVector(line[1]);
-				else if (line[0] == "VideoMaxFPS")
-					settings.videoMaxFPS = StrUtils::strToUInt(line[1]);
-				else if (line[0] == "AudioSoundEffectVolume")
-					settings.audioSoundEffectVolume = StrUtils::strToUInt(line[1]);
-				else if (line[0] == "AudioMusicVolume")
-					settings.audioMusicVolume = StrUtils::strToUInt(line[1]);
-				else if (line[0] == "InputRepeatKeyboardEvents")
-					settings.inputRepeatKeyboardEvents = StrUtils::strToBool(line[1]);
-				else if (line[0] == "InputRepeatMouseEvents")
-					settings.inputRepeatMouseEvents = StrUtils::strToBool(line[1]);
-				else if (line[0] == "EngineSplashScreen")
-					settings.engineSplashScreen = StrUtils::strToBool(line[1]);
-				else if (line[0] == "DebuggingShowInformation")
-					settings.debuggingShowInformation = StrUtils::strToBool(line[1]);
- 			} else
- 				Logger::log("Unknown format in Settings file " + path + " line " + StrUtils::str(i), "SettingsUtils", Logger::Error);
+		//Go through each child attribute in the document
+		for (MLElement& child : document.getRoot().getChildren()) {
+			//Go through the attributes of the child element
+			for (MLAttribute& attrib : child.getAttributes()) {
+				//Check the child name
+				if (child.getName() == "window") {
+					//Check the attribute name
+					if (attrib.getName() == "title")
+						settings.windowTitle = attrib.getData();
+					else if (attrib.getName() == "width")
+						settings.windowWidth = attrib.getDataAsUInt();
+					else if (attrib.getName() == "height")
+						settings.windowHeight = attrib.getDataAsUInt();
+					else if (attrib.getName() == "resizable")
+						settings.windowResizable = attrib.getDataAsBool();
+					else if (attrib.getName() == "decorated")
+						settings.windowDecorated = attrib.getDataAsBool();
+					else if (attrib.getName() == "borderless")
+						settings.windowBorderless = attrib.getDataAsBool();
+					else if (attrib.getName() == "fullscreen")
+						settings.windowFullscreen = attrib.getDataAsBool();
+					else if (attrib.getName() == "floating")
+						settings.windowFloating = attrib.getDataAsBool();
+				} else if (child.getName() == "video") {
+					//Check the attribute name
+					if (attrib.getName() == "vSync")
+						settings.videoVSync = attrib.getDataAsBool();
+					else if (attrib.getName() == "samples")
+						settings.videoSamples = attrib.getDataAsUInt();
+					else if (attrib.getName() == "maxAnisotropicSamples")
+						settings.videoMaxAnisotropicSamples = attrib.getDataAsUInt();
+					else if (attrib.getName() == "refreshRate")
+						settings.videoRefreshRate = attrib.getDataAsUInt();
+					else if (attrib.getName() == "resolution")
+						settings.videoResolution = VideoResolution::toVector(attrib.getData());
+					else if (attrib.getName() == "maxFPS")
+						settings.videoMaxFPS = attrib.getDataAsUInt();
+				} else if (child.getName() == "audio") {
+					//Check the attribute name
+					if (attrib.getName() == "soundEffectVolume")
+						settings.audioSoundEffectVolume = attrib.getDataAsUInt();
+					else if (attrib.getName() == "musicVolume")
+						settings.audioMusicVolume = attrib.getDataAsUInt();
+				} else if (child.getName() == "input") {
+					//Check the attribute name
+					if (attrib.getName() == "repeatKeyboardEvents")
+						settings.inputRepeatKeyboardEvents = attrib.getDataAsBool();
+					else if (attrib.getName() == "repeatMouseEvents")
+						settings.inputRepeatMouseEvents = attrib.getDataAsBool();
+				} else if (child.getName() == "engine") {
+					//Check the attribute name
+					if (attrib.getName() == "splashScreen")
+						settings.engineSplashScreen = attrib.getDataAsBool();
+				} else if (child.getName() == "debugging") {
+					//Check the attribute name
+					if (attrib.getName() == "showInformation")
+						settings.debuggingShowInformation = attrib.getDataAsBool();
+				}
+			}
 		}
-
+		//Return the settings
 		return settings;
 	}
 }
@@ -278,5 +344,37 @@ namespace ClipboardUtils {
 
 	std::string getText() {
 		return std::string(glfwGetClipboardString(Window::getCurrentInstance()->getInstance()));
+	}
+}
+
+/*****************************************************************************
+ * Various controller utilities
+ *****************************************************************************/
+
+namespace ControllerUtils {
+	/* Returns the index of a controller given its name or -1 if not found */
+	int getControllerIndexByName(std::string name) {
+		//Go through each possible index
+		for (unsigned int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_LAST; i++) {
+			//Check the name of the current controller
+			if (glfwJoystickPresent(i) && std::string(glfwGetJoystickName(i)) == name && name.length() > 0)
+				//Return the index
+				return i;
+		}
+		return -1;
+	}
+
+	/* Return the index of a controller if it has the provided name, if not
+	 * it will search for a controller with that name and return that or -1
+	 * if still not found */
+	int findController(int index, std::string name) {
+		//Get the name of the controller at the given index
+		if (glfwJoystickPresent(index) && std::string(glfwGetJoystickName(index)) == name)
+			//Return the index as it is correct
+			return index;
+		else
+			//Not the correct controller, so try and locate and return the
+			//controller's index
+			return getControllerIndexByName(name);
 	}
 }

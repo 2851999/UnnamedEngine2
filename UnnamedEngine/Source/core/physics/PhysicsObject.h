@@ -19,8 +19,8 @@
 #ifndef CORE_PHYSICS_PHYSICSOBJECT_H_
 #define CORE_PHYSICS_PHYSICSOBJECT_H_
 
-#include "../Object.h"
 #include "Collider.h"
+#include "../Object.h"
 
 /*****************************************************************************
  * The PhysicsObject class is the basis of any physics object
@@ -28,10 +28,6 @@
 
 class PhysicsObject {
 private:
-	/* The name of this object - can be used to identify what kind
-	 * of object this is */
-	std::string name;
-
 	/* The mass of this object */
 	float mass = 1.0f;
 
@@ -49,11 +45,9 @@ public:
 	virtual void updatePhysics(float delta) {}
 
 	/* Setters and getters */
-	inline void setName(std::string name) { this->name = name; }
 	inline void setMass(float mass) { this->mass = mass; }
 	inline void setRestitution(float restitution) { this->restitution = restitution; }
 
-	inline std::string getName() { return name; }
 	inline float getMass() { return mass; }
 	inline float getRestitution() { return restitution; }
 };
@@ -87,6 +81,11 @@ public:
 		if (child)
 			child->setParent(this);
 	}
+
+	PhysicsObject2D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0) : GameObject2D(mesh, shader, width, height) {}
+	PhysicsObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0) : GameObject2D(meshes, shader, width, height) {}
+	PhysicsObject2D(Mesh* mesh, std::string shaderId, float width = 0, float height = 0) : GameObject2D(mesh, shaderId, width, height) {}
+	PhysicsObject2D(std::vector<Mesh*> meshes, std::string shaderId, float width = 0, float height = 0) : GameObject2D(meshes, shaderId, width, height) {}
 
 	/* The destructor */
 	virtual ~PhysicsObject2D() {}
@@ -144,7 +143,10 @@ public:
 		if (child)
 			child->setParent(this);
 	}
-	PhysicsObject3D(std::vector<Mesh*> meshes, RenderShader* shader) : GameObject3D(meshes, shader) {}
+	PhysicsObject3D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(mesh, shader, width, height, depth) {}
+	PhysicsObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(meshes, shader, width, height, depth) {}
+	PhysicsObject3D(Mesh* mesh, std::string shaderId, float width = 0, float height = 0, float depth = 0) : GameObject3D(mesh, shaderId, width, height, depth) {}
+	PhysicsObject3D(std::vector<Mesh*> meshes, std::string shaderId, float width = 0, float height = 0, float depth = 0) : GameObject3D(meshes, shaderId, width, height, depth) {}
 
 	/* The destructor */
 	virtual ~PhysicsObject3D() {}

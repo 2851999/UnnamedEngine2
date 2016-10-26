@@ -19,16 +19,13 @@
 #ifndef CORE_GUI_GUICOMPONENT_H_
 #define CORE_GUI_GUICOMPONENT_H_
 
-#include <initializer_list>
+#include "Font.h"
 
 #include "../Object.h"
+#include "../input/Input.h"
 #include "../render/Colour.h"
 #include "../render/Texture.h"
 #include "../render/Renderer.h"
-#include "../input/Input.h"
-#include "../Window.h"
-
-#include "Font.h"
 
 /*****************************************************************************
  * The GUIComponentRenderer class is used to render a GUIComponent
@@ -58,13 +55,13 @@ public:
 	/* The constructors */
 	GUIComponentRenderer() {}
 	GUIComponentRenderer(float width, float height) :
-		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)) }, Renderer::getRenderShader("Material"), width, height) { setup(); }
+		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)) }, "Material", width, height) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Colour> colours) :
-		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)) }, Renderer::getRenderShader("Material"), width, height), colours(colours) { setup(); }
+		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)) }, "Material", width, height), colours(colours) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Texture*> textures) :
-		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)) }, Renderer::getRenderShader("Material"), width, height), textures(textures) { setup(); }
+		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)) }, "Material", width, height), textures(textures) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Colour> colours, std::vector<Texture*> textures) :
-		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)) }, Renderer::getRenderShader("Material"), width, height), colours(colours), textures(textures) { setup(); }
+		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)) }, "Material", width, height), colours(colours), textures(textures) { setup(); }
 
 	/* Destructor */
 	virtual ~GUIComponentRenderer() {}
@@ -80,8 +77,8 @@ public:
 	unsigned int getMaxRenderIndex();
 
 	/* Methods used to set the colours/textures */
-	inline void setColour(Colour colour) { colours.clear(); colours.push_back(colour); }
-	inline void setTexture(Texture* texture) { textures.clear(); textures.push_back(texture); }
+	void setColour(Colour colour);
+	void setTexture(Texture* texture);
 
 	/* Setters and getters */
 	inline void setFont(Font* font) { this->font = font; }
@@ -166,6 +163,8 @@ public:
  * The GUIComponent class is used to create a component for a GUI
  *****************************************************************************/
 
+class GUIGroup;
+
 class GUIComponent : public GUIComponentRenderer, InputListener {
 private:
 	/* The component listeners */
@@ -189,6 +188,9 @@ protected:
 
 	/* The border of this component (Can be NULL) */
 	GUIBorder* border = NULL;
+
+	/* The group this component belongs to (Can be NULL) */
+	GUIGroup* group = NULL;
 
 	/* Method called to update this component (useful when no need to override
 	 * the default component update method */
@@ -222,13 +224,8 @@ public:
 	virtual ~GUIComponent();
 
 	/* The methods used to add and remove a component listener */
-	inline void addListener(GUIComponentListener* listener) {
-		listeners.push_back(listener);
-	}
-
-	inline void removeListener(GUIComponentListener* listener) {
-		listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
-	}
+	void addListener(GUIComponentListener* listener);
+	void removeListener(GUIComponentListener* listener);
 
 	/* Method used to add a component to this one */
 	inline void add(GUIComponent* component) { component->setParent(this); attachedComponents.push_back(component); }
@@ -267,6 +264,7 @@ public:
 	void setVisible(bool visible);
 	void setOccluded(bool occluded);
 	inline void setBorder(GUIBorder* border) { this->border = border; }
+	inline void setGroup(GUIGroup* group) { this->group = group; }
 
 	inline std::string getName() { return name;    }
 	inline std::string getText() { return text;    }
@@ -274,6 +272,9 @@ public:
 	inline bool isVisible()      { return visible; }
 	inline bool isOccluded()     { return occluded; }
 	inline GUIBorder* getBorder() { return border; }
+	inline bool hasBorder() { return border; }
+	inline GUIGroup* getGroup() { return group; }
+	inline GUIGroup* hasGroup() { return group; }
 	inline bool isMouseHovering() { return mouseHover; }
 	inline bool isClicked() { return mouseClicked; }
 };

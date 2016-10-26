@@ -20,7 +20,6 @@
 #define CORE_RENDER_RENDERER_H_
 
 #include "Camera.h"
-#include<iostream>
 #include "FBO.h"
 
 /*****************************************************************************

@@ -19,6 +19,8 @@
 #ifndef CORE_RECTANGLE_H_
 #define CORE_RECTANGLE_H_
 
+#include "Vector.h"
+
 /*****************************************************************************
  * The Rect class defines a rectangle
  *****************************************************************************/

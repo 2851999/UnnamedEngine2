@@ -16,10 +16,11 @@
  *
  *****************************************************************************/
 
+#include "Shader.h"
+
 #include <algorithm>
 #include <fstream>
 
-#include "Shader.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -28,12 +29,15 @@
 
 Shader* Shader::currentShader = NULL;
 
-Shader::Shader(GLint vertexShader, GLint fragmentShader) {
+Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 	this->program = glCreateProgram();
 	this->vertexShader = vertexShader;
+	this->geometryShader = geometryShader;
 	this->fragmentShader = fragmentShader;
 
 	attach(vertexShader);
+	if (geometryShader)
+		attach(geometryShader);
 	attach(fragmentShader);
 }
 
@@ -183,6 +187,30 @@ Shader* Shader::createShader(ShaderSource vertexSource, ShaderSource fragmentSou
 	for (auto& iterator : vertexSource.uniforms)
 		shader->addUniform(iterator.first, iterator.second);
 	for (auto& iterator : vertexSource.attributes)
+		shader->addAttribute(iterator.first, iterator.second);
+	for (auto& iterator : fragmentSource.uniforms)
+		shader->addUniform(iterator.first, iterator.second);
+	for (auto& iterator : fragmentSource.attributes)
+		shader->addAttribute(iterator.first, iterator.second);
+	shader->stopUsing();
+
+	//Return the shader
+	return shader;
+}
+
+Shader* Shader::createShader(ShaderSource vertexSource, ShaderSource geometrySource, ShaderSource fragmentSource) {
+	//Create the shader
+	Shader* shader = new Shader(Shader::createShader(vertexSource.source, GL_VERTEX_SHADER), Shader::createShader(geometrySource.source, GL_GEOMETRY_SHADER), Shader::createShader(fragmentSource.source, GL_FRAGMENT_SHADER));
+
+	//Add the uniforms and attributes (if any)
+	shader->use();
+	for (auto& iterator : vertexSource.uniforms)
+		shader->addUniform(iterator.first, iterator.second);
+	for (auto& iterator : vertexSource.attributes)
+		shader->addAttribute(iterator.first, iterator.second);
+	for (auto& iterator : geometrySource.uniforms)
+		shader->addUniform(iterator.first, iterator.second);
+	for (auto& iterator : geometrySource.attributes)
 		shader->addAttribute(iterator.first, iterator.second);
 	for (auto& iterator : fragmentSource.uniforms)
 		shader->addUniform(iterator.first, iterator.second);

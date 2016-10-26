@@ -41,6 +41,9 @@ private:
 	/* Loading bar for the player's health */
 	GUILoadingBar* barPlayerHealth;
 
+	/* Loading bar for the player's shield */
+	GUILoadingBar* barPlayerShield;
+
 	/* The player instance */
 	Player* player;
 public:

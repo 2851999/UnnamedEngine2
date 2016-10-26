@@ -18,6 +18,10 @@
 
 #include "KeyboardShortcuts.h"
 
+#include <algorithm>
+
+#include "../Window.h"
+
 /*****************************************************************************
  * The KeyboardShortcut class
  *****************************************************************************/
@@ -25,6 +29,8 @@
 KeyboardShortcut::KeyboardShortcut(std::string name, std::vector<int> keys) {
 	//Assign the name
 	this->name = name;
+	//Assign the completed value
+	this->completed = false;
 	//Go though each key provided and add them to the keys list
 	for (unsigned int a = 0; a < keys.size(); a++)
 		this->keys.insert(std::pair<int, bool>(keys[a], false));
@@ -34,26 +40,25 @@ KeyboardShortcut::~KeyboardShortcut() {
 
 }
 
-bool KeyboardShortcut::hasCompleted() {
-	bool completed = true;
-	//Only make completed = true when all of the keys states are also true
-	for (auto& iterator : keys)
-		completed = completed && iterator.second;
-	return completed;
-}
-
 void KeyboardShortcut::onKeyPressed(int code) {
 	//Check whether one of the keys has the same key code
 	if (keys.count(code) > 0)
 		//Update it's state
 		keys.at(code) = true;
+	//Only make completed = true when all of the keys states are also true
+	completed = true;
+	for (auto& iterator : keys)
+		completed = completed && iterator.second;
 }
 
 void KeyboardShortcut::onKeyReleased(int code) {
 	//Check whether one of the keys has the same key code
-	if (keys.count(code) > 0)
+	if (keys.count(code) > 0) {
 		//Update it's state
 		keys.at(code) = false;
+		//Completed is now definitely false
+		completed = false;
+	}
 }
 
 /*****************************************************************************
@@ -66,6 +71,14 @@ KeyboardShortcuts::KeyboardShortcuts() {
 
 KeyboardShortcuts::~KeyboardShortcuts() {
 
+}
+
+void KeyboardShortcuts::addListener(KeyboardShortcutListener* listener) {
+	listeners.push_back(listener);
+}
+
+void KeyboardShortcuts::removeListener(KeyboardShortcutListener* listener) {
+	listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 }
 
 void KeyboardShortcuts::callOnShortcut(KeyboardShortcut* e) {

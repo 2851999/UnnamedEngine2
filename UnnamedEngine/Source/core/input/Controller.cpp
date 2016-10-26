@@ -23,9 +23,10 @@
 /*****************************************************************************
  * The Controller class
  *****************************************************************************/
-#include <iostream>
+
 Controller::Controller(int index) {
 	this->index = index;
+	this->name = std::string(glfwGetJoystickName(index));
 
 	//Get the current states
 	currentAxisValues   = glfwGetJoystickAxes(index, &axisCount);
@@ -65,7 +66,5 @@ void Controller::checkInput() {
 		}
 	}
 }
-
-std::string Controller::getName() { return std::string(glfwGetJoystickName(index)); }
 
 bool Controller::getButton(int index) { return buttonValues[index] == GLFW_PRESS; }

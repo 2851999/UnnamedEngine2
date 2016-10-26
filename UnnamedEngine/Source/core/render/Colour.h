@@ -46,13 +46,14 @@ public:
 //	static const Colour ARRAY_BLUE[];
 //	static const Colour ARRAY_SUNSET[];
 
+	/* The constructors */
 	Colour() : Vector4f() {}
 	Colour(const Vector<float, 4> &base) : Vector4f(base) {}
 	Colour(Colour colour, float a) : Vector4f(colour.getR(), colour.getG(), colour.getB(), a) {}
 	Colour(float grey, float a = 1.0f) : Vector4f(grey, grey, grey, a) {}
 	Colour(float r, float g, float b, float a = 1.0f) : Vector4f(r, g, b, a) {}
 
-	/* The getters and setters */
+	/* The setters and getterss */
 	void set(float grey, float a = 1.0f) {
 		setX(grey); setY(grey); setZ(grey); setA(a);
 	}

@@ -31,6 +31,8 @@ void FPSCalculator::start() {
 		//Assign the last frame's time
 		lastFrame = getMilliseconds();
 		lastFPSCountUpdate = lastFrame;
+		currentDelta = 0;
+		currentDeltaSeconds = 0;
 		started = true;
 	}
 }
@@ -41,12 +43,17 @@ void FPSCalculator::update() {
 		//Obtain the current time in milliseconds
 		long current = getMilliseconds();
 
-		//Calculate the current time in milliseconds
-		currentDelta = current - lastFrame;
-		currentDeltaSeconds = (float) currentDelta / 1000.0f;
+		//With a high FPS the delta will become 0, but to stop this causing issues
+		//the current delta will only be assigned when this is not the case and
+		//some time has passed
+		if (current != lastFrame) {
+			//Calculate the current time in milliseconds
+			currentDelta = current - lastFrame;
+			currentDeltaSeconds = (float) currentDelta / 1000.0f;
 
-		//Assign the last frame time
-		lastFrame = current;
+			//Assign the last frame time
+			lastFrame = current;
+		}
 
 		//Check the mode
 		if (mode == PER_FRAME) {

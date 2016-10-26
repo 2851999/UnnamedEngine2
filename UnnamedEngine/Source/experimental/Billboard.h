@@ -20,10 +20,11 @@
 #define EXPERIMENTAL_BILLBOARD_H_
 
 #include "../core/Object.h"
+#include "../core/render/Renderer.h"
 
 class Billboard : public GameObject3D {
 public:
-	Billboard(float width, float height) : GameObject3D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad3D(width, height)) }, Renderer::getRenderShader("Billboard"), width, height) {
+	Billboard(float width, float height) : GameObject3D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad3D(width, height)) }, "Billboard", width, height) {
 		getMaterial()->setDiffuseColour(Colour::RED);
 	}
 

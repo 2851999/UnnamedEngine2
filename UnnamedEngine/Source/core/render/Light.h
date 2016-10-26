@@ -19,8 +19,8 @@
 #ifndef CORE_RENDER_LIGHT_H_
 #define CORE_RENDER_LIGHT_H_
 
-#include "../Object.h"
 #include "FBO.h"
+#include "../Object.h"
 
 /*****************************************************************************
  * The Light class contains the information required to create a light
@@ -35,8 +35,8 @@ private:
 	Vector3f direction;
 
 	/* The diffuse and specular colours */
-	Colour diffuseColour;
-	Colour specularColour;
+	Colour diffuseColour = Colour::WHITE;
+	Colour specularColour = Colour::WHITE;
 
 	/* The constant, linear and quadratic terms for point lights */
 	float constant = 0;

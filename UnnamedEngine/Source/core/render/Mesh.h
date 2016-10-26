@@ -19,11 +19,10 @@
 #ifndef CORE_RENDER_MESH_H_
 #define CORE_RENDER_MESH_H_
 
-#include "../Matrix.h"
 #include "Colour.h"
-#include "Shader.h"
 #include "Material.h"
 #include "RenderData.h"
+#include "Shader.h"
 #include "VBO.h"
 
 /*****************************************************************************
@@ -211,30 +210,28 @@ private:
 	/* The material */
 	Material* material = new Material();
 public:
-	Mesh(MeshData* data) {
-		this->data = data;
-	}
+	/* The constructor */
+	Mesh(MeshData* data);
 
+	/* The destructor */
+	virtual ~Mesh();
+
+	/* Method called to setup this mesh for rendering */
 	inline void setup(RenderShader* renderShader) {
 		this->renderData = new MeshRenderData(this->data, renderShader);
 	}
 
-	virtual ~Mesh() {
-		if (material)
-			delete material;
-		delete renderData;
-		delete data;
-	}
-
-
 	/* The setters and getters */
-	MeshData* getData() { return data; }
-	MeshRenderData* getRenderData() { return renderData; }
 	void setMaterial(Material* material) { this->material = material; }
 
+	MeshData* getData() { return data; }
+	MeshRenderData* getRenderData() { return renderData; }
 	bool hasRenderData() { return renderData; }
 	Material* getMaterial() { return material; }
 	bool hasMaterial() { return material; }
+
+	/* Static method called to read a file and load a model's meshes */
+	static std::vector<Mesh*> loadModel(std::string path, std::string fileName);
 };
 
 /*****************************************************************************

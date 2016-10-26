@@ -47,7 +47,7 @@ public:
 	/* The method used to get the data for the sides of the texture */
 	void getSides(unsigned int textureIndex, float& top, float& left, float& bottom, float& right);
 
-	/* The setters and getters */
+	/* Getters */
 	inline Texture* getTexture() { return texture; }
 };
 

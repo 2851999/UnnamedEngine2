@@ -19,10 +19,9 @@
 #ifndef CORE_RENDER_CAMERA_H_
 #define CORE_RENDER_CAMERA_H_
 
-#include "../Object.h"
 #include "SkyBox.h"
-#include "../../utils/Utils.h"
-#include "Frustum.h"
+#include "../Object.h"
+//#include "../../experimental/Frustum.h"
 
 /*****************************************************************************
  * The Camera class contains the base functionality of a camera
@@ -59,6 +58,9 @@ class Camera2D : public Camera, public GameObject2D {
 public:
 	/* Various constructors */
 	Camera2D() {}
+	Camera2D(float left, float right, float bottom, float top, float zNear, float zFar) :
+		Camera(Matrix4f().initOrthographic(left, right, bottom, top, zNear, zFar)) {}
+	Camera2D(float width, float height, float zNear, float zFar) : Camera2D(0, width, height, 0, zNear, zFar) {}
 	Camera2D(Matrix4f projectionMatrix) : Camera(projectionMatrix) {}
 	Camera2D(Matrix4f projectionMatrix, Vector2f position) : Camera(projectionMatrix) {
 		setPosition(position);
@@ -92,10 +94,12 @@ private:
 	Vector3f cameraUp    = Vector3f(0.0f, 1.0f, 0.0f);
 	Vector3f cameraRight = Vector3f(1.0f, 0.0f, 0.0f);
 
-	Frustum frustum;
+//	Frustum frustum;
 public:
 	/* Various constructors */
 	Camera3D() {}
+	Camera3D(float fovy, float aspect, float zNear, float zFar) :
+		Camera(Matrix4f().initPerspective(fovy, aspect, zNear, zFar)) {}
 	Camera3D(Matrix4f projectionMatrix) : Camera(projectionMatrix) {}
 	Camera3D(Matrix4f projectionMatrix, Vector3f position) : Camera(projectionMatrix) {
 		setPosition(position);
@@ -153,7 +157,7 @@ public:
 	inline bool hasSkyBox() { return skyBox; }
 	inline bool isFlying() { return flying; }
 
-	inline Frustum& getFrustum() { return frustum; }
+	//inline Frustum& getFrustum() { return frustum; }
 };
 
 #endif /* CORE_RENDER_CAMERA_H_ */

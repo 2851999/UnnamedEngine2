@@ -17,7 +17,9 @@
  *****************************************************************************/
 
 #include "SoundSystem.h"
-#include <iostream>
+
+#include <algorithm>
+
 /***************************************************************************************************
  * The SoundSystem class
  ***************************************************************************************************/
@@ -80,5 +82,6 @@ void SoundSystem::destroy() {
 	sources.clear();
 	playing.clear();
 
-	delete listener;
+	if (listener)
+		delete listener;
 }

@@ -20,7 +20,6 @@
 #define UTILS_LOGGING_H_
 
 #include <iostream>
-#include "Utils.h"
 
 /*****************************************************************************
  * Stuff for logging

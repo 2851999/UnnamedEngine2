@@ -19,7 +19,7 @@
 #ifndef CORE_RENDER_SKYBOX_H_
 #define CORE_RENDER_SKYBOX_H_
 
-#include "Cubemap.h"
+#include "Texture.h"
 #include "../Object.h"
 
 /*****************************************************************************
@@ -28,17 +28,28 @@
 
 class SkyBox {
 private:
+	/* The skybox texture */
 	Cubemap* cubemap;
+
+	/* The skybox */
 	GameObject3D* box;
 public:
+	/* The constructors */
 	SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom, float size);
+	SkyBox(std::string path, std::string fileExtension, float size) : SkyBox(path, "front" + fileExtension, "back" + fileExtension, "left" + fileExtension, "right" + fileExtension, "top" + fileExtension, "bottom" + fileExtension, size) {}
+
+	/* The destructor */
 	virtual ~SkyBox() { destroy(); }
 
+	/* Method to update this skybox's position */
 	void update(Vector3f cameraPosition);
+	/* Method to render this skybox */
 	void render();
 
+	/* Method to free up all resources used by this skybox */
 	void destroy();
 
+	/* Getters */
 	inline Cubemap* getCubemap() { return cubemap; }
 };
 

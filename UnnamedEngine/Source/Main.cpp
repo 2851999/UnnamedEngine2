@@ -16,15 +16,18 @@
  *
  *****************************************************************************/
 
-#include "GUITest.h"
-//#include "examples/asteroids/AsteroidsGame.h"
-//#include "examples/asteroids-old/Asteroids.h"
+//#include "tests/GUITest.h"
+//#include "examples/basic/BasicRendering.h"
+#include "examples/asteroids/AsteroidsGame.h"
 
 int main() {
-	Test test;
-	test.create();
-//	AsteroidsGame asteroids;
-//	asteroids.create();
+//	Test test;
+//	test.create();
+	AsteroidsGame asteroids;
+	asteroids.create();
+
+//	Tutorial tutorial;
+//	tutorial.create();
 
 	return 0;
 }

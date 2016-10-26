@@ -19,20 +19,23 @@
 #ifndef BASEENGINETEST2D_H_
 #define BASEENGINETEST2D_H_
 
-#include "core/BaseEngine.h"
-#include "core/render/Camera.h"
-#include "core/render/Renderer.h"
-#include "core/ResourceLoader.h"
-#include "core/gui/Font.h"
-#include "core/gui/GUIButton.h"
-#include "core/gui/GUILoadingBar.h"
-#include "core/gui/GUICheckBox.h"
-#include "core/gui/GUIDropDownMenu.h"
-#include "core/gui/GUIDropDownList.h"
-#include "core/gui/GUIPanel.h"
-#include "core/gui/GUILabel.h"
-#include "core/gui/GUISlider.h"
-#include "core/gui/GUITextBox.h"
+#include "../core/BaseEngine.h"
+#include "../core/render/Camera.h"
+#include "../core/render/Renderer.h"
+#include "../core/ResourceLoader.h"
+#include "../core/gui/Font.h"
+#include "../core/gui/GUIButton.h"
+#include "../core/gui/GUILoadingBar.h"
+#include "../core/gui/GUICheckBox.h"
+#include "../core/gui/GUIDropDownMenu.h"
+#include "../core/gui/GUIDropDownList.h"
+#include "../core/gui/GUIPanel.h"
+#include "../core/gui/GUILabel.h"
+#include "../core/gui/GUISlider.h"
+#include "../core/gui/GUITextBox.h"
+#include "../core/gui/GUIGroup.h"
+#include "../core/gui/GUIRadioCheckBox.h"
+#include "../core/ml/ML.h"
 
 class Test : public BaseEngine {
 private:
@@ -47,6 +50,7 @@ private:
 	GUISlider* verticalSlider;
 	GUISlider* horizontalSlider;
 	GUITextBox* textBox;
+	GUIGroup* radioCheckBoxGroup;
 public:
 	virtual ~Test() {}
 
@@ -107,15 +111,15 @@ void Test::created() {
 
 	GUIButton* dropDownMenuButton = new GUIButton("File", 200, 20, colours);
 	dropDownMenu = new GUIDropDownMenu(dropDownMenuButton);
-	dropDownMenu->addButton(new GUIButton("Save", 200, 20, colours));
-	dropDownMenu->addButton(new GUIButton("Save As", 200, 20, colours));
+	dropDownMenu->createButton("Save");
+	dropDownMenu->createButton("Save As");
 	dropDownMenu->setPosition(400, 20);
 
 	GUIButton* dropDownListButton = new GUIButton("Select", 200, 20, colours);
-	dropDownList = new GUIDropDownList(dropDownListButton, ResourceLoader::sLoadTexture("C:/UnnamedEngine/GUIDropDownOverlayClosed.png"), ResourceLoader::sLoadTexture("C:/UnnamedEngine/GUIDropDownOverlayOpened.png"));
-	dropDownList->addButton(new GUIButton("800 x 600", 200, 20, colours));
-	dropDownList->addButton(new GUIButton("1280 x 720", 200, 20, colours));
-	dropDownList->addButton(new GUIButton("1920 x 1080", 200, 20, colours));
+	dropDownList = new GUIDropDownList(dropDownListButton, ResourceLoader::sLoadTexture("C:/UnnamedEngine/textures/DropDownOverlayClosed.png"), ResourceLoader::sLoadTexture("C:/UnnamedEngine/textures/DropDownOverlayOpened.png"));
+	dropDownList->createButton("800 x 600");
+	dropDownList->createButton("1280 x 720");
+	dropDownList->createButton("1920 x 1080");
 	dropDownList->setPosition(700, 20);
 
 	label = new GUILabel("Hello World!");
@@ -139,6 +143,22 @@ void Test::created() {
 	//textBox->borderEnabled = true;
 	textBox->selection->setColour(Colour(Colour::LIGHT_BLUE, 0.2f));
 
+	radioCheckBoxGroup = new GUIGroup();
+	GUIRadioCheckBox* box0 = new GUIRadioCheckBox("Box 0", 20, 20, colours);
+	box0->setPosition(0, 0);
+	box0->setBorder(new GUIBorder(box0, 2, Colour::ORANGE));
+	GUIRadioCheckBox* box1 = new GUIRadioCheckBox("Box 1", 20, 20, colours);
+	box1->setPosition(0, 25);
+	box1->setBorder(new GUIBorder(box1, 2, Colour::ORANGE));
+	GUIRadioCheckBox* box2 = new GUIRadioCheckBox("Box 2", 20, 20, colours);
+	box2->setPosition(0, 50);
+	box2->setBorder(new GUIBorder(box2, 2, Colour::ORANGE));
+	radioCheckBoxGroup->add(box0);
+	radioCheckBoxGroup->add(box1);
+	radioCheckBoxGroup->add(box2);
+	radioCheckBoxGroup->setPosition(700, 400);
+	radioCheckBoxGroup->show(); //Find a way to remove this
+
 	panel->add(button);
 	panel->add(loadingBar);
 	panel->add(checkBox);
@@ -148,12 +168,18 @@ void Test::created() {
 	panel->add(verticalSlider);
 	panel->add(horizontalSlider);
 	panel->add(textBox);
+	panel->add(radioCheckBoxGroup);
 
 	panel->show();
 
 	//panel->enable();
 
+	getWindow()->centreCursor();
 	Renderer::addCamera(camera);
+
+	MLDocument document;
+	document.load("C:/Users/Joel/Desktop/Idea.xml");
+	//document.save("C:/Users/Joel/Desktop/Test.xml");
 }
 
 void Test::update() {
