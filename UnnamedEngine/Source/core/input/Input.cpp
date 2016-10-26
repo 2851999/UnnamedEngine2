@@ -59,9 +59,18 @@ void InputManager::updateControllers() {
 		controllers[i]->checkInput();
 }
 
-/* Used to add a controller */
 void InputManager::addController(Controller* controller) {
 	controllers.push_back(controller);
+}
+
+void InputManager::removeController(Controller* controller) {
+	controllers.erase(std::remove(controllers.begin(), controllers.end(), controller), controllers.end());
+}
+
+void InputManager::releaseControllers() {
+	for (unsigned int i = 0; i < controllers.size(); i++)
+		delete controllers[i];
+	controllers.clear();
 }
 
 void InputManager::keyCallback(int key, int scancode, int action, int mods) {

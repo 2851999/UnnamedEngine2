@@ -33,7 +33,8 @@ class Player : public Ship, public InputListener {
 private:
 	/* Input axis/buttons */
 	InputBindingAxis* axisForward;
-	InputBindingAxis* axisSideways;
+	InputBindingAxis* lookX;
+	InputBindingAxis* lookY;
 	InputBindingButton* buttonShoot;
 
 	/* The player's score */

@@ -115,8 +115,14 @@ public:
 	/* Updates the attached controllers */
 	void updateControllers();
 
-	/* Used to add a controller */
+	/* Method used to add a controller */
 	void addController(Controller* controller);
+
+	/* Method used to remove a controller */
+	void removeController(Controller* controller);
+
+	/* Method used to release all of the controllers */
+	void releaseControllers();
 
 	/* Returns the CursorData structure */
 	inline CursorData& getCursorData() { return cursorData; }

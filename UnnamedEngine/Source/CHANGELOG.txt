@@ -1,4 +1,44 @@
 --------------------------------------------------------------
+Release 0 | Beta 1 | Development 5 (V0.1.3)
+
+* Added methods to remove a controller from an InputManager
+  as well as to release all controllers
+
+* Fixed bug: InputBindings assigned the keyboard key for an
+             InputBindingButton to the mouse button when
+             loading
+* Fixed bug: InputBindings assigned the keyboard key for an
+             InputBindingButton to the mouse button when
+             loading
+             
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 4 | Experimental 3
+
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 4 | Experimental 2
+
+* Added methods to remove a controller from an InputManager
+  as well as to release all controllers
+
+* Fixed bug: InputBinding's continued to wait for input even
+             after receiving it
+             
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 4 | Experimental 1
+
+* Fixed bug: InputBindings assigned the keyboard key for an
+             InputBindingButton to the mouse button when
+             loading
+             
+* More Asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 4 (V0.1.2)
 
 * Added GUIGroup
