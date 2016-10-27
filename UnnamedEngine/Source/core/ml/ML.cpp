@@ -123,29 +123,32 @@ std::string MLDocument::toString() {
  *****************************************************************************/
 
 MLParser::MLParser() {
-
+	inComment = false;
 }
 
 void MLParser::parse(std::string line) {
 	//Try and locate the start of a tag
 	std::size_t startLoc = line.find("<");
 	//Ensure the sequence has been found
-	if (startLoc != std::string::npos) {
+	if (startLoc != std::string::npos && ! inComment) {
+		//Check for a comment
+		if (StrUtils::strStartsWith(line.substr(startLoc + 1), "!--"))
+			inComment = true;
 
-		//Locate the end of the current tag
-		std::size_t endLoc = line.find(">");
+		//Ensure the current line isn't part of a comment
+		if (! inComment) {
+			//Locate the end of the current tag
+			std::size_t endLoc = line.find(">");
 
-		//Ensure the end was found
-		if (endLoc != std::string::npos) {
-			//Now extract the tag
-			std::string tag = line.substr(startLoc + 1, endLoc - (startLoc + 1));
-			//Now extract any remaining data within the line
-			std::string remaining = line.substr(endLoc + 1);
+			//Ensure the end was found
+			if (endLoc != std::string::npos) {
+				//Now extract the tag
+				std::string tag = line.substr(startLoc + 1, endLoc - (startLoc + 1));
+				//Now extract any remaining data within the line
+				std::string remaining = line.substr(endLoc + 1);
 
-			//std::cout << tag << std::endl;
+				//std::cout << tag << std::endl;
 
-			//Check for a comment
-			if (! StrUtils::strStartsWith(tag, "!--")) {
 				//Ensure the current tag is not closing a previous  one
 				if (! StrUtils::strStartsWith(tag, "/")) {
 					//A new element has been declared so parse it
@@ -170,15 +173,17 @@ void MLParser::parse(std::string line) {
 					} else
 						Logger::log("Element '" + name + "' cannot be closed as another element is still open", "MLDocument", Logger::Warning);
 				}
+
+				//Check whether anything else is on the same line
+				if (remaining.size() > 0)
+					//Parse the remaining text
+					parse(remaining);
 			}
-
-
-			//Check whether anything else is on the same line
-			if (remaining.size() > 0)
-				//Parse the remaining text
-				parse(remaining);
 		}
 	}
+	//Check whether a comment ends on the current line
+	if (inComment && StrUtils::strEndsWith(line, "-->"))
+		inComment = false;
 }
 
 MLElement MLParser::parseElement(std::string line) {

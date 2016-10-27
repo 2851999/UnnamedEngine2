@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 0 | Experimental 2
+
+* Added multi-line comments in ML
+* Added time stamps to logs
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 0 | Experimental 1
 
 * Fixed bug: FPSLimiter didn't work properly when VSync was

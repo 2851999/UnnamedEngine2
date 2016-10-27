@@ -18,6 +18,19 @@
 
 #include "Logging.h"
 
+#include "Utils.h"
+
 namespace Logger {
 	LogType logLevel = LogType::Debug | LogType::Information | LogType::Warning | LogType::Error;
+
+	bool includeTimeStamp = true;
+
+	void log(std::string message, LogType type) {
+		if (shouldLog(type)) {
+			std::string m = "[" + logTypeString(type) + "]" + message;
+			if (includeTimeStamp)
+				m = "[" + TimeUtils::getTimeAsString() + "]" + m;
+			std::cout << m << std::endl;
+		}
+	}
 };

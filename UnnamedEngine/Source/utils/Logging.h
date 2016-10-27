@@ -26,7 +26,6 @@
  *****************************************************************************/
 
 namespace Logger {
-
 	/* Log types */
 	enum LogType {
 		Debug       = 1,
@@ -57,14 +56,14 @@ namespace Logger {
 	/* The current log level */
 	extern LogType logLevel;
 
+	/* Some logger settings that can be modified */
+	extern bool includeTimeStamp;
+
 	/* Determines whether a log should be printed based on the current log level */
 	inline bool shouldLog(LogType type) { return logLevel & type; }
 
 	/* Various log functions */
-	inline void log(std::string message, LogType type) {
-		if (shouldLog(type))
-			std::cout << "[" + logTypeString(type) + "]" + message << std::endl;
-	}
+	void log(std::string message, LogType type);
 
 	inline void log(std::string message) {
 		log(" " + message, LogType::Debug);

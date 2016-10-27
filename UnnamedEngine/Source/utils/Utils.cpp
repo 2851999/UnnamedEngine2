@@ -170,6 +170,8 @@ namespace FileUtils {
  * Various file utilities
  *****************************************************************************/
 
+#include <ctime>
+
 namespace TimeUtils {
 	double getSeconds() {
 		return glfwGetTime();
@@ -179,13 +181,29 @@ namespace TimeUtils {
 		//For Windows
 		Sleep(milliseconds);
 	}
+
+	std::string getTimeAsString() {
+		time_t t = time(NULL);
+		struct tm* now = localtime(&t);
+
+		std::string hour = StrUtils::str(now->tm_hour);
+		std::string minute = StrUtils::str(now->tm_min);
+		std::string second = StrUtils::str(now->tm_sec);
+
+		if (hour.length() == 1)
+			hour = "0" + hour;
+		if (minute.length() == 1)
+			minute = "0" + minute;
+		if (second.length() == 1)
+			second = "0" + second;
+
+		return hour + ":" + minute + ":" + second;
+	}
 }
 
 /*****************************************************************************
  * Various random utilities
  *****************************************************************************/
-
-#include <ctime>
 
 namespace RandomUtils {
 	/* Method used to initialise the random generator with the current time */

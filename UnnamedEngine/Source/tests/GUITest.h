@@ -177,8 +177,10 @@ void Test::created() {
 	getWindow()->centreCursor();
 	Renderer::addCamera(camera);
 
-	MLDocument document;
-	document.load("C:/Users/Joel/Desktop/Idea.xml");
+//	MLDocument document;
+//	document.load("H:/Storage/Users/Joel/Desktop/Idea.xml");
+//	for (MLElement& elem : document.getRoot().getChildren())
+//		std::cout << elem.getName() << std::endl;
 	//document.save("C:/Users/Joel/Desktop/Test.xml");
 }
 
