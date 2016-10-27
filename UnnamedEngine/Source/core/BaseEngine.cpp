@@ -86,6 +86,7 @@ void BaseEngine::create() {
 	//The main game loop - continues until either the window is told to close,
 	//or the game requests it to stop
 	while ((! window->shouldClose()) && (! closeRequested)) {
+		fpsLimiter.start();
 		fpsCalculator.update();
 
 		update();
@@ -96,7 +97,7 @@ void BaseEngine::create() {
 
 		window->update();
 
-		fpsLimiter.update(fpsCalculator.getDelta());
+		fpsLimiter.update();
 	}
 
 	//Tell the game to destroy everything it created

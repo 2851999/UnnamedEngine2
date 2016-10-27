@@ -1,4 +1,99 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 0 | Experimental 1
+
+* Fixed bug: FPSLimiter didn't work properly when VSync was
+             enabled
+
+* Note: Started shader cleanup
+
+--------------------------------------------------------------
+Release 0 | Beta 2 (V0.1.3)
+
+* Added MLAttribute
+* Added MLElement
+* Added MLDocument
+* Added MLParser
+* Added Mouse
+* Added Keyboard
+* Added GUIGroup
+* Added GUIRadioCheckBox
+* Added methods in Window to set the cursor position and
+  centre the cursor
+* Added new Camera2D and 3D constructors
+* Added getCursorPosition in Window
+* Added save and load methods in InputBindings to allow input
+  bindings to be saved/loaded from an ML file
+* Added re-written BaseEngineTest3D using a new BaseTest3D
+  class
+* Added new GameObject2D and GameObject3D constructors
+* Added some examples:
+	- BasicSetup
+	- BasicInput
+	- BasicRendering
+* Added createButton in GUIDropDownMenu
+* Added new GameObject2D and 3D constructors
+* Added new PhysicsObject2D and 3D constructors
+* Added geometry shader support
+* Added onButtonAssigned and onAxisAssigned methods in the
+  InputBindingListener class
+* Added waitForInputPos and waitForInputNeg methods in the
+  InputBindingAxis class
+* Added methods to remove a controller from an InputManager
+  as well as to release all controllers
+  
+* Changed Font so that it now creates a bigger bitmap font
+  than required and scales it down, improving quality
+* Changed GUIComponent so that setActive will now reset
+  the render index to 0
+* Changed setColour and setTexture methods in
+  GUIComponentRenderer
+* Changed writeToFile and readFromFile methods in
+  SettingsUtils to use ML
+* Changed DebugCamera's constructor to allow a custom
+  InputBindings instance to be provided
+* Changed Light so that it has its diffuse and specular
+  colours set to Colour::WHITE by default
+* Changed GUIPanel to inherit from GUIGroup
+  
+* Moved Frustum.h to the experimental folder
+* Moved loadModel from Model to Mesh
+
+* Removed Cubemap.h (Contents moved to Texture.h)
+* Removed Cubemap.cpp (Contents moved to Texture.cpp)
+* Removed the 'name' variable in PhysicsObject
+* Removed glValue and boolValue in GLUtils
+* Removed Model
+  
+* Fixed bug: Shadows didn't work
+* Fixed bug: InputBindings getButtonBinding and
+             getAxisBinding methods caused a crash if the
+             binding wasn't found
+* Fixed bug: A high FPS meant that the delta would become 0,
+             so it couldn't be used to regulate movement,
+             this is now fixed but will mean that the FPS
+             reading for PER_FRAME is not very accurate
+             at high frame rates
+
+* More asteroids development
+
+* Note: Cleanup
+
+--------------------------------------------------------------
+Release 0 | Beta 1 | Development 5 (V0.1.3)
+
+* Added methods to remove a controller from an InputManager
+  as well as to release all controllers
+
+* Fixed bug: InputBindings assigned the keyboard key for an
+             InputBindingButton to the mouse button when
+             loading
+* Fixed bug: InputBindings assigned the keyboard key for an
+             InputBindingButton to the mouse button when
+             loading
+             
+* More Asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 1 | Development 4 | Experimental 3
 
 * More Asteroids development
