@@ -98,6 +98,14 @@ namespace MathsUtils {
 		else
 			return b;
 	}
+
+	template<typename T>
+	inline T abs(T value) {
+		if (value < 0)
+			return -value;
+		else
+			return value;
+	}
 }
 
 /*****************************************************************************

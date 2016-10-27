@@ -1,4 +1,39 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 1 | Experimental 1
+
+* Added a way to invert the controller axis in
+  InputBindingAxis
+* Added abs method in MathsUtils
+* Added support for dead zones in InputBindingAxis
+
+* Fixed bug: Random controller noise could assign an
+             InputBindingAxis - this also improves assignment
+             making it harder to accidentally assign the
+             wrong axis
+  
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 1 (V0.1.4)
+
+* Added multi-line comments in ML
+* Added time stamps to logs
+* Added method in InputManager to add all available
+  controllers
+* Added the ability to make the Logger output to a file
+
+* Changed Logger to be a class instead of a namespace
+
+* Fixed bug: FPSLimiter didn't work properly when VSync was
+             enabled
+* Fixed bug: InputBindings would sometimes create a new
+			 controller instance when it wasn't supposed to
+
+* Note: Started shader cleanup
+
+* More Asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 0 | Experimental 4
 
 * Added the ability to make the Logger output to a file

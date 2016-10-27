@@ -61,10 +61,17 @@ HUD::HUD(AsteroidsGame* game, Player* player) : player(player) {
 	add(barPlayerShield);
 	add(labelShield);
 	add(labelScore);
+
+	//Create the cross hair
+	crossHair = new GameObject2D(new Mesh(MeshBuilder::createQuad(8, 8, game->getResources().getTextureCrossHair())), "Material");
+	crossHair->getMaterial()->setDiffuseTexture(game->getResources().getTextureCrossHair());
+	crossHair->setPosition(windowWidth / 2 - crossHair->getWidth() / 2, windowHeight / 2 - crossHair->getHeight() / 2);
+	crossHair->update();
 }
 
 HUD::~HUD() {
 	//Delete created resources
+	delete crossHair;
 	delete camera;
 }
 
@@ -89,6 +96,9 @@ void HUD::render() {
 
 	//Render the panel
 	GUIPanel::render();
+
+	//Render the cross hair
+	crossHair->render();
 
 	//Remove the camera
 	Renderer::removeCamera();

@@ -146,6 +146,8 @@ private:
 	/* Controller axis */
 	Controller* controller = NULL;
 	int controllerAxis = -1;
+	bool controllerAxisInverted = false;
+	float controllerAxisDeadZone = 0.0f;
 
 	/* The current axis value */
 	float value = 0;
@@ -165,6 +167,9 @@ public:
 	inline void assignKeyNeg(int keyNegative) { keyboardKeyNegative = keyNegative; }
 	inline void assignKeys(int keyPositive, int keyNegative) { keyboardKeyPositive = keyPositive; keyboardKeyNegative = keyNegative; }
 	inline void assignControllerAxis(Controller* controller, int axis) { this->controller = controller; controllerAxis = axis; }
+	inline void assignControllerAxis(Controller* controller, int axis, bool invert) { this->controller = controller; controllerAxis = axis; controllerAxisInverted = invert; }
+	inline void assignControllerAxis(Controller* controller, int axis, float deadZone) { this->controller = controller; controllerAxis = axis; controllerAxisDeadZone = deadZone; }
+	inline void assignControllerAxis(Controller* controller, int axis, bool invert, float deadZone) { this->controller = controller; controllerAxis = axis; controllerAxisInverted = invert; controllerAxisDeadZone = deadZone; }
 
 	/* Setters and getters */
 	inline void waitForInputPos() { waitingForInput = true; waitingForPos = true; }
@@ -175,6 +180,9 @@ public:
 		waitingForNeg = false;
 	}
 
+	inline void setControllerAxisInverted(bool invert) { controllerAxisInverted = invert; }
+	inline void setControllerAxisDeadZone(float deadZone) { controllerAxisDeadZone = deadZone; }
+
 	inline int getKeyboardKeyPos() { return keyboardKeyPositive; }
 	inline bool hasKeyboardKeyPos() { return keyboardKeyPositive != -1; }
 	inline int getKeyboardKeyNeg() { return keyboardKeyNegative; }
@@ -183,6 +191,8 @@ public:
 	inline bool hasController() { return controller; }
 	inline int getControllerAxis() { return controllerAxis; }
 	inline bool hasControllerAxis() { return controllerAxis != -1; }
+	inline bool getControllerAxisInverted() { return controllerAxisInverted; }
+	inline float getControllerAxisDeadZone() { return controllerAxisDeadZone; }
 	inline float getValue() { return value; }
 
 	/* Input methods */

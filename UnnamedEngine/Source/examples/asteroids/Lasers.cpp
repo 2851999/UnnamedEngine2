@@ -177,7 +177,7 @@ void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f
 		//Assign the object's properties
 		objects[nextIndex]->setPosition(position);
 		objects[nextIndex]->setVelocity(currentVelocity + (front * 20.0f));
-		objects[nextIndex]->setRotation(rotation * Vector3f(0.0f, -1.0f, 0.0f));
+		//objects[nextIndex]->setRotation(rotation * Vector3f(0.0f, -1.0f, 0.0f));
 		timesLeft[nextIndex] = 3.0f;
 
 		//Play the sound effect
