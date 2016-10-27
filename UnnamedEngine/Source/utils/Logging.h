@@ -21,27 +21,28 @@
 
 #include <iostream>
 
+/* Log types */
+enum LogType {
+	Debug       = 1,
+	Information = 2,
+	Warning     = 4,
+	Error       = 8
+};
+
+/* Provides flag functionality for log levels */
+inline LogType operator|(LogType a, LogType b) {
+	return static_cast<LogType>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+
 /*****************************************************************************
- * Stuff for logging
+ * The Logger class used for logging
  *****************************************************************************/
 
-namespace Logger {
-
-	/* Log types */
-	enum LogType {
-		Debug       = 1,
-		Information = 2,
-		Warning     = 4,
-		Error       = 8
-	};
-
-	/* Provides flag functionality for log levels */
-	inline LogType operator|(LogType a, LogType b) {
-		return static_cast<LogType>(static_cast<int>(a) | static_cast<int>(b));
-	}
-
+class Logger {
+private:
 	/* Used to get a string representation of a log type */
-	inline std::string logTypeString(LogType type) {
+	static inline std::string logTypeString(LogType type) {
 		if (type == LogType::Debug)
 			return "DEBUG";
 		else if (type == LogType::Information)
@@ -54,27 +55,37 @@ namespace Logger {
 			return "UNKNOWN";
 	}
 
+	/* States whether logs should be saved to a file */
+	static bool saveLogsToFile;
+
+	/* The file output stream to put new logs into */
+	static std::ofstream fileOutputStream;
+public:
 	/* The current log level */
-	extern LogType logLevel;
+	static LogType logLevel;
+
+	/* Some logger settings that can be modified */
+	static bool includeTimeStamp;
 
 	/* Determines whether a log should be printed based on the current log level */
-	inline bool shouldLog(LogType type) { return logLevel & type; }
+	static inline bool shouldLog(LogType type) { return logLevel & type; }
+
+	/* Method to start saving the logs */
+	static void startFileOutput(std::string path);
+
+	/* Method to stop saving the logs */
+	static void stopFileOutput();
 
 	/* Various log functions */
-	inline void log(std::string message, LogType type) {
-		if (shouldLog(type))
-			std::cout << "[" + logTypeString(type) + "]" + message << std::endl;
-	}
+	static void log(std::string message, LogType type);
 
-	inline void log(std::string message) {
+	static inline void log(std::string message) {
 		log(" " + message, LogType::Debug);
 	}
 
-	inline void log(std::string message, std::string source, LogType type) {
+	static inline void log(std::string message, std::string source, LogType type) {
 		log("[" + source + "] " + message, type);
 	}
-
-}
-
+};
 
 #endif /* UTILS_LOGGING_H_ */

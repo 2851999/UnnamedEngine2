@@ -47,7 +47,7 @@ Camera* Renderer::getCamera() {
 	if (cameras.size() > 0)
 		return cameras.back();
 	else {
-		Logger::log("No Camera added, nothing will render", "Renderer", Logger::Warning);
+		Logger::log("No Camera added, nothing will render", "Renderer", LogType::Warning);
 		return NULL;
 	}
 }
@@ -215,7 +215,7 @@ RenderShader* Renderer::getRenderShader(std::string id) {
 	if (renderShaders.count(id) > 0)
 		return renderShaders.at(id);
 	else {
-		Logger::log("The RenderShader with the id '" + id + "' could not be found", "Renderer", Logger::Error);
+		Logger::log("The RenderShader with the id '" + id + "' could not be found", "Renderer", LogType::Error);
 		return NULL;
 	}
 }

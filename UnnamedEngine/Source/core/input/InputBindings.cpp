@@ -222,7 +222,7 @@ InputBindingButton* InputBindings::getButtonBinding(std::string name) {
 		return buttonBindings.at(name);
 	else {
 		//Log an error
-		Logger::log("No button binding with the name '" + name + "'", "InputBindings", Logger::Error);
+		Logger::log("No button binding with the name '" + name + "'", "InputBindings", LogType::Error);
 		//Return
 		return NULL;
 	}
@@ -235,7 +235,7 @@ InputBindingAxis* InputBindings::getAxisBinding(std::string name) {
 		return axisBindings.at(name);
 	else {
 		//Log an error
-		Logger::log("No axis binding with the name '" + name + "'", "InputBindings", Logger::Error);
+		Logger::log("No axis binding with the name '" + name + "'", "InputBindings", LogType::Error);
 		//Return
 		return NULL;
 	}
@@ -336,9 +336,10 @@ void InputBindings::load(std::string path, InputManager* inputManager) {
 					else if (attrib.getName() == "name")
 						name = attrib.getData();
 				}
+				//Get the controller index
+				index = ControllerUtils::findController(index, name);
 				//Add the controller if required
-				if (controllers.count(index) < 1) {
-					int index = ControllerUtils::findController(index, name);
+				if (controllers.count(index) < 1 && index > -1) {
 					if (index >= 0) {
 						currentController = new Controller(index);
 						controllers.insert(std::pair<int, Controller*>(index, currentController));

@@ -133,6 +133,9 @@ namespace TimeUtils {
 
 	/* Pauses the thread for a set amount of time given in milliseconds */
 	void sleep(long milliseconds);
+
+	/* Returns the current time as a string */
+	std::string getTimeAsString();
 }
 
 /*****************************************************************************

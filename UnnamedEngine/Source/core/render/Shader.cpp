@@ -55,7 +55,7 @@ void Shader::attach(GLuint shader) {
 	if (! status) {
 		GLchar error[1024];
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
-		Logger::log("Error linking shader" + StrUtils::str(error), "Shader", Logger::LogType::Error);
+		Logger::log("Error linking shader" + StrUtils::str(error), "Shader", LogType::Error);
 	}
 
 	status = 0;
@@ -64,7 +64,7 @@ void Shader::attach(GLuint shader) {
 	if (! status) {
 		GLchar error[1024];
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
-		Logger::log("Error validating shader program " + StrUtils::str(error), "Shader", Logger::LogType::Error);
+		Logger::log("Error validating shader program " + StrUtils::str(error), "Shader", LogType::Error);
 	}
 }
 
@@ -93,14 +93,14 @@ void Shader::destroy() {
 void Shader::addUniform(std::string id, std::string name) {
 	GLint location = glGetUniformLocation(program, name.c_str());
 	if (location == -1)
-		Logger::log("Could not find uniform with the name '" + name + "'", "Shader", Logger::LogType::Warning);
+		Logger::log("Could not find uniform with the name '" + name + "'", "Shader", LogType::Warning);
 	uniforms.insert(std::pair<std::string, GLint>(id, location));
 }
 
 void Shader::addAttribute(std::string id, std::string name) {
 	GLint location = glGetAttribLocation(program, name.c_str());
 	if (location == -1)
-		Logger::log("Could not find attribute with the name '" + name + "'", "Shader", Logger::LogType::Warning);
+		Logger::log("Could not find attribute with the name '" + name + "'", "Shader", LogType::Warning);
 	attributes.insert(std::pair<std::string, GLint>(id, location));
 }
 
@@ -114,7 +114,7 @@ GLint Shader::getUniformLocation(std::string id) {
 
 GLint Shader::getAttributeLocation(std::string id) {
 	if (! attributes.count(id)) {
-		Logger::log("The attribute with the id '" + id + "' was not added", "Shader", Logger::LogType::Debug);
+		Logger::log("The attribute with the id '" + id + "' was not added", "Shader", LogType::Debug);
 		return -1;
 	} else
 		return attributes.at(id);
@@ -169,7 +169,7 @@ GLint Shader::createShader(std::string source, GLenum type) {
 	if (! status) {
 		GLchar error[1024];
 		glGetShaderInfoLog(shader, sizeof(error), NULL, error);
-		Logger::log("Error compiling shader: " + StrUtils::str(error) + " Source:\n" + source, "Shader", Logger::LogType::Error);
+		Logger::log("Error compiling shader: " + StrUtils::str(error) + " Source:\n" + source, "Shader", LogType::Error);
 
 		glDeleteShader(shader);
 

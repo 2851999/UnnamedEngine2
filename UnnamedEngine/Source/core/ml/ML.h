@@ -127,6 +127,9 @@ private:
 	/* The currently loaded elements that are still open, so are being
 	 * added to */
 	std::vector<MLElement> elements;
+
+	/* States whether the parser is currently parsing a comment */
+	bool inComment;
 public:
 	/* The constructor */
 	MLParser();

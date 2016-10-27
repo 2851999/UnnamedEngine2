@@ -1,3 +1,21 @@
+/*****************************************************************************
+ *
+ *   Copyright 2016 Joel Davies
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ *****************************************************************************/
+
 #version 140
 
 #define MAX_LIGHTS 6
@@ -17,8 +35,10 @@ struct Material {
 	float shininess;
 };
 
+//The material to use
 uniform Material material;
 
+//The light structure contains all data that may be needed for a light
 struct Light {
 	int  type;
 
@@ -36,20 +56,28 @@ struct Light {
 	float outerCutoff;
 };
 
+//The lights to render
 uniform Light lights[MAX_LIGHTS];
 
+//The number of lights actually assigned
 uniform int numLights;
+//The ambient light to use
 uniform vec3 light_ambient;
+//The current camera position
 uniform vec3 camera_position;
 
+//The environment map (experimental)
 uniform samplerCube environmentMap;
 uniform bool useEnvironmentMap;
 
+//States whether the normal map should be used
 uniform bool useNormalMap;
 
-uniform bool useShadowMap;
+//The shadow map
 uniform sampler2D shadowMap;
+uniform bool useShadowMap;
 
+//Data from the vertex shader
 in vec3 frag_position;
 in vec2 frag_textureCoord;
 in vec3 frag_normal;
@@ -57,8 +85,10 @@ in vec4 frag_pos_lightspace;
 
 in mat3 frag_tbnMatrix;
 
+//The final colour
 out vec4 FragColour;
 
+//Returns the result of directional lighting calculations
 vec3 calculateDirectionalLight(Light light, vec3 diffuseColour, vec3 specularColour, vec3 normal) {
 	vec3 lightDirection = normalize(-light.direction);
 	
@@ -74,6 +104,7 @@ vec3 calculateDirectionalLight(Light light, vec3 diffuseColour, vec3 specularCol
 	return diffuseLight + specularLight;
 }
 
+//Returns the result of point lighting calculations
 vec3 calculatePointLight(Light light, vec3 diffuseColour, vec3 specularColour, vec3 normal) {
 	vec4 diffuseTexColour = texture(material.diffuseTexture, frag_textureCoord);
 	
@@ -97,6 +128,7 @@ vec3 calculatePointLight(Light light, vec3 diffuseColour, vec3 specularColour, v
 	return diffuseLight + specularLight;
 }
 
+//Returns the result of spot lighting calculations
 vec3 calculateSpotLight(Light light, vec3 diffuseColour, vec3 specularColour, vec3 normal) {
 	vec3 lightDirection = normalize(light.position - frag_position);
 	
@@ -124,6 +156,7 @@ vec3 calculateSpotLight(Light light, vec3 diffuseColour, vec3 specularColour, ve
 	}
 }
 
+//Returns a float value which states how much in shadow a particular fragment is
 float calculateShadow(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal) {
 	//Perspective divide
 	vec3 projectedCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -169,14 +202,18 @@ void main() {
 		specularColour *= texture(environmentMap, R).rgb;
 	}
 	
-	vec3 normal = normalize(frag_normal);
+	//Calculate the normal
+	vec3 normal;
 	
 	if (useNormalMap) {
+		//Get the normal from the texture
 		normal = texture(material.normalMap, frag_textureCoord).rgb;
 		normal.y = 1 - normal.y;
 		
 		normal = normalize(normal * 2.0 - 1.0);
 		normal = normalize(frag_tbnMatrix * normal);
+	} else {
+		normal = normalize(frag_normal);
 	}
 	
 	//Go through the lights
@@ -193,5 +230,6 @@ void main() {
 			otherLight += calculateSpotLight(lights[i], diffuseColour.xyz, specularColour, normal);
 	}
 	
+	//Assign the colour
 	FragColour = vec4(ambientLight + otherLight, 1.0);
 }

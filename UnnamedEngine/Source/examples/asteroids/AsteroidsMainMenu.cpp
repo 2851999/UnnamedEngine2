@@ -415,6 +415,10 @@ void MainMenuSettingsControls::onComponentClicked(GUIComponent* component) {
 		bindings->getAxisBinding("LookX")->waitForInputPos();
 	else if (component == buttonLookXNeg)
 		bindings->getAxisBinding("LookX")->waitForInputNeg();
+	else if (component == buttonLookYPos)
+		bindings->getAxisBinding("LookY")->waitForInputPos();
+	else if (component == buttonLookYNeg)
+		bindings->getAxisBinding("LookY")->waitForInputNeg();
 	else if (component == buttonShoot)
 		bindings->getButtonBinding("Shoot")->waitForInput();
 }

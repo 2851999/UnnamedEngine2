@@ -54,22 +54,35 @@ void InputManager::removeListener(InputListener* listener) {
 	listeners.erase(std::remove(listeners.begin(), listeners.end(), listener), listeners.end());
 }
 
+void InputManager::addAvailableControllers() {
+	//Go through each possible index
+	for (unsigned int i = GLFW_JOYSTICK_1; i < GLFW_JOYSTICK_LAST; i++) {
+		//Check that there is a controller at the current index
+		if (glfwJoystickPresent(i)) {
+			//Ensure this controller has not already been added
+			if (controllers.count(i) == 0)
+				//Add the controller
+				addController(new Controller(i));
+		}
+	}
+}
+
 void InputManager::updateControllers() {
-	for (unsigned int i = 0; i < controllers.size(); i++)
-		controllers[i]->checkInput();
+	for (auto const& controller : controllers)
+		controller.second->checkInput();
 }
 
 void InputManager::addController(Controller* controller) {
-	controllers.push_back(controller);
+	controllers.insert(std::pair<int, Controller*>(controller->getIndex(), controller));
 }
 
 void InputManager::removeController(Controller* controller) {
-	controllers.erase(std::remove(controllers.begin(), controllers.end(), controller), controllers.end());
+	controllers.erase(controller->getIndex());
 }
 
 void InputManager::releaseControllers() {
-	for (unsigned int i = 0; i < controllers.size(); i++)
-		delete controllers[i];
+	for (auto const& controller : controllers)
+		delete controller.second;
 	controllers.clear();
 }
 

@@ -25,8 +25,6 @@
  * The Window class
  *****************************************************************************/
 
-using namespace Logger;
-
 Window* Window::currentInstance;
 
 Window::Window() {
@@ -36,7 +34,7 @@ Window::Window() {
 bool Window::create() {
 	//Attempt to initialise GLFW
 	if (! glfwInit()) {
-		log("Failed to initialise GLFW", "Window", LogType::Error);
+		Logger::log("Failed to initialise GLFW", "Window", LogType::Error);
 		return false;
 	}
 
@@ -68,7 +66,7 @@ bool Window::create() {
 	instance = glfwCreateWindow(targetRes.getX(), targetRes.getY(), settings.windowTitle.c_str(), monitor, NULL);
 
 	if (! instance) {
-		log("Failed to create the window", "Window", LogType::Error);
+		Logger::log("Failed to create the window", "Window", LogType::Error);
 		glfwTerminate();
 		return false;
 	}
@@ -161,7 +159,7 @@ Vector2d Window::getCursorPosition() {
 
 Window* Window::getCurrentInstance() {
 	if (currentInstance == NULL)
-		Logger::log("No window is current", "Window", Logger::Warning);
+		Logger::log("No window is current", "Window", LogType::Warning);
 	return currentInstance;
 }
 

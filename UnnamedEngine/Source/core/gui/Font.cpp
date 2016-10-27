@@ -33,7 +33,7 @@ void Font::setup(std::string name, unsigned int size, Colour colour, TexturePara
 	//Attempt to get the font face
 	if (FT_New_Face(ftLibrary, name.c_str(), 0, &face)) {
 		//An error occurred obtaining the font so log an error
-		Logger::log("Failed to obtain the font face '" + name + "'", "Font", Logger::Error);
+		Logger::log("Failed to obtain the font face '" + name + "'", "Font", LogType::Error);
 		return;
 	}
 	//Assign the size
@@ -51,7 +51,7 @@ void Font::setup(std::string name, unsigned int size, Colour colour, TexturePara
 		//Attempt to load the current character
 		if (FT_Load_Char(face, i, FT_LOAD_RENDER)) {
 			//An error occurred loading the character so log an error
-			Logger::log("Failed to load the character'" + StrUtils::str((char) i) + "' in the font face '" + name + "'", "Font", Logger::Error);
+			Logger::log("Failed to load the character'" + StrUtils::str((char) i) + "' in the font face '" + name + "'", "Font", LogType::Error);
 			return;
 		}
 		//Add onto the width
@@ -303,7 +303,7 @@ void Font::initialiseFreeType() {
 	//Attempt to initialise FreeType
 	if (FT_Init_FreeType(&ftLibrary)) {
 		//An error occurred initialising FreeType so log an error
-		Logger::log("Failed to initialise FreeType", "Font", Logger::Error);
+		Logger::log("Failed to initialise FreeType", "Font", LogType::Error);
 	}
 }
 

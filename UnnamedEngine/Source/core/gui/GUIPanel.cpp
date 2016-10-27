@@ -97,7 +97,7 @@ void GUIPanelGroup::show(std::string id) {
 		//Show the current panel
 		current->show();
 	} else
-		Logger::log("GUIPanel with the id " + id + " hasn't been added", "GUIPanelGroup", Logger::Debug);
+		Logger::log("GUIPanel with the id " + id + " hasn't been added", "GUIPanelGroup", LogType::Debug);
 }
 
 void GUIPanelGroup::hideCurrent() {
