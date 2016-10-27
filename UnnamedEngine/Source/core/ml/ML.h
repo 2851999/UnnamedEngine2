@@ -128,7 +128,7 @@ private:
 	 * added to */
 	std::vector<MLElement> elements;
 
-	/* Determines whether the parser is currently parsing a comment */
+	/* States whether the parser is currently parsing a comment */
 	bool inComment;
 public:
 	/* The constructor */

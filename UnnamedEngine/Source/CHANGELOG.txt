@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 0 | Experimental 3
+
+* Added method in InputManager to add all available
+  controllers
+
+* Fixed bug: InputBindings would sometimes create a new
+			 controller instance when it wasn't supposed to
+
+* More Asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 0 | Experimental 2
 
 * Added multi-line comments in ML

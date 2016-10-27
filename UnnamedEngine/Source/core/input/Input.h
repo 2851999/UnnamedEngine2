@@ -20,6 +20,7 @@
 #define CORE_INPUT_INPUT_H_
 
 #include <vector>
+#include <map>
 
 #include "Controller.h"
 #include "../Vector.h"
@@ -100,7 +101,7 @@ private:
 	CursorData cursorData;
 
 	/* All of the added controllers */
-	std::vector<Controller*> controllers;
+	std::map<int, Controller*> controllers;
 public:
 	/* The constructor */
 	InputManager(Window* window) { this->window = window; }
@@ -111,6 +112,9 @@ public:
 	/* Various input methods */
 	void addListener(InputListener* listener);
 	void removeListener(InputListener* listener);
+
+	/* Method used to add all available controllers */
+	void addAvailableControllers();
 
 	/* Updates the attached controllers */
 	void updateControllers();

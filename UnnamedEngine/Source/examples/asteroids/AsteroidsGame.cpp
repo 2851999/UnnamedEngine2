@@ -67,6 +67,8 @@ void AsteroidsGame::created() {
 	//Load the controls
 	inputBindings->load(resourceLoader.getPath() + "settings/controls.txt", getWindow()->getInputManager());
 
+	getWindow()->getInputManager()->addAvailableControllers();
+
 	//Create the axis bindings
 //	InputBindingAxis* axisForward = inputBindings->createAxisBinding("Forward");
 //	InputBindingAxis* axisLookX = inputBindings->createAxisBinding("LookX");
