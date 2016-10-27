@@ -64,7 +64,7 @@ ResourceManager* ResourceManager::getCurrent() {
 	if (currentManagers.size() > 0)
 		return currentManagers[currentManagers.size() - 1];
 	else {
-		Logger::log("No ResourceManager's added", "ResourceManager", Logger::Error);
+		Logger::log("No ResourceManager's added", "ResourceManager", LogType::Error);
 		return NULL;
 	}
 }

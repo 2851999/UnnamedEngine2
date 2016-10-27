@@ -36,7 +36,7 @@ namespace StrUtils {
 		unsigned int value = 0;
 		std::stringstream ss(string);
 		if (! (ss >> value))
-			Logger::log("String " + string + " cannot be converted to unsigned integer", "StrUtils", Logger::Error);
+			Logger::log("String " + string + " cannot be converted to unsigned integer", "StrUtils", LogType::Error);
 		return value;
 	}
 
@@ -44,7 +44,7 @@ namespace StrUtils {
 		int value = 0;
 		std::stringstream ss(string);
 		if (! (ss >> value))
-			Logger::log("String " + string + " cannot be converted to integer", "StrUtils", Logger::Error);
+			Logger::log("String " + string + " cannot be converted to integer", "StrUtils", LogType::Error);
 		return value;
 	}
 
@@ -52,7 +52,7 @@ namespace StrUtils {
 		float value = 0.0;
 		std::stringstream ss(string);
 		if (! (ss >> value))
-			Logger::log("String " + string + " cannot be converted to float", "StrUtils", Logger::Error);
+			Logger::log("String " + string + " cannot be converted to float", "StrUtils", LogType::Error);
 		return value;
 	}
 
@@ -60,7 +60,7 @@ namespace StrUtils {
 		bool value = 0;
 		std::stringstream ss(string);
 		if (! (ss >> value))
-			Logger::log("String " + string + " cannot be converted to boolean", "StrUtils", Logger::Error);
+			Logger::log("String " + string + " cannot be converted to boolean", "StrUtils", LogType::Error);
 		return value;
 	}
 
@@ -114,7 +114,7 @@ namespace FileUtils {
 				output += line + "\n";
 			input.close();
 		} else
-			Logger::log("Could not open file: " + path, "FileUtils", Logger::Error);
+			Logger::log("Could not open file: " + path, "FileUtils", LogType::Error);
 		return output;
 	}
 
@@ -130,7 +130,7 @@ namespace FileUtils {
 				output.push_back(line);
 			input.close();
 		} else
-			Logger::log("Could not open file: " + path, "FileUtils", Logger::Error);
+			Logger::log("Could not open file: " + path, "FileUtils", LogType::Error);
 
 		return output;
 	}
@@ -144,7 +144,7 @@ namespace FileUtils {
 			output << text;
 			output.close();
 		} else
-			Logger::log("Could not open file: " + path, "FileUtils", Logger::Error);
+			Logger::log("Could not open file: " + path, "FileUtils", LogType::Error);
 	}
 
 	void writeFile(std::string path, std::vector<std::string> text) {
@@ -162,7 +162,7 @@ namespace FileUtils {
 			}
 			output.close();
 		} else
-			Logger::log("Could not open file: " + path, "FileUtils", Logger::Error);
+			Logger::log("Could not open file: " + path, "FileUtils", LogType::Error);
 	}
 }
 
@@ -204,6 +204,8 @@ namespace TimeUtils {
 /*****************************************************************************
  * Various random utilities
  *****************************************************************************/
+
+#include <cstdlib>
 
 namespace RandomUtils {
 	/* Method used to initialise the random generator with the current time */

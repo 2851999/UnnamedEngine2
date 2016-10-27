@@ -18,19 +18,46 @@
 
 #include "Logging.h"
 
+#include <fstream>
+
 #include "Utils.h"
 
-namespace Logger {
-	LogType logLevel = LogType::Debug | LogType::Information | LogType::Warning | LogType::Error;
+bool Logger::saveLogsToFile = false;
 
-	bool includeTimeStamp = true;
+std::ofstream Logger::fileOutputStream;
 
-	void log(std::string message, LogType type) {
-		if (shouldLog(type)) {
-			std::string m = "[" + logTypeString(type) + "]" + message;
-			if (includeTimeStamp)
-				m = "[" + TimeUtils::getTimeAsString() + "]" + m;
-			std::cout << m << std::endl;
+LogType Logger::logLevel = LogType::Debug | LogType::Information | LogType::Warning | LogType::Error;
+
+bool Logger::includeTimeStamp = true;
+
+void Logger::startFileOutput(std::string path) {
+	//Attempt to open the output stream
+	fileOutputStream.open(path.c_str(), std::ofstream::out | std::ofstream::app);
+	//Check whether the output stream was successfully opened
+	if (fileOutputStream.is_open())
+		saveLogsToFile = true;
+	else
+		//Log an error
+		log("Could not open file: " + path, "Logger", LogType::Error);
+}
+
+void Logger::stopFileOutput() {
+	//Ensure the output stream is currently open
+	if (fileOutputStream.is_open())
+		fileOutputStream.close();
+}
+
+void Logger::log(std::string message, LogType type) {
+	if (shouldLog(type)) {
+		std::string m = "[" + logTypeString(type) + "]" + message;
+		if (includeTimeStamp)
+			m = "[" + TimeUtils::getTimeAsString() + "]" + m;
+		std::cout << m << std::endl;
+		//Check whether the same message should be output to a file
+		if (saveLogsToFile) {
+			//Output the message
+			fileOutputStream << m << std::endl;
+			fileOutputStream.flush();
 		}
 	}
-};
+}

@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 0 | Experimental 4
+
+* Added the ability to make the Logger output to a file
+
+* Changed Logger to be a class instead of a namespace
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 0 | Experimental 3
 
 * Added method in InputManager to add all available

@@ -107,7 +107,7 @@ void MLDocument::load(std::string path) {
 		//Assign the root element of this document
 		root = parser.getDocumentRoot();
 	} else
-		Logger::log("Couldn't open the file with the path '" + path + "'", "MLDocument", Logger::Error);
+		Logger::log("Couldn't open the file with the path '" + path + "'", "MLDocument", LogType::Error);
 }
 
 void MLDocument::save(std::string path) {
@@ -171,7 +171,7 @@ void MLParser::parse(std::string line) {
 							elements.pop_back();
 						}
 					} else
-						Logger::log("Element '" + name + "' cannot be closed as another element is still open", "MLDocument", Logger::Warning);
+						Logger::log("Element '" + name + "' cannot be closed as another element is still open", "MLDocument", LogType::Warning);
 				}
 
 				//Check whether anything else is on the same line
@@ -245,7 +245,7 @@ MLElement MLParser::getDocumentRoot() {
 	//Check whether the document is valid
 	if (elements.size() != 1)
 		//More than one root node - possibly left one element open, so print an error
-		Logger::log("Invalid document - Can only have one root element (are any elements not closed properly?)", "MLParser", Logger::Error);
+		Logger::log("Invalid document - Can only have one root element (are any elements not closed properly?)", "MLParser", LogType::Error);
 	//Return the first element
 	return elements.at(0);
 }

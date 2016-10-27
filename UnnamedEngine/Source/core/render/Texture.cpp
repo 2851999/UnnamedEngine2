@@ -72,7 +72,7 @@ unsigned char* Texture::loadTexture(std::string path, int& numComponents, GLsize
 	//Check that the data was loaded
 	if (image == nullptr) {
 		//Log an error if not
-		Logger::log("Failed to load the image from the path '" + path + "'", "Texture", Logger::Error);
+		Logger::log("Failed to load the image from the path '" + path + "'", "Texture", LogType::Error);
 		return NULL;
 	}
 
@@ -170,6 +170,6 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 		applyParameters(false, true);
 	} else {
 		//Log an error
-		Logger::log("Need 6 faces for a cubemap texture", "Cubemap", Logger::Error);
+		Logger::log("Need 6 faces for a cubemap texture", "Cubemap", LogType::Error);
 	}
 }

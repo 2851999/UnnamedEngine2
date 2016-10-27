@@ -222,7 +222,7 @@ InputBindingButton* InputBindings::getButtonBinding(std::string name) {
 		return buttonBindings.at(name);
 	else {
 		//Log an error
-		Logger::log("No button binding with the name '" + name + "'", "InputBindings", Logger::Error);
+		Logger::log("No button binding with the name '" + name + "'", "InputBindings", LogType::Error);
 		//Return
 		return NULL;
 	}
@@ -235,7 +235,7 @@ InputBindingAxis* InputBindings::getAxisBinding(std::string name) {
 		return axisBindings.at(name);
 	else {
 		//Log an error
-		Logger::log("No axis binding with the name '" + name + "'", "InputBindings", Logger::Error);
+		Logger::log("No axis binding with the name '" + name + "'", "InputBindings", LogType::Error);
 		//Return
 		return NULL;
 	}

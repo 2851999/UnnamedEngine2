@@ -466,7 +466,7 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 		return meshes;
 	} else {
 		//Log an error as Assimp didn't manage to load the model correctly
-		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", Logger::Error);
+		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", LogType::Error);
 		return meshes;
 	}
 }

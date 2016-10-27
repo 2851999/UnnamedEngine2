@@ -18,6 +18,8 @@
 
 #include "AsteroidsGame.h"
 
+#include "../../utils/Logging.h"
+
 /*****************************************************************************
  * The AsteroidsGame class
  *****************************************************************************/
@@ -39,6 +41,8 @@ void AsteroidsGame::initialise() {
 	resourceLoader.setPathModels("models/");
 	resourceLoader.setPathShaders("shaders/");
 	resourceLoader.setPathAudio("audio/");
+
+	Logger::startFileOutput(resourceLoader.getPath() + "logs.txt");
 
 	//Setup the settings
 	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
@@ -130,6 +134,8 @@ void AsteroidsGame::render() {
 }
 
 void AsteroidsGame::destroy() {
+	Logger::stopFileOutput();
+
 	//Delete all created resources
 	delete soundSystem;
 	delete mainMenu;
