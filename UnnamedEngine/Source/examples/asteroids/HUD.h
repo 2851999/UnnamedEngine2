@@ -44,6 +44,9 @@ private:
 	/* Loading bar for the player's shield */
 	GUILoadingBar* barPlayerShield;
 
+	/* The cross hair object */
+	GameObject2D* crossHair;
+
 	/* The player instance */
 	Player* player;
 public:

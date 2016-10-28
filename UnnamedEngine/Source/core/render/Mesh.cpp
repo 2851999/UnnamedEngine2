@@ -256,7 +256,7 @@ void MeshRenderData::updatePositions(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateColours(MeshData* data) {
+void MeshRenderData::updateColours() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboColours->update();
@@ -264,7 +264,7 @@ void MeshRenderData::updateColours(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateTextureCoords(MeshData* data) {
+void MeshRenderData::updateTextureCoords() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboTextureCoords->update();
@@ -272,7 +272,7 @@ void MeshRenderData::updateTextureCoords(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateNormals(MeshData* data) {
+void MeshRenderData::updateNormals() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboNormals->update();
@@ -280,7 +280,7 @@ void MeshRenderData::updateNormals(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateTangents(MeshData* data) {
+void MeshRenderData::updateTangents() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboTangents->update();
@@ -288,7 +288,7 @@ void MeshRenderData::updateTangents(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateBitangents(MeshData* data) {
+void MeshRenderData::updateBitangents() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboBitangents->update();
@@ -533,6 +533,13 @@ void MeshBuilder::addQuadI(MeshData* data) {
 	data->addIndex(3);
 	data->addIndex(0);
 	data->addIndex(2);
+}
+
+void MeshBuilder::addQuadT(MeshData* data, float top, float left, float bottom, float right) {
+	data->addTextureCoord(Vector2f(left, top));
+	data->addTextureCoord(Vector2f(right, top));
+	data->addTextureCoord(Vector2f(right, bottom));
+	data->addTextureCoord(Vector2f(left, bottom));
 }
 
 /* 3D Stuff */

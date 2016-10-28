@@ -196,11 +196,11 @@ void Font::update(std::string text) {
 	}
 	if (billboarded) {
 		object3D->getMeshes()[0]->getRenderData()->updatePositions(data);
-		object3D->getMeshes()[0]->getRenderData()->updateTextureCoords(data);
+		object3D->getMeshes()[0]->getRenderData()->updateTextureCoords();
 		object3D->getMeshes()[0]->getRenderData()->updateIndices(data);
 	} else {
 		object2D->getMeshes()[0]->getRenderData()->updatePositions(data);
-		object2D->getMeshes()[0]->getRenderData()->updateTextureCoords(data);
+		object2D->getMeshes()[0]->getRenderData()->updateTextureCoords();
 		object2D->getMeshes()[0]->getRenderData()->updateIndices(data);
 	}
 }

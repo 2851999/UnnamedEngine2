@@ -60,10 +60,12 @@ public:
 	inline void setRenderShader(RenderShader* renderShader) { this->renderShader = renderShader; }
 
 	inline bool hasMesh() { return meshes.size() > 0; }
+	inline Mesh* getMesh() { return meshes[0]; }
 	inline std::vector<Mesh*>& getMeshes() { return meshes; }
 
 	/* Returns the material a MeshRenderData has, should not be used unless
 	 * the object has a Material */
+	inline bool hasMaterial() { return meshes[0]->getMaterial(); }
 	inline Material* getMaterial() { return meshes[0]->getMaterial(); }
 
 	inline RenderShader* getRenderShader() { return renderShader; }

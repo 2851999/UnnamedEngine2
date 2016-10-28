@@ -53,7 +53,7 @@ void RenderData::render() {
 			glDrawElementsInstanced(mode, count, GL_UNSIGNED_INT, (void*) NULL, primcount);
 		else
 			glDrawArraysInstanced(mode, 0, count, primcount);
-	} else {
+	} else if (primcount == -1) {
 		//Check for indices
 		if (vboIndices)
 			glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) NULL);

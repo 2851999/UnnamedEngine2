@@ -35,6 +35,7 @@ void AsteroidsResources::setup(ResourceLoader& loader) {
 
 	texturesButtons = { loader.loadTexture("Button.png"), loader.loadTexture("Button_Hover.png"), loader.loadTexture("Button_Clicked.png") };
 	textureShieldBar = loader.loadTexture("ShieldBar.png");
+	textureCrossHair = loader.loadTexture("CrossHair.png");
 
 	audioLaser = loader.loadAudio("lasermono.wav");
 	audioExplosion = loader.loadAudio("explosion.wav");

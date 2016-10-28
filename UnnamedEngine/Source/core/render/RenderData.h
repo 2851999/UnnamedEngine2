@@ -42,7 +42,7 @@ private:
 
 	/* States the number of instances to render, instancing is only used if
 	 * this value is greater than zero */
-	GLsizei primcount = 0;
+	GLsizei primcount = -1;
 public:
 	/* The constructor */
 	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}

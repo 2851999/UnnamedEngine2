@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-//#include "tests/GUITest.h"
+//#include "tests/BaseEngineTest2D.h"
 //#include "examples/basic/BasicRendering.h"
 #include "examples/asteroids/AsteroidsGame.h"
 

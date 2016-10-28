@@ -23,12 +23,15 @@
 #include "../core/render/Camera.h"
 #include "../core/render/Renderer.h"
 #include "../core/gui/Font.h"
+#include "../core/Sprite.h"
+#include "../utils/GLUtils.h"
 
 class Test : public BaseEngine {
 private:
 	Camera2D* camera;
 	GameObject2D* object;
 	Font* font;
+	Sprite2D* sprite;
 public:
 	virtual ~Test() {}
 
@@ -62,14 +65,20 @@ void Test::initialise() {
 
 void Test::created() {
 	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));
-	object = new GameObject2D({ new Mesh(MeshBuilder::createQuad(200, 200, texture)) }, "Material");
+	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), "Material");
 	object->setSize(200, 200);
 	object->setPosition(getSettings().windowWidth / 2 - 100, getSettings().windowHeight / 2 - 100);
 	object->getMaterial()->setDiffuseTexture(texture);
 	object->getMaterial()->setDiffuseColour(Colour::WHITE);
 	object->update();
 
-	camera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
+	sprite = new Sprite2D(texture, 100, 100);
+	sprite->setPosition(400, 100);
+	//Animation2D* animation = new TextureAnimation2D(sprite, new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/ParticleAtlas3.png"), 8, 8, 64), 0.05f);
+	sprite->addAnimation("Smoke", new TextureAnimation2D(new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/smoke.png"), 7, 7, 46), 0.05f, true));
+	sprite->startAnimation("Smoke");
+
+	camera = new Camera2D(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1);
 	camera->update();
 
 	Renderer::addCamera(camera);
@@ -78,13 +87,16 @@ void Test::created() {
 void Test::update() {
 	object->getRelRotation() += 0.1f * getDelta();
 	object->update();
+
+	sprite->update(getDeltaSeconds());
 }
 
 void Test::render() {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_TEXTURE_2D);
+	GLUtils::setupSimple2DView();
 
 	object->render();
+
+	sprite->render();
 }
 
 void Test::destroy() {
