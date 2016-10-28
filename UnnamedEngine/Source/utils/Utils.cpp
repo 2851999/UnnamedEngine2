@@ -98,6 +98,21 @@ namespace StrUtils {
 }
 
 /*****************************************************************************
+ * Various maths utilities
+ *****************************************************************************/
+
+namespace MathsUtils {
+	float clampToClosestInterval(float value, float interval) {
+		float remainder = fmod(value, interval);
+		if (remainder < interval / 2.0f)
+			value -= remainder;
+		else
+			value += (interval - remainder);
+		return value;
+	}
+}
+
+/*****************************************************************************
  * Various file utilities
  *****************************************************************************/
 

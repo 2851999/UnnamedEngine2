@@ -31,8 +31,8 @@ protected:
 	std::vector<GUIComponent*> components;
 public:
 	/* The constructor */
-	GUIGroup() {}
-	GUIGroup(std::vector<GUIComponent*> components) : components(components) {}
+	GUIGroup(float width = 0, float height = 0) { setWidth(width); setHeight(height); }
+	GUIGroup(std::vector<GUIComponent*>& components, float width = 0, float height = 0) : components(components) { setWidth(width), setHeight(height); }
 
 	/* The destructor */
 	virtual ~GUIGroup();

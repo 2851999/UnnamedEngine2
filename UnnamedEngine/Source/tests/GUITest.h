@@ -128,7 +128,7 @@ void Test::created() {
 	GUIButton* verticalSliderButton = new GUIButton("", 26, 10, colours);
 	verticalSlider = new GUISlider(verticalSliderButton, GUISlider::VERTICAL, 4, 110, Colour::WHITE);
 	verticalSlider->setPosition(20, 400);
-	verticalSlider->setInterval(10.0f);
+	verticalSlider->setInterval(0.1f);
 
 	GUIButton* horizontalSliderButton = new GUIButton("", 10, 26, colours);
 	horizontalSlider = new GUISlider(horizontalSliderButton, GUISlider::HORIZONTAL, 110, 4, Colour::WHITE);
@@ -183,11 +183,11 @@ void Test::created() {
 //		std::cout << elem.getName() << std::endl;
 	//document.save("C:/Users/Joel/Desktop/Test.xml");
 }
-
+#include <iostream>
 void Test::update() {
 	panel->update();
 
-	//std::cout << verticalSlider->getValue() << std::endl;
+	std::cout << verticalSlider->getValue() << std::endl;
 }
 
 void Test::render() {

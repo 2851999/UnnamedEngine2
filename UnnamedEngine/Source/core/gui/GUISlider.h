@@ -45,6 +45,10 @@ private:
 	/* The current slider value */
 	float value;
 
+	/* The maximum and minimum values of this slider */
+	float valueMin = 0.0f;
+	float valueMax = 1.0f;
+
 	/* The interval value - only values with this set interval are allowed,
 	 * unless it is set to 0 */
 	float interval;
@@ -76,11 +80,15 @@ public:
 	virtual void onMouseReleased(int button) override;
 
 	/* Setters and getters */
+	inline void setValueMin(float min) { valueMin = min; }
+	inline void setValueMax(float max) { valueMax = max; }
 	inline void setInterval(float interval) { this->interval = interval; }
 
 	inline GUIButton* getButton() { return button; }
 	inline Direction getDirection() { return direction; }
 	inline float getValue() { return value; }
+	inline float getValueMin() { return valueMin; }
+	inline float getValueMax() { return valueMax; }
 	inline float getInterval() { return interval; }
 };
 

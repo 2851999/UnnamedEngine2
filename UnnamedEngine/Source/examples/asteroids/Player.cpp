@@ -74,7 +74,7 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 
 		//Orientate the camera
 		getRelRotation() += Vector3f(lookY->getValue(), lookX->getValue(), 0) * 80.0f * currentDelta;
-		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
+		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0f, 89.0f));
 
 		//Move the player
 		if (axisForward->getValue() != 0)
@@ -135,7 +135,7 @@ void Player::onMouseMoved(double x, double y, double dx, double dy) {
 	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING && ! game->getMainGame()->showingUpgrades()) {
 		//Orientate the camera
 		getRelRotation() += Vector3f(-dy, dx, 0) * 10.0f * currentDelta;
-		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
+		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0f, 89.0f));
 	}
 }
 

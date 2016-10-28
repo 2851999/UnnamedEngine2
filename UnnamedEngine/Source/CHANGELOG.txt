@@ -1,4 +1,45 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 1
+
+* Added maximum and minimum values for a GUISlider (default
+  is 0 and 1)
+* Added the method clampToClosestInterval in MathsUtils
+
+* Fixed bug: GUISlider didn't assign the value correctly
+             when using an interval
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 (V0.1.5)
+
+* Added Animation2D
+* Added TextureAnimation2D
+* Added Sprite2D
+* Added a way to invert the controller axis in
+  InputBindingAxis
+* Added abs method in MathsUtils
+* Added support for dead zones in InputBindingAxis
+* Added method in InputManager to check whether a controller
+  with a specific index has been added
+  
+* Changed RenderData so non-instanced rendering only occurs
+  when primcount = -1, which it is set to by default
+* Changed public variables in TextureAtlas to be private
+  
+* Removed the MeshData* parameter in some of the update
+  methods in MeshRenderData
+
+* Fixed bug: Random controller noise could assign an
+             InputBindingAxis - this also improves assignment
+             making it harder to accidentally assign the
+             wrong axis
+* Fixed bug: ParticleEmitter could emit too many particles
+             when using the emitParticles method
+* Fixed bug: RenderData still rendered a mesh, even when
+             the number of instances was supposed to be 0
+  
+* More Asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 1 | Experimental 3
 
 * Added Animation2D
