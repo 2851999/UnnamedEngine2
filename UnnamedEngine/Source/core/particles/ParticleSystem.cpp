@@ -154,7 +154,7 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 				//Check for a texture
 				if (textureAtlas) {
 					//Calculates the texture index based on the time it has left
-					particles[i].textureIndex = (int) ((((float) textureAtlas->numTextures) / emitter->particleLifeSpan) * (emitter->particleLifeSpan - particles[i].life));
+					particles[i].textureIndex = (int) ((((float) textureAtlas->getNumTextures()) / emitter->particleLifeSpan) * (emitter->particleLifeSpan - particles[i].life));
 					//Get the texture data
 					float top, left, bottom, right;
 					textureAtlas->getSides(particles[i].textureIndex, top, left, bottom, right);

@@ -1,4 +1,16 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 1 | Experimental 3
+
+* Added Animation2D
+* Added TextureAnimation2D
+* Added Sprite2D
+
+* Changed public variables in TextureAtlas to be private
+
+* Removed the MeshData* parameter in some of the update
+  methods in MeshRenderData
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 1 | Experimental 2
 
 * Added method in InputManager to check whether a controller
