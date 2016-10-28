@@ -126,7 +126,6 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 				//Assign the camera distance
 				particles[i].cameraDistance = -1.0f;
 
-
 			if (particles[i].life >=  0) {
 				if (effect)
 					effect->update(particles[i], emitter);

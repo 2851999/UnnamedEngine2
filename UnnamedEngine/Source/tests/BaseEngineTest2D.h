@@ -62,14 +62,14 @@ void Test::initialise() {
 
 void Test::created() {
 	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));
-	object = new GameObject2D({ new Mesh(MeshBuilder::createQuad(200, 200, texture)) }, "Material");
+	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), "Material");
 	object->setSize(200, 200);
 	object->setPosition(getSettings().windowWidth / 2 - 100, getSettings().windowHeight / 2 - 100);
 	object->getMaterial()->setDiffuseTexture(texture);
 	object->getMaterial()->setDiffuseColour(Colour::WHITE);
 	object->update();
 
-	camera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
+	camera = new Camera2D(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1);
 	camera->update();
 
 	Renderer::addCamera(camera);
