@@ -40,10 +40,10 @@ public:
 
 	/* Various operations */
 	inline void set(unsigned int row, unsigned int col, T value) { values[col][row] = value; } //COLUMN MAJOR ORDER!!!!!
-	inline T get(unsigned int row, unsigned int col)             { return values[col][row];  }
+	inline T get(unsigned int row, unsigned int col)       const { return values[col][row];  }
 
 	/* Returns the result of adding another matrix to this one */
-	inline Matrix<T, N> operator+(Matrix<T, N> other) {
+	inline Matrix<T, N> operator+(const Matrix<T, N>& other) const {
 		Matrix<T, N> result;
 		//Go through each value and assign the result to the sum of the two
 		for (unsigned int row = 0; row < N; row++) {
@@ -54,7 +54,7 @@ public:
 	}
 
 	/* Returns the result of subtracting another matrix from this one */
-	inline Matrix<T, N> operator-(Matrix<T, N> other) {
+	inline Matrix<T, N> operator-(const Matrix<T, N>& other) const {
 		Matrix<T, N> result;
 		//Go through each value and assign the result to the subtraction of the two
 		for (unsigned int row = 0; row < N; row++) {
@@ -65,7 +65,7 @@ public:
 	}
 
 	/* Returns the result of multiplying this matrix by a scalar */
-	inline Matrix<T, N> operator*(T value) {
+	inline Matrix<T, N> operator*(const T& value) const {
 		Matrix<T, N> result;
 		//Go through each value and multiply it by the scalar value
 		for (unsigned int row = 0; row < N; row++) {
@@ -76,7 +76,7 @@ public:
 	}
 
 	/* Returns the result of 'dividing' this matrix by a scalar */
-	inline Matrix<T, N> operator/(T value) {
+	inline Matrix<T, N> operator/(const T& value) const {
 		Matrix<T, N> result;
 		//Go through each value and divide it by the scalar value
 		for (unsigned int row = 0; row < N; row++) {
@@ -87,43 +87,47 @@ public:
 	}
 
 	/* Adds another matrix to this one */
-	inline void operator+=(Matrix<T, N> other) {
+	inline Matrix<T, N>& operator+=(const Matrix<T, N>& other) {
 		//Go through each value and set it to the sum of the two
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) + other.get(row, col));
 		}
+		return (*this);
 	}
 
 	/* Subtracts another matrix from this one */
-	inline void operator-=(Matrix<T, N> other) {
+	inline Matrix<T, N>& operator-=(const Matrix<T, N>& other) {
 		//Go through each value and set it to the subtraction of the two
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) - other.get(row, col));
 		}
+		return (*this);
 	}
 
 	/* Multiplies this matrix by a scalar */
-	inline void operator*=(T value) {
+	inline Matrix<T, N>& operator*=(const T& value) {
 		//Go through each value and multiply it by the scalar
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) * value);
 		}
+		return (*this);
 	}
 
 	/* Divides this matrix by a scalar */
-	inline void operator/=(T value) {
+	inline Matrix<T, N>& operator/=(const T& value) {
 		//Go through each value and divide it by the scalar
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) / value);
 		}
+		return (*this);
 	}
 
 	/* Returns the result of multiplying this matrix by another */
-	Matrix<T, N> operator*(Matrix<T, N> other) {
+	inline Matrix<T, N> operator*(const Matrix<T, N>& other) const {
 		Matrix<T, N> result;
 		//Go through each row and column
 		for (unsigned int row = 0; row < N; row++) {
@@ -138,7 +142,7 @@ public:
 	}
 
 	/* Multiplies this matrix by another */
-	void operator*=(Matrix<T, N> other) {
+	inline Matrix<T, N>& operator*=(const Matrix<T, N>& other) {
 		//Calculate the result of multiplying this matrix by the other one
 		Matrix<T, N> result = (*this) * other;
 		//Assign all of the values within this matrix now that the data is no longer needed
@@ -146,6 +150,7 @@ public:
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, result.get(row, col));
 		}
+		return (*this);
 	}
 
 	/* Comparison operators */

@@ -89,13 +89,6 @@ protected:
 	/* The texture parameters for this texture */
 	TextureParameters parameters;
 public:
-	/* Refers to the various positions of the texture, can be used in texture
-	 * atlas's to define the position of a sub texture */
-	float top    = 0.0f;
-	float bottom = 1.0f;
-	float left   = 0.0f;
-	float right  = 1.0f;
-
 	/* The constructors */
 	Texture(TextureParameters parameters = TextureParameters()) : parameters(parameters) { create(); }
 	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : texture(texture), parameters(parameters) {}
@@ -153,7 +146,7 @@ public:
 	 * be called once the image data is no longer needed */
 	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& format);
 
-	/* Calls sybi_image_free */
+	/* Calls stbi_image_free */
 	static void freeTexture(unsigned char* texture);
 
 	/* Returns a Texture instance after reading its data from a file */

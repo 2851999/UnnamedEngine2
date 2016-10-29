@@ -79,6 +79,7 @@ GameObject2D::GameObject2D(Mesh* mesh, std::string shaderId, float width , float
 GameObject2D::GameObject2D(std::vector<Mesh*> meshes, std::string shaderId, float width, float height) :
 		GameObject2D(meshes, Renderer::getRenderShader(shaderId), width, height) {}
 
+//#include "../experimental/Quaternion.h"
 void GameObject2D::update() {
 	//Check to make sure this object has a mesh
 	if (hasMesh()) {
@@ -92,6 +93,10 @@ void GameObject2D::update() {
 		modelMatrix.rotate(getRotation());
 		modelMatrix.translate(offset * -1);
 		modelMatrix.scale(getScale());
+//		modelMatrix.translate(offset + getPosition());
+//		modelMatrix *= Quaternion(Vector3f(0.0f, 0.0f, 1.0f), 3.14159f/2.0f).toRotationMatrix();
+//		modelMatrix.translate(offset * -1);
+//		modelMatrix.scale(getScale());
 	}
 }
 

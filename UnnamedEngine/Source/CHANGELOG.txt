@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 2
+
+* Added Quaternion
+
+* Removed top, bottom, left and right variables from Texture
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 2 | Experimental 1
 
 * Added maximum and minimum values for a GUISlider (default
