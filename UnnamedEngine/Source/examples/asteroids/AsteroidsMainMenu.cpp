@@ -448,7 +448,7 @@ AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) {
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
-	background->getMaterial()->setDiffuseTexture(backgroundTexture);
+	background->getMaterial()->diffuseTexture = backgroundTexture;
 	background->update();
 
 	//Setup the buttons

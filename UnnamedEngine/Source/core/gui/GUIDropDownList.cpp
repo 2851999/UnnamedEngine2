@@ -35,7 +35,7 @@ GUIDropDownList::GUIDropDownList(GUIButton* menuButton, Texture* overlayClosedTe
 	else
 		this->overlayOpenedTexture = overlayClosedTexture;
 
-	overlay->getMaterial()->setDiffuseTexture(overlayClosedTexture);
+	overlay->getMaterial()->diffuseTexture = overlayClosedTexture;
 }
 
 void GUIDropDownList::onComponentClicked(GUIComponent* component) {
@@ -48,9 +48,9 @@ void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 
 		if (overlayClosedTexture) {
 			if (menuOpen)
-				overlay->getMaterial()->setDiffuseTexture(overlayOpenedTexture);
+				overlay->getMaterial()->diffuseTexture = overlayOpenedTexture;
 			else
-				overlay->getMaterial()->setDiffuseTexture(overlayClosedTexture);
+				overlay->getMaterial()->diffuseTexture = overlayClosedTexture;
 		}
 	} else if (menuOpen && component != this) {
 		//Assign the text of the menu button
@@ -61,7 +61,7 @@ void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 		setupMenu();
 
 		if (overlayClosedTexture)
-			overlay->getMaterial()->setDiffuseTexture(overlayClosedTexture);
+			overlay->getMaterial()->diffuseTexture = overlayClosedTexture;
 	}
 }
 
@@ -88,7 +88,7 @@ void GUIDropDownList::onMousePressed(int button) {
 		if (! contains(data.lastX, data.lastY)) {
 			menuOpen = false;
 			if (overlayClosedTexture)
-				overlay->getMaterial()->setDiffuseTexture(overlayClosedTexture);
+				overlay->getMaterial()->diffuseTexture = overlayClosedTexture;
 			setupMenu();
 		}
 	}

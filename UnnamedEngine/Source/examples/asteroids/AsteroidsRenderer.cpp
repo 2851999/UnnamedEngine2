@@ -167,7 +167,7 @@ void AsteroidsRenderer::render() {
 	//Use the shader
 	shader->use();
 	Renderer::saveTextures();
-	mesh->getMaterial()->setUniforms(shader, "Lighting");
+	Renderer::setMaterialUniforms(shader, "Lighting", mesh->getMaterial());
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
 	shader->setUniformVector3("Light_Direction", Vector3f(0.0f, -1.0f, -1.0f));
 	shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));

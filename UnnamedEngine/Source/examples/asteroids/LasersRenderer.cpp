@@ -118,7 +118,7 @@ void LasersRenderer::render() {
 	//Use the shader
 	shader->use();
 	Renderer::saveTextures();
-	mesh->getMaterial()->setUniforms(shader, "Material");
+	Renderer::setMaterialUniforms(shader, "Material", mesh->getMaterial());
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
 
 	glEnable(GL_CULL_FACE);

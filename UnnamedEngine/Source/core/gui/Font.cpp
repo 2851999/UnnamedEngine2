@@ -105,15 +105,15 @@ void Font::setup(std::string name, unsigned int size, Colour colour, TexturePara
 	if (billboarded) {
 		//Create the GameObject3D instance and assign the texture
 		object3D = new GameObject3D({ new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "BillboardedFont");
-		object3D->getMaterial()->setDiffuseColour(colour);
-		object3D->getMaterial()->setDiffuseTexture(textureAtlas);
+		object3D->getMaterial()->diffuseColour = colour;
+		object3D->getMaterial()->diffuseTexture = textureAtlas;
 		object3D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE, 1.0f);
 		object3D->update();
 	} else {
 		//Create the GameObject2D instance and assign the texture
 		object2D = new GameObject2D({ new Mesh(MeshBuilder::createQuad(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "Font");
-		object2D->getMaterial()->setDiffuseColour(colour);
-		object2D->getMaterial()->setDiffuseTexture(textureAtlas);
+		object2D->getMaterial()->diffuseColour = colour;
+		object2D->getMaterial()->diffuseTexture = textureAtlas;
 		object2D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE);
 		object2D->update();
 	}

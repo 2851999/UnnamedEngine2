@@ -95,9 +95,9 @@ TextureAnimation2D::TextureAnimation2D(GameObject2D* entity, TextureAtlas* textu
 
 void TextureAnimation2D::onStart() {
 	//Assign the texture in the entity
-	if (entity && entity->hasMaterial())
+	if (entity)
 		//Assign the texture
-		entity->getMaterial()->setDiffuseTexture(textureAtlas->getTexture());
+		entity->getMaterial()->diffuseTexture = textureAtlas->getTexture();
 }
 
 void TextureAnimation2D::updateFrame() {
@@ -118,12 +118,12 @@ void TextureAnimation2D::updateFrame() {
 
 Sprite2D::Sprite2D(Texture* texture) :
 		GameObject2D(new Mesh(MeshBuilder::createQuad(texture->getWidth(), texture->getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), "Material", texture->getWidth(), texture->getHeight()) {
-	getMaterial()->setDiffuseTexture(texture);
+	getMaterial()->diffuseTexture = texture;
 }
 
 Sprite2D::Sprite2D(Texture* texture, float width, float height) :
 		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, texture, MeshData::SEPARATE_TEXTURE_COORDS)), "Material", width, height) {
-	getMaterial()->setDiffuseTexture(texture);
+	getMaterial()->diffuseTexture = texture;
 }
 
 Sprite2D::~Sprite2D() {

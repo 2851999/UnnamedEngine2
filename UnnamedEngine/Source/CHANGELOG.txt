@@ -1,6 +1,11 @@
 --------------------------------------------------------------
 Release 0 | Beta 2 | Development 2 | Experimental 2
 
+* Changed Material from a class to a structure
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 2
+
 * Added Quaternion
 
 * Removed top, bottom, left and right variables from Texture

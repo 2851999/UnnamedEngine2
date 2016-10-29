@@ -31,8 +31,8 @@ Font* GUIComponentRenderer::DEFAULT_FONT = NULL;
 
 void GUIComponentRenderer::setup() {
 	//Set the default colour and texture
-	getMaterial()->setDiffuseColour(Colour::WHITE);
-	getMaterial()->setDiffuseTexture(Renderer::getBlankTexture());
+	getMaterial()->diffuseColour = Colour::WHITE;
+	getMaterial()->diffuseTexture = Renderer::getBlankTexture();
 }
 
 void GUIComponentRenderer::update() {
@@ -42,10 +42,10 @@ void GUIComponentRenderer::update() {
 	//Check that there are colours and the render index is within its bounds
 	if (colours.size() > renderIndex)
 		//Assign the colour
-		getMaterial()->setDiffuseColour(colours[renderIndex]);
+		getMaterial()->diffuseColour = colours[renderIndex];
 	//Now to do the same for the textures
 	if (textures.size() > renderIndex)
-		getMaterial()->setDiffuseTexture(textures[renderIndex]);
+		getMaterial()->diffuseTexture = textures[renderIndex];
 }
 
 void GUIComponentRenderer::renderText(std::string text, Vector2f relPos) {

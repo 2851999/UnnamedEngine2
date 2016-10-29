@@ -37,8 +37,8 @@ UpgradesMenu::UpgradesMenu(AsteroidsGame* game, AsteroidsMainGame* mainGame) : g
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
-	background->getMaterial()->setDiffuseTexture(backgroundTexture);
-	background->getMaterial()->setDiffuseColour(Colour(1.0f, 1.0f, 1.0f, 0.8f));
+	background->getMaterial()->diffuseTexture = backgroundTexture;
+	background->getMaterial()->diffuseColour = Colour(1.0f, 1.0f, 1.0f, 0.8f);
 	background->update();
 
 	buttonUpgradeFireSpeed = new GUIButton("Upgrade", 280, 30, std::vector<Colour> { Colour::WHITE }, game->getResources().getTexturesButtons());

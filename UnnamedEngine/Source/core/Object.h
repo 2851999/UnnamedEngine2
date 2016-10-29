@@ -64,7 +64,7 @@ public:
 	inline std::vector<Mesh*>& getMeshes() { return meshes; }
 
 	/* Returns the material a MeshRenderData has, should not be used unless
-	 * the object has a Material */
+	 * the object has a mesh */
 	inline bool hasMaterial() { return meshes[0]->getMaterial(); }
 	inline Material* getMaterial() { return meshes[0]->getMaterial(); }
 
