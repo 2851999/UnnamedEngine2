@@ -72,6 +72,8 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		//Get the current delta
 		currentDelta = deltaSeconds;
 
+		//BOUNDS ALL BETWEEN -200 and 200
+
 		//Orientate the camera
 		getRelRotation() += Vector3f(lookY->getValue(), lookX->getValue(), 0) * 80.0f * currentDelta;
 		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0f, 89.0f));
@@ -81,6 +83,25 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 			thrust(camera->getFront() * axisForward->getValue());
 		else
 			setAcceleration(getVelocity() * -12.0f * currentDelta);
+
+		//Check the bounds
+		if (getPosition().getX() < -200 && getVelocity().getX() < 0)
+			//Ensure we are not moving in this direction
+			getRelVelocity().setX(0);
+		else if (getPosition().getX() > 200 && getVelocity().getX() > 0)
+			getRelVelocity().setX(0);
+
+		if (getPosition().getY() < -200 && getVelocity().getY() < 0)
+			//Ensure we are not moving in this direction
+			getRelVelocity().setY(0);
+		else if (getPosition().getY() > 200 && getVelocity().getY() > 0)
+			getRelVelocity().setY(0);
+
+		if (getPosition().getZ() < -200 && getVelocity().getZ() < 0)
+			//Ensure we are not moving in this direction
+			getRelVelocity().setZ(0);
+		else if (getPosition().getZ() > 200 && getVelocity().getZ() > 0)
+			getRelVelocity().setZ(0);
 
 		camera->update();
 

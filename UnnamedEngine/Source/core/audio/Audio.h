@@ -33,11 +33,12 @@ private:
 	/* Allows AudioObjects to be linked with GameObjects and have their positions relative
 	 * to each other */
 	GameObject3D* parent = NULL;
-public:
+
 	/* The position, rotation, and velocity of this object */
 	Vector3f position;
 	Vector3f rotation;
 	Vector3f velocity;
+public:
 
 	/* The default constructor */
 	AudioObject() {}
@@ -161,8 +162,8 @@ public:
 
 class AudioSource : public AudioObject {
 private:
-	GLuint sourceHandle = 0;
-	GLuint bufferHandle = 0;
+	ALuint sourceHandle = 0;
+	ALuint bufferHandle = 0;
 
 	unsigned int type = 0;
 

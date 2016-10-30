@@ -1,5 +1,16 @@
 --------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 2
+Release 0 | Beta 2 | Development 2 | Experimental 4
+
+* Changed the position, rotation and velocity variables to
+  private in AudioObject
+
+* Fixed bug: TextureAtlas wouldn't work if numRows didn't
+			 equal numColumns
+			 
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 3
 
 * Changed Material from a class to a structure
 

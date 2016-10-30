@@ -122,11 +122,11 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 			particles[i].life -= delta;
 
 			//Check whether the particle has just died
-			if (particles[i].life < 0)
+			if (particles[i].life <= 0)
 				//Assign the camera distance
 				particles[i].cameraDistance = -1.0f;
 
-			if (particles[i].life >=  0) {
+			if (particles[i].life >  0) {
 				if (effect)
 					effect->update(particles[i], emitter);
 
@@ -214,7 +214,7 @@ unsigned int ParticleSystem::findUnusedParticle() {
 	//Checks the particles starting from where it left off
 	for (unsigned int i = lastParticleChecked; i < maxParticles; i++) {
 		//Checks to see whether the particle is unused
-		if (particles[i].life < 0) {
+		if (particles[i].life <= 0) {
 			//Used for the next time round - this makes it very likely that only one iteration will be needed
 			//to find an unused particle
 			lastParticleChecked = i;
@@ -224,7 +224,7 @@ unsigned int ParticleSystem::findUnusedParticle() {
 
 	//Start searching the rest of the particles starting from the beginning
 	for (unsigned int i = 0; i < lastParticleChecked; i++) {
-		if (particles[i].life < 0) {
+		if (particles[i].life <= 0) {
 			lastParticleChecked = i;
 			return i;
 		}
