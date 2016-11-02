@@ -335,7 +335,6 @@ void InputBindings::load(std::string path, InputManager* inputManager) {
 	for (MLElement& child : root.getChildren()) {
 		//The current controller
 		Controller* currentController = NULL;
-
 		//Go through each element within the child
 		for (MLElement& elem : child.getChildren()) {
 			//Check the name
@@ -351,17 +350,17 @@ void InputBindings::load(std::string path, InputManager* inputManager) {
 				}
 				//Get the controller index
 				index = ControllerUtils::findController(index, name);
-				//Add the controller if required
-				if (controllers.count(index) < 1 && index > -1) {
-					if (index >= 0) {
+				//Add the controller if found
+				if (index > -1 ) {
+					if (controllers.count(index) < 1) {
 						currentController = new Controller(index);
 						controllers.insert(std::pair<int, Controller*>(index, currentController));
 						//Add the controller to the input manager if it was provided
 						if (inputManager)
 							inputManager->addController(currentController);
-					}
-				} else
-					currentController = controllers.at(index);
+					} else
+						currentController = controllers.at(index);
+				}
 			}
 		}
 
@@ -378,7 +377,7 @@ void InputBindings::load(std::string path, InputManager* inputManager) {
 					buttonBinding->assignKey(attrib.getDataAsInt());
 				else if (attrib.getName() == "mouseButton")
 					buttonBinding->assignMouseButton(attrib.getDataAsInt());
-				else if (attrib.getName() == "controllerButton" && currentController)
+				else if (attrib.getName() == "controllerButton")
 					buttonBinding->assignControllerButton(currentController, attrib.getDataAsInt());
 			}
 		} else if (child.getName() == "axis") {
@@ -393,11 +392,11 @@ void InputBindings::load(std::string path, InputManager* inputManager) {
 					axisBinding->assignKeyPos(attrib.getDataAsInt());
 				else if (attrib.getName() == "keyboardKeyNeg")
 					axisBinding->assignKeyNeg(attrib.getDataAsInt());
-				else if (attrib.getName() == "controllerAxis" && currentController)
+				else if (attrib.getName() == "controllerAxis")
 					axisBinding->assignControllerAxis(currentController, attrib.getDataAsInt());
-				else if (attrib.getName() == "controllerAxisInverted" && currentController)
+				else if (attrib.getName() == "controllerAxisInverted")
 					axisBinding->setControllerAxisInverted(attrib.getDataAsBool());
-				else if (attrib.getName() == "controllerAxisDeadZone" && currentController)
+				else if (attrib.getName() == "controllerAxisDeadZone")
 					axisBinding->setControllerAxisDeadZone(attrib.getDataAsFloat());
 			}
 		}

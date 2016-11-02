@@ -48,10 +48,10 @@ void AsteroidsGame::initialise() {
 	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
 
-	//Setup the highscores
-	highscores.setPath(resourceLoader.getPath() + "highscores.txt");
-	//Load the highscores
-	highscores.load();
+	//Setup the high scores
+	highScores.setPath(resourceLoader.getPath() + "highscores.txt");
+	//Load the high scores
+	highScores.load();
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 }

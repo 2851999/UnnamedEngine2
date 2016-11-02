@@ -16,25 +16,31 @@
  *
  *****************************************************************************/
 
+#include "GameRenderer.h"
+
 #include "../../core/render/Renderer.h"
-#include "LasersRenderer.h"
 
 /*****************************************************************************
- * The LasersRenderer class
+ * The GameRenderer class
  *****************************************************************************/
 
-LasersRenderer::LasersRenderer(const ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
-	//Load the model mesh
-	mesh = loader.loadModel("lasernew.obj")[0];
-	//mesh->getMaterial()->setDiffuseColour(Colour(mesh->getMaterial()->getDiffuseColour(), 0.5f));
+GameRenderer::GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, bool useTextureCoords, bool useLighting, bool useNormalMapping) : mesh(mesh), shader(shader), numObjects(numObjects), useLighting(useLighting)  {
+	//Get the mesh data
 	MeshData* meshData = mesh->getData();
-	//Setup the shader
-	shader = loader.loadShader("LaserShader");
 	//Setup the render data
 	renderData = new RenderData(GL_TRIANGLES, meshData->getNumIndices());
 
 	vboVerticesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, meshData->getOthers().size() * sizeof(meshData->getOthers()[0]), meshData->getOthers(), GL_STATIC_DRAW, true);
 	vboVerticesData->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
+	if (useTextureCoords)
+		vboVerticesData->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2, 0);
+	if (useLighting) {
+		vboVerticesData->addAttribute(shader->getAttributeLocation("Normal"), 3, 0);
+		if (useNormalMapping) {
+			vboVerticesData->addAttribute(shader->getAttributeLocation("Tangent"), 3, 0);
+			vboVerticesData->addAttribute(shader->getAttributeLocation("Bitangent"), 3, 0);
+		}
+	}
 	renderData->addVBO(vboVerticesData);
 
 	vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, meshData->getNumIndices() * sizeof(meshData->getIndices()[0]), meshData->getIndices(), GL_STATIC_DRAW);
@@ -43,6 +49,7 @@ LasersRenderer::LasersRenderer(const ResourceLoader& loader, unsigned int numObj
 
 	for (unsigned int i = 0; i < numObjects; i++) {
 		matricesData.push_back(Matrix4f().initIdentity());
+		normalMatricesData.push_back(Matrix3f().initIdentity());
 
 		for (unsigned int x = 0; x < 4; x++) {
 			for (unsigned int y = 0; y < 4; y++) {
@@ -50,7 +57,13 @@ LasersRenderer::LasersRenderer(const ResourceLoader& loader, unsigned int numObj
 			}
 		}
 
-		visibleData.push_back(0);
+		for (unsigned int x = 0; x < 3; x++) {
+			for (unsigned int y = 0; y < 3; y++) {
+				normalMatricesDataRaw.push_back(0);
+			}
+		}
+
+		visibleData.push_back(1);
 	}
 
 	vboMatricesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * 16 * sizeof(GLfloat), matricesDataRaw, GL_STREAM_DRAW, true);
@@ -60,6 +73,14 @@ LasersRenderer::LasersRenderer(const ResourceLoader& loader, unsigned int numObj
 	vboMatricesData->addAttribute(shader->getAttributeLocation("ModelMatrix") + 3, 4, 1);
 	renderData->addVBO(vboMatricesData);
 
+	if (useLighting) {
+		vboNormalMatricesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * 9 * sizeof(GLfloat), normalMatricesDataRaw, GL_STREAM_DRAW, true);
+		vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix"), 3, 1);
+		vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 1, 3, 1);
+		vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 2, 3, 1);
+		renderData->addVBO(vboNormalMatricesData);
+	}
+
 	vboVisibleData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * sizeof(GLfloat), visibleData, GL_STREAM_DRAW, true);
 	vboVisibleData->addAttribute(shader->getAttributeLocation("Visible"), 1, 1);
 	renderData->addVBO(vboVisibleData);
@@ -68,11 +89,13 @@ LasersRenderer::LasersRenderer(const ResourceLoader& loader, unsigned int numObj
 	renderData->setNumInstances(numObjects);
 }
 
-LasersRenderer::~LasersRenderer() {
+GameRenderer::~GameRenderer() {
 	delete renderData;
 	delete vboVerticesData;
 	delete vboIndices;
 	delete vboMatricesData;
+	if (useLighting)
+		delete vboNormalMatricesData;
 	delete mesh;
 
 	for (unsigned int i = 0; i < objects.size(); i++)
@@ -80,27 +103,22 @@ LasersRenderer::~LasersRenderer() {
 	objects.clear();
 }
 
-void LasersRenderer::showLaser(unsigned int index) {
-	//Ensure the laser is currently showing
-	if (visibleData[index] < 0.5f) {
-		visibleData[index] = 1.0f;
-		vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
-	}
+void GameRenderer::show(unsigned int index) {
+	visibleData[index] = 1.0f;
+	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
-void LasersRenderer::hideLaser(unsigned int index) {
-	//Ensure the laser is currently showing
-	if (visibleData[index] > 0.5f) {
-		visibleData[index] = 0.0f;
-		vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
-	}
+void GameRenderer::hide(unsigned int index) {
+	visibleData[index] = 0.0f;
+	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
-void LasersRenderer::update() {
-	for (unsigned int i = 0; i < objects.size(); i++) {
+void GameRenderer::update(unsigned int startIndex, unsigned int endIndex) {
+	for (unsigned int i = startIndex; i < endIndex; i++) {
 		matricesData[i].initIdentity();
 		matricesData[i].translate(objects[i]->getPosition());
 		matricesData[i].rotate(objects[i]->getRotation());
+		matricesData[i].scale(objects[i]->getScale());
 
 		int pos = i * 16;
 
@@ -110,16 +128,37 @@ void LasersRenderer::update() {
 				pos += 1;
 			}
 		}
+
+		if (useLighting) {
+			normalMatricesData[i] = matricesData[i].to3x3().inverse().transpose();
+			pos = i * 9;
+			for (unsigned int x = 0; x < 3; x++) {
+				for (unsigned int y = 0; y < 3; y++) {
+					normalMatricesDataRaw[pos] = normalMatricesData[i].get(y, x);
+					pos += 1;
+				}
+			}
+		}
 	}
 	vboMatricesData->updateStream(numObjects * 16 * sizeof(GLfloat));
+	if (useLighting)
+		vboNormalMatricesData->updateStream(numObjects * 9 * sizeof(GLfloat));
 }
 
-void LasersRenderer::render() {
+void GameRenderer::render() {
 	//Use the shader
 	shader->use();
 	Renderer::saveTextures();
-	Renderer::setMaterialUniforms(shader, "Material", mesh->getMaterial());
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
+	if (useLighting) {
+		Renderer::setMaterialUniforms(shader, "Lighting", mesh->getMaterial());
+		shader->setUniformVector3("Light_Direction", Vector3f(0.0f, -1.0f, -1.0f));
+		shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));
+		shader->setUniformColourRGB("Light_SpecularColour", Colour(1.0f, 1.0f, 1.0f));
+		shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+	} else {
+		Renderer::setMaterialUniforms(shader, "Material", mesh->getMaterial());
+	}
 
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
@@ -131,16 +170,18 @@ void LasersRenderer::render() {
 	shader->stopUsing();
 }
 
-void LasersRenderer::showAll() {
+void GameRenderer::showAll() {
 	//Go through all of the visible data
 	for (unsigned int i = 0; i < visibleData.size(); i++)
 		visibleData[i] = 1.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
-void LasersRenderer::hideAll() {
+void GameRenderer::hideAll() {
 	//Go through all of the visible data
 	for (unsigned int i = 0; i < visibleData.size(); i++)
 		visibleData[i] = 0.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
+
+

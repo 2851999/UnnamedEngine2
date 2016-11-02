@@ -16,18 +16,17 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ENEMIESRENDERER_H_
-#define EXAMPLES_ASTEROIDS_ENEMIESRENDERER_H_
+#ifndef EXAMPLES_ASTEROIDS_GAMERENDERER_H_
+#define EXAMPLES_ASTEROIDS_GAMERENDERER_H_
 
-#include "../../core/Matrix.h"
-#include "../../core/ResourceLoader.h"
 #include "../../core/render/RenderData.h"
+#include "../../core/render/Renderer.h"
 
 /*****************************************************************************
- * The EnemiesRenderer class attempts to instance render a lot of enemies
+ * The GameRenderer class attempts to instance render stuff for the game
  *****************************************************************************/
 
-class EnemiesRenderer {
+class GameRenderer {
 private:
 	/* The render data instance */
 	RenderData* renderData;
@@ -45,47 +44,49 @@ private:
 	std::vector<GLfloat> normalMatricesDataRaw;
 	std::vector<GLfloat> visibleData;
 
-	/* The shader used for rendering */
-	Shader* shader;
-
 	/* The mesh used for rendering */
 	Mesh* mesh;
+
+	/* The shader used for rendering */
+	Shader* shader;
 
 	/* The number of objects */
 	unsigned int numObjects;
 
 	/* The game objects who's position/rotation/scale data will be used for rendering */
 	std::vector<GameObject3D*> objects;
+
+	/* States whether lighting should be used */
+	bool useLighting;
 public:
 	/* The constructor */
-	EnemiesRenderer(const ResourceLoader& loader, unsigned int numObjects);
+	GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, bool useTextureCoords, bool useLighting, bool useNormalMapping);
 
 	/* The destructor */
-	virtual ~EnemiesRenderer();
+	virtual ~GameRenderer();
 
-	/* The method used to add an enemy */
-	inline void addEnemy(GameObject3D* object) { objects.push_back(object); }
+	/* The method used to add an object */
+	inline void add(GameObject3D* object) { objects.push_back(object); }
 
-	/* The method used to show an enemy */
-	void showEnemy(unsigned int index);
+	/* The method used to hide an object */
+	void show(unsigned int index);
+	void hide(unsigned int index);
 
-	/* The method used to hide an enemy */
-	void hideEnemy(unsigned int index);
+	/* Method used to check whether an object is visible */
+	inline bool isVisible(unsigned int index) { return visibleData[index] > 0.5f; }
 
-	/* Method used to check whether an enemy is visible */
-	inline bool isEnemyVisible(unsigned int index) { return visibleData[index] > 0.5f; }
-
-	/* Method called to update the enemies */
-	void update();
-
-	/* Method called to render the enemies */
+	/* Method called to update a group of the objects */
+	void update(unsigned int startIndex, unsigned int endIndex);
+	/* Method called to update all of the objects */
+	inline void updateAll() { update(0, objects.size()); }
+	/* Method called to render the objects */
 	void render();
 
-	/* Method called to show all of the enemies */
+	/* Method called to show all of the objects */
 	void showAll();
 
-	/* Method called to hide all of the enemies */
+	/* Method called to hide all of the objects */
 	void hideAll();
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ENEMIESRENDERER_H_ */
+#endif /* EXAMPLES_ASTEROIDS_GAMERENDERER_H_ */

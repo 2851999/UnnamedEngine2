@@ -77,7 +77,7 @@ void main() {
 	if (useNormalMap) {
 		vec3 T = normalize(normalMatrix * tangent);
 		vec3 B = normalize(normalMatrix * bitangent);
-		vec3 N = normalize(normalMatrix * normal);
+		vec3 N = normalize(frag_normal);
 	
 		frag_tbnMatrix = mat3(T, B, N);
 	}

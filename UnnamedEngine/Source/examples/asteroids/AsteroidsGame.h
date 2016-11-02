@@ -28,7 +28,7 @@
 #include "AsteroidsMainGame.h"
 #include "AsteroidsPauseMenu.h"
 #include "AsteroidsResources.h"
-#include "Highscores.h"
+#include "HighScores.h"
 
 /*****************************************************************************
  * The AsteroidsGame class sets up and manages the game
@@ -68,7 +68,7 @@ private:
 	AsteroidsPauseMenu* pauseMenu = NULL;
 
 	/* The highscores */
-	Highscores highscores;
+	HighScores highScores;
 public:
 	/* The constructor */
 	AsteroidsGame();
@@ -88,7 +88,7 @@ public:
 
 	/* Setters and getters */
 	ResourceLoader& getResourceLoader() { return resourceLoader; }
-	Highscores& getHighscores() { return highscores; }
+	HighScores& getHighScores() { return highScores; }
 	const AsteroidsResources& getResources() { return resources; }
 	GameState getCurrentState() { return currentState; }
 	AsteroidsMainGame* getMainGame() { return mainGame; }

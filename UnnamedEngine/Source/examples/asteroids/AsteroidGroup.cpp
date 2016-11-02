@@ -23,7 +23,7 @@
  * The AsteroidGroup class
  *****************************************************************************/
 
-AsteroidGroup::AsteroidGroup(AsteroidsRenderer* renderer, unsigned int rendererStartIndex, Vector3f position) :
+AsteroidGroup::AsteroidGroup(GameRenderer* renderer, unsigned int rendererStartIndex, Vector3f position) :
 	renderer(renderer), rendererStartIndex(rendererStartIndex), position(position) {
 
 }
@@ -32,13 +32,13 @@ AsteroidGroup::~AsteroidGroup() {
 
 }
 
-void AsteroidGroup::generateAsteroids(unsigned int number, AsteroidsRenderer* renderer) {
+void AsteroidGroup::generateAsteroids(unsigned int number, GameRenderer* renderer) {
 	//Go through and generate the requested number of asteroids
 	for (unsigned int i = 0; i < number; i++) {
 		PhysicsObject3D* asteroid = new PhysicsObject3D(NULL);
 
 		objects.push_back(asteroid);
-		renderer->addAsteroid(asteroid);
+		renderer->add(asteroid);
 	}
 }
 
@@ -60,7 +60,7 @@ void AsteroidGroup::update(float deltaSeconds, Player* player) {
 	//Go through and update all of the asteroids in this group
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		//Only perform collision testing if the object is visible
-		if (renderer->isAsteroidVisible(rendererStartIndex + i)) {
+		if (renderer->isVisible(rendererStartIndex + i)) {
 			//Calculate the relative position between the player and the current asteroid
 			Vector3f relPos = player->getPosition() - objects[i]->getPosition();
 			//Calculate the distance between them
@@ -76,20 +76,23 @@ void AsteroidGroup::update(float deltaSeconds, Player* player) {
 				//Calculate the relative velocity along the normal
 				float velAlongNormal = relativeVelocity.dot(normal);
 
-				if (velAlongNormal <= 0) {
+				if (velAlongNormal < 0) {
 					//Get a value for the restitution of the collision
 					float e = MathsUtils::min(player->getRestitution(), objects[i]->getRestitution());
 
+					float playerInvMass = 1.0f / player->getMass();
+					float asteroidInvMass = 1.0f / objects[i]->getMass();
+
 					//Calculate the value of the impulse
-					float j = (-(1.0f + e) * velAlongNormal) / (1.0f / player->getMass() + 1.0f / objects[i]->getMass());
+					float j = (-(1.0f + e) * velAlongNormal) / (playerInvMass + asteroidInvMass);
 
 					//Calculate the impulse
 					Vector3f impulse = normal * j;
 
 					//Apply the impulse to the player and the asteroid - the greater the object's mass
 					//the less the impulse should effect it, so multiply by the inverse of the mass
-					player->setVelocity(player->getVelocity() + impulse * (1.0f / player->getMass()));
-					objects[i]->setVelocity(objects[i]->getVelocity() - impulse * (1.0f / objects[i]->getMass()));
+					player->setVelocity(player->getVelocity() + impulse * playerInvMass);
+					objects[i]->setVelocity(objects[i]->getVelocity() - impulse * asteroidInvMass);
 				}
 			}
 
@@ -102,6 +105,6 @@ void AsteroidGroup::update(float deltaSeconds, Player* player) {
 		}
 	}
 	//Update the renderer
-	renderer->update((*this));
+	renderer->update(getRendererStartIndex(), getRendererEndIndex());
 }
 

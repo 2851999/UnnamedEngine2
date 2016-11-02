@@ -1,4 +1,21 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 5
+
+* Added replaceAll method in StrUtils
+
+* Changed InputBindings so it would still load the controller
+  data from a file, even if the controller wasn't found
+* Changed the default TextureParameters for a font
+
+* Renamed FPSLimiter's methods start/update to startFrame/
+  endFrame
+
+* Fixed bug: InputBindings caused a crash is a controller
+  was not found
+  
+* More Asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 2 | Experimental 4
 
 * Changed the position, rotation and velocity variables to

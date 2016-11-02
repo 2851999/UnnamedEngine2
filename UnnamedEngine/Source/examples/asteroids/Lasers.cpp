@@ -39,15 +39,18 @@ Lasers::Lasers(AsteroidsGame* game, Ship* ship) : soundSystem(game->getSoundSyst
 	//Assign the maximum number of lasers
 	maxLasers = 20;
 
+	//Get the resource loader
+	ResourceLoader& loader = game->getResourceLoader();
+
 	//Setup the lasers renderer
-	renderer = new LasersRenderer(game->getResourceLoader(), maxLasers);
+	renderer = new GameRenderer(loader.loadModel("lasernew.obj")[0], loader.loadShader("LaserShader"), maxLasers, false, false, false);
 
 	for (unsigned int i = 0; i < maxLasers; i++) {
 		GameObject3D* object = new GameObject3D();
 
 		objects.push_back(new PhysicsObject3D(object));
 		timesLeft.push_back(0);
-		renderer->addLaser(object);
+		renderer->add(object);
 	}
 
 	//Assign the next index (to point to the start of the objects array)
@@ -82,7 +85,7 @@ Lasers::~Lasers() {
 void Lasers::reset() {
 	//Reset the renderer
 	renderer->hideAll();
-	renderer->update();
+	renderer->updateAll();
 	//Assign the next index (to point to the start of the objects array)
 	nextIndex = 0;
 	//Assign the last laser fired time
@@ -98,12 +101,12 @@ void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	//Go through each laser object and update its physics
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		//Ensure the laser is visible
-		if (renderer->isLaserVisible(i)) {
+		if (renderer->isVisible(i)) {
 			//Subtract time from the laser's life
 			timesLeft[i] -= deltaSeconds;
 			//Check whether the laser should be hidden
 			if (timesLeft[i] <= 0)
-				renderer->hideLaser(i);
+				renderer->hide(i);
 			else
 				objects[i]->updatePhysics(deltaSeconds);
 
@@ -129,7 +132,7 @@ void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 						//Check for an intersection with the asteroid
 						if (distance < 9.21f / 2.0f * scale) {
 							//Hide the laser and the asteroid
-							renderer->hideLaser(i);
+							renderer->hide(i);
 							closestGroup.hideAsteroid(j);
 							//Create an explosion
 							explode(closestAsteroids[j]->getPosition(), 2.0f * scale);
@@ -140,12 +143,12 @@ void Lasers::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 				}
 			} else
 				//Hide the laser
-				renderer->hideLaser(i);
+				renderer->hide(i);
 		}
 	}
 
 	//Update the renderer
-	renderer->update();
+	renderer->updateAll();
 
 	//Update the particle system
 	particleSystem->update(deltaSeconds, ((Camera3D*) Renderer::getCamera())->getPosition());
@@ -185,7 +188,7 @@ void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f
 		soundSystem->play("Laser" + StrUtils::str(instanceNumber));
 
 		//Make the laser visible
-		renderer->showLaser(nextIndex);
+		renderer->show(nextIndex);
 		//Increment the index, and then ensure it is within the bounds of the objects array
 		nextIndex++;
 		if (nextIndex >= objects.size())

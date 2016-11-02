@@ -28,9 +28,9 @@ void ParticleEmitter::reset() {
 	particlesToEmit = 0;
 }
 
-void ParticleEmitter::update(ParticleSystem* system, float delta) {
+void ParticleEmitter::update(float delta) {
 	//Check whether this emitter is active
-	if (active) {
+	if (active && system) {
 		//Cumulate the delta
 		cumulativeDelta += delta;
 

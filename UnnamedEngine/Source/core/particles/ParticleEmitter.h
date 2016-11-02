@@ -37,6 +37,9 @@ private:
 	/* Used to emit a set number of particles - assigned using emitParticles()
 	 * (<= 0 means the method has not been called */
 	int particlesToEmit = 0;
+
+	/* The particle system this emitter is attached to */
+	ParticleSystem* system = NULL;
 protected:
 	/* The overrideable method used to setup and emit a particle */
 	virtual void emitParticle(Particle& particle) {}
@@ -66,15 +69,16 @@ public:
 	/* Method used to reset this emitter */
 	void reset();
 
-	/* The method used to update this emitter and emit any required particles
-	 * given a particle system instance */
-	void update(ParticleSystem* system, float delta);
+	/* The method used to update this emitter and emit any required particles */
+	void update(float delta);
 
 	/* Method used to emit a set number of particles before becoming no longer active */
 	void emitParticles(unsigned int count);
 
 	/* Setters and getters */
+	inline void setParticleSystem(ParticleSystem* system) { this->system = system; }
 	inline void setActive(bool active) { this->active = active; }
+	inline ParticleSystem* getParticleSystem() { return system; }
 	inline bool isActive() { return active; }
 };
 

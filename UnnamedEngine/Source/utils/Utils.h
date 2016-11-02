@@ -55,6 +55,8 @@ namespace StrUtils {
 	inline std::string substring(const std::string &s, int begin, int end) {
 		return s.substr(begin, end - begin);
 	}
+
+	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement);
 };
 
 #include <cmath>

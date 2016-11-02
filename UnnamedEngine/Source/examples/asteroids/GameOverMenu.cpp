@@ -80,14 +80,14 @@ void GameOverMenu::show() {
 
 	GUIPanel::show();
 
-	//Get a reference to the highscores
-	Highscores& highscores = game->getHighscores();
+	//Get a reference to the high scores
+	HighScores& highScores = game->getHighScores();
 
-	if (highscores.isHighscore(player->getScore())) {
+	if (highScores.isHighScore(player->getScore())) {
 		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - A new highscore! :)");
 		nameTextBox->setActive(true);
 		nameTextBox->setVisible(true);
-	} else if (highscores.isOnTable(player->getScore())) {
+	} else if (highScores.isOnTable(player->getScore())) {
 		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - You're on the highscore table!");
 		nameTextBox->setActive(true);
 		nameTextBox->setVisible(true);
@@ -132,9 +132,9 @@ void GameOverMenu::onComponentClicked(GUIComponent* component) {
 		//Check whether a highscore should be added
 		if (nameTextBox->isActive() && nameTextBox->getText().length() > 0) {
 			//Add the score
-			game->getHighscores().add(nameTextBox->getText(), player->getScore());
-			//Save the highscores
-			game->getHighscores().save();
+			game->getHighScores().add(nameTextBox->getText(), player->getScore());
+			//Save the high scores
+			game->getHighScores().save();
 		}
 		//Go to the main menu
 		game->changeState(AsteroidsGame::MAIN_MENU);

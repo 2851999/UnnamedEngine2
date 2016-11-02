@@ -41,7 +41,7 @@ private:
 
 	/* The buttons on the menu */
 	GUIButton* buttonPlay;
-	GUIButton* buttonHighscores;
+	GUIButton* buttonHighScores;
 	GUIButton* buttonSettings;
 	GUIButton* buttonExit;
 public:
@@ -64,8 +64,8 @@ private:
 	/* The game instance */
 	AsteroidsGame* game;
 
-	/* The highscores label */
-	GUILabel* highscoresLabel;
+	/* The high scores label */
+	GUILabel* highScoresLabel;
 
 	/* The buttons on the menu */
 	GUIButton* buttonBack;
@@ -85,12 +85,6 @@ public:
  *****************************************************************************/
 
 class MainMenuSettings : public GUIPanel {
-private:
-	/* The buttons on the menu */
-	GUIButton* buttonVideo;
-	GUIButton* buttonAudio;
-	GUIButton* buttonControls;
-	GUIButton* buttonBack;
 public:
 	/* The constructor */
 	MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGroup);
@@ -114,7 +108,6 @@ private:
 	GUICheckBox* checkBoxVSync;
 	/* The buttons on the menu */
 	GUIButton* buttonApply;
-	GUIButton* buttonBack;
 public:
 	/* The constructor */
 	MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup* panelGroup);
@@ -148,7 +141,9 @@ private:
 	GUIButton* buttonLookYNeg;
 	GUIButton* buttonShoot;
 	GUIButton* buttonSave;
-	GUIButton* buttonBack;
+
+	/* Method used to update the GUI */
+	void updateGUI();
 public:
 	/* The constructor */
 	MainMenuSettingsControls(AsteroidsGame* game, GUIPanelGroup* panelGroup);
@@ -158,9 +153,6 @@ public:
 
 	/* Method used to show this GUIPanel */
 	virtual void show() override;
-
-	/* Method used to update the GUI */
-	void updateGUI();
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override;

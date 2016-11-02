@@ -27,7 +27,6 @@
 
 #include "AsteroidsGame.h"
 #include "AsteroidGroup.h"
-#include "LasersRenderer.h"
 
 class Ship;
 class Player;
@@ -55,7 +54,7 @@ private:
 	unsigned int maxLasers;
 
 	/* The renderer used to render the lasers */
-	LasersRenderer* renderer;
+	GameRenderer* renderer;
 
 	/* The physics objects representing the lasers */
 	std::vector<PhysicsObject3D*> objects;

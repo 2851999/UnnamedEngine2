@@ -37,6 +37,8 @@ const GLfloat ParticleSystem::vertexBufferData[] = {
 };
 
 ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticles) : emitter(emitter), maxParticles(maxParticles) {
+	//Assign the emitter's system
+	emitter->setParticleSystem(this);
 	//Generate the OpenGL VBO's
 	std::vector<GLfloat> data;
 	for (unsigned int i = 0; i < 12u; i++)
@@ -110,7 +112,7 @@ void ParticleSystem::reset() {
 
 void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 	//Update the particle emitter
-	emitter->update(this, delta);
+	emitter->update(delta);
 	//Reset the particle count
 	particleCount = 0;
 	//Go through the maximum number of particles

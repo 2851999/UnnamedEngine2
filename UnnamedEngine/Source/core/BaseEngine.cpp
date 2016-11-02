@@ -54,7 +54,7 @@ void BaseEngine::create() {
 	Font::initialiseFreeType();
 
 	//Assign the default font
-	defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16, Colour::WHITE, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
+	defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16, Colour::WHITE);
 	//Create the debug camera
 	debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
 	debugCamera->update();
@@ -86,7 +86,7 @@ void BaseEngine::create() {
 	//The main game loop - continues until either the window is told to close,
 	//or the game requests it to stop
 	while ((! window->shouldClose()) && (! closeRequested)) {
-		fpsLimiter.start();
+		fpsLimiter.startFrame();
 		fpsCalculator.update();
 
 		update();
@@ -97,7 +97,7 @@ void BaseEngine::create() {
 
 		window->update();
 
-		fpsLimiter.update();
+		fpsLimiter.endFrame();
 	}
 
 	//Tell the game to destroy everything it created
