@@ -31,9 +31,6 @@ UpgradesMenu::UpgradesMenu(AsteroidsGame* game, AsteroidsMainGame* mainGame) : g
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	//Setup the camera
-	camera = new Camera2D(Matrix4f().initOrthographic(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f));
-	camera->update();
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
@@ -57,7 +54,7 @@ UpgradesMenu::UpgradesMenu(AsteroidsGame* game, AsteroidsMainGame* mainGame) : g
 	Font* headingFont = game->getResources().getFontHeading();
 
 	//Create the label's
-	labelTitle = new GUILabel("Upgrades", titleFont);
+	GUILabel* labelTitle = new GUILabel("Upgrades", titleFont);
 	labelTitle->setPosition(windowWidth / 2 - labelTitle->getWidth() / 2, 40.0f);
 
 	labelFireSpeed = new GUILabel("", headingFont);
@@ -74,14 +71,13 @@ UpgradesMenu::UpgradesMenu(AsteroidsGame* game, AsteroidsMainGame* mainGame) : g
 
 UpgradesMenu::~UpgradesMenu() {
 	//Delete created resources
-	delete camera;
 	delete background;
 }
 
 void UpgradesMenu::show() {
 	game->getWindow()->enableCursor();
 	game->getWindow()->centreCursor();
-	updateButtons();
+	updateMenu();
 	GUIPanel::show();
 }
 
@@ -97,7 +93,7 @@ void UpgradesMenu::render() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Add the camera
-	Renderer::addCamera(camera);
+	Renderer::addCamera(game->getCamera2D());
 
 	//Render the background
 	background->render();
@@ -109,7 +105,7 @@ void UpgradesMenu::render() {
 	Renderer::removeCamera();
 }
 
-void UpgradesMenu::updateButtons() {
+void UpgradesMenu::updateMenu() {
 	//Disable/Activate the buttons as required
 	buttonUpgradeFireSpeed->setActive(mainGame->getPlayer()->getLasers()->getCooldown() > 0.5f && mainGame->getPlayer()->getScore() >= 2000);
 	if (buttonUpgradeFireSpeed->isActive())
@@ -146,13 +142,13 @@ void UpgradesMenu::onComponentClicked(GUIComponent* component) {
 		if (component == buttonBack)
 			mainGame->hideUpgrades();
 		else if (component == buttonUpgradeMovementSpeed) {
-			mainGame->getPlayer()->removeScore(2000);
+			mainGame->getPlayer()->removePoints(2000);
 			mainGame->getPlayer()->setMaximumSpeed(mainGame->getPlayer()->getMaximumSpeed() + 2);
-			updateButtons();
+			updateMenu();
 		} else if (component == buttonUpgradeFireSpeed) {
-			mainGame->getPlayer()->removeScore(2000);
+			mainGame->getPlayer()->removePoints(2000);
 			mainGame->getPlayer()->getLasers()->setCooldown(mainGame->getPlayer()->getLasers()->getCooldown() - 0.5f);
-			updateButtons();
+			updateMenu();
 		}
 	}
 }

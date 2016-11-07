@@ -28,8 +28,8 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 	//Setup input
 	InputBindings* inputBindings = game->getInputBindings();
 	axisForward = inputBindings->getAxisBinding("Forward");
-	lookX = inputBindings->getAxisBinding("LookX");
-	lookY = inputBindings->getAxisBinding("LookY");
+	axisLookX = inputBindings->getAxisBinding("LookX");
+	axisLookY = inputBindings->getAxisBinding("LookY");
 	buttonShoot = inputBindings->getButtonBinding("Shoot");
 
 	score = 0;
@@ -75,7 +75,7 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		//BOUNDS ALL BETWEEN -200 and 200
 
 		//Orientate the camera
-		getRelRotation() += Vector3f(lookY->getValue(), lookX->getValue(), 0) * 80.0f * currentDelta;
+		getRelRotation() += Vector3f(axisLookY->getValue(), axisLookX->getValue(), 0) * 80.0f * currentDelta;
 		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0f, 89.0f));
 
 		//Move the player
@@ -160,7 +160,7 @@ void Player::onMouseMoved(double x, double y, double dx, double dy) {
 	}
 }
 
-void Player::removeScore(unsigned int points) {
+void Player::removePoints(unsigned int points) {
 	if (points > score)
 		score = 0;
 	else

@@ -35,9 +35,6 @@ private:
 	/* The instance of the game */
 	AsteroidsGame* game;
 
-	/* The camera used when rendering the menu */
-	Camera2D* camera;
-
 	/* The background for the menu */
 	GameObject2D* background;
 

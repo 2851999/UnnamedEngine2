@@ -169,8 +169,8 @@ public:
 
 class AsteroidsMainMenu {
 private:
-	/* The camera used when rendering the main menu */
-	Camera2D* camera;
+	/* The game instance */
+	AsteroidsGame* game;
 
 	/* The background for the main menu */
 	GameObject2D* background;

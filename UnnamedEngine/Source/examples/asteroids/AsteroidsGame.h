@@ -69,6 +69,9 @@ private:
 
 	/* The highscores */
 	HighScores highScores;
+
+	/* The camera 2D instance used for 2D graphics */
+	Camera2D* camera2D = NULL;
 public:
 	/* The constructor */
 	AsteroidsGame();
@@ -94,6 +97,7 @@ public:
 	AsteroidsMainGame* getMainGame() { return mainGame; }
 	SoundSystem* getSoundSystem() { return soundSystem; }
 	InputBindings* getInputBindings() { return inputBindings; }
+	Camera2D* getCamera2D() { return camera2D; }
 };
 
 

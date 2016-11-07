@@ -72,10 +72,10 @@ private:
 	ParticleSystem*  particleSystem;
 
 	/* The cooldown time for the lasers (in seconds) */
-	double cooldown;
+	float cooldown;
 
 	/* The last time a laser was fired (in seconds) */
-	double timeLastLaserFired;
+	float timeLastLaserFired;
 public:
 	/* The constructor */
 	Lasers(AsteroidsGame* game, Ship* ship);

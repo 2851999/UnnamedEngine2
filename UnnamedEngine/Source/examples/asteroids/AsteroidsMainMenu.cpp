@@ -437,14 +437,11 @@ void MainMenuSettingsControls::onAxisAssigned(InputBindingAxis* axis) {
  * The AsteroidsMainMenu class
  *****************************************************************************/
 
-AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) {
+AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) : game(game) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	//Setup the camera
-	camera = new Camera2D(Matrix4f().initOrthographic(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f));
-	camera->update();
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
@@ -466,13 +463,12 @@ AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) {
 
 AsteroidsMainMenu::~AsteroidsMainMenu() {
 	//Delete created resources
-	delete camera;
 	delete background;
 }
 
 void AsteroidsMainMenu::show() {
 	//Add the camera
-	Renderer::addCamera(camera);
+	Renderer::addCamera(game->getCamera2D());
 
 	//Show the panel group
 	panelGroup->show("Main");

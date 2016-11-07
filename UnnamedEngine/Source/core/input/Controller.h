@@ -59,9 +59,9 @@ public:
 	/* The getters */
 	inline std::string getName() { return name; }
 	inline int getIndex() { return index; }
-	inline float getAxis(int index) { return axisValues[index]; }
+	inline float getAxis(unsigned int index) { return axisValues[index]; }
 	inline float getAxisCount() { return axisCount; }
-	bool getButton(int index);
+	bool getButton(unsigned int index);
 };
 
 #endif /* CORE_INPUT_CONTROLLER_H_ */

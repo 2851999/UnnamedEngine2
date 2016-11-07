@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 6
+
+* More Asteroids development
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 2 | Experimental 5
 
 * Added replaceAll method in StrUtils

@@ -98,6 +98,10 @@ void AsteroidsGame::created() {
 //	}
 //	inputBindings->save(resourceLoader.getPath() + "settings/controls.txt");
 
+	//Create the Camera2D instance
+	camera2D = new Camera2D(Matrix4f().initOrthographic(0.0f, getSettings().windowWidth, getSettings().windowHeight, 0.0f, -1.0f, 1.0f));
+	camera2D->update();
+
 	//Setup the main menu
 	mainMenu = new AsteroidsMainMenu(this);
 	mainMenu->show();

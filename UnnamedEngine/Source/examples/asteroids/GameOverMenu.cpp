@@ -29,9 +29,6 @@ GameOverMenu::GameOverMenu(AsteroidsGame* game, Player* player) : game(game), pl
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	//Setup the camera
-	camera = new Camera2D(Matrix4f().initOrthographic(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f));
-	camera->update();
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
@@ -71,7 +68,6 @@ GameOverMenu::GameOverMenu(AsteroidsGame* game, Player* player) : game(game), pl
 
 GameOverMenu::~GameOverMenu() {
 	//Delete created resources
-	delete camera;
 	delete background;
 }
 
@@ -114,7 +110,7 @@ void GameOverMenu::render() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Add the camera
-	Renderer::addCamera(camera);
+	Renderer::addCamera(game->getCamera2D());
 
 	//Render the background
 	background->render();

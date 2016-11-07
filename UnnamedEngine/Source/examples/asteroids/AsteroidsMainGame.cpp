@@ -112,11 +112,11 @@ void AsteroidsMainGame::start() {
 
 	//Setup the enemies
 	enemiesRenderer->hideAll();
-	enemiesRenderer->updateAll();
 	for (unsigned int i = 0; i < enemies.size(); i++) {
 		enemies[i]->reset();
 		enemies[i]->setHealth(0);
 	}
+	enemiesRenderer->updateAll();
 
 	//Reset the player ship
 	player->reset();
