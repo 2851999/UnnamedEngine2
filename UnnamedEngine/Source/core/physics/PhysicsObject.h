@@ -19,7 +19,6 @@
 #ifndef CORE_PHYSICS_PHYSICSOBJECT_H_
 #define CORE_PHYSICS_PHYSICSOBJECT_H_
 
-#include "Collider.h"
 #include "../Object.h"
 
 /*****************************************************************************
@@ -70,9 +69,6 @@ private:
 
 	/* The angular acceleration */
 	float angularAcceleration = 0;
-
-	/* The collider (can be NULL) */
-	Collider2D* collider = NULL;
 public:
 	/* The constructor - Takes the GameObject that this will be controlling, once
 	 * this is done, the position/rotation of the child object should only be
@@ -101,17 +97,12 @@ public:
 	void setAngularVelocity(float angularVelocity) { this->angularVelocity = angularVelocity; }
 	void setAngularAcceleration(float angularAcceleration) { this->angularAcceleration = angularAcceleration; }
 
-	inline void setCollider(Collider2D* collider) { this->collider = collider; }
-
 	Vector2f getVelocity() { return velocity; }
 	Vector2f& getRelVelocity() { return velocity; }
 	Vector2f getAcceleration() { return acceleration; }
 	Vector2f& getRelAcceleration() { return acceleration; }
 	float getAngularVelocity() { return angularVelocity; }
 	float getAngularAcceleration() { return angularAcceleration; }
-
-	inline Collider2D* getCollider() { return collider; }
-	inline bool hasCollider() { return collider; }
 };
 
 /*****************************************************************************
@@ -132,9 +123,6 @@ private:
 
 	/* The angular acceleration */
 	Vector3f angularAcceleration;
-
-	/* The collider (can be NULL) */
-	Collider3D* collider = NULL;
 public:
 	/* The constructor - Takes the GameObject that this will be controlling, once
 	 * this is done, the position/rotation of the child object should only be
@@ -164,8 +152,6 @@ public:
 	void setAngularAcceleration(Vector3f angularAcceleration) { this->angularAcceleration = angularAcceleration; }
 	void setAngularAcceleration(float x, float y, float z) { angularAcceleration = Vector3f(x, y, z); }
 
-	inline void setCollider(Collider3D* collider) { this->collider = collider; }
-
 	Vector3f getVelocity() { return velocity; }
 	Vector3f& getRelVelocity() { return velocity; }
 	Vector3f getAcceleration() { return acceleration; }
@@ -174,9 +160,6 @@ public:
 	Vector3f& getRelAngularVelocity() { return angularVelocity; }
 	Vector3f getAngularAcceleration() { return angularAcceleration; }
 	Vector3f& getRelAngularAcceleration() { return angularAcceleration; }
-
-	inline Collider3D* getCollider() { return collider; }
-	inline bool hasCollider() { return collider; }
 };
 
 #endif /* CORE_PHYSICS_PHYSICSOBJECT_H_ */

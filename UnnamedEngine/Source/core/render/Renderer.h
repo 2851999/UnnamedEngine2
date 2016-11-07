@@ -20,7 +20,6 @@
 #define CORE_RENDER_RENDERER_H_
 
 #include "Camera.h"
-#include "FBO.h"
 
 /*****************************************************************************
  * The Renderer class contains everything need to render a Mesh
@@ -84,9 +83,6 @@ public:
 
 	/* Method used to render a Mesh */
 	static void render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderShader* shader);
-
-	/* Method used to render a FramebufferTexture */
-	static void render(FramebufferTexture* texture, Shader* shader = NULL);
 
 	/* Method use to destroy any objects that were created */
 	static void destroy();

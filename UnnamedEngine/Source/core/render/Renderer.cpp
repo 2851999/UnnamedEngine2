@@ -163,21 +163,6 @@ void Renderer::render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderS
 	}
 }
 
-void Renderer::render(FramebufferTexture* texture, Shader* shader) {
-	if (shader == NULL)
-		shader = getRenderShader("Framebuffer")->getShader();
-
-	shader->use();
-
-	shader->setUniformi("Texture", bindTexture(texture));
-
-	screenTextureMesh->render();
-
-	shader->stopUsing();
-
-	unbindTexture();
-}
-
 void Renderer::destroy() {
 	delete screenTextureMesh;
 }
