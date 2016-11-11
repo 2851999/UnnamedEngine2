@@ -19,7 +19,6 @@
 #ifndef EXAMPLES_ASTEROIDS_PLAYER_H_
 #define EXAMPLES_ASTEROIDS_PLAYER_H_
 
-#include "../../utils/DebugCamera.h"
 #include "../../core/physics/PhysicsObject.h"
 #include "AsteroidsGame.h"
 #include "Lasers.h"

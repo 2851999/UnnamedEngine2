@@ -37,7 +37,6 @@ private:
 	/* OpenGL shader stuff */
 	GLint program = -1;
 	GLint vertexShader = -1;
-	GLint geometryShader = -1;
 	GLint fragmentShader = -1;
 
 	/* Maps with locations of the variables in the shaders */
@@ -53,8 +52,7 @@ public:
 
 	/* Constructors and destructors */
 	Shader() {}
-	Shader(GLint vertexShader, GLint fragmentShader) : Shader(vertexShader, -1, fragmentShader) {}
-	Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader);
+	Shader(GLint vertexShader, GLint fragmentShader);
 	virtual ~Shader();
 
 	/* Various shader functions */
@@ -87,7 +85,6 @@ public:
 	/* Methods to create a shader */
 	static GLint createShader(std::string source, GLenum type);
 	static Shader* createShader(ShaderSource vertexSource, ShaderSource fragmentSource);
-	static Shader* createShader(ShaderSource vertexSource, ShaderSource geometrySource, ShaderSource fragmentSource);
 
 	/* Methods used to load a shader */
 	static ShaderSource loadShaderSource(std::string path);

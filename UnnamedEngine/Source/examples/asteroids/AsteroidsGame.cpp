@@ -18,6 +18,8 @@
 
 #include "AsteroidsGame.h"
 
+#include <fstream>
+
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -68,9 +70,29 @@ void AsteroidsGame::created() {
 
 	//Create the InputBindings instance
 	inputBindings = new InputBindings();
-	//Load the controls
-	inputBindings->load(resourceLoader.getPath() + "settings/controls.txt", getWindow()->getInputManager());
+	//Check whether the controls settings has been created
+	if (std::ifstream(resourceLoader.getPath() + "settings/controls.txt"))
+		//Load the controls
+		inputBindings->load(resourceLoader.getPath() + "settings/controls.txt", getWindow()->getInputManager());
+	else {
+		//Create the axis bindings
+		InputBindingAxis* axisForward = inputBindings->createAxisBinding("Forward");
+		inputBindings->createAxisBinding("LookX");
+		inputBindings->createAxisBinding("LookY");
+		//Create the button bindings
+		InputBindingButton* buttonShoot = inputBindings->createButtonBinding("Shoot");
+		InputBindingButton* buttonPause = inputBindings->createButtonBinding("Pause");
+		InputBindingButton* buttonUpgrades = inputBindings->createButtonBinding("Upgrades");
+		//Setup default keys
+		axisForward->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
+		buttonShoot->assignKey(GLFW_KEY_SPACE);
+		buttonPause->assignKey(GLFW_KEY_ESCAPE);
+		buttonUpgrades->assignKey(GLFW_KEY_U);
 
+		inputBindings->save(resourceLoader.getPath() + "settings/controls.txt");
+	}
+
+	//Add the controllers
 	getWindow()->getInputManager()->addAvailableControllers();
 
 	//Create the axis bindings
