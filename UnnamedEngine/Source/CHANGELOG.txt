@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 8
+
+* Now using new 'Transformation' class for transformations
+  of 2D objects
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 2 | Experimental 7
 
 * Added Transform

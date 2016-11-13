@@ -16,10 +16,11 @@
  *
  *****************************************************************************/
 
-#ifndef EXPERIMENTAL_QUATERNION_H_
-#define EXPERIMENTAL_QUATERNION_H_
+#ifndef CORE_QUATERNION_H_
+#define CORE_QUATERNION_H_
 
-#include "../core/Vector.h"
+#include "Vector.h"
+
 class Matrix4f;
 
 /*****************************************************************************
@@ -105,4 +106,4 @@ public:
 	}
 };
 
-#endif /* EXPERIMENTAL_QUATERNION_H_ */
+#endif /* CORE_QUATERNION_H_ */

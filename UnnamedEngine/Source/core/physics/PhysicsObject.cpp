@@ -29,8 +29,8 @@ void PhysicsObject2D::updatePhysics(float delta) {
 	angularVelocity += angularAcceleration * delta;
 
 	//Update the position and rotation
-	position += velocity * delta;
-	rotation += angularVelocity * delta;
+	transform->setPosition(transform->getLocalPosition() + Vector3f(velocity * delta, 0.0f));
+	transform->setRotation(getLocalRotationEuler() + (angularVelocity * delta));
 }
 
 /*****************************************************************************

@@ -62,14 +62,10 @@ void GameObject::addMesh(Mesh* mesh) {
  *****************************************************************************/
 
 GameObject2D::GameObject2D(float width, float height) : GameObject(NULL, NULL) {
-	rotation = 0;
-	scale = Vector2f(1.0f, 1.0f);
 	size = Vector2f(width, height);
 }
 
 GameObject2D::GameObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width, float height) : GameObject(meshes, shader) {
-	rotation = 0;
-	scale = Vector2f(1.0f, 1.0f);
 	size = Vector2f(width, height);
 }
 
@@ -79,50 +75,14 @@ GameObject2D::GameObject2D(Mesh* mesh, std::string shaderId, float width , float
 GameObject2D::GameObject2D(std::vector<Mesh*> meshes, std::string shaderId, float width, float height) :
 		GameObject2D(meshes, Renderer::getRenderShader(shaderId), width, height) {}
 
-//#include "../experimental/Quaternion.h"
 void GameObject2D::update() {
 	//Check to make sure this object has a mesh
-	if (hasMesh()) {
-		Matrix4f& modelMatrix = getModelMatrix();
-
-		modelMatrix.setIdentity();
-
-		Vector2f offset = Vector2f(getWidth() / 2, getHeight() / 2);
-
-		modelMatrix.translate(offset + getPosition());
-		modelMatrix.rotate(getRotation());
-		modelMatrix.translate(offset * -1);
-		modelMatrix.scale(getScale());
-//		modelMatrix.translate(offset + getPosition());
-//		modelMatrix *= Quaternion(Vector3f(0.0f, 0.0f, 1.0f), 3.14159f/2.0f).toRotationMatrix();
-//		modelMatrix.translate(offset * -1);
-//		modelMatrix.scale(getScale());
-	}
-}
-
-Vector2f GameObject2D::getPosition() {
-	if (parent)
-		return position + parent->getPosition();
-	else
-		return position;
-}
-
-float GameObject2D::getRotation() {
-	if (parent)
-		return rotation + parent->getRotation();
-	else
-		return rotation;
-}
-
-Vector2f GameObject2D::getScale() {
-	if (parent)
-		return scale * parent->getScale();
-	else
-		return scale;
+	if (hasMesh())
+		transform->calculateMatrix(Vector2f(getWidth() / 2, getHeight() / 2));
 }
 
 Vector2f GameObject2D::getSize() {
-	return size * getScale();
+	return size * Vector2f(getScale().getX(), getScale().getY());
 }
 
 /*****************************************************************************

@@ -78,7 +78,7 @@ void GUITextBoxCursor::render() {
 	//Check whether the cursor is currently shown
 	if (cursorShown) {
 		//Get the text box's current position
-		Vector2f p = textBox->getPosition();
+		Vector3f p = textBox->getPosition();
 		//Calculate the x and y position the cursor should be on the screen
 		float x = 1 + p.getX() + (textBox->getFont()->getWidth(StrUtils::substring(textBox->renderText, 0, textBox->cursorIndex - textBox->viewIndexStart)));
 		float y = (p.getY() + (textBox->getHeight() / 2)) - (getHeight() / 2);
@@ -120,7 +120,7 @@ void GUITextBoxSelection::render() {
 	//Check whether there is a selection within the text box
 	if (textBox->isSelection) {
 		//Get the position of the text box
-		Vector2f p = textBox->getPosition();
+		Vector3f p = textBox->getPosition();
 		//The x position of the start of the selection
 		float selectionX = 0;
 		try {
@@ -238,7 +238,7 @@ void GUITextBox::onComponentRender() {
 	}
 
 	//Get the text box position - used to calculate the text position
-	Vector2f p = getPosition();
+	Vector3f p = getPosition();
 
 	//Calculate the text position
 	float textX = p.getX() + 1;
@@ -320,7 +320,7 @@ int GUITextBox::getIndex(double x) {
 		double widthOfLastCharacter = getFont()->getWidth(currentString.substr(currentString.length() - 1));
 
 		//Add onto lookX the position this text box starts rendering the text
-		lookX += position.getX() + 1;
+		lookX += getLocalPosition().getX() + 1;
 		//Add onto lookX the width of the string - (the width of the last character / 2) - ensures
 		//the index of the new place ends up being before if it is less than half way through
 		//the character, or after if >= to half way through then current character

@@ -20,6 +20,7 @@
 #define CORE_OBJECT_H_
 
 #include "Rectangle.h"
+#include "Transform.h"
 #include "Vector.h"
 #include "render/Mesh.h"
 
@@ -33,11 +34,11 @@ private:
 	/* Mesh instances associated with this object */
 	std::vector<Mesh*> meshes;
 
-	/* The model matrix used when rendering this object */
-	Matrix4f modelMatrix;
-
 	/* The RenderShader used when rendering */
 	RenderShader* renderShader;
+protected:
+	/* Tranform for this object */
+	Transform* transform = new Transform();
 public:
 	/* The constructors */
 	GameObject(Mesh* mesh = NULL, RenderShader* shader = NULL);
@@ -53,9 +54,14 @@ public:
 	/* Method used to add a mesh */
 	void addMesh(Mesh* mesh);
 
+	/* Method used to add a child object */
+	inline void addChild(GameObject* child) { transform->addChild(child->getTransform()); }
+	/* method used to remove a child object */
+	inline void removeChild(GameObject* child) { transform->removeChild(child->getTransform()); }
+
 	/* Setters and getters */
-	inline void setModelMatrix(Matrix4f modelMatrix) { this->modelMatrix = modelMatrix; }
-	inline Matrix4f& getModelMatrix() { return modelMatrix; }
+	inline void setModelMatrix(Matrix4f modelMatrix) { transform->setMatrix(modelMatrix); }
+	inline Matrix4f& getModelMatrix() { return transform->getMatrix(); }
 
 	inline void setRenderShader(RenderShader* renderShader) { this->renderShader = renderShader; }
 
@@ -68,6 +74,7 @@ public:
 	inline bool hasMaterial() { return meshes[0]->getMaterial(); }
 	inline Material* getMaterial() { return meshes[0]->getMaterial(); }
 
+	inline Transform* getTransform() { return transform; }
 	inline RenderShader* getRenderShader() { return renderShader; }
 	inline Shader* getShader() { return renderShader->getShader(); }
 };
@@ -79,14 +86,7 @@ public:
 class GameObject2D : public GameObject {
 protected:
 	/* Various information about this object */
-	Vector2f position;
-	float    rotation;
-	Vector2f scale;
 	Vector2f size;
-
-	/* Allows objects to be linked together and have their positions relative
-	 * to each other */
-	GameObject2D* parent = NULL;
 public:
 	/* The constructors */
 	GameObject2D(float width = 0, float height = 0);
@@ -101,38 +101,36 @@ public:
 	virtual void update() override;
 
 	/* Setters and getters */
-	inline void setPosition(Vector2f position) { this->position = position; }
-	inline void setPosition(float x, float y) { position = Vector2f(x, y); }
-	inline void setRotation(float rotation) { this->rotation = rotation; }
-	inline void setScale(Vector2f scale) { this->scale = scale; }
-	inline void setScale(float x, float y) { scale = Vector2f(x, y); }
-	inline void setSize(Vector2f size) { this->size = size; }
+	inline void setPosition(Vector2f position) { transform->setPosition(position); }
+	inline void setPosition(float x, float y)  { transform->setPosition(x, y); }
+	inline void setRotation(float rotation)    { transform->setRotation(rotation); }
+	inline void setScale(Vector2f scale)       { transform->setScale(scale); }
+	inline void setScale(float x, float y)     { transform->setScale(x, y); }
+	inline void setSize(Vector2f size)         { this->size = size; }
 	inline void setSize(float width, float height) { size = Vector2f(width, height); }
-	inline void setWidth(float width) { size.setX(width); }
-	inline void setHeight(float height) { size.setY(height); }
+	inline void setWidth(float width)          { size.setX(width); }
+	inline void setHeight(float height)        { size.setY(height); }
 
-	inline Vector2f& getRelPosition() { return position; }
-	inline float& getRelRotation() { return rotation; }
-	inline Vector2f& getRelScale() { return scale; }
+	inline Vector3f   getLocalPosition()      { return transform->getLocalPosition(); }
+	inline Quaternion getLocalRotation()      { return transform->getLocalRotation(); }
+	inline float      getLocalRotationEuler() { return transform->getLocalRotation().toEuler().getZ(); }
+	inline Vector3f   getLocalScale()         { return transform->getLocalScale(); }
 
-	Vector2f getPosition();
-	float getRotation();
-	Vector2f getScale();
+	inline Vector3f   getPosition()      { return transform->getPosition(); }
+	inline Quaternion getRotation()      { return transform->getRotation(); }
+	inline float      getRotationEuler() { return transform->getRotation().toEuler().getZ(); }
+	inline Vector3f   getScale()         { return transform->getScale(); }
 	Vector2f getSize();
 
-	inline Vector2f& getRelSize() { return size; }
+	inline Vector2f& getLocalSize() { return size; }
 
 	inline float getWidth() { return size.getX() * getScale().getX(); }
-	inline float getRelWidth() { return size.getX(); }
+	inline float getLocalWidth() { return size.getX(); }
 	inline float getHeight() { return size.getY() * getScale().getY(); }
-	inline float getRelHeight() { return size.getY(); }
+	inline float getLocalHeight() { return size.getY(); }
 
 	/* Returns the bounds of this object in the form of a Rectangle */
-	inline Rect getBounds() { return Rect(getPosition(), getSize()); }
-
-	inline void setParent(GameObject2D* parent) { this->parent = parent; }
-	inline bool hasParent() { return parent; }
-	inline GameObject2D* getParent() { return parent; }
+	inline Rect getBounds() { return Rect(Vector2f(getPosition().getX(), getPosition().getY()), Vector2f(getSize().getX(), getSize().getY())); }
 };
 
 /*****************************************************************************

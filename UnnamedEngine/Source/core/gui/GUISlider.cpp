@@ -75,7 +75,7 @@ void GUISlider::onComponentRender() {
 		button->setPosition(0.0f, pos);
 
 		//Make sure the button is in the middle
-		button->getRelPosition().setX(-buttonWidth / 2 + width / 2);
+		button->setPosition(-buttonWidth / 2 + width / 2, button->getLocalPosition().getY());
 	} else if (direction == HORIZONTAL) {
 		float pos = position;
 		if (interval != 0.0f)
@@ -85,7 +85,7 @@ void GUISlider::onComponentRender() {
 		button->setPosition(pos, 0.0f);
 
 		//Make sure the button is in the middle
-		button->getRelPosition().setY(-buttonHeight / 2 + height / 2);
+		button->setPosition(button->getLocalPosition().getY(), -buttonHeight / 2 + height / 2);
 	}
 }
 
@@ -115,12 +115,12 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 				position += dy;
 				position = MathsUtils::clamp(position, 0.0f, height - button->getHeight());
 				//Set the slider value
-				value = valueMin + (button->getRelPosition().getY() / (height - button->getHeight())) * (valueMax - valueMin);
+				value = valueMin + (button->getLocalPosition().getY() / (height - button->getHeight())) * (valueMax - valueMin);
 			} else if (direction == HORIZONTAL) {
 				position += dx;
 				position = MathsUtils::clamp(position, 0.0f, width - button->getWidth());
 				//Set the slider value
-				value = valueMin + (button->getRelPosition().getX() / (width - button->getWidth())) * (valueMax - valueMin);
+				value = valueMin + (button->getLocalPosition().getX() / (width - button->getWidth())) * (valueMax - valueMin);
 			}
 			//Check whether the value needs to be clamped to an interval
 			if (interval != 0.0f)

@@ -65,7 +65,7 @@ void GUIDropDownMenu::setupMenu() {
 GUIDropDownMenu::GUIDropDownMenu(GUIButton* menuButton) : menuButton(menuButton) {
 	menuOpen = false;
 	//Assign the parent of the menu button to this
-	menuButton->setParent(this);
+	addChild(menuButton);
 	//Assign the component size
 	setupMenu();
 	//Add this component listener to the button and this
@@ -82,7 +82,7 @@ GUIDropDownMenu::~GUIDropDownMenu() {
 
 void GUIDropDownMenu::addButton(GUIButton* button) {
 	//Set the button's parent to this
-	button->setParent(this);
+	addChild(button);
 	//Set the buttons active and visible properties
 	button->setActive(false);
 	button->setVisible(false);
@@ -90,7 +90,7 @@ void GUIDropDownMenu::addButton(GUIButton* button) {
 	if (buttons.size() == 0)
 		button->setPosition(Vector2f(menuButton->getWidth() / 2 - button->getWidth() / 2, menuButton->getHeight()));
 	else
-		button->setPosition(Vector2f(menuButton->getWidth() / 2 - button->getWidth() / 2, buttons[buttons.size() - 1]->getRelPosition().getY() + buttons[buttons.size() - 1]->getHeight()));
+		button->setPosition(Vector2f(menuButton->getWidth() / 2 - button->getWidth() / 2, buttons[buttons.size() - 1]->getLocalPosition().getY() + buttons[buttons.size() - 1]->getHeight()));
 	//Add this component listener to the button
 	button->addListener(this);
 	//Add the button

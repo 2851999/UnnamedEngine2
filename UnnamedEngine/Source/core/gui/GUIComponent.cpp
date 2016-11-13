@@ -52,7 +52,7 @@ void GUIComponentRenderer::renderText(std::string text, Vector2f relPos) {
 	//Make sure there is a font instance
 	if (font)
 		//Render the text
-		font->render(text, getPosition() + relPos);
+		font->render(text, Vector2f(getPosition().getX(), getPosition().getY()) + relPos);
 }
 
 void GUIComponentRenderer::renderTextAtCentre(std::string text) {
@@ -81,11 +81,11 @@ void GUIComponentRenderer::setTexture(Texture* texture) {
  *****************************************************************************/
 
 void GUIFill::updateWidth(float width) {
-	getRelScale().setX(width / getRelWidth());
+	setScale(width / getLocalWidth(), getLocalScale().getY());
 }
 
 void GUIFill::updateHeight(float height) {
-	getRelScale().setY(height / getRelHeight());
+	setScale(getLocalScale().getX(), height / getLocalHeight());
 }
 
 /*****************************************************************************
@@ -97,7 +97,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour) :
 		component(component), thickness(thickness) {
 
 	setPosition(-thickness, -thickness);
-	setParent(component);
+	component->addChild(this);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, Texture* texture) :
@@ -105,7 +105,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, Texture* texture)
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		setParent(component);
+		component->addChild(this);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour, Texture* texture) :
@@ -113,7 +113,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour, Te
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		setParent(component);
+		component->addChild(this);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colour> colours) :
@@ -121,7 +121,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colou
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		setParent(component);
+		component->addChild(this);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Texture*> textures) :
@@ -129,7 +129,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Textu
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		setParent(component);
+		component->addChild(this);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colour> colours, std::vector<Texture*> textures) :
@@ -137,7 +137,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colou
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		setParent(component);
+		component->addChild(this);
 }
 
 /*****************************************************************************
@@ -164,7 +164,7 @@ void GUIComponent::removeListener(GUIComponentListener* listener) {
 }
 
 bool GUIComponent::contains(double x, double y) {
-	Vector2f position = getPosition();
+	Vector3f position = getPosition();
 	Vector2f size = getSize();
 	float px = position.getX();
 	float py = position.getY();

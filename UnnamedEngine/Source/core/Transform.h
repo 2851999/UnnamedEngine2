@@ -16,11 +16,13 @@
  *
  *****************************************************************************/
 
-#ifndef EXPERIMENTAL_TRANSFORM_H_
-#define EXPERIMENTAL_TRANSFORM_H_
+#ifndef CORE_TRANSFORM_H_
+#define CORE_TRANSFORM_H_
 
+#include "Matrix.h"
 #include "Quaternion.h"
-#include "../core/Matrix.h"
+
+#include <algorithm>
 
 /*****************************************************************************
  * The Transform class takes care of transformations and produces a resultant
@@ -34,12 +36,12 @@ private:
 	/* The rotation (stored as a quaternion) */
 	Quaternion rotation;
 	/* The scale vector */
-	Vector3f scale;
+	Vector3f scale = Vector3f(1.0f, 1.0f, 1.0f);
 
 	/* The local data of the above */
 	Vector3f   localPosition;
 	Quaternion localRotation;
-	Vector3f   localScale;
+	Vector3f   localScale = Vector3f(1.0f, 1.0f, 1.0f);
 
 	/* The matrix of this transform */
 	Matrix4f matrix;
@@ -67,19 +69,24 @@ public:
 	/* Method used to add a child transform */
 	inline void addChild(Transform* child) {
 		//Assign the parent of the child
-		child->setParent(child);
+		child->setParent(this);
+		child->setPosition(child->getLocalPosition());
+		child->setRotation(child->getLocalRotation());
+		child->setScale(child->getLocalScale());
 		//Add the child
 		children.push_back(child);
 	}
 
-	/* The method used to calculate this transform's matrix */
-	inline void calculateMatrix(Vector3f offset) {
-		matrix.setIdentity();
-		matrix.translate(position + offset);
-		matrix.rotate(rotation);
-		matrix.translate(offset * -1);
-		matrix.scale(scale);
+	/* Method used to remove a child transform */
+	inline void removeChild(Transform* child) {
+		//Remove the parent of the child
+		child->setParent(NULL);
+		//Remove the child from the children vector
+		children.erase(std::remove(children.begin(), children.end(), child), children.end());
 	}
+
+	/* Method used to calculate this transform's matrix */
+	void calculateMatrix(Vector3f offset);
 
 	/* Various getters and setters */
 	inline void setPosition(Vector3f position) {
@@ -88,7 +95,6 @@ public:
 		//Check whether there is a parent
 		if (parent)
 			this->position += parent->getPosition();
-		//Assign the child positions
 		for (unsigned int i = 0; i < children.size(); i++)
 			children[i]->setPosition(children[i]->getLocalPosition());
 	}
@@ -121,17 +127,18 @@ public:
 	inline void setScale(Vector2f scale)                   { setScale(Vector3f(scale)); }
 	inline void setScale(float x, float y, float z = 0.0f) { setScale(Vector3f(x, y, z)); }
 
+	inline void setMatrix(Matrix4f matrix)   { this->matrix = matrix; }
 	inline void setParent(Transform* parent) { this->parent = parent; }
 
-	inline Vector3f&   getLocalPosition() { return localPosition; }
-	inline Quaternion& getLocalRotation() { return localRotation; }
-	inline Vector3f&   getLocalScale()    { return localScale; }
+	inline Vector3f   getLocalPosition() { return localPosition; }
+	inline Quaternion getLocalRotation() { return localRotation; }
+	inline Vector3f   getLocalScale()    { return localScale; }
 
 	inline Vector3f    getPosition() { return position; }
 	inline Quaternion  getRotation() { return rotation; }
 	inline Vector3f    getScale()    { return scale; }
 
-	inline Matrix4f getMatrix() { return matrix; }
+	inline Matrix4f&  getMatrix() { return matrix; }
 	inline Transform* getParent() { return parent; }
 	inline Transform* hasParent() { return parent; }
 	inline std::vector<Transform*> getChildren() { return children; }
@@ -140,4 +147,4 @@ public:
 	inline Transform* getChild(unsigned int i) { return children.at(i); }
 };
 
-#endif /* EXPERIMENTAL_TRANSFORM_H_ */
+#endif /* CORE_TRANSFORM_H_ */

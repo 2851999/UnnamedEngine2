@@ -24,9 +24,9 @@
  *
  * Tutorial Number: 3
  * Tutorial Name: Basic Rendering
- * Engine Version: V0.1.5 (0::2::2::3)
+ * Engine Version: V0.1.5 (0::2::2::8)
  * Date Created: 17/10/2016
- * Date Updated: 29/10/2016
+ * Date Updated: 13/11/2016
  *
  * Description: Demonstrates how to start rendering in 2D
  *****************************************************************************/
@@ -119,14 +119,9 @@ void Tutorial::update() {
 	//This rotates the object by a certain amount equal to 5 degrees per second
 	//getDeltaSeconds() returns the time between the current frame, and the
 	//last frame in seconds
-	object->getRelRotation() += 5.0f * getDeltaSeconds();
-	//In general any getRel methods return a reference to the value in question
-	//allowing them to be directly changed - also this is probably better since
-	//using:
-	//object->setRotation(object->getRotation() + 1.0f * getDeltaSeconds);
-	//Will only work when the object is not attached to anything else that is
-	//rotation as getRotation() will return the total rotation of the object in
-	//this case
+	object->setRotation(object->getLocalRotationEuler() + 5.0f * getDeltaSeconds());
+	//The engine uses quaternions to handle rotations, but above we are using
+	//Euler angles in degrees
 
 	//Now to update the object's model matrix so the changes to it's rotation
 	//become visible the next time it is rendered

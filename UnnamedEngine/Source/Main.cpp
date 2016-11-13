@@ -18,7 +18,7 @@
 
 //#include "tests/BaseEngineTest2D.h"
 //#include "examples/basic/BasicRendering.h"
-#include "examples/asteroids/AsteroidsGame.h"
+//#include "examples/asteroids/AsteroidsGame.h"
 
 int main() {
 //	Test test;

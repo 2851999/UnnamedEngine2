@@ -18,8 +18,8 @@
 #ifndef CORE_MATRIX_H_
 #define CORE_MATRIX_H_
 
+#include "Quaternion.h"
 #include "Vector.h"
-#include "../experimental/Quaternion.h"
 
 /*****************************************************************************
  * The generalised version of a Matrix
@@ -504,7 +504,14 @@ public:
 		rotate(r);
 		scale(s);
 	}
+
 	inline void transform(Vector3f t, Vector3f r, Vector3f s) {
+		translate(t);
+		rotate(r);
+		scale(s);
+	}
+
+	inline void transform(Vector3f t, Quaternion r, Vector3f s) {
 		translate(t);
 		rotate(r);
 		scale(s);
@@ -516,7 +523,7 @@ public:
 		translate(t);
 	}
 
-	inline void transformR(Vector3f t, Vector3f r, Vector3f s) {
+	inline void transformR(Vector3f t, Quaternion r, Vector3f s) {
 		scale(s);
 		rotate(r);
 		translate(t);

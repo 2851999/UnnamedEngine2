@@ -22,4 +22,10 @@
  * The Transform class
  *****************************************************************************/
 
-
+void Transform::calculateMatrix(Vector3f offset) {
+	matrix.setIdentity();
+	matrix.translate(position + offset);
+	matrix.rotate(rotation);
+	matrix.translate(offset * -1);
+	matrix.scale(scale);
+}
