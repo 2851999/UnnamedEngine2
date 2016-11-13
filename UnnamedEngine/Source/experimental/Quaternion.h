@@ -19,6 +19,9 @@
 #ifndef EXPERIMENTAL_QUATERNION_H_
 #define EXPERIMENTAL_QUATERNION_H_
 
+#include "../core/Vector.h"
+class Matrix4f;
+
 /*****************************************************************************
  * The Quaternion class used to representing quaternions
  *****************************************************************************/
@@ -33,14 +36,32 @@ public:
 	Quaternion(Vector3f axis, float angle) {
 		//Calculate some needed constants for transforming it into the
 		//quaternion representation
-		float a = angle / 2;
-		float c = cos(a);
+		float a = MathsUtils::toRadians(angle) / 2;
 		float s = sin(a);
+		float c = cos(a);
 		//Assign the values
 		setX(axis.getX() * s);
 		setY(axis.getY() * s);
 		setZ(axis.getZ() * s);
 		setW(c);
+	}
+
+	Quaternion(Vector3f euler) {
+		float hx = MathsUtils::toRadians(euler.getX()) / 2;
+		float hy = MathsUtils::toRadians(euler.getY()) / 2;
+		float hz = MathsUtils::toRadians(euler.getZ()) / 2;
+		float c1 = cos(hy);
+		float s1 = sin(hy);
+		float c2 = cos(hx);
+		float s2 = sin(hx);
+		float c3 = cos(hz);
+		float s3 = sin(hz);
+		float c1c2 = c1 * c2;
+		float s1s2 = s1 * s2;
+		setX(c1 * s2 * c3 - s1 * c2 * s3);
+		setY(s1 * c2 * c3 + c1 * s2 * s3);
+		setZ(c1c2 * s3 + s1s2 * c3);
+		setW(c1c2 * c3 - s1s2 * s3);
 	}
 
 	/* Various operations */
@@ -66,21 +87,13 @@ public:
 
 	inline Quaternion conjugate() const { return Quaternion(-getX(), -getY(), -getZ(), getW()); }
 
-	inline Matrix4f toRotationMatrix() const {
-		//https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
-		Matrix4f m;
+	Matrix4f toRotationMatrix();
 
-		float i = getX();
-		float j = getY();
-		float k = getZ();
-		float r = getW();
-
-		m.set(0, 0, 1 - (2 * j * j) - (2 * k * k)); m.set(0, 1, 2 * (i * j - k * r)); m.set(0, 2, 2 * (i * k + j * r)); m.set(0, 3, 0);
-		m.set(1, 0, 2 * (i * j + k * r)); m.set(1, 1, 1 - (2 * i * i) - (2 * k * k)); m.set(1, 2, 2 * (j * k - i * r)); m.set(1, 3, 0);
-		m.set(2, 0, 2 * (i * k - j * r)); m.set(2, 1, 2 * (j * k + i * r)); m.set(2, 2, 1 - (2 * i * i) - (2 * j * j)); m.set(2, 3, 0);
-		m.set(3, 0, 0); m.set(3, 1, 0); m.set(3, 2, 0); m.set(3, 3, 1);
-
-		return m;
+	inline Vector3f toEuler() {
+		float x = MathsUtils::toDegrees(atan2(2 * getX() * getW() - 2 * getY() * getZ(), 1 - 2 * getX() * getX() - 2 * getZ() * getZ()));
+		float z = MathsUtils::toDegrees(asin(2 * getX() * getY() + 2 * getZ() * getW()));
+		float y = MathsUtils::toDegrees(atan2(2 * getY() * getW() - 2 * getX() * getZ(), 1 - 2 * getY() * getY() - 2 * getZ() * getZ()));
+		return Vector3f(x, y, z);
 	}
 
 	static Vector3f rotate(const Vector3f& vector, const Quaternion& quaternion) {

@@ -19,6 +19,7 @@
 #define CORE_MATRIX_H_
 
 #include "Vector.h"
+#include "../experimental/Quaternion.h"
 
 /*****************************************************************************
  * The generalised version of a Matrix
@@ -482,6 +483,7 @@ public:
 	inline void translate(Vector2f vector) { (*this) *= Matrix4f().initTranslation(vector); }
 	inline void translate(Vector3f vector) { (*this) *= Matrix4f().initTranslation(vector); }
 
+	inline void rotate(Quaternion angle) { (*this) *= angle.toRotationMatrix(); }
 	inline void rotate(float angle, bool x, bool y, bool z) { (*this) *= Matrix4f().initRotation(angle, x, y, z); }
 	inline void rotate(float angle) { rotate(angle, 0, 0, 1); }
 	inline void rotate(Vector2f angles){
