@@ -172,7 +172,7 @@ void Lasers::explode(Vector3f position, float maxSpeed) {
 	soundSystem->play("Explosion" + StrUtils::str(instanceNumber));
 }
 
-void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f currentVelocity) {
+void Lasers::fire(Vector3f position, Quaternion rotation, Vector3f front, Vector3f currentVelocity) {
 	//Ensure the lasers can fire
 	if (canFire()) {
 		//Assign the new time the last laser was fired

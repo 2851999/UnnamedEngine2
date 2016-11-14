@@ -30,16 +30,19 @@ class Matrix4f;
 class Quaternion : public Vector4f {
 public:
 	/* The constructors */
-	Quaternion(float x = 0.0f, float y = 0.0f, float z = 0.0f, float w = 0.0f) {
+	Quaternion(float x = 0.0f, float y = 0.0f, float z = 0.0f, float w = 1.0f) {
 		setX(x); setY(y); setZ(z); setW(w);
 	}
+	Quaternion(const Vector<float, 4> base) { setX(base[0]); setY(base[1]); setZ(base[2]); setW(base[3]); }
+	Quaternion(const Vector4f& base) { setX(base.getX()); setY(base.getY()); setZ(base.getZ()); setW(base.getW()); }
+	Quaternion(const Vector4<float>& base) { setX(base.getX()); setY(base.getY()); setZ(base.getZ()); setW(base.getW()); }
 
 	Quaternion(Vector3f axis, float angle) {
 		//Calculate some needed constants for transforming it into the
 		//quaternion representation
-		float a = MathsUtils::toRadians(angle) / 2;
-		float s = sin(a);
-		float c = cos(a);
+		float a = MathsUtils::toRadians(angle / 2);
+		float s = sinf(a);
+		float c = cosf(a);
 		//Assign the values
 		setX(axis.getX() * s);
 		setY(axis.getY() * s);
@@ -47,32 +50,37 @@ public:
 		setW(c);
 	}
 
-	Quaternion(Vector3f euler) {
-		float hx = MathsUtils::toRadians(euler.getX()) / 2;
-		float hy = MathsUtils::toRadians(euler.getY()) / 2;
-		float hz = MathsUtils::toRadians(euler.getZ()) / 2;
-		float c1 = cos(hy);
-		float s1 = sin(hy);
-		float c2 = cos(hx);
-		float s2 = sin(hx);
-		float c3 = cos(hz);
-		float s3 = sin(hz);
-		float c1c2 = c1 * c2;
-		float s1s2 = s1 * s2;
-		setX(c1 * s2 * c3 - s1 * c2 * s3);
-		setY(s1 * c2 * c3 + c1 * s2 * s3);
-		setZ(c1c2 * s3 + s1s2 * c3);
-		setW(c1c2 * c3 - s1s2 * s3);
-	}
+	Quaternion(Vector3f euler);
 
 	/* Various operations */
 	inline Quaternion operator*(const Quaternion& other) const {
 		Quaternion result;
+
 		result[0] = (getW() * other.getX()) + (getX() * other.getW()) - (getY() * other.getZ()) + (getZ() * other.getY());
 		result[1] = (getW() * other.getY()) + (getX() * other.getZ()) + (getY() * other.getW()) - (getZ() * other.getX());
 		result[2] = (getW() * other.getZ()) - (getX() * other.getY()) + (getY() * other.getX()) + (getZ() * other.getW());
 		result[3] = (getW() * other.getW()) - (getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ());
+
 		return result;
+	}
+
+	inline Quaternion& operator*=(const Quaternion& other) {
+		float x = (getW() * other.getX()) + (getX() * other.getW()) - (getY() * other.getZ()) + (getZ() * other.getY());
+		float y = (getW() * other.getY()) + (getX() * other.getZ()) + (getY() * other.getW()) - (getZ() * other.getX());
+		float z = (getW() * other.getZ()) - (getX() * other.getY()) + (getY() * other.getX()) + (getZ() * other.getW());
+		float w = (getW() * other.getW()) - (getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ());
+
+//		float w = (getW() * other.getW()) - (getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ());
+//		float x = (getX() * other.getW()) + (getW() * other.getX()) + (getY() * other.getZ()) - (getZ() * other.getY());
+//		float y = (getY() * other.getW()) + (getW() * other.getY()) + (getZ() * other.getX()) - (getX() * other.getZ());
+//		float z = (getZ() * other.getW()) + (getW() * other.getZ()) + (getX() * other.getY()) - (getY() * other.getX());
+
+		setX(x);
+		setY(y);
+		setZ(z);
+		setW(w);
+
+		return (*this);
 	}
 
 	inline Quaternion operator*(const Vector3f& other) const {
@@ -86,15 +94,48 @@ public:
 		return result;
 	}
 
+	inline Quaternion& operator*=(const Vector3f& other) {
+		float x =  (getW() * other.getX()) + (getY() * other.getZ()) - (getZ() * other.getY());
+		float y =  (getW() * other.getY()) + (getZ() * other.getX()) - (getX() * other.getZ());
+		float z =  (getW() * other.getZ()) + (getX() * other.getY()) - (getY() * other.getX());
+		float w = -(getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ());
+
+		setX(x);
+		setY(y);
+		setZ(z);
+		setW(w);
+
+		return (*this);
+	}
+
 	inline Quaternion conjugate() const { return Quaternion(-getX(), -getY(), -getZ(), getW()); }
 
 	Matrix4f toRotationMatrix();
 
-	inline Vector3f toEuler() {
-		float x = MathsUtils::toDegrees(atan2(2 * getX() * getW() - 2 * getY() * getZ(), 1 - 2 * getX() * getX() - 2 * getZ() * getZ()));
-		float z = MathsUtils::toDegrees(asin(2 * getX() * getY() + 2 * getZ() * getW()));
-		float y = MathsUtils::toDegrees(atan2(2 * getY() * getW() - 2 * getX() * getZ(), 1 - 2 * getY() * getY() - 2 * getZ() * getZ()));
-		return Vector3f(x, y, z);
+	Vector3f toEuler();
+
+	inline Vector3f getForward() const {
+		return rotate(Vector3f(0.0f, 0.0f, 1.0f), (*this));
+	}
+
+	inline Vector3f getBackward() const {
+		return rotate(Vector3f(0.0f, 0.0f, -1.0f), (*this));
+	}
+
+	inline Vector3f getUp() const {
+		return rotate(Vector3f(0.0f, 1.0f, 0.0f), (*this));
+	}
+
+	inline Vector3f getDown() const {
+		return rotate(Vector3f(0.0f, -1.0f, 0.0f), (*this));
+	}
+
+	inline Vector3f getLeft() const {
+		return rotate(Vector3f(-1.0f, 0.0f, 0.0f), (*this));
+	}
+
+	inline Vector3f getRight() const {
+		return rotate(Vector3f(1.0f, 0.0f, 0.0f), (*this));
 	}
 
 	static Vector3f rotate(const Vector3f& vector, const Quaternion& quaternion) {

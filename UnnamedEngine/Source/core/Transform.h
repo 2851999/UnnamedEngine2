@@ -23,6 +23,7 @@
 #include "Quaternion.h"
 
 #include <algorithm>
+#include <iostream>
 
 /*****************************************************************************
  * The Transform class takes care of transformations and produces a resultant
@@ -88,6 +89,10 @@ public:
 	/* Method used to calculate this transform's matrix */
 	void calculateMatrix(Vector3f offset);
 
+	/* Method used to rotate the rotation vector by some amount */
+	void rotate(const Quaternion& rotation);
+	inline void rotate(const Vector3f& axis, float angle) { rotate(Quaternion(axis, angle)); }
+
 	/* Various getters and setters */
 	inline void setPosition(Vector3f position) {
 		this->localPosition = position;
@@ -106,7 +111,7 @@ public:
 		this->rotation = localRotation;
 		//Check whether there is a parent
 		if (parent)
-			this->rotation *= parent->getRotation();
+			this->rotation = parent->getRotation() * this->rotation;
 		//Assign the child rotations
 		for (unsigned int i = 0; i < children.size(); i++)
 			children[i]->setRotation(children[i]->getLocalRotation());

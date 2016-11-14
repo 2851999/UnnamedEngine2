@@ -128,22 +128,22 @@ public:
 
 	/* Moves the camera forward in the direction it is facing */
 	inline void moveForward(float amount) {
-		position += cameraFront * amount;
+		setPosition(getLocalPosition() + cameraFront * amount);
 	}
 
 	/* Moves the camera backward in the direction it is facing */
 	inline void moveBackward(float amount) {
-		position -= cameraFront * amount;
+		setPosition(getLocalPosition() - cameraFront * amount);
 	}
 
 	/* Moves the camera left in the direction it is facing */
 	inline void moveLeft(float amount) {
-		position -= cameraFront.cross(cameraUp).normalise() * amount;
+		setPosition(getLocalPosition() - cameraFront.cross(cameraUp).normalise() * amount);
 	}
 
 	/* Moves the camera right in the direction it is facing */
 	inline void moveRight(float amount) {
-		position += cameraFront.cross(cameraUp).normalise() * amount;
+		setPosition(getLocalPosition() + cameraFront.cross(cameraUp).normalise() * amount);
 	}
 
 	/* The setters and getters */

@@ -39,7 +39,7 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 	camera = new Camera3D(110.0f, game->getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setSkyBox(new SkyBox(game->getResourceLoader().getPath() + "skybox/", "skyboxBK.png", "skyboxFT.png", "skyboxLF.png", "skyboxRT.png", "skyboxUP.png", "skyboxDN.png", 100.0f));
 	camera->setFlying(true);
-	camera->setParent(this);
+	addChild(camera);
 
 	game->getWindow()->getInputManager()->addListener(this);
 
@@ -75,8 +75,13 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		//BOUNDS ALL BETWEEN -200 and 200
 
 		//Orientate the camera
-		getRelRotation() += Vector3f(axisLookY->getValue(), axisLookX->getValue(), 0) * 80.0f * currentDelta;
-		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0f, 89.0f));
+//		Vector3f rotation = getLocalRotationEuler();
+//		rotation += Vector3f(axisLookY->getValue(), axisLookX->getValue(), 0) * 80.0f * currentDelta;
+//		rotation.setX(MathsUtils::clamp(rotation.getX(), -89.0f, 89.0f));
+//		setRotation(rotation);
+
+		//std::cout << rotation.toString() << std::endl;
+		std::cout << getLocalRotationEuler().toString() << std::endl;
 
 		//Move the player
 		if (axisForward->getValue() != 0)
@@ -155,8 +160,14 @@ bool Player::checkCollision(PhysicsObject3D* laser) {
 void Player::onMouseMoved(double x, double y, double dx, double dy) {
 	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING && ! game->getMainGame()->showingUpgrades()) {
 		//Orientate the camera
-		getRelRotation() += Vector3f(-dy, dx, 0) * 10.0f * currentDelta;
-		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0f, 89.0f));
+//		Vector3f rotation = getLocalRotationEuler();
+//		rotation += Vector3f(-dy, dx, 0) * 10.0f * currentDelta;
+//		rotation.setX(MathsUtils::clamp(rotation.getX(), -89.0f, 89.0f));
+//		setRotation(rotation);
+		if (dx != 0)
+			getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), dx * 10.0f * currentDelta);
+		if (dy != 0)
+			getTransform()->rotate(getTransform()->getRotation().getRight(), -dy * 10.0f * currentDelta);
 	}
 }
 

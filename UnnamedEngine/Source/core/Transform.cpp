@@ -29,3 +29,7 @@ void Transform::calculateMatrix(Vector3f offset) {
 	matrix.translate(offset * -1);
 	matrix.scale(scale);
 }
+
+void Transform::rotate(const Quaternion& rotation) {
+	setRotation(Quaternion((rotation * this->localRotation).normalise()));
+}

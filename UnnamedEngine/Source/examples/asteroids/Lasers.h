@@ -96,7 +96,7 @@ public:
 	void explode(Vector3f position, float maxSpeed);
 
 	/* The method used to fire this set of lasers */
-	void fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f currentVelocity);
+	void fire(Vector3f position, Quaternion rotation, Vector3f front, Vector3f currentVelocity);
 
 	/* Returns whether the lasers can fire */
 	inline bool canFire() { return TimeUtils::getSeconds() - timeLastLaserFired > cooldown; }

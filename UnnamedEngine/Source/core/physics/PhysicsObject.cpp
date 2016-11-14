@@ -44,8 +44,8 @@ void PhysicsObject3D::updatePhysics(float delta) {
 	angularVelocity += angularAcceleration * delta;
 
 	//Update the position and rotation
-	position += velocity * delta;
-	rotation += angularVelocity * delta;
+	transform->setPosition(transform->getLocalPosition() + velocity * delta);
+	transform->setRotation(getLocalRotationEuler() + (angularVelocity * delta));
 
 	//Update the model view matrix if the mesh exists
 	if (hasMesh())

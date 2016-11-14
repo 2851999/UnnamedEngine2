@@ -80,7 +80,7 @@ public:
 
 	Vector3f getRotation() {
 		if (parent != NULL)
-			return parent->getRotation() + rotation;
+			return parent->getRotationEuler() + rotation;
 		else
 			return rotation;
 	}

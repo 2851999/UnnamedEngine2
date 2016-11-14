@@ -35,10 +35,11 @@ void Camera2D::update() {
 
 void Camera3D::update() {
 	//Calculate the forwards direction, -90 from the Y value so that 0, 0, 0 points directly into the screen
+	Vector3f rotation = getRotationEuler();
 	cameraFront = Vector3f(
-		cos(MathsUtils::toRadians(getRotation().getY() - 90)) * cos(MathsUtils::toRadians(getRotation().getX())),
-		sin(MathsUtils::toRadians(getRotation().getX())),
-		sin(MathsUtils::toRadians(getRotation().getY() - 90)) * cos(MathsUtils::toRadians(getRotation().getX()))
+		cos(MathsUtils::toRadians(rotation.getY() - 90)) * cos(MathsUtils::toRadians(rotation.getX())),
+		sin(MathsUtils::toRadians(rotation.getX())),
+		sin(MathsUtils::toRadians(rotation.getY() - 90)) * cos(MathsUtils::toRadians(rotation.getX()))
 	).normalise();
 	cameraRight = cameraFront.cross(cameraUp).normalise();
 	Vector3f up = cameraRight.cross(cameraFront).normalise();
