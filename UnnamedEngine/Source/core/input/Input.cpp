@@ -23,26 +23,6 @@
 #include "../Window.h"
 
 /*****************************************************************************
- * The Mouse class
- *****************************************************************************/
-
-bool Mouse::isPressed(int button) {
-	return Window::getCurrentInstance()->isMouseDown(button);
-}
-
-Vector2d Mouse::getPosition() {
-	return Window::getCurrentInstance()->getCursorPosition();
-}
-
-/*****************************************************************************
- * The Keyboard class
- *****************************************************************************/
-
-bool Keyboard::isPressed(int key) {
-	return Window::getCurrentInstance()->isKeyPressed(key);
-}
-
-/*****************************************************************************
  * The InputManager class
  *****************************************************************************/
 
