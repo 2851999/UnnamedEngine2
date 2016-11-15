@@ -27,9 +27,9 @@ void Transform::calculateMatrix(Vector3f offset) {
 	matrix.translate(position + offset);
 	matrix.rotate(rotation);
 	matrix.translate(offset * -1);
-	matrix.scale(scale);
+	matrix.scale(m_scale);
 }
 
-void Transform::rotate(const Quaternion& rotation) {
-	setRotation(Quaternion((rotation * this->localRotation).normalise()));
+void Transform::rotate(const Quaternion& angle) {
+	setRotation(Quaternion((angle * this->localRotation).normalise()));
 }

@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 10
+
+* More quaternions
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 2 | Experimental 9
 
 * More quaternions

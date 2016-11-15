@@ -345,6 +345,15 @@ public:
 	Matrix4f(const Matrix<float, 4> &base) : Matrix4<float>(base) {}
 	Matrix4f(const Matrix4<float> &base) : Matrix4<float>(base) {}
 
+	const Matrix4f& initFromVectors(const Vector3f& forward, const Vector3f& up, const Vector3f& right) {
+		set(0, 0, right.getX()); set(0, 1, right.getY()); set(0, 2, right.getZ()); set(0, 3, 0);
+		set(1, 0, up.getX()); set(1, 1, up.getY()); set(1, 2, up.getZ()); set(1, 3, 0);
+		set(2, 0, forward.getX()); set(2, 1, forward.getY()); set(2, 2, forward.getZ()); set(2, 3, 0);
+		set(3, 0, 0); set(3, 1, 0); set(3, 2, 0); set(3, 3, 1);
+
+		return (*this);
+	}
+
 	const Matrix4f& initOrthographic(float left, float right, float bottom, float top, float zNear, float zFar) {
 		set(0, 0, 2.0f / (right - left));
 		set(0, 1, 0);

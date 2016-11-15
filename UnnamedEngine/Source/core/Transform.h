@@ -37,7 +37,7 @@ private:
 	/* The rotation (stored as a quaternion) */
 	Quaternion rotation;
 	/* The scale vector */
-	Vector3f scale = Vector3f(1.0f, 1.0f, 1.0f);
+	Vector3f m_scale = Vector3f(1.0f, 1.0f, 1.0f);
 
 	/* The local data of the above */
 	Vector3f   localPosition;
@@ -89,9 +89,20 @@ public:
 	/* Method used to calculate this transform's matrix */
 	void calculateMatrix(Vector3f offset);
 
-	/* Method used to rotate the rotation vector by some amount */
-	void rotate(const Quaternion& rotation);
+	/* Methods used to translate the position of this transform */
+	inline void translate(const Vector3f& amount) { setPosition(this->localPosition + amount); }
+	inline void translate(const Vector2f& amount) { translate(Vector3f(amount)); }
+
+	/* Methods used to rotate the rotation vector by some amount */
+	void rotate(const Quaternion& angle);
 	inline void rotate(const Vector3f& axis, float angle) { rotate(Quaternion(axis, angle)); }
+	inline void rotate(const Vector3f& angles) { rotate(Quaternion(angles)); }
+	inline void rotate(const float& angle) { rotate(Quaternion(Vector3f(0.0f, 0.0f, angle))); }
+
+	/* Methods used to scale this transform */
+	inline void scale(const Vector3f& amount) { setScale(this->localScale * amount); }
+	inline void scale(const Vector2f& amount) { scale(Vector3f(amount)); }
+	inline void scale(const float& amount) { scale(Vector3f(amount)); }
 
 	/* Various getters and setters */
 	inline void setPosition(Vector3f position) {
@@ -111,7 +122,7 @@ public:
 		this->rotation = localRotation;
 		//Check whether there is a parent
 		if (parent)
-			this->rotation = parent->getRotation() * this->rotation;
+			this->rotation = parent->getRotation() * this->localRotation;
 		//Assign the child rotations
 		for (unsigned int i = 0; i < children.size(); i++)
 			children[i]->setRotation(children[i]->getLocalRotation());
@@ -121,10 +132,10 @@ public:
 	inline void setRotation(float rotation)            { setRotation(Quaternion(Vector3f(0.0f, 0.0f, 1.0f), rotation)); }
 	inline void setScale(Vector3f scale) {
 		this->localScale = scale;
-		this->scale = localScale;
+		this->m_scale = localScale;
 		//Check whether there is a parent
 		if (parent)
-			this->scale *= parent->getScale();
+			this->m_scale *= parent->getScale();
 		//Assign the child scales
 		for (unsigned int i = 0; i < children.size(); i++)
 			children[i]->setScale(children[i]->getLocalScale());
@@ -141,7 +152,7 @@ public:
 
 	inline Vector3f    getPosition() { return position; }
 	inline Quaternion  getRotation() { return rotation; }
-	inline Vector3f    getScale()    { return scale; }
+	inline Vector3f    getScale()    { return m_scale; }
 
 	inline Matrix4f&  getMatrix() { return matrix; }
 	inline Transform* getParent() { return parent; }

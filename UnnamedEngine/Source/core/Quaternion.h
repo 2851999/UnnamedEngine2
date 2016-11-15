@@ -40,9 +40,9 @@ public:
 	Quaternion(Vector3f axis, float angle) {
 		//Calculate some needed constants for transforming it into the
 		//quaternion representation
-		float a = MathsUtils::toRadians(angle / 2);
-		float s = sinf(a);
-		float c = cosf(a);
+		float a = MathsUtils::toRadians(angle / 2.0f);
+		float s = sin(a);
+		float c = cos(a);
 		//Assign the values
 		setX(axis.getX() * s);
 		setY(axis.getY() * s);
@@ -55,30 +55,19 @@ public:
 	/* Various operations */
 	inline Quaternion operator*(const Quaternion& other) const {
 		Quaternion result;
-
-		result[0] = (getW() * other.getX()) + (getX() * other.getW()) - (getY() * other.getZ()) + (getZ() * other.getY());
-		result[1] = (getW() * other.getY()) + (getX() * other.getZ()) + (getY() * other.getW()) - (getZ() * other.getX());
-		result[2] = (getW() * other.getZ()) - (getX() * other.getY()) + (getY() * other.getX()) + (getZ() * other.getW());
 		result[3] = (getW() * other.getW()) - (getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ());
+		result[0] = (getX() * other.getW()) + (getW() * other.getX()) + (getY() * other.getZ()) - (getZ() * other.getY());
+		result[1] = (getY() * other.getW()) + (getW() * other.getY()) + (getZ() * other.getX()) - (getX() * other.getZ());
+		result[2] = (getZ() * other.getW()) + (getW() * other.getZ()) + (getX() * other.getY()) - (getY() * other.getX());
 
 		return result;
 	}
 
 	inline Quaternion& operator*=(const Quaternion& other) {
-		float x = (getW() * other.getX()) + (getX() * other.getW()) - (getY() * other.getZ()) + (getZ() * other.getY());
-		float y = (getW() * other.getY()) + (getX() * other.getZ()) + (getY() * other.getW()) - (getZ() * other.getX());
-		float z = (getW() * other.getZ()) - (getX() * other.getY()) + (getY() * other.getX()) + (getZ() * other.getW());
-		float w = (getW() * other.getW()) - (getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ());
-
-//		float w = (getW() * other.getW()) - (getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ());
-//		float x = (getX() * other.getW()) + (getW() * other.getX()) + (getY() * other.getZ()) - (getZ() * other.getY());
-//		float y = (getY() * other.getW()) + (getW() * other.getY()) + (getZ() * other.getX()) - (getX() * other.getZ());
-//		float z = (getZ() * other.getW()) + (getW() * other.getZ()) + (getX() * other.getY()) - (getY() * other.getX());
-
-		setX(x);
-		setY(y);
-		setZ(z);
-		setW(w);
+		setW((getW() * other.getW()) - (getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ()));
+		setX((getX() * other.getW()) + (getW() * other.getX()) + (getY() * other.getZ()) - (getZ() * other.getY()));
+		setY((getY() * other.getW()) + (getW() * other.getY()) + (getZ() * other.getX()) - (getX() * other.getZ()));
+		setZ((getZ() * other.getW()) + (getW() * other.getZ()) + (getX() * other.getY()) - (getY() * other.getX()));
 
 		return (*this);
 	}
@@ -143,7 +132,7 @@ public:
 		Vector3f u(quaternion.getX(), quaternion.getY(), quaternion.getZ());
 		float s = quaternion.getW();
 
-		return u * 2.0f * u.dot(vector) + vector * (s * s - u.dot(u)) + u.cross(vector) * 2.0f * s;
+		return (u * 2.0f * u.dot(vector) + vector * (s * s - u.dot(u)) + u.cross(vector) * 2.0f * s);
 	}
 };
 

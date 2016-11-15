@@ -75,13 +75,10 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		//BOUNDS ALL BETWEEN -200 and 200
 
 		//Orientate the camera
-//		Vector3f rotation = getLocalRotationEuler();
-//		rotation += Vector3f(axisLookY->getValue(), axisLookX->getValue(), 0) * 80.0f * currentDelta;
-//		rotation.setX(MathsUtils::clamp(rotation.getX(), -89.0f, 89.0f));
-//		setRotation(rotation);
-
-		//std::cout << rotation.toString() << std::endl;
-		std::cout << getLocalRotationEuler().toString() << std::endl;
+		getTransform()->rotate(Vector3f(axisLookY->getValue(), axisLookX->getValue(), 0) * 80.0f * currentDelta);
+		Vector3f currentRot = getTransform()->getLocalRotation().toEuler();
+		currentRot.setX(MathsUtils::clamp(currentRot.getX(), -89.0f, 89.0f));
+		getTransform()->setRotation(currentRot);
 
 		//Move the player
 		if (axisForward->getValue() != 0)
@@ -160,14 +157,10 @@ bool Player::checkCollision(PhysicsObject3D* laser) {
 void Player::onMouseMoved(double x, double y, double dx, double dy) {
 	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING && ! game->getMainGame()->showingUpgrades()) {
 		//Orientate the camera
-//		Vector3f rotation = getLocalRotationEuler();
-//		rotation += Vector3f(-dy, dx, 0) * 10.0f * currentDelta;
-//		rotation.setX(MathsUtils::clamp(rotation.getX(), -89.0f, 89.0f));
-//		setRotation(rotation);
 		if (dx != 0)
-			getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), dx * 10.0f * currentDelta);
+			getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -dx * 10.0f * currentDelta);
 		if (dy != 0)
-			getTransform()->rotate(getTransform()->getRotation().getRight(), -dy * 10.0f * currentDelta);
+			getTransform()->rotate(getTransform()->getRotation().getRight(), dy * 10.0f * currentDelta);
 	}
 }
 

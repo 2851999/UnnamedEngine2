@@ -29,8 +29,8 @@ void PhysicsObject2D::updatePhysics(float delta) {
 	angularVelocity += angularAcceleration * delta;
 
 	//Update the position and rotation
-	transform->setPosition(transform->getLocalPosition() + Vector3f(velocity * delta, 0.0f));
-	transform->setRotation(getLocalRotationEuler() + (angularVelocity * delta));
+	transform->translate(velocity * delta);
+	transform->rotate(angularVelocity * delta);
 }
 
 /*****************************************************************************
@@ -44,8 +44,8 @@ void PhysicsObject3D::updatePhysics(float delta) {
 	angularVelocity += angularAcceleration * delta;
 
 	//Update the position and rotation
-	transform->setPosition(transform->getLocalPosition() + velocity * delta);
-	transform->setRotation(getLocalRotationEuler() + (angularVelocity * delta));
+	transform->translate(velocity * delta);
+	transform->rotate(angularVelocity * delta);
 
 	//Update the model view matrix if the mesh exists
 	if (hasMesh())
