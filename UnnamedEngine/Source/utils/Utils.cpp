@@ -95,6 +95,31 @@ namespace StrUtils {
 
 		return split;
 	}
+
+	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement) {
+		size_t index = 0;
+		std::string str = s;
+		while ((index = str.find(old, index)) != std::string::npos) {
+			str.replace(index, old.length(), replacement);
+			index += replacement.length();
+		}
+		return str;
+	}
+}
+
+/*****************************************************************************
+ * Various maths utilities
+ *****************************************************************************/
+
+namespace MathsUtils {
+	float clampToClosestInterval(float value, float interval) {
+		float remainder = fmod(value, interval);
+		if (remainder < interval / 2.0f)
+			value -= remainder;
+		else
+			value += (interval - remainder);
+		return value;
+	}
 }
 
 /*****************************************************************************

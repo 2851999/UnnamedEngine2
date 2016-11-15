@@ -100,12 +100,12 @@ void FPSLimiter::setMaxFPS(unsigned int maxFPS) {
 		targetDelta = (long) (1000.0f / (float) maxFPS);
 }
 
-void FPSLimiter::start() {
+void FPSLimiter::startFrame() {
 	//Assign the time of the start of the current frame
 	startOfFrame = TimeUtils::getMilliseconds();
 }
 
-void FPSLimiter::update() {
+void FPSLimiter::endFrame() {
 	//Ensure there is a frame cap
 	if (maxFPS > 0) {
 		//Calculate the difference in the target delta, and the current one

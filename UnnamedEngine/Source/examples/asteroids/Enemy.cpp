@@ -47,19 +47,29 @@ void Enemy::reset() {
 void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	if (isAlive()) {
 		//AI stuff
-		Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
-
-		thrust(directionToPlayer);
-
-		float laserSpeed = 20.0f;
-		float currentDistance = (player->getPosition() - getPosition()).length();
-		float timeToReach = currentDistance / laserSpeed;
-
-		Vector3f newPosition = player->getPosition() + ((player->getVelocity() - getVelocity()) * timeToReach);
-
-		fireLasers((newPosition - getPosition()).normalise());
+//		Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
+//
+//		thrust(directionToPlayer);
+//
+//		float laserSpeed = 20.0f;
+//		float currentDistance = (player->getPosition() - getPosition()).length();
+//		float timeToReach = currentDistance / laserSpeed;
+//
+//		Vector3f newPosition = player->getPosition() + ((player->getVelocity() - getVelocity()) * timeToReach);
+//
+//		fireLasers((newPosition - getPosition()).normalise());
 
 		//Since rotation is a bit hard without quaternions at the moment, enemies are SPHERES OF DEATH
+
+		Vector3f relPos = player->getPosition() - getPosition();
+		thrust(relPos.normalise());
+		if (getLasers()->canFire()) {
+			float laserSpeed = 20.0f + getVelocity().length();
+			float currentDistance = relPos.length();
+			float timeToReach = currentDistance / laserSpeed;
+			Vector3f direction = ((player->getPosition() + player->getVelocity() * timeToReach) - (getPosition() + getVelocity() * timeToReach)).normalise();
+			fireLasers(direction);
+		}
 	}
 
 	//Update the ship afterwards as the lasers renderer should be updated after firing
@@ -73,13 +83,13 @@ bool Enemy::checkCollision(PhysicsObject3D* laser) {
 		//Get the distance between the current laser object and the current enemy object
 		float distance = (laser->getPosition() - player->getPosition()).length();
 
-		//Check for an intersection with the asteroid
-		if (distance < 1.0f) {
+		//Check for an intersection with the player
+		if (distance < 2.0f) {
 			//Remove health
 			player->removeHealth(1);
 			if (! player->isAlive())
 				//Create an explosion
-				getLasers()->explode(player->getPosition(), 2.0f);
+				getLasers()->explode(player->getPosition(), 1.0f);
 			return true;
 		}
 	}

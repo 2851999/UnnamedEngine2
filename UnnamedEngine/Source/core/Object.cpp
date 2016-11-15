@@ -62,14 +62,10 @@ void GameObject::addMesh(Mesh* mesh) {
  *****************************************************************************/
 
 GameObject2D::GameObject2D(float width, float height) : GameObject(NULL, NULL) {
-	rotation = 0;
-	scale = Vector2f(1.0f, 1.0f);
 	size = Vector2f(width, height);
 }
 
 GameObject2D::GameObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width, float height) : GameObject(meshes, shader) {
-	rotation = 0;
-	scale = Vector2f(1.0f, 1.0f);
 	size = Vector2f(width, height);
 }
 
@@ -81,43 +77,12 @@ GameObject2D::GameObject2D(std::vector<Mesh*> meshes, std::string shaderId, floa
 
 void GameObject2D::update() {
 	//Check to make sure this object has a mesh
-	if (hasMesh()) {
-		Matrix4f& modelMatrix = getModelMatrix();
-
-		modelMatrix.setIdentity();
-
-		Vector2f offset = Vector2f(getWidth() / 2, getHeight() / 2);
-
-		modelMatrix.translate(offset + getPosition());
-		modelMatrix.rotate(getRotation());
-		modelMatrix.translate(offset * -1);
-		modelMatrix.scale(getScale());
-	}
-}
-
-Vector2f GameObject2D::getPosition() {
-	if (parent)
-		return position + parent->getPosition();
-	else
-		return position;
-}
-
-float GameObject2D::getRotation() {
-	if (parent)
-		return rotation + parent->getRotation();
-	else
-		return rotation;
-}
-
-Vector2f GameObject2D::getScale() {
-	if (parent)
-		return scale * parent->getScale();
-	else
-		return scale;
+	if (hasMesh())
+		transform->calculateMatrix(Vector2f(getWidth() / 2, getHeight() / 2));
 }
 
 Vector2f GameObject2D::getSize() {
-	return size * getScale();
+	return size * Vector2f(getScale().getX(), getScale().getY());
 }
 
 /*****************************************************************************
@@ -125,14 +90,10 @@ Vector2f GameObject2D::getSize() {
  *****************************************************************************/
 
 GameObject3D::GameObject3D(float width, float height, float depth) : GameObject(NULL, NULL) {
-	rotation = 0;
-	scale = Vector3f(1.0f, 1.0f, 1.0f);
 	size = Vector3f(width, height, depth);
 }
 
 GameObject3D::GameObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width, float height, float depth) : GameObject(meshes, shader) {
-	rotation = 0;
-	scale = Vector3f(1.0f, 1.0f, 1.0f);
 	size = Vector3f(width, height, depth);
 }
 
@@ -144,39 +105,8 @@ GameObject3D::GameObject3D(std::vector<Mesh*> meshes, std::string shaderId, floa
 
 void GameObject3D::update() {
 	//Check to make sure this object has a mesh
-	if (hasMesh()) {
-		Matrix4f& modelMatrix = getModelMatrix();
-
-		modelMatrix.setIdentity();
-
-		Vector3f offset = Vector3f(getWidth() / 2, getHeight() / 2, getDepth() / 2);
-
-		modelMatrix.translate(offset + getPosition());
-		modelMatrix.rotate(getRotation());
-		modelMatrix.translate(offset * -1);
-		modelMatrix.scale(getScale());
-	}
-}
-
-Vector3f GameObject3D::getPosition() {
-	if (parent)
-		return position + parent->getPosition();
-	else
-		return position;
-}
-
-Vector3f GameObject3D::getRotation() {
-	if (parent)
-		return rotation + parent->getRotation();
-	else
-		return rotation;
-}
-
-Vector3f GameObject3D::getScale() {
-	if (parent)
-		return scale * parent->getScale();
-	else
-		return scale;
+	if (hasMesh())
+		transform->calculateMatrix(Vector3f(getWidth() / 2, getHeight() / 2, getDepth() / 2));
 }
 
 Vector3f GameObject3D::getSize() {

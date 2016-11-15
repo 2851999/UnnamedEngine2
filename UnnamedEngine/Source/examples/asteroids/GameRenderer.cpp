@@ -16,29 +16,31 @@
  *
  *****************************************************************************/
 
-#include "AsteroidsRenderer.h"
-#include "AsteroidGroup.h"
+#include "GameRenderer.h"
+
 #include "../../core/render/Renderer.h"
 
 /*****************************************************************************
- * The AsteroidsRenderer class
+ * The GameRenderer class
  *****************************************************************************/
 
-AsteroidsRenderer::AsteroidsRenderer(const ResourceLoader& loader, unsigned int numObjects) : numObjects(numObjects)  {
-	//Load the model mesh
-	mesh = loader.loadModel("asteroid_model.obj")[0];
+GameRenderer::GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, bool useTextureCoords, bool useLighting, bool useNormalMapping) : mesh(mesh), shader(shader), numObjects(numObjects), useLighting(useLighting)  {
+	//Get the mesh data
 	MeshData* meshData = mesh->getData();
-	//Setup the shader
-	shader = loader.loadShader("AsteroidShader");
 	//Setup the render data
 	renderData = new RenderData(GL_TRIANGLES, meshData->getNumIndices());
 
 	vboVerticesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, meshData->getOthers().size() * sizeof(meshData->getOthers()[0]), meshData->getOthers(), GL_STATIC_DRAW, true);
 	vboVerticesData->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("Normal"), 3, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("Tangent"), 3, 0);
-	vboVerticesData->addAttribute(shader->getAttributeLocation("Bitangent"), 3, 0);
+	if (useTextureCoords)
+		vboVerticesData->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2, 0);
+	if (useLighting) {
+		vboVerticesData->addAttribute(shader->getAttributeLocation("Normal"), 3, 0);
+		if (useNormalMapping) {
+			vboVerticesData->addAttribute(shader->getAttributeLocation("Tangent"), 3, 0);
+			vboVerticesData->addAttribute(shader->getAttributeLocation("Bitangent"), 3, 0);
+		}
+	}
 	renderData->addVBO(vboVerticesData);
 
 	vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, meshData->getNumIndices() * sizeof(meshData->getIndices()[0]), meshData->getIndices(), GL_STATIC_DRAW);
@@ -71,11 +73,13 @@ AsteroidsRenderer::AsteroidsRenderer(const ResourceLoader& loader, unsigned int 
 	vboMatricesData->addAttribute(shader->getAttributeLocation("ModelMatrix") + 3, 4, 1);
 	renderData->addVBO(vboMatricesData);
 
-	vboNormalMatricesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * 9 * sizeof(GLfloat), normalMatricesDataRaw, GL_STREAM_DRAW, true);
-	vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix"), 3, 1);
-	vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 1, 3, 1);
-	vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 2, 3, 1);
-	renderData->addVBO(vboNormalMatricesData);
+	if (useLighting) {
+		vboNormalMatricesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * 9 * sizeof(GLfloat), normalMatricesDataRaw, GL_STREAM_DRAW, true);
+		vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix"), 3, 1);
+		vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 1, 3, 1);
+		vboNormalMatricesData->addAttribute(shader->getAttributeLocation("NormalMatrix") + 2, 3, 1);
+		renderData->addVBO(vboNormalMatricesData);
+	}
 
 	vboVisibleData = new VBO<GLfloat>(GL_ARRAY_BUFFER, numObjects * sizeof(GLfloat), visibleData, GL_STREAM_DRAW, true);
 	vboVisibleData->addAttribute(shader->getAttributeLocation("Visible"), 1, 1);
@@ -85,12 +89,13 @@ AsteroidsRenderer::AsteroidsRenderer(const ResourceLoader& loader, unsigned int 
 	renderData->setNumInstances(numObjects);
 }
 
-AsteroidsRenderer::~AsteroidsRenderer() {
+GameRenderer::~GameRenderer() {
 	delete renderData;
 	delete vboVerticesData;
 	delete vboIndices;
 	delete vboMatricesData;
-	delete vboNormalMatricesData;
+	if (useLighting)
+		delete vboNormalMatricesData;
 	delete mesh;
 
 	for (unsigned int i = 0; i < objects.size(); i++)
@@ -98,18 +103,22 @@ AsteroidsRenderer::~AsteroidsRenderer() {
 	objects.clear();
 }
 
-void AsteroidsRenderer::hideAsteroid(unsigned int index) {
+void GameRenderer::show(unsigned int index) {
+	visibleData[index] = 1.0f;
+	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
+}
+
+void GameRenderer::hide(unsigned int index) {
 	visibleData[index] = 0.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
-void AsteroidsRenderer::updateAll() {
-	for (unsigned int i = 0; i < objects.size(); i++) {
+void GameRenderer::update(unsigned int startIndex, unsigned int endIndex) {
+	for (unsigned int i = startIndex; i < endIndex; i++) {
 		matricesData[i].initIdentity();
 		matricesData[i].translate(objects[i]->getPosition());
 		matricesData[i].rotate(objects[i]->getRotation());
 		matricesData[i].scale(objects[i]->getScale());
-		normalMatricesData[i] = matricesData[i].to3x3().inverse().transpose();
 
 		int pos = i * 16;
 
@@ -120,59 +129,36 @@ void AsteroidsRenderer::updateAll() {
 			}
 		}
 
-		pos = i * 9;
-		for (unsigned int x = 0; x < 3; x++) {
-			for (unsigned int y = 0; y < 3; y++) {
-				normalMatricesDataRaw[pos] = normalMatricesData[i].get(y, x);
-				pos += 1;
+		if (useLighting) {
+			normalMatricesData[i] = matricesData[i].to3x3().inverse().transpose();
+			pos = i * 9;
+			for (unsigned int x = 0; x < 3; x++) {
+				for (unsigned int y = 0; y < 3; y++) {
+					normalMatricesDataRaw[pos] = normalMatricesData[i].get(y, x);
+					pos += 1;
+				}
 			}
 		}
 	}
-
 	vboMatricesData->updateStream(numObjects * 16 * sizeof(GLfloat));
-	vboNormalMatricesData->updateStream(numObjects * 9 * sizeof(GLfloat));
+	if (useLighting)
+		vboNormalMatricesData->updateStream(numObjects * 9 * sizeof(GLfloat));
 }
 
-void AsteroidsRenderer::update(AsteroidGroup& group) {
-	for (unsigned int i = group.getRendererStartIndex(); i < group.getRendererEndIndex(); i++) {
-		matricesData[i].initIdentity();
-		matricesData[i].translate(objects[i]->getPosition());
-		matricesData[i].rotate(objects[i]->getRotation());
-		matricesData[i].scale(objects[i]->getScale());
-		normalMatricesData[i] = matricesData[i].to3x3().inverse().transpose();
-
-		int pos = i * 16;
-
-		for (unsigned int x = 0; x < 4; x++) {
-			for (unsigned int y = 0; y < 4; y++) {
-				matricesDataRaw[pos] = matricesData[i].get(y, x);
-				pos += 1;
-			}
-		}
-
-		pos = i * 9;
-		for (unsigned int x = 0; x < 3; x++) {
-			for (unsigned int y = 0; y < 3; y++) {
-				normalMatricesDataRaw[pos] = normalMatricesData[i].get(y, x);
-				pos += 1;
-			}
-		}
-	}
-
-	vboMatricesData->updateStream(numObjects * 16 * sizeof(GLfloat));
-	vboNormalMatricesData->updateStream(numObjects * 9 * sizeof(GLfloat));
-}
-
-void AsteroidsRenderer::render() {
+void GameRenderer::render() {
 	//Use the shader
 	shader->use();
 	Renderer::saveTextures();
-	mesh->getMaterial()->setUniforms(shader, "Lighting");
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
-	shader->setUniformVector3("Light_Direction", Vector3f(0.0f, -1.0f, -1.0f));
-	shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));
-	shader->setUniformColourRGB("Light_SpecularColour", Colour(1.0f, 1.0f, 1.0f));
-	shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+	if (useLighting) {
+		Renderer::setMaterialUniforms(shader, "Lighting", mesh->getMaterial());
+		shader->setUniformVector3("Light_Direction", Vector3f(0.0f, -1.0f, -1.0f));
+		shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));
+		shader->setUniformColourRGB("Light_SpecularColour", Colour(1.0f, 1.0f, 1.0f));
+		shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+	} else {
+		Renderer::setMaterialUniforms(shader, "Material", mesh->getMaterial());
+	}
 
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
@@ -184,16 +170,18 @@ void AsteroidsRenderer::render() {
 	shader->stopUsing();
 }
 
-void AsteroidsRenderer::showAll() {
+void GameRenderer::showAll() {
 	//Go through all of the visible data
 	for (unsigned int i = 0; i < visibleData.size(); i++)
 		visibleData[i] = 1.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
-void AsteroidsRenderer::hideAll() {
+void GameRenderer::hideAll() {
 	//Go through all of the visible data
 	for (unsigned int i = 0; i < visibleData.size(); i++)
 		visibleData[i] = 0.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
+
+

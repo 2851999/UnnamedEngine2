@@ -29,11 +29,12 @@
 
 FT_Library Font::ftLibrary;
 
-void Font::setup(std::string name, unsigned int size, Colour colour, TextureParameters parameters) {
+void Font::setup(std::string path, unsigned int size, Colour colour, TextureParameters parameters) {
+	FT_Face face;
 	//Attempt to get the font face
-	if (FT_New_Face(ftLibrary, name.c_str(), 0, &face)) {
+	if (FT_New_Face(ftLibrary, path.c_str(), 0, &face)) {
 		//An error occurred obtaining the font so log an error
-		Logger::log("Failed to obtain the font face '" + name + "'", "Font", LogType::Error);
+		Logger::log("Failed to obtain the font face '" + path + "'", "Font", LogType::Error);
 		return;
 	}
 	//Assign the size
@@ -51,7 +52,7 @@ void Font::setup(std::string name, unsigned int size, Colour colour, TexturePara
 		//Attempt to load the current character
 		if (FT_Load_Char(face, i, FT_LOAD_RENDER)) {
 			//An error occurred loading the character so log an error
-			Logger::log("Failed to load the character'" + StrUtils::str((char) i) + "' in the font face '" + name + "'", "Font", LogType::Error);
+			Logger::log("Failed to load the character'" + StrUtils::str((char) i) + "' in the font face '" + path + "'", "Font", LogType::Error);
 			return;
 		}
 		//Add onto the width
@@ -82,13 +83,13 @@ void Font::setup(std::string name, unsigned int size, Colour colour, TexturePara
 		glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, 0, glyphSlot->bitmap.width, glyphSlot->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyphSlot->bitmap.buffer);
 
 		//Assign the character info data
-		characters[i - ASCII_START].advanceX     = glyphSlot->advance.x;
-		characters[i - ASCII_START].advanceY     = glyphSlot->advance.y;
-		characters[i - ASCII_START].bitmapWidth  = glyphSlot->bitmap.width;
-		characters[i - ASCII_START].bitmapHeight = glyphSlot->bitmap.rows;
-		characters[i - ASCII_START].bitmapLeft   = glyphSlot->bitmap_left;
-		characters[i - ASCII_START].bitmapTop    = glyphSlot->bitmap_top;
-		characters[i - ASCII_START].xOffset      = xOffset;
+		glyphs[i - ASCII_START].advanceX    = glyphSlot->advance.x;
+		glyphs[i - ASCII_START].advanceY    = glyphSlot->advance.y;
+		glyphs[i - ASCII_START].glyphWidth  = glyphSlot->bitmap.width;
+		glyphs[i - ASCII_START].glyphHeight = glyphSlot->bitmap.rows;
+		glyphs[i - ASCII_START].glyphLeft   = glyphSlot->bitmap_left;
+		glyphs[i - ASCII_START].glyphTop    = glyphSlot->bitmap_top;
+		glyphs[i - ASCII_START].xOffset     = xOffset;
 
 		//Increment the x offset
 		xOffset += glyphSlot->bitmap.width;
@@ -105,15 +106,15 @@ void Font::setup(std::string name, unsigned int size, Colour colour, TexturePara
 	if (billboarded) {
 		//Create the GameObject3D instance and assign the texture
 		object3D = new GameObject3D({ new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "BillboardedFont");
-		object3D->getMaterial()->setDiffuseColour(colour);
-		object3D->getMaterial()->setDiffuseTexture(textureAtlas);
+		object3D->getMaterial()->diffuseColour = colour;
+		object3D->getMaterial()->diffuseTexture = textureAtlas;
 		object3D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE, 1.0f);
 		object3D->update();
 	} else {
 		//Create the GameObject2D instance and assign the texture
 		object2D = new GameObject2D({ new Mesh(MeshBuilder::createQuad(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "Font");
-		object2D->getMaterial()->setDiffuseColour(colour);
-		object2D->getMaterial()->setDiffuseTexture(textureAtlas);
+		object2D->getMaterial()->diffuseColour = colour;
+		object2D->getMaterial()->diffuseTexture = textureAtlas;
 		object2D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE);
 		object2D->update();
 	}
@@ -134,12 +135,12 @@ void Font::update(std::string text) {
 	data->clearIndices();
 
 	//The current x and y positions
-	float currentX = 0;
-	float currentY = 0;
+	float currentX = 0.0f;
+	float currentY = 0.0f;
 
 	if (billboarded) {
-		currentX = -getWidth(text) / 2;
-		currentY = getHeight(text) / 2;
+		currentX = -getWidth(text) / 2.0f;
+		currentY = getHeight(text) / 2.0f;
 	}
 
 	unsigned int newLineCount = 0;
@@ -149,21 +150,21 @@ void Font::update(std::string text) {
 		if (text.compare(i, 1, "\n") == 0) {
 			newLineCount ++;
 			//Go to a new line
-			currentX = 0;
+			currentX = 0.0f;
 			currentY += textureAtlasHeight;
 
 			if (billboarded)
 				currentX = -getWidth(text) / 2;
 		} else {
 			//Get the character data for the current character
-			CharInfo info = characters[((int) text.at(i)) - ASCII_START];
+			GlyphInfo info = glyphs[((int) text.at(i)) - ASCII_START];
 
 			//The positions used for the vertices
-			float xPos = currentX + info.bitmapLeft;
-			float yPos = currentY - (info.bitmapHeight + (info.bitmapTop - info.bitmapHeight));
+			float xPos = currentX + info.glyphLeft;
+			float yPos = currentY - (info.glyphHeight + (info.glyphTop - info.glyphHeight));
 
-			float width = info.bitmapWidth;
-			float height = info.bitmapHeight;
+			float width = info.glyphWidth;
+			float height = info.glyphHeight;
 
 			if (billboarded) {
 				data->addPosition(Vector3f(xPos, yPos, 0.0f));
@@ -178,9 +179,9 @@ void Font::update(std::string text) {
 			}
 
 			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, 0.0f));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.bitmapWidth) / (float) textureAtlasWidth), 0.0f));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.bitmapWidth) / (float) textureAtlasWidth), info.bitmapHeight / (float) textureAtlasHeight));
-			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, info.bitmapHeight / (float) textureAtlasHeight));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth), 0.0f));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth), info.glyphHeight / (float) textureAtlasHeight));
+			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, info.glyphHeight / (float) textureAtlasHeight));
 
 			unsigned int ip = (i - newLineCount) * 4;
 
@@ -191,7 +192,7 @@ void Font::update(std::string text) {
 			data->addIndex(ip + 0);
 			data->addIndex(ip + 2);
 
-			currentX += (info.advanceX / 64);
+			currentX += (info.advanceX / 64.0f);
 		}
 	}
 	if (billboarded) {
@@ -259,7 +260,7 @@ float Font::getWidth(std::string text) {
 	//Go through each character in the text
 	for (unsigned int i = 0; i < text.length(); i++) {
 		//Get the character data for the current character
-		CharInfo info = characters[((int) text.at(i)) - ASCII_START];
+		GlyphInfo info = glyphs[((int) text.at(i)) - ASCII_START];
 		//Add onto the width
 		lineWidth += (info.advanceX / 64);
 
@@ -287,9 +288,9 @@ float Font::getHeight(std::string text) {
 			height += lineHeight;
 		} else {
 			//Get the character data for the current character
-			CharInfo info = characters[((int) text.at(i)) - ASCII_START];
+			GlyphInfo info = glyphs[((int) text.at(i)) - ASCII_START];
 			//Assign the height
-			lineHeight = MathsUtils::max(lineHeight, info.bitmapHeight + (info.bitmapTop - info.bitmapHeight));
+			lineHeight = MathsUtils::max(lineHeight, info.glyphHeight + (info.glyphTop - info.glyphHeight));
 		}
 	}
 	if (height == 0)

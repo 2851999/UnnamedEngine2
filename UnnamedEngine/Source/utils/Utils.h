@@ -55,6 +55,8 @@ namespace StrUtils {
 	inline std::string substring(const std::string &s, int begin, int end) {
 		return s.substr(begin, end - begin);
 	}
+
+	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement);
 };
 
 #include <cmath>
@@ -74,7 +76,8 @@ namespace MathsUtils {
 		return radians * (180.0f / PI);
 	}
 
-	inline float clamp(float value, float min, float max) {
+	template<typename T>
+	inline T clamp(T value, T min, T max) {
 		if (value < min)
 			return min;
 		else if (value > max)
@@ -106,6 +109,10 @@ namespace MathsUtils {
 		else
 			return value;
 	}
+
+	/* Returns a value that is a multiple of the interval, closest to the
+	 * value given */
+	float clampToClosestInterval(float value, float interval);
 }
 
 /*****************************************************************************

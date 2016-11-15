@@ -33,8 +33,8 @@ class Player : public Ship, public InputListener {
 private:
 	/* Input axis/buttons */
 	InputBindingAxis* axisForward;
-	InputBindingAxis* lookX;
-	InputBindingAxis* lookY;
+	InputBindingAxis* axisLookX;
+	InputBindingAxis* axisLookY;
 	InputBindingButton* buttonShoot;
 
 	/* The player's score */
@@ -59,7 +59,7 @@ public:
 	virtual ~Player();
 
 	/* Called to reset the player */
-	virtual void reset() override;
+	void reset() override;
 
 	/* Method used to update the player and their lasers */
 	void update(float deltaSeconds, AsteroidGroup& closestAsteroids) override;
@@ -68,17 +68,17 @@ public:
 	void render();
 
 	/* Called when an asteroid has been destroyed by this ship's lasers */
-	virtual void onAsteroidDestroyed(GameObject3D* asteroid) override;
+	void onAsteroidDestroyed(GameObject3D* asteroid) override;
 
 	/* Method used to check whether a laser has collided with anything */
-	virtual bool checkCollision(PhysicsObject3D* laser) override;
+	bool checkCollision(PhysicsObject3D* laser) override;
 
 	/* Input methods */
-	virtual void onMouseMoved(double x, double y, double dx, double dy) override;
+	void onMouseMoved(double x, double y, double dx, double dy) override;
 
 	/* Setters and getters */
 	inline void addPoints(unsigned int points) { score += points; }
-	void removeScore(unsigned int points);
+	void removePoints(unsigned int points);
 	inline unsigned int getScore() { return score; }
 	inline Camera3D* getCamera() { return camera; }
 };

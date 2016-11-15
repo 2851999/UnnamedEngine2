@@ -29,13 +29,13 @@ TextureAtlas::TextureAtlas(Texture* texture, unsigned int numColumns, unsigned i
 	this->numTextures = numTextures;
 
 	textureWidth = (float) texture->getWidth() / (float) numColumns;
-	textureHeight = (float) texture->getHeight() / (float) numColumns;
+	textureHeight = (float) texture->getHeight() / (float) numRows;
 }
 
 void TextureAtlas::getSides(unsigned int textureIndex, float& top, float& left, float& bottom, float& right) {
 	//Coordinates of the tile in pixels
 	float x = (textureIndex % numColumns) * textureWidth;
-	float y = (textureIndex / numColumns) * textureHeight;
+	float y = (textureIndex / numRows) * textureHeight;
 
 	//Assign the texture coordinates
 	top = y / (float) texture->getWidth();

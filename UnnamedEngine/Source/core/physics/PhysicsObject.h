@@ -79,7 +79,7 @@ public:
 	 * modified by changing the value in this instance */
 	PhysicsObject2D(GameObject2D* child) {
 		if (child)
-			child->setParent(this);
+			addChild(child);
 	}
 
 	PhysicsObject2D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0) : GameObject2D(mesh, shader, width, height) {}
@@ -141,7 +141,7 @@ public:
 	 * modified by changing the value in this instance */
 	PhysicsObject3D(GameObject3D* child) {
 		if (child)
-			child->setParent(this);
+			addChild(child);
 	}
 	PhysicsObject3D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(mesh, shader, width, height, depth) {}
 	PhysicsObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(meshes, shader, width, height, depth) {}

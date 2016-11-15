@@ -68,14 +68,15 @@ void Test::created() {
 	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), "Material");
 	object->setSize(200, 200);
 	object->setPosition(getSettings().windowWidth / 2 - 100, getSettings().windowHeight / 2 - 100);
-	object->getMaterial()->setDiffuseTexture(texture);
-	object->getMaterial()->setDiffuseColour(Colour::WHITE);
+	object->getMaterial()->diffuseTexture = texture;
+	object->getMaterial()->diffuseColour = Colour::WHITE;
 	object->update();
 
 	sprite = new Sprite2D(texture, 100, 100);
 	sprite->setPosition(400, 100);
 	//Animation2D* animation = new TextureAnimation2D(sprite, new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/ParticleAtlas3.png"), 8, 8, 64), 0.05f);
 	sprite->addAnimation("Smoke", new TextureAnimation2D(new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/smoke.png"), 7, 7, 46), 0.05f, true));
+	//sprite->addAnimation("Smoke", new TextureAnimation2D(new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/ParticleAtlas2.png"), 1, 1, 1), 0.05f, true));
 	sprite->startAnimation("Smoke");
 
 	camera = new Camera2D(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1);

@@ -119,7 +119,7 @@ private:
 	float radius;
 public:
 	/* The constructor */
-	SphereCollider(GameObject3D* object, float radius) : Collider3D(TYPE_SPHERE), radius(radius) { setParent(object); }
+	SphereCollider(GameObject3D* object, float radius) : Collider3D(TYPE_SPHERE), radius(radius) { object->addChild(this); }
 
 	/* The destructor */
 	virtual ~SphereCollider() {}

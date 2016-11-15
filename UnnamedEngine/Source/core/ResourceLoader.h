@@ -96,7 +96,7 @@ public:
 
 	inline static std::vector<Mesh*> sLoadModel(std::string path, std::string fileName) { return Mesh::loadModel(path, fileName); }
 
-	inline static Font* sLoadFont(std::string path, int size = 18, Colour colour = Colour::WHITE) { return new Font(path, size, colour, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST)); }
+	inline static Font* sLoadFont(std::string path, int size = 18, Colour colour = Colour::WHITE) { return new Font(path, size, colour); }
 };
 
 

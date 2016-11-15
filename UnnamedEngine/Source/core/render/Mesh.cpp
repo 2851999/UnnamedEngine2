@@ -421,7 +421,7 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 						//Load the texture and assign it in the material
 						aiString p;
 						currentMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &p);
-						material->setDiffuseTexture(Texture::loadTexture(path + StrUtils::str(p.C_Str())));
+						material->diffuseTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
 					}
 
 					//Check to see whether the material has a specular texture
@@ -429,7 +429,7 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 						//Load the texture and assign it in the material
 						aiString p;
 						currentMaterial->GetTexture(aiTextureType_SPECULAR, 0, &p);
-						material->setSpecularTexture(Texture::loadTexture(path + StrUtils::str(p.C_Str())));
+						material->specularTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
 					}
 
 					//Check to see whether the material has a normal map
@@ -437,24 +437,23 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 						//Load the texture and assign it in the material
 						aiString p;
 						currentMaterial->GetTexture(aiTextureType_HEIGHT, 0, &p);
-						material->setNormalMap(Texture::loadTexture(path + StrUtils::str(p.C_Str())));
+						material->normalMap = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
 					}
 
 					//Get the ambient, diffuse and specular colours and set them in the material
 					aiColor3D ambientColour = aiColor3D(1.0f, 1.0f, 1.0f);
 					currentMaterial->Get(AI_MATKEY_COLOR_AMBIENT, ambientColour);
-					material->setAmbientColour(Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f));
+					material->ambientColour = Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f);
 
 					aiColor3D diffuseColour = aiColor3D(1.0f, 1.0f, 1.0f);
 					currentMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColour);
-					material->setDiffuseColour(Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f));
+					material->diffuseColour = Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f);
 
 					aiColor3D specularColour = aiColor3D(1.0f, 1.0f, 1.0f);
 					currentMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specularColour);
-					material->setSpecularColour(Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f));
+					material->specularColour = Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f);
 				}
-
-				//Assign the material to the current mesh
+				//Assign the current mesh's material
 				mesh->setMaterial(material);
 			}
 			//Add the current mesh to the list

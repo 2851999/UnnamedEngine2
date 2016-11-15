@@ -48,10 +48,10 @@ void AsteroidsGame::initialise() {
 	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
 
-	//Setup the highscores
-	highscores.setPath(resourceLoader.getPath() + "highscores.txt");
-	//Load the highscores
-	highscores.load();
+	//Setup the high scores
+	highScores.setPath(resourceLoader.getPath() + "highscores.txt");
+	//Load the high scores
+	highScores.load();
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 }
@@ -97,6 +97,10 @@ void AsteroidsGame::created() {
 //		getWindow()->getInputManager()->addController(controller);
 //	}
 //	inputBindings->save(resourceLoader.getPath() + "settings/controls.txt");
+
+	//Create the Camera2D instance
+	camera2D = new Camera2D(Matrix4f().initOrthographic(0.0f, getSettings().windowWidth, getSettings().windowHeight, 0.0f, -1.0f, 1.0f));
+	camera2D->update();
 
 	//Setup the main menu
 	mainMenu = new AsteroidsMainMenu(this);

@@ -61,7 +61,7 @@ public:
 	void attach(GLuint shader);
 	void detach(GLuint shader);
 	void use();
-	static void stopUsing();
+	void stopUsing();
 	virtual void destroy() override;
 	void addUniform(std::string id, std::string name);
 	void addAttribute(std::string id, std::string name);
@@ -80,7 +80,7 @@ public:
 	void setUniformMatrix3(std::string id, Matrix3f matrix);
 	void setUniformMatrix4(std::string id, Matrix4f matrix);
 
-	/* Methods to get a reference to the map of uniforms for assigning in
+	/* Method to get a reference to the map of uniforms for assigning in
 	 * the Renderer */
 	std::map<std::string, GLint>& getUniforms() { return uniforms; }
 

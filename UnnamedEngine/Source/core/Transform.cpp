@@ -16,33 +16,20 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_MATERIAL_H_
-#define CORE_RENDER_MATERIAL_H_
-
-#include "Colour.h"
-#include "Shader.h"
-#include "Texture.h"
+#include "Transform.h"
 
 /*****************************************************************************
- * The Material structure stores data about a material and can apply them to a
- * shader
+ * The Transform class
  *****************************************************************************/
 
-struct Material {
-	/* The colours */
-	Colour ambientColour  = Colour(0.1f, 0.1f, 0.1f);
-	Colour diffuseColour  = Colour::WHITE;
-	Colour specularColour = Colour::WHITE;
+void Transform::calculateMatrix(Vector3f offset) {
+	matrix.setIdentity();
+	matrix.translate(position + offset);
+	matrix.rotate(rotation);
+	matrix.translate(offset * -1);
+	matrix.scale(m_scale);
+}
 
-	/* The textures */
-	Texture* ambientTexture  = NULL;
-	Texture* diffuseTexture  = NULL;
-	Texture* specularTexture = NULL;
-
-	Texture* normalMap = NULL;
-
-	/* The shininess value */
-	float shininess = 32.0f;
-};
-
-#endif /* CORE_RENDER_MATERIAL_H_ */
+void Transform::rotate(const Quaternion& angle) {
+	setRotation(Quaternion((angle * this->localRotation).normalise()));
+}

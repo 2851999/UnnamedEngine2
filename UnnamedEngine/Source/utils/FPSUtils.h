@@ -100,11 +100,11 @@ public:
 	void setMaxFPS(unsigned int maxFPS);
 
 	/* Called at the start of a frame, to assign the time */
-	void start();
+	void startFrame();
 
 	/* Calculates the time to pause the thread for an then sleeps for that amount
 	 * of time - should be called at the end of a frame */
-	void update();
+	void endFrame();
 };
 
 #endif /* UTILS_FPSUTILS_H_ */
