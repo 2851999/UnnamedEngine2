@@ -240,14 +240,14 @@ void AudioListener::update() {
 	if (AudioManager::hasContext()) {
 		//Get the needed values
 		Vector3f listenerPosition = getPosition();
-		Vector3f listenerRotation = getRotation();
 		Vector3f listenerVelocity = getVelocity();
-		float xDirection = (float) sin(MathsUtils::toRadians(listenerRotation.getY()));
-		float zDirection = (float) -cos(MathsUtils::toRadians(listenerRotation.getY()));
+		Vector3f at = getRotation().getForward();
+		Vector3f up = getRotation().getUp();
+
 		//Setup OpenAL
 		alListener3f(AL_POSITION, listenerPosition.getX(), listenerPosition.getY(), listenerPosition.getZ());
 		alListener3f(AL_VELOCITY, listenerVelocity.getX(), listenerVelocity.getY(), listenerVelocity.getZ());
-		ALfloat listenerOrientation[] = { xDirection, 0.0f, zDirection, 0.0f, 1.0f, 0.0f };
+		ALfloat listenerOrientation[] = { at.getX(), at.getY(), at.getZ(), up.getX(), up.getY(), up.getZ() };
 		alListenerfv(AL_ORIENTATION, listenerOrientation);
 	}
 }

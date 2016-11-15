@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 11
+
+* Changed audio system to use the new transform class and
+  quaternions
+
+* Fixed incorrect audio positions
+
+* More quaternions
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 2 | Experimental 10
 
 * More quaternions

@@ -75,7 +75,8 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		//BOUNDS ALL BETWEEN -200 and 200
 
 		//Orientate the camera
-		getTransform()->rotate(Vector3f(axisLookY->getValue(), axisLookX->getValue(), 0) * 80.0f * currentDelta);
+		getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -axisLookX->getValue() * 80.0f * currentDelta);
+		getTransform()->rotate(getTransform()->getRotation().getRight(), -axisLookY->getValue() * 80.0f * currentDelta);
 		Vector3f currentRot = getTransform()->getLocalRotation().toEuler();
 		currentRot.setX(MathsUtils::clamp(currentRot.getX(), -89.0f, 89.0f));
 		getTransform()->setRotation(currentRot);
