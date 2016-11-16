@@ -45,28 +45,28 @@ public:
 		GUIComponent(width, height, std::vector<Colour> { Colour::WHITE }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, Colour::YELLOW);
-		addChild(fill);
+		fill->setParent(this);
 	}
 
 	GUILoadingBar(float width, float height, unsigned int totalStages, Colour backgroundColour, Colour fillColour) :
 		GUIComponent(width, height, std::vector<Colour> { backgroundColour }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, fillColour);
-		addChild(fill);
+		fill->setParent(this);
 	}
 
 	GUILoadingBar(float width, float height, unsigned int totalStages, Texture* backgroundTexture, Texture* fillTexture) :
 		GUIComponent(width, height, std::vector<Texture*> { backgroundTexture }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, fillTexture);
-		addChild(fill);
+		fill->setParent(this);
 	}
 
 	GUILoadingBar(float width, float height, unsigned int totalStages, Colour backgroundColour, Texture* backgroundTexture, Colour fillColour, Texture* fillTexture) :
 		GUIComponent(width, height, std::vector<Colour> { backgroundColour }, std::vector<Texture*> { backgroundTexture }), totalStages(totalStages) {
 
 		fill = new GUIFill(width, height, fillColour, fillTexture);
-		addChild(fill);
+		fill->setParent(this);
 	}
 
 	/* The destructor */

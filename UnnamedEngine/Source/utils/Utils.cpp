@@ -20,6 +20,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
+#include <boost/filesystem.hpp>
 #include <fstream>
 #include <cstdarg>
 
@@ -188,6 +189,21 @@ namespace FileUtils {
 			output.close();
 		} else
 			Logger::log("Could not open file: " + path, "FileUtils", LogType::Error);
+	}
+
+	/* Returns whether the file with the specified path exists */
+	bool doesExist(std::string path) {
+		return boost::filesystem::exists(path.c_str());
+	}
+
+	/* Returns whether the specified path is a file */
+	bool isFile(std::string path) {
+		return boost::filesystem::is_regular_file(path.c_str());
+	}
+
+	/* Returns whether the specified path is a directory */
+	bool isDirectory(std::string path) {
+		return boost::filesystem::is_directory(path.c_str());
 	}
 }
 

@@ -77,7 +77,7 @@ GameObject2D::GameObject2D(std::vector<Mesh*> meshes, std::string shaderId, floa
 
 void GameObject2D::update() {
 	//Check to make sure this object has a mesh
-	if (hasMesh())
+	if (hasMesh() && transform->hasChanged())
 		transform->calculateMatrix(Vector2f(getWidth() / 2, getHeight() / 2));
 }
 
@@ -105,8 +105,8 @@ GameObject3D::GameObject3D(std::vector<Mesh*> meshes, std::string shaderId, floa
 
 void GameObject3D::update() {
 	//Check to make sure this object has a mesh
-	if (hasMesh())
-		transform->calculateMatrix(Vector3f(getWidth() / 2, getHeight() / 2, getDepth() / 2));
+	if (hasMesh() && transform->hasChanged())
+		transform->calculateMatrix();
 }
 
 Vector3f GameObject3D::getSize() {

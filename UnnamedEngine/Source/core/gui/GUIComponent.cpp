@@ -97,7 +97,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour) :
 		component(component), thickness(thickness) {
 
 	setPosition(-thickness, -thickness);
-	component->addChild(this);
+	setParent(component);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, Texture* texture) :
@@ -105,7 +105,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, Texture* texture)
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		component->addChild(this);
+		setParent(component);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour, Texture* texture) :
@@ -113,7 +113,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour, Te
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		component->addChild(this);
+		setParent(component);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colour> colours) :
@@ -121,7 +121,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colou
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		component->addChild(this);
+		setParent(component);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Texture*> textures) :
@@ -129,7 +129,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Textu
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		component->addChild(this);
+		setParent(component);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colour> colours, std::vector<Texture*> textures) :
@@ -137,7 +137,7 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colou
 				component(component), thickness(thickness) {
 
 		setPosition(-thickness, -thickness);
-		component->addChild(this);
+		setParent(component);
 }
 
 /*****************************************************************************

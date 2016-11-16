@@ -34,15 +34,6 @@ void Camera2D::update() {
  *****************************************************************************/
 
 void Camera3D::update() {
-	//Calculate the forwards direction
-//	Vector3f rotation = getRotationEuler();
-//	cameraFront = Vector3f(
-//		cos(MathsUtils::toRadians(rotation.getY())) * cos(MathsUtils::toRadians(rotation.getX())),
-//		sin(MathsUtils::toRadians(rotation.getX())),
-//		sin(MathsUtils::toRadians(rotation.getY())) * cos(MathsUtils::toRadians(rotation.getX()))
-//	).normalise();
-//	cameraRight = cameraFront.cross(cameraUp).normalise();
-//	Vector3f up = cameraRight.cross(cameraFront).normalise();
 	cameraFront = getTransform()->getRotation().getForward();
 	cameraRight = getTransform()->getRotation().getRight();
 	Vector3f up = getTransform()->getRotation().getUp();

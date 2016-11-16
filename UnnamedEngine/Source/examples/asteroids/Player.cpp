@@ -39,7 +39,7 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 	camera = new Camera3D(110.0f, game->getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setSkyBox(new SkyBox(game->getResourceLoader().getPath() + "skybox/", "skyboxBK.png", "skyboxFT.png", "skyboxLF.png", "skyboxRT.png", "skyboxUP.png", "skyboxDN.png", 100.0f));
 	camera->setFlying(true);
-	addChild(camera);
+	camera->setParent(this);
 
 	game->getWindow()->getInputManager()->addListener(this);
 

@@ -37,20 +37,21 @@ public:
 	Quaternion(const Vector4f& base) { setX(base.getX()); setY(base.getY()); setZ(base.getZ()); setW(base.getW()); }
 	Quaternion(const Vector4<float>& base) { setX(base.getX()); setY(base.getY()); setZ(base.getZ()); setW(base.getW()); }
 
-	Quaternion(Vector3f axis, float angle) {
-		//Calculate some needed constants for transforming it into the
-		//quaternion representation
-		float a = MathsUtils::toRadians(angle / 2.0f);
-		float s = sin(a);
-		float c = cos(a);
-		//Assign the values
-		setX(axis.getX() * s);
-		setY(axis.getY() * s);
-		setZ(axis.getZ() * s);
-		setW(c);
-	}
+	Quaternion(Vector3f axis, float angle) { initFromAxisAngle(axis, angle); }
+	Quaternion(const Vector3f& angles) { initFromEulerAngles(angles); }
+	Quaternion(const Matrix4f& m) { initFromRotationMatrix(m); }
 
-	Quaternion(Vector3f euler);
+	/* Method that initialises this quaternion using an axis angle representation (angle is in degrees) */
+	Quaternion& initFromAxisAngle(const Vector3f& axis, float angle);
+
+	/* Method that initialises this quaternion using a set of euler angles (angles are in degrees) */
+	Quaternion& initFromEulerAngles(const Vector3f& angles);
+
+	/* Method that initialises this quaternion using a matrix */
+	Quaternion& initFromRotationMatrix(const Matrix4f& m);
+
+	/* Method used to assign this quaternions values to look at something */
+	Quaternion& lookAt(const Vector3f& eye, const Vector3f& centre, const Vector3f& up);
 
 	/* Various operations */
 	inline Quaternion operator*(const Quaternion& other) const {
@@ -127,6 +128,7 @@ public:
 		return rotate(Vector3f(1.0f, 0.0f, 0.0f), (*this));
 	}
 
+	/* Static method to rotate a vector using a quaternion */
 	static Vector3f rotate(const Vector3f& vector, const Quaternion& quaternion) {
 		//http://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
 		Vector3f u(quaternion.getX(), quaternion.getY(), quaternion.getZ());

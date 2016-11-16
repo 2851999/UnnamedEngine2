@@ -24,10 +24,25 @@
  * The Quaternion class
  *****************************************************************************/
 
-Quaternion::Quaternion(Vector3f euler) {
-	float h = MathsUtils::toRadians(euler.getY());
-	float a = MathsUtils::toRadians(euler.getZ());
-	float b = MathsUtils::toRadians(euler.getX());
+Quaternion& Quaternion::initFromAxisAngle(const Vector3f& axis, float angle) {
+	//Calculate some needed constants for transforming it into the
+	//quaternion representation
+	float a = MathsUtils::toRadians(angle / 2.0f);
+	float s = sin(a);
+	float c = cos(a);
+	//Assign the values
+	setX(axis.getX() * s);
+	setY(axis.getY() * s);
+	setZ(axis.getZ() * s);
+	setW(c);
+
+	return (*this);
+}
+
+Quaternion& Quaternion::initFromEulerAngles(const Vector3f& angles) {
+	float h = MathsUtils::toRadians(angles.getY());
+	float a = MathsUtils::toRadians(angles.getZ());
+	float b = MathsUtils::toRadians(angles.getX());
 
     float c1 = cosf(h / 2.0f);
     float s1 = sinf(h / 2.0f);
@@ -41,6 +56,45 @@ Quaternion::Quaternion(Vector3f euler) {
   	setX(c1c2 * s3 + s1s2 * c3);
 	setY(s1 * c2 * c3 + c1 * s2 * s3);
 	setZ(c1 * s2 * c3 - s1 * c2 * s3);
+
+	return (*this);
+}
+
+Quaternion& Quaternion::initFromRotationMatrix(const Matrix4f& m) {
+	float trace = m.get(0, 0) + m.get(1, 1) + m.get(2, 2);
+
+	if (trace > 0) {
+		float s = 0.5f / sqrtf(trace + 1.0f);
+		setW(0.25f / s);
+		setX((m.get(2, 1) - m.get(1, 2)) * s);
+		setY((m.get(0, 2) - m.get(2, 0)) * s);
+		setZ((m.get(1, 0) - m.get(1, 0)) * s);
+	} else if (m.get(0, 0) > m.get(1, 1) && m.get(0, 0) > m.get(2, 2)) {
+		float s = 2.0f * sqrtf(1.0f + m.get(0, 0) - m.get(1, 1) - m.get(2, 2));
+		setW((m.get(2, 1) - m.get(1, 2)) / s);
+		setX(0.25f * s);
+		setY((m.get(0, 1) + m.get(1, 0)) / s);
+		setZ((m.get(0, 2) + m.get(2, 0)) / s);
+	} else if (m.get(1, 1) > m.get(2, 2)) {
+		float s = 2.0f * sqrtf(1.0f + m.get(1, 1) - m.get(0, 0) - m.get(2, 2));
+		setW((m.get(0, 2) - m.get(2, 0)) / s);
+		setX((m.get(0, 1) + m.get(1, 0)) / s);
+		setY(0.25f * s);
+		setZ((m.get(1, 2) + m.get(2, 1)) / s);
+	} else {
+		float s = 2.0f * sqrtf(1.0f + m.get(2, 2) - m.get(1, 1) - m.get(0, 0));
+		setW((m.get(1, 0) - m.get(0, 1)) / s);
+		setX((m.get(0, 2) + m.get(2, 0)) / s);
+		setY((m.get(2, 1) + m.get(2, 1)) / s);
+		setZ(0.25f * s);
+	}
+	normalise();
+
+	return (*this);
+}
+
+Quaternion& Quaternion::lookAt(const Vector3f& eye, const Vector3f& centre, const Vector3f& up) {
+	return initFromRotationMatrix(Matrix4f().initLookAt(eye, centre, up));
 }
 
 Matrix4f Quaternion::toRotationMatrix() {

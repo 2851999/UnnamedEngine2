@@ -228,7 +228,7 @@ public:
 	void removeListener(GUIComponentListener* listener);
 
 	/* Method used to add a component to this one */
-	inline void add(GUIComponent* component) { addChild(component); attachedComponents.push_back(component); }
+	inline void add(GUIComponent* component) { component->setParent(this); attachedComponents.push_back(component); }
 
 	/* Method used to check whether a position is within the component */
 	bool contains(double x, double y);

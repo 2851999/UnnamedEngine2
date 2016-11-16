@@ -23,11 +23,24 @@
  *****************************************************************************/
 
 void Transform::calculateMatrix(Vector3f offset) {
+	//Calcualte the transformation matrix
 	matrix.setIdentity();
 	matrix.translate(position + offset);
 	matrix.rotate(rotation);
 	matrix.translate(offset * -1);
 	matrix.scale(m_scale);
+
+	changed = false;
+}
+
+void Transform::calculateMatrix() {
+	//Calcualte the transformation matrix
+	matrix.setIdentity();
+	matrix.translate(position);
+	matrix.rotate(rotation);
+	matrix.scale(m_scale);
+
+	changed = false;
 }
 
 void Transform::rotate(const Quaternion& angle) {

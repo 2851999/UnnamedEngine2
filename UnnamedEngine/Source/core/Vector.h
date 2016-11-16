@@ -147,6 +147,19 @@ public:
 	inline bool operator>(const Vector<T, N>& other)  { return length() > other.length();  }
 	inline bool operator>=(const Vector<T, N>& other) { return length() >= other.length(); }
 
+	/* Method to linearly interpolate between two vectors */
+	inline static Vector<T, N> lerp(const Vector<T, N>& a, const Vector<T, N>& b, T t) { return (a + t * (b - a)); }
+	inline static Vector<T, N> slerp(const Vector<T, N>& a, const Vector<T, N>& b, T t) {
+		//https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
+		float dot = a.dot(b);
+		dot = MathsUtils::clamp(dot, -1.0f, 1.0f);
+		float theta = acosf(dot) * t;
+		Vector<T, N> relative = b - a * dot;
+		relative.normalise();
+		return ((a * cosf(theta)) + (relative * sin(theta)));
+	}
+	inline static Vector<T, N> nlerp(const Vector<T, N>& a, const Vector<T, N>& b, T t) { return lerp(a, b, t).nomalise(); }
+
 	/* Finds the total length of the vector */
 	inline T length() const {
 		double total = 0;
@@ -157,7 +170,7 @@ public:
 		return sqrt(total);
 	}
 
-	/* Returns the unit vector */
+	/* Returns the unit vector (while modifying this one) */
 	inline Vector<T, N> normalise() {
 		//Calculate the length of this vector
 		T length = this->length();
@@ -167,6 +180,12 @@ public:
 				values[i] /= length;
 		}
 		return (*this);
+	}
+
+	/* Returns the unit vector */
+	inline Vector<T, N> normalised() const {
+		Vector<T, N> result = (*this);
+		return result.normalise();
 	}
 
 	/* Finds and returns the smallest component of this vector */
@@ -206,7 +225,7 @@ public:
 	}
 
 	/* Returns the dot product of this, and another vector */
-	inline T dot(const Vector<T, N>& other) {
+	inline T dot(const Vector<T, N>& other) const {
 		T dotProduct = 0;
 		for (unsigned int i = 0; i < N; i++)
 			dotProduct += values[i] * other[i];
