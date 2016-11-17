@@ -73,35 +73,13 @@ public:
 		return (*this);
 	}
 
-	inline Quaternion operator*(const Vector3f& other) const {
-		Quaternion result;
-
-		result[0] =  (getW() * other.getX()) + (getY() * other.getZ()) - (getZ() * other.getY());
-		result[1] =  (getW() * other.getY()) + (getZ() * other.getX()) - (getX() * other.getZ());
-		result[2] =  (getW() * other.getZ()) + (getX() * other.getY()) - (getY() * other.getX());
-		result[3] = -(getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ());
-
-		return result;
-	}
-
-	inline Quaternion& operator*=(const Vector3f& other) {
-		float x =  (getW() * other.getX()) + (getY() * other.getZ()) - (getZ() * other.getY());
-		float y =  (getW() * other.getY()) + (getZ() * other.getX()) - (getX() * other.getZ());
-		float z =  (getW() * other.getZ()) + (getX() * other.getY()) - (getY() * other.getX());
-		float w = -(getX() * other.getX()) - (getY() * other.getY()) - (getZ() * other.getZ());
-
-		setX(x);
-		setY(y);
-		setZ(z);
-		setW(w);
-
-		return (*this);
+	inline Vector3f operator*(const Vector3f& other) const {
+		return rotate(other, (*this));
 	}
 
 	inline Quaternion conjugate() const { return Quaternion(-getX(), -getY(), -getZ(), getW()); }
 
 	Matrix4f toRotationMatrix();
-
 	Vector3f toEuler();
 
 	inline Vector3f getForward() const {

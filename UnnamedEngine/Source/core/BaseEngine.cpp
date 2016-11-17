@@ -61,6 +61,13 @@ void BaseEngine::create() {
 
 	GUIComponentRenderer::DEFAULT_FONT = defaultFont;
 
+	//Create the debug console
+	if (getSettings().debuggingConsoleEnabled) {
+		debugConsole = new DebugConsole(this);
+		debugConsole->enable();
+		debugConsole->hide();
+	}
+
 //	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 //	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 
@@ -89,7 +96,9 @@ void BaseEngine::create() {
 		fpsLimiter.startFrame();
 		fpsCalculator.update();
 
-		update();
+		//Ensure the debug console isn't open
+		if (! debugConsole || ! debugConsole->isVisible())
+			update();
 		render();
 
 		if (getSettings().debuggingShowInformation)
@@ -110,6 +119,8 @@ void BaseEngine::create() {
 
 	//Delete all of the objects required by the BaseEngine class
 	delete debugCamera;
+	if (debugConsole)
+		delete debugConsole;
 
 	delete window;
 }
@@ -139,6 +150,11 @@ void BaseEngine::renderDebuggingInfo() {
 							"SFX Volume     : " + str(getSettings().audioMusicVolume) + "\n" +
 							"-----------------------------"
 							, 2, 16);
+	//Render the debug console if needed
+	if (debugConsole && debugConsole->isVisible()) {
+		debugConsole->update();
+		debugConsole->render();
+	}
 	Renderer::removeCamera();
 
 	glDisable(GL_BLEND);

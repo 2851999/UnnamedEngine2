@@ -171,6 +171,14 @@ public:
 			parent->getChildren().push_back(this);
 		//Assign the parent of this transform
 		this->parent = parent;
+		//Update this transform
+		for (unsigned int i = 0; i < children.size(); i++)
+			children[i]->setPosition(children[i]->getLocalPosition());
+		for (unsigned int i = 0; i < children.size(); i++)
+			children[i]->setRotation(children[i]->getLocalRotation());
+		for (unsigned int i = 0; i < children.size(); i++)
+			children[i]->setScale(children[i]->getLocalScale());
+		changed = true;
 	}
 
 	inline void setHasChanged(bool hasChanged) { this->changed = hasChanged; }

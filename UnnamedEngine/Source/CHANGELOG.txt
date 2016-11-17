@@ -1,4 +1,19 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 3 | Experimental 2
+
+* Added DebugConsole
+* Added find method in MLElement
+* Added writeToDocument and readFromDocument methods in
+  SettingsUtils
+* Added save and load methods in InputBindings with an
+  MLDocument as a parameter
+* Added Quaternion * Vector3f method
+
+* Fixed bug: Assigning the parent of a transform wouldn't
+             update the position, rotation and scale
+* Fixed bug: GUIBorder didn't render in the correct place
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 3 | Experimental 1
 
 * Added lerp, slerp and nlerp methods in Vector

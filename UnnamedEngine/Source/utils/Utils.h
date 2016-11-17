@@ -182,10 +182,17 @@ namespace RandomUtils {
  *****************************************************************************/
 
 class Settings;
+class MLDocument;
 
 namespace SettingsUtils {
+	/* Writes settings to a document */
+	void writeToDocument(MLDocument& document, Settings& settings);
+
 	/* Writes settings to a file */
 	void writeToFile(std::string path, Settings& settings);
+
+	/* Returns settings stored in a document */
+	Settings readFromDocument(MLDocument& document);
 
 	/* Returns settings read from a file */
 	Settings readFromFile(std::string path);

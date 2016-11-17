@@ -272,8 +272,15 @@ public:
 	/* Method used to get an axis binding given its name */
 	InputBindingAxis* getAxisBinding(std::string name);
 
+	/* Method used to save these input bindings to an MLDocument */
+	void save(MLDocument& document);
+
 	/* Method used to save these input bindings to a file */
 	void save(std::string path);
+
+	/* Method used to load input bindings from an MLDocument, an InputManager
+	 * should be provided if it is expected to have controller input */
+	void load(MLDocument& document, InputManager* inputManager = NULL);
 
 	/* Method used to load input bindings from a file, an InputManager should be
 	 * provided if it is expected to have controller input */

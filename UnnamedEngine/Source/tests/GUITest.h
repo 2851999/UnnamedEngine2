@@ -140,7 +140,6 @@ void Test::created() {
 	textBox->setPosition(20, 300);
 	textBox->setDefaultText("Enter something");
 	textBox->setBorder(new GUIBorder(textBox, 1.0f, Colour::LIGHT_BLUE));
-	//textBox->borderEnabled = true;
 	textBox->selection->setColour(Colour(Colour::LIGHT_BLUE, 0.2f));
 
 	radioCheckBoxGroup = new GUIGroup();
@@ -183,11 +182,11 @@ void Test::created() {
 //		std::cout << elem.getName() << std::endl;
 	//document.save("C:/Users/Joel/Desktop/Test.xml");
 }
-#include <iostream>
+//#include <iostream>
 void Test::update() {
 	panel->update();
 
-	std::cout << verticalSlider->getValue() << std::endl;
+	//std::cout << verticalSlider->getValue() << std::endl;
 }
 
 void Test::render() {

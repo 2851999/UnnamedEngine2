@@ -52,6 +52,18 @@ MLElement::MLElement(std::string name) {
 	this->name = name;
 }
 
+int MLElement::find(std::string name) {
+	//Go through each element and compare their name
+	for (unsigned int i = 0; i < children.size(); i++) {
+		//Compare the name of the current child
+		if (children[i].getName() == name)
+			//Return the current index
+			return i;
+	}
+	//Return -1, as no child element was found with the specified name
+	return -1;
+}
+
 std::string MLElement::toString(std::string prefix) {
 	//The string representation
 	std::string text = prefix + "<" + name;
