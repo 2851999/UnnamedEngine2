@@ -133,6 +133,15 @@ namespace FileUtils {
 
 	/* Writes to a file given the text to be written in the form of a vector */
 	void writeFile(std::string path, std::vector<std::string> text);
+
+	/* Returns whether the file with the specified path exists */
+	bool doesExist(std::string path);
+
+	/* Returns whether the specified path is a file */
+	bool isFile(std::string path);
+
+	/* Returns whether the specified path is a directory */
+	bool isDirectory(std::string path);
 }
 
 /*****************************************************************************
@@ -173,10 +182,17 @@ namespace RandomUtils {
  *****************************************************************************/
 
 class Settings;
+class MLDocument;
 
 namespace SettingsUtils {
+	/* Writes settings to a document */
+	void writeToDocument(MLDocument& document, Settings& settings);
+
 	/* Writes settings to a file */
 	void writeToFile(std::string path, Settings& settings);
+
+	/* Returns settings stored in a document */
+	Settings readFromDocument(MLDocument& document);
 
 	/* Returns settings read from a file */
 	Settings readFromFile(std::string path);

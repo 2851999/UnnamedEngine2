@@ -52,6 +52,9 @@ private:
 
 	/* Child transforms attached to this one */
 	std::vector<Transform*> children;
+
+	/* Boolean value that states whether anything has been changed and so needs to be recalculated */
+	bool changed = true;
 public:
 	/* The constructors */
 	Transform() {}
@@ -67,27 +70,37 @@ public:
 	/* The destructor */
 	virtual ~Transform() {}
 
-	/* Method used to add a child transform */
-	inline void addChild(Transform* child) {
-		//Assign the parent of the child
-		child->setParent(this);
-		child->setPosition(child->getLocalPosition());
-		child->setRotation(child->getLocalRotation());
-		child->setScale(child->getLocalScale());
-		//Add the child
-		children.push_back(child);
-	}
+//	/* Method used to add a child transform */
+//	inline void addChild(Transform* child) {
+//		//Assign the parent of the child
+//		child->setParent(this);
+//		child->setPosition(child->getLocalPosition());
+//		child->setRotation(child->getLocalRotation());
+//		child->setScale(child->getLocalScale());
+//		//Add the child
+//		children.push_back(child);
+//	}
 
 	/* Method used to remove a child transform */
 	inline void removeChild(Transform* child) {
-		//Remove the parent of the child
-		child->setParent(NULL);
 		//Remove the child from the children vector
 		children.erase(std::remove(children.begin(), children.end(), child), children.end());
 	}
 
-	/* Method used to calculate this transform's matrix */
+	/* Method used to remove all child transforms */
+	inline void removeChildren() {
+		//Go through each child transform
+		for (unsigned int i = 0; i < children.size(); i++)
+			//Assign their parent
+			children[i]->setParent(NULL);
+		//Remove all child transforms
+		children.clear();
+	}
+
+	/* Method used to calculate this transform's matrix given an offset to do rotations */
 	void calculateMatrix(Vector3f offset);
+	/* Method used to calculate this transform's matrix */
+	void calculateMatrix();
 
 	/* Methods used to translate the position of this transform */
 	inline void translate(const Vector3f& amount) { setPosition(this->localPosition + amount); }
@@ -113,6 +126,7 @@ public:
 			this->position += parent->getPosition();
 		for (unsigned int i = 0; i < children.size(); i++)
 			children[i]->setPosition(children[i]->getLocalPosition());
+		changed = true;
 	}
 	inline void setPosition(Vector2f position)                { setPosition(Vector3f(position)); }
 	inline void setPosition(float x, float y, float z = 0.0f) { setPosition(Vector3f(x, y, z)); }
@@ -126,10 +140,12 @@ public:
 		//Assign the child rotations
 		for (unsigned int i = 0; i < children.size(); i++)
 			children[i]->setRotation(children[i]->getLocalRotation());
+		changed = true;
 	}
 	inline void setRotation(Vector3f rotation)         { setRotation(Quaternion(rotation)); }
 	inline void setRotation(float x, float y, float z) { setRotation(Vector3f(x, y, z)); }
 	inline void setRotation(float rotation)            { setRotation(Quaternion(Vector3f(0.0f, 0.0f, 1.0f), rotation)); }
+
 	inline void setScale(Vector3f scale) {
 		this->localScale = scale;
 		this->m_scale = localScale;
@@ -139,12 +155,33 @@ public:
 		//Assign the child scales
 		for (unsigned int i = 0; i < children.size(); i++)
 			children[i]->setScale(children[i]->getLocalScale());
+		changed = true;
 	}
 	inline void setScale(Vector2f scale)                   { setScale(Vector3f(scale)); }
 	inline void setScale(float x, float y, float z = 0.0f) { setScale(Vector3f(x, y, z)); }
 
 	inline void setMatrix(Matrix4f matrix)   { this->matrix = matrix; }
-	inline void setParent(Transform* parent) { this->parent = parent; }
+	inline void setParent(Transform* parent) {
+		//Check whether there is a parent currently
+		if (this->parent)
+			//Remove this child from the parent
+			this->parent->removeChild(this);
+		//Add this child to the parent
+		if (parent)
+			parent->getChildren().push_back(this);
+		//Assign the parent of this transform
+		this->parent = parent;
+		//Update this transform
+		for (unsigned int i = 0; i < children.size(); i++)
+			children[i]->setPosition(children[i]->getLocalPosition());
+		for (unsigned int i = 0; i < children.size(); i++)
+			children[i]->setRotation(children[i]->getLocalRotation());
+		for (unsigned int i = 0; i < children.size(); i++)
+			children[i]->setScale(children[i]->getLocalScale());
+		changed = true;
+	}
+
+	inline void setHasChanged(bool hasChanged) { this->changed = hasChanged; }
 
 	inline Vector3f   getLocalPosition() { return localPosition; }
 	inline Quaternion getLocalRotation() { return localRotation; }
@@ -154,10 +191,11 @@ public:
 	inline Quaternion  getRotation() { return rotation; }
 	inline Vector3f    getScale()    { return m_scale; }
 
-	inline Matrix4f&  getMatrix() { return matrix; }
-	inline Transform* getParent() { return parent; }
-	inline Transform* hasParent() { return parent; }
-	inline std::vector<Transform*> getChildren() { return children; }
+	inline Matrix4f&  getMatrix()  { return matrix; }
+	inline Transform* getParent()  { return parent; }
+	inline Transform* hasParent()  { return parent; }
+	inline bool       hasChanged() { return changed; }
+	inline std::vector<Transform*>& getChildren() { return children; }
 	inline unsigned int getChildrenCount() { return children.size(); }
 	inline bool hasChildren() { return children.size() > 0; }
 	inline Transform* getChild(unsigned int i) { return children.at(i); }

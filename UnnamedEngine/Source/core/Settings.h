@@ -79,6 +79,7 @@ struct Settings {
 
 	/* Various debugging settings */
 	bool         debuggingShowInformation = true;
+	bool         debuggingConsoleEnabled  = true;
 };
 
 #endif /* CORE_SETTINGS_H_ */

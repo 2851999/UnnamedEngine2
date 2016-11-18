@@ -96,48 +96,48 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour) :
 		GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), colour),
 		component(component), thickness(thickness) {
 
+	setParent(component);
 	setPosition(-thickness, -thickness);
-	component->addChild(this);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, Texture* texture) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), texture),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		component->addChild(this);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour, Texture* texture) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), colour, texture),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		component->addChild(this);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colour> colours) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), colours),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		component->addChild(this);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Texture*> textures) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), textures),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		component->addChild(this);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colour> colours, std::vector<Texture*> textures) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), colours, textures),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		component->addChild(this);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 /*****************************************************************************

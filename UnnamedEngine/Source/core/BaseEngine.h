@@ -24,6 +24,7 @@
 #include "Window.h"
 #include "gui/Font.h"
 #include "render/Camera.h"
+#include "../utils/DebugConsole.h"
 #include "../utils/FPSUtils.h"
 
 namespace Engine {
@@ -31,8 +32,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.1.6";
-	const std::string DateCreated = "15/11/2016";
+	const std::string Version     = "V0.1.7";
+	const std::string DateCreated = "18/11/2016";
 	const std::string Build       = "Development";
 }
 
@@ -56,6 +57,8 @@ private:
 
 	/* Debug camera used when rendering debug information */
 	Camera2D* debugCamera = NULL;
+	/* Debug console */
+	DebugConsole* debugConsole = NULL;
 public:
 	/* The constructor */
 	BaseEngine();
@@ -89,6 +92,9 @@ public:
 	Window* getWindow() { return window; }
 	Settings& getSettings() { return window->getSettings(); }
 	Font* getDefaultFont() { return defaultFont; }
+	Camera2D* getDebugCamera() { return debugCamera; }
+	DebugConsole* getDebugConsole() { return debugConsole; }
+	bool hasDebugConsole() { return debugConsole; }
 
 	unsigned int getFPS() { return fpsCalculator.getFPS(); }
 	long getDelta() { return fpsCalculator.getDelta(); }

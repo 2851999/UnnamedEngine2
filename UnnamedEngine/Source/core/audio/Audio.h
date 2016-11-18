@@ -46,10 +46,10 @@ public:
 	AudioObject(Vector3f position, Vector3f rotation) { setPosition(position); setRotation(rotation); }
 	AudioObject(Vector3f position, Vector3f rotation, Vector3f velocity) : velocity(velocity) { setPosition(position); setRotation(rotation); }
 
-	AudioObject(GameObject* parent) { parent->getTransform()->addChild(transform); }
+	AudioObject(GameObject* parent) { transform->setParent(parent->getTransform()); }
 
-	/* Method used to add a child object */
-	inline void addChild(GameObject* child) { transform->addChild(child->getTransform()); }
+	/* Method used set the parent of this object */
+	inline void setParent(GameObject* parent) { transform->setParent(parent->getTransform()); }
 	/* method used to remove a child object */
 	inline void removeChild(GameObject* child) { transform->removeChild(child->getTransform()); }
 
@@ -164,7 +164,7 @@ public:
 		setPosition(position);
 	}
 	AudioSource(AudioData* data, unsigned int type, GameObject* parent) : AudioSource(data, type) {
-		parent->getTransform()->addChild(transform);
+		transform->setParent(parent->getTransform());
 	}
 
 	virtual ~AudioSource() {

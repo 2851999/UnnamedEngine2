@@ -33,7 +33,7 @@ GUIGroup::~GUIGroup() {
 
 void GUIGroup::add(GUIComponent* component) {
 	//Add the component
-	addChild(component);
+	component->setParent(this);
 	component->setGroup(this);
 	components.push_back(component);
 }

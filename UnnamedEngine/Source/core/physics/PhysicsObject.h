@@ -79,7 +79,7 @@ public:
 	 * modified by changing the value in this instance */
 	PhysicsObject2D(GameObject2D* child) {
 		if (child)
-			addChild(child);
+			child->setParent(this);
 	}
 
 	PhysicsObject2D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0) : GameObject2D(mesh, shader, width, height) {}
@@ -103,10 +103,10 @@ public:
 
 	inline void setCollider(Collider2D* collider) { this->collider = collider; }
 
-	Vector2f getVelocity() { return velocity; }
-	Vector2f& getRelVelocity() { return velocity; }
-	Vector2f getAcceleration() { return acceleration; }
-	Vector2f& getRelAcceleration() { return acceleration; }
+	Vector2f  getVelocity() { return velocity; }
+	Vector2f& getLocalVelocity() { return velocity; }
+	Vector2f  getAcceleration() { return acceleration; }
+	Vector2f& getLocalAcceleration() { return acceleration; }
 	float getAngularVelocity() { return angularVelocity; }
 	float getAngularAcceleration() { return angularAcceleration; }
 
@@ -141,7 +141,7 @@ public:
 	 * modified by changing the value in this instance */
 	PhysicsObject3D(GameObject3D* child) {
 		if (child)
-			addChild(child);
+			child->setParent(this);
 	}
 	PhysicsObject3D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(mesh, shader, width, height, depth) {}
 	PhysicsObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(meshes, shader, width, height, depth) {}
@@ -166,14 +166,14 @@ public:
 
 	inline void setCollider(Collider3D* collider) { this->collider = collider; }
 
-	Vector3f getVelocity() { return velocity; }
-	Vector3f& getRelVelocity() { return velocity; }
-	Vector3f getAcceleration() { return acceleration; }
-	Vector3f& getRelAcceleration() { return acceleration; }
-	Vector3f getAngularVelocity() { return angularVelocity; }
-	Vector3f& getRelAngularVelocity() { return angularVelocity; }
-	Vector3f getAngularAcceleration() { return angularAcceleration; }
-	Vector3f& getRelAngularAcceleration() { return angularAcceleration; }
+	Vector3f  getVelocity() { return velocity; }
+	Vector3f& getLocalVelocity() { return velocity; }
+	Vector3f  getAcceleration() { return acceleration; }
+	Vector3f& getLocalAcceleration() { return acceleration; }
+	Vector3f  getAngularVelocity() { return angularVelocity; }
+	Vector3f& getLocalAngularVelocity() { return angularVelocity; }
+	Vector3f  getAngularAcceleration() { return angularAcceleration; }
+	Vector3f& getLocalAngularAcceleration() { return angularAcceleration; }
 
 	inline Collider3D* getCollider() { return collider; }
 	inline bool hasCollider() { return collider; }

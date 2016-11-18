@@ -41,7 +41,7 @@ public:
 
 	/* Various operations */
 	inline void set(unsigned int row, unsigned int col, T value) { values[col][row] = value; } //COLUMN MAJOR ORDER!!!!!
-	inline T get(unsigned int row, unsigned int col)       const { return values[col][row];  }
+	inline T get(unsigned int row, unsigned int col)       const { return values[col][row]; }
 
 	/* Returns the result of adding another matrix to this one */
 	inline Matrix<T, N> operator+(const Matrix<T, N>& other) const {
@@ -413,7 +413,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initTranslation(Vector2f vector) {
+	const Matrix4f& initTranslation(const Vector2f& vector) {
 		set(0, 0, 1); set(0, 1, 0); set(0, 2, 0); set(0, 3, vector.getX());
 		set(1, 0, 0); set(1, 1, 1); set(1, 2, 0); set(1, 3, vector.getY());
 		set(2, 0, 0); set(2, 1, 0); set(2, 2, 1); set(2, 3, 0);
@@ -422,7 +422,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initTranslation(Vector3f vector) {
+	const Matrix4f& initTranslation(const Vector3f& vector) {
 		set(0, 0, 1); set(0, 1, 0); set(0, 2, 0); set(0, 3, vector.getX());
 		set(1, 0, 0); set(1, 1, 1); set(1, 2, 0); set(1, 3, vector.getY());
 		set(2, 0, 0); set(2, 1, 0); set(2, 2, 1); set(2, 3, vector.getZ());
@@ -455,7 +455,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initScale(Vector2f vector) {
+	const Matrix4f& initScale(const Vector2f& vector) {
 		set(0, 0, vector.getX()); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
 		set(1, 0, 0); set(1, 1, vector.getY()); set(1, 2, 0); set(1, 3, 0);
 		set(2, 0, 0); set(2, 1, 0); set(2, 2, 1); set(2, 3, 0);
@@ -464,7 +464,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initScale(Vector3f vector) {
+	const Matrix4f& initScale(const Vector3f& vector) {
 		set(0, 0, vector.getX()); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
 		set(1, 0, 0); set(1, 1, vector.getY()); set(1, 2, 0); set(1, 3, 0);
 		set(2, 0, 0); set(2, 1, 0); set(2, 2, vector.getZ()); set(2, 3, 0);
@@ -473,11 +473,11 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initLookAt(Vector3f eye, Vector3f centre, Vector3f up) {
+	const Matrix4f& initLookAt(const Vector3f& eye, const Vector3f& centre, const Vector3f& up) {
 		//EXPLANATION: http://stackoverflow.com/questions/21152556/an-inconsistency-in-my-understanding-of-the-glm-lookat-function
 
 		Vector3f forward = (centre - eye).normalise();
-		Vector3f u = up.normalise();
+		Vector3f u = up.normalised();
 		Vector3f side = forward.cross(u).normalise();
 		u = side.cross(forward);
 

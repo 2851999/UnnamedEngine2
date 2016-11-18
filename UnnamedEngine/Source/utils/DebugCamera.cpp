@@ -74,7 +74,8 @@ void DebugCamera::update(float delta) {
 	moveLeft(axis1->getValue() * currentDelta * movementSpeed);
 
 	//Orientate the camera
-	transform->rotate(Vector3f(axis2->getValue() * lookSensitivityX, -axis3->getValue() * lookSensitivityY, 0) * currentDelta);
+	getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -axis3->getValue() * lookSensitivityX * currentDelta);
+	getTransform()->rotate(getTransform()->getRotation().getRight(), axis2->getValue() * lookSensitivityY * currentDelta);
 	Vector3f currentRot = getTransform()->getLocalRotation().toEuler();
 	currentRot.setX(MathsUtils::clamp(currentRot.getX(), -89.0f, 89.0f));
 	getTransform()->setRotation(currentRot);
@@ -85,6 +86,8 @@ void DebugCamera::update(float delta) {
 
 void DebugCamera::onMouseMoved(double x, double y, double dx, double dy) {
 	//Orientate the camera
-	transform->rotate(Vector3f(-dy * mouseSensitivityX, dx * mouseSensitivityY, 0) * currentDelta);
+	if (dx != 0)
+		getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -dx * mouseSensitivityX * currentDelta);
+	if (dy != 0)
+		getTransform()->rotate(getTransform()->getRotation().getRight(), dy * mouseSensitivityY * currentDelta);
 }
-

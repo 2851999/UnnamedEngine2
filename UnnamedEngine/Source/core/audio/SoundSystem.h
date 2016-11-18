@@ -47,7 +47,7 @@ public:
 	inline void createListener(Vector3f position) { listener = new AudioListener(position); }
 
 	/* Methods used to assign the audio listener position */
-	inline void setListener(GameObject* parent) { parent->getTransform()->addChild(listener->getTransform()); }
+	inline void setListener(GameObject* parent) { listener->setParent(parent); }
 	inline void setListener(Vector2f position) { listener->setPosition(position); }
 	inline void setListener(Vector3f position) { listener->setPosition(position); }
 

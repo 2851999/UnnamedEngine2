@@ -54,8 +54,8 @@ public:
 	/* Method used to add a mesh */
 	void addMesh(Mesh* mesh);
 
-	/* Method used to add a child object */
-	inline void addChild(GameObject* child) { transform->addChild(child->getTransform()); }
+	/* Method used to set the parent of this object */
+	inline void setParent(GameObject* parent) { transform->setParent(parent->getTransform()); }
 	/* method used to remove a child object */
 	inline void removeChild(GameObject* child) { transform->removeChild(child->getTransform()); }
 

@@ -86,7 +86,7 @@ void Test::created() {
 }
 
 void Test::update() {
-	object->getRelRotation() += 0.1f * getDelta();
+	object->getTransform()->rotate(60.0f * getDeltaSeconds());
 	object->update();
 
 	sprite->update(getDeltaSeconds());
