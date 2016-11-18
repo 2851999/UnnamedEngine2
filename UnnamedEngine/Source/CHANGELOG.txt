@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 0 | Beta 2 | Development 3 | Experimental 3
+
+* Renamed getRel methods in PhysicsObject2D/3D to getLocal
+
+* Some shader cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 2 | Development 3 | Experimental 2
 
 * Added DebugConsole
@@ -40,8 +47,6 @@ Release 0 | Beta 2 | Development 3 (V0.1.6)
 * Changed Material from a class to a structure
 * Changed the position, rotation and velocity variables to
   private in AudioObject
-* Changed InputBindings so it would still load the controller
-  data from a file, even if the controller wasn't found
 * Changed the default TextureParameters for a font
 * Changed objects to use the new 'Transform' class
 * Changed audio system to use the new 'Transform' class and
@@ -59,6 +64,8 @@ Release 0 | Beta 2 | Development 3 (V0.1.6)
 			 equal numColumns
 * Fixed bug: InputBindings caused a crash if a controller
   			 was not found
+* Fixed bug: InputBindings would still load the controller
+  data from a file, even if the controller wasn't found
 
 * More Asteroids development
 
