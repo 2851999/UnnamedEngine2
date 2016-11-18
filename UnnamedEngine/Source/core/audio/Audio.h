@@ -30,67 +30,48 @@
 
 class AudioObject {
 private:
-	/* Allows AudioObjects to be linked with GameObjects and have their positions relative
-	 * to each other */
-	GameObject3D* parent = NULL;
-public:
-	/* The position, rotation, and velocity of this object */
-	Vector3f position;
-	Vector3f rotation;
+	/* The velocity for this audio object */
 	Vector3f velocity;
+protected:
+	/* The transform of this audio object */
+	Transform* transform = new Transform();
+public:
 
 	/* The default constructor */
 	AudioObject() {}
 
 	/* The various other constructors */
-	AudioObject(Vector2f position) {
-		this->position = Vector3f(position);
-	}
+	AudioObject(Vector2f position) { setPosition(position); }
+	AudioObject(Vector3f position) { setPosition(position); }
+	AudioObject(Vector3f position, Vector3f rotation) { setPosition(position); setRotation(rotation); }
+	AudioObject(Vector3f position, Vector3f rotation, Vector3f velocity) : velocity(velocity) { setPosition(position); setRotation(rotation); }
 
-	AudioObject(Vector3f position) : position(position) {}
-	AudioObject(Vector3f position, Vector3f rotation) : position(position), rotation(rotation) {}
-	AudioObject(Vector3f position, Vector3f rotation, Vector3f velocity) : position(position), rotation(rotation), velocity(velocity) {}
+	AudioObject(GameObject* parent) { transform->setParent(parent->getTransform()); }
 
-	AudioObject(GameObject3D* parent) : parent(parent) {}
+	/* Method used set the parent of this object */
+	inline void setParent(GameObject* parent) { transform->setParent(parent->getTransform()); }
+	/* method used to remove a child object */
+	inline void removeChild(GameObject* child) { transform->removeChild(child->getTransform()); }
 
 	/* The setters and getters */
-	void setPosition(Vector2f position) { this->position = Vector3f(position); }
-	void setPosition(Vector3f position) { this->position = position; }
-	void setPosition(float x, float y)  { position = Vector3f(x, y, 0); }
-	void setPosition(float x, float y, float z) { position = Vector3f(x, y, z); }
+	inline void setPosition(Vector3f position) { transform->setPosition(position); }
+	inline void setPosition(float x, float y, float z)  { transform->setPosition(x, y, z); }
+	inline void setRotation(Quaternion rotation) { transform->setRotation(rotation); }
+	inline void setRotation(Vector3f rotation) { transform->setRotation(rotation); }
+	inline void setRotation(float x, float y, float z) { transform->setRotation(x, y, z); }
+	inline void setVelocity(Vector3f velocity) { this->velocity = velocity; }
+	inline void setVelocity(float x, float y, float z) { this->velocity = Vector3f(x, y, z); }
 
-	void setRotation(Vector3f rotation) { this->rotation = rotation; }
-	void setRotation(float x, float y, float z) { rotation = Vector3f(x, y, z); }
+	inline Vector3f   getLocalPosition()      { return transform->getLocalPosition(); }
+	inline Quaternion getLocalRotation()      { return transform->getLocalRotation(); }
+	inline Vector3f   getLocalRotationEuler() { return transform->getLocalRotation().toEuler(); }
 
-	void setVelocity(Vector2f velocity) { this->velocity = Vector3f(velocity); }
-	void setVelocity(Vector3f velocity) { this->velocity = velocity; }
-	void setVelocity(float x, float y)  { velocity = Vector3f(x, y, 0); }
-	void setVelocity(float x, float y, float z) { velocity = Vector3f(x, y, z); }
+	inline Vector3f   getPosition()      { return transform->getPosition(); }
+	inline Quaternion getRotation()      { return transform->getRotation(); }
+	inline Vector3f   getRotationEuler() { return transform->getRotation().toEuler(); }
+	inline Vector3f   getVelocity()      { return velocity; }
 
-	Vector3f& getRelPosition() { return position; }
-	Vector3f& getRelRotation() { return rotation; }
-
-	Vector3f getPosition() {
-		if (parent != NULL)
-			return parent->getPosition() + position;
-		else
-			return position;
-	}
-
-	Vector3f getRotation() {
-		if (parent != NULL)
-			return parent->getRotation() + rotation;
-		else
-			return rotation;
-	}
-
-	Vector3f getVelocity() {
-		return velocity;
-	}
-
-	void setParent(GameObject3D* parent) { this->parent = parent; }
-	bool hasParent() { return parent; }
-	GameObject3D* getParent() { return parent; }
+	inline Transform* getTransform() { return transform; }
 };
 
 /*****************************************************************************
@@ -161,8 +142,8 @@ public:
 
 class AudioSource : public AudioObject {
 private:
-	GLuint sourceHandle = 0;
-	GLuint bufferHandle = 0;
+	ALuint sourceHandle = 0;
+	ALuint bufferHandle = 0;
 
 	unsigned int type = 0;
 
@@ -182,8 +163,8 @@ public:
 	AudioSource(AudioData* data, unsigned int type, Vector3f position) : AudioSource(data, type) {
 		setPosition(position);
 	}
-	AudioSource(AudioData* data, unsigned int type, GameObject3D* parent) : AudioSource(data, type) {
-		setParent(parent);
+	AudioSource(AudioData* data, unsigned int type, GameObject* parent) : AudioSource(data, type) {
+		transform->setParent(parent->getTransform());
 	}
 
 	virtual ~AudioSource() {
@@ -222,7 +203,7 @@ public:
 	AudioListener() {}
 
 	/* The other constructors */
-	AudioListener(GameObject3D* parent) : AudioObject(parent) {}
+	AudioListener(GameObject* parent) : AudioObject(parent) {}
 	AudioListener(Vector2f position) : AudioObject(position) {}
 	AudioListener(Vector3f position) : AudioObject(position) {}
 

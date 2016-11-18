@@ -32,6 +32,7 @@ GUIGroup::~GUIGroup() {
 }
 
 void GUIGroup::add(GUIComponent* component) {
+	//Add the component
 	component->setParent(this);
 	component->setGroup(this);
 	components.push_back(component);
@@ -42,7 +43,7 @@ void GUIGroup::remove(GUIComponent* component) {
 	//Ensure the component has been added
 	if (std::find(components.begin(), components.end(), component) != components.end()) {
 		//Remove the parent of the component
-		component->setParent(NULL);
+		removeChild(component);
 		//Remove the component
 		components.erase(std::remove(components.begin(), components.end(), component), components.end());
 	}

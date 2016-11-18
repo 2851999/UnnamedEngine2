@@ -55,6 +55,8 @@ namespace StrUtils {
 	inline std::string substring(const std::string &s, int begin, int end) {
 		return s.substr(begin, end - begin);
 	}
+
+	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement);
 };
 
 #include <cmath>
@@ -74,7 +76,8 @@ namespace MathsUtils {
 		return radians * (180.0f / PI);
 	}
 
-	inline float clamp(float value, float min, float max) {
+	template<typename T>
+	inline T clamp(T value, T min, T max) {
 		if (value < min)
 			return min;
 		else if (value > max)
@@ -98,6 +101,18 @@ namespace MathsUtils {
 		else
 			return b;
 	}
+
+	template<typename T>
+	inline T abs(T value) {
+		if (value < 0)
+			return -value;
+		else
+			return value;
+	}
+
+	/* Returns a value that is a multiple of the interval, closest to the
+	 * value given */
+	float clampToClosestInterval(float value, float interval);
 }
 
 /*****************************************************************************
@@ -118,6 +133,15 @@ namespace FileUtils {
 
 	/* Writes to a file given the text to be written in the form of a vector */
 	void writeFile(std::string path, std::vector<std::string> text);
+
+	/* Returns whether the file with the specified path exists */
+	bool doesExist(std::string path);
+
+	/* Returns whether the specified path is a file */
+	bool isFile(std::string path);
+
+	/* Returns whether the specified path is a directory */
+	bool isDirectory(std::string path);
 }
 
 /*****************************************************************************
@@ -133,6 +157,9 @@ namespace TimeUtils {
 
 	/* Pauses the thread for a set amount of time given in milliseconds */
 	void sleep(long milliseconds);
+
+	/* Returns the current time as a string */
+	std::string getTimeAsString();
 }
 
 /*****************************************************************************
@@ -155,10 +182,17 @@ namespace RandomUtils {
  *****************************************************************************/
 
 class Settings;
+class MLDocument;
 
 namespace SettingsUtils {
+	/* Writes settings to a document */
+	void writeToDocument(MLDocument& document, Settings& settings);
+
 	/* Writes settings to a file */
 	void writeToFile(std::string path, Settings& settings);
+
+	/* Returns settings stored in a document */
+	Settings readFromDocument(MLDocument& document);
 
 	/* Returns settings read from a file */
 	Settings readFromFile(std::string path);

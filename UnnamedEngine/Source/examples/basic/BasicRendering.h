@@ -24,9 +24,9 @@
  *
  * Tutorial Number: 3
  * Tutorial Name: Basic Rendering
- * Engine Version: V0.1.1 (0::1::3::2)
+ * Engine Version: V0.1.5 (0::2::2::8)
  * Date Created: 17/10/2016
- * Date Updated: 19/10/2016
+ * Date Updated: 13/11/2016
  *
  * Description: Demonstrates how to start rendering in 2D
  *****************************************************************************/
@@ -69,14 +69,14 @@ void Tutorial::created() {
 
 	//Now we can change the colour of the mesh, or modify other
 	//material properties
-	mesh->getMaterial()->setDiffuseColour(Colour::ORANGE);
+	mesh->getMaterial()->diffuseColour = Colour::ORANGE;
 
 	//Now create the object instance, passing the mesh, and the shader to
 	//use when rendering it (in this case the 'Material' shader)
 	object = new GameObject2D(mesh, "Material", 100, 100);
 
 	//We can also change the material using the game object:
-	object->getMaterial()->setDiffuseColour(Colour::RED);
+	object->getMaterial()->diffuseColour = Colour::RED;
 
 	//But when using more complex objects with multiple meshes, this will
 	//only assign the material of the first mesh added, so will only work
@@ -119,14 +119,9 @@ void Tutorial::update() {
 	//This rotates the object by a certain amount equal to 5 degrees per second
 	//getDeltaSeconds() returns the time between the current frame, and the
 	//last frame in seconds
-	object->getRelRotation() += 5.0f * getDeltaSeconds();
-	//In general any getRel methods return a reference to the value in question
-	//allowing them to be directly changed - also this is probably better since
-	//using:
-	//object->setRotation(object->getRotation() + 1.0f * getDeltaSeconds);
-	//Will only work when the object is not attached to anything else that is
-	//rotation as getRotation() will return the total rotation of the object in
-	//this case
+	object->setRotation(object->getLocalRotationEuler() + 5.0f * getDeltaSeconds());
+	//The engine uses quaternions to handle rotations, but above we are using
+	//Euler angles in degrees
 
 	//Now to update the object's model matrix so the changes to it's rotation
 	//become visible the next time it is rendered
@@ -148,11 +143,11 @@ void Tutorial::destroy() {
 void Tutorial::onKeyPressed(int key) {
 	//Check the key
 	if (key == GLFW_KEY_R)
-		object->getMaterial()->setDiffuseColour(Colour::RED);
+		object->getMaterial()->diffuseColour = Colour::RED;
 	else if (key == GLFW_KEY_O)
-		object->getMaterial()->setDiffuseColour(Colour::ORANGE);
+		object->getMaterial()->diffuseColour = Colour::ORANGE;
 	else if (key == GLFW_KEY_Q)
-		object->getMaterial()->setDiffuseColour(Colour(1.0, 0.5f, 0.5f));
+		object->getMaterial()->diffuseColour = Colour(1.0, 0.5f, 0.5f);
 }
 
 #endif /* EXAMPLES_BASIC_BASICSETUP_H_ */

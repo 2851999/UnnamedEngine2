@@ -84,6 +84,9 @@ private:
 	/* The maximum allowed FPS */
 	unsigned int maxFPS = 0;
 
+	/* The time at the start of the current frame */
+	long startOfFrame = 0;
+
 	/* The delta when at the maximum FPS */
 	long targetDelta = 0;
 public:
@@ -96,9 +99,12 @@ public:
 	/* Assigns the maximum FPS */
 	void setMaxFPS(unsigned int maxFPS);
 
+	/* Called at the start of a frame, to assign the time */
+	void startFrame();
+
 	/* Calculates the time to pause the thread for an then sleeps for that amount
-	 * of time */
-	void update(long currentDeta);
+	 * of time - should be called at the end of a frame */
+	void endFrame();
 };
 
 #endif /* UTILS_FPSUTILS_H_ */

@@ -33,8 +33,8 @@ private:
 	GUIComponent* getTop(double x, double y);
 public:
 	/* The constructor */
-	GUIPanel() : GUIGroup() {}
-	GUIPanel(std::vector<GUIComponent*> components) : GUIGroup(components) {}
+	GUIPanel(float width = 0, float height = 0) : GUIGroup(width, height) {}
+	GUIPanel(std::vector<GUIComponent*>& components, float width = 0, float height = 0) : GUIGroup(components, width, height) {}
 
 	/* The destructor */
 	virtual ~GUIPanel() {}

@@ -60,16 +60,16 @@ void Ship::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 		float speed = getVelocity().length();
 		//Clamp the speed
 		if (speed > maximumSpeed)
-			getRelVelocity() *= (maximumSpeed / speed);
+			getLocalVelocity() *= (maximumSpeed / speed);
+
+		//Check whether the shield should be increased
+		if (shieldMax > 0 && shield < shieldMax && shieldTimer.hasTimePassedSeconds(shieldRegenRate)) {
+			shield ++;
+			shieldTimer.restart();
+		}
 	}
 	//Update the lasers
 	lasers->update(deltaSeconds, closestGroup);
-
-	//Check whether the shield should be increased
-	if (shieldMax > 0 && shield < shieldMax && shieldTimer.hasTimePassedSeconds(shieldRegenRate)) {
-		shield ++;
-		shieldTimer.restart();
-	}
 }
 
 void Ship::render() {

@@ -79,6 +79,9 @@ public:
 	/* Method used to initialise the rendering system */
 	static void initialise();
 
+	/* The method used to apply the material properties to a shader assuming it is already being used */
+	static void setMaterialUniforms(Shader* shader, std::string shaderName, Material* material);
+
 	/* Method used to render a Mesh */
 	static void render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderShader* shader);
 

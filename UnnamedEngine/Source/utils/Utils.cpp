@@ -20,6 +20,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
+#include <boost/filesystem.hpp>
 #include <fstream>
 #include <cstdarg>
 
@@ -36,7 +37,7 @@ namespace StrUtils {
 		unsigned int value = 0;
 		std::stringstream ss(string);
 		if (! (ss >> value))
-			Logger::log("String " + string + " cannot be converted to unsigned integer", "StrUtils", Logger::Error);
+			Logger::log("String " + string + " cannot be converted to unsigned integer", "StrUtils", LogType::Error);
 		return value;
 	}
 
@@ -44,7 +45,7 @@ namespace StrUtils {
 		int value = 0;
 		std::stringstream ss(string);
 		if (! (ss >> value))
-			Logger::log("String " + string + " cannot be converted to integer", "StrUtils", Logger::Error);
+			Logger::log("String " + string + " cannot be converted to integer", "StrUtils", LogType::Error);
 		return value;
 	}
 
@@ -52,7 +53,7 @@ namespace StrUtils {
 		float value = 0.0;
 		std::stringstream ss(string);
 		if (! (ss >> value))
-			Logger::log("String " + string + " cannot be converted to float", "StrUtils", Logger::Error);
+			Logger::log("String " + string + " cannot be converted to float", "StrUtils", LogType::Error);
 		return value;
 	}
 
@@ -60,7 +61,7 @@ namespace StrUtils {
 		bool value = 0;
 		std::stringstream ss(string);
 		if (! (ss >> value))
-			Logger::log("String " + string + " cannot be converted to boolean", "StrUtils", Logger::Error);
+			Logger::log("String " + string + " cannot be converted to boolean", "StrUtils", LogType::Error);
 		return value;
 	}
 
@@ -95,6 +96,31 @@ namespace StrUtils {
 
 		return split;
 	}
+
+	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement) {
+		size_t index = 0;
+		std::string str = s;
+		while ((index = str.find(old, index)) != std::string::npos) {
+			str.replace(index, old.length(), replacement);
+			index += replacement.length();
+		}
+		return str;
+	}
+}
+
+/*****************************************************************************
+ * Various maths utilities
+ *****************************************************************************/
+
+namespace MathsUtils {
+	float clampToClosestInterval(float value, float interval) {
+		float remainder = fmod(value, interval);
+		if (remainder < interval / 2.0f)
+			value -= remainder;
+		else
+			value += (interval - remainder);
+		return value;
+	}
 }
 
 /*****************************************************************************
@@ -114,7 +140,7 @@ namespace FileUtils {
 				output += line + "\n";
 			input.close();
 		} else
-			Logger::log("Could not open file: " + path, "FileUtils", Logger::Error);
+			Logger::log("Could not open file: " + path, "FileUtils", LogType::Error);
 		return output;
 	}
 
@@ -130,7 +156,7 @@ namespace FileUtils {
 				output.push_back(line);
 			input.close();
 		} else
-			Logger::log("Could not open file: " + path, "FileUtils", Logger::Error);
+			Logger::log("Could not open file: " + path, "FileUtils", LogType::Error);
 
 		return output;
 	}
@@ -144,7 +170,7 @@ namespace FileUtils {
 			output << text;
 			output.close();
 		} else
-			Logger::log("Could not open file: " + path, "FileUtils", Logger::Error);
+			Logger::log("Could not open file: " + path, "FileUtils", LogType::Error);
 	}
 
 	void writeFile(std::string path, std::vector<std::string> text) {
@@ -162,13 +188,30 @@ namespace FileUtils {
 			}
 			output.close();
 		} else
-			Logger::log("Could not open file: " + path, "FileUtils", Logger::Error);
+			Logger::log("Could not open file: " + path, "FileUtils", LogType::Error);
+	}
+
+	/* Returns whether the file with the specified path exists */
+	bool doesExist(std::string path) {
+		return boost::filesystem::exists(path.c_str());
+	}
+
+	/* Returns whether the specified path is a file */
+	bool isFile(std::string path) {
+		return boost::filesystem::is_regular_file(path.c_str());
+	}
+
+	/* Returns whether the specified path is a directory */
+	bool isDirectory(std::string path) {
+		return boost::filesystem::is_directory(path.c_str());
 	}
 }
 
 /*****************************************************************************
  * Various file utilities
  *****************************************************************************/
+
+#include <ctime>
 
 namespace TimeUtils {
 	double getSeconds() {
@@ -179,13 +222,31 @@ namespace TimeUtils {
 		//For Windows
 		Sleep(milliseconds);
 	}
+
+	std::string getTimeAsString() {
+		time_t t = time(NULL);
+		struct tm* now = localtime(&t);
+
+		std::string hour = StrUtils::str(now->tm_hour);
+		std::string minute = StrUtils::str(now->tm_min);
+		std::string second = StrUtils::str(now->tm_sec);
+
+		if (hour.length() == 1)
+			hour = "0" + hour;
+		if (minute.length() == 1)
+			minute = "0" + minute;
+		if (second.length() == 1)
+			second = "0" + second;
+
+		return hour + ":" + minute + ":" + second;
+	}
 }
 
 /*****************************************************************************
  * Various random utilities
  *****************************************************************************/
 
-#include <ctime>
+#include <cstdlib>
 
 namespace RandomUtils {
 	/* Method used to initialise the random generator with the current time */
@@ -211,10 +272,10 @@ namespace RandomUtils {
 #include "../core/Settings.h"
 
 namespace SettingsUtils {
-	/* Writes settings to a file */
-	void writeToFile(std::string path, Settings& settings) {
-		//The root element
-		MLElement root("ml");
+	/* Writes settings to a document */
+	void writeToDocument(MLDocument& document, Settings& settings) {
+		//Create the settings element for the settings
+		MLElement settingsElement("settings");
 
 		//Add all of the elements
 		MLElement window("window");
@@ -226,7 +287,7 @@ namespace SettingsUtils {
 		window.add(MLAttribute("borderless", StrUtils::str(settings.windowBorderless)));
 		window.add(MLAttribute("fullscreen", StrUtils::str(settings.windowFullscreen)));
 		window.add(MLAttribute("floating", StrUtils::str(settings.windowFloating)));
-		root.add(window);
+		settingsElement.add(window);
 
 		MLElement video("video");
 		video.add(MLAttribute("vSync", StrUtils::str(settings.videoVSync)));
@@ -235,101 +296,129 @@ namespace SettingsUtils {
 		video.add(MLAttribute("refreshRate", StrUtils::str(settings.videoRefreshRate)));
 		video.add(MLAttribute("resolution", VideoResolution::toString(settings.videoResolution)));
 		video.add(MLAttribute("maxFPS", StrUtils::str(settings.videoMaxFPS)));
-		root.add(video);
+		settingsElement.add(video);
 
 		MLElement audio("audio");
 		audio.add(MLAttribute("soundEffectVolume", StrUtils::str(settings.audioSoundEffectVolume)));
 		audio.add(MLAttribute("musicVolume", StrUtils::str(settings.audioMusicVolume)));
-		root.add(audio);
+		settingsElement.add(audio);
 
 		MLElement input("input");
 		input.add(MLAttribute("repeatKeyboardEvents", StrUtils::str(settings.inputRepeatKeyboardEvents)));
 		input.add(MLAttribute("repeatMouseEvents", StrUtils::str(settings.inputRepeatMouseEvents)));
-		root.add(input);
+		settingsElement.add(input);
 
 		MLElement engine("engine");
 		engine.add(MLAttribute("splashScreen", StrUtils::str(settings.engineSplashScreen)));
-		root.add(engine);
+		settingsElement.add(engine);
 
 		MLElement debugging("debugging");
 		debugging.add(MLAttribute("showInformation", StrUtils::str(settings.debuggingShowInformation)));
-		root.add(debugging);
+		debugging.add(MLAttribute("consoleEnabled", StrUtils::str(settings.debuggingConsoleEnabled)));
+		settingsElement.add(debugging);
 
-		//Create the document and save it
-		MLDocument document(root);
+		//Add the settings element, or replace the current one if one already exists
+		int index = document.getRoot().find("settings");
+		if (index >= 0)
+			document.getRoot().setChild(index, settingsElement);
+		else
+			document.getRoot().add(settingsElement);
+	}
+
+	/* Writes settings to a file */
+	void writeToFile(std::string path, Settings& settings) {
+		//Create the document
+		MLDocument document(MLElement("ml"));
+		//Write the settings to the document
+		writeToDocument(document, settings);
+		//Save the document
 		document.save(path);
+	}
+
+	/* Returns settings stored in a document */
+	Settings readFromDocument(MLDocument& document) {
+		//The settings instance
+		Settings settings;
+		//Attempt to get the index of the settings element in the document
+		int index = document.getRoot().find("settings");
+		//Check whether the settings element was found
+		if (index >= 0) {
+			//Go through each child attribute in the document
+			for (MLElement& child : document.getRoot().getChild(index).getChildren()) {
+				//Go through the attributes of the child element
+				for (MLAttribute& attrib : child.getAttributes()) {
+					//Check the child name
+					if (child.getName() == "window") {
+						//Check the attribute name
+						if (attrib.getName() == "title")
+							settings.windowTitle = attrib.getData();
+						else if (attrib.getName() == "width")
+							settings.windowWidth = attrib.getDataAsUInt();
+						else if (attrib.getName() == "height")
+							settings.windowHeight = attrib.getDataAsUInt();
+						else if (attrib.getName() == "resizable")
+							settings.windowResizable = attrib.getDataAsBool();
+						else if (attrib.getName() == "decorated")
+							settings.windowDecorated = attrib.getDataAsBool();
+						else if (attrib.getName() == "borderless")
+							settings.windowBorderless = attrib.getDataAsBool();
+						else if (attrib.getName() == "fullscreen")
+							settings.windowFullscreen = attrib.getDataAsBool();
+						else if (attrib.getName() == "floating")
+							settings.windowFloating = attrib.getDataAsBool();
+					} else if (child.getName() == "video") {
+						//Check the attribute name
+						if (attrib.getName() == "vSync")
+							settings.videoVSync = attrib.getDataAsBool();
+						else if (attrib.getName() == "samples")
+							settings.videoSamples = attrib.getDataAsUInt();
+						else if (attrib.getName() == "maxAnisotropicSamples")
+							settings.videoMaxAnisotropicSamples = attrib.getDataAsUInt();
+						else if (attrib.getName() == "refreshRate")
+							settings.videoRefreshRate = attrib.getDataAsUInt();
+						else if (attrib.getName() == "resolution")
+							settings.videoResolution = VideoResolution::toVector(attrib.getData());
+						else if (attrib.getName() == "maxFPS")
+							settings.videoMaxFPS = attrib.getDataAsUInt();
+					} else if (child.getName() == "audio") {
+						//Check the attribute name
+						if (attrib.getName() == "soundEffectVolume")
+							settings.audioSoundEffectVolume = attrib.getDataAsUInt();
+						else if (attrib.getName() == "musicVolume")
+							settings.audioMusicVolume = attrib.getDataAsUInt();
+					} else if (child.getName() == "input") {
+						//Check the attribute name
+						if (attrib.getName() == "repeatKeyboardEvents")
+							settings.inputRepeatKeyboardEvents = attrib.getDataAsBool();
+						else if (attrib.getName() == "repeatMouseEvents")
+							settings.inputRepeatMouseEvents = attrib.getDataAsBool();
+					} else if (child.getName() == "engine") {
+						//Check the attribute name
+						if (attrib.getName() == "splashScreen")
+							settings.engineSplashScreen = attrib.getDataAsBool();
+					} else if (child.getName() == "debugging") {
+						//Check the attribute name
+						if (attrib.getName() == "showInformation")
+							settings.debuggingShowInformation = attrib.getDataAsBool();
+						else if (attrib.getName() == "consoleEnabled")
+							settings.debuggingConsoleEnabled = attrib.getDataAsBool();
+					}
+				}
+			}
+		} else
+			//Log an error
+			Logger::log("Settings not found in the document", "SettingsUtils", LogType::Error);
+		//Return the settings
+		return settings;
 	}
 
 	/* Returns settings read from a file */
 	Settings readFromFile(std::string path) {
-		//The settings instance
-		Settings settings;
 		//Load the document
 		MLDocument document;
 		document.load(path);
-
-		//Go through each child attribute in the document
-		for (MLElement& child : document.getRoot().getChildren()) {
-			//Go through the attributes of the child element
-			for (MLAttribute& attrib : child.getAttributes()) {
-				//Check the child name
-				if (child.getName() == "window") {
-					//Check the attribute name
-					if (attrib.getName() == "title")
-						settings.windowTitle = attrib.getData();
-					else if (attrib.getName() == "width")
-						settings.windowWidth = attrib.getDataAsUInt();
-					else if (attrib.getName() == "height")
-						settings.windowHeight = attrib.getDataAsUInt();
-					else if (attrib.getName() == "resizable")
-						settings.windowResizable = attrib.getDataAsBool();
-					else if (attrib.getName() == "decorated")
-						settings.windowDecorated = attrib.getDataAsBool();
-					else if (attrib.getName() == "borderless")
-						settings.windowBorderless = attrib.getDataAsBool();
-					else if (attrib.getName() == "fullscreen")
-						settings.windowFullscreen = attrib.getDataAsBool();
-					else if (attrib.getName() == "floating")
-						settings.windowFloating = attrib.getDataAsBool();
-				} else if (child.getName() == "video") {
-					//Check the attribute name
-					if (attrib.getName() == "vSync")
-						settings.videoVSync = attrib.getDataAsBool();
-					else if (attrib.getName() == "samples")
-						settings.videoSamples = attrib.getDataAsUInt();
-					else if (attrib.getName() == "maxAnisotropicSamples")
-						settings.videoMaxAnisotropicSamples = attrib.getDataAsUInt();
-					else if (attrib.getName() == "refreshRate")
-						settings.videoRefreshRate = attrib.getDataAsUInt();
-					else if (attrib.getName() == "resolution")
-						settings.videoResolution = VideoResolution::toVector(attrib.getData());
-					else if (attrib.getName() == "maxFPS")
-						settings.videoMaxFPS = attrib.getDataAsUInt();
-				} else if (child.getName() == "audio") {
-					//Check the attribute name
-					if (attrib.getName() == "soundEffectVolume")
-						settings.audioSoundEffectVolume = attrib.getDataAsUInt();
-					else if (attrib.getName() == "musicVolume")
-						settings.audioMusicVolume = attrib.getDataAsUInt();
-				} else if (child.getName() == "input") {
-					//Check the attribute name
-					if (attrib.getName() == "repeatKeyboardEvents")
-						settings.inputRepeatKeyboardEvents = attrib.getDataAsBool();
-					else if (attrib.getName() == "repeatMouseEvents")
-						settings.inputRepeatMouseEvents = attrib.getDataAsBool();
-				} else if (child.getName() == "engine") {
-					//Check the attribute name
-					if (attrib.getName() == "splashScreen")
-						settings.engineSplashScreen = attrib.getDataAsBool();
-				} else if (child.getName() == "debugging") {
-					//Check the attribute name
-					if (attrib.getName() == "showInformation")
-						settings.debuggingShowInformation = attrib.getDataAsBool();
-				}
-			}
-		}
 		//Return the settings
-		return settings;
+		return readFromDocument(document);
 	}
 }
 

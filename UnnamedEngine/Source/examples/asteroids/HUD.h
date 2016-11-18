@@ -32,8 +32,8 @@ class Player;
 
 class HUD : public GUIPanel {
 private:
-	/* Camera used for rendering the HUD */
-	Camera2D* camera;
+	/* The game instance */
+	AsteroidsGame* game;
 
 	/* The label displaying the player's score */
 	GUILabel* labelScore;
@@ -43,6 +43,9 @@ private:
 
 	/* Loading bar for the player's shield */
 	GUILoadingBar* barPlayerShield;
+
+	/* The cross hair object */
+	GameObject2D* crossHair;
 
 	/* The player instance */
 	Player* player;

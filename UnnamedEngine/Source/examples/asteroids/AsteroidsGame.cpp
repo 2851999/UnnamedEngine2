@@ -18,6 +18,8 @@
 
 #include "AsteroidsGame.h"
 
+#include "../../utils/Logging.h"
+
 /*****************************************************************************
  * The AsteroidsGame class
  *****************************************************************************/
@@ -40,14 +42,16 @@ void AsteroidsGame::initialise() {
 	resourceLoader.setPathShaders("shaders/");
 	resourceLoader.setPathAudio("audio/");
 
+	Logger::startFileOutput(resourceLoader.getPath() + "logs.txt");
+
 	//Setup the settings
 	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
 
-	//Setup the highscores
-	highscores.setPath(resourceLoader.getPath() + "highscores.txt");
-	//Load the highscores
-	highscores.load();
+	//Setup the high scores
+	highScores.setPath(resourceLoader.getPath() + "highscores.txt");
+	//Load the high scores
+	highScores.load();
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 }
@@ -66,6 +70,8 @@ void AsteroidsGame::created() {
 	inputBindings = new InputBindings();
 	//Load the controls
 	inputBindings->load(resourceLoader.getPath() + "settings/controls.txt", getWindow()->getInputManager());
+
+	getWindow()->getInputManager()->addAvailableControllers();
 
 	//Create the axis bindings
 //	InputBindingAxis* axisForward = inputBindings->createAxisBinding("Forward");
@@ -91,6 +97,10 @@ void AsteroidsGame::created() {
 //		getWindow()->getInputManager()->addController(controller);
 //	}
 //	inputBindings->save(resourceLoader.getPath() + "settings/controls.txt");
+
+	//Create the Camera2D instance
+	camera2D = new Camera2D(Matrix4f().initOrthographic(0.0f, getSettings().windowWidth, getSettings().windowHeight, 0.0f, -1.0f, 1.0f));
+	camera2D->update();
 
 	//Setup the main menu
 	mainMenu = new AsteroidsMainMenu(this);
@@ -128,6 +138,8 @@ void AsteroidsGame::render() {
 }
 
 void AsteroidsGame::destroy() {
+	Logger::stopFileOutput();
+
 	//Delete all created resources
 	delete soundSystem;
 	delete mainMenu;

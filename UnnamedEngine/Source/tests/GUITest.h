@@ -128,7 +128,7 @@ void Test::created() {
 	GUIButton* verticalSliderButton = new GUIButton("", 26, 10, colours);
 	verticalSlider = new GUISlider(verticalSliderButton, GUISlider::VERTICAL, 4, 110, Colour::WHITE);
 	verticalSlider->setPosition(20, 400);
-	verticalSlider->setInterval(10.0f);
+	verticalSlider->setInterval(0.1f);
 
 	GUIButton* horizontalSliderButton = new GUIButton("", 10, 26, colours);
 	horizontalSlider = new GUISlider(horizontalSliderButton, GUISlider::HORIZONTAL, 110, 4, Colour::WHITE);
@@ -140,7 +140,6 @@ void Test::created() {
 	textBox->setPosition(20, 300);
 	textBox->setDefaultText("Enter something");
 	textBox->setBorder(new GUIBorder(textBox, 1.0f, Colour::LIGHT_BLUE));
-	//textBox->borderEnabled = true;
 	textBox->selection->setColour(Colour(Colour::LIGHT_BLUE, 0.2f));
 
 	radioCheckBoxGroup = new GUIGroup();
@@ -177,11 +176,13 @@ void Test::created() {
 	getWindow()->centreCursor();
 	Renderer::addCamera(camera);
 
-	MLDocument document;
-	document.load("C:/Users/Joel/Desktop/Idea.xml");
+//	MLDocument document;
+//	document.load("H:/Storage/Users/Joel/Desktop/Idea.xml");
+//	for (MLElement& elem : document.getRoot().getChildren())
+//		std::cout << elem.getName() << std::endl;
 	//document.save("C:/Users/Joel/Desktop/Test.xml");
 }
-
+//#include <iostream>
 void Test::update() {
 	panel->update();
 

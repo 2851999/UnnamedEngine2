@@ -27,7 +27,6 @@
 
 #include "AsteroidsGame.h"
 #include "AsteroidGroup.h"
-#include "LasersRenderer.h"
 
 class Ship;
 class Player;
@@ -55,7 +54,7 @@ private:
 	unsigned int maxLasers;
 
 	/* The renderer used to render the lasers */
-	LasersRenderer* renderer;
+	GameRenderer* renderer;
 
 	/* The physics objects representing the lasers */
 	std::vector<PhysicsObject3D*> objects;
@@ -73,10 +72,10 @@ private:
 	ParticleSystem*  particleSystem;
 
 	/* The cooldown time for the lasers (in seconds) */
-	double cooldown;
+	float cooldown;
 
 	/* The last time a laser was fired (in seconds) */
-	double timeLastLaserFired;
+	float timeLastLaserFired;
 public:
 	/* The constructor */
 	Lasers(AsteroidsGame* game, Ship* ship);
@@ -97,7 +96,7 @@ public:
 	void explode(Vector3f position, float maxSpeed);
 
 	/* The method used to fire this set of lasers */
-	void fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f currentVelocity);
+	void fire(Vector3f position, Quaternion rotation, Vector3f front, Vector3f currentVelocity);
 
 	/* Returns whether the lasers can fire */
 	inline bool canFire() { return TimeUtils::getSeconds() - timeLastLaserFired > cooldown; }

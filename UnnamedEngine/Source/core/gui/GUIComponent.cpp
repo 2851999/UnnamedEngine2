@@ -31,8 +31,8 @@ Font* GUIComponentRenderer::DEFAULT_FONT = NULL;
 
 void GUIComponentRenderer::setup() {
 	//Set the default colour and texture
-	getMaterial()->setDiffuseColour(Colour::WHITE);
-	getMaterial()->setDiffuseTexture(Renderer::getBlankTexture());
+	getMaterial()->diffuseColour = Colour::WHITE;
+	getMaterial()->diffuseTexture = Renderer::getBlankTexture();
 }
 
 void GUIComponentRenderer::update() {
@@ -42,17 +42,17 @@ void GUIComponentRenderer::update() {
 	//Check that there are colours and the render index is within its bounds
 	if (colours.size() > renderIndex)
 		//Assign the colour
-		getMaterial()->setDiffuseColour(colours[renderIndex]);
+		getMaterial()->diffuseColour = colours[renderIndex];
 	//Now to do the same for the textures
 	if (textures.size() > renderIndex)
-		getMaterial()->setDiffuseTexture(textures[renderIndex]);
+		getMaterial()->diffuseTexture = textures[renderIndex];
 }
 
 void GUIComponentRenderer::renderText(std::string text, Vector2f relPos) {
 	//Make sure there is a font instance
 	if (font)
 		//Render the text
-		font->render(text, getPosition() + relPos);
+		font->render(text, Vector2f(getPosition().getX(), getPosition().getY()) + relPos);
 }
 
 void GUIComponentRenderer::renderTextAtCentre(std::string text) {
@@ -81,11 +81,11 @@ void GUIComponentRenderer::setTexture(Texture* texture) {
  *****************************************************************************/
 
 void GUIFill::updateWidth(float width) {
-	getRelScale().setX(width / getRelWidth());
+	setScale(width / getLocalWidth(), getLocalScale().getY());
 }
 
 void GUIFill::updateHeight(float height) {
-	getRelScale().setY(height / getRelHeight());
+	setScale(getLocalScale().getX(), height / getLocalHeight());
 }
 
 /*****************************************************************************
@@ -96,48 +96,48 @@ GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour) :
 		GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), colour),
 		component(component), thickness(thickness) {
 
-	setPosition(-thickness, -thickness);
 	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, Texture* texture) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), texture),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		setParent(component);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, Colour colour, Texture* texture) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), colour, texture),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		setParent(component);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colour> colours) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), colours),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		setParent(component);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Texture*> textures) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), textures),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		setParent(component);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 GUIBorder::GUIBorder(GUIComponent* component, float thickness, std::vector<Colour> colours, std::vector<Texture*> textures) :
 				GUIFill(component->getWidth() + (thickness * 2), component->getHeight() + (thickness * 2), colours, textures),
 				component(component), thickness(thickness) {
 
-		setPosition(-thickness, -thickness);
-		setParent(component);
+	setParent(component);
+	setPosition(-thickness, -thickness);
 }
 
 /*****************************************************************************
@@ -164,7 +164,7 @@ void GUIComponent::removeListener(GUIComponentListener* listener) {
 }
 
 bool GUIComponent::contains(double x, double y) {
-	Vector2f position = getPosition();
+	Vector3f position = getPosition();
 	Vector2f size = getSize();
 	float px = position.getX();
 	float py = position.getY();

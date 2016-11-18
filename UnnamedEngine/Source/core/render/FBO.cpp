@@ -69,7 +69,7 @@ void FBO::setup() {
 
 	//Check to see whether the setup was successful
 	if (glCheckFramebufferStatus(target) != GL_FRAMEBUFFER_COMPLETE)
-		Logger::log("Framebuffer is not complete", "FramebufferObject", Logger::Error);
+		Logger::log("Framebuffer is not complete", "FramebufferObject", LogType::Error);
 
 	//Bind the default FBO
 	glBindFramebuffer(target, 0);

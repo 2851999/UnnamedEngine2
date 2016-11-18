@@ -42,12 +42,12 @@ public:
 
 	/* The methods used to create a listener */
 	inline void createListener() { listener = new AudioListener(); }
-	inline void createListener(GameObject3D* parent) { listener = new AudioListener(parent); }
+	inline void createListener(GameObject* parent) { listener = new AudioListener(parent); }
 	inline void createListener(Vector2f position) { listener = new AudioListener(position); }
 	inline void createListener(Vector3f position) { listener = new AudioListener(position); }
 
 	/* Methods used to assign the audio listener position */
-	inline void setListener(GameObject3D* parent) { listener->setParent(parent); }
+	inline void setListener(GameObject* parent) { listener->setParent(parent); }
 	inline void setListener(Vector2f position) { listener->setPosition(position); }
 	inline void setListener(Vector3f position) { listener->setPosition(position); }
 

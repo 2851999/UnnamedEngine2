@@ -23,14 +23,10 @@
  * The HUD class
  *****************************************************************************/
 
-HUD::HUD(AsteroidsGame* game, Player* player) : player(player) {
+HUD::HUD(AsteroidsGame* game, Player* player) : game(game), player(player) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
-
-	//Setup the camera
-	camera = new Camera2D(Matrix4f().initOrthographic(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f));
-	camera->update();
 
 	//Get the heading font
 	Font* headingFont = game->getResources().getFontHeading();
@@ -61,11 +57,17 @@ HUD::HUD(AsteroidsGame* game, Player* player) : player(player) {
 	add(barPlayerShield);
 	add(labelShield);
 	add(labelScore);
+
+	//Create the cross hair
+	crossHair = new GameObject2D(new Mesh(MeshBuilder::createQuad(8, 8, game->getResources().getTextureCrossHair())), "Material");
+	crossHair->getMaterial()->diffuseTexture = game->getResources().getTextureCrossHair();
+	crossHair->setPosition(windowWidth / 2 - crossHair->getWidth() / 2, windowHeight / 2 - crossHair->getHeight() / 2);
+	crossHair->update();
 }
 
 HUD::~HUD() {
 	//Delete created resources
-	delete camera;
+	delete crossHair;
 }
 
 void HUD::update() {
@@ -85,10 +87,13 @@ void HUD::render() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Add the camera
-	Renderer::addCamera(camera);
+	Renderer::addCamera(game->getCamera2D());
 
 	//Render the panel
 	GUIPanel::render();
+
+	//Render the cross hair
+	crossHair->render();
 
 	//Remove the camera
 	Renderer::removeCamera();

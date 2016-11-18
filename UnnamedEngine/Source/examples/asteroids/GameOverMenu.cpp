@@ -29,14 +29,11 @@ GameOverMenu::GameOverMenu(AsteroidsGame* game, Player* player) : game(game), pl
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	//Setup the camera
-	camera = new Camera2D(Matrix4f().initOrthographic(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f));
-	camera->update();
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
-	background->getMaterial()->setDiffuseTexture(backgroundTexture);
-	background->getMaterial()->setDiffuseColour(Colour(1.0f, 1.0f, 1.0f, 0.8f));
+	background->getMaterial()->diffuseTexture = backgroundTexture;
+	background->getMaterial()->diffuseColour = Colour(1.0f, 1.0f, 1.0f, 0.8f);
 	background->update();
 
 	buttonExit = new GUIButton("Exit", 400, 30, game->getResources().getTexturesButtons());
@@ -71,7 +68,6 @@ GameOverMenu::GameOverMenu(AsteroidsGame* game, Player* player) : game(game), pl
 
 GameOverMenu::~GameOverMenu() {
 	//Delete created resources
-	delete camera;
 	delete background;
 }
 
@@ -80,14 +76,14 @@ void GameOverMenu::show() {
 
 	GUIPanel::show();
 
-	//Get a reference to the highscores
-	Highscores& highscores = game->getHighscores();
+	//Get a reference to the high scores
+	HighScores& highScores = game->getHighScores();
 
-	if (highscores.isHighscore(player->getScore())) {
+	if (highScores.isHighScore(player->getScore())) {
 		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - A new highscore! :)");
 		nameTextBox->setActive(true);
 		nameTextBox->setVisible(true);
-	} else if (highscores.isOnTable(player->getScore())) {
+	} else if (highScores.isOnTable(player->getScore())) {
 		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - You're on the highscore table!");
 		nameTextBox->setActive(true);
 		nameTextBox->setVisible(true);
@@ -114,7 +110,7 @@ void GameOverMenu::render() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Add the camera
-	Renderer::addCamera(camera);
+	Renderer::addCamera(game->getCamera2D());
 
 	//Render the background
 	background->render();
@@ -132,9 +128,9 @@ void GameOverMenu::onComponentClicked(GUIComponent* component) {
 		//Check whether a highscore should be added
 		if (nameTextBox->isActive() && nameTextBox->getText().length() > 0) {
 			//Add the score
-			game->getHighscores().add(nameTextBox->getText(), player->getScore());
-			//Save the highscores
-			game->getHighscores().save();
+			game->getHighScores().add(nameTextBox->getText(), player->getScore());
+			//Save the high scores
+			game->getHighScores().save();
 		}
 		//Go to the main menu
 		game->changeState(AsteroidsGame::MAIN_MENU);

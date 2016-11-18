@@ -29,7 +29,7 @@ SkyBox::SkyBox(std::string path, std::string front, std::string back, std::strin
 	//Load the texture
 	cubemap = new Cubemap(path, { right, left, top, bottom, back, front });
 	//Assign the texture in the skybox
-	box->getMaterial()->setDiffuseTexture(cubemap);
+	box->getMaterial()->diffuseTexture = cubemap;
 }
 
 void SkyBox::update(Vector3f cameraPosition) {

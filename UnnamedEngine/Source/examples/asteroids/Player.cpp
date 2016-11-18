@@ -28,8 +28,8 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 	//Setup input
 	InputBindings* inputBindings = game->getInputBindings();
 	axisForward = inputBindings->getAxisBinding("Forward");
-	lookX = inputBindings->getAxisBinding("LookX");
-	lookY = inputBindings->getAxisBinding("LookY");
+	axisLookX = inputBindings->getAxisBinding("LookX");
+	axisLookY = inputBindings->getAxisBinding("LookY");
 	buttonShoot = inputBindings->getButtonBinding("Shoot");
 
 	score = 0;
@@ -72,15 +72,39 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		//Get the current delta
 		currentDelta = deltaSeconds;
 
+		//BOUNDS ALL BETWEEN -200 and 200
+
 		//Orientate the camera
-		getRelRotation() += Vector3f(lookY->getValue(), -lookX->getValue(), 0) * 80.0f * currentDelta;
-		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
+		getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -axisLookX->getValue() * 80.0f * currentDelta);
+		getTransform()->rotate(getTransform()->getRotation().getRight(), -axisLookY->getValue() * 80.0f * currentDelta);
+		Vector3f currentRot = getTransform()->getLocalRotation().toEuler();
+		currentRot.setX(MathsUtils::clamp(currentRot.getX(), -89.0f, 89.0f));
+		getTransform()->setRotation(currentRot);
 
 		//Move the player
 		if (axisForward->getValue() != 0)
 			thrust(camera->getFront() * axisForward->getValue());
 		else
 			setAcceleration(getVelocity() * -12.0f * currentDelta);
+
+		//Check the bounds
+		if (getPosition().getX() < -200 && getVelocity().getX() < 0)
+			//Ensure we are not moving in this direction
+			getRelVelocity().setX(0);
+		else if (getPosition().getX() > 200 && getVelocity().getX() > 0)
+			getRelVelocity().setX(0);
+
+		if (getPosition().getY() < -200 && getVelocity().getY() < 0)
+			//Ensure we are not moving in this direction
+			getRelVelocity().setY(0);
+		else if (getPosition().getY() > 200 && getVelocity().getY() > 0)
+			getRelVelocity().setY(0);
+
+		if (getPosition().getZ() < -200 && getVelocity().getZ() < 0)
+			//Ensure we are not moving in this direction
+			getRelVelocity().setZ(0);
+		else if (getPosition().getZ() > 200 && getVelocity().getZ() > 0)
+			getRelVelocity().setZ(0);
 
 		camera->update();
 
@@ -134,12 +158,14 @@ bool Player::checkCollision(PhysicsObject3D* laser) {
 void Player::onMouseMoved(double x, double y, double dx, double dy) {
 	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING && ! game->getMainGame()->showingUpgrades()) {
 		//Orientate the camera
-		getRelRotation() += Vector3f(-dy, dx, 0) * 10.0f * currentDelta;
-		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0, 89.0));
+		if (dx != 0)
+			getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -dx * 10.0f * currentDelta);
+		if (dy != 0)
+			getTransform()->rotate(getTransform()->getRotation().getRight(), dy * 10.0f * currentDelta);
 	}
 }
 
-void Player::removeScore(unsigned int points) {
+void Player::removePoints(unsigned int points) {
 	if (points > score)
 		score = 0;
 	else

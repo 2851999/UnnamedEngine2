@@ -29,7 +29,7 @@ class TextureAtlas {
 private:
 	/* The texture */
 	Texture* texture;
-public:
+
 	/* The number of textures in this atlas */
 	unsigned int numTextures = 0;
 
@@ -40,15 +40,18 @@ public:
 	/* The width/height of a texture within this atlas */
 	float textureWidth;
 	float textureHeight;
-
+public:
 	/* The constructor */
 	TextureAtlas(Texture* texture, unsigned int numColumns, unsigned int numRows, unsigned int numTextures);
 
-	/* The method used to get the data for the sides of the texture */
+	/* The method used to get the data for the sides of the texture  (textureIndex starts at 0)*/
 	void getSides(unsigned int textureIndex, float& top, float& left, float& bottom, float& right);
 
 	/* Getters */
 	inline Texture* getTexture() { return texture; }
+	inline unsigned int getNumTextures() { return numTextures; }
+	inline float getSubTextureWidth() { return textureWidth; }
+	inline float getSubTextureHeight() { return textureHeight; }
 };
 
 #endif /* CORE_RENDER_TEXTUREATLAS_H_ */

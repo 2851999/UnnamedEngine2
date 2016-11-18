@@ -67,23 +67,25 @@ void GUISlider::onComponentRender() {
 
 	//Check the slider direction
 	if (direction == VERTICAL) {
-		//Assign the appropriate position in the correct direction
-		if (interval == 0.0f)
-			button->setPosition(0.0f, position);
-		else
-			button->setPosition(0.0f, (int) (position / interval) * interval);
+		float pos = position;
+		if (interval != 0.0f)
+			pos = MathsUtils::clampToClosestInterval(position, ((getHeight() - buttonHeight) * interval) / (valueMax - valueMin));
+
+		//Assign the position
+		button->setPosition(0.0f, pos);
 
 		//Make sure the button is in the middle
-		button->getRelPosition().setX(-buttonWidth / 2 + width / 2);
+		button->setPosition(-buttonWidth / 2 + width / 2, button->getLocalPosition().getY());
 	} else if (direction == HORIZONTAL) {
-		//Assign the appropriate position in the correct direction
-		if (interval == 0.0f)
-			button->setPosition(position, 0.0f);
-		else
-			button->setPosition((int) (position / interval) * interval, 0.0f);
+		float pos = position;
+		if (interval != 0.0f)
+			pos = MathsUtils::clampToClosestInterval(position, ((getWidth() - buttonWidth) * interval) / (valueMax - valueMin));
+
+		//Assign the position
+		button->setPosition(pos, 0.0f);
 
 		//Make sure the button is in the middle
-		button->getRelPosition().setY(-buttonHeight / 2 + height / 2);
+		button->setPosition(button->getLocalPosition().getY(), -buttonHeight / 2 + height / 2);
 	}
 }
 
@@ -104,35 +106,28 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 
 	//Make sure this is visible and active
 	if (visible && active) {
-		float width = getWidth();
-		float height = getHeight();
-		//Check the direction of this slider
-		if (direction == VERTICAL) {
-			if (dragging) {
+		//Check whether the button is being dragged
+		if (dragging) {
+			float width = getWidth();
+			float height = getHeight();
+			//Check the direction of this slider
+			if (direction == VERTICAL) {
 				position += dy;
 				position = MathsUtils::clamp(position, 0.0f, height - button->getHeight());
 				//Set the slider value
-				if (interval == 0.0f)
-					value = (button->getRelPosition().getY() / (height - button->getHeight())) * 100.0f;
-				else
-					value = (((int) ((int) position / (int) interval) * interval) / (int) (height - button->getHeight())) * 100.0f;
-			}
-		} else if (direction == HORIZONTAL) {
-			if (dragging) {
+				value = valueMin + (button->getLocalPosition().getY() / (height - button->getHeight())) * (valueMax - valueMin);
+			} else if (direction == HORIZONTAL) {
 				position += dx;
 				position = MathsUtils::clamp(position, 0.0f, width - button->getWidth());
 				//Set the slider value
-				if (interval == 0.0f)
-					value = (button->getRelPosition().getX() / (width - button->getWidth())) * 100.0f;
-				else
-					value = (((int) ((int) position / (int) interval) * interval) / (int) (width - button->getWidth())) * 100.0f;
+				value = valueMin + (button->getLocalPosition().getX() / (width - button->getWidth())) * (valueMax - valueMin);
 			}
+			//Check whether the value needs to be clamped to an interval
+			if (interval != 0.0f)
+				value = MathsUtils::clampToClosestInterval(value, interval);
+			//Clamp the slider value
+			MathsUtils::clamp(value, valueMin, valueMax);
 		}
-		//Clamp the slider value
-		if (value < 0)
-			value = 0;
-		else if (value > 100)
-			value = 100;
 	}
 }
 

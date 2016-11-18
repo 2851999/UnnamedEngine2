@@ -16,33 +16,34 @@
  *
  *****************************************************************************/
 
-#include "Highscores.h"
+#include "HighScores.h"
+
 #include "../../utils/Utils.h"
 
 /*****************************************************************************
- * The Highscores class
+ * The HighScores class
  *****************************************************************************/
 
-Highscores::Highscores() {
-	maxHighscores = 5;
+HighScores::HighScores() {
+	maxHighScores = 5;
 }
 
-Highscores::~Highscores() {
+HighScores::~HighScores() {
 	names.clear();
 	scores.clear();
 }
 
-void Highscores::save() {
+void HighScores::save() {
 	//The file text to save
 	std::vector<std::string> fileText;
 	//Go through each name
 	for (unsigned int i = 0; i < names.size(); i++)
 		fileText.push_back(names[i] + ": " + StrUtils::str(scores[i]));
-	//Write to the highscores file
+	//Write to the high scores file
 	FileUtils::writeFile(filePath, fileText);
 }
 
-void Highscores::load() {
+void HighScores::load() {
 	//Ensure the names and scores are clear
 	names.clear();
 	scores.clear();
@@ -58,8 +59,10 @@ void Highscores::load() {
 	}
 }
 
-void Highscores::add(std::string name, unsigned int score) {
+void HighScores::add(std::string name, unsigned int score) {
 	bool added = false;
+	//Ensure the name will not break anything
+	name = StrUtils::replaceAll(name, ": ", "");
 	//Go through the current scores
 	for (unsigned int i = 0; i < scores.size(); i++) {
 		//Check the current score
@@ -73,13 +76,13 @@ void Highscores::add(std::string name, unsigned int score) {
 	//Check whether the score was added
 	if (! added) {
 		//Check the length of the scores
-		if (scores.size() < maxHighscores) {
+		if (scores.size() < maxHighScores) {
 			names.push_back(name);
 			scores.push_back(score);
 		}
 	} else {
 		//Check whether the number of scores stored is now too big
-		if (scores.size() > maxHighscores) {
+		if (scores.size() > maxHighScores) {
 			//Remove the last ones
 			names.pop_back();
 			scores.pop_back();
@@ -87,20 +90,20 @@ void Highscores::add(std::string name, unsigned int score) {
 	}
 }
 
-bool Highscores::isHighscore(unsigned int score) {
+bool HighScores::isHighScore(unsigned int score) {
 	if (scores.size() > 0) {
 		return score > scores[0];
 	} else
 		return true;
 }
 
-bool Highscores::isOnTable(unsigned int score) {
+bool HighScores::isOnTable(unsigned int score) {
 	//Check how many scores are stored
-	if (scores.size() < maxHighscores)
+	if (scores.size() < maxHighScores)
 		return true;
 	else {
 		//Go through the scores
-		for (unsigned int i = 0; i < maxHighscores; i++) {
+		for (unsigned int i = 0; i < maxHighScores; i++) {
 			//Check the score agains the currrent one
 			if (score > scores[i])
 				return true;

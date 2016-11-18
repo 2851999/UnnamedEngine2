@@ -256,7 +256,7 @@ void MeshRenderData::updatePositions(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateColours(MeshData* data) {
+void MeshRenderData::updateColours() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboColours->update();
@@ -264,7 +264,7 @@ void MeshRenderData::updateColours(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateTextureCoords(MeshData* data) {
+void MeshRenderData::updateTextureCoords() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboTextureCoords->update();
@@ -272,7 +272,7 @@ void MeshRenderData::updateTextureCoords(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateNormals(MeshData* data) {
+void MeshRenderData::updateNormals() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboNormals->update();
@@ -280,7 +280,7 @@ void MeshRenderData::updateNormals(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateTangents(MeshData* data) {
+void MeshRenderData::updateTangents() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboTangents->update();
@@ -288,7 +288,7 @@ void MeshRenderData::updateTangents(MeshData* data) {
 	glBindVertexArray(0);
 }
 
-void MeshRenderData::updateBitangents(MeshData* data) {
+void MeshRenderData::updateBitangents() {
 	glBindVertexArray(renderData->getVAO());
 
 	vboBitangents->update();
@@ -421,7 +421,7 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 						//Load the texture and assign it in the material
 						aiString p;
 						currentMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &p);
-						material->setDiffuseTexture(Texture::loadTexture(path + StrUtils::str(p.C_Str())));
+						material->diffuseTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
 					}
 
 					//Check to see whether the material has a specular texture
@@ -429,7 +429,7 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 						//Load the texture and assign it in the material
 						aiString p;
 						currentMaterial->GetTexture(aiTextureType_SPECULAR, 0, &p);
-						material->setSpecularTexture(Texture::loadTexture(path + StrUtils::str(p.C_Str())));
+						material->specularTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
 					}
 
 					//Check to see whether the material has a normal map
@@ -437,24 +437,23 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 						//Load the texture and assign it in the material
 						aiString p;
 						currentMaterial->GetTexture(aiTextureType_HEIGHT, 0, &p);
-						material->setNormalMap(Texture::loadTexture(path + StrUtils::str(p.C_Str())));
+						material->normalMap = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
 					}
 
 					//Get the ambient, diffuse and specular colours and set them in the material
 					aiColor3D ambientColour = aiColor3D(1.0f, 1.0f, 1.0f);
 					currentMaterial->Get(AI_MATKEY_COLOR_AMBIENT, ambientColour);
-					material->setAmbientColour(Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f));
+					material->ambientColour = Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f);
 
 					aiColor3D diffuseColour = aiColor3D(1.0f, 1.0f, 1.0f);
 					currentMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColour);
-					material->setDiffuseColour(Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f));
+					material->diffuseColour = Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f);
 
 					aiColor3D specularColour = aiColor3D(1.0f, 1.0f, 1.0f);
 					currentMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specularColour);
-					material->setSpecularColour(Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f));
+					material->specularColour = Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f);
 				}
-
-				//Assign the material to the current mesh
+				//Assign the current mesh's material
 				mesh->setMaterial(material);
 			}
 			//Add the current mesh to the list
@@ -466,7 +465,7 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 		return meshes;
 	} else {
 		//Log an error as Assimp didn't manage to load the model correctly
-		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", Logger::Error);
+		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", LogType::Error);
 		return meshes;
 	}
 }
@@ -533,6 +532,13 @@ void MeshBuilder::addQuadI(MeshData* data) {
 	data->addIndex(3);
 	data->addIndex(0);
 	data->addIndex(2);
+}
+
+void MeshBuilder::addQuadT(MeshData* data, float top, float left, float bottom, float right) {
+	data->addTextureCoord(Vector2f(left, top));
+	data->addTextureCoord(Vector2f(right, top));
+	data->addTextureCoord(Vector2f(right, bottom));
+	data->addTextureCoord(Vector2f(left, bottom));
 }
 
 /* 3D Stuff */

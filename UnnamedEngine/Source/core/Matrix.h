@@ -18,6 +18,7 @@
 #ifndef CORE_MATRIX_H_
 #define CORE_MATRIX_H_
 
+#include "Quaternion.h"
 #include "Vector.h"
 
 /*****************************************************************************
@@ -40,10 +41,10 @@ public:
 
 	/* Various operations */
 	inline void set(unsigned int row, unsigned int col, T value) { values[col][row] = value; } //COLUMN MAJOR ORDER!!!!!
-	inline T get(unsigned int row, unsigned int col)             { return values[col][row];  }
+	inline T get(unsigned int row, unsigned int col)       const { return values[col][row]; }
 
 	/* Returns the result of adding another matrix to this one */
-	inline Matrix<T, N> operator+(Matrix<T, N> other) {
+	inline Matrix<T, N> operator+(const Matrix<T, N>& other) const {
 		Matrix<T, N> result;
 		//Go through each value and assign the result to the sum of the two
 		for (unsigned int row = 0; row < N; row++) {
@@ -54,7 +55,7 @@ public:
 	}
 
 	/* Returns the result of subtracting another matrix from this one */
-	inline Matrix<T, N> operator-(Matrix<T, N> other) {
+	inline Matrix<T, N> operator-(const Matrix<T, N>& other) const {
 		Matrix<T, N> result;
 		//Go through each value and assign the result to the subtraction of the two
 		for (unsigned int row = 0; row < N; row++) {
@@ -65,7 +66,7 @@ public:
 	}
 
 	/* Returns the result of multiplying this matrix by a scalar */
-	inline Matrix<T, N> operator*(T value) {
+	inline Matrix<T, N> operator*(const T& value) const {
 		Matrix<T, N> result;
 		//Go through each value and multiply it by the scalar value
 		for (unsigned int row = 0; row < N; row++) {
@@ -76,7 +77,7 @@ public:
 	}
 
 	/* Returns the result of 'dividing' this matrix by a scalar */
-	inline Matrix<T, N> operator/(T value) {
+	inline Matrix<T, N> operator/(const T& value) const {
 		Matrix<T, N> result;
 		//Go through each value and divide it by the scalar value
 		for (unsigned int row = 0; row < N; row++) {
@@ -87,43 +88,47 @@ public:
 	}
 
 	/* Adds another matrix to this one */
-	inline void operator+=(Matrix<T, N> other) {
+	inline Matrix<T, N>& operator+=(const Matrix<T, N>& other) {
 		//Go through each value and set it to the sum of the two
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) + other.get(row, col));
 		}
+		return (*this);
 	}
 
 	/* Subtracts another matrix from this one */
-	inline void operator-=(Matrix<T, N> other) {
+	inline Matrix<T, N>& operator-=(const Matrix<T, N>& other) {
 		//Go through each value and set it to the subtraction of the two
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) - other.get(row, col));
 		}
+		return (*this);
 	}
 
 	/* Multiplies this matrix by a scalar */
-	inline void operator*=(T value) {
+	inline Matrix<T, N>& operator*=(const T& value) {
 		//Go through each value and multiply it by the scalar
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) * value);
 		}
+		return (*this);
 	}
 
 	/* Divides this matrix by a scalar */
-	inline void operator/=(T value) {
+	inline Matrix<T, N>& operator/=(const T& value) {
 		//Go through each value and divide it by the scalar
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, get(row, col) / value);
 		}
+		return (*this);
 	}
 
 	/* Returns the result of multiplying this matrix by another */
-	Matrix<T, N> operator*(Matrix<T, N> other) {
+	inline Matrix<T, N> operator*(const Matrix<T, N>& other) const {
 		Matrix<T, N> result;
 		//Go through each row and column
 		for (unsigned int row = 0; row < N; row++) {
@@ -138,7 +143,7 @@ public:
 	}
 
 	/* Multiplies this matrix by another */
-	void operator*=(Matrix<T, N> other) {
+	inline Matrix<T, N>& operator*=(const Matrix<T, N>& other) {
 		//Calculate the result of multiplying this matrix by the other one
 		Matrix<T, N> result = (*this) * other;
 		//Assign all of the values within this matrix now that the data is no longer needed
@@ -146,6 +151,7 @@ public:
 			for (unsigned int col = 0; col < N; col++)
 				set(row, col, result.get(row, col));
 		}
+		return (*this);
 	}
 
 	/* Comparison operators */
@@ -339,6 +345,15 @@ public:
 	Matrix4f(const Matrix<float, 4> &base) : Matrix4<float>(base) {}
 	Matrix4f(const Matrix4<float> &base) : Matrix4<float>(base) {}
 
+	const Matrix4f& initFromVectors(const Vector3f& forward, const Vector3f& up, const Vector3f& right) {
+		set(0, 0, right.getX()); set(0, 1, right.getY()); set(0, 2, right.getZ()); set(0, 3, 0);
+		set(1, 0, up.getX()); set(1, 1, up.getY()); set(1, 2, up.getZ()); set(1, 3, 0);
+		set(2, 0, forward.getX()); set(2, 1, forward.getY()); set(2, 2, forward.getZ()); set(2, 3, 0);
+		set(3, 0, 0); set(3, 1, 0); set(3, 2, 0); set(3, 3, 1);
+
+		return (*this);
+	}
+
 	const Matrix4f& initOrthographic(float left, float right, float bottom, float top, float zNear, float zFar) {
 		set(0, 0, 2.0f / (right - left));
 		set(0, 1, 0);
@@ -398,7 +413,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initTranslation(Vector2f vector) {
+	const Matrix4f& initTranslation(const Vector2f& vector) {
 		set(0, 0, 1); set(0, 1, 0); set(0, 2, 0); set(0, 3, vector.getX());
 		set(1, 0, 0); set(1, 1, 1); set(1, 2, 0); set(1, 3, vector.getY());
 		set(2, 0, 0); set(2, 1, 0); set(2, 2, 1); set(2, 3, 0);
@@ -407,7 +422,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initTranslation(Vector3f vector) {
+	const Matrix4f& initTranslation(const Vector3f& vector) {
 		set(0, 0, 1); set(0, 1, 0); set(0, 2, 0); set(0, 3, vector.getX());
 		set(1, 0, 0); set(1, 1, 1); set(1, 2, 0); set(1, 3, vector.getY());
 		set(2, 0, 0); set(2, 1, 0); set(2, 2, 1); set(2, 3, vector.getZ());
@@ -440,7 +455,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initScale(Vector2f vector) {
+	const Matrix4f& initScale(const Vector2f& vector) {
 		set(0, 0, vector.getX()); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
 		set(1, 0, 0); set(1, 1, vector.getY()); set(1, 2, 0); set(1, 3, 0);
 		set(2, 0, 0); set(2, 1, 0); set(2, 2, 1); set(2, 3, 0);
@@ -449,7 +464,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initScale(Vector3f vector) {
+	const Matrix4f& initScale(const Vector3f& vector) {
 		set(0, 0, vector.getX()); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
 		set(1, 0, 0); set(1, 1, vector.getY()); set(1, 2, 0); set(1, 3, 0);
 		set(2, 0, 0); set(2, 1, 0); set(2, 2, vector.getZ()); set(2, 3, 0);
@@ -458,11 +473,11 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initLookAt(Vector3f eye, Vector3f centre, Vector3f up) {
+	const Matrix4f& initLookAt(const Vector3f& eye, const Vector3f& centre, const Vector3f& up) {
 		//EXPLANATION: http://stackoverflow.com/questions/21152556/an-inconsistency-in-my-understanding-of-the-glm-lookat-function
 
 		Vector3f forward = (centre - eye).normalise();
-		Vector3f u = up.normalise();
+		Vector3f u = up.normalised();
 		Vector3f side = forward.cross(u).normalise();
 		u = side.cross(forward);
 
@@ -477,6 +492,7 @@ public:
 	inline void translate(Vector2f vector) { (*this) *= Matrix4f().initTranslation(vector); }
 	inline void translate(Vector3f vector) { (*this) *= Matrix4f().initTranslation(vector); }
 
+	inline void rotate(Quaternion angle) { (*this) *= angle.toRotationMatrix(); }
 	inline void rotate(float angle, bool x, bool y, bool z) { (*this) *= Matrix4f().initRotation(angle, x, y, z); }
 	inline void rotate(float angle) { rotate(angle, 0, 0, 1); }
 	inline void rotate(Vector2f angles){
@@ -497,7 +513,14 @@ public:
 		rotate(r);
 		scale(s);
 	}
+
 	inline void transform(Vector3f t, Vector3f r, Vector3f s) {
+		translate(t);
+		rotate(r);
+		scale(s);
+	}
+
+	inline void transform(Vector3f t, Quaternion r, Vector3f s) {
 		translate(t);
 		rotate(r);
 		scale(s);
@@ -509,7 +532,7 @@ public:
 		translate(t);
 	}
 
-	inline void transformR(Vector3f t, Vector3f r, Vector3f s) {
+	inline void transformR(Vector3f t, Quaternion r, Vector3f s) {
 		scale(s);
 		rotate(r);
 		translate(t);

@@ -37,18 +37,16 @@ private:
 	/* The FreeType library */
 	static FT_Library ftLibrary;
 
-	FT_Face face;
-
-	/* Information about the characters */
-	struct CharInfo {
+	/* Information about the glyphs */
+	struct GlyphInfo {
 		float advanceX;
 		float advanceY;
-		float bitmapWidth;
-		float bitmapHeight;
-		float bitmapLeft;
-		float bitmapTop;
+		float glyphWidth;
+		float glyphHeight;
+		float glyphLeft;
+		float glyphTop;
 		float xOffset;
-	} characters[(ASCII_END - ASCII_START) + 1] ;
+	} glyphs[(ASCII_END - ASCII_START) + 1] ;
 
 	/* The width/height of then texture atlas */
 	unsigned int textureAtlasWidth  = 0;
@@ -64,14 +62,14 @@ private:
 	GameObject3D* object3D = NULL;
 
 	/* The method used to setup this Font instance given the font name and size */
-	void setup(std::string name, unsigned int size, Colour colour, TextureParameters parameters);
+	void setup(std::string path, unsigned int size, Colour colour, TextureParameters parameters);
 
 	/* Methods used to update this font ready to render some text */
 	void update(std::string text);
 public:
 	/* The constructor */
-	Font(std::string name, unsigned int size = 18, Colour colour = Colour::WHITE, TextureParameters parameters = TextureParameters()) { setup(name, size, colour, parameters); }
-	Font(std::string name, unsigned int size, Colour colour, bool billboarded, TextureParameters parameters = TextureParameters()) : billboarded(billboarded) { setup(name, size, colour, parameters); }
+	Font(std::string path, unsigned int size = 18, Colour colour = Colour::WHITE, TextureParameters parameters = TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST)) { setup(path, size, colour, parameters); }
+	Font(std::string path, unsigned int size, Colour colour, bool billboarded, TextureParameters parameters = TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST)) : billboarded(billboarded) { setup(path, size, colour, parameters); }
 	virtual ~Font() { destroy(); }
 
 	/* Methods used to update this font ready to render some text */
@@ -88,8 +86,18 @@ public:
 		update(text, position);
 		render();
 	}
+
 	inline void render(std::string text, float x, float y) {
 		render(text, Vector2f(x, y));
+	}
+
+	inline void render(std::string text, Vector3f position) {
+		update(text, position);
+		render();
+	}
+
+	inline void render(std::string text, float x, float y, float z) {
+		render(text, Vector3f(x, y, z));
 	}
 
 	/* Method used to release all of the resources this font holds */

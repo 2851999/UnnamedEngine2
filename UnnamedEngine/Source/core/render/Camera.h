@@ -128,22 +128,32 @@ public:
 
 	/* Moves the camera forward in the direction it is facing */
 	inline void moveForward(float amount) {
-		position += cameraFront * amount;
+		if (! flying) {
+			Vector3f direction = cameraFront;
+			direction.setY(0.0f);
+			getTransform()->translate(direction * amount);
+		} else
+			getTransform()->translate(cameraFront * amount);
 	}
 
 	/* Moves the camera backward in the direction it is facing */
 	inline void moveBackward(float amount) {
-		position -= cameraFront * amount;
+		if (! flying) {
+			Vector3f direction = cameraFront;
+			direction.setY(0.0f);
+			getTransform()->translate(direction * -amount);
+		} else
+			getTransform()->translate(cameraFront * -amount);
 	}
 
 	/* Moves the camera left in the direction it is facing */
 	inline void moveLeft(float amount) {
-		position -= cameraFront.cross(cameraUp).normalise() * amount;
+		getTransform()->translate(cameraRight.normalise() * -amount);
 	}
 
 	/* Moves the camera right in the direction it is facing */
 	inline void moveRight(float amount) {
-		position += cameraFront.cross(cameraUp).normalise() * amount;
+		getTransform()->translate(cameraRight.normalise() * amount);
 	}
 
 	/* The setters and getters */

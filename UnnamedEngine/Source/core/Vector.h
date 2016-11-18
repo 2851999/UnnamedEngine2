@@ -38,7 +38,7 @@ public:
 	inline T& operator[](int i) { return values[i]; }
 
 	/* Returns the result of adding another vector to this one */
-	inline Vector<T, N> operator+(Vector<T, N> other) {
+	inline Vector<T, N> operator+(const Vector<T, N>& other) const {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
 			result[i] = values[i] + other[i];
@@ -46,7 +46,7 @@ public:
 	}
 
 	/* Returns the result of subtracting another vector from this one */
-	inline Vector<T, N> operator-(Vector<T, N> other) {
+	inline Vector<T, N> operator-(const Vector<T, N>& other) const {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
 			result[i] = values[i] - other[i];
@@ -54,7 +54,7 @@ public:
 	}
 
 	/* Returns the result of multiplying this vector by another */
-	inline Vector<T, N> operator*(Vector<T, N> other) {
+	inline Vector<T, N> operator*(const Vector<T, N>& other) const {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
 			result[i] = values[i] * other[i];
@@ -62,7 +62,7 @@ public:
 	}
 
 	/* Returns the result of dividing this vector by another */
-	inline Vector<T, N> operator/(Vector<T, N> other) {
+	inline Vector<T, N> operator/(const Vector<T, N>& other) const {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
 			result[i] = values[i] / other[i];
@@ -70,31 +70,35 @@ public:
 	}
 
 	/* Adds another vector to this one */
-	inline void operator+=(Vector<T, N> other) {
+	inline Vector<T, N>& operator+=(const Vector<T, N>& other) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] += other[i];
+		return (*this);
 	}
 
 	/* Subtracts another vector from this one */
-	inline void operator-=(Vector<T, N> other) {
+	inline Vector<T, N>& operator-=(const Vector<T, N>& other) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] -= other[i];
+		return (*this);
 	}
 
 	/* Multiplies this vector by another one */
-	inline void operator*=(Vector<T, N> other) {
+	inline Vector<T, N>& operator*=(const Vector<T, N>& other) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] *= other[i];
+		return (*this);
 	}
 
 	/* Divides this vector by another */
-	inline void operator/=(Vector<T, N> other) {
+	inline Vector<T, N>& operator/=(const Vector<T, N>& other) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] /= other[i];
+		return (*this);
 	}
 
 	/* Returns the result of multiplying this vector by a scalar */
-	inline Vector<T, N> operator*(T value) {
+	inline Vector<T, N> operator*(const T& value) const {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
 			result[i] = values[i] * value;
@@ -102,7 +106,7 @@ public:
 	}
 
 	/* Returns the result of dividing this vector by a scalar */
-	inline Vector<T, N> operator/(T value) {
+	inline Vector<T, N> operator/(const T& value) const {
 		Vector<T, N> result;
 		for (unsigned int i = 0; i < N; i++)
 			result[i] = values[i] / value;
@@ -110,19 +114,21 @@ public:
 	}
 
 	/* Multiplies this vector by a scalar */
-	inline void operator*=(T value) {
+	inline Vector<T, N>& operator*=(const T& value) {
 		for (unsigned int i = 0; i < N; i++)
 			values[i] *= value;
+		return (*this);
 	}
 
 	/* Divides this vector by a scalar */
-	inline void operator/=(T value) {
+	inline Vector<T, N>& operator/=(const T& value) {
 		for (unsigned int i = 0; i < N; i++)
 			values /= value;
+		return (*this);
 	}
 
 	/* Compares this vector to another one and returns whether they are equal */
-	inline bool operator==(Vector<T, N> other) {
+	inline bool operator==(const Vector<T, N>& other) {
 		//Go through each value
 		for (unsigned int i = 0; i < N; i++) {
 			//Return false if it isn't equal
@@ -135,14 +141,27 @@ public:
 	}
 
 	/* Various other comparison operators */
-	inline bool operator!=(Vector<T, N> other) { return ! ((*this) == other);       }
-	inline bool operator<(Vector<T, N> other)  { return length() < other.length();  }
-	inline bool operator<=(Vector<T, N> other) { return length() <= other.length(); }
-	inline bool operator>(Vector<T, N> other)  { return length() > other.length();  }
-	inline bool operator>=(Vector<T, N> other) { return length() >= other.length(); }
+	inline bool operator!=(const Vector<T, N>& other) { return ! ((*this) == other);       }
+	inline bool operator<(const Vector<T, N>& other)  { return length() < other.length();  }
+	inline bool operator<=(const Vector<T, N>& other) { return length() <= other.length(); }
+	inline bool operator>(const Vector<T, N>& other)  { return length() > other.length();  }
+	inline bool operator>=(const Vector<T, N>& other) { return length() >= other.length(); }
+
+	/* Method to linearly interpolate between two vectors */
+	inline static Vector<T, N> lerp(const Vector<T, N>& a, const Vector<T, N>& b, T t) { return (a + t * (b - a)); }
+	inline static Vector<T, N> slerp(const Vector<T, N>& a, const Vector<T, N>& b, T t) {
+		//https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
+		float dot = a.dot(b);
+		dot = MathsUtils::clamp(dot, -1.0f, 1.0f);
+		float theta = acosf(dot) * t;
+		Vector<T, N> relative = b - a * dot;
+		relative.normalise();
+		return ((a * cosf(theta)) + (relative * sin(theta)));
+	}
+	inline static Vector<T, N> nlerp(const Vector<T, N>& a, const Vector<T, N>& b, T t) { return lerp(a, b, t).nomalise(); }
 
 	/* Finds the total length of the vector */
-	inline T length() {
+	inline T length() const {
 		double total = 0;
 		//Go through and add on the square of the current value to the total
 		for (unsigned int i = 0; i < N; i++)
@@ -151,7 +170,7 @@ public:
 		return sqrt(total);
 	}
 
-	/* Returns the unit vector */
+	/* Returns the unit vector (while modifying this one) */
 	inline Vector<T, N> normalise() {
 		//Calculate the length of this vector
 		T length = this->length();
@@ -161,6 +180,12 @@ public:
 				values[i] /= length;
 		}
 		return (*this);
+	}
+
+	/* Returns the unit vector */
+	inline Vector<T, N> normalised() const {
+		Vector<T, N> result = (*this);
+		return result.normalise();
 	}
 
 	/* Finds and returns the smallest component of this vector */
@@ -200,7 +225,7 @@ public:
 	}
 
 	/* Returns the dot product of this, and another vector */
-	inline T dot(Vector<T, N> other) {
+	inline T dot(const Vector<T, N>& other) const {
 		T dotProduct = 0;
 		for (unsigned int i = 0; i < N; i++)
 			dotProduct += values[i] * other[i];
@@ -232,8 +257,8 @@ public:
 
 	inline void setX(T x) { (*this)[0] = x; }
 	inline void setY(T y) { (*this)[1] = y; }
-	inline T getX() { return (*this)[0]; }
-	inline T getY() { return (*this)[1]; }
+	inline T getX() const { return (*this)[0]; }
+	inline T getY() const { return (*this)[1]; }
 };
 
 template <typename T>
@@ -252,9 +277,9 @@ public:
 	inline void setX(T x) { (*this)[0] = x; }
 	inline void setY(T y) { (*this)[1] = y; }
 	inline void setZ(T z) { (*this)[2] = z; }
-	inline T getX() { return (*this)[0]; }
-	inline T getY() { return (*this)[1]; }
-	inline T getZ() { return (*this)[2]; }
+	inline T getX() const { return (*this)[0]; }
+	inline T getY() const { return (*this)[1]; }
+	inline T getZ() const { return (*this)[2]; }
 };
 
 template <typename T>
@@ -268,10 +293,10 @@ public:
 	inline void setY(T y) { (*this)[1] = y; }
 	inline void setZ(T z) { (*this)[2] = z; }
 	inline void setW(T w) { (*this)[3] = w; }
-	inline T getX() { return (*this)[0]; }
-	inline T getY() { return (*this)[1]; }
-	inline T getZ() { return (*this)[2]; }
-	inline T getW() { return (*this)[3]; }
+	inline T getX() const { return (*this)[0]; }
+	inline T getY() const { return (*this)[1]; }
+	inline T getZ() const { return (*this)[2]; }
+	inline T getW() const { return (*this)[3]; }
 };
 
 /*****************************************************************************

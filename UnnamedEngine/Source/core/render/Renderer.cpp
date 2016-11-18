@@ -47,7 +47,7 @@ Camera* Renderer::getCamera() {
 	if (cameras.size() > 0)
 		return cameras.back();
 	else {
-		Logger::log("No Camera added, nothing will render", "Renderer", Logger::Warning);
+		Logger::log("No Camera added, nothing will render", "Renderer", LogType::Warning);
 		return NULL;
 	}
 }
@@ -102,6 +102,35 @@ void Renderer::initialise() {
 	screenTextureMesh = new MeshRenderData(meshData, getRenderShader("Framebuffer"));
 }
 
+void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Material* material) {
+	shader->setUniformColourRGBA("Material_DiffuseColour", material->diffuseColour);
+
+	if (material->diffuseTexture)
+		shader->setUniformi("Material_DiffuseTexture", bindTexture(material->diffuseTexture));
+	else
+		shader->setUniformi("Material_DiffuseTexture", bindTexture(Renderer::getBlankTexture()));
+
+	//Check to see whether the shader is for lighting
+	if (shaderName == "Lighting") {
+		//Assign other lighting specific properties
+		shader->setUniformColourRGB("Material_AmbientColour", material->ambientColour);
+		shader->setUniformColourRGB("Material_SpecularColour", material->specularColour);
+
+		if (material->specularTexture)
+			shader->setUniformi("Material_SpecularTexture", bindTexture(material->specularTexture));
+		else
+			shader->setUniformi("Material_SpecularTexture", Renderer::bindTexture(Renderer::getBlankTexture()));
+
+		if (material->normalMap) {
+			shader->setUniformi("Material_NormalMap", bindTexture(material->normalMap));
+			shader->setUniformi("UseNormalMap", 1);
+		} else
+			shader->setUniformi("UseNormalMap", 0);
+
+		shader->setUniformf("Material_Shininess", material->shininess);
+	}
+}
+
 void Renderer::render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderShader* renderShader) {
 	//Ensure there is a Shader and Camera instance for rendering
 	if (renderShader && getCamera()) {
@@ -124,7 +153,7 @@ void Renderer::render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderS
 
 				saveTextures();
 
-				meshes[i]->getMaterial()->setUniforms(renderShader->getShader(), renderShader->getName());
+				setMaterialUniforms(renderShader->getShader(), renderShader->getName(), meshes[i]->getMaterial());
 
 				meshes[i]->getRenderData()->render();
 
@@ -215,7 +244,7 @@ RenderShader* Renderer::getRenderShader(std::string id) {
 	if (renderShaders.count(id) > 0)
 		return renderShaders.at(id);
 	else {
-		Logger::log("The RenderShader with the id '" + id + "' could not be found", "Renderer", Logger::Error);
+		Logger::log("The RenderShader with the id '" + id + "' could not be found", "Renderer", LogType::Error);
 		return NULL;
 	}
 }

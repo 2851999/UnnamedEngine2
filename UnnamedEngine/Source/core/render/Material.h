@@ -24,12 +24,11 @@
 #include "Texture.h"
 
 /*****************************************************************************
- * The Material class stores data about a material and can apply them to a
+ * The Material structure stores data about a material and can apply them to a
  * shader
  *****************************************************************************/
 
-class Material {
-private:
+struct Material {
 	/* The colours */
 	Colour ambientColour  = Colour(0.1f, 0.1f, 0.1f);
 	Colour diffuseColour  = Colour::WHITE;
@@ -44,40 +43,6 @@ private:
 
 	/* The shininess value */
 	float shininess = 32.0f;
-public:
-	/* Various constructors */
-	Material() {}
-	Material(Colour diffuseColour) : diffuseColour(diffuseColour) {}
-	Material(Texture* diffuseTexture) : diffuseTexture(diffuseTexture) {}
-	Material(Colour diffuseColour, Texture* diffuseTexture) : diffuseColour(diffuseColour), diffuseTexture(diffuseTexture) {}
-
-	virtual ~Material() {}
-
-	/* The method used to apply the material properties to a shader assuming it is already being used */
-	void setUniforms(Shader* shader, std::string shaderName);
-
-	/* The setters and getters */
-	inline void setAmbientColour(Colour colour)  { ambientColour = colour;  }
-	inline void setDiffuseColour(Colour colour)  { diffuseColour = colour;  }
-	inline void setSpecularColour(Colour colour) { specularColour = colour; }
-	inline void setAmbientTexture(Texture* texture)  { ambientTexture = texture;  }
-	inline void setDiffuseTexture(Texture* texture)  { diffuseTexture = texture;  }
-	inline void setSpecularTexture(Texture* texture) { specularTexture = texture; }
-	inline void setNormalMap(Texture* texture)   { normalMap = texture;     }
-	inline void setShininess(float shininess) { this->shininess = shininess; }
-
-	inline Colour getAmbientColour()  { return ambientColour;  }
-	inline Colour getDiffuseColour()  { return diffuseColour;  }
-	inline Colour getSpecularColour() { return specularColour; }
-	inline Texture* getAmbientTexture()  { return ambientTexture;  }
-	inline Texture* getDiffuseTexture()  { return diffuseTexture;  }
-	inline Texture* getSpecularTexture() { return specularTexture; }
-	inline Texture* getNormalMap()    { return normalMap; }
-	inline float getShininess() { return shininess; }
-
-	inline bool hasAmbientTexture()  { return ambientTexture;  }
-	inline bool hasDiffuseTexture()  { return diffuseTexture;  }
-	inline bool hasSpecularTexture() { return specularTexture; }
 };
 
 #endif /* CORE_RENDER_MATERIAL_H_ */

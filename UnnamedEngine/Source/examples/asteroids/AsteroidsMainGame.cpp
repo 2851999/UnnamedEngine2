@@ -39,9 +39,12 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	upgradesMenu = new UpgradesMenu(game, this);
 	showUpgradesMenu = false;
 
+	//Get the resource loader
+	ResourceLoader& loader = game->getResourceLoader();
+
 	//Setup the asteroid renderer
 	unsigned int numAsteroids = 1250;
-	asteroidRenderer = new AsteroidsRenderer(game->getResourceLoader(), numAsteroids);
+	asteroidRenderer = new GameRenderer(loader.loadModel("asteroid_model.obj")[0], loader.loadShader("AsteroidShader"), numAsteroids, true, true, true);
 
 	//The current number of asteroids generated
 	unsigned int currentNumAsteroids = 0;
@@ -60,14 +63,14 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	}
 
 	unsigned int numEnemies = 10;
-	enemiesRenderer = new EnemiesRenderer(game->getResourceLoader(), numEnemies);
+	enemiesRenderer = new GameRenderer(loader.loadModel("enemyship.obj")[0], loader.loadShader("AsteroidShader"), numEnemies, false, true, false);
 
 	//Go through the enemies
 	for (unsigned int i = 0; i < numEnemies; i++) {
 		//Create an enemy instance
 		Enemy* enemy = new Enemy(game, player);
 		//Add the enemy
-		enemiesRenderer->addEnemy(enemy);
+		enemiesRenderer->add(enemy);
 		enemies.push_back(enemy);
 	}
 
@@ -109,9 +112,11 @@ void AsteroidsMainGame::start() {
 
 	//Setup the enemies
 	enemiesRenderer->hideAll();
-	enemiesRenderer->update();
-	for (unsigned int i = 0; i < enemies.size(); i++)
+	for (unsigned int i = 0; i < enemies.size(); i++) {
+		enemies[i]->reset();
 		enemies[i]->setHealth(0);
+	}
+	enemiesRenderer->updateAll();
 
 	//Reset the player ship
 	player->reset();
@@ -187,10 +192,9 @@ void AsteroidsMainGame::update() {
 		for (unsigned int i = 0; i < enemies.size(); i++) {
 			enemies[i]->update(game->getDeltaSeconds(), findClosestAsteroids(enemies[i]->getPosition()));
 			//Check whether it is still alive
-			if (! enemies[i]->isAlive() && enemiesRenderer->isEnemyVisible(i)) {
+			if (! enemies[i]->isAlive() && enemiesRenderer->isVisible(i))
 				//Reset the enemy and move them somewhere else
 				enemies[i]->reset();
-			}
 		}
 
 		//Check whether another enemy should spawn
@@ -199,7 +203,7 @@ void AsteroidsMainGame::update() {
 			spawnEnemy();
 
 		//Update the enemies renderer
-		enemiesRenderer->update();
+		enemiesRenderer->updateAll();
 
 		if (! player->isAlive()) {
 			if (! gameOverMenu->isVisible())
@@ -217,7 +221,7 @@ void AsteroidsMainGame::spawnEnemy() {
 	for (unsigned int i = 0; i < enemies.size(); i++) {
 		if (! enemies[i]->isAlive()) {
 			enemies[i]->reset();
-			enemiesRenderer->showEnemy(i);
+			enemiesRenderer->show(i);
 
 			//Assign the time until the next enemy
 			timeForNextEnemy = RandomUtils::randomFloat(10.0f, 60.0f);

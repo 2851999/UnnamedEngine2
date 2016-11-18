@@ -37,7 +37,7 @@ AudioData* AudioLoader::loadFile(std::string path) {
 	else if (StrUtils::strEndsWith(path, ".ogg"))
 		return loadOggFile(path);
 	else {
-		Logger::log("Unknown audio file type of file '" + path + "'", "AudioLoader", Logger::Error);
+		Logger::log("Unknown audio file type of file '" + path + "'", "AudioLoader", LogType::Error);
 		return NULL;
 	}
 }
@@ -63,13 +63,13 @@ AudioData* AudioLoader::loadWaveFile(std::string path) {
 	//Ensure the RIFF header data is correct for a wave file
 	if (waveRiff.ChunkID[0] != 'R' || waveRiff.ChunkID[1] != 'I' || waveRiff.ChunkID[2] != 'F' || waveRiff.ChunkID[3] != 'F') {
 		input.close();
-		Logger::log("Wave file '" + path + "' has an invalid 'RIFF' header", "AudioLoader", Logger::Error);
+		Logger::log("Wave file '" + path + "' has an invalid 'RIFF' header", "AudioLoader", LogType::Error);
 		return NULL;
 	}
 
 	if (waveRiff.Format[0] != 'W' || waveRiff.Format[1] != 'A' || waveRiff.Format[2] != 'V' || waveRiff.Format[3] != 'E') {
 		input.close();
-		Logger::log("Wave file '" + path + "' has an invalid 'RIFF' header for a wave file", "AudioLoader", Logger::Error);
+		Logger::log("Wave file '" + path + "' has an invalid 'RIFF' header for a wave file", "AudioLoader", LogType::Error);
 		return NULL;
 	}
 
@@ -79,7 +79,7 @@ AudioData* AudioLoader::loadWaveFile(std::string path) {
 	//Ensure it is valid
 	if (waveFmt.SubChunkID[0] != 'f' || waveFmt.SubChunkID[1] != 'm' || waveFmt.SubChunkID[2] != 't' || waveFmt.SubChunkID[3] != ' ') {
 		input.close();
-		Logger::log("Wave file '" + path + "' has an invalid 'fmt' header", "AudioLoader", Logger::Error);
+		Logger::log("Wave file '" + path + "' has an invalid 'fmt' header", "AudioLoader", LogType::Error);
 		return NULL;
 	}
 
@@ -89,7 +89,7 @@ AudioData* AudioLoader::loadWaveFile(std::string path) {
 	//Ensure the data is valid
 	if (waveData.SubChunkID[0] != 'd' || waveData.SubChunkID[1] != 'a' || waveData.SubChunkID[2] != 't' || waveData.SubChunkID[3] != 'a') {
 		input.close();
-		Logger::log("Wave file '" + path + "' has an invalid 'data' header", "AudioLoader", Logger::Error);
+		Logger::log("Wave file '" + path + "' has an invalid 'data' header", "AudioLoader", LogType::Error);
 		return NULL;
 	}
 
@@ -240,14 +240,14 @@ void AudioListener::update() {
 	if (AudioManager::hasContext()) {
 		//Get the needed values
 		Vector3f listenerPosition = getPosition();
-		Vector3f listenerRotation = getRotation();
 		Vector3f listenerVelocity = getVelocity();
-		float xDirection = (float) sin(MathsUtils::toRadians(listenerRotation.getY()));
-		float zDirection = (float) -cos(MathsUtils::toRadians(listenerRotation.getY()));
+		Vector3f at = getRotation().getForward();
+		Vector3f up = getRotation().getUp();
+
 		//Setup OpenAL
 		alListener3f(AL_POSITION, listenerPosition.getX(), listenerPosition.getY(), listenerPosition.getZ());
 		alListener3f(AL_VELOCITY, listenerVelocity.getX(), listenerVelocity.getY(), listenerVelocity.getZ());
-		ALfloat listenerOrientation[] = { xDirection, 0.0f, zDirection, 0.0f, 1.0f, 0.0f };
+		ALfloat listenerOrientation[] = { at.getX(), at.getY(), at.getZ(), up.getX(), up.getY(), up.getZ() };
 		alListenerfv(AL_ORIENTATION, listenerOrientation);
 	}
 }

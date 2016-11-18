@@ -38,6 +38,7 @@ private:
 	/* Various textures */
 	std::vector<Texture*> texturesButtons;
 	Texture* textureShieldBar = NULL;
+	Texture* textureCrossHair = NULL;
 
 	/* Various sounds */
 	AudioData* audioLaser = NULL;
@@ -60,6 +61,7 @@ public:
 
 	inline const std::vector<Texture*>& getTexturesButtons() const { return texturesButtons; }
 	inline Texture* getTextureShieldBar() const { return textureShieldBar; }
+	inline Texture* getTextureCrossHair() const { return textureCrossHair; }
 
 	inline AudioData* getAudioLaser() const { return audioLaser; }
 	inline AudioData* getAudioExplosion() const { return audioExplosion; }

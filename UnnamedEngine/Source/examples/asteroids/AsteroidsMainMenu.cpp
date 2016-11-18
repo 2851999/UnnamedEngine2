@@ -37,9 +37,9 @@ MainMenuMain::MainMenuMain(AsteroidsGame* game, GUIPanelGroup* panelGroup) : gam
 	buttonPlay = new GUIButton("Play", 400, 30, texturesButtons);
 	buttonPlay->setPosition(windowWidth / 2 - buttonPlay->getWidth() / 2, 140);
 
-	buttonHighscores = new GUIButton("Highscores", 400, 30, texturesButtons);
-	buttonHighscores->setPosition(windowWidth / 2 - buttonHighscores->getWidth() / 2, 180);
-	panelGroup->assignButton(buttonHighscores, "Highscores");
+	buttonHighScores = new GUIButton("High Scores", 400, 30, texturesButtons);
+	buttonHighScores->setPosition(windowWidth / 2 - buttonHighScores->getWidth() / 2, 180);
+	panelGroup->assignButton(buttonHighScores, "HighScores");
 
 	buttonSettings = new GUIButton("Settings", 400, 30, texturesButtons);
 	buttonSettings->setPosition(windowWidth / 2 - buttonSettings->getWidth() / 2, 220);
@@ -58,7 +58,7 @@ MainMenuMain::MainMenuMain(AsteroidsGame* game, GUIPanelGroup* panelGroup) : gam
 	//Add the components to this panel
 	add(titleLabel);
 	add(buttonPlay);
-	add(buttonHighscores);
+	add(buttonHighScores);
 	add(buttonSettings);
 	add(buttonExit);
 }
@@ -99,12 +99,12 @@ MainMenuHighScores::MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panel
 	//Get the header font
 	Font* headerFont = game->getResources().getFontHeadingMono();
 
-	//Create the highscores label
-	highscoresLabel = new GUILabel("", headerFont);
+	//Create the highScores label
+	highScoresLabel = new GUILabel("", headerFont);
 
 	//Add the components to this panel
 	add(titleLabel);
-	add(highscoresLabel);
+	add(highScoresLabel);
 	add(buttonBack);
 }
 
@@ -118,32 +118,32 @@ void MainMenuHighScores::show() {
 	//The length of the current/longest names
 	unsigned int currentNameLength = 0;
 
-	//Get a referene to the highscores
-	Highscores& highscores = game->getHighscores();
+	//Get a reference to the high scores
+	HighScores& highScores = game->getHighScores();
 
-	//Go through the highscores
-	for (unsigned int i = 0; i < highscores.getNumHighscores(); i++) {
+	//Go through the highScores
+	for (unsigned int i = 0; i < highScores.getNumHighScores(); i++) {
 		//Add onto the text
 		text += StrUtils::str(i + 1) + ". ";
 		//Get the current name's length
-		currentNameLength = highscores.getName(i).length();
+		currentNameLength = highScores.getName(i).length();
 		//Check the length
 		if (currentNameLength > maxLength - 3)
 			//Add only the first part of the name
-			text += highscores.getName(i).substr(0, maxLength - 3) + "...";
+			text += highScores.getName(i).substr(0, maxLength - 3) + "...";
 		else {
 			//Add on the name
-			text += highscores.getName(i);
+			text += highScores.getName(i);
 			//Add some spaces
 			for (unsigned int j = 0; j < maxLength - currentNameLength; j++)
 				text += " ";
 		}
 		//Add the score
-		text += "    " + StrUtils::str(highscores.getScore(i)) + "\n";
+		text += "    " + StrUtils::str(highScores.getScore(i)) + "\n";
 	}
 
-	highscoresLabel->setText(text);
-	highscoresLabel->setPosition(game->getSettings().windowWidth / 2 - highscoresLabel->getWidth() / 2, 160.0f);
+	highScoresLabel->setText(text);
+	highScoresLabel->setPosition(game->getSettings().windowWidth / 2 - highScoresLabel->getWidth() / 2, 160.0f);
 
 	GUIPanel::show();
 }
@@ -161,18 +161,18 @@ MainMenuSettings::MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGrou
 	std::vector<Texture*> texturesButtons = game->getResources().getTexturesButtons();
 
 	//Create the buttons
-	buttonVideo = new GUIButton("Video", 400, 30, texturesButtons);
+	GUIButton* buttonVideo = new GUIButton("Video", 400, 30, texturesButtons);
 	buttonVideo->setPosition(windowWidth / 2 - buttonVideo->getWidth() / 2, 140);
 	panelGroup->assignButton(buttonVideo, "SettingsVideo");
 
-	buttonAudio = new GUIButton("Audio", 400, 30, texturesButtons);
+	GUIButton* buttonAudio = new GUIButton("Audio", 400, 30, texturesButtons);
 	buttonAudio->setPosition(windowWidth / 2 - buttonAudio->getWidth() / 2, 180);
 
-	buttonControls = new GUIButton("Controls", 400, 30, texturesButtons);
+	GUIButton* buttonControls = new GUIButton("Controls", 400, 30, texturesButtons);
 	buttonControls->setPosition(windowWidth / 2 - buttonControls->getWidth() / 2, 220);
 	panelGroup->assignButton(buttonControls, "SettingsControls");
 
-	buttonBack = new GUIButton("Back", 400, 30, texturesButtons);
+	GUIButton* buttonBack = new GUIButton("Back", 400, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 - buttonBack->getWidth() / 2, windowHeight - 50);
 	panelGroup->assignButton(buttonBack, "Main");
 
@@ -244,7 +244,7 @@ MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup*
 	buttonApply->setPosition(windowWidth / 2 - 200, windowHeight - 50);
 	buttonApply->addListener(this);
 
-	buttonBack = new GUIButton("Back", 195, 30, texturesButtons);
+	GUIButton* buttonBack = new GUIButton("Back", 195, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 + 5, windowHeight - 50);
 	buttonBack->addListener(this);
 	panelGroup->assignButton(buttonBack, "Settings");
@@ -347,7 +347,7 @@ MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanel
 	buttonSave->setPosition(windowWidth / 2 - 200, windowHeight - 50);
 	buttonSave->addListener(this);
 
-	buttonBack = new GUIButton("Back", 195, 30, texturesButtons);
+	GUIButton* buttonBack = new GUIButton("Back", 195, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 + 5, windowHeight - 50);
 	buttonBack->addListener(this);
 	panelGroup->assignButton(buttonBack, "Settings");
@@ -415,6 +415,10 @@ void MainMenuSettingsControls::onComponentClicked(GUIComponent* component) {
 		bindings->getAxisBinding("LookX")->waitForInputPos();
 	else if (component == buttonLookXNeg)
 		bindings->getAxisBinding("LookX")->waitForInputNeg();
+	else if (component == buttonLookYPos)
+		bindings->getAxisBinding("LookY")->waitForInputPos();
+	else if (component == buttonLookYNeg)
+		bindings->getAxisBinding("LookY")->waitForInputNeg();
 	else if (component == buttonShoot)
 		bindings->getButtonBinding("Shoot")->waitForInput();
 }
@@ -433,18 +437,15 @@ void MainMenuSettingsControls::onAxisAssigned(InputBindingAxis* axis) {
  * The AsteroidsMainMenu class
  *****************************************************************************/
 
-AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) {
+AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) : game(game) {
 	//The window width/height
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	//Setup the camera
-	camera = new Camera2D(Matrix4f().initOrthographic(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f));
-	camera->update();
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
-	background->getMaterial()->setDiffuseTexture(backgroundTexture);
+	background->getMaterial()->diffuseTexture = backgroundTexture;
 	background->update();
 
 	//Setup the buttons
@@ -454,7 +455,7 @@ AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) {
 	panelGroup = new GUIPanelGroup();
 	//Add the panels to the panel group
 	panelGroup->add("Main", new MainMenuMain(game, panelGroup));
-	panelGroup->add("Highscores", new MainMenuHighScores(game, panelGroup));
+	panelGroup->add("HighScores", new MainMenuHighScores(game, panelGroup));
 	panelGroup->add("Settings", new MainMenuSettings(game, panelGroup));
 	panelGroup->add("SettingsVideo", new MainMenuSettingsVideo(game, panelGroup));
 	panelGroup->add("SettingsControls", new MainMenuSettingsControls(game, panelGroup));
@@ -462,13 +463,12 @@ AsteroidsMainMenu::AsteroidsMainMenu(AsteroidsGame* game) {
 
 AsteroidsMainMenu::~AsteroidsMainMenu() {
 	//Delete created resources
-	delete camera;
 	delete background;
 }
 
 void AsteroidsMainMenu::show() {
 	//Add the camera
-	Renderer::addCamera(camera);
+	Renderer::addCamera(game->getCamera2D());
 
 	//Show the panel group
 	panelGroup->show("Main");

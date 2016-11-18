@@ -37,6 +37,8 @@ const GLfloat ParticleSystem::vertexBufferData[] = {
 };
 
 ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticles) : emitter(emitter), maxParticles(maxParticles) {
+	//Assign the emitter's system
+	emitter->setParticleSystem(this);
 	//Generate the OpenGL VBO's
 	std::vector<GLfloat> data;
 	for (unsigned int i = 0; i < 12u; i++)
@@ -110,7 +112,7 @@ void ParticleSystem::reset() {
 
 void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 	//Update the particle emitter
-	emitter->update(this, delta);
+	emitter->update(delta);
 	//Reset the particle count
 	particleCount = 0;
 	//Go through the maximum number of particles
@@ -122,12 +124,11 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 			particles[i].life -= delta;
 
 			//Check whether the particle has just died
-			if (particles[i].life < 0)
+			if (particles[i].life <= 0)
 				//Assign the camera distance
 				particles[i].cameraDistance = -1.0f;
 
-
-			if (particles[i].life >=  0) {
+			if (particles[i].life >  0) {
 				if (effect)
 					effect->update(particles[i], emitter);
 
@@ -155,7 +156,7 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 				//Check for a texture
 				if (textureAtlas) {
 					//Calculates the texture index based on the time it has left
-					particles[i].textureIndex = (int) ((((float) textureAtlas->numTextures) / emitter->particleLifeSpan) * (emitter->particleLifeSpan - particles[i].life));
+					particles[i].textureIndex = (int) ((((float) textureAtlas->getNumTextures()) / emitter->particleLifeSpan) * (emitter->particleLifeSpan - particles[i].life));
 					//Get the texture data
 					float top, left, bottom, right;
 					textureAtlas->getSides(particles[i].textureIndex, top, left, bottom, right);
@@ -215,7 +216,7 @@ unsigned int ParticleSystem::findUnusedParticle() {
 	//Checks the particles starting from where it left off
 	for (unsigned int i = lastParticleChecked; i < maxParticles; i++) {
 		//Checks to see whether the particle is unused
-		if (particles[i].life < 0) {
+		if (particles[i].life <= 0) {
 			//Used for the next time round - this makes it very likely that only one iteration will be needed
 			//to find an unused particle
 			lastParticleChecked = i;
@@ -225,7 +226,7 @@ unsigned int ParticleSystem::findUnusedParticle() {
 
 	//Start searching the rest of the particles starting from the beginning
 	for (unsigned int i = 0; i < lastParticleChecked; i++) {
-		if (particles[i].life < 0) {
+		if (particles[i].life <= 0) {
 			lastParticleChecked = i;
 			return i;
 		}

@@ -28,9 +28,9 @@ void ParticleEmitter::reset() {
 	particlesToEmit = 0;
 }
 
-void ParticleEmitter::update(ParticleSystem* system, float delta) {
+void ParticleEmitter::update(float delta) {
 	//Check whether this emitter is active
-	if (active) {
+	if (active && system) {
 		//Cumulate the delta
 		cumulativeDelta += delta;
 
@@ -43,11 +43,14 @@ void ParticleEmitter::update(ParticleSystem* system, float delta) {
 
 			//Check whether a set number of particles is being emitted
 			if (particlesToEmit > 0) {
-				//Subtract from the number of particles left to be emitted
-				particlesToEmit -= newParticles;
-				//Check whether this emitter should be deactivated again
-				if (particlesToEmit <= 0)
+				//Check whether the last particles are being emitted
+				if ((unsigned int) particlesToEmit <= newParticles) {
+					newParticles = particlesToEmit;
+					particlesToEmit = 0;
 					active = false;
+				} else
+					//Subtract from the number of particles left to be emitted
+					particlesToEmit -= newParticles;
 			}
 		}
 
@@ -58,7 +61,7 @@ void ParticleEmitter::update(ParticleSystem* system, float delta) {
 
 			//Emit the particle
 			Particle& particle = system->getParticle(index);
-			particle.position = getPosition() + Vector3f(0, 0, 0);
+			particle.position = getPosition();
 			particle.colour = particleColour;
 			//particle.colour = Colour(RandomUtils::randomFloat(), RandomUtils::randomFloat(), RandomUtils::randomFloat(), RandomUtils::randomFloat());
 			particle.size = particleSize;

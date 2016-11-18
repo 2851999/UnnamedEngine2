@@ -20,6 +20,7 @@
 #define CORE_INPUT_INPUT_H_
 
 #include <vector>
+#include <map>
 
 #include "Controller.h"
 #include "../Vector.h"
@@ -100,7 +101,7 @@ private:
 	CursorData cursorData;
 
 	/* All of the added controllers */
-	std::vector<Controller*> controllers;
+	std::map<int, Controller*> controllers;
 public:
 	/* The constructor */
 	InputManager(Window* window) { this->window = window; }
@@ -112,6 +113,9 @@ public:
 	void addListener(InputListener* listener);
 	void removeListener(InputListener* listener);
 
+	/* Method used to add all available controllers */
+	void addAvailableControllers();
+
 	/* Updates the attached controllers */
 	void updateControllers();
 
@@ -120,6 +124,9 @@ public:
 
 	/* Method used to remove a controller */
 	void removeController(Controller* controller);
+
+	/* Method used to check whether a controller with a certain index has been added */
+	inline bool hasController(int index) { return controllers.count(index) > 0; }
 
 	/* Method used to release all of the controllers */
 	void releaseControllers();

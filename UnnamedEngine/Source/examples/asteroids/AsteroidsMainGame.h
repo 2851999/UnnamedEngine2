@@ -22,9 +22,7 @@
 class AsteroidsGame;
 
 #include "../../core/input/InputBindings.h"
-#include "AsteroidsRenderer.h"
 #include "AsteroidGroup.h"
-#include "EnemiesRenderer.h"
 #include "HUD.h"
 #include "GameOverMenu.h"
 #include "UpgradesMenu.h"
@@ -57,7 +55,7 @@ private:
 	bool showUpgradesMenu = false;
 
 	/* The asteroid renderer */
-	AsteroidsRenderer* asteroidRenderer;
+	GameRenderer* asteroidRenderer;
 
 	/* The asteroid groups */
 	std::vector<AsteroidGroup> asteroidGroups;
@@ -66,7 +64,7 @@ private:
 	std::vector<Enemy*> enemies;
 
 	/* The enemies renderer */
-	EnemiesRenderer* enemiesRenderer;
+	GameRenderer* enemiesRenderer;
 
 	/* The pause button */
 	InputBindingButton* pauseButton;

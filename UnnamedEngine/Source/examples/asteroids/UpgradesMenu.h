@@ -38,14 +38,10 @@ private:
 	AsteroidsGame* game;
 	AsteroidsMainGame* mainGame;
 
-	/* The camera used when rendering the menu */
-	Camera2D* camera;
-
 	/* The background for the menu */
 	GameObject2D* background;
 
 	/* The labels */
-	GUILabel* labelTitle;
 	GUILabel* labelFireSpeed;
 	GUILabel* labelMovementSpeed;
 
@@ -54,8 +50,8 @@ private:
 	GUIButton* buttonUpgradeMovementSpeed;
 	GUIButton* buttonBack;
 
-	/* Method used to update the buttons */
-	void updateButtons();
+	/* Method used to update the menu */
+	void updateMenu();
 public:
 	/* The constructor */
 	UpgradesMenu(AsteroidsGame* game, AsteroidsMainGame* mainGame);
@@ -64,16 +60,16 @@ public:
 	virtual ~UpgradesMenu();
 
 	/* Method called to setup ready to show the menu */
-	virtual void show() override;
+	void show() override;
 
 	/* Method called to remove the camera and hide the menu */
-	virtual void hide() override;
+	void hide() override;
 
 	/* Methods used to render the menu */
-	virtual void render() override;
+	void render() override;
 
 	/* Called when a component is clicked */
-	virtual void onComponentClicked(GUIComponent* component) override;
+	void onComponentClicked(GUIComponent* component) override;
 };
 
 #endif /* EXAMPLES_ASTEROIDS_UPGRADESMENU_H_ */

@@ -30,14 +30,11 @@ AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	//Setup the camera
-	camera = new Camera2D(Matrix4f().initOrthographic(0.0f, windowWidth, windowHeight, 0.0f, -1.0f, 1.0f));
-	camera->update();
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
-	background->getMaterial()->setDiffuseTexture(backgroundTexture);
-	background->getMaterial()->setDiffuseColour(Colour(1.0f, 1.0f, 1.0f, 0.8f));
+	background->getMaterial()->diffuseTexture = backgroundTexture;
+	background->getMaterial()->diffuseColour = Colour(1.0f, 1.0f, 1.0f, 0.8f);
 	background->update();
 
 	buttonContinue = new GUIButton("Continue", 400, 30, game->getResources().getTexturesButtons());
@@ -63,7 +60,6 @@ AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
 
 AsteroidsPauseMenu::~AsteroidsPauseMenu() {
 	//Delete created resources
-	delete camera;
 	delete background;
 }
 
@@ -84,7 +80,7 @@ void AsteroidsPauseMenu::render() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	//Add the camera
-	Renderer::addCamera(camera);
+	Renderer::addCamera(game->getCamera2D());
 
 	//Render the background
 	background->render();

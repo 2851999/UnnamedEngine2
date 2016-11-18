@@ -67,4 +67,4 @@ void Controller::checkInput() {
 	}
 }
 
-bool Controller::getButton(int index) { return buttonValues[index] == GLFW_PRESS; }
+bool Controller::getButton(unsigned int index) { return buttonValues[index] == GLFW_PRESS; }

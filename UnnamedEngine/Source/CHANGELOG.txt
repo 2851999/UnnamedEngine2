@@ -1,4 +1,391 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 (V0.1.7)
+
+* Added Animation2D
+* Added TextureAnimation2D
+* Added Sprite2D
+* Added Quaternion
+* Added Transform
+* Added DebugConsole
+* Added multi-line comments in ML
+* Added time stamps to logs
+* Added method in InputManager to add all available
+  controllers
+* Added the ability to make the Logger output to a file
+* Added a way to invert the controller axis in
+  InputBindingAxis
+* Added abs method in MathsUtils
+* Added support for dead zones in InputBindingAxis
+* Added method in InputManager to check whether a controller
+  with a specific index has been added
+* Added maximum and minimum values for a GUISlider (default
+  is 0 and 1)
+* Added the method clampToClosestInterval in MathsUtils
+* Added replaceAll method in StrUtils
+* Added lerp, slerp and nlerp methods in Vector
+* Added normalised method in Vector
+* Added doesExist, isFile and isDirectory to FileUtils
+* Added find method in MLElement
+* Added writeToDocument and readFromDocument methods in
+  SettingsUtils
+* Added save and load methods in InputBindings with an
+  MLDocument as a parameter
+
+* Changed Logger to be a class instead of a namespace
+* Changed RenderData so non-instanced rendering only occurs
+  when primcount = -1, which it is set to by default
+* Changed public variables in TextureAtlas to be private
+* Changed Material from a class to a structure
+* Changed the position, rotation and velocity variables to
+  private in AudioObject
+* Changed the default TextureParameters for a font
+* Changed objects to use the new 'Transform' class
+* Changed audio system to use the new 'Transform' class and
+  quaternions
+  
+* Renamed FPSLimiter's methods start/update to startFrame/
+  endFrame
+* Renamed getRel methods to getLocal
+
+* Removed the MeshData* parameter in some of the update
+  methods in MeshRenderData
+* Removed top, bottom, left and right variables from Texture
+
+* Fixed bug: FPSLimiter didn't work properly when VSync was
+             enabled
+* Fixed bug: InputBindings would sometimes create a new
+			 controller instance when it wasn't supposed to
+* Fixed bug: Random controller noise could assign an
+             InputBindingAxis - this also improves assignment
+             making it harder to accidentally assign the
+             wrong axis
+* Fixed bug: ParticleEmitter could emit too many particles
+             when using the emitParticles method
+* Fixed bug: RenderData still rendered a mesh, even when
+             the number of instances was supposed to be 0
+* Fixed bug: GUISlider didn't assign the value correctly
+             when using an interval
+* Fixed bug: TextureAtlas wouldn't work if numRows didn't
+			 equal numColumns
+* Fixed bug: InputBindings caused a crash if a controller
+  			 was not found
+* Fixed bug: InputBindings would still load the controller
+             data from a file, even if the controller wasn't
+             found
+* Fixed bug: Setting the flying value to false in Camera3D
+             didn't do anything
+
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 4 (V0.1.7)
+
+* Added DebugConsole
+* Added lerp, slerp and nlerp methods in Vector
+* Added normalised method in Vector
+* Added some init methods in Quaternion
+* Added doesExist, isFile and isDirectory to FileUtils
+* Added find method in MLElement
+* Added writeToDocument and readFromDocument methods in
+  SettingsUtils
+* Added save and load methods in InputBindings with an
+  MLDocument as a parameter
+* Added Quaternion * Vector3f method
+
+* Removed addChild in Transform and replaced all occurrences
+  with setParent instead
+  
+* Fixed bug: Setting the flying value to false in Camera3D
+             didn't do anything
+* Fixed bug: Assigning the parent of a transform wouldn't
+             update the position, rotation and scale
+* Fixed bug: GUIBorder didn't render in the correct place
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 3 | Experimental 3
+
+* Renamed getRel methods in PhysicsObject2D/3D to getLocal
+
+* Some shader cleanup
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 3 | Experimental 2
+
+* Added DebugConsole
+* Added find method in MLElement
+* Added writeToDocument and readFromDocument methods in
+  SettingsUtils
+* Added save and load methods in InputBindings with an
+  MLDocument as a parameter
+* Added Quaternion * Vector3f method
+
+* Fixed bug: Assigning the parent of a transform wouldn't
+             update the position, rotation and scale
+* Fixed bug: GUIBorder didn't render in the correct place
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 3 | Experimental 1
+
+* Added lerp, slerp and nlerp methods in Vector
+* Added normalised method in Vector
+* Added some init methods in Quaternion
+* Added doesExist, isFile and isDirectory to FileUtils
+
+* Removed addChild in Transform and replaced all occurrences
+  with setParent instead
+  
+* Fixed bug: Setting the flying value to false in Camera3D
+             didn't do anything
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 3 (V0.1.6)
+
+* Added Quaternion
+* Added Transform
+* Added maximum and minimum values for a GUISlider (default
+  is 0 and 1)
+* Added the method clampToClosestInterval in MathsUtils
+* Added replaceAll method in StrUtils
+
+* Changed Material from a class to a structure
+* Changed the position, rotation and velocity variables to
+  private in AudioObject
+* Changed the default TextureParameters for a font
+* Changed objects to use the new 'Transform' class
+* Changed audio system to use the new 'Transform' class and
+  quaternions
+
+* Renamed FPSLimiter's methods start/update to startFrame/
+  endFrame
+* Renamed getRel methods to getLocal
+
+* Removed top, bottom, left and right variables from Texture
+
+* Fixed bug: GUISlider didn't assign the value correctly
+             when using an interval
+* Fixed bug: TextureAtlas wouldn't work if numRows didn't
+			 equal numColumns
+* Fixed bug: InputBindings caused a crash if a controller
+  			 was not found
+* Fixed bug: InputBindings would still load the controller
+             data from a file, even if the controller wasn't
+             found
+
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 11
+
+* Changed audio system to use the new transform class and
+  quaternions
+
+* Fixed bug: Incorrect audio positions
+
+* More quaternions
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 10
+
+* More quaternions
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 9
+
+* More quaternions
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 8
+
+* Now using new 'Transformation' class for transformations
+  of 2D objects
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 7
+
+* Added Transform
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 6
+
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 5
+
+* Added replaceAll method in StrUtils
+
+* Changed InputBindings so it would still load the controller
+  data from a file, even if the controller wasn't found
+* Changed the default TextureParameters for a font
+
+* Renamed FPSLimiter's methods start/update to startFrame/
+  endFrame
+
+* Fixed bug: InputBindings caused a crash if a controller
+  was not found
+  
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 4
+
+* Changed the position, rotation and velocity variables to
+  private in AudioObject
+
+* Fixed bug: TextureAtlas wouldn't work if numRows didn't
+			 equal numColumns
+			 
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 3
+
+* Changed Material from a class to a structure
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 2
+
+* Added Quaternion
+
+* Removed top, bottom, left and right variables from Texture
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 | Experimental 1
+
+* Added maximum and minimum values for a GUISlider (default
+  is 0 and 1)
+* Added the method clampToClosestInterval in MathsUtils
+
+* Fixed bug: GUISlider didn't assign the value correctly
+             when using an interval
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 2 (V0.1.5)
+
+* Added Animation2D
+* Added TextureAnimation2D
+* Added Sprite2D
+* Added a way to invert the controller axis in
+  InputBindingAxis
+* Added abs method in MathsUtils
+* Added support for dead zones in InputBindingAxis
+* Added method in InputManager to check whether a controller
+  with a specific index has been added
+  
+* Changed RenderData so non-instanced rendering only occurs
+  when primcount = -1, which it is set to by default
+* Changed public variables in TextureAtlas to be private
+  
+* Removed the MeshData* parameter in some of the update
+  methods in MeshRenderData
+
+* Fixed bug: Random controller noise could assign an
+             InputBindingAxis - this also improves assignment
+             making it harder to accidentally assign the
+             wrong axis
+* Fixed bug: ParticleEmitter could emit too many particles
+             when using the emitParticles method
+* Fixed bug: RenderData still rendered a mesh, even when
+             the number of instances was supposed to be 0
+  
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 1 | Experimental 3
+
+* Added Animation2D
+* Added TextureAnimation2D
+* Added Sprite2D
+
+* Changed public variables in TextureAtlas to be private
+
+* Removed the MeshData* parameter in some of the update
+  methods in MeshRenderData
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 1 | Experimental 2
+
+* Added method in InputManager to check whether a controller
+  with a specific index has been added
+  
+* Changed RenderData so non-instanced rendering only occurs
+  when primcount = -1, which it is set to by default
+  
+* Fixed bug: ParticleEmitter could emit too many particles
+             when using the emitParticles method
+* Fixed bug: RenderData still rendered a mesh, even when
+             the number of instances was supposed to be 0
+             
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 1 | Experimental 1
+
+* Added a way to invert the controller axis in
+  InputBindingAxis
+* Added abs method in MathsUtils
+* Added support for dead zones in InputBindingAxis
+
+* Fixed bug: Random controller noise could assign an
+             InputBindingAxis - this also improves assignment
+             making it harder to accidentally assign the
+             wrong axis
+  
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 1 (V0.1.4)
+
+* Added multi-line comments in ML
+* Added time stamps to logs
+* Added method in InputManager to add all available
+  controllers
+* Added the ability to make the Logger output to a file
+
+* Changed Logger to be a class instead of a namespace
+
+* Fixed bug: FPSLimiter didn't work properly when VSync was
+             enabled
+* Fixed bug: InputBindings would sometimes create a new
+			 controller instance when it wasn't supposed to
+
+* Note: Started shader cleanup
+
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 0 | Experimental 4
+
+* Added the ability to make the Logger output to a file
+
+* Changed Logger to be a class instead of a namespace
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 0 | Experimental 3
+
+* Added method in InputManager to add all available
+  controllers
+
+* Fixed bug: InputBindings would sometimes create a new
+			 controller instance when it wasn't supposed to
+
+* More Asteroids development
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 0 | Experimental 2
+
+* Added multi-line comments in ML
+* Added time stamps to logs
+
+--------------------------------------------------------------
+Release 0 | Beta 2 | Development 0 | Experimental 1
+
+* Fixed bug: FPSLimiter didn't work properly when VSync was
+             enabled
+
+* Note: Started shader cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 2 (V0.1.3)
 
 * Added MLAttribute

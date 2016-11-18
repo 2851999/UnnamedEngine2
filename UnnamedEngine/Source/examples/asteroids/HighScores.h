@@ -23,45 +23,45 @@
 #include <vector>
 
 /*****************************************************************************
- * The Highscores class manages/loads and saves highscores
+ * The HighScores class manages/loads and saves high scores
  *****************************************************************************/
 
-class Highscores {
+class HighScores {
 private:
-	/* The highscores file path */
+	/* The high scores file path */
 	std::string filePath;
 	/* The names and scores */
 	std::vector<std::string> names;
 	std::vector<unsigned int> scores;
-	/* The maximum number of highscores stored */
-	unsigned int maxHighscores;
+	/* The maximum number of high scores stored */
+	unsigned int maxHighScores;
 public:
 	/* The constructor */
-	Highscores();
+	HighScores();
 
 	/* The destructor */
-	virtual ~Highscores();
+	virtual ~HighScores();
 
 	/* Used to assing the file path */
 	inline void setPath(std::string path) { filePath = path; }
 
-	/* Method used to save the highscores to a file */
+	/* Method used to save the high scores to a file */
 	void save();
 
-	/* Method used to load the highscores from a file */
+	/* Method used to load the high scores from a file */
 	void load();
 
-	/* Method used to add a highscore to the table */
+	/* Method used to add a high score to the table */
 	void add(std::string name, unsigned int score);
 
-	/* Method used to check whether a score is a new highscore */
-	bool isHighscore(unsigned int score);
+	/* Method used to check whether a score is a new high score */
+	bool isHighScore(unsigned int score);
 
-	/* Method used to check whether a score is on the table of highscores */
+	/* Method used to check whether a score is on the table of high scores */
 	bool isOnTable(unsigned int score);
 
 	/* Getters */
-	inline unsigned int getNumHighscores() { return names.size(); }
+	inline unsigned int getNumHighScores() { return names.size(); }
 	inline std::string getName(unsigned int index) { return names[index]; }
 	inline unsigned int getScore(unsigned int index) { return scores[index]; }
 };

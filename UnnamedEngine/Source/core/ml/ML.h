@@ -79,11 +79,17 @@ public:
 	inline void add(MLAttribute attribute) { attributes.push_back(attribute); }
 	inline void add(MLElement child) { children.push_back(child); }
 
+	/* Method used to find an element given its name and return the index of the
+	 * first occurrence if it exists - otherwise it will return -1 */
+	int find(std::string name);
+
 	/* Various setters and getters */
 	inline void setName(std::string name) { this->name = name; }
+	inline void setChild(unsigned int index, MLElement& element) { children[index] = element; }
 	inline std::string& getName() { return name; }
 	inline std::vector<MLAttribute>& getAttributes() { return attributes; }
 	inline std::vector<MLElement>& getChildren() { return children; }
+	inline MLElement& getChild(unsigned int index) { return children[index]; }
 
 	/* Method used to generate the text representation of this element */
 	std::string toString(std::string prefix = "");
@@ -127,6 +133,9 @@ private:
 	/* The currently loaded elements that are still open, so are being
 	 * added to */
 	std::vector<MLElement> elements;
+
+	/* States whether the parser is currently parsing a comment */
+	bool inComment;
 public:
 	/* The constructor */
 	MLParser();

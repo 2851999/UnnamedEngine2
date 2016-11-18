@@ -185,11 +185,11 @@ public:
 
 	/* Various methods to completely update a set of values (assuming it is in its own separate VBO) */
 	void updatePositions(MeshData* data);
-	void updateColours(MeshData* data);
-	void updateTextureCoords(MeshData* data);
-	void updateNormals(MeshData* data);
-	void updateTangents(MeshData* data);
-	void updateBitangents(MeshData* data);
+	void updateColours();
+	void updateTextureCoords();
+	void updateNormals();
+	void updateTangents();
+	void updateBitangents();
 	void updateIndices(MeshData* data);
 
 	/* Method to destroy the OpenGL data */
@@ -259,6 +259,8 @@ public:
 	static void addQuadData(MeshData* data, Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture);
 	/* Method used to add the indices for a quad to a MeshData instance */
 	static void addQuadI(MeshData* data);
+	/* Method used to add the texture coordinates for a quad to a MeshData instance */
+	static void addQuadT(MeshData* data, float top, float left, float bottom, float right);
 
 	/* 3D Stuff */
 

@@ -79,13 +79,13 @@ void Test::onUpdate() {
 	particleSystem->update(getDeltaSeconds(), camera->getPosition());
 
 	if (Keyboard::isPressed(GLFW_KEY_UP))
-		particleEmitter->getRelPosition() += Vector3f(0.0f, 0.0f, -0.008f * getDelta());
+		particleEmitter->getTransform()->translate(Vector3f(0.0f, 0.0f, -0.008f * getDelta()));
 	else if (Keyboard::isPressed(GLFW_KEY_DOWN))
-		particleEmitter->getRelPosition() += Vector3f(0.0f, 0.0f, 0.008f * getDelta());
+		particleEmitter->getTransform()->translate(Vector3f(0.0f, 0.0f, 0.008f * getDelta()));
 	if (Keyboard::isPressed(GLFW_KEY_LEFT))
-		particleEmitter->getRelPosition() += Vector3f(-0.008f * getDelta(), 0.0f, 0.0f);
+		particleEmitter->getTransform()->translate(Vector3f(-0.008f * getDelta(), 0.0f, 0.0f));
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
-		particleEmitter->getRelPosition() += Vector3f(0.008f * getDelta(), 0.0f, 0.0f);
+		particleEmitter->getTransform()->translate(Vector3f(0.008f * getDelta(), 0.0f, 0.0f));
 }
 
 void Test::onRender() {
