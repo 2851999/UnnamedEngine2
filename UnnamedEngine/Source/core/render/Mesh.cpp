@@ -154,6 +154,8 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 
 	//Create the RenderData instance
 	renderData = new RenderData(GL_TRIANGLES, numVertices);
+	//Assign all of the sub data instances
+	renderData->setSubData(data->getSubData());
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
@@ -327,30 +329,34 @@ void MeshRenderData::destroy() {
 
 Mesh::Mesh(MeshData* data) {
 	this->data = data;
+	//Add the default material
+	this->addMaterial(new Material());
 }
 
 Mesh::~Mesh() {
 	//Delete the created resources
-	if (material)
-		delete material;
+	if (hasMaterial()) {
+		for (Material* material : materials)
+			delete material;
+		materials.clear();
+	}
 	delete renderData;
 	delete data;
 }
 
-std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
+Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 	//Load the file using Assimp
-	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes); //aiProcessPreset_TargetRealtime_MaxQuality
-	//This map is used to keep track of materials that have already been loaded so they aren't loaded again
-	std::map<std::string, Material*> loadedMaterials;
-	//Create the std::vector of meshes in the model
-	std::vector<Mesh*> meshes;
+	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
+	//The MeshData instance used to store the data for the current mesh
+	MeshData* currentData = new MeshData(MeshData::DIMENSIONS_3D);
+	//The current and last number of indices added
+	unsigned int numIndices = 0;
+	unsigned int numVertices = 0;
 
 	//Ensure the data was loaded successfully
 	if (scene != NULL) {
 		//Go through each loaded mesh
 		for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
-			//The MeshData instance used to store the data for the current mesh
-			MeshData* currentData = new MeshData(3);
 			//Pointer to the current mesh being read
 			const struct aiMesh* currentMesh = scene->mMeshes[a];
 
@@ -373,10 +379,8 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 					if (currentMesh->mTangents != NULL) {
 						aiVector3D& tangent = currentMesh->mTangents[i];
 						currentData->addTangent(Vector3f(tangent.x, tangent.y, tangent.z));
-					}
 
-					//Add the bitangent data if it exists
-					if (currentMesh->mBitangents != NULL) {
+						//Add the bitangent data
 						aiVector3D& bitangent = currentMesh->mBitangents[i];
 						currentData->addBitangent(Vector3f(bitangent.x, bitangent.y, bitangent.z));
 					}
@@ -393,80 +397,74 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 					//Add the indices for the current face
 					currentData->addIndex(currentFace.mIndices[c]);
 			}
-			//Create the mesh
-			Mesh* mesh = new Mesh(currentData);
 
-			//Check for any materials that also need to be loaded
-			if (scene->mNumMaterials > 0) {
-				//Pointer to the material for the current mesh
-				aiMaterial* currentMaterial = scene->mMaterials[currentMesh->mMaterialIndex];
-				//Define the material and material name
-				Material* material;
-				aiString currentMaterialName;
-				//Get the material name
-				currentMaterial->Get(AI_MATKEY_NAME, currentMaterialName);
-
-				//Check to see whether the material has already been loaded
-				if (loadedMaterials.find(currentMaterialName.C_Str()) != loadedMaterials.end())
-					//Assign the material to the one loaded earlier
-					material = loadedMaterials.at(currentMaterialName.C_Str());
-				else {
-					//Create the material instance as a new material needs to be loaded
-					material = new Material();
-					//Add the material to the loaded materials
-					loadedMaterials.insert(std::pair<std::string, Material*>(currentMaterialName.C_Str(), material));
-
-					//Check to see whether the material has a diffuse texture
-					if (currentMaterial->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
-						//Load the texture and assign it in the material
-						aiString p;
-						currentMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &p);
-						material->diffuseTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
-					}
-
-					//Check to see whether the material has a specular texture
-					if (currentMaterial->GetTextureCount(aiTextureType_SPECULAR) != 0) {
-						//Load the texture and assign it in the material
-						aiString p;
-						currentMaterial->GetTexture(aiTextureType_SPECULAR, 0, &p);
-						material->specularTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
-					}
-
-					//Check to see whether the material has a normal map
-					if (currentMaterial->GetTextureCount(aiTextureType_HEIGHT) != 0) {
-						//Load the texture and assign it in the material
-						aiString p;
-						currentMaterial->GetTexture(aiTextureType_HEIGHT, 0, &p);
-						material->normalMap = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
-					}
-
-					//Get the ambient, diffuse and specular colours and set them in the material
-					aiColor3D ambientColour = aiColor3D(1.0f, 1.0f, 1.0f);
-					currentMaterial->Get(AI_MATKEY_COLOR_AMBIENT, ambientColour);
-					material->ambientColour = Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f);
-
-					aiColor3D diffuseColour = aiColor3D(1.0f, 1.0f, 1.0f);
-					currentMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColour);
-					material->diffuseColour = Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f);
-
-					aiColor3D specularColour = aiColor3D(1.0f, 1.0f, 1.0f);
-					currentMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specularColour);
-					material->specularColour = Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f);
-				}
-				//Assign the current mesh's material
-				mesh->setMaterial(material);
-			}
-			//Add the current mesh to the list
-			meshes.push_back(mesh);
+			//Add a sub data instance
+			currentData->addSubData(numIndices, numVertices, currentMesh->mNumFaces * 3, currentMesh->mMaterialIndex);
+			numIndices += currentMesh->mNumFaces * 3;
+			numVertices += currentMesh->mNumVertices;
 		}
+		//Create the mesh
+		Mesh* mesh = new Mesh(currentData);
+		//Load and add the materials
+		if (scene->mNumMaterials > 0) {
+			for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
+				//Pointer to the current material being processed
+				aiMaterial* currentMaterial = scene->mMaterials[i];
+				//Create the material instance
+				Material* material = new Material();
+				//aiString currentMaterialName;
+				//Get the material name
+				//currentMaterial->Get(AI_MATKEY_NAME, currentMaterialName);
+
+				//Check to see whether the material has a diffuse texture
+				if (currentMaterial->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
+					//Load the texture and assign it in the material
+					aiString p;
+					currentMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &p);
+					material->diffuseTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
+				}
+
+				//Check to see whether the material has a specular texture
+				if (currentMaterial->GetTextureCount(aiTextureType_SPECULAR) != 0) {
+					//Load the texture and assign it in the material
+					aiString p;
+					currentMaterial->GetTexture(aiTextureType_SPECULAR, 0, &p);
+					material->specularTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
+				}
+
+				//Check to see whether the material has a normal map
+				if (currentMaterial->GetTextureCount(aiTextureType_HEIGHT) != 0) {
+					//Load the texture and assign it in the material
+					aiString p;
+					currentMaterial->GetTexture(aiTextureType_HEIGHT, 0, &p);
+					material->normalMap = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
+				}
+
+				//Get the ambient, diffuse and specular colours and set them in the material
+				aiColor3D ambientColour = aiColor3D(1.0f, 1.0f, 1.0f);
+				currentMaterial->Get(AI_MATKEY_COLOR_AMBIENT, ambientColour);
+				material->ambientColour = Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f);
+
+				aiColor3D diffuseColour = aiColor3D(1.0f, 1.0f, 1.0f);
+				currentMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColour);
+				material->diffuseColour = Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f);
+
+				aiColor3D specularColour = aiColor3D(1.0f, 1.0f, 1.0f);
+				currentMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specularColour);
+				material->specularColour = Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f);
+
+				mesh->setMaterial(i, material);
+			}
+		}
+
 		//Release all of the resources Assimp loaded
 		aiReleaseImport(scene);
 		//Return the meshes
-		return meshes;
+		return mesh;
 	} else {
 		//Log an error as Assimp didn't manage to load the model correctly
 		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", LogType::Error);
-		return meshes;
+		return NULL;
 	}
 }
 

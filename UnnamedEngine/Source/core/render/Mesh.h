@@ -52,6 +52,9 @@ private:
 	unsigned int numTangents   = 0;
 	unsigned int numBitangents = 0;
 	unsigned int numIndices    = 0;
+
+	/* The sub data instances */
+	std::vector<RenderData::SubData> subData;
 public:
 	static const unsigned int DIMENSIONS_2D = 2;
 	static const unsigned int DIMENSIONS_3D = 3;
@@ -82,6 +85,17 @@ public:
 	void addBitangent(Vector3f bitangent);
 
 	inline void addIndex(unsigned int index) { indices.push_back(index); numIndices++; }
+
+	/* Methods used to add a sub data structure */
+	inline void addSubData(RenderData::SubData& data) { subData.push_back(data); }
+	inline void addSubData(unsigned int baseIndex, unsigned int baseVertex, unsigned int count, unsigned int materialIndex) {
+		RenderData::SubData data;
+		data.baseIndex  = baseIndex;
+		data.baseVertex = baseVertex;
+		data.count      = count;
+		data.materialIndex = materialIndex;
+		addSubData(data);
+	}
 
 	/* Methods to remove data */
 	inline void clearPositions()     { positions.clear();     numPositions     = 0; }
@@ -128,6 +142,7 @@ public:
 	std::vector<float>& getBitangents()     { return bitangents;    }
 	std::vector<float>& getOthers()         { return others;        }
 	std::vector<unsigned int>& getIndices() { return indices;       }
+	std::vector<RenderData::SubData>& getSubData() { return subData; }
 private:
 	/* The flags being used */
 	Flag flags = Flag::NONE;
@@ -194,6 +209,9 @@ public:
 
 	/* Method to destroy the OpenGL data */
 	void destroy();
+
+	/* Setters and getters */
+	inline RenderData* getRenderData() { return renderData; }
 };
 
 /*****************************************************************************
@@ -207,8 +225,8 @@ private:
 	MeshData* data;
 	MeshRenderData* renderData = NULL;
 
-	/* The material */
-	Material* material = new Material();
+	/* The materials */
+	std::vector<Material*> materials;
 public:
 	/* The constructor */
 	Mesh(MeshData* data);
@@ -221,17 +239,27 @@ public:
 		this->renderData = new MeshRenderData(this->data, renderShader);
 	}
 
-	/* The setters and getters */
-	void setMaterial(Material* material) { this->material = material; }
+	/* Method to add a material */
+	inline void addMaterial(Material* material) { materials.push_back(material); }
 
-	MeshData* getData() { return data; }
-	MeshRenderData* getRenderData() { return renderData; }
-	bool hasRenderData() { return renderData; }
-	Material* getMaterial() { return material; }
-	bool hasMaterial() { return material; }
+	/* The setters and getters */
+	inline void setMaterial(Material* material) { this->materials[0] = material; }
+	inline void setMaterial(unsigned int index, Material* material) {
+		if (index == materials.size())
+			addMaterial(material);
+		else
+			materials[index] = material;
+	}
+
+	inline MeshData* getData() { return data; }
+	inline MeshRenderData* getRenderData() { return renderData; }
+	inline bool hasRenderData() { return renderData; }
+	inline Material* getMaterial(unsigned int index = 0) { return materials[index]; }
+	inline std::vector<Material*>& getMaterials() { return materials; }
+	inline bool hasMaterial() { return materials.size() > 0; }
 
 	/* Static method called to read a file and load a model's meshes */
-	static std::vector<Mesh*> loadModel(std::string path, std::string fileName);
+	static Mesh* loadModel(std::string path, std::string fileName);
 };
 
 /*****************************************************************************

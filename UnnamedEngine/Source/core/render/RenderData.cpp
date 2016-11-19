@@ -42,24 +42,29 @@ void RenderData::setup() {
 	glBindVertexArray(0);
 }
 
-void RenderData::render() {
-	//Use the VAO
-	glBindVertexArray(vao);
-
-	//Check for instancing
-	if (primcount > 0) {
-		//Check for indices
-		if (vboIndices)
-			glDrawElementsInstanced(mode, count, GL_UNSIGNED_INT, (void*) NULL, primcount);
-		else
-			glDrawArraysInstanced(mode, 0, count, primcount);
-	} else if (primcount == -1) {
-		//Check for indices
-		if (vboIndices)
-			glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) NULL);
-		else
-			glDrawArrays(mode, 0, count);
+void RenderData::renderWithoutBinding(int subDataIndex) {
+	//Check whether the index was assigned
+	if (subDataIndex >= 0) {
+		//Check for instancing
+		if (primcount == -1) {
+			//Check for indices
+			if (vboIndices)
+				glDrawElementsBaseVertex(mode, subData[subDataIndex].count, GL_UNSIGNED_INT, (void*) (subData[subDataIndex].baseIndex * sizeof(unsigned int)), subData[subDataIndex].baseVertex);
+		}
+	} else {
+		//Check for instancing
+		if (primcount > 0) {
+			//Check for indices
+			if (vboIndices)
+				glDrawElementsInstanced(mode, count, GL_UNSIGNED_INT, (void*) NULL, primcount);
+			else
+				glDrawArraysInstanced(mode, 0, count, primcount);
+		} else if (primcount == -1) {
+			//Check for indices
+			if (vboIndices)
+				glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) NULL);
+			else
+				glDrawArrays(mode, 0, count);
+		}
 	}
-
-	glBindVertexArray(0);
 }

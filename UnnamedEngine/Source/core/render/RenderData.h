@@ -26,6 +26,14 @@
  *****************************************************************************/
 
 class RenderData {
+public:
+	/* Data for a sub mesh that may be rendered */
+	struct SubData {
+		unsigned int baseIndex;  //The base index to start rendering from
+		unsigned int baseVertex; //The base vertex to start rendering from
+		unsigned int count;      //Number of indices/vertices to render
+		unsigned int materialIndex;
+	};
 private:
 	/* The VAO */
 	GLuint vao = 0;
@@ -43,7 +51,11 @@ private:
 	/* States the number of instances to render, instancing is only used if
 	 * this value is greater than zero */
 	GLsizei primcount = -1;
+
+	/* The sub data instances */
+	std::vector<SubData> subData;
 public:
+
 	/* The constructor */
 	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}
 
@@ -53,8 +65,31 @@ public:
 	/* The method used to setup this data for rendering */
 	void setup();
 
+	/* Methods used to add a sub data structure */
+	inline void addSubData(SubData& data) { subData.push_back(data); }
+	inline void addSubData(unsigned int baseIndex, unsigned int baseVertex, unsigned int count, unsigned int materialIndex = 0) {
+		SubData data;
+		data.baseIndex  = baseIndex;
+		data.baseVertex = baseVertex;
+		data.count      = count;
+		data.materialIndex = 0;
+		addSubData(data);
+	}
+
+	/* Method used to bind/unbind the VAO */
+	inline void bindVAO() { glBindVertexArray(vao); }
+	inline void unbindVAO() { glBindVertexArray(0); }
+
 	/* The method used to render this data */
-	void render();
+	inline void render() {
+		bindVAO();
+		renderWithoutBinding();
+		unbindVAO();
+	}
+
+	/* The method to render this data without binding/unbinding the VAO, given an index of
+	 * the sub data to render */
+	void renderWithoutBinding(int subDataIndex = -1);
 
 	/* The setters and getters */
 	inline void addVBO(VBO<GLfloat>* vbo) { vbos.push_back(vbo); }
@@ -62,8 +97,12 @@ public:
 	inline void setMode(GLenum mode) { this->mode = mode; }
 	inline void setCount(GLsizei count) { this->count = count; }
 	inline void setNumInstances(GLsizei primcount) { this->primcount = primcount; }
+	inline void setSubData(std::vector<SubData>& subData) { this->subData = subData; }
 
 	inline GLuint getVAO() { return vao; }
+	inline bool hasSubData() { return subData.size() > 0; }
+	inline unsigned int getSubDataCount() { return subData.size(); }
+	inline SubData& getSubData(unsigned int index) { return subData[index]; }
 };
 
 #endif /* CORE_RENDER_RENDERDATA_H_ */

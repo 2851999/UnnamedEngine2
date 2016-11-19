@@ -31,8 +31,8 @@
 
 class GameObject {
 private:
-	/* Mesh instances associated with this object */
-	std::vector<Mesh*> meshes;
+	/* Mesh instance associated with this object */
+	Mesh* mesh;
 
 	/* The RenderShader used when rendering */
 	RenderShader* renderShader;
@@ -42,7 +42,6 @@ protected:
 public:
 	/* The constructors */
 	GameObject(Mesh* mesh = NULL, RenderShader* shader = NULL);
-	GameObject(std::vector<Mesh*> meshes, RenderShader* shader);
 
 	/* The destructor */
 	virtual ~GameObject();
@@ -50,9 +49,6 @@ public:
 	/* Overrideable methods to update and render the GameObject */
 	virtual void update() {}
 	virtual void render();
-
-	/* Method used to add a mesh */
-	void addMesh(Mesh* mesh);
 
 	/* Method used to set the parent of this object */
 	inline void setParent(GameObject* parent) { transform->setParent(parent->getTransform()); }
@@ -65,14 +61,13 @@ public:
 
 	inline void setRenderShader(RenderShader* renderShader) { this->renderShader = renderShader; }
 
-	inline bool hasMesh() { return meshes.size() > 0; }
-	inline Mesh* getMesh() { return meshes[0]; }
-	inline std::vector<Mesh*>& getMeshes() { return meshes; }
+	inline bool hasMesh() { return mesh; }
+	inline Mesh* getMesh() { return mesh; }
 
 	/* Returns the material a MeshRenderData has, should not be used unless
 	 * the object has a mesh */
-	inline bool hasMaterial() { return meshes[0]->getMaterial(); }
-	inline Material* getMaterial() { return meshes[0]->getMaterial(); }
+	inline bool hasMaterial() { return mesh->hasMaterial(); }
+	inline Material* getMaterial() { return mesh->getMaterial(); }
 
 	inline Transform* getTransform() { return transform; }
 	inline RenderShader* getRenderShader() { return renderShader; }
@@ -90,10 +85,8 @@ protected:
 public:
 	/* The constructors */
 	GameObject2D(float width = 0, float height = 0);
-	GameObject2D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0) : GameObject2D(std::vector<Mesh*> { mesh }, shader, width, height) {}
-	GameObject2D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0);
+	GameObject2D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0) : GameObject(mesh, shader) { setSize(width, height); }
 	GameObject2D(Mesh* mesh, std::string shaderId, float width = 0, float height = 0);
-	GameObject2D(std::vector<Mesh*> meshes, std::string shaderId, float width = 0, float height = 0);
 
 	/* The destructor */
 	virtual ~GameObject2D() {}
@@ -145,10 +138,8 @@ protected:
 public:
 	/* The constructors */
 	GameObject3D(float width = 0, float height = 0, float depth = 0);
-	GameObject3D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject3D(std::vector<Mesh*> { mesh }, shader, width, height, depth) {}
-	GameObject3D(std::vector<Mesh*> meshes, RenderShader* shader, float width = 0, float height = 0, float depth = 0);
+	GameObject3D(Mesh* mesh, RenderShader* shader, float width = 0, float height = 0, float depth = 0) : GameObject(mesh, shader) { setSize(width, height, depth); }
 	GameObject3D(Mesh* mesh, std::string shaderId, float width = 0, float height = 0, float depth = 0);
-	GameObject3D(std::vector<Mesh*> meshes, std::string shaderId, float width = 0, float height = 0, float depth = 0);
 
 	/* The destructor */
 	virtual ~GameObject3D() {}

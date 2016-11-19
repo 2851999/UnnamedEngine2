@@ -41,6 +41,8 @@ public:
 		GLuint stride;
 
 		GLuint divisor;
+
+		GLuint type;
 	};
 private:
 	/* Various pieces of data for OpenGL */
@@ -69,7 +71,8 @@ public:
 	inline void bind() { glBindBuffer(target, buffer); }
 
 	/* Used to add an attribute */
-	void addAttribute(GLint location, GLint size, GLuint divisor = 0);
+	void addAttributeWithType(GLuint type, GLint location, GLint size, GLuint divisor = 0);
+	inline void addAttribute(GLint location, GLint size, GLuint divisor = 0) { addAttributeWithType(GL_FLOAT, location, size, divisor); }
 
 	/* Used to create and setup this VBO */
 	void setup();

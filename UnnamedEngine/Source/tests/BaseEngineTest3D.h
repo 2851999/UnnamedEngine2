@@ -47,7 +47,8 @@ void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	GameObject3D* teapot = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Lighting");
+	//GameObject3D* teapot = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Lighting");
+	GameObject3D* teapot = new GameObject3D(resourceLoader.loadModel("gingerbreadman.dae"), "Lighting");
 	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane.obj"), "Lighting");
 	teapot->setPosition(0.0f, 0.8f, 0.0f);
 	teapot->update();
