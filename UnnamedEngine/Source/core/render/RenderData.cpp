@@ -28,9 +28,14 @@ void RenderData::setup() {
 	glBindVertexArray(vao);
 
 	//Go through each VBO and set it up
-	for (unsigned int i = 0; i < vbos.size(); i++) {
-		vbos[i]->setup();
-		vbos[i]->startRendering();
+	for (unsigned int i = 0; i < vbosFloat.size(); i++) {
+		vbosFloat[i]->setup();
+		vbosFloat[i]->startRendering();
+	}
+
+	for (unsigned int i = 0; i < vbosUInteger.size(); i++) {
+		vbosUInteger[i]->setup();
+		vbosUInteger[i]->startRendering();
 	}
 
 	//Now setup the indices VBO if assigned
@@ -42,29 +47,28 @@ void RenderData::setup() {
 	glBindVertexArray(0);
 }
 
-void RenderData::renderWithoutBinding(int subDataIndex) {
-	//Check whether the index was assigned
-	if (subDataIndex >= 0) {
-		//Check for instancing
-		if (primcount == -1) {
-			//Check for indices
-			if (vboIndices)
-				glDrawElementsBaseVertex(mode, subData[subDataIndex].count, GL_UNSIGNED_INT, (void*) (subData[subDataIndex].baseIndex * sizeof(unsigned int)), subData[subDataIndex].baseVertex);
-		}
-	} else {
-		//Check for instancing
-		if (primcount > 0) {
-			//Check for indices
-			if (vboIndices)
-				glDrawElementsInstanced(mode, count, GL_UNSIGNED_INT, (void*) NULL, primcount);
-			else
-				glDrawArraysInstanced(mode, 0, count, primcount);
-		} else if (primcount == -1) {
-			//Check for indices
-			if (vboIndices)
-				glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) NULL);
-			else
-				glDrawArrays(mode, 0, count);
-		}
+void RenderData::renderWithoutBinding() {
+	//Check for instancing
+	if (primcount > 0) {
+		//Check for indices
+		if (vboIndices)
+			glDrawElementsInstanced(mode, count, GL_UNSIGNED_INT, (void*) NULL, primcount);
+		else
+			glDrawArraysInstanced(mode, 0, count, primcount);
+	} else if (primcount == -1) {
+		//Check for indices
+		if (vboIndices)
+			glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) NULL);
+		else
+			glDrawArrays(mode, 0, count);
+	}
+}
+
+void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset, unsigned int baseVertex) {
+	//Check for instancing
+	if (primcount == -1) {
+		//Check for indices
+		if (vboIndices)
+			glDrawElementsBaseVertex(mode, count, GL_UNSIGNED_INT, (void*) indicesOffset, baseVertex);
 	}
 }

@@ -30,6 +30,14 @@
  *****************************************************************************/
 
 class MeshData {
+public:
+	/* Data for a sub mesh that may be rendered */
+	struct SubData {
+		unsigned int baseIndex;  	//The base index to start rendering from
+		unsigned int baseVertex; 	//The base vertex to start rendering from
+		unsigned int count;      	//Number of indices/vertices to render
+		unsigned int materialIndex; //The material index of this part of the mesh
+	};
 private:
 	/* The raw data stored for this mesh */
 	std::vector<float> positions;
@@ -54,7 +62,7 @@ private:
 	unsigned int numIndices    = 0;
 
 	/* The sub data instances */
-	std::vector<RenderData::SubData> subData;
+	std::vector<SubData> subData;
 public:
 	static const unsigned int DIMENSIONS_2D = 2;
 	static const unsigned int DIMENSIONS_3D = 3;
@@ -87,9 +95,9 @@ public:
 	inline void addIndex(unsigned int index) { indices.push_back(index); numIndices++; }
 
 	/* Methods used to add a sub data structure */
-	inline void addSubData(RenderData::SubData& data) { subData.push_back(data); }
-	inline void addSubData(unsigned int baseIndex, unsigned int baseVertex, unsigned int count, unsigned int materialIndex) {
-		RenderData::SubData data;
+	inline void addSubData(SubData& data) { subData.push_back(data); }
+	inline void addSubData(unsigned int baseIndex, unsigned int baseVertex, unsigned int count, unsigned int materialIndex = 0) {
+		SubData data;
 		data.baseIndex  = baseIndex;
 		data.baseVertex = baseVertex;
 		data.count      = count;
@@ -142,7 +150,9 @@ public:
 	std::vector<float>& getBitangents()     { return bitangents;    }
 	std::vector<float>& getOthers()         { return others;        }
 	std::vector<unsigned int>& getIndices() { return indices;       }
-	std::vector<RenderData::SubData>& getSubData() { return subData; }
+	inline bool hasSubData() { return subData.size() > 0; }
+	inline unsigned int getSubDataCount() { return subData.size(); }
+	inline SubData& getSubData(unsigned int index) { return subData[index]; }
 private:
 	/* The flags being used */
 	Flag flags = Flag::NONE;
@@ -252,6 +262,7 @@ public:
 	}
 
 	inline MeshData* getData() { return data; }
+	inline bool hasData() { return data; }
 	inline MeshRenderData* getRenderData() { return renderData; }
 	inline bool hasRenderData() { return renderData; }
 	inline Material* getMaterial(unsigned int index = 0) { return materials[index]; }

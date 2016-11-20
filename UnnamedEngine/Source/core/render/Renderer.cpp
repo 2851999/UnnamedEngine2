@@ -147,10 +147,11 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 //				shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
 //		}
 		shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
-		if (mesh->hasRenderData()) {
-			RenderData* data = mesh->getRenderData()->getRenderData();
+		if (mesh->hasData() && mesh->hasRenderData()) {
+			MeshData* data = mesh->getData();
+			MeshRenderData* renderData = mesh->getRenderData();
 			if (data->hasSubData()) {
-				data->bindVAO();
+				renderData->getRenderData()->bindVAO();
 
 				//Go through each sub data instance
 				for (unsigned int i = 0; i < data->getSubDataCount(); i++) {
@@ -158,17 +159,17 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 					if (mesh->hasMaterial())
 						setMaterialUniforms(renderShader->getShader(), renderShader->getName(), mesh->getMaterial(data->getSubData(i).materialIndex));
-					data->renderWithoutBinding(i);
+					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex * sizeof(unsigned int), data->getSubData(i).baseVertex);
 
 					releaseNewTextures();
 				}
 
-				data->unbindVAO();
+				renderData->getRenderData()->unbindVAO();
 			} else {
 				saveTextures();
 				if (mesh->hasMaterial())
 					setMaterialUniforms(renderShader->getShader(), renderShader->getName(), mesh->getMaterial());
-				data->render();
+				renderData->render();
 				releaseNewTextures();
 			}
 		}

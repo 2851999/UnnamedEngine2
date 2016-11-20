@@ -49,10 +49,10 @@ private:
 	GLuint                buffer;
 	GLenum                target;
 	GLsizeiptr            size;
-	std::vector<T>& data;
+	std::vector<T>&       data;
 	GLenum                usage;
 
-	bool                 instanced;
+	bool                  instanced;
 
 	/* The attributes this VBO supplies */
 	std::vector<Attribute> attributes;

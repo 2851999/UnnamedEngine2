@@ -154,8 +154,6 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 
 	//Create the RenderData instance
 	renderData = new RenderData(GL_TRIANGLES, numVertices);
-	//Assign all of the sub data instances
-	renderData->setSubData(data->getSubData());
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {

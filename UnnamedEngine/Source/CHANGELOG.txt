@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 0 | Beta 4 | Development 0 | Experimental 2
+
+* Moved the SubData structure to MeshData
+
+--------------------------------------------------------------
 Release 0 | Beta 4 | Development 0 | Experimental 1
 
 * Added 'wireframe' command to DebugConsole
