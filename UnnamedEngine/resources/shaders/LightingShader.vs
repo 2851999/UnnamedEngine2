@@ -66,17 +66,49 @@ out vec4 frag_pos_lightspace;
 
 out mat3 frag_tbnMatrix;
 
+#map attribute BoneIDs boneIDs
+#map attribute BoneWeights boneWeights
+#map uniform UseSkinning useSkinning
+
+const int MAX_BONES = 50;
+uniform mat4 bones[MAX_BONES];
+
+in ivec4 boneIDs;
+in vec4  boneWeights;
+
+uniform bool useSkinning;
+
 void main() {
 	//Assign the needed data for the fragment shader
 	frag_position = vec3(modelMatrix * vec4(position, 1.0));
 	frag_textureCoord = textureCoord;
 	frag_normal = normalMatrix * normal;
+
+	mat4 boneTransform;
+	if (useSkinning) {
+		boneTransform =  bones[boneIDs[0]] * boneWeights[0];
+		boneTransform += bones[boneIDs[1]] * boneWeights[1];
+		boneTransform += bones[boneIDs[2]] * boneWeights[2];
+		boneTransform += bones[boneIDs[3]] * boneWeights[3];
+		
+		frag_position = vec3(modelMatrix * boneTransform * vec4(position, 1.0));
+		
+		frag_normal = normalMatrix * vec3(boneTransform * vec4(normal, 0.0));
+	}
 	
 	frag_pos_lightspace = lightSpaceMatrix * vec4(frag_position, 1.0);
 	
 	if (useNormalMap) {
-		vec3 T = normalize(normalMatrix * tangent);
-		vec3 B = normalize(normalMatrix * bitangent);
+		vec3 T;
+		vec3 B;
+		
+		if (useSkinning) {
+			T = normalize(normalMatrix * vec3(boneTransform * vec4(tangent, 0.0)));
+			B = normalize(normalMatrix * vec3(boneTransform * vec4(bitangent, 0.0)));
+		} else {
+			T = normalize(normalMatrix * tangent);
+			B = normalize(normalMatrix * bitangent);
+		}
 		vec3 N = normalize(frag_normal);
 	
 		frag_tbnMatrix = mat3(T, B, N);
@@ -84,4 +116,8 @@ void main() {
 	
 	//Assign the vertex position
 	gl_Position = mvpMatrix * vec4(position, 1.0);
+	
+	if (useSkinning) {
+		gl_Position = mvpMatrix * boneTransform * vec4(position, 1.0);
+	}
 }

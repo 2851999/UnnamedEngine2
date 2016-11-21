@@ -150,6 +150,15 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		if (mesh->hasData() && mesh->hasRenderData()) {
 			MeshData* data = mesh->getData();
 			MeshRenderData* renderData = mesh->getRenderData();
+
+			if (data->bones.size() > 0) {
+				for (unsigned int i = 0; i < data->boneInfo.size(); i++)
+					shader->setUniformMatrix4("Bones[" + StrUtils::str(i) + "]", data->boneInfo[i].finalTransformation);
+				shader->setUniformi("UseSkinning", 1);
+			} else {
+				shader->setUniformi("UseSkinning", 0);
+			}
+
 			if (data->hasSubData()) {
 				renderData->getRenderData()->bindVAO();
 
@@ -228,6 +237,9 @@ void Renderer::addRenderShader(std::string id, Shader* shader) {
 			shader->addUniform("Light_Cutoff["         + str(i) + "]", "lights[" + str(i) + "].cutoff");
 			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "lights[" + str(i) + "].outerCutoff");
 		}
+
+		for (unsigned int i = 0; i < 50; i++)
+			shader->addUniform("Bones[" + str(i) + "]", "bones[" + str(i) + "]");
 
 		shader->addUniform("NumLights", "numLights");
 		shader->addUniform("Light_Ambient", "light_ambient");

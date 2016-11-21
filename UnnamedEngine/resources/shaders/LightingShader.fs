@@ -231,5 +231,6 @@ void main() {
 	}
 	
 	//Assign the colour
-	FragColour = vec4(ambientLight + otherLight, 1.0);
+	//FragColour = vec4(ambientLight + otherLight, 1.0);
+	FragColour = vec4(ambientLight + otherLight, diffuseColour.a);
 }

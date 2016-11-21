@@ -25,9 +25,20 @@
 #include "Shader.h"
 #include "VBO.h"
 
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/mesh.h>
+#include <assimp/vector3.h>
+#include <assimp/matrix4x4.h>
+
 /*****************************************************************************
  * The MeshData class stores information about a mesh
  *****************************************************************************/
+
+struct aiScene;
+
+#define NUM_BONES_PER_VERTEX 4
 
 class MeshData {
 public:
@@ -38,6 +49,37 @@ public:
 		unsigned int count;      	//Number of indices/vertices to render
 		unsigned int materialIndex; //The material index of this part of the mesh
 	};
+
+	struct BoneInfo {
+		Matrix4f boneOffset;
+		Matrix4f finalTransformation;
+	};
+
+	struct VertexBoneData {
+		unsigned int ids[NUM_BONES_PER_VERTEX];
+		float weights[NUM_BONES_PER_VERTEX];
+
+		void addBoneData(unsigned int boneID, float weight) {
+			for (unsigned int i = 0; i < NUM_BONES_PER_VERTEX; i++) {
+				if (weights[i] == 0.0f) {
+					ids[i] = boneID;
+					weights[i] = weight;
+					return;
+				}
+			}
+		}
+	};
+
+	std::map<std::string, unsigned int> boneMappings;
+	unsigned int numBones = 0;
+	std::vector<BoneInfo> boneInfo;
+	std::vector<VertexBoneData> bones;
+	Matrix4f globalInverseTransform;
+
+	const aiScene* scene = NULL;
+
+	std::vector<unsigned int> boneIds;
+	std::vector<float> boneWeights;
 private:
 	/* The raw data stored for this mesh */
 	std::vector<float> positions;
@@ -181,6 +223,9 @@ private:
 	VBO<unsigned int>* vboIndices  = NULL;
 	VBO<GLfloat>* vboOthers        = NULL;
 
+	VBO<unsigned int>* vboBoneIDs = NULL;
+	VBO<GLfloat>*  vboBoneWeights = NULL;
+
 	/* Usage of each VBO, the default is GL_STATIC_DRAW */
 	GLenum usagePositions     = GL_STATIC_DRAW;
 	GLenum usageColours       = GL_STATIC_DRAW;
@@ -269,8 +314,24 @@ public:
 	inline std::vector<Material*>& getMaterials() { return materials; }
 	inline bool hasMaterial() { return materials.size() > 0; }
 
+	void boneTransform(float timeInSeconds);
+	void readNodeHeirachy(float animationTime, const aiNode* parent, const Matrix4f& parentMatrix);
+
+	void calcInterpolatedScaling(aiVector3D& out, float animationTime, const aiNodeAnim* parent);
+	void calcInterpolatedRotation(aiQuaternion& out, float animationTime, const aiNodeAnim* parent);
+	void calcInterpolatedPosition(aiVector3D& out, float animationTime, const aiNodeAnim* parent);
+
+	unsigned int findScaling(float animationTime, const aiNodeAnim* parentAnim);
+	unsigned int findRotation(float animationTime, const aiNodeAnim* parentAnim);
+	unsigned int findPosition(float animationTime, const aiNodeAnim* parentAnim);
+
+	const aiNodeAnim* findNodeAnim(const aiAnimation* parent, const std::string nodeName);
+
 	/* Static method called to read a file and load a model's meshes */
 	static Mesh* loadModel(std::string path, std::string fileName);
+
+	static Matrix4f toMatrix4f(aiMatrix4x4 mat);
+	static Matrix4f toMatrix4f(aiMatrix3x3 mat);
 };
 
 /*****************************************************************************

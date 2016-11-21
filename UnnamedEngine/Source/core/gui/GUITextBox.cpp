@@ -700,7 +700,11 @@ void GUITextBox::onShortcut(KeyboardShortcut* e) {
 			std::string front = StrUtils::substring(text, 0, cursorIndex);
 			std::string back = text.substr(cursorIndex);
 
-			text = front + ClipboardUtils::getText() + back;
+			std::string str = ClipboardUtils::getText();
+			str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
+			str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
+
+			text = front + str + back;
 
 			cursorIndex = text.length() - back.length();
 			viewIndexEnd = text.length();

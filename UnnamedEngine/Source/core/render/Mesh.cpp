@@ -18,12 +18,6 @@
 
 #include "Mesh.h"
 
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/mesh.h>
-#include <assimp/vector3.h>
-
 #include "Renderer.h"
 #include "../../utils/Logging.h"
 
@@ -197,6 +191,17 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 		renderData->addVBO(vboBitangents);
 	}
 
+	//Setup bones
+	if (data->boneIds.size() > 0) {
+		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->boneIds.size() * sizeof(data->boneIds[0]), data->boneIds, GL_STATIC_DRAW);
+		vboBoneIDs->addAttribute(shader->getAttributeLocation("BoneIDs"), 4);
+		renderData->addVBO(vboBoneIDs);
+
+		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->boneWeights.size() * sizeof(data->boneWeights[0]), data->boneWeights, GL_STATIC_DRAW);
+		vboBoneWeights->addAttribute(shader->getAttributeLocation("BoneWeights"), 4);
+		renderData->addVBO(vboBoneWeights);
+	}
+
 	//Check to see whether the 'other' VBO is required
 	if (data->hasOthers()) {
 
@@ -342,14 +347,149 @@ Mesh::~Mesh() {
 	delete data;
 }
 
+void Mesh::boneTransform(float timeInSeconds) {
+	Matrix4f matrix = Matrix4f().initIdentity();
+
+	float ticksPerSecond = data->scene->mAnimations[0]->mTicksPerSecond;
+	float timeInTicks = timeInSeconds * ticksPerSecond;
+	float animationTime = fmod(timeInTicks, data->scene->mAnimations[0]->mDuration);
+	readNodeHeirachy(animationTime, data->scene->mRootNode, matrix);
+}
+
+void Mesh::readNodeHeirachy(float animationTime, const aiNode* parent, const Matrix4f& parentMatrix) {
+	std::string nodeName(parent->mName.data);
+
+	const aiAnimation* animation = data->scene->mAnimations[0];
+
+	Matrix4f nodeTransformation = toMatrix4f(parent->mTransformation);
+
+	const aiNodeAnim* parentNodeAnim = findNodeAnim(animation, nodeName);
+
+	if (parentNodeAnim) {
+		aiVector3D scaling;
+		calcInterpolatedScaling(scaling, animationTime, parentNodeAnim);
+		Matrix4f scalingM = Matrix4f().initScale(Vector3f(scaling.x, scaling. y, scaling.z));
+
+		aiQuaternion rotation;
+		calcInterpolatedRotation(rotation, animationTime, parentNodeAnim);
+		Matrix4f rotationM = toMatrix4f(rotation.GetMatrix());
+
+		aiVector3D translation;
+		calcInterpolatedPosition(translation, animationTime, parentNodeAnim);
+		Matrix4f translationM = Matrix4f().initTranslation(Vector3f(translation.x, translation.y, translation.z));
+
+		nodeTransformation = translationM * rotationM * scalingM;
+	}
+
+	Matrix4f globalTransformation = parentMatrix * nodeTransformation;
+
+	if (data->boneMappings.find(nodeName) != data->boneMappings.end()) {
+		unsigned int boneIndex = data->boneMappings[nodeName];
+		data->boneInfo[boneIndex].finalTransformation = data->globalInverseTransform * globalTransformation * data->boneInfo[boneIndex].boneOffset;
+	}
+
+	for (unsigned int i = 0; i < parent->mNumChildren; i++) {
+		readNodeHeirachy(animationTime, parent->mChildren[i], globalTransformation);
+	}
+}
+
+void Mesh::calcInterpolatedScaling(aiVector3D& out, float animationTime, const aiNodeAnim* parentAnim) {
+	if (parentAnim->mNumScalingKeys == 1) {
+		out = parentAnim->mScalingKeys[0].mValue;
+		return;
+	}
+
+	unsigned int scalingIndex = findScaling(animationTime, parentAnim);
+	unsigned int nextScalingIndex = (scalingIndex + 1);
+
+	float deltaTime = parentAnim->mScalingKeys[nextScalingIndex].mTime - parentAnim->mScalingKeys[scalingIndex].mTime;
+	float factor = (animationTime - (float) parentAnim->mScalingKeys[scalingIndex].mTime) / deltaTime;
+	const aiVector3D& start = parentAnim->mScalingKeys[scalingIndex].mValue;
+	const aiVector3D& end = parentAnim->mScalingKeys[nextScalingIndex].mValue;
+    aiVector3D delta = end - start;
+    out = start + factor * delta;
+}
+
+void Mesh::calcInterpolatedRotation(aiQuaternion& out, float animationTime, const aiNodeAnim* parentAnim) {
+	if (parentAnim->mNumRotationKeys == 1) {
+		out = parentAnim->mRotationKeys[0].mValue;
+		return;
+	}
+
+	unsigned int rotationIndex = findRotation(animationTime, parentAnim);
+	unsigned int nextRotationIndex = (rotationIndex + 1);
+
+	float deltaTime = parentAnim->mRotationKeys[nextRotationIndex].mTime - parentAnim->mRotationKeys[rotationIndex].mTime;
+	float factor = (animationTime - (float) parentAnim->mRotationKeys[rotationIndex].mTime) / deltaTime;
+	const aiQuaternion& startRotation = parentAnim->mRotationKeys[rotationIndex].mValue;
+	const aiQuaternion& endRotation = parentAnim->mRotationKeys[nextRotationIndex].mValue;
+	aiQuaternion::Interpolate(out, startRotation, endRotation, factor);
+	out = out.Normalize();
+}
+
+void Mesh::calcInterpolatedPosition(aiVector3D& out, float animationTime, const aiNodeAnim* parentAnim) {
+	if (parentAnim->mNumPositionKeys == 1) {
+		out = parentAnim->mPositionKeys[0].mValue;
+		return;
+	}
+
+	unsigned int positionIndex = findScaling(animationTime, parentAnim);
+	unsigned int nextPositionIndex = (positionIndex + 1);
+
+	float deltaTime = parentAnim->mPositionKeys[nextPositionIndex].mTime - parentAnim->mPositionKeys[positionIndex].mTime;
+	float factor = (animationTime - (float) parentAnim->mPositionKeys[positionIndex].mTime) / deltaTime;
+	const aiVector3D& start = parentAnim->mPositionKeys[positionIndex].mValue;
+	const aiVector3D& end = parentAnim->mPositionKeys[nextPositionIndex].mValue;
+    aiVector3D delta = end - start;
+    out = start + factor * delta;
+}
+
+const aiNodeAnim* Mesh::findNodeAnim(const aiAnimation* parent, const std::string nodeName) {
+	for (unsigned int i = 0; i < parent->mNumChannels; i++) {
+		const aiNodeAnim* parentAnim = parent->mChannels[i];
+		if (std::string(parentAnim->mNodeName.data) == nodeName)
+			return parentAnim;
+	}
+	return NULL;
+}
+
+unsigned int Mesh::findScaling(float animationTime, const aiNodeAnim* parentAnim) {
+	for (unsigned int i = 0; i < parentAnim->mNumScalingKeys - 1; i++) {
+		if (animationTime < (float) parentAnim->mScalingKeys[i + 1].mTime)
+			return i;
+	}
+	std::cout << "JKHSDJKHSD" << std::endl;
+	return 0;
+}
+
+unsigned int Mesh::findRotation(float animationTime, const aiNodeAnim* parentAnim) {
+	for (unsigned int i = 0; i < parentAnim->mNumRotationKeys - 1; i++) {
+		if (animationTime < (float) parentAnim->mRotationKeys[i + 1].mTime)
+			return i;
+	}
+	std::cout << "JKHSDJKHSD" << std::endl;
+	return 0;
+}
+
+unsigned int Mesh::findPosition(float animationTime, const aiNodeAnim* parentAnim) {
+	for (unsigned int i = 0; i < parentAnim->mNumPositionKeys - 1; i++) {
+		if (animationTime < (float) parentAnim->mPositionKeys[i + 1].mTime)
+			return i;
+	}
+	std::cout << "JKHSDJKHSD" << std::endl;
+	return 0;
+}
+
 Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 	//Load the file using Assimp
-	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
+	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
 	//The MeshData instance used to store the data for the current mesh
 	MeshData* currentData = new MeshData(MeshData::DIMENSIONS_3D);
+	currentData->scene = scene;
 	//The current and last number of indices added
 	unsigned int numIndices = 0;
 	unsigned int numVertices = 0;
+	bool hasBones = false;
 
 	//Ensure the data was loaded successfully
 	if (scene != NULL) {
@@ -357,6 +497,8 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 		for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
 			//Pointer to the current mesh being read
 			const struct aiMesh* currentMesh = scene->mMeshes[a];
+
+			hasBones = hasBones || (currentMesh->mNumBones > 0);
 
 			//Go though all of the vertices
 			for (unsigned int i = 0; i < currentMesh->mNumVertices; i++) {
@@ -401,6 +543,44 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			numIndices += currentMesh->mNumFaces * 3;
 			numVertices += currentMesh->mNumVertices;
 		}
+
+		if (hasBones) {
+			currentData->globalInverseTransform = toMatrix4f(scene->mRootNode->mTransformation.Inverse());
+			currentData->bones.resize(numVertices);
+
+			//Load the bones
+			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
+				//Pointer to the current mesh being read
+				const struct aiMesh* currentMesh = scene->mMeshes[a];
+				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
+					unsigned int boneIndex = 0;
+					std::string boneName(currentMesh->mBones[b]->mName.data);
+					if (currentData->boneMappings.find(boneName) == currentData->boneMappings.end()) {
+						boneIndex = currentData->numBones;
+						currentData->numBones++;
+						MeshData::BoneInfo bi;
+						currentData->boneInfo.push_back(bi);
+						currentData->boneInfo[boneIndex].boneOffset = toMatrix4f(currentMesh->mBones[b]->mOffsetMatrix);
+						currentData->boneMappings.insert(std::pair<std::string, unsigned int>(boneName, boneIndex));
+					} else
+						boneIndex = currentData->boneMappings[boneName];
+
+					for (unsigned int c = 0; c < currentMesh->mBones[b]->mNumWeights; c++) {
+						unsigned int vertexID = currentData->getSubData(a).baseVertex + currentMesh->mBones[b]->mWeights[c].mVertexId;
+						float weight = currentMesh->mBones[b]->mWeights[c].mWeight;
+						currentData->bones[vertexID].addBoneData(boneIndex, weight);
+					}
+				}
+			}
+
+			for (unsigned int a = 0; a < currentData->bones.size(); a++) {
+				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; b++) {
+					currentData->boneIds.push_back(currentData->bones[a].ids[b]);
+					currentData->boneWeights.push_back(currentData->bones[a].weights[b]);
+				}
+			}
+		}
+
 		//Create the mesh
 		Mesh* mesh = new Mesh(currentData);
 		//Load and add the materials
@@ -431,32 +611,43 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 				}
 
 				//Check to see whether the material has a normal map
-				if (currentMaterial->GetTextureCount(aiTextureType_HEIGHT) != 0) {
+				if (currentMaterial->GetTextureCount(aiTextureType_NORMALS) != 0) {
 					//Load the texture and assign it in the material
 					aiString p;
-					currentMaterial->GetTexture(aiTextureType_HEIGHT, 0, &p);
+					currentMaterial->GetTexture(aiTextureType_NORMALS, 0, &p);
+					std::cout << p.C_Str() << std::endl;
 					material->normalMap = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
 				}
 
 				//Get the ambient, diffuse and specular colours and set them in the material
+
 				aiColor3D ambientColour = aiColor3D(1.0f, 1.0f, 1.0f);
-				currentMaterial->Get(AI_MATKEY_COLOR_AMBIENT, ambientColour);
-				material->ambientColour = Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f);
+				if (AI_SUCCESS == currentMaterial->Get(AI_MATKEY_COLOR_AMBIENT, ambientColour))
+					material->ambientColour = Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f);
+				else
+					material->ambientColour = Colour::WHITE;
 
 				aiColor3D diffuseColour = aiColor3D(1.0f, 1.0f, 1.0f);
-				currentMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColour);
-				material->diffuseColour = Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f);
+				if (AI_SUCCESS == currentMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColour))
+					material->diffuseColour = Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f);
+				else
+					material->diffuseColour = Colour::WHITE;
 
 				aiColor3D specularColour = aiColor3D(1.0f, 1.0f, 1.0f);
-				currentMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specularColour);
-				material->specularColour = Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f);
+				if (AI_SUCCESS == currentMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specularColour))
+					material->specularColour = Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f);
+				else
+					material->specularColour = Colour::WHITE;
 
-				mesh->setMaterial(i, material);
+				if (i == 0)
+					mesh->setMaterial(material);
+				else
+					mesh->addMaterial(material);
 			}
 		}
 
 		//Release all of the resources Assimp loaded
-		aiReleaseImport(scene);
+		//aiReleaseImport(scene);
 		//Return the meshes
 		return mesh;
 	} else {
@@ -464,6 +655,28 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", LogType::Error);
 		return NULL;
 	}
+}
+
+Matrix4f Mesh::toMatrix4f(aiMatrix4x4 mat) {
+	Matrix4f m;
+
+	m.set(0, 0, mat.a1); m.set(0, 1, mat.a2); m.set(0, 2, mat.a3); m.set(0, 3, mat.a4);
+	m.set(1, 0, mat.b1); m.set(1, 1, mat.b2); m.set(1, 2, mat.b3); m.set(1, 3, mat.b4);
+	m.set(2, 0, mat.c1); m.set(2, 1, mat.c2); m.set(2, 2, mat.c3); m.set(2, 3, mat.c4);
+	m.set(3, 0, mat.d1); m.set(3, 1, mat.d2); m.set(3, 2, mat.d3); m.set(3, 3, mat.d4);
+
+	return m;
+}
+
+Matrix4f Mesh::toMatrix4f(aiMatrix3x3 mat) {
+	Matrix4f m;
+
+	m.set(0, 0, mat.a1); m.set(0, 1, mat.a2); m.set(0, 2, mat.a3); m.set(0, 3, 0);
+	m.set(1, 0, mat.b1); m.set(1, 1, mat.b2); m.set(1, 2, mat.b3); m.set(1, 3, 0);
+	m.set(2, 0, mat.c1); m.set(2, 1, mat.c2); m.set(2, 2, mat.c3); m.set(2, 3, 0);
+	m.set(3, 0, 0); m.set(3, 1, 0); m.set(3, 2, 0); m.set(3, 3, 1);
+
+	return m;
 }
 
 /*****************************************************************************

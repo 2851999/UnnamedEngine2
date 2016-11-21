@@ -31,6 +31,9 @@ class Test : public BaseTest3D {
 private:
 	ParticleEmitter* particleEmitter;
 	ParticleSystem* particleSystem;
+
+	GameObject3D* teapot;
+	float c = 0;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -42,21 +45,22 @@ public:
 void Test::onInitialise() {
 
 }
-
+//MATERIAL WORKS, SO MUST BE BONE TRANSFORMATIONS
 void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
 	//GameObject3D* teapot = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Lighting");
-	GameObject3D* teapot = new GameObject3D(resourceLoader.loadModel("gingerbreadman.dae"), "Lighting");
+	teapot = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), "Lighting");
 	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane.obj"), "Lighting");
 	teapot->setPosition(0.0f, 0.8f, 0.0f);
+	teapot->setRotation(90.0f, 180.0f, 0.0f);
 	teapot->update();
 	plane->update();
 	renderScene->add(teapot);
 	renderScene->add(plane);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, -0.2f);
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, 0.0f, 0.2f);
 	light0->update();
 	renderScene->addLight(light0);
 
@@ -87,6 +91,9 @@ void Test::onUpdate() {
 		particleEmitter->getTransform()->translate(Vector3f(-0.008f * getDelta(), 0.0f, 0.0f));
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		particleEmitter->getTransform()->translate(Vector3f(0.008f * getDelta(), 0.0f, 0.0f));
+
+	c += getDeltaSeconds();
+	teapot->getMesh()->boneTransform(c);
 }
 
 void Test::onRender() {

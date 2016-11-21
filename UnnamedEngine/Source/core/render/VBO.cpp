@@ -92,10 +92,10 @@ void VBO<T>::setup(Attribute& attribute) {
 	if (attribute.location != -1) {
 		//Enable that vertex attribute array and setup its pointer
 		glEnableVertexAttribArray(attribute.location);
-		if (attribute.type == GL_UNSIGNED_INT)
-			glVertexAttribIPointer(attribute.location, attribute.size, GL_UNSIGNED_INT, attribute.stride, (void*) attribute.offset);
+		if (attribute.type == GL_UNSIGNED_INT || attribute.type == GL_INT)
+			glVertexAttribIPointer(attribute.location, attribute.size, attribute.type, attribute.stride, (void*) attribute.offset);
 		else
-			glVertexAttribPointer(attribute.location, attribute.size, GL_FLOAT, GL_FALSE, attribute.stride, (void*) attribute.offset);
+			glVertexAttribPointer(attribute.location, attribute.size, attribute.type, GL_FALSE, attribute.stride, (void*) attribute.offset);
 	}
 }
 
