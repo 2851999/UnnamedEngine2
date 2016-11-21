@@ -313,13 +313,16 @@ public:
 		//From this, the inverse of the determinant is calculated so it
 		//can be multiplied by the transpose of the matrix of cofactors
 		//to get the determinant
-		float invDet = 1.0f / (a * A + b * B + c * C);
+		float determinant = (a * A + b * B + c * C);
+		//Ensure the determinant is not 0 to prevent dividing by 0
+		if (determinant != 0) {
+			float invDet = 1.0f / determinant;
 
-		//Finally assign the result
-		result.set(0, 0, invDet * A); result.set(0, 1, invDet * D); result.set(0, 2, invDet * G);
-		result.set(1, 0, invDet * B); result.set(1, 1, invDet * E); result.set(1, 2, invDet * H);
-		result.set(2, 0, invDet * C); result.set(2, 1, invDet * F); result.set(2, 2, invDet * I);
-
+			//Finally assign the result
+			result.set(0, 0, invDet * A); result.set(0, 1, invDet * D); result.set(0, 2, invDet * G);
+			result.set(1, 0, invDet * B); result.set(1, 1, invDet * E); result.set(1, 2, invDet * H);
+			result.set(2, 0, invDet * C); result.set(2, 1, invDet * F); result.set(2, 2, invDet * I);
+		}
 		return result;
 	}
 };

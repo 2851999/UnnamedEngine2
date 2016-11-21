@@ -49,6 +49,7 @@ void AsteroidsGame::initialise() {
 	//Setup the settings
 	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
+	getSettings().debuggingShowInformation = false;
 
 	//Setup the high scores
 	highScores.setPath(resourceLoader.getPath() + "highscores.txt");
@@ -94,31 +95,6 @@ void AsteroidsGame::created() {
 
 	//Add the controllers
 	getWindow()->getInputManager()->addAvailableControllers();
-
-	//Create the axis bindings
-//	InputBindingAxis* axisForward = inputBindings->createAxisBinding("Forward");
-//	InputBindingAxis* axisLookX = inputBindings->createAxisBinding("LookX");
-//	InputBindingAxis* axisLookY = inputBindings->createAxisBinding("LookY");
-//	//Create the button bindings
-//	InputBindingButton* buttonShoot = inputBindings->createButtonBinding("Shoot");
-//	InputBindingButton* buttonPause = inputBindings->createButtonBinding("Pause");
-//	InputBindingButton* buttonUpgrades = inputBindings->createButtonBinding("Upgrades");
-//	//Setup default keys
-//	axisForward->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
-//	buttonShoot->assignKey(GLFW_KEY_SPACE);
-//	buttonPause->assignKey(GLFW_KEY_ESCAPE);
-//	buttonUpgrades->assignKey(GLFW_KEY_U);
-//
-//	int controllerIndex = 1;
-//	if (controllerIndex != -1) {
-//		Controller* controller = new Controller(controllerIndex);
-//		axisForward->assignControllerAxis(controller, 1);
-//		axisLookX->assignControllerAxis(controller, 2);
-//		axisLookY->assignControllerAxis(controller, 3);
-//		buttonShoot->assignControllerButton(controller, 0);
-//		getWindow()->getInputManager()->addController(controller);
-//	}
-//	inputBindings->save(resourceLoader.getPath() + "settings/controls.txt");
 
 	//Create the Camera2D instance
 	camera2D = new Camera2D(Matrix4f().initOrthographic(0.0f, getSettings().windowWidth, getSettings().windowHeight, 0.0f, -1.0f, 1.0f));

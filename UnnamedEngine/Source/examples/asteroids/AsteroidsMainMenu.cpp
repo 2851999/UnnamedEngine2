@@ -93,8 +93,8 @@ MainMenuHighScores::MainMenuHighScores(AsteroidsGame* game, GUIPanelGroup* panel
 	Font* titleFont = game->getResources().getFontTitle();
 
 	//Create the title label
-	GUILabel* titleLabel = new GUILabel("Highscores", titleFont);
-	titleLabel->setPosition(game->getSettings().windowWidth / 2 - titleFont->getWidth("Highscores") / 2, 40.0f);
+	GUILabel* titleLabel = new GUILabel("High Scores", titleFont);
+	titleLabel->setPosition(game->getSettings().windowWidth / 2 - titleLabel->getWidth() / 2, 40.0f);
 
 	//Get the header font
 	Font* headerFont = game->getResources().getFontHeadingMono();
@@ -165,12 +165,12 @@ MainMenuSettings::MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGrou
 	buttonVideo->setPosition(windowWidth / 2 - buttonVideo->getWidth() / 2, 140);
 	panelGroup->assignButton(buttonVideo, "SettingsVideo");
 
-	GUIButton* buttonAudio = new GUIButton("Audio", 400, 30, texturesButtons);
-	buttonAudio->setPosition(windowWidth / 2 - buttonAudio->getWidth() / 2, 180);
-
 	GUIButton* buttonControls = new GUIButton("Controls", 400, 30, texturesButtons);
-	buttonControls->setPosition(windowWidth / 2 - buttonControls->getWidth() / 2, 220);
+	buttonControls->setPosition(windowWidth / 2 - buttonControls->getWidth() / 2, 180);
 	panelGroup->assignButton(buttonControls, "SettingsControls");
+
+//	GUIButton* buttonAudio = new GUIButton("Audio", 400, 30, texturesButtons);
+//	buttonAudio->setPosition(windowWidth / 2 - buttonAudio->getWidth() / 2, 220);
 
 	GUIButton* buttonBack = new GUIButton("Back", 400, 30, texturesButtons);
 	buttonBack->setPosition(windowWidth / 2 - buttonBack->getWidth() / 2, windowHeight - 50);
@@ -186,7 +186,7 @@ MainMenuSettings::MainMenuSettings(AsteroidsGame* game, GUIPanelGroup* panelGrou
 	//Add the components to this panel
 	add(titleLabel);
 	add(buttonVideo);
-	add(buttonAudio);
+	//add(buttonAudio);
 	add(buttonControls);
 	add(buttonBack);
 }
