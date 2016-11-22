@@ -381,7 +381,7 @@ void Mesh::readNodeHeirachy(float animationTime, const aiNode* parent, const Mat
 		nodeTransformation = translationM * rotationM * scalingM;
 	}
 
-	Matrix4f globalTransformation = parentMatrix * nodeTransformation;
+	Matrix4f globalTransformation = parentMatrix *  nodeTransformation;
 
 	if (data->boneMappings.find(nodeName) != data->boneMappings.end()) {
 		unsigned int boneIndex = data->boneMappings[nodeName];
@@ -433,7 +433,7 @@ void Mesh::calcInterpolatedPosition(aiVector3D& out, float animationTime, const 
 		return;
 	}
 
-	unsigned int positionIndex = findScaling(animationTime, parentAnim);
+	unsigned int positionIndex = findPosition(animationTime, parentAnim);
 	unsigned int nextPositionIndex = (positionIndex + 1);
 
 	float deltaTime = parentAnim->mPositionKeys[nextPositionIndex].mTime - parentAnim->mPositionKeys[positionIndex].mTime;
@@ -458,7 +458,7 @@ unsigned int Mesh::findScaling(float animationTime, const aiNodeAnim* parentAnim
 		if (animationTime < (float) parentAnim->mScalingKeys[i + 1].mTime)
 			return i;
 	}
-	std::cout << "JKHSDJKHSD" << std::endl;
+	Logger::log("Scaling not found for skinned mesh", "Mesh", LogType::Error);
 	return 0;
 }
 
@@ -467,7 +467,7 @@ unsigned int Mesh::findRotation(float animationTime, const aiNodeAnim* parentAni
 		if (animationTime < (float) parentAnim->mRotationKeys[i + 1].mTime)
 			return i;
 	}
-	std::cout << "JKHSDJKHSD" << std::endl;
+	Logger::log("Rotation not found for skinned mesh", "Mesh", LogType::Error);
 	return 0;
 }
 
@@ -476,7 +476,7 @@ unsigned int Mesh::findPosition(float animationTime, const aiNodeAnim* parentAni
 		if (animationTime < (float) parentAnim->mPositionKeys[i + 1].mTime)
 			return i;
 	}
-	std::cout << "JKHSDJKHSD" << std::endl;
+	Logger::log("Position not found for skinned mesh", "Mesh", LogType::Error);
 	return 0;
 }
 
@@ -584,66 +584,14 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 		//Create the mesh
 		Mesh* mesh = new Mesh(currentData);
 		//Load and add the materials
-		if (scene->mNumMaterials > 0) {
-			for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
-				//Pointer to the current material being processed
-				aiMaterial* currentMaterial = scene->mMaterials[i];
-				//Create the material instance
-				Material* material = new Material();
-				//aiString currentMaterialName;
-				//Get the material name
-				//currentMaterial->Get(AI_MATKEY_NAME, currentMaterialName);
+		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
+			//Load the current material
+			Material* material = loadMaterial(path, fileName, scene->mMaterials[i]);
 
-				//Check to see whether the material has a diffuse texture
-				if (currentMaterial->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
-					//Load the texture and assign it in the material
-					aiString p;
-					currentMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &p);
-					material->diffuseTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
-				}
-
-				//Check to see whether the material has a specular texture
-				if (currentMaterial->GetTextureCount(aiTextureType_SPECULAR) != 0) {
-					//Load the texture and assign it in the material
-					aiString p;
-					currentMaterial->GetTexture(aiTextureType_SPECULAR, 0, &p);
-					material->specularTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
-				}
-
-				//Check to see whether the material has a normal map
-				if (currentMaterial->GetTextureCount(aiTextureType_NORMALS) != 0) {
-					//Load the texture and assign it in the material
-					aiString p;
-					currentMaterial->GetTexture(aiTextureType_NORMALS, 0, &p);
-					std::cout << p.C_Str() << std::endl;
-					material->normalMap = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
-				}
-
-				//Get the ambient, diffuse and specular colours and set them in the material
-
-				aiColor3D ambientColour = aiColor3D(1.0f, 1.0f, 1.0f);
-				if (AI_SUCCESS == currentMaterial->Get(AI_MATKEY_COLOR_AMBIENT, ambientColour))
-					material->ambientColour = Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f);
-				else
-					material->ambientColour = Colour::WHITE;
-
-				aiColor3D diffuseColour = aiColor3D(1.0f, 1.0f, 1.0f);
-				if (AI_SUCCESS == currentMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColour))
-					material->diffuseColour = Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f);
-				else
-					material->diffuseColour = Colour::WHITE;
-
-				aiColor3D specularColour = aiColor3D(1.0f, 1.0f, 1.0f);
-				if (AI_SUCCESS == currentMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specularColour))
-					material->specularColour = Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f);
-				else
-					material->specularColour = Colour::WHITE;
-
-				if (i == 0)
-					mesh->setMaterial(material);
-				else
-					mesh->addMaterial(material);
-			}
+			if (i == 0)
+				mesh->setMaterial(material);
+			else
+				mesh->addMaterial(material);
 		}
 
 		//Release all of the resources Assimp loaded
@@ -655,6 +603,51 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", LogType::Error);
 		return NULL;
 	}
+}
+
+Material* Mesh::loadMaterial(std::string path, std::string fileName, const aiMaterial* mat) {
+	//Create the material instance
+	Material* material = new Material();
+
+	//Load and assign the textures
+	material->ambientTexture  = loadTexture(path, mat, aiTextureType_AMBIENT);
+	material->diffuseTexture  = loadTexture(path, mat, aiTextureType_DIFFUSE);
+	material->specularTexture = loadTexture(path, mat, aiTextureType_SPECULAR);
+
+	//Check to see whether the material has a normal map
+	if (mat->GetTextureCount(aiTextureType_NORMALS) != 0)
+		material->normalMap = loadTexture(path, mat, aiTextureType_NORMALS);
+	else if (StrUtils::strEndsWith(fileName, ".obj") && (mat->GetTextureCount(aiTextureType_HEIGHT) != 0))
+		material->normalMap = loadTexture(path, mat, aiTextureType_HEIGHT);
+
+	//Load and assign the colours
+	material->ambientColour  = loadColour(mat, AI_MATKEY_COLOR_AMBIENT);
+	material->diffuseColour  = loadColour(mat, AI_MATKEY_COLOR_DIFFUSE);
+	material->specularColour = loadColour(mat, AI_MATKEY_COLOR_SPECULAR);
+
+	return material;
+}
+
+Texture* Mesh::loadTexture(std::string path, const aiMaterial* material, const aiTextureType type) {
+	//Check whether the texture is defined
+	if (material->GetTextureCount(type) != 0) {
+		//Get the path of the texture
+		aiString p;
+		material->GetTexture(type, 0, &p);
+		//Return the loaded texture
+		return Texture::loadTexture(path + StrUtils::str(p.C_Str()));
+	} else
+		return NULL;
+}
+
+Colour Mesh::loadColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx) {
+	//The colour
+	aiColor4D colour;
+	//Attempt to load the colour
+	if (material->Get(key, type, idx, colour) == AI_SUCCESS)
+		return Colour(colour.r, colour.g, colour.b, colour.a);
+	else
+		return Colour::WHITE;
 }
 
 Matrix4f Mesh::toMatrix4f(aiMatrix4x4 mat) {

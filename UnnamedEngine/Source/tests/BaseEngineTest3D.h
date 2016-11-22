@@ -45,7 +45,7 @@ public:
 void Test::onInitialise() {
 
 }
-//MATERIAL WORKS, SO MUST BE BONE TRANSFORMATIONS
+
 void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
@@ -60,7 +60,7 @@ void Test::onCreated() {
 	renderScene->add(teapot);
 	renderScene->add(plane);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, 0.0f, 0.2f);
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.2f);
 	light0->update();
 	renderScene->addLight(light0);
 

@@ -330,6 +330,15 @@ public:
 	/* Static method called to read a file and load a model's meshes */
 	static Mesh* loadModel(std::string path, std::string fileName);
 
+	/* Static method called to load a material */
+	static Material* loadMaterial(std::string path, std::string fileName, const aiMaterial* material);
+
+	/* Static method called to load a texture */
+	static Texture* loadTexture(std::string path, const aiMaterial* material, const aiTextureType type);
+
+	/* Static method called to load a colour (If not assigned, returns WHITE instead) */
+	static Colour loadColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx);
+
 	static Matrix4f toMatrix4f(aiMatrix4x4 mat);
 	static Matrix4f toMatrix4f(aiMatrix3x3 mat);
 };

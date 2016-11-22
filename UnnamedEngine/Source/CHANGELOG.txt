@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 0 | Beta 4 | Development 0 | Experimental 4
+
+* Changed Mesh to load the normal map as a height map from
+  an OBJ file
+  
+* Fixed bug: Animations didn't work quite right (scale
+             was being searched for instead of position)
+
+--------------------------------------------------------------
 Release 0 | Beta 4 | Development 0 | Experimental 3
 
 * Added skeletal animation (work in progress)
