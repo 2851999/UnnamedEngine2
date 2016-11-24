@@ -23,6 +23,7 @@
 #include "Material.h"
 #include "RenderData.h"
 #include "Shader.h"
+#include "Skinning.h"
 #include "VBO.h"
 
 #include <assimp/cimport.h>
@@ -282,6 +283,9 @@ private:
 
 	/* The materials */
 	std::vector<Material*> materials;
+
+	/* The skeleton for this mesh */
+	Skeleton* skeleton = NULL;
 public:
 	/* The constructor */
 	Mesh(MeshData* data);
@@ -305,6 +309,7 @@ public:
 		else
 			materials[index] = material;
 	}
+	inline void setSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
 
 	inline MeshData* getData() { return data; }
 	inline bool hasData() { return data; }
@@ -313,6 +318,8 @@ public:
 	inline Material* getMaterial(unsigned int index = 0) { return materials[index]; }
 	inline std::vector<Material*>& getMaterials() { return materials; }
 	inline bool hasMaterial() { return materials.size() > 0; }
+	inline Skeleton* getSkeleton() { return skeleton; }
+	inline bool hasSkeleton() { return skeleton; }
 
 	void boneTransform(float timeInSeconds);
 	void readNodeHeirachy(float animationTime, const aiNode* parent, const Matrix4f& parentMatrix);
@@ -327,6 +334,9 @@ public:
 
 	const aiNodeAnim* findNodeAnim(const aiAnimation* parent, const std::string nodeName);
 
+	static const aiNode* findNode(const aiNode* parent, std::string name);
+	static void addParents(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes, std::string stopName, const aiNode* stopParent);
+
 	/* Static method called to read a file and load a model's meshes */
 	static Mesh* loadModel(std::string path, std::string fileName);
 
@@ -339,6 +349,8 @@ public:
 	/* Static method called to load a colour (If not assigned, returns WHITE instead) */
 	static Colour loadColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx);
 
+	static Vector3f toVector3f(aiVector3D vec);
+	static Quaternion toQuaternion(aiQuaternion quat);
 	static Matrix4f toMatrix4f(aiMatrix4x4 mat);
 	static Matrix4f toMatrix4f(aiMatrix3x3 mat);
 };

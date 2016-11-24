@@ -54,7 +54,7 @@ void Test::onCreated() {
 	teapot = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), "Lighting");
 	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane.obj"), "Lighting");
 	teapot->setPosition(0.0f, 0.8f, 0.0f);
-	teapot->setRotation(90.0f, 180.0f, 0.0f);
+	teapot->setRotation(-90.0f, 180.0f, 0.0f);
 	teapot->update();
 	plane->update();
 	renderScene->add(teapot);

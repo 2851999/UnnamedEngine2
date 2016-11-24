@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 0 | Beta 4 | Development 0 | Experimental 5
+
+* Added BoneAnimationData
+* Added Bone
+* Added Animation
+* Added Skeleton
+
+* Better animated model loading (Work in progress)
+
+--------------------------------------------------------------
 Release 0 | Beta 4 | Development 0 | Experimental 4
 
 * Changed Mesh to load the normal map as a height map from
@@ -10,7 +20,7 @@ Release 0 | Beta 4 | Development 0 | Experimental 4
 --------------------------------------------------------------
 Release 0 | Beta 4 | Development 0 | Experimental 3
 
-* Added skeletal animation (work in progress)
+* Added skeletal animation (Work in progress)
 
 * Changed Mesh to load a default colour of white if a
   material colour is not defined

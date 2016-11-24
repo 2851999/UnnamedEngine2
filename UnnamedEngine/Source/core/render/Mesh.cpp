@@ -480,6 +480,37 @@ unsigned int Mesh::findPosition(float animationTime, const aiNodeAnim* parentAni
 	return 0;
 }
 
+const aiNode* Mesh::findNode(const aiNode* parent, std::string name) {
+	//The current node
+	const aiNode* node = NULL;
+	//Check whether the current node is the correct one
+	if (std::string(parent->mName.C_Str()) == name)
+		//The parent given is the one being searched for so return it
+		return parent;
+	//Go through each child node of the parent
+	for (unsigned int i = 0; i < parent->mNumChildren; i++) {
+		//Check the current child
+		node = findNode(parent->mChildren[i], name);
+		//Return the node if it has been found
+		if (node)
+			return node;
+	}
+	//Return NULL as the node was not found
+	return NULL;
+}
+
+void Mesh::addParents(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes, std::string stopName, const aiNode* stopParent) {
+	//Check the node has a parent and it isn't already added
+	if (node->mParent && (nodes.count(node->mParent) == 0)) {
+		//Add the parent node
+		nodes.insert(std::pair<aiNode*, aiBone*>(node->mParent, NULL));
+		//Check whether the process should continue
+		if (stopName != std::string(node->mName.C_Str()) && node->mParent != stopParent)
+			//Add the parents of the parent node
+			addParents(node, nodes, stopName, stopParent);
+	}
+}
+
 Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 	//Load the file using Assimp
 	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
@@ -581,8 +612,130 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			}
 		}
 
+		//The skeleton instance
+		Skeleton* skeleton = NULL;
+
+		//Check whether there are bones
+		if (hasBones) {
+			//Create the skeleton instance
+			skeleton = new Skeleton();
+			//Assign the global inverse transform
+			skeleton->setGlobalInverseTransform(toMatrix4f(scene->mRootNode->mTransformation.Inverse()));
+
+			//Necessary nodes, a
+			std::map<const aiNode*, const aiBone*> necessaryNodes;
+			std::map<std::string, unsigned int>    boneIndices;
+			//Place to store all of the created bones
+			std::vector<Bone*> bones;
+
+			//Go through each mesh
+			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
+				//The current mesh instance
+				const aiMesh* currentMesh = scene->mMeshes[a];
+				//Go through each bone in the mesh, b
+				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
+					//Find the corresponding node in the scene's hierarchy, b1
+					const aiNode* correspondingNode = findNode(scene->mRootNode, std::string(currentMesh->mBones[b]->mName.C_Str()));
+					//Add the node to the necessary nodes if it was found
+					if (correspondingNode) {
+						if (necessaryNodes.count(correspondingNode) == 0)
+							necessaryNodes.insert(std::pair<const aiNode*, const aiBone*>(correspondingNode, currentMesh->mBones[b]));
+						else
+							necessaryNodes[correspondingNode] = currentMesh->mBones[b];
+						addParents(correspondingNode, necessaryNodes, std::string(currentMesh->mBones[b]->mName.C_Str()), correspondingNode->mParent);
+					}
+				}
+
+				//http://www.assimp.org/lib_html/data.html
+			}
+
+			//Add the bone indices
+			unsigned int currentIndex = 0;
+			for (const auto& current : necessaryNodes) {
+				boneIndices.insert(std::pair<std::string, unsigned int>(std::string(current.first->mName.C_Str()), currentIndex));
+				currentIndex++;
+			}
+
+			//Make room for all of the bones
+			bones.resize(currentIndex);
+
+			//Reset the current index, to keep track of the bone being processed
+			currentIndex = 0;
+			//The root bone index
+			unsigned int rootBoneIndex = 0;
+			//At this point, all necessary nodes should have been added, so now go through and add the bones
+			for (const auto& current : necessaryNodes) {
+				//Create the current bone
+				Bone* currentBone = new Bone(std::string(current.first->mName.C_Str()), toMatrix4f(current.first->mTransformation));
+				//Check whether the current bone is the root one and assign it's index if necessary
+				if (current.first == scene->mRootNode)
+					rootBoneIndex = currentIndex;
+				//Assign the bone offset matrix if the bone exists
+				if (current.second)
+					currentBone->setOffset(toMatrix4f(current.second->mOffsetMatrix));
+				//Add the child bone indices
+				for (unsigned int b = 0; b < current.first->mNumChildren; b++) {
+					//Check whether the child is necessary
+					if (necessaryNodes.find(current.first->mChildren[b]) != necessaryNodes.end())
+						//Add the child index
+						currentBone->addChild(boneIndices[std::string(current.first->mChildren[b]->mName.C_Str())]);
+				}
+				//Add the current bone
+				bones[currentIndex] = currentBone;
+				//Increment the current index
+				currentIndex++;
+			}
+
+			//Assign the bones in the skeleton
+			skeleton->setBones(bones);
+			skeleton->setRootBone(rootBoneIndex);
+
+			//Place to store all of the created animations
+			std::vector<Animation*> animations;
+
+			//Make room for all of the animations
+			animations.resize(scene->mNumAnimations);
+
+			//Now go through all of the animations
+			for (unsigned int b = 0; b < scene->mNumAnimations; b++) {
+				//Create the current animation
+				Animation* currentAnimation = new Animation(std::string(scene->mAnimations[b]->mName.C_Str()), scene->mAnimations[b]->mTicksPerSecond, scene->mAnimations[b]->mDuration);
+				//The current aiAnimation instance
+				const aiAnimation* currentAssimpAnim = scene->mAnimations[b];
+				//Place to store the bone data
+				std::vector<BoneAnimationData*> boneData;
+				//Make room for the bone animation data
+				boneData.resize(currentAssimpAnim->mNumChannels);
+				//Go through each animation channel
+				for (unsigned int c = 0; c < currentAssimpAnim->mNumChannels; c++) {
+					//The current aiNodeAnim instance
+					const aiNodeAnim* currentAnimNode = currentAssimpAnim->mChannels[c];
+					//Create the bone animation data instance
+					BoneAnimationData* currentBoneData = new BoneAnimationData(boneIndices[std::string(currentAnimNode->mNodeName.C_Str())], currentAnimNode->mNumPositionKeys, currentAnimNode->mNumRotationKeys, currentAnimNode->mNumScalingKeys);
+					//Go through and assign all of the data
+					for (unsigned int d = 0; d < currentAnimNode->mNumPositionKeys; d++)
+						currentBoneData->setKeyframePosition(d, toVector3f(currentAnimNode->mPositionKeys[d].mValue), currentAnimNode->mPositionKeys[d].mTime);
+					for (unsigned int d = 0; d < currentAnimNode->mNumRotationKeys; d++)
+						currentBoneData->setKeyframeRotation(d, toQuaternion(currentAnimNode->mRotationKeys[d].mValue), currentAnimNode->mRotationKeys[d].mTime);
+					for (unsigned int d = 0; d < currentAnimNode->mNumScalingKeys; d++)
+						currentBoneData->setKeyframeScale(d, toVector3f(currentAnimNode->mScalingKeys[d].mValue), currentAnimNode->mScalingKeys[d].mTime);
+					//Add the bone data
+					boneData[c] = currentBoneData;
+				}
+				//Assign the bone data in the current animation
+				currentAnimation->setBoneData(boneData);
+				//Assign the animation
+				animations[b] = currentAnimation;
+			}
+			//Assign the animations in the skeleton instance
+			skeleton->setAnimations(animations);
+		}
+
 		//Create the mesh
 		Mesh* mesh = new Mesh(currentData);
+		//Assign the mesh's skeleton
+		mesh->setSkeleton(skeleton);
+
 		//Load and add the materials
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
 			//Load the current material
@@ -648,6 +801,14 @@ Colour Mesh::loadColour(const aiMaterial* material, const char* key, unsigned in
 		return Colour(colour.r, colour.g, colour.b, colour.a);
 	else
 		return Colour::WHITE;
+}
+
+Vector3f Mesh::toVector3f(aiVector3D vec) {
+	return Vector3f(vec.x, vec.y, vec.z);
+}
+
+Quaternion Mesh::toQuaternion(aiQuaternion quat) {
+	return Quaternion(quat.x, quat.y, quat.z, quat.w);
 }
 
 Matrix4f Mesh::toMatrix4f(aiMatrix4x4 mat) {

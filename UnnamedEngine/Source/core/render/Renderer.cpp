@@ -151,13 +151,12 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			MeshData* data = mesh->getData();
 			MeshRenderData* renderData = mesh->getRenderData();
 
-			if (data->bones.size() > 0) {
+			if (mesh->hasSkeleton()) {
 				for (unsigned int i = 0; i < data->boneInfo.size(); i++)
 					shader->setUniformMatrix4("Bones[" + StrUtils::str(i) + "]", data->boneInfo[i].finalTransformation);
 				shader->setUniformi("UseSkinning", 1);
-			} else {
+			} else
 				shader->setUniformi("UseSkinning", 0);
-			}
 
 			if (data->hasSubData()) {
 				renderData->getRenderData()->bindVAO();
