@@ -53,10 +53,25 @@ public:
 	/* The destructor */
 	virtual ~BoneAnimationData() {}
 
+	/* Method used to calculate and return the transformation matrix at a given time */
+	Matrix4f getTransformMatrix(float animationTime);
+
+	/* Methods used to calculate and return the interpolated position/rotation/scale at a given time */
+	Vector3f   getInterpolatedPosition(float animationTime);
+	Quaternion getInterpolatedRotation(float animationTime);
+	Vector3f   getInterpolatedScale   (float animationTime);
+
+	/* Method used to find and return the index of the last position/rotation/scale keyframe for a given time */
+	unsigned int getPositionIndex(float animationTime);
+	unsigned int getRotationIndex(float animationTime);
+	unsigned int getScaleIndex   (float animationTime);
+
 	/* Setters and getters */
 	inline void setKeyframePosition(unsigned int index, const Vector3f& position, const float time) { keyframePositions[index] = position; keyframePositionsTimes[index] = time; }
 	inline void setKeyframeRotation(unsigned int index, const Quaternion& rotation, const float time) { keyframeRotations[index] = rotation; keyframeRotations[index] = time; }
 	inline void setKeyframeScale(unsigned int index, const Vector3f& scale, const float time) { keyframeScales[index] = scale; keyframeScalesTimes[index] = time; }
+
+	inline unsigned int getBoneIndex() { return boneIndex; }
 };
 
 /*****************************************************************************
@@ -93,9 +108,15 @@ public:
 	/* Setters and getters */
 	inline void setTransform(const Matrix4f& transform) { this->transform = transform; }
 	inline void setOffset(const Matrix4f& offset) { this->offset = offset; }
+	inline void setFinalTransform(const Matrix4f& finalTransform) { this->finalTransform = finalTransform; }
 	inline void addChild(unsigned int childIndex) { children.push_back(childIndex); }
+	inline void setAnimationData(BoneAnimationData* animationData) { this->animationData = animationData; }
 
-	inline const Matrix4f& getFinalTransform() { return finalTransform; }
+	inline Matrix4f& getOffset() { return offset; }
+	inline Matrix4f& getFinalTransform() { return finalTransform; }
+	inline unsigned int getNumChildren() { return children.size(); }
+	inline unsigned int getChild(unsigned int index) { return children[index]; }
+	inline BoneAnimationData* getAnimationData() { return animationData; }
 };
 
 /*****************************************************************************
@@ -131,6 +152,7 @@ public:
 	inline std::string getName() { return name; }
 	inline float getTicksPerSecond() { return ticksPerSecond; }
 	inline float getDuration() { return duration; }
+	BoneAnimationData* getBoneAnimationData(unsigned int boneIndex);
 };
 
 /*****************************************************************************
@@ -153,12 +175,27 @@ private:
 
 	/* The index of the root bone */
 	unsigned int rootBoneIndex = 0;
+
+	/* The current time of an animation */
+	float currentTime = 0;
+
+	/* Recursive method used to update a bone */
+	void updateBone(float animationTime, Bone* parentBone, Matrix4f& parentMatrix);
 public:
 	/* The constructor */
 	Skeleton() {}
 
 	/* The destructor */
 	virtual ~Skeleton() {}
+
+	/* Method called to update this model */
+	void update(float deltaSeconds);
+
+	/* Method called to start playing an animation */
+	void startAnimation(std::string name);
+
+	/* Method called to stop playing an animation */
+	void stopAnimation();
 
 	/* Setters and getters */
 	inline void setGlobalInverseTransform(const Matrix4f& globalInverseTransform) { this->globalInverseTransform = globalInverseTransform; }
@@ -167,6 +204,7 @@ public:
 	inline void setRootBone(unsigned int rootBoneIndex) { this->rootBoneIndex = rootBoneIndex; }
 
 	inline const Matrix4f& getGlobalInverseTransform() { return globalInverseTransform; }
+	Animation* getAnimation(std::string name);
 };
 
 #endif /* CORE_RENDER_SKINNING_H_ */

@@ -1,5 +1,10 @@
 --------------------------------------------------------------
-Release 0 | Beta 4 | Development 0 | Experimental 5
+Release 0 | Beta 3 | Development 0 | Experimental 6
+
+* More development of skeletal animation
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 0 | Experimental 5
 
 * Added BoneAnimationData
 * Added Bone
@@ -9,7 +14,7 @@ Release 0 | Beta 4 | Development 0 | Experimental 5
 * Better animated model loading (Work in progress)
 
 --------------------------------------------------------------
-Release 0 | Beta 4 | Development 0 | Experimental 4
+Release 0 | Beta 3 | Development 0 | Experimental 4
 
 * Changed Mesh to load the normal map as a height map from
   an OBJ file
@@ -18,7 +23,7 @@ Release 0 | Beta 4 | Development 0 | Experimental 4
              was being searched for instead of position)
 
 --------------------------------------------------------------
-Release 0 | Beta 4 | Development 0 | Experimental 3
+Release 0 | Beta 3 | Development 0 | Experimental 3
 
 * Added skeletal animation (Work in progress)
 
@@ -31,12 +36,12 @@ Release 0 | Beta 4 | Development 0 | Experimental 3
              characters caused the text to render incorrectly
 
 --------------------------------------------------------------
-Release 0 | Beta 4 | Development 0 | Experimental 2
+Release 0 | Beta 3 | Development 0 | Experimental 2
 
 * Moved the SubData structure to MeshData
 
 --------------------------------------------------------------
-Release 0 | Beta 4 | Development 0 | Experimental 1
+Release 0 | Beta 3 | Development 0 | Experimental 1
 
 * Added 'wireframe' command to DebugConsole
 * Added renderWithoutBinding method in RenderData

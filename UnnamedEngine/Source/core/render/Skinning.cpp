@@ -18,6 +18,8 @@
 
 #include "Skinning.h"
 
+#include "../../utils/Logging.h"
+
 /*****************************************************************************
  * The BoneAnimationData class
  *****************************************************************************/
@@ -33,6 +35,116 @@ BoneAnimationData::BoneAnimationData(unsigned int boneIndex, unsigned int numKey
 
 	keyframeScales.resize(numKeyframeScales);
 	keyframeScalesTimes.resize(numKeyframeScales);
+}
+
+Matrix4f BoneAnimationData::getTransformMatrix(float animationTime) {
+	//Get the interpolated position, rotation and scale at the current time
+	Vector3f   position = getInterpolatedPosition(animationTime);
+	Quaternion rotation = getInterpolatedRotation(animationTime);
+	Vector3f   scale    = getInterpolatedScale   (animationTime);
+	//Calculate the matrix and return it
+	return Matrix4f().initTranslation(position) * rotation.toRotationMatrix() * Matrix4f().initScale(scale);
+}
+
+Vector3f BoneAnimationData::getInterpolatedPosition(float animationTime) {
+	//Check whether there is only one keyframe
+	if (keyframePositions.size() == 1)
+		return keyframePositions[0];
+	//Get the index of the last keyframe
+	unsigned int lastIndex = getPositionIndex(animationTime);
+	//Calculate the index of the next keyframe
+	unsigned int nextIndex = lastIndex + 1;
+
+	//Calculate the difference in the times between the two keyframes
+	float deltaTime = keyframePositionsTimes[nextIndex] - keyframePositionsTimes[lastIndex];
+	//Calculate the interpolation factor
+	float factor = (animationTime - keyframePositionsTimes[lastIndex]) / deltaTime;
+	//Get the start and end positions
+	Vector3f start = keyframePositions[lastIndex];
+	Vector3f end   = keyframePositions[nextIndex];
+	//Interpolate and return then result
+	Vector3f delta = end - start;
+	return start + delta * factor;
+}
+
+Quaternion BoneAnimationData::getInterpolatedRotation(float animationTime) {
+	//Check whether there is only one keyframe
+	if (keyframeRotations.size() == 1)
+		return keyframeRotations[0];
+	//Get the index of the last keyframe
+	unsigned int lastIndex = getRotationIndex(animationTime);
+	//Calculate the index of the next keyframe
+	unsigned int nextIndex = lastIndex + 1;
+
+	//Calculate the difference in the times between the two keyframes
+	float deltaTime = keyframeRotationsTimes[nextIndex] - keyframeRotationsTimes[lastIndex];
+	//Calculate the interpolation factor
+	float factor = (animationTime - keyframeRotationsTimes[lastIndex]) / deltaTime;
+	//Get the start and end scales
+	Quaternion start = keyframeRotations[lastIndex];
+	Quaternion end   = keyframeRotations[nextIndex];
+	//Interpolate and return then result
+	return Quaternion::slerp(start, end, factor);
+}
+
+Vector3f BoneAnimationData::getInterpolatedScale(float animationTime) {
+	//Check whether there is only one keyframe
+	if (keyframeScales.size() == 1)
+		return keyframeScales[0];
+	//Get the index of the last keyframe
+	unsigned int lastIndex = getScaleIndex(animationTime);
+	//Calculate the index of the next keyframe
+	unsigned int nextIndex = lastIndex + 1;
+
+	//Calculate the difference in the times between the two keyframes
+	float deltaTime = keyframeScalesTimes[nextIndex] - keyframeScalesTimes[lastIndex];
+	//Calculate the interpolation factor
+	float factor = (animationTime - keyframeScalesTimes[lastIndex]) / deltaTime;
+	//Get the start and end scales
+	Vector3f start = keyframeScales[lastIndex];
+	Vector3f end   = keyframeScales[nextIndex];
+	//Interpolate and return then result
+	Vector3f delta = end - start;
+	return start + delta * factor;
+}
+
+unsigned int BoneAnimationData::getPositionIndex(float animationTime) {
+	//Go through each keyframe
+	for (unsigned int i = 0; i < keyframePositionsTimes.size() - 1; i++) {
+		//Check the next keyframe's time
+		if (animationTime < keyframePositionsTimes[i + 1])
+			//The next keyframe is after the time given, so return the current index
+			return i;
+	}
+	//Log an error
+	Logger::log("Position not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
+	return 0;
+}
+
+unsigned int BoneAnimationData::getRotationIndex(float animationTime) {
+	//Go through each keyframe
+	for (unsigned int i = 0; i < keyframeRotationsTimes.size() - 1; i++) {
+		//Check the next keyframe's time
+		if (animationTime < keyframeRotationsTimes[i + 1])
+			//The next keyframe is after the time given, so return the current index
+			return i;
+	}
+	//Log an error
+	Logger::log("Rotation not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
+	return 0;
+}
+
+unsigned int BoneAnimationData::getScaleIndex(float animationTime) {
+	//Go through each keyframe
+	for (unsigned int i = 0; i < keyframeScalesTimes.size() - 1; i++) {
+		//Check the next keyframe's time
+		if (animationTime < keyframeScalesTimes[i + 1])
+			//The next keyframe is after the time given, so return the current index
+			return i;
+	}
+	//Log an error
+	Logger::log("Scale not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
+	return 0;
 }
 
 /*****************************************************************************
@@ -51,6 +163,82 @@ Animation::Animation(std::string name, float ticksPerSecond, float duration) : n
 
 }
 
+BoneAnimationData* Animation::getBoneAnimationData(unsigned int boneIndex) {
+	//Go through the animations
+	for (unsigned int i = 0; i < boneData.size(); i++) {
+		//Check the current animation's name
+		if (boneData[i]->getBoneIndex() == boneIndex)
+			//Return the animation
+			return boneData[i];
+	}
+	//Log an error
+	Logger::log("BoneAnimationData with the index '" + StrUtils::str(boneIndex) + "' was not found in the animation with the name '" + name + "'", "Animation", LogType::Error);
+	//Return NULL if not found
+	return NULL;
+}
+
 /*****************************************************************************
  * The Skeleton class
  *****************************************************************************/
+
+void Skeleton::updateBone(float animationTime, Bone* parentBone, Matrix4f& parentMatrix) {
+	//Calculate the matrix for the current bone
+	Matrix4f globalTransformation = parentMatrix * parentBone->getAnimationData()->getTransformMatrix(animationTime);
+	//Calculate the final transformation for the current bone
+	Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
+	//Assign the bone's final transformation
+	parentBone->setFinalTransform(finalTransformation);
+	//Go through each child bone
+	for (unsigned int i = 0; i < parentBone->getNumChildren(); i++)
+		//Update the current bone
+		updateBone(animationTime, bones[parentBone->getChild(i)], globalTransformation);
+}
+
+void Skeleton::update(float deltaSeconds) {
+	//Check whether an animation is occurring
+	if (currentAnimation) {
+		//Add to the current animation time
+		currentTime += deltaSeconds;
+
+		//Get the current animation time
+		float timeInTicks = currentTime * currentAnimation->getTicksPerSecond();
+		float animationTime = fmod(timeInTicks, currentAnimation->getDuration());
+
+		//Identity matrix
+		Matrix4f identity = Matrix4f().initIdentity();
+
+		//Update the root bone
+		updateBone(animationTime, bones[rootBoneIndex], identity);
+	}
+}
+
+void Skeleton::startAnimation(std::string name) {
+	//Assign the current animation
+	currentAnimation = getAnimation(name);
+	//Reset the time
+	currentTime = 0;
+	//Ensure the animation was found
+	if (currentAnimation) {
+		//Go through each bone and assign their animation data
+		for (unsigned int i = 0; i < bones.size(); i++)
+			bones[i]->setAnimationData(currentAnimation->getBoneAnimationData(i));
+	}
+}
+
+void Skeleton::stopAnimation() {
+	currentAnimation = NULL;
+}
+
+Animation* Skeleton::getAnimation(std::string name) {
+	//Go through the animations
+	for (unsigned int i = 0; i < animations.size(); i++) {
+		//Check the current animation's name
+		if (animations[i]->getName() == name)
+			//Return the animation
+			return animations[i];
+	}
+	//Log an error
+	Logger::log("Animation with the name '" + name + "' was not found in the skeleton", "Skeleton", LogType::Error);
+	//Return NULL if not found
+	return NULL;
+}
