@@ -347,139 +347,6 @@ Mesh::~Mesh() {
 	delete data;
 }
 
-void Mesh::boneTransform(float timeInSeconds) {
-	Matrix4f matrix = Matrix4f().initIdentity();
-
-	float ticksPerSecond = data->scene->mAnimations[0]->mTicksPerSecond;
-	float timeInTicks = timeInSeconds * ticksPerSecond;
-	float animationTime = fmod(timeInTicks, data->scene->mAnimations[0]->mDuration);
-	readNodeHeirachy(animationTime, data->scene->mRootNode, matrix);
-}
-
-void Mesh::readNodeHeirachy(float animationTime, const aiNode* parent, const Matrix4f& parentMatrix) {
-	std::string nodeName(parent->mName.data);
-
-	const aiAnimation* animation = data->scene->mAnimations[0];
-
-	Matrix4f nodeTransformation = toMatrix4f(parent->mTransformation);
-
-	const aiNodeAnim* parentNodeAnim = findNodeAnim(animation, nodeName);
-
-	if (parentNodeAnim) {
-		aiVector3D scaling;
-		calcInterpolatedScaling(scaling, animationTime, parentNodeAnim);
-		Matrix4f scalingM = Matrix4f().initScale(Vector3f(scaling.x, scaling. y, scaling.z));
-
-		aiQuaternion rotation;
-		calcInterpolatedRotation(rotation, animationTime, parentNodeAnim);
-		Matrix4f rotationM = toMatrix4f(rotation.GetMatrix());
-
-		aiVector3D translation;
-		calcInterpolatedPosition(translation, animationTime, parentNodeAnim);
-		Matrix4f translationM = Matrix4f().initTranslation(Vector3f(translation.x, translation.y, translation.z));
-
-		nodeTransformation = translationM * rotationM * scalingM;
-	}
-
-	Matrix4f globalTransformation = parentMatrix *  nodeTransformation;
-
-	if (data->boneMappings.find(nodeName) != data->boneMappings.end()) {
-		unsigned int boneIndex = data->boneMappings[nodeName];
-		data->boneInfo[boneIndex].finalTransformation = data->globalInverseTransform * globalTransformation * data->boneInfo[boneIndex].boneOffset;
-	}
-
-	for (unsigned int i = 0; i < parent->mNumChildren; i++) {
-		readNodeHeirachy(animationTime, parent->mChildren[i], globalTransformation);
-	}
-}
-
-void Mesh::calcInterpolatedScaling(aiVector3D& out, float animationTime, const aiNodeAnim* parentAnim) {
-	if (parentAnim->mNumScalingKeys == 1) {
-		out = parentAnim->mScalingKeys[0].mValue;
-		return;
-	}
-
-	unsigned int scalingIndex = findScaling(animationTime, parentAnim);
-	unsigned int nextScalingIndex = (scalingIndex + 1);
-
-	float deltaTime = parentAnim->mScalingKeys[nextScalingIndex].mTime - parentAnim->mScalingKeys[scalingIndex].mTime;
-	float factor = (animationTime - (float) parentAnim->mScalingKeys[scalingIndex].mTime) / deltaTime;
-	const aiVector3D& start = parentAnim->mScalingKeys[scalingIndex].mValue;
-	const aiVector3D& end = parentAnim->mScalingKeys[nextScalingIndex].mValue;
-    aiVector3D delta = end - start;
-    out = start + factor * delta;
-}
-
-void Mesh::calcInterpolatedRotation(aiQuaternion& out, float animationTime, const aiNodeAnim* parentAnim) {
-	if (parentAnim->mNumRotationKeys == 1) {
-		out = parentAnim->mRotationKeys[0].mValue;
-		return;
-	}
-
-	unsigned int rotationIndex = findRotation(animationTime, parentAnim);
-	unsigned int nextRotationIndex = (rotationIndex + 1);
-
-	float deltaTime = parentAnim->mRotationKeys[nextRotationIndex].mTime - parentAnim->mRotationKeys[rotationIndex].mTime;
-	float factor = (animationTime - (float) parentAnim->mRotationKeys[rotationIndex].mTime) / deltaTime;
-	const aiQuaternion& startRotation = parentAnim->mRotationKeys[rotationIndex].mValue;
-	const aiQuaternion& endRotation = parentAnim->mRotationKeys[nextRotationIndex].mValue;
-	aiQuaternion::Interpolate(out, startRotation, endRotation, factor);
-	out = out.Normalize();
-}
-
-void Mesh::calcInterpolatedPosition(aiVector3D& out, float animationTime, const aiNodeAnim* parentAnim) {
-	if (parentAnim->mNumPositionKeys == 1) {
-		out = parentAnim->mPositionKeys[0].mValue;
-		return;
-	}
-
-	unsigned int positionIndex = findPosition(animationTime, parentAnim);
-	unsigned int nextPositionIndex = (positionIndex + 1);
-
-	float deltaTime = parentAnim->mPositionKeys[nextPositionIndex].mTime - parentAnim->mPositionKeys[positionIndex].mTime;
-	float factor = (animationTime - (float) parentAnim->mPositionKeys[positionIndex].mTime) / deltaTime;
-	const aiVector3D& start = parentAnim->mPositionKeys[positionIndex].mValue;
-	const aiVector3D& end = parentAnim->mPositionKeys[nextPositionIndex].mValue;
-    aiVector3D delta = end - start;
-    out = start + factor * delta;
-}
-
-const aiNodeAnim* Mesh::findNodeAnim(const aiAnimation* parent, const std::string nodeName) {
-	for (unsigned int i = 0; i < parent->mNumChannels; i++) {
-		const aiNodeAnim* parentAnim = parent->mChannels[i];
-		if (std::string(parentAnim->mNodeName.data) == nodeName)
-			return parentAnim;
-	}
-	return NULL;
-}
-
-unsigned int Mesh::findScaling(float animationTime, const aiNodeAnim* parentAnim) {
-	for (unsigned int i = 0; i < parentAnim->mNumScalingKeys - 1; i++) {
-		if (animationTime < (float) parentAnim->mScalingKeys[i + 1].mTime)
-			return i;
-	}
-	Logger::log("Scaling not found for skinned mesh", "Mesh", LogType::Error);
-	return 0;
-}
-
-unsigned int Mesh::findRotation(float animationTime, const aiNodeAnim* parentAnim) {
-	for (unsigned int i = 0; i < parentAnim->mNumRotationKeys - 1; i++) {
-		if (animationTime < (float) parentAnim->mRotationKeys[i + 1].mTime)
-			return i;
-	}
-	Logger::log("Rotation not found for skinned mesh", "Mesh", LogType::Error);
-	return 0;
-}
-
-unsigned int Mesh::findPosition(float animationTime, const aiNodeAnim* parentAnim) {
-	for (unsigned int i = 0; i < parentAnim->mNumPositionKeys - 1; i++) {
-		if (animationTime < (float) parentAnim->mPositionKeys[i + 1].mTime)
-			return i;
-	}
-	Logger::log("Position not found for skinned mesh", "Mesh", LogType::Error);
-	return 0;
-}
-
 const aiNode* Mesh::findNode(const aiNode* parent, std::string name) {
 	//The current node
 	const aiNode* node = NULL;
@@ -516,7 +383,6 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
 	//The MeshData instance used to store the data for the current mesh
 	MeshData* currentData = new MeshData(MeshData::DIMENSIONS_3D);
-	currentData->scene = scene;
 	//The current and last number of indices added
 	unsigned int numIndices = 0;
 	unsigned int numVertices = 0;
@@ -575,43 +441,6 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			numVertices += currentMesh->mNumVertices;
 		}
 
-		if (hasBones) {
-			currentData->globalInverseTransform = toMatrix4f(scene->mRootNode->mTransformation.Inverse());
-			currentData->bones.resize(numVertices);
-
-			//Load the bones
-			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
-				//Pointer to the current mesh being read
-				const struct aiMesh* currentMesh = scene->mMeshes[a];
-				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
-					unsigned int boneIndex = 0;
-					std::string boneName(currentMesh->mBones[b]->mName.data);
-					if (currentData->boneMappings.find(boneName) == currentData->boneMappings.end()) {
-						boneIndex = currentData->numBones;
-						currentData->numBones++;
-						MeshData::BoneInfo bi;
-						currentData->boneInfo.push_back(bi);
-						currentData->boneInfo[boneIndex].boneOffset = toMatrix4f(currentMesh->mBones[b]->mOffsetMatrix);
-						currentData->boneMappings.insert(std::pair<std::string, unsigned int>(boneName, boneIndex));
-					} else
-						boneIndex = currentData->boneMappings[boneName];
-
-					for (unsigned int c = 0; c < currentMesh->mBones[b]->mNumWeights; c++) {
-						unsigned int vertexID = currentData->getSubData(a).baseVertex + currentMesh->mBones[b]->mWeights[c].mVertexId;
-						float weight = currentMesh->mBones[b]->mWeights[c].mWeight;
-						currentData->bones[vertexID].addBoneData(boneIndex, weight);
-					}
-				}
-			}
-
-			for (unsigned int a = 0; a < currentData->bones.size(); a++) {
-				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; b++) {
-					currentData->boneIds.push_back(currentData->bones[a].ids[b]);
-					currentData->boneWeights.push_back(currentData->bones[a].weights[b]);
-				}
-			}
-		}
-
 		//The skeleton instance
 		Skeleton* skeleton = NULL;
 
@@ -627,6 +456,8 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			std::map<std::string, unsigned int>    boneIndices;
 			//Place to store all of the created bones
 			std::vector<Bone*> bones;
+
+			currentData->bones.resize(numVertices);
 
 			//Go through each mesh
 			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
@@ -655,6 +486,27 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 				boneIndices.insert(std::pair<std::string, unsigned int>(std::string(current.first->mName.C_Str()), currentIndex));
 				currentIndex++;
 			}
+
+			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
+				//Pointer to the current mesh being read
+				const struct aiMesh* currentMesh = scene->mMeshes[a];
+				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
+					unsigned int boneIndex = boneIndices[std::string(currentMesh->mBones[b]->mName.C_Str())];
+
+					for (unsigned int c = 0; c < currentMesh->mBones[b]->mNumWeights; c++) {
+						unsigned int vertexID = currentData->getSubData(a).baseVertex + currentMesh->mBones[b]->mWeights[c].mVertexId;
+						float weight = currentMesh->mBones[b]->mWeights[c].mWeight;
+						currentData->bones[vertexID].addBoneData(boneIndex, weight);
+					}
+				}
+			}
+			for (unsigned int a = 0; a < currentData->bones.size(); a++) {
+				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; b++) {
+					currentData->boneIds.push_back(currentData->bones[a].ids[b]);
+					currentData->boneWeights.push_back(currentData->bones[a].weights[b]);
+				}
+			}
+
 
 			//Make room for all of the bones
 			bones.resize(currentIndex);
@@ -748,7 +600,7 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 		}
 
 		//Release all of the resources Assimp loaded
-		//aiReleaseImport(scene);
+		aiReleaseImport(scene);
 		//Return the meshes
 		return mesh;
 	} else {

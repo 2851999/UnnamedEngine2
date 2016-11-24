@@ -152,8 +152,8 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			MeshRenderData* renderData = mesh->getRenderData();
 
 			if (mesh->hasSkeleton()) {
-				for (unsigned int i = 0; i < data->boneInfo.size(); i++)
-					shader->setUniformMatrix4("Bones[" + StrUtils::str(i) + "]", data->boneInfo[i].finalTransformation);
+				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); i++)
+					shader->setUniformMatrix4("Bones[" + StrUtils::str(i) + "]", mesh->getSkeleton()->getBone(i)->getFinalTransform());
 				shader->setUniformi("UseSkinning", 1);
 			} else
 				shader->setUniformi("UseSkinning", 0);

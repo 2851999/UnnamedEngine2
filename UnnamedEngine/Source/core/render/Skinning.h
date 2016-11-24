@@ -46,6 +46,11 @@ private:
 	/* The key-frame scales and times */
 	std::vector<Vector3f> keyframeScales;
 	std::vector<float>    keyframeScalesTimes;
+
+	/* The indices of the last locations checked */
+	unsigned int lastPositionsIndex = 0;
+	unsigned int lastRotationsIndex = 0;
+	unsigned int lastScalesIndex    = 0;
 public:
 	/* The constructor */
 	BoneAnimationData(unsigned int boneIndex, unsigned int numKeyframePositions, unsigned int numKeyframeRotations, unsigned int numKeyframeScales);
@@ -68,7 +73,7 @@ public:
 
 	/* Setters and getters */
 	inline void setKeyframePosition(unsigned int index, const Vector3f& position, const float time) { keyframePositions[index] = position; keyframePositionsTimes[index] = time; }
-	inline void setKeyframeRotation(unsigned int index, const Quaternion& rotation, const float time) { keyframeRotations[index] = rotation; keyframeRotations[index] = time; }
+	inline void setKeyframeRotation(unsigned int index, const Quaternion& rotation, const float time) { keyframeRotations[index] = rotation; keyframeRotationsTimes[index] = time; }
 	inline void setKeyframeScale(unsigned int index, const Vector3f& scale, const float time) { keyframeScales[index] = scale; keyframeScalesTimes[index] = time; }
 
 	inline unsigned int getBoneIndex() { return boneIndex; }
@@ -112,6 +117,7 @@ public:
 	inline void addChild(unsigned int childIndex) { children.push_back(childIndex); }
 	inline void setAnimationData(BoneAnimationData* animationData) { this->animationData = animationData; }
 
+	inline Matrix4f& getTransform() { return transform; }
 	inline Matrix4f& getOffset() { return offset; }
 	inline Matrix4f& getFinalTransform() { return finalTransform; }
 	inline unsigned int getNumChildren() { return children.size(); }
@@ -181,12 +187,18 @@ private:
 
 	/* Recursive method used to update a bone */
 	void updateBone(float animationTime, Bone* parentBone, Matrix4f& parentMatrix);
+
+	/* Recursive method used to set the bind pose of a bone */
+	void setBoneBindPose(Bone* parentBone, Matrix4f& parentMatrix);
 public:
 	/* The constructor */
 	Skeleton() {}
 
 	/* The destructor */
 	virtual ~Skeleton() {}
+
+	/* Method called to update all of the bones given an animation time */
+	void updateBones(float animationTime);
 
 	/* Method called to update this model */
 	void update(float deltaSeconds);
@@ -197,6 +209,9 @@ public:
 	/* Method called to stop playing an animation */
 	void stopAnimation();
 
+	/* Method called to setup the bind pose of this skeleton */
+	void setBindPose();
+
 	/* Setters and getters */
 	inline void setGlobalInverseTransform(const Matrix4f& globalInverseTransform) { this->globalInverseTransform = globalInverseTransform; }
 	inline void setAnimations(std::vector<Animation*>& animations) { this->animations = animations; }
@@ -205,6 +220,8 @@ public:
 
 	inline const Matrix4f& getGlobalInverseTransform() { return globalInverseTransform; }
 	Animation* getAnimation(std::string name);
+	inline unsigned int getNumBones() { return bones.size(); }
+	inline Bone* getBone(unsigned int index) { return bones[index]; }
 };
 
 #endif /* CORE_RENDER_SKINNING_H_ */

@@ -51,11 +51,6 @@ public:
 		unsigned int materialIndex; //The material index of this part of the mesh
 	};
 
-	struct BoneInfo {
-		Matrix4f boneOffset;
-		Matrix4f finalTransformation;
-	};
-
 	struct VertexBoneData {
 		unsigned int ids[NUM_BONES_PER_VERTEX];
 		float weights[NUM_BONES_PER_VERTEX];
@@ -71,13 +66,7 @@ public:
 		}
 	};
 
-	std::map<std::string, unsigned int> boneMappings;
-	unsigned int numBones = 0;
-	std::vector<BoneInfo> boneInfo;
 	std::vector<VertexBoneData> bones;
-	Matrix4f globalInverseTransform;
-
-	const aiScene* scene = NULL;
 
 	std::vector<unsigned int> boneIds;
 	std::vector<float> boneWeights;
@@ -320,19 +309,6 @@ public:
 	inline bool hasMaterial() { return materials.size() > 0; }
 	inline Skeleton* getSkeleton() { return skeleton; }
 	inline bool hasSkeleton() { return skeleton; }
-
-	void boneTransform(float timeInSeconds);
-	void readNodeHeirachy(float animationTime, const aiNode* parent, const Matrix4f& parentMatrix);
-
-	void calcInterpolatedScaling(aiVector3D& out, float animationTime, const aiNodeAnim* parent);
-	void calcInterpolatedRotation(aiQuaternion& out, float animationTime, const aiNodeAnim* parent);
-	void calcInterpolatedPosition(aiVector3D& out, float animationTime, const aiNodeAnim* parent);
-
-	unsigned int findScaling(float animationTime, const aiNodeAnim* parentAnim);
-	unsigned int findRotation(float animationTime, const aiNodeAnim* parentAnim);
-	unsigned int findPosition(float animationTime, const aiNodeAnim* parentAnim);
-
-	const aiNodeAnim* findNodeAnim(const aiAnimation* parent, const std::string nodeName);
 
 	static const aiNode* findNode(const aiNode* parent, std::string name);
 	static void addParents(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes, std::string stopName, const aiNode* stopParent);

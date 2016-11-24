@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 0 | Experimental 7
+
+* Fixed bug: Vector's lerp and nlerp methods were incorrect
+
+* More skeletal animation
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 0 | Experimental 6
 
 * More development of skeletal animation
