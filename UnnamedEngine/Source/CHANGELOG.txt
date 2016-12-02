@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 0 | Experimental 9
+
+* Fixed bug: Models didn't always have the correct orientation
+
+* More skeletal animation
+
+* Note: At the moment any loaded models assume the file being
+        loaded only has one model within it
+        
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 0 | Experimental 8
 
 * More skeletal animation

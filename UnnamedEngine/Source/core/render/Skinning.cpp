@@ -43,11 +43,7 @@ Matrix4f BoneAnimationData::getTransformMatrix(float animationTime) {
 	Quaternion rotation = getInterpolatedRotation(animationTime);
 	Vector3f   scale    = getInterpolatedScale   (animationTime);
 
-	Matrix4f translationM = Matrix4f().initTranslation(position);
-	Matrix4f rotationM    = rotation.toRotationMatrix();
-	Matrix4f scaleM       = Matrix4f().initScale(scale);
-
-	Matrix4f result = translationM * rotationM * scaleM;
+	Matrix4f result = Matrix4f().initTranslation(position) * rotation.toRotationMatrix() * Matrix4f().initScale(scale);
 
 	//Calculate the matrix and return it
 	return result;
@@ -105,9 +101,17 @@ Vector3f BoneAnimationData::getInterpolatedScale(float animationTime) {
 }
 
 unsigned int BoneAnimationData::getPositionIndex(float animationTime) {
-	for (unsigned int i = 0; i < keyframePositionsTimes.size() - 1; i++) {
-		if (animationTime < keyframePositionsTimes[i + 1])
+	for (unsigned int i = lastPositionsIndex; i < keyframePositionsTimes.size() - 1; i++) {
+		if (animationTime < keyframePositionsTimes[i + 1] && animationTime >= keyframePositionsTimes[i]) {
+			lastPositionsIndex = i;
 			return i;
+		}
+	}
+	for (unsigned int i = 0; i <= lastPositionsIndex; i++) {
+		if (animationTime < keyframePositionsTimes[i + 1]) {
+			lastPositionsIndex = i;
+			return i;
+		}
 	}
 	//Log an error
 	Logger::log("Position not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
@@ -115,9 +119,17 @@ unsigned int BoneAnimationData::getPositionIndex(float animationTime) {
 }
 
 unsigned int BoneAnimationData::getRotationIndex(float animationTime) {
-	for (unsigned int i = 0; i < keyframeRotationsTimes.size() - 1; i++) {
-		if (animationTime < keyframeRotationsTimes[i + 1])
+	for (unsigned int i = lastRotationsIndex; i < keyframeRotationsTimes.size() - 1; i++) {
+		if (animationTime < keyframeRotationsTimes[i + 1] && animationTime >= keyframeRotationsTimes[i]) {
+			lastRotationsIndex = i;
 			return i;
+		}
+	}
+	for (unsigned int i = 0; i <= lastRotationsIndex; i++) {
+		if (animationTime < keyframeRotationsTimes[i + 1]) {
+			lastRotationsIndex = i;
+			return i;
+		}
 	}
 	//Log an error
 	Logger::log("Rotation not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
@@ -125,9 +137,17 @@ unsigned int BoneAnimationData::getRotationIndex(float animationTime) {
 }
 
 unsigned int BoneAnimationData::getScaleIndex(float animationTime) {
-	for (unsigned int i = 0; i < keyframeScalesTimes.size() - 1; i++) {
-		if (animationTime < keyframeScalesTimes[i + 1])
+	for (unsigned int i = lastScalesIndex; i < keyframeScalesTimes.size() - 1; i++) {
+		if (animationTime < keyframeScalesTimes[i + 1] && animationTime >= keyframeScalesTimes[i]) {
+			lastScalesIndex = i;
 			return i;
+		}
+	}
+	for (unsigned int i = 0; i <= lastScalesIndex; i++) {
+		if (animationTime < keyframeScalesTimes[i + 1]) {
+			lastScalesIndex = i;
+			return i;
+		}
 	}
 	//Log an error
 	Logger::log("Scale not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
@@ -176,7 +196,7 @@ void Skeleton::updateBone(float animationTime, Bone* parentBone, const Matrix4f&
 		nodeTransformation = parentBone->getAnimationData()->getTransformMatrix(animationTime);
 	Matrix4f globalTransformation = parentMatrix * nodeTransformation;
 	//Calculate the final transformation for the current bone
-	Matrix4f finalTransformation = globalTransformation * parentBone->getOffset();
+	Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
 	//Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
 	//Assign the bone's final transformation
 	parentBone->setFinalTransform(finalTransformation);
@@ -202,7 +222,7 @@ void Skeleton::setBoneBindPose(Bone* parentBone, const Matrix4f& parentMatrix) {
 	//Calculate the matrix for the current bone
 	Matrix4f globalTransformation = parentMatrix * parentBone->getTransform();
 	//Calculate the final transformation for the current bone
-	Matrix4f finalTransformation = globalTransformation * parentBone->getOffset();
+	Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
 	//Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
 	//Assign the bone's final transformation
 	parentBone->setFinalTransform(finalTransformation);

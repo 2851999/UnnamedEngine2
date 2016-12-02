@@ -334,6 +334,8 @@ Mesh::Mesh(MeshData* data) {
 	this->data = data;
 	//Add the default material
 	this->addMaterial(new Material());
+
+	transform.setIdentity();
 }
 
 Mesh::~Mesh() {
@@ -386,6 +388,32 @@ void Mesh::addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*
 		addChildren(node->mChildren[i], nodes);
 }
 
+const aiNode* Mesh::findMeshNode(const aiNode* parent) {
+	//The current node
+	const aiNode* node = NULL;
+	//Check whether the current node is the correct one
+	if (parent->mNumMeshes > 0)
+		//The parent given is the one being searched for so return it
+		return parent;
+	//Go through each child node of the parent
+	for (unsigned int i = 0; i < parent->mNumChildren; i++) {
+		//Check the current child
+		node = findMeshNode(parent->mChildren[i]);
+		//Return the node if it has been found
+		if (node)
+			return node;
+	}
+	//Return NULL as the node was not found
+	return NULL;
+}
+
+const aiMatrix4x4 Mesh::calculateMatrix(const aiNode* current, aiMatrix4x4 currentMatrix) {
+	currentMatrix = currentMatrix * current->mTransformation;
+	if (current->mParent)
+		currentMatrix = calculateMatrix(current->mParent, currentMatrix);
+	return currentMatrix;
+}
+
 Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 	//Load the file using Assimp
 	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
@@ -398,7 +426,6 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 
 	//Ensure the data was loaded successfully
 	if (scene != NULL) {
-		std::cout << toMatrix4f(scene->mRootNode->mTransformation).toString() << std::endl;
 		//Go through each loaded mesh
 		for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
 			//Pointer to the current mesh being read
@@ -412,17 +439,17 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 				aiVector3D& position = currentMesh->mVertices[i];
 				currentData->addPosition(Vector3f(position.x, position.y, position.z));
 				//Add the texture coordinates data if it exists
-				if (currentMesh->mTextureCoords[0] != NULL) {
+				if (currentMesh->HasTextureCoords(0)) {
 					aiVector3D& textureCoord = currentMesh->mTextureCoords[0][i];
 					currentData->addTextureCoord(Vector2f(textureCoord.x, textureCoord.y));
 				}
 				//Add the normals data if it exists
-				if (currentMesh->mNormals != NULL) {
+				if (currentMesh->HasNormals()) {
 					aiVector3D& normal = currentMesh->mNormals[i];
 					currentData->addNormal(Vector3f(normal.x, normal.y, normal.z));
 
 					//Add the tangent data if it exists
-					if (currentMesh->mTangents != NULL) {
+					if (currentMesh->HasTangentsAndBitangents()) {
 						aiVector3D& tangent = currentMesh->mTangents[i];
 						currentData->addTangent(Vector3f(tangent.x, tangent.y, tangent.z));
 
@@ -481,11 +508,7 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 					const aiNode* correspondingNode = findNode(scene->mRootNode, std::string(currentMesh->mBones[b]->mName.C_Str()));
 					//Add the node to the necessary nodes if it was found
 					if (correspondingNode) {
-						//if (necessaryNodes.count(correspondingNode) == 0)
-							//necessaryNodes.insert(std::pair<const aiNode*, const aiBone*>(correspondingNode, currentMesh->mBones[b]));
-						//else
-							necessaryNodes[correspondingNode] = currentMesh->mBones[b];
-						//addParents(correspondingNode, necessaryNodes, std::string(currentMesh->mBones[b]->mName.C_Str()), correspondingNode->mParent);
+						necessaryNodes[correspondingNode] = currentMesh->mBones[b];
 					}
 				}
 
@@ -495,8 +518,6 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			//Add the bone indices
 			unsigned int currentIndex = 0;
 			for (const auto& current : necessaryNodes) {
-				std::cout << std::string(current.first->mName.C_Str()) << std::endl;
-				std::cout << current.first << std::endl;
 				boneIndices.insert(std::pair<std::string, unsigned int>(std::string(current.first->mName.C_Str()), currentIndex));
 				currentIndex++;
 			}
@@ -600,6 +621,14 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 
 		//Create the mesh
 		Mesh* mesh = new Mesh(currentData);
+		const aiNode* meshNode = findMeshNode(scene->mRootNode);
+		aiMatrix4x4 matrix = calculateMatrix(meshNode, aiMatrix4x4(1, 0, 0, 0,
+																   0, 1, 0, 0,
+																   0, 0, 1, 0,
+																   0, 0, 0, 1));
+		mesh->setMatrix(toMatrix4f(matrix));
+		if (skeleton)
+			skeleton->setGlobalInverseTransform(toMatrix4f(matrix.Inverse()));
 		//Assign the mesh's skeleton
 		mesh->setSkeleton(skeleton);
 

@@ -270,6 +270,9 @@ private:
 	MeshData* data;
 	MeshRenderData* renderData = NULL;
 
+	/* The transform matrix for this mesh */
+	Matrix4f transform;
+
 	/* The materials */
 	std::vector<Material*> materials;
 
@@ -291,6 +294,7 @@ public:
 	inline void addMaterial(Material* material) { materials.push_back(material); }
 
 	/* The setters and getters */
+	inline void setMatrix(const Matrix4f& transform) { this->transform = transform; }
 	inline void setMaterial(Material* material) { this->materials[0] = material; }
 	inline void setMaterial(unsigned int index, Material* material) {
 		if (index == materials.size())
@@ -300,6 +304,7 @@ public:
 	}
 	inline void setSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
 
+	inline Matrix4f getMatrix() { return transform; }
 	inline MeshData* getData() { return data; }
 	inline bool hasData() { return data; }
 	inline MeshRenderData* getRenderData() { return renderData; }
@@ -313,6 +318,8 @@ public:
 	static const aiNode* findNode(const aiNode* parent, std::string name);
 	static void addParents(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes, std::string stopName, const aiNode* stopParent);
 	static void addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes);
+	static const aiNode* findMeshNode(const aiNode* parent);
+	static const aiMatrix4x4 calculateMatrix(const aiNode* current, aiMatrix4x4 currentMatrix);
 
 	/* Static method called to read a file and load a model's meshes */
 	static Mesh* loadModel(std::string path, std::string fileName);

@@ -54,8 +54,10 @@ GameObject2D::GameObject2D(Mesh* mesh, std::string shaderId, float width , float
 
 void GameObject2D::update() {
 	//Check to make sure this object has a mesh
-	if (hasMesh() && transform->hasChanged())
+	if (hasMesh() && transform->hasChanged()) {
 		transform->calculateMatrix(Vector2f(getWidth() / 2, getHeight() / 2));
+		transform->setMatrix(transform->getMatrix() * getMesh()->getMatrix());
+	}
 }
 
 Vector2f GameObject2D::getSize() {
@@ -75,8 +77,10 @@ GameObject3D::GameObject3D(Mesh* mesh, std::string shaderId, float width , float
 
 void GameObject3D::update() {
 	//Check to make sure this object has a mesh
-	if (hasMesh() && transform->hasChanged())
+	if (hasMesh() && transform->hasChanged()) {
 		transform->calculateMatrix();
+		transform->setMatrix(transform->getMatrix() * getMesh()->getMatrix());
+	}
 }
 
 Vector3f GameObject3D::getSize() {

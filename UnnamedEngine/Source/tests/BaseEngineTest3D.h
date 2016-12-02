@@ -32,7 +32,9 @@ private:
 	ParticleEmitter* particleEmitter;
 	ParticleSystem* particleSystem;
 
-	GameObject3D* teapot;
+	GameObject3D* model1;
+	GameObject3D* model2;
+	GameObject3D* model3;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -49,26 +51,32 @@ void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	//GameObject3D* teapot = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Lighting");
-	teapot = new GameObject3D(resourceLoader.loadModel("", "monkey2.obj"), "Lighting");
 	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane.dae"), "Lighting");
-	teapot->setPosition(0.0f, 0.8f, 0.0f);
-	//teapot->setRotation(-180.0f, 180.0f, 0.0f);
-	teapot->update();
-
-	Matrix4f mat;
-	mat.set(0, 0, 1); mat.set(0, 1, 0); mat.set(0, 2, 0); mat.set(0, 3, 0);
-	mat.set(1, 0, 0); mat.set(1, 1, 0); mat.set(1, 2, 1); mat.set(1, 3, 0);
-	mat.set(2, 0, 0); mat.set(2, 1, -1); mat.set(2, 2, 0); mat.set(2, 3, 0);
-	mat.set(3, 0, 0); mat.set(3, 1, 0); mat.set(3, 2, 0); mat.set(3, 3, 1);
-	teapot->getTransform()->setMatrix(teapot->getTransform()->getMatrix() * mat);
-
-	//teapot->getMesh()->getSkeleton()->print();
-	//teapot->getMesh()->getSkeleton()->startAnimation("");
-	//teapot->getMesh()->getSkeleton()->stopAnimation();
 	plane->update();
-	renderScene->add(teapot);
+
+	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), "Lighting");
+	model1->setPosition(-2.0f, 0.8f, 0.0f);
+	model1->update();
+
+	model1->getMesh()->getSkeleton()->startAnimation("");
+	//model1->getMesh()->getSkeleton()->stopAnimation();
+
+	model2 = new GameObject3D(resourceLoader.loadModel("astroboy.dae"), "Lighting");
+	model2->setPosition(0.0f, 0.8f, 0.0f);
+	model2->update();
+
+	model2->getMesh()->getSkeleton()->startAnimation("");
+
+	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.dae"), "Lighting");
+	model3->setPosition(2.0f, 0.8f, 0.0f);
+	model3->update();
+
+	model3->getMesh()->getSkeleton()->startAnimation("");
+
 	renderScene->add(plane);
+	renderScene->add(model1);
+	renderScene->add(model2);
+	renderScene->add(model3);
 
 	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.2f);
 	light0->update();
@@ -102,7 +110,9 @@ void Test::onUpdate() {
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		particleEmitter->getTransform()->translate(Vector3f(0.008f * getDelta(), 0.0f, 0.0f));
 
-	//teapot->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	model1->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	model2->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	model3->getMesh()->getSkeleton()->update(getDeltaSeconds());
 }
 
 void Test::onRender() {
