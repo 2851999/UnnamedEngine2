@@ -70,7 +70,7 @@ out mat3 frag_tbnMatrix;
 #map attribute BoneWeights boneWeights
 #map uniform UseSkinning useSkinning
 
-const int MAX_BONES = 50;
+const int MAX_BONES = 80;
 uniform mat4 bones[MAX_BONES];
 
 in ivec4 boneIDs;

@@ -312,6 +312,7 @@ public:
 
 	static const aiNode* findNode(const aiNode* parent, std::string name);
 	static void addParents(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes, std::string stopName, const aiNode* stopParent);
+	static void addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes);
 
 	/* Static method called to read a file and load a model's meshes */
 	static Mesh* loadModel(std::string path, std::string fileName);

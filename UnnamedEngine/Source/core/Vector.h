@@ -148,7 +148,7 @@ public:
 	inline bool operator>=(const Vector<T, N>& other) { return length() >= other.length(); }
 
 	/* Method to linearly interpolate between two vectors */
-	inline static Vector<T, N> lerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) { return (a + (b - a) * factor); }
+	inline static Vector<T, N> lerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) { return (a + ((b - a) * factor)); }
 	inline static Vector<T, N> slerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) {
 		//https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
 		float dot = a.dot(b);

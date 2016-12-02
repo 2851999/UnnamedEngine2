@@ -237,7 +237,7 @@ void Renderer::addRenderShader(std::string id, Shader* shader) {
 			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "lights[" + str(i) + "].outerCutoff");
 		}
 
-		for (unsigned int i = 0; i < 50; i++)
+		for (unsigned int i = 0; i < 80; i++)
 			shader->addUniform("Bones[" + str(i) + "]", "bones[" + str(i) + "]");
 
 		shader->addUniform("NumLights", "numLights");

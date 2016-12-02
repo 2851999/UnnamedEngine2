@@ -42,8 +42,15 @@ Matrix4f BoneAnimationData::getTransformMatrix(float animationTime) {
 	Vector3f   position = getInterpolatedPosition(animationTime);
 	Quaternion rotation = getInterpolatedRotation(animationTime);
 	Vector3f   scale    = getInterpolatedScale   (animationTime);
+
+	Matrix4f translationM = Matrix4f().initTranslation(position);
+	Matrix4f rotationM    = rotation.toRotationMatrix();
+	Matrix4f scaleM       = Matrix4f().initScale(scale);
+
+	Matrix4f result = translationM * rotationM * scaleM;
+
 	//Calculate the matrix and return it
-	return Matrix4f().initTranslation(position) * rotation.toRotationMatrix() * Matrix4f().initScale(scale);
+	return result;
 }
 
 Vector3f BoneAnimationData::getInterpolatedPosition(float animationTime) {
@@ -77,7 +84,7 @@ Quaternion BoneAnimationData::getInterpolatedRotation(float animationTime) {
 	//Calculate the interpolation factor
 	float factor = (animationTime - keyframeRotationsTimes[lastIndex]) / deltaTime;
 	//Interpolate and return the result
-	return Quaternion::slerp(keyframeRotations[lastIndex], keyframeRotations[nextIndex], factor);
+	return Quaternion::slerp(keyframeRotations[lastIndex], keyframeRotations[nextIndex], factor).normalise();
 }
 
 Vector3f BoneAnimationData::getInterpolatedScale(float animationTime) {
@@ -98,21 +105,9 @@ Vector3f BoneAnimationData::getInterpolatedScale(float animationTime) {
 }
 
 unsigned int BoneAnimationData::getPositionIndex(float animationTime) {
-	//Go through each keyframe from the last one checked
-	for (unsigned int i = lastPositionsIndex; i < keyframePositionsTimes.size() - 1; i++) {
-		//Check the next and last keyframe's time
-		if (keyframePositionsTimes[i] <= animationTime && animationTime < keyframePositionsTimes[i + 1]) {
-			lastPositionsIndex = i;
-			//The next keyframe is after the time given, so return the current index
+	for (unsigned int i = 0; i < keyframePositionsTimes.size() - 1; i++) {
+		if (animationTime < keyframePositionsTimes[i + 1])
 			return i;
-		}
-	}
-	//Go through the rest of the keyframes like above but starting from the beginning
-	for (unsigned int i = 0; i < lastPositionsIndex - 1; i++) {
-		if (animationTime < keyframePositionsTimes[i + 1]) {
-			lastPositionsIndex = i;
-			return i;
-		}
 	}
 	//Log an error
 	Logger::log("Position not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
@@ -120,21 +115,9 @@ unsigned int BoneAnimationData::getPositionIndex(float animationTime) {
 }
 
 unsigned int BoneAnimationData::getRotationIndex(float animationTime) {
-	//Go through each keyframe from the last one checked
-	for (unsigned int i = lastRotationsIndex; i < keyframeRotationsTimes.size() - 1; i++) {
-		//Check the next and last keyframe's time
-		if (keyframeRotationsTimes[i] <= animationTime && animationTime < keyframeRotationsTimes[i + 1]) {
-			lastRotationsIndex = i;
-			//The next keyframe is after the time given, so return the current index
+	for (unsigned int i = 0; i < keyframeRotationsTimes.size() - 1; i++) {
+		if (animationTime < keyframeRotationsTimes[i + 1])
 			return i;
-		}
-	}
-	//Go through the rest of the keyframes like above but starting from the beginning
-	for (unsigned int i = 0; i < lastRotationsIndex - 1; i++) {
-		if (animationTime < keyframeRotationsTimes[i + 1]) {
-			lastRotationsIndex = i;
-			return i;
-		}
 	}
 	//Log an error
 	Logger::log("Rotation not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
@@ -142,21 +125,9 @@ unsigned int BoneAnimationData::getRotationIndex(float animationTime) {
 }
 
 unsigned int BoneAnimationData::getScaleIndex(float animationTime) {
-	//Go through each keyframe from the last one checked
-	for (unsigned int i = lastScalesIndex; i < keyframeScalesTimes.size() - 1; i++) {
-		//Check the next and last keyframe's time
-		if (keyframeScalesTimes[i] <= animationTime && animationTime < keyframeScalesTimes[i + 1]) {
-			lastScalesIndex = i;
-			//The next keyframe is after the time given, so return the current index
+	for (unsigned int i = 0; i < keyframeScalesTimes.size() - 1; i++) {
+		if (animationTime < keyframeScalesTimes[i + 1])
 			return i;
-		}
-	}
-	//Go through the rest of the keyframes like above but starting from the beginning
-	for (unsigned int i = 0; i < lastScalesIndex - 1; i++) {
-		if (animationTime < keyframeScalesTimes[i + 1]) {
-			lastScalesIndex = i;
-			return i;
-		}
 	}
 	//Log an error
 	Logger::log("Scale not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
@@ -198,28 +169,41 @@ BoneAnimationData* Animation::getBoneAnimationData(unsigned int boneIndex) {
  * The Skeleton class
  *****************************************************************************/
 
-void Skeleton::updateBone(float animationTime, Bone* parentBone, Matrix4f& parentMatrix) {
+void Skeleton::updateBone(float animationTime, Bone* parentBone, const Matrix4f& parentMatrix) {
 	//Calculate the matrix for the current bone
-	Matrix4f globalTransformation = parentMatrix;
+	Matrix4f nodeTransformation = parentBone->getTransform();
 	if (parentBone->getAnimationData())
-		globalTransformation *= parentBone->getAnimationData()->getTransformMatrix(animationTime);
-	else
-		globalTransformation *= parentBone->getTransform();
+		nodeTransformation = parentBone->getAnimationData()->getTransformMatrix(animationTime);
+	Matrix4f globalTransformation = parentMatrix * nodeTransformation;
 	//Calculate the final transformation for the current bone
-	Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
+	Matrix4f finalTransformation = globalTransformation * parentBone->getOffset();
+	//Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
 	//Assign the bone's final transformation
 	parentBone->setFinalTransform(finalTransformation);
+
+//	std::cout << "TRANSFORM" << std::endl;
+//	std::cout << parentBone->getTransform().toString() << std::endl;
+//	std::cout << "OFFSET" << std::endl;
+//	std::cout << parentBone->getOffset().toString() << std::endl;
+//	std::cout << "GLOBAL INVERSE TRANSFORMATION" << std::endl;
+//	std::cout << globalInverseTransform.toString() << std::endl;
+//	std::cout << "GLOBAL TRANSFORMATION" << std::endl;
+//	std::cout << globalTransformation.toString() << std::endl;
+//	std::cout << "FINAL TRANSFORMATION" << std::endl;
+//	std::cout << parentBone->getFinalTransform().toString() << std::endl;
+//	std::cout << "END" << std::endl;
 	//Go through each child bone
 	for (unsigned int i = 0; i < parentBone->getNumChildren(); i++)
 		//Update the current bone
 		updateBone(animationTime, bones[parentBone->getChild(i)], globalTransformation);
 }
 
-void Skeleton::setBoneBindPose(Bone* parentBone, Matrix4f& parentMatrix) {
+void Skeleton::setBoneBindPose(Bone* parentBone, const Matrix4f& parentMatrix) {
 	//Calculate the matrix for the current bone
 	Matrix4f globalTransformation = parentMatrix * parentBone->getTransform();
 	//Calculate the final transformation for the current bone
-	Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
+	Matrix4f finalTransformation = globalTransformation * parentBone->getOffset();
+	//Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
 	//Assign the bone's final transformation
 	parentBone->setFinalTransform(finalTransformation);
 	//Go through each child bone
@@ -275,6 +259,14 @@ void Skeleton::setBindPose() {
 
 	//Update the root bone
 	setBoneBindPose(bones[rootBoneIndex], identity);
+}
+
+void Skeleton::print(std::string prefix, Bone* current) {
+	prefix += current->getName();
+	std::cout << prefix << std::endl;
+	for (unsigned int i = 0; i < current->getNumChildren(); i++) {
+		print(prefix + "/", bones[current->getChild(i)]);
+	}
 }
 
 Animation* Skeleton::getAnimation(std::string name) {

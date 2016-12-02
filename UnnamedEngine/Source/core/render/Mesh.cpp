@@ -368,14 +368,22 @@ const aiNode* Mesh::findNode(const aiNode* parent, std::string name) {
 
 void Mesh::addParents(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes, std::string stopName, const aiNode* stopParent) {
 	//Check the node has a parent and it isn't already added
-	if (node->mParent && (nodes.count(node->mParent) == 0)) {
+	if (node->mParent) {
 		//Add the parent node
-		nodes.insert(std::pair<aiNode*, aiBone*>(node->mParent, NULL));
+		if (nodes.count(node->mParent) == 0)
+			nodes.insert(std::pair<aiNode*, aiBone*>(node->mParent, NULL));
 		//Check whether the process should continue
-		if (stopName != std::string(node->mName.C_Str()) && node->mParent != stopParent)
+		//if (stopName != std::string(node->mName.C_Str()) && node->mParent != stopParent)
 			//Add the parents of the parent node
-			addParents(node, nodes, stopName, stopParent);
+			addParents(node->mParent, nodes, stopName, stopParent);
 	}
+}
+
+void Mesh::addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes) {
+	if (nodes.count(node) == 0)
+		nodes.insert(std::pair<const aiNode*, const aiBone*>(node, NULL));
+	for (unsigned int i = 0; i < node->mNumChildren; i++)
+		addChildren(node->mChildren[i], nodes);
 }
 
 Mesh* Mesh::loadModel(std::string path, std::string fileName) {
@@ -390,6 +398,7 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 
 	//Ensure the data was loaded successfully
 	if (scene != NULL) {
+		std::cout << toMatrix4f(scene->mRootNode->mTransformation).toString() << std::endl;
 		//Go through each loaded mesh
 		for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
 			//Pointer to the current mesh being read
@@ -449,7 +458,8 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			//Create the skeleton instance
 			skeleton = new Skeleton();
 			//Assign the global inverse transform
-			skeleton->setGlobalInverseTransform(toMatrix4f(scene->mRootNode->mTransformation.Inverse()));
+			aiMatrix4x4 matrix = scene->mRootNode->mTransformation;
+			skeleton->setGlobalInverseTransform(toMatrix4f(matrix.Inverse()));
 
 			//Necessary nodes, a
 			std::map<const aiNode*, const aiBone*> necessaryNodes;
@@ -458,6 +468,8 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			std::vector<Bone*> bones;
 
 			currentData->bones.resize(numVertices);
+
+			addChildren(scene->mRootNode, necessaryNodes);
 
 			//Go through each mesh
 			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
@@ -469,11 +481,11 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 					const aiNode* correspondingNode = findNode(scene->mRootNode, std::string(currentMesh->mBones[b]->mName.C_Str()));
 					//Add the node to the necessary nodes if it was found
 					if (correspondingNode) {
-						if (necessaryNodes.count(correspondingNode) == 0)
-							necessaryNodes.insert(std::pair<const aiNode*, const aiBone*>(correspondingNode, currentMesh->mBones[b]));
-						else
+						//if (necessaryNodes.count(correspondingNode) == 0)
+							//necessaryNodes.insert(std::pair<const aiNode*, const aiBone*>(correspondingNode, currentMesh->mBones[b]));
+						//else
 							necessaryNodes[correspondingNode] = currentMesh->mBones[b];
-						addParents(correspondingNode, necessaryNodes, std::string(currentMesh->mBones[b]->mName.C_Str()), correspondingNode->mParent);
+						//addParents(correspondingNode, necessaryNodes, std::string(currentMesh->mBones[b]->mName.C_Str()), correspondingNode->mParent);
 					}
 				}
 
@@ -483,6 +495,8 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			//Add the bone indices
 			unsigned int currentIndex = 0;
 			for (const auto& current : necessaryNodes) {
+				std::cout << std::string(current.first->mName.C_Str()) << std::endl;
+				std::cout << current.first << std::endl;
 				boneIndices.insert(std::pair<std::string, unsigned int>(std::string(current.first->mName.C_Str()), currentIndex));
 				currentIndex++;
 			}
@@ -507,7 +521,6 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 				}
 			}
 
-
 			//Make room for all of the bones
 			bones.resize(currentIndex);
 
@@ -520,6 +533,8 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 				//Create the current bone
 				Bone* currentBone = new Bone(std::string(current.first->mName.C_Str()), toMatrix4f(current.first->mTransformation));
 				//Check whether the current bone is the root one and assign it's index if necessary
+//				if (std::string(current.first->mName.C_Str()) == "root")
+//					rootBoneIndex = currentIndex;
 				if (current.first == scene->mRootNode)
 					rootBoneIndex = currentIndex;
 				//Assign the bone offset matrix if the bone exists
@@ -680,7 +695,7 @@ Matrix4f Mesh::toMatrix4f(aiMatrix3x3 mat) {
 	m.set(0, 0, mat.a1); m.set(0, 1, mat.a2); m.set(0, 2, mat.a3); m.set(0, 3, 0);
 	m.set(1, 0, mat.b1); m.set(1, 1, mat.b2); m.set(1, 2, mat.b3); m.set(1, 3, 0);
 	m.set(2, 0, mat.c1); m.set(2, 1, mat.c2); m.set(2, 2, mat.c3); m.set(2, 3, 0);
-	m.set(3, 0, 0); m.set(3, 1, 0); m.set(3, 2, 0); m.set(3, 3, 1);
+	m.set(3, 0, 0);      m.set(3, 1, 0);      m.set(3, 2, 0);      m.set(3, 3, 1);
 
 	return m;
 }

@@ -50,12 +50,21 @@ void Test::onCreated() {
 	camera->setFlying(true);
 
 	//GameObject3D* teapot = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Lighting");
-	teapot = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), "Lighting");
-	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane.obj"), "Lighting");
+	teapot = new GameObject3D(resourceLoader.loadModel("", "monkey2.obj"), "Lighting");
+	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane.dae"), "Lighting");
 	teapot->setPosition(0.0f, 0.8f, 0.0f);
-	teapot->setRotation(180.0f, 180.0f, 0.0f);
+	//teapot->setRotation(-180.0f, 180.0f, 0.0f);
 	teapot->update();
-	teapot->getMesh()->getSkeleton()->startAnimation("");
+
+	Matrix4f mat;
+	mat.set(0, 0, 1); mat.set(0, 1, 0); mat.set(0, 2, 0); mat.set(0, 3, 0);
+	mat.set(1, 0, 0); mat.set(1, 1, 0); mat.set(1, 2, 1); mat.set(1, 3, 0);
+	mat.set(2, 0, 0); mat.set(2, 1, -1); mat.set(2, 2, 0); mat.set(2, 3, 0);
+	mat.set(3, 0, 0); mat.set(3, 1, 0); mat.set(3, 2, 0); mat.set(3, 3, 1);
+	teapot->getTransform()->setMatrix(teapot->getTransform()->getMatrix() * mat);
+
+	//teapot->getMesh()->getSkeleton()->print();
+	//teapot->getMesh()->getSkeleton()->startAnimation("");
 	//teapot->getMesh()->getSkeleton()->stopAnimation();
 	plane->update();
 	renderScene->add(teapot);
@@ -93,7 +102,7 @@ void Test::onUpdate() {
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		particleEmitter->getTransform()->translate(Vector3f(0.008f * getDelta(), 0.0f, 0.0f));
 
-	teapot->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	//teapot->getMesh()->getSkeleton()->update(getDeltaSeconds());
 }
 
 void Test::onRender() {

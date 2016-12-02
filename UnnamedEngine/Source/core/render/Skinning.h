@@ -117,6 +117,7 @@ public:
 	inline void addChild(unsigned int childIndex) { children.push_back(childIndex); }
 	inline void setAnimationData(BoneAnimationData* animationData) { this->animationData = animationData; }
 
+	inline std::string getName() { return name; }
 	inline Matrix4f& getTransform() { return transform; }
 	inline Matrix4f& getOffset() { return offset; }
 	inline Matrix4f& getFinalTransform() { return finalTransform; }
@@ -186,10 +187,10 @@ private:
 	float currentTime = 0;
 
 	/* Recursive method used to update a bone */
-	void updateBone(float animationTime, Bone* parentBone, Matrix4f& parentMatrix);
+	void updateBone(float animationTime, Bone* parentBone, const Matrix4f& parentMatrix);
 
 	/* Recursive method used to set the bind pose of a bone */
-	void setBoneBindPose(Bone* parentBone, Matrix4f& parentMatrix);
+	void setBoneBindPose(Bone* parentBone, const Matrix4f& parentMatrix);
 public:
 	/* The constructor */
 	Skeleton() {}
@@ -211,6 +212,9 @@ public:
 
 	/* Method called to setup the bind pose of this skeleton */
 	void setBindPose();
+
+	inline void print() { print("", bones[rootBoneIndex]); }
+	void print(std::string prefix, Bone* current);
 
 	/* Setters and getters */
 	inline void setGlobalInverseTransform(const Matrix4f& globalInverseTransform) { this->globalInverseTransform = globalInverseTransform; }
