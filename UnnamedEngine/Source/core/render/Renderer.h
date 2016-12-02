@@ -83,7 +83,7 @@ public:
 	static void setMaterialUniforms(Shader* shader, std::string shaderName, Material* material);
 
 	/* Method used to render a Mesh */
-	static void render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderShader* shader);
+	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
 
 	/* Method used to render a FramebufferTexture */
 	static void render(FramebufferTexture* texture, Shader* shader = NULL);

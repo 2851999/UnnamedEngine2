@@ -18,17 +18,20 @@
 
 #include "VBO.h"
 
+#include <type_traits>
+
 /*****************************************************************************
  * The VBO class
  *****************************************************************************/
 template <typename T>
-void VBO<T>::addAttribute(GLint location, GLint size, GLuint divisor) {
+void VBO<T>::addAttributeWithType(GLuint type, GLint location, GLint size, GLuint divisor) {
 	Attribute attrib;
 	attrib.location = location;
 	attrib.size     = size;
 	attrib.offset   = 0;
 	attrib.stride   = 0;
 	attrib.divisor  = divisor;
+	attrib.type     = type;
 	attributes.push_back(attrib);
 }
 
@@ -89,7 +92,10 @@ void VBO<T>::setup(Attribute& attribute) {
 	if (attribute.location != -1) {
 		//Enable that vertex attribute array and setup its pointer
 		glEnableVertexAttribArray(attribute.location);
-		glVertexAttribPointer(attribute.location, attribute.size, GL_FLOAT, GL_FALSE, attribute.stride, (void*) attribute.offset);
+		if (attribute.type == GL_UNSIGNED_INT || attribute.type == GL_INT)
+			glVertexAttribIPointer(attribute.location, attribute.size, attribute.type, attribute.stride, (void*) attribute.offset);
+		else
+			glVertexAttribPointer(attribute.location, attribute.size, attribute.type, GL_FALSE, attribute.stride, (void*) attribute.offset);
 	}
 }
 

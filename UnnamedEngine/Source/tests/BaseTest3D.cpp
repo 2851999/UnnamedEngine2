@@ -31,6 +31,8 @@ void BaseTest3D::initialise() {
 	settings.videoMaxAnisotropicSamples = 16;
 	settings.videoSamples = 16;
 	settings.videoVSync = false;
+
+	onInitialise();
 }
 
 void BaseTest3D::created() {

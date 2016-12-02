@@ -30,7 +30,8 @@ private:
 	/* The VAO */
 	GLuint vao = 0;
 	/* The VBO's used for rendering */
-	std::vector<VBO<GLfloat>*> vbos;
+	std::vector<VBO<GLfloat>*> vbosFloat;
+	std::vector<VBO<GLuint>*>  vbosUInteger;
 	VBO<unsigned int>*         vboIndices = NULL;
 
 	/* The render mode */
@@ -44,6 +45,7 @@ private:
 	 * this value is greater than zero */
 	GLsizei primcount = -1;
 public:
+
 	/* The constructor */
 	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}
 
@@ -53,11 +55,26 @@ public:
 	/* The method used to setup this data for rendering */
 	void setup();
 
+	/* Method used to bind/unbind the VAO */
+	inline void bindVAO() { glBindVertexArray(vao); }
+	inline void unbindVAO() { glBindVertexArray(0); }
+
 	/* The method used to render this data */
-	void render();
+	inline void render() {
+		bindVAO();
+		renderWithoutBinding();
+		unbindVAO();
+	}
+
+	/* The method to render this data without binding/unbinding the VAO */
+	void renderWithoutBinding();
+
+	/* Method to render this data using glDrawElementsBaseVertex */
+	void renderBaseVertex(unsigned int count, unsigned int indicesOffset, unsigned int baseVertex);
 
 	/* The setters and getters */
-	inline void addVBO(VBO<GLfloat>* vbo) { vbos.push_back(vbo); }
+	inline void addVBO(VBO<GLfloat>* vbo) { vbosFloat.push_back(vbo); }
+	inline void addVBO(VBO<GLuint>* vbo) { vbosUInteger.push_back(vbo); }
 	inline void setIndicesVBO(VBO<unsigned int>* vboIndices) { this->vboIndices = vboIndices; }
 	inline void setMode(GLenum mode) { this->mode = mode; }
 	inline void setCount(GLsizei count) { this->count = count; }

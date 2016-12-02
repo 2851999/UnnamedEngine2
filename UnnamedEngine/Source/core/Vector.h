@@ -148,17 +148,17 @@ public:
 	inline bool operator>=(const Vector<T, N>& other) { return length() >= other.length(); }
 
 	/* Method to linearly interpolate between two vectors */
-	inline static Vector<T, N> lerp(const Vector<T, N>& a, const Vector<T, N>& b, T t) { return (a + t * (b - a)); }
-	inline static Vector<T, N> slerp(const Vector<T, N>& a, const Vector<T, N>& b, T t) {
+	inline static Vector<T, N> lerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) { return (a + ((b - a) * factor)); }
+	inline static Vector<T, N> slerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) {
 		//https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
 		float dot = a.dot(b);
 		dot = MathsUtils::clamp(dot, -1.0f, 1.0f);
-		float theta = acosf(dot) * t;
+		float theta = acosf(dot) * factor;
 		Vector<T, N> relative = b - a * dot;
 		relative.normalise();
 		return ((a * cosf(theta)) + (relative * sin(theta)));
 	}
-	inline static Vector<T, N> nlerp(const Vector<T, N>& a, const Vector<T, N>& b, T t) { return lerp(a, b, t).nomalise(); }
+	inline static Vector<T, N> nlerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) { return lerp(a, b, factor).normalise(); }
 
 	/* Finds the total length of the vector */
 	inline T length() const {

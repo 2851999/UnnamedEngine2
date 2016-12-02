@@ -23,13 +23,48 @@
 #include "Material.h"
 #include "RenderData.h"
 #include "Shader.h"
+#include "Skinning.h"
 #include "VBO.h"
+
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/mesh.h>
+#include <assimp/vector3.h>
+#include <assimp/matrix4x4.h>
 
 /*****************************************************************************
  * The MeshData class stores information about a mesh
  *****************************************************************************/
 
+struct aiScene;
+
+#define NUM_BONES_PER_VERTEX 4
+
 class MeshData {
+public:
+	/* Data for a sub mesh that may be rendered */
+	struct SubData {
+		unsigned int baseIndex;  	//The base index to start rendering from
+		unsigned int baseVertex; 	//The base vertex to start rendering from
+		unsigned int count;      	//Number of indices/vertices to render
+		unsigned int materialIndex; //The material index of this part of the mesh
+	};
+
+	struct VertexBoneData {
+		unsigned int ids[NUM_BONES_PER_VERTEX];
+		float weights[NUM_BONES_PER_VERTEX];
+
+		void addBoneData(unsigned int boneID, float weight) {
+			for (unsigned int i = 0; i < NUM_BONES_PER_VERTEX; i++) {
+				if (weights[i] == 0.0f) {
+					ids[i] = boneID;
+					weights[i] = weight;
+					return;
+				}
+			}
+		}
+	};
 private:
 	/* The raw data stored for this mesh */
 	std::vector<float> positions;
@@ -40,6 +75,9 @@ private:
 	std::vector<float> bitangents;
 	std::vector<float> others;
 	std::vector<unsigned int> indices;
+
+	std::vector<unsigned int>   boneIDs;
+	std::vector<float> 		    boneWeights;
 
 	/* Various data about how the data is stored */
 	unsigned int numDimensions = 0;
@@ -52,6 +90,11 @@ private:
 	unsigned int numTangents   = 0;
 	unsigned int numBitangents = 0;
 	unsigned int numIndices    = 0;
+
+	unsigned int numBones      = 0;
+
+	/* The sub data instances */
+	std::vector<SubData> subData;
 public:
 	static const unsigned int DIMENSIONS_2D = 2;
 	static const unsigned int DIMENSIONS_3D = 3;
@@ -72,6 +115,9 @@ public:
 		this->flags = flags;
 	}
 
+	/* Method called to setup the bones structures */
+	void setupBones(unsigned int numVertices);
+
 	/* Methods to add data */
 	void addPosition(Vector2f position);
 	void addPosition(Vector3f position);
@@ -82,6 +128,19 @@ public:
 	void addBitangent(Vector3f bitangent);
 
 	inline void addIndex(unsigned int index) { indices.push_back(index); numIndices++; }
+
+	void addBoneData(unsigned int boneID, float boneWeight);
+
+	/* Methods used to add a sub data structure */
+	inline void addSubData(SubData& data) { subData.push_back(data); }
+	inline void addSubData(unsigned int baseIndex, unsigned int baseVertex, unsigned int count, unsigned int materialIndex = 0) {
+		SubData data;
+		data.baseIndex  = baseIndex;
+		data.baseVertex = baseVertex;
+		data.count      = count;
+		data.materialIndex = materialIndex;
+		addSubData(data);
+	}
 
 	/* Methods to remove data */
 	inline void clearPositions()     { positions.clear();     numPositions     = 0; }
@@ -108,7 +167,8 @@ public:
 	inline bool hasTangents()      { return numTangents > 0;      }
 	inline bool hasBitangents()    { return numBitangents > 0;    }
 	inline bool hasOthers()        { return others.size() > 0;    }
-	inline bool hasIndices()       { return indices.size() > 0;   }
+	inline bool hasIndices()       { return numIndices > 0;       }
+	inline bool hasBones()         { return numBones > 0;         }
 
 	/* Methods to get the data */
 	unsigned int getNumPositions()     { return numPositions;     }
@@ -118,6 +178,7 @@ public:
 	unsigned int getNumTangents()      { return numTangents;      }
 	unsigned int getNumBitangents()    { return numBitangents;    }
 	unsigned int getNumIndices()       { return numIndices;       }
+	unsigned int getNumBones()         { return numBones;         }
 	unsigned int getNumDimensions()    { return numDimensions;    }
 
 	std::vector<float>& getPositions()      { return positions;     }
@@ -128,6 +189,11 @@ public:
 	std::vector<float>& getBitangents()     { return bitangents;    }
 	std::vector<float>& getOthers()         { return others;        }
 	std::vector<unsigned int>& getIndices() { return indices;       }
+	std::vector<unsigned int>& getBoneIDs() { return boneIDs;       }
+	std::vector<float>& getBoneWeights()    { return boneWeights;   }
+	inline bool hasSubData() { return subData.size() > 0; }
+	inline unsigned int getSubDataCount() { return subData.size(); }
+	inline SubData& getSubData(unsigned int index) { return subData[index]; }
 private:
 	/* The flags being used */
 	Flag flags = Flag::NONE;
@@ -155,6 +221,9 @@ private:
 	VBO<GLfloat>* vboBitangents    = NULL;
 	VBO<unsigned int>* vboIndices  = NULL;
 	VBO<GLfloat>* vboOthers        = NULL;
+
+	VBO<unsigned int>* vboBoneIDs = NULL;
+	VBO<GLfloat>*  vboBoneWeights = NULL;
 
 	/* Usage of each VBO, the default is GL_STATIC_DRAW */
 	GLenum usagePositions     = GL_STATIC_DRAW;
@@ -194,6 +263,9 @@ public:
 
 	/* Method to destroy the OpenGL data */
 	void destroy();
+
+	/* Setters and getters */
+	inline RenderData* getRenderData() { return renderData; }
 };
 
 /*****************************************************************************
@@ -207,8 +279,14 @@ private:
 	MeshData* data;
 	MeshRenderData* renderData = NULL;
 
-	/* The material */
-	Material* material = new Material();
+	/* The transform matrix for this mesh */
+	Matrix4f transform;
+
+	/* The materials */
+	std::vector<Material*> materials;
+
+	/* The skeleton for this mesh */
+	Skeleton* skeleton = NULL;
 public:
 	/* The constructor */
 	Mesh(MeshData* data);
@@ -221,17 +299,51 @@ public:
 		this->renderData = new MeshRenderData(this->data, renderShader);
 	}
 
-	/* The setters and getters */
-	void setMaterial(Material* material) { this->material = material; }
+	/* Method to add a material */
+	inline void addMaterial(Material* material) { materials.push_back(material); }
 
-	MeshData* getData() { return data; }
-	MeshRenderData* getRenderData() { return renderData; }
-	bool hasRenderData() { return renderData; }
-	Material* getMaterial() { return material; }
-	bool hasMaterial() { return material; }
+	/* The setters and getters */
+	inline void setMatrix(const Matrix4f& transform) { this->transform = transform; }
+	inline void setMaterial(Material* material) { this->materials[0] = material; }
+	inline void setMaterial(unsigned int index, Material* material) {
+		if (index == materials.size())
+			addMaterial(material);
+		else
+			materials[index] = material;
+	}
+	inline void setSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
+
+	inline Matrix4f getMatrix() { return transform; }
+	inline MeshData* getData() { return data; }
+	inline bool hasData() { return data; }
+	inline MeshRenderData* getRenderData() { return renderData; }
+	inline bool hasRenderData() { return renderData; }
+	inline Material* getMaterial(unsigned int index = 0) { return materials[index]; }
+	inline std::vector<Material*>& getMaterials() { return materials; }
+	inline bool hasMaterial() { return materials.size() > 0; }
+	inline Skeleton* getSkeleton() { return skeleton; }
+	inline bool hasSkeleton() { return skeleton; }
+
+	static void addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes);
+	static const aiNode* findMeshNode(const aiNode* parent);
+	static const aiMatrix4x4 calculateMatrix(const aiNode* current, aiMatrix4x4 currentMatrix);
 
 	/* Static method called to read a file and load a model's meshes */
-	static std::vector<Mesh*> loadModel(std::string path, std::string fileName);
+	static Mesh* loadModel(std::string path, std::string fileName);
+
+	/* Static method called to load a material */
+	static Material* loadMaterial(std::string path, std::string fileName, const aiMaterial* material);
+
+	/* Static method called to load a texture */
+	static Texture* loadTexture(std::string path, const aiMaterial* material, const aiTextureType type);
+
+	/* Static method called to load a colour (If not assigned, returns WHITE instead) */
+	static Colour loadColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx);
+
+	static Vector3f toVector3f(aiVector3D vec);
+	static Quaternion toQuaternion(aiQuaternion quat);
+	static Matrix4f toMatrix4f(aiMatrix4x4 mat);
+	static Matrix4f toMatrix4f(aiMatrix3x3 mat);
 };
 
 /*****************************************************************************

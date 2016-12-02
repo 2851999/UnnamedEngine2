@@ -41,16 +41,18 @@ public:
 		GLuint stride;
 
 		GLuint divisor;
+
+		GLuint type;
 	};
 private:
 	/* Various pieces of data for OpenGL */
 	GLuint                buffer;
 	GLenum                target;
 	GLsizeiptr            size;
-	std::vector<T>& data;
+	std::vector<T>&       data;
 	GLenum                usage;
 
-	bool                 instanced;
+	bool                  instanced;
 
 	/* The attributes this VBO supplies */
 	std::vector<Attribute> attributes;
@@ -69,7 +71,8 @@ public:
 	inline void bind() { glBindBuffer(target, buffer); }
 
 	/* Used to add an attribute */
-	void addAttribute(GLint location, GLint size, GLuint divisor = 0);
+	void addAttributeWithType(GLuint type, GLint location, GLint size, GLuint divisor = 0);
+	inline void addAttribute(GLint location, GLint size, GLuint divisor = 0) { addAttributeWithType(GL_FLOAT, location, size, divisor); }
 
 	/* Used to create and setup this VBO */
 	void setup();

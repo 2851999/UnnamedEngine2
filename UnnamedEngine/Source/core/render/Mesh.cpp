@@ -18,12 +18,6 @@
 
 #include "Mesh.h"
 
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/mesh.h>
-#include <assimp/vector3.h>
-
 #include "Renderer.h"
 #include "../../utils/Logging.h"
 
@@ -134,6 +128,12 @@ void MeshData::addBitangent(Vector3f bitangent) {
 	numBitangents++;
 }
 
+void MeshData::addBoneData(unsigned int boneID, float boneWeight) {
+	boneIDs.push_back(boneID);
+	boneWeights.push_back(boneWeight);
+	numBones++;
+}
+
 /*****************************************************************************
  * The MeshRenderData class
  *****************************************************************************/
@@ -195,6 +195,17 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 		vboBitangents = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBitangents().size() * sizeof(data->getBitangents()[0]), data->getBitangents(), usageBitangents);
 		vboBitangents->addAttribute(shader->getAttributeLocation("Bitangent"), 3);
 		renderData->addVBO(vboBitangents);
+	}
+
+	//Setup bones
+	if (data->hasBones()) {
+		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), GL_STATIC_DRAW);
+		vboBoneIDs->addAttribute(shader->getAttributeLocation("BoneIDs"), 4);
+		renderData->addVBO(vboBoneIDs);
+
+		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), GL_STATIC_DRAW);
+		vboBoneWeights->addAttribute(shader->getAttributeLocation("BoneWeights"), 4);
+		renderData->addVBO(vboBoneWeights);
 	}
 
 	//Check to see whether the 'other' VBO is required
@@ -327,32 +338,74 @@ void MeshRenderData::destroy() {
 
 Mesh::Mesh(MeshData* data) {
 	this->data = data;
+	//Add the default material
+	this->addMaterial(new Material());
+
+	transform.setIdentity();
 }
 
 Mesh::~Mesh() {
 	//Delete the created resources
-	if (material)
-		delete material;
+	if (hasMaterial()) {
+		for (Material* material : materials)
+			delete material;
+		materials.clear();
+	}
 	delete renderData;
 	delete data;
 }
 
-std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
+void Mesh::addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes) {
+	if (nodes.count(node) == 0)
+		nodes.insert(std::pair<const aiNode*, const aiBone*>(node, NULL));
+	for (unsigned int i = 0; i < node->mNumChildren; i++)
+		addChildren(node->mChildren[i], nodes);
+}
+
+const aiNode* Mesh::findMeshNode(const aiNode* parent) {
+	//The current node
+	const aiNode* node = NULL;
+	//Check whether the current node is the correct one
+	if (parent->mNumMeshes > 0)
+		//The parent given is the one being searched for so return it
+		return parent;
+	//Go through each child node of the parent
+	for (unsigned int i = 0; i < parent->mNumChildren; i++) {
+		//Check the current child
+		node = findMeshNode(parent->mChildren[i]);
+		//Return the node if it has been found
+		if (node)
+			return node;
+	}
+	//Return NULL as the node was not found
+	return NULL;
+}
+
+const aiMatrix4x4 Mesh::calculateMatrix(const aiNode* current, aiMatrix4x4 currentMatrix) {
+	currentMatrix = currentMatrix * current->mTransformation;
+	if (current->mParent)
+		currentMatrix = calculateMatrix(current->mParent, currentMatrix);
+	return currentMatrix;
+}
+
+Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 	//Load the file using Assimp
-	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes); //aiProcessPreset_TargetRealtime_MaxQuality
-	//This map is used to keep track of materials that have already been loaded so they aren't loaded again
-	std::map<std::string, Material*> loadedMaterials;
-	//Create the std::vector of meshes in the model
-	std::vector<Mesh*> meshes;
+	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
+	//The MeshData instance used to store the data for the current mesh
+	MeshData* currentData = new MeshData(MeshData::DIMENSIONS_3D);
+	//The current and last number of indices added
+	unsigned int numIndices = 0;
+	unsigned int numVertices = 0;
+	bool hasBones = false;
 
 	//Ensure the data was loaded successfully
 	if (scene != NULL) {
 		//Go through each loaded mesh
 		for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
-			//The MeshData instance used to store the data for the current mesh
-			MeshData* currentData = new MeshData(3);
 			//Pointer to the current mesh being read
 			const struct aiMesh* currentMesh = scene->mMeshes[a];
+
+			hasBones = hasBones || (currentMesh->mNumBones > 0);
 
 			//Go though all of the vertices
 			for (unsigned int i = 0; i < currentMesh->mNumVertices; i++) {
@@ -360,23 +413,21 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 				aiVector3D& position = currentMesh->mVertices[i];
 				currentData->addPosition(Vector3f(position.x, position.y, position.z));
 				//Add the texture coordinates data if it exists
-				if (currentMesh->mTextureCoords[0] != NULL) {
+				if (currentMesh->HasTextureCoords(0)) {
 					aiVector3D& textureCoord = currentMesh->mTextureCoords[0][i];
 					currentData->addTextureCoord(Vector2f(textureCoord.x, textureCoord.y));
 				}
 				//Add the normals data if it exists
-				if (currentMesh->mNormals != NULL) {
+				if (currentMesh->HasNormals()) {
 					aiVector3D& normal = currentMesh->mNormals[i];
 					currentData->addNormal(Vector3f(normal.x, normal.y, normal.z));
 
 					//Add the tangent data if it exists
-					if (currentMesh->mTangents != NULL) {
+					if (currentMesh->HasTangentsAndBitangents()) {
 						aiVector3D& tangent = currentMesh->mTangents[i];
 						currentData->addTangent(Vector3f(tangent.x, tangent.y, tangent.z));
-					}
 
-					//Add the bitangent data if it exists
-					if (currentMesh->mBitangents != NULL) {
+						//Add the bitangent data
 						aiVector3D& bitangent = currentMesh->mBitangents[i];
 						currentData->addBitangent(Vector3f(bitangent.x, bitangent.y, bitangent.z));
 					}
@@ -393,81 +444,257 @@ std::vector<Mesh*> Mesh::loadModel(std::string path, std::string fileName) {
 					//Add the indices for the current face
 					currentData->addIndex(currentFace.mIndices[c]);
 			}
-			//Create the mesh
-			Mesh* mesh = new Mesh(currentData);
 
-			//Check for any materials that also need to be loaded
-			if (scene->mNumMaterials > 0) {
-				//Pointer to the material for the current mesh
-				aiMaterial* currentMaterial = scene->mMaterials[currentMesh->mMaterialIndex];
-				//Define the material and material name
-				Material* material;
-				aiString currentMaterialName;
-				//Get the material name
-				currentMaterial->Get(AI_MATKEY_NAME, currentMaterialName);
-
-				//Check to see whether the material has already been loaded
-				if (loadedMaterials.find(currentMaterialName.C_Str()) != loadedMaterials.end())
-					//Assign the material to the one loaded earlier
-					material = loadedMaterials.at(currentMaterialName.C_Str());
-				else {
-					//Create the material instance as a new material needs to be loaded
-					material = new Material();
-					//Add the material to the loaded materials
-					loadedMaterials.insert(std::pair<std::string, Material*>(currentMaterialName.C_Str(), material));
-
-					//Check to see whether the material has a diffuse texture
-					if (currentMaterial->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
-						//Load the texture and assign it in the material
-						aiString p;
-						currentMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &p);
-						material->diffuseTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
-					}
-
-					//Check to see whether the material has a specular texture
-					if (currentMaterial->GetTextureCount(aiTextureType_SPECULAR) != 0) {
-						//Load the texture and assign it in the material
-						aiString p;
-						currentMaterial->GetTexture(aiTextureType_SPECULAR, 0, &p);
-						material->specularTexture = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
-					}
-
-					//Check to see whether the material has a normal map
-					if (currentMaterial->GetTextureCount(aiTextureType_HEIGHT) != 0) {
-						//Load the texture and assign it in the material
-						aiString p;
-						currentMaterial->GetTexture(aiTextureType_HEIGHT, 0, &p);
-						material->normalMap = Texture::loadTexture(path + StrUtils::str(p.C_Str()));
-					}
-
-					//Get the ambient, diffuse and specular colours and set them in the material
-					aiColor3D ambientColour = aiColor3D(1.0f, 1.0f, 1.0f);
-					currentMaterial->Get(AI_MATKEY_COLOR_AMBIENT, ambientColour);
-					material->ambientColour = Colour(ambientColour.r, ambientColour.g, ambientColour.b, 1.0f);
-
-					aiColor3D diffuseColour = aiColor3D(1.0f, 1.0f, 1.0f);
-					currentMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColour);
-					material->diffuseColour = Colour(diffuseColour.r, diffuseColour.g, diffuseColour.b, 1.0f);
-
-					aiColor3D specularColour = aiColor3D(1.0f, 1.0f, 1.0f);
-					currentMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specularColour);
-					material->specularColour = Colour(specularColour.r, specularColour.g, specularColour.b, 1.0f);
-				}
-				//Assign the current mesh's material
-				mesh->setMaterial(material);
-			}
-			//Add the current mesh to the list
-			meshes.push_back(mesh);
+			//Add a sub data instance
+			currentData->addSubData(numIndices, numVertices, currentMesh->mNumFaces * 3, currentMesh->mMaterialIndex);
+			numIndices += currentMesh->mNumFaces * 3;
+			numVertices += currentMesh->mNumVertices;
 		}
+
+		//The skeleton instance
+		Skeleton* skeleton = NULL;
+
+		//Check whether there are bones
+		if (hasBones) {
+			//Create the skeleton instance
+			skeleton = new Skeleton();
+			//Assign the global inverse transform
+			aiMatrix4x4 matrix = scene->mRootNode->mTransformation;
+			skeleton->setGlobalInverseTransform(toMatrix4f(matrix.Inverse()));
+
+			//Necessary nodes
+			std::map<const aiNode*, const aiBone*> necessaryNodes;
+			std::map<std::string, unsigned int>    boneIndices;
+			std::vector<MeshData::VertexBoneData> verticesBonesData;
+			//Place to store all of the created bones
+			std::vector<Bone*> bones;
+
+			verticesBonesData.resize(numVertices);
+
+			addChildren(scene->mRootNode, necessaryNodes);
+
+			//Go through each mesh
+			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
+				//The current mesh instance
+				const aiMesh* currentMesh = scene->mMeshes[a];
+				//Go through each bone in the mesh
+				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
+					//Find the corresponding node in the scene's hierarchy
+					const aiNode* correspondingNode = scene->mRootNode->FindNode(currentMesh->mBones[b]->mName);
+					//Add the node to the necessary nodes if it was found
+					if (correspondingNode)
+						necessaryNodes[correspondingNode] = currentMesh->mBones[b];
+				}
+			}
+
+			//Add the bone indices
+			unsigned int currentIndex = 0;
+			for (const auto& current : necessaryNodes) {
+				boneIndices.insert(std::pair<std::string, unsigned int>(std::string(current.first->mName.C_Str()), currentIndex));
+				currentIndex++;
+			}
+
+			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
+				//Pointer to the current mesh being read
+				const struct aiMesh* currentMesh = scene->mMeshes[a];
+				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
+					unsigned int boneIndex = boneIndices[std::string(currentMesh->mBones[b]->mName.C_Str())];
+
+					for (unsigned int c = 0; c < currentMesh->mBones[b]->mNumWeights; c++) {
+						unsigned int vertexID = currentData->getSubData(a).baseVertex + currentMesh->mBones[b]->mWeights[c].mVertexId;
+						float weight = currentMesh->mBones[b]->mWeights[c].mWeight;
+						verticesBonesData[vertexID].addBoneData(boneIndex, weight);
+					}
+				}
+			}
+			for (unsigned int a = 0; a < verticesBonesData.size(); a++) {
+				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; b++)
+					currentData->addBoneData(verticesBonesData[a].ids[b], verticesBonesData[a].weights[b]);
+			}
+
+			//Make room for all of the bones
+			bones.resize(currentIndex);
+
+			//Reset the current index, to keep track of the bone being processed
+			currentIndex = 0;
+			//The root bone index
+			unsigned int rootBoneIndex = 0;
+			//At this point, all necessary nodes should have been added, so now go through and add the bones
+			for (const auto& current : necessaryNodes) {
+				//Create the current bone
+				Bone* currentBone = new Bone(std::string(current.first->mName.C_Str()), toMatrix4f(current.first->mTransformation));
+				//Check whether the current bone is the root one and assign it's index if necessary
+				if (current.first == scene->mRootNode)
+					rootBoneIndex = currentIndex;
+				//Assign the bone offset matrix if the bone exists
+				if (current.second)
+					currentBone->setOffset(toMatrix4f(current.second->mOffsetMatrix));
+				//Add the child bone indices
+				for (unsigned int b = 0; b < current.first->mNumChildren; b++) {
+					//Check whether the child is necessary
+					if (necessaryNodes.find(current.first->mChildren[b]) != necessaryNodes.end())
+						//Add the child index
+						currentBone->addChild(boneIndices[std::string(current.first->mChildren[b]->mName.C_Str())]);
+				}
+				//Add the current bone
+				bones[currentIndex] = currentBone;
+				//Increment the current index
+				currentIndex++;
+			}
+
+			//Assign the bones in the skeleton
+			skeleton->setBones(bones);
+			skeleton->setRootBone(rootBoneIndex);
+
+			//Place to store all of the created animations
+			std::vector<Animation*> animations;
+
+			//Make room for all of the animations
+			animations.resize(scene->mNumAnimations);
+
+			//Now go through all of the animations
+			for (unsigned int b = 0; b < scene->mNumAnimations; b++) {
+				//Create the current animation
+				Animation* currentAnimation = new Animation(std::string(scene->mAnimations[b]->mName.C_Str()), scene->mAnimations[b]->mTicksPerSecond, scene->mAnimations[b]->mDuration);
+				//The current aiAnimation instance
+				const aiAnimation* currentAssimpAnim = scene->mAnimations[b];
+				//Place to store the bone data
+				std::vector<BoneAnimationData*> boneData;
+				//Make room for the bone animation data
+				boneData.resize(currentAssimpAnim->mNumChannels);
+				//Go through each animation channel
+				for (unsigned int c = 0; c < currentAssimpAnim->mNumChannels; c++) {
+					//The current aiNodeAnim instance
+					const aiNodeAnim* currentAnimNode = currentAssimpAnim->mChannels[c];
+					//Create the bone animation data instance
+					BoneAnimationData* currentBoneData = new BoneAnimationData(boneIndices[std::string(currentAnimNode->mNodeName.C_Str())], currentAnimNode->mNumPositionKeys, currentAnimNode->mNumRotationKeys, currentAnimNode->mNumScalingKeys);
+					//Go through and assign all of the data
+					for (unsigned int d = 0; d < currentAnimNode->mNumPositionKeys; d++)
+						currentBoneData->setKeyframePosition(d, toVector3f(currentAnimNode->mPositionKeys[d].mValue), currentAnimNode->mPositionKeys[d].mTime);
+					for (unsigned int d = 0; d < currentAnimNode->mNumRotationKeys; d++)
+						currentBoneData->setKeyframeRotation(d, toQuaternion(currentAnimNode->mRotationKeys[d].mValue), currentAnimNode->mRotationKeys[d].mTime);
+					for (unsigned int d = 0; d < currentAnimNode->mNumScalingKeys; d++)
+						currentBoneData->setKeyframeScale(d, toVector3f(currentAnimNode->mScalingKeys[d].mValue), currentAnimNode->mScalingKeys[d].mTime);
+					//Add the bone data
+					boneData[c] = currentBoneData;
+				}
+				//Assign the bone data in the current animation
+				currentAnimation->setBoneData(boneData);
+				//Assign the animation
+				animations[b] = currentAnimation;
+			}
+			//Assign the animations in the skeleton instance
+			skeleton->setAnimations(animations);
+		}
+
+		//Create the mesh
+		Mesh* mesh = new Mesh(currentData);
+		const aiNode* meshNode = findMeshNode(scene->mRootNode);
+		aiMatrix4x4 matrix = calculateMatrix(meshNode, aiMatrix4x4(1.0f, 0.0f, 0.0f, 0.0f,
+																   0.0f, 1.0f, 0.0f, 0.0f,
+																   0.0f, 0.0f, 1.0f, 0.0f,
+																   0.0f, 0.0f, 0.0f, 1.0f));
+		mesh->setMatrix(toMatrix4f(matrix));
+		if (skeleton)
+			skeleton->setGlobalInverseTransform(toMatrix4f(matrix.Inverse()));
+		//Assign the mesh's skeleton
+		mesh->setSkeleton(skeleton);
+
+		//Load and add the materials
+		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
+			//Load the current material
+			Material* material = loadMaterial(path, fileName, scene->mMaterials[i]);
+
+			if (i == 0)
+				mesh->setMaterial(material);
+			else
+				mesh->addMaterial(material);
+		}
+
 		//Release all of the resources Assimp loaded
 		aiReleaseImport(scene);
 		//Return the meshes
-		return meshes;
+		return mesh;
 	} else {
 		//Log an error as Assimp didn't manage to load the model correctly
 		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", LogType::Error);
-		return meshes;
+		return NULL;
 	}
+}
+
+Material* Mesh::loadMaterial(std::string path, std::string fileName, const aiMaterial* mat) {
+	//Create the material instance
+	Material* material = new Material();
+
+	//Load and assign the textures
+	material->ambientTexture  = loadTexture(path, mat, aiTextureType_AMBIENT);
+	material->diffuseTexture  = loadTexture(path, mat, aiTextureType_DIFFUSE);
+	material->specularTexture = loadTexture(path, mat, aiTextureType_SPECULAR);
+
+	//Check to see whether the material has a normal map
+	if (mat->GetTextureCount(aiTextureType_NORMALS) != 0)
+		material->normalMap = loadTexture(path, mat, aiTextureType_NORMALS);
+	else if (StrUtils::strEndsWith(fileName, ".obj") && (mat->GetTextureCount(aiTextureType_HEIGHT) != 0))
+		material->normalMap = loadTexture(path, mat, aiTextureType_HEIGHT);
+
+	//Load and assign the colours
+	material->ambientColour  = loadColour(mat, AI_MATKEY_COLOR_AMBIENT);
+	material->diffuseColour  = loadColour(mat, AI_MATKEY_COLOR_DIFFUSE);
+	material->specularColour = loadColour(mat, AI_MATKEY_COLOR_SPECULAR);
+
+	return material;
+}
+
+Texture* Mesh::loadTexture(std::string path, const aiMaterial* material, const aiTextureType type) {
+	//Check whether the texture is defined
+	if (material->GetTextureCount(type) != 0) {
+		//Get the path of the texture
+		aiString p;
+		material->GetTexture(type, 0, &p);
+		//Return the loaded texture
+		return Texture::loadTexture(path + StrUtils::str(p.C_Str()));
+	} else
+		return NULL;
+}
+
+Colour Mesh::loadColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx) {
+	//The colour
+	aiColor4D colour;
+	//Attempt to load the colour
+	if (material->Get(key, type, idx, colour) == AI_SUCCESS)
+		return Colour(colour.r, colour.g, colour.b, colour.a);
+	else
+		return Colour::WHITE;
+}
+
+Vector3f Mesh::toVector3f(aiVector3D vec) {
+	return Vector3f(vec.x, vec.y, vec.z);
+}
+
+Quaternion Mesh::toQuaternion(aiQuaternion quat) {
+	return Quaternion(quat.x, quat.y, quat.z, quat.w);
+}
+
+Matrix4f Mesh::toMatrix4f(aiMatrix4x4 mat) {
+	Matrix4f m;
+
+	m.set(0, 0, mat.a1); m.set(0, 1, mat.a2); m.set(0, 2, mat.a3); m.set(0, 3, mat.a4);
+	m.set(1, 0, mat.b1); m.set(1, 1, mat.b2); m.set(1, 2, mat.b3); m.set(1, 3, mat.b4);
+	m.set(2, 0, mat.c1); m.set(2, 1, mat.c2); m.set(2, 2, mat.c3); m.set(2, 3, mat.c4);
+	m.set(3, 0, mat.d1); m.set(3, 1, mat.d2); m.set(3, 2, mat.d3); m.set(3, 3, mat.d4);
+
+	return m;
+}
+
+Matrix4f Mesh::toMatrix4f(aiMatrix3x3 mat) {
+	Matrix4f m;
+
+	m.set(0, 0, mat.a1); m.set(0, 1, mat.a2); m.set(0, 2, mat.a3); m.set(0, 3, 0);
+	m.set(1, 0, mat.b1); m.set(1, 1, mat.b2); m.set(1, 2, mat.b3); m.set(1, 3, 0);
+	m.set(2, 0, mat.c1); m.set(2, 1, mat.c2); m.set(2, 2, mat.c3); m.set(2, 3, 0);
+	m.set(3, 0, 0);      m.set(3, 1, 0);      m.set(3, 2, 0);      m.set(3, 3, 1);
+
+	return m;
 }
 
 /*****************************************************************************

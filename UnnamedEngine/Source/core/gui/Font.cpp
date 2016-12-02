@@ -125,9 +125,9 @@ void Font::update(std::string text) {
 	MeshData* data;
 
 	if (billboarded)
-		data = object3D->getMeshes()[0]->getData();
+		data = object3D->getMesh()->getData();
 	else
-		data = object2D->getMeshes()[0]->getData();
+		data = object2D->getMesh()->getData();
 
 	//Clear the previous data
 	data->clearPositions();
@@ -196,13 +196,13 @@ void Font::update(std::string text) {
 		}
 	}
 	if (billboarded) {
-		object3D->getMeshes()[0]->getRenderData()->updatePositions(data);
-		object3D->getMeshes()[0]->getRenderData()->updateTextureCoords();
-		object3D->getMeshes()[0]->getRenderData()->updateIndices(data);
+		object3D->getMesh()->getRenderData()->updatePositions(data);
+		object3D->getMesh()->getRenderData()->updateTextureCoords();
+		object3D->getMesh()->getRenderData()->updateIndices(data);
 	} else {
-		object2D->getMeshes()[0]->getRenderData()->updatePositions(data);
-		object2D->getMeshes()[0]->getRenderData()->updateTextureCoords();
-		object2D->getMeshes()[0]->getRenderData()->updateIndices(data);
+		object2D->getMesh()->getRenderData()->updatePositions(data);
+		object2D->getMesh()->getRenderData()->updateTextureCoords();
+		object2D->getMesh()->getRenderData()->updateIndices(data);
 	}
 }
 

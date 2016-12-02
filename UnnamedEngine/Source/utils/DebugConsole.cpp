@@ -19,6 +19,7 @@
 #include "DebugConsole.h"
 
 #include "../core/BaseEngine.h"
+#include "GLUtils.h"
 
 /*****************************************************************************
  * The DebugConsole class
@@ -44,6 +45,12 @@ void DebugConsole::process(std::string command) {
 		if (split[0] == "exit")
 			//Request the engine to stop
 			baseEngine->requestClose();
+		else if (split[0] == "wireframe") {
+			if (split[1] == "enable")
+				GLUtils::enableWireframe();
+			else if (split[1] == "disable")
+				GLUtils::disableWireframe();
+		}
 
 		//Go through the functions and attempt to process the data
 		for (unsigned int i = 0; i < functions.size(); i++)

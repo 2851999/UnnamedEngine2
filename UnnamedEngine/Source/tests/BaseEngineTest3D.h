@@ -31,6 +31,10 @@ class Test : public BaseTest3D {
 private:
 	ParticleEmitter* particleEmitter;
 	ParticleSystem* particleSystem;
+
+	GameObject3D* model1;
+	GameObject3D* model2;
+	GameObject3D* model3;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -47,15 +51,39 @@ void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	GameObject3D* teapot = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Lighting");
 	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane.obj"), "Lighting");
-	teapot->setPosition(0.0f, 0.8f, 0.0f);
-	teapot->update();
 	plane->update();
-	renderScene->add(teapot);
-	renderScene->add(plane);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, -0.2f);
+	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), "Lighting");
+	model1->setRotation(0.0f, 180.0f, 0.0f);
+	model1->setPosition(-2.0f, 0.8f, 0.0f);
+	model1->update();
+
+	model1->getMesh()->getSkeleton()->startAnimation("");
+	//model1->getMesh()->getSkeleton()->stopAnimation();
+
+	model2 = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Lighting");
+	model2->setRotation(0.0f, 180.0f, 0.0f);
+	model2->setPosition(0.0f, 0.8f, 2.0f);
+	model2->update();
+//
+//	model2->getMesh()->getSkeleton()->startAnimation("");
+	//model2->getMesh()->getSkeleton()->stopAnimation();
+
+	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.dae"), "Lighting");
+	model3->setRotation(0.0f, 180.0f, 0.0f);
+	model3->setPosition(2.0f, 0.8f, 0.0f);
+	model3->update();
+
+	model3->getMesh()->getSkeleton()->startAnimation("");
+	//model3->getMesh()->getSkeleton()->stopAnimation();
+
+	renderScene->add(plane);
+	renderScene->add(model1);
+	renderScene->add(model2);
+	renderScene->add(model3);
+
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.2f);
 	light0->update();
 	renderScene->addLight(light0);
 
@@ -86,6 +114,10 @@ void Test::onUpdate() {
 		particleEmitter->getTransform()->translate(Vector3f(-0.008f * getDelta(), 0.0f, 0.0f));
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		particleEmitter->getTransform()->translate(Vector3f(0.008f * getDelta(), 0.0f, 0.0f));
+
+	model1->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	//model2->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	model3->getMesh()->getSkeleton()->update(getDeltaSeconds());
 }
 
 void Test::onRender() {

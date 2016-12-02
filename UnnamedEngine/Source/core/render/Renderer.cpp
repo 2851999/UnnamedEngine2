@@ -131,7 +131,7 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 	}
 }
 
-void Renderer::render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderShader* renderShader) {
+void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
 	//Ensure there is a Shader and Camera instance for rendering
 	if (renderShader && getCamera()) {
 		//Get the shader for rendering
@@ -147,16 +147,37 @@ void Renderer::render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderS
 //				shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
 //		}
 		shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
+		if (mesh->hasData() && mesh->hasRenderData()) {
+			MeshData* data = mesh->getData();
+			MeshRenderData* renderData = mesh->getRenderData();
 
-		for (unsigned int i = 0; i < meshes.size(); i++) {
-			if (meshes[i]->getRenderData()) {
+			if (mesh->hasSkeleton()) {
+				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); i++)
+					shader->setUniformMatrix4("Bones[" + StrUtils::str(i) + "]", mesh->getSkeleton()->getBone(i)->getFinalTransform());
+				shader->setUniformi("UseSkinning", 1);
+			} else
+				shader->setUniformi("UseSkinning", 0);
 
+			if (data->hasSubData()) {
+				renderData->getRenderData()->bindVAO();
+
+				//Go through each sub data instance
+				for (unsigned int i = 0; i < data->getSubDataCount(); i++) {
+					saveTextures();
+
+					if (mesh->hasMaterial())
+						setMaterialUniforms(renderShader->getShader(), renderShader->getName(), mesh->getMaterial(data->getSubData(i).materialIndex));
+					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex * sizeof(unsigned int), data->getSubData(i).baseVertex);
+
+					releaseNewTextures();
+				}
+
+				renderData->getRenderData()->unbindVAO();
+			} else {
 				saveTextures();
-
-				setMaterialUniforms(renderShader->getShader(), renderShader->getName(), meshes[i]->getMaterial());
-
-				meshes[i]->getRenderData()->render();
-
+				if (mesh->hasMaterial())
+					setMaterialUniforms(renderShader->getShader(), renderShader->getName(), mesh->getMaterial());
+				renderData->render();
 				releaseNewTextures();
 			}
 		}
@@ -215,6 +236,9 @@ void Renderer::addRenderShader(std::string id, Shader* shader) {
 			shader->addUniform("Light_Cutoff["         + str(i) + "]", "lights[" + str(i) + "].cutoff");
 			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "lights[" + str(i) + "].outerCutoff");
 		}
+
+		for (unsigned int i = 0; i < 80; i++)
+			shader->addUniform("Bones[" + str(i) + "]", "bones[" + str(i) + "]");
 
 		shader->addUniform("NumLights", "numLights");
 		shader->addUniform("Light_Ambient", "light_ambient");
