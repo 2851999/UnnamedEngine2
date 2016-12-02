@@ -128,6 +128,12 @@ void MeshData::addBitangent(Vector3f bitangent) {
 	numBitangents++;
 }
 
+void MeshData::addBoneData(unsigned int boneID, float boneWeight) {
+	boneIDs.push_back(boneID);
+	boneWeights.push_back(boneWeight);
+	numBones++;
+}
+
 /*****************************************************************************
  * The MeshRenderData class
  *****************************************************************************/
@@ -192,12 +198,12 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 	}
 
 	//Setup bones
-	if (data->boneIds.size() > 0) {
-		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->boneIds.size() * sizeof(data->boneIds[0]), data->boneIds, GL_STATIC_DRAW);
+	if (data->hasBones()) {
+		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), GL_STATIC_DRAW);
 		vboBoneIDs->addAttribute(shader->getAttributeLocation("BoneIDs"), 4);
 		renderData->addVBO(vboBoneIDs);
 
-		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->boneWeights.size() * sizeof(data->boneWeights[0]), data->boneWeights, GL_STATIC_DRAW);
+		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), GL_STATIC_DRAW);
 		vboBoneWeights->addAttribute(shader->getAttributeLocation("BoneWeights"), 4);
 		renderData->addVBO(vboBoneWeights);
 	}
@@ -349,38 +355,6 @@ Mesh::~Mesh() {
 	delete data;
 }
 
-const aiNode* Mesh::findNode(const aiNode* parent, std::string name) {
-	//The current node
-	const aiNode* node = NULL;
-	//Check whether the current node is the correct one
-	if (std::string(parent->mName.C_Str()) == name)
-		//The parent given is the one being searched for so return it
-		return parent;
-	//Go through each child node of the parent
-	for (unsigned int i = 0; i < parent->mNumChildren; i++) {
-		//Check the current child
-		node = findNode(parent->mChildren[i], name);
-		//Return the node if it has been found
-		if (node)
-			return node;
-	}
-	//Return NULL as the node was not found
-	return NULL;
-}
-
-void Mesh::addParents(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes, std::string stopName, const aiNode* stopParent) {
-	//Check the node has a parent and it isn't already added
-	if (node->mParent) {
-		//Add the parent node
-		if (nodes.count(node->mParent) == 0)
-			nodes.insert(std::pair<aiNode*, aiBone*>(node->mParent, NULL));
-		//Check whether the process should continue
-		//if (stopName != std::string(node->mName.C_Str()) && node->mParent != stopParent)
-			//Add the parents of the parent node
-			addParents(node->mParent, nodes, stopName, stopParent);
-	}
-}
-
 void Mesh::addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes) {
 	if (nodes.count(node) == 0)
 		nodes.insert(std::pair<const aiNode*, const aiBone*>(node, NULL));
@@ -488,13 +462,14 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			aiMatrix4x4 matrix = scene->mRootNode->mTransformation;
 			skeleton->setGlobalInverseTransform(toMatrix4f(matrix.Inverse()));
 
-			//Necessary nodes, a
+			//Necessary nodes
 			std::map<const aiNode*, const aiBone*> necessaryNodes;
 			std::map<std::string, unsigned int>    boneIndices;
+			std::vector<MeshData::VertexBoneData> verticesBonesData;
 			//Place to store all of the created bones
 			std::vector<Bone*> bones;
 
-			currentData->bones.resize(numVertices);
+			verticesBonesData.resize(numVertices);
 
 			addChildren(scene->mRootNode, necessaryNodes);
 
@@ -502,17 +477,14 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
 				//The current mesh instance
 				const aiMesh* currentMesh = scene->mMeshes[a];
-				//Go through each bone in the mesh, b
+				//Go through each bone in the mesh
 				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
-					//Find the corresponding node in the scene's hierarchy, b1
-					const aiNode* correspondingNode = findNode(scene->mRootNode, std::string(currentMesh->mBones[b]->mName.C_Str()));
+					//Find the corresponding node in the scene's hierarchy
+					const aiNode* correspondingNode = scene->mRootNode->FindNode(currentMesh->mBones[b]->mName);
 					//Add the node to the necessary nodes if it was found
-					if (correspondingNode) {
+					if (correspondingNode)
 						necessaryNodes[correspondingNode] = currentMesh->mBones[b];
-					}
 				}
-
-				//http://www.assimp.org/lib_html/data.html
 			}
 
 			//Add the bone indices
@@ -531,15 +503,13 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 					for (unsigned int c = 0; c < currentMesh->mBones[b]->mNumWeights; c++) {
 						unsigned int vertexID = currentData->getSubData(a).baseVertex + currentMesh->mBones[b]->mWeights[c].mVertexId;
 						float weight = currentMesh->mBones[b]->mWeights[c].mWeight;
-						currentData->bones[vertexID].addBoneData(boneIndex, weight);
+						verticesBonesData[vertexID].addBoneData(boneIndex, weight);
 					}
 				}
 			}
-			for (unsigned int a = 0; a < currentData->bones.size(); a++) {
-				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; b++) {
-					currentData->boneIds.push_back(currentData->bones[a].ids[b]);
-					currentData->boneWeights.push_back(currentData->bones[a].weights[b]);
-				}
+			for (unsigned int a = 0; a < verticesBonesData.size(); a++) {
+				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; b++)
+					currentData->addBoneData(verticesBonesData[a].ids[b], verticesBonesData[a].weights[b]);
 			}
 
 			//Make room for all of the bones
@@ -554,8 +524,6 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 				//Create the current bone
 				Bone* currentBone = new Bone(std::string(current.first->mName.C_Str()), toMatrix4f(current.first->mTransformation));
 				//Check whether the current bone is the root one and assign it's index if necessary
-//				if (std::string(current.first->mName.C_Str()) == "root")
-//					rootBoneIndex = currentIndex;
 				if (current.first == scene->mRootNode)
 					rootBoneIndex = currentIndex;
 				//Assign the bone offset matrix if the bone exists
@@ -622,10 +590,10 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 		//Create the mesh
 		Mesh* mesh = new Mesh(currentData);
 		const aiNode* meshNode = findMeshNode(scene->mRootNode);
-		aiMatrix4x4 matrix = calculateMatrix(meshNode, aiMatrix4x4(1, 0, 0, 0,
-																   0, 1, 0, 0,
-																   0, 0, 1, 0,
-																   0, 0, 0, 1));
+		aiMatrix4x4 matrix = calculateMatrix(meshNode, aiMatrix4x4(1.0f, 0.0f, 0.0f, 0.0f,
+																   0.0f, 1.0f, 0.0f, 0.0f,
+																   0.0f, 0.0f, 1.0f, 0.0f,
+																   0.0f, 0.0f, 0.0f, 1.0f));
 		mesh->setMatrix(toMatrix4f(matrix));
 		if (skeleton)
 			skeleton->setGlobalInverseTransform(toMatrix4f(matrix.Inverse()));

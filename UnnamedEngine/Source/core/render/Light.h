@@ -39,12 +39,12 @@ private:
 	Colour specularColour = Colour::WHITE;
 
 	/* The constant, linear and quadratic terms for point lights */
-	float constant = 0;
-	float linear = 0;
-	float quadratic = 0;
+	float constant  = 0.0f;
+	float linear    = 0.0f;
+	float quadratic = 1.0f;
 
 	/* The cutoff and outer cutoff values for spot lights */
-	float cutoff = 0;
+	float cutoff      = 0;
 	float outerCutoff = 0;
 
 	/* The FBO if assigned for shadow mapping */

@@ -104,6 +104,7 @@ private:
 	 * animation being executed */
 	BoneAnimationData* animationData = NULL;
 public:
+
 	/* The constructor */
 	Bone(std::string name, Matrix4f transform);
 
@@ -213,8 +214,8 @@ public:
 	/* Method called to setup the bind pose of this skeleton */
 	void setBindPose();
 
-	inline void print() { print("", bones[rootBoneIndex]); }
-	void print(std::string prefix, Bone* current);
+//	inline void print() { print("", bones[rootBoneIndex]); }
+//	void print(std::string prefix, Bone* current);
 
 	/* Setters and getters */
 	inline void setGlobalInverseTransform(const Matrix4f& globalInverseTransform) { this->globalInverseTransform = globalInverseTransform; }

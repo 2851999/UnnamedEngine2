@@ -43,10 +43,8 @@ Matrix4f BoneAnimationData::getTransformMatrix(float animationTime) {
 	Quaternion rotation = getInterpolatedRotation(animationTime);
 	Vector3f   scale    = getInterpolatedScale   (animationTime);
 
-	Matrix4f result = Matrix4f().initTranslation(position) * rotation.toRotationMatrix() * Matrix4f().initScale(scale);
-
 	//Calculate the matrix and return it
-	return result;
+	return Matrix4f().initTranslation(position) * rotation.toRotationMatrix() * Matrix4f().initScale(scale);
 }
 
 Vector3f BoneAnimationData::getInterpolatedPosition(float animationTime) {
@@ -191,13 +189,14 @@ BoneAnimationData* Animation::getBoneAnimationData(unsigned int boneIndex) {
 
 void Skeleton::updateBone(float animationTime, Bone* parentBone, const Matrix4f& parentMatrix) {
 	//Calculate the matrix for the current bone
-	Matrix4f nodeTransformation = parentBone->getTransform();
+	Matrix4f nodeTransformation;
 	if (parentBone->getAnimationData())
 		nodeTransformation = parentBone->getAnimationData()->getTransformMatrix(animationTime);
+	else
+		nodeTransformation = parentBone->getTransform();
 	Matrix4f globalTransformation = parentMatrix * nodeTransformation;
 	//Calculate the final transformation for the current bone
 	Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
-	//Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
 	//Assign the bone's final transformation
 	parentBone->setFinalTransform(finalTransformation);
 
@@ -220,10 +219,10 @@ void Skeleton::updateBone(float animationTime, Bone* parentBone, const Matrix4f&
 
 void Skeleton::setBoneBindPose(Bone* parentBone, const Matrix4f& parentMatrix) {
 	//Calculate the matrix for the current bone
-	Matrix4f globalTransformation = parentMatrix * parentBone->getTransform();
+	Matrix4f nodeTransformation = parentBone->getTransform();
+	Matrix4f globalTransformation = parentMatrix * nodeTransformation;
 	//Calculate the final transformation for the current bone
 	Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
-	//Matrix4f finalTransformation = globalInverseTransform * globalTransformation * parentBone->getOffset();
 	//Assign the bone's final transformation
 	parentBone->setFinalTransform(finalTransformation);
 	//Go through each child bone
@@ -281,13 +280,13 @@ void Skeleton::setBindPose() {
 	setBoneBindPose(bones[rootBoneIndex], identity);
 }
 
-void Skeleton::print(std::string prefix, Bone* current) {
-	prefix += current->getName();
-	std::cout << prefix << std::endl;
-	for (unsigned int i = 0; i < current->getNumChildren(); i++) {
-		print(prefix + "/", bones[current->getChild(i)]);
-	}
-}
+//void Skeleton::print(std::string prefix, Bone* current) {
+//	prefix += current->getName();
+//	std::cout << prefix << std::endl;
+//	for (unsigned int i = 0; i < current->getNumChildren(); i++) {
+//		print(prefix + "/", bones[current->getChild(i)]);
+//	}
+//}
 
 Animation* Skeleton::getAnimation(std::string name) {
 	//Go through the animations

@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 0 | Experimental 10
+
+* Changed lights to have a default quadratic attenuation of 1
+
+* Fixed bug: Camera3D was initialised to face the wrong way
+             (+Z instead of the default -Z)
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 0 | Experimental 9
 
 * Fixed bug: Models didn't always have the correct orientation

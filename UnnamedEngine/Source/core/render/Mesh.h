@@ -65,11 +65,6 @@ public:
 			}
 		}
 	};
-
-	std::vector<VertexBoneData> bones;
-
-	std::vector<unsigned int> boneIds;
-	std::vector<float> boneWeights;
 private:
 	/* The raw data stored for this mesh */
 	std::vector<float> positions;
@@ -80,6 +75,9 @@ private:
 	std::vector<float> bitangents;
 	std::vector<float> others;
 	std::vector<unsigned int> indices;
+
+	std::vector<unsigned int>   boneIDs;
+	std::vector<float> 		    boneWeights;
 
 	/* Various data about how the data is stored */
 	unsigned int numDimensions = 0;
@@ -92,6 +90,8 @@ private:
 	unsigned int numTangents   = 0;
 	unsigned int numBitangents = 0;
 	unsigned int numIndices    = 0;
+
+	unsigned int numBones      = 0;
 
 	/* The sub data instances */
 	std::vector<SubData> subData;
@@ -115,6 +115,9 @@ public:
 		this->flags = flags;
 	}
 
+	/* Method called to setup the bones structures */
+	void setupBones(unsigned int numVertices);
+
 	/* Methods to add data */
 	void addPosition(Vector2f position);
 	void addPosition(Vector3f position);
@@ -125,6 +128,8 @@ public:
 	void addBitangent(Vector3f bitangent);
 
 	inline void addIndex(unsigned int index) { indices.push_back(index); numIndices++; }
+
+	void addBoneData(unsigned int boneID, float boneWeight);
 
 	/* Methods used to add a sub data structure */
 	inline void addSubData(SubData& data) { subData.push_back(data); }
@@ -162,7 +167,8 @@ public:
 	inline bool hasTangents()      { return numTangents > 0;      }
 	inline bool hasBitangents()    { return numBitangents > 0;    }
 	inline bool hasOthers()        { return others.size() > 0;    }
-	inline bool hasIndices()       { return indices.size() > 0;   }
+	inline bool hasIndices()       { return numIndices > 0;       }
+	inline bool hasBones()         { return numBones > 0;         }
 
 	/* Methods to get the data */
 	unsigned int getNumPositions()     { return numPositions;     }
@@ -172,6 +178,7 @@ public:
 	unsigned int getNumTangents()      { return numTangents;      }
 	unsigned int getNumBitangents()    { return numBitangents;    }
 	unsigned int getNumIndices()       { return numIndices;       }
+	unsigned int getNumBones()         { return numBones;         }
 	unsigned int getNumDimensions()    { return numDimensions;    }
 
 	std::vector<float>& getPositions()      { return positions;     }
@@ -182,6 +189,8 @@ public:
 	std::vector<float>& getBitangents()     { return bitangents;    }
 	std::vector<float>& getOthers()         { return others;        }
 	std::vector<unsigned int>& getIndices() { return indices;       }
+	std::vector<unsigned int>& getBoneIDs() { return boneIDs;       }
+	std::vector<float>& getBoneWeights()    { return boneWeights;   }
 	inline bool hasSubData() { return subData.size() > 0; }
 	inline unsigned int getSubDataCount() { return subData.size(); }
 	inline SubData& getSubData(unsigned int index) { return subData[index]; }
@@ -315,8 +324,6 @@ public:
 	inline Skeleton* getSkeleton() { return skeleton; }
 	inline bool hasSkeleton() { return skeleton; }
 
-	static const aiNode* findNode(const aiNode* parent, std::string name);
-	static void addParents(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes, std::string stopName, const aiNode* stopParent);
 	static void addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes);
 	static const aiNode* findMeshNode(const aiNode* parent);
 	static const aiMatrix4x4 calculateMatrix(const aiNode* current, aiMatrix4x4 currentMatrix);
