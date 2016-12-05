@@ -1,10 +1,48 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 1 | Experimental 1
+
+* Changed shaders to use #map duplicates to replace the
+  previous assignment
+* Changed shadows to work with skeletal animation
+  
+* Fixed bug: Shadows would render properly in certain
+             circumstances
+             
+* More shader cleanup
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 1 (V0.1.8)
+
+* Added BoneAnimationData
+* Added Bone
+* Added Animation
+* Added Skeleton
+* Added 'wireframe' command to DebugConsole
+* Added renderWithoutBinding method in RenderData
+* Added SubData struct in RenderData
+* Added the ability to have multiple meshes in a single VBO
+* Added skeletal animation
+
+* Changed Mesh to load a default colour of white if a
+  material colour is not defined
+* Changed Mesh to load the normal map as a height map from
+  an OBJ file
+  
+* Moved the SubData structure to MeshData
+  
+* Fixed bug: Trying to get the inverse of a Matrix3f with a
+             determinant of 0 would cause a crash
+* Fixed bug: Pasting text into a text box with new line
+             characters caused the text to render incorrectly
+* Fixed bug: Models didn't always have the correct orientation
+             
+* Note: At the moment any loaded models assume the file being
+        loaded only has one model within it
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 0 | Experimental 10
 
 * Changed lights to have a default quadratic attenuation of 1
-
-* Fixed bug: Camera3D was initialised to face the wrong way
-             (+Z instead of the default -Z)
 
 --------------------------------------------------------------
 Release 0 | Beta 3 | Development 0 | Experimental 9

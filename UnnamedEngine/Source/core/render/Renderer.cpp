@@ -80,15 +80,15 @@ void Renderer::initialise() {
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the shaders
-	addRenderShader("Material", Shader::loadShader("resources/shaders/MaterialShader"));
-	addRenderShader("SkyBox", Shader::loadShader("resources/shaders/SkyBoxShader"));
-	addRenderShader("Font", Shader::loadShader("resources/shaders/FontShader"));
+	addRenderShader("Material", Shader::loadShader("resources/shaders/new/MaterialShader"));
+	addRenderShader("SkyBox", Shader::loadShader("resources/shaders/new/SkyBoxShader"));
+	addRenderShader("Font", Shader::loadShader("resources/shaders/new/FontShader"));
 	addRenderShader("Billboard", Shader::loadShader("resources/shaders/BillboardShader"));
 	addRenderShader("Particle", Shader::loadShader("resources/shaders/ParticleShader"));
-	addRenderShader("Lighting", Shader::loadShader("resources/shaders/LightingShader"));
+	addRenderShader("Lighting", Shader::loadShader("resources/shaders/new/LightingShader"));
 	addRenderShader("Framebuffer", Shader::loadShader("resources/shaders/FramebufferShader"));
 	addRenderShader("EnvironmentMap", Shader::loadShader("resources/shaders/EnvironmentMapShader"));
-	addRenderShader("ShadowMap", Shader::loadShader("resources/shaders/ShadowMapShader"));
+	addRenderShader("ShadowMap", Shader::loadShader("resources/shaders/new/ShadowMapShader"));
 	addRenderShader("BillboardedFont", Shader::loadShader("resources/shaders/BillboardedFontShader"));
 
 	//Setup the screen texture mesh
@@ -252,6 +252,9 @@ void Renderer::addRenderShader(std::string id, Shader* shader) {
 		shader->addAttribute("Normal", "normal");
 		shader->addAttribute("Tangent", "tangent");
 		shader->addAttribute("Bitangent", "bitangent");
+	} else if (id == "ShadowMap") {
+		for (unsigned int i = 0; i < 80; i++)
+			shader->addUniform("Bones[" + str(i) + "]", "bones[" + str(i) + "]");
 	}
 
 	shader->stopUsing();

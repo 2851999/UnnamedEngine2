@@ -46,20 +46,24 @@ void RenderScene3D::render() {
 				FBO* depthBuffer = lights[i]->getDepthBuffer();
 
 				depthBuffer->bind();
+				glEnable(GL_DEPTH_TEST);
 				glClear(GL_DEPTH_BUFFER_BIT);
 				glViewport(0, 0, 1024, 1024);
 
 				shadowMapShader->use();
 
 				Matrix4f lightSpaceMatrix = lights[i]->getLightSpaceMatrix();
+//
+//				Renderer::getCamera()->setViewMatrix(lights[i]->getLightViewMatrix());
+//				Renderer::getCamera()->setProjectionMatrix(lights[i]->getLightProjectionMatrix());
 
 				for (unsigned int j = 0; j < objects.size(); j++) {
-					shadowMapShader->setUniformMatrix4("LightSpaceMatrix", (lightSpaceMatrix * objects[j]->getModelMatrix()));
-					objects[i]->getRenderShader()->addForwardShader(shadowMapShader);
+					shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * objects[j]->getModelMatrix());
+					objects[j]->getRenderShader()->addForwardShader(shadowMapShader);
 
-					objects[i]->render();
+					objects[j]->render();
 
-					objects[i]->getRenderShader()->removeForwardShader(shadowMapShader);
+					objects[j]->getRenderShader()->removeForwardShader(shadowMapShader);
 				}
 
 				shadowMapShader->stopUsing();

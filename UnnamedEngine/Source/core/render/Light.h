@@ -79,7 +79,7 @@ public:
 
 				depthBuffer->setup();
 
-				lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 8.0f);
+				lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
 			}
 		}
 	}
@@ -118,6 +118,8 @@ public:
 
 	inline FBO* getDepthBuffer() { return depthBuffer; }
 	inline bool hasDepthBuffer() { return depthBuffer; }
+	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
+	inline Matrix4f getLightViewMatrix() { return lightView; }
 	inline Matrix4f getLightSpaceMatrix() { return lightProjection * lightView; }
 };
 
