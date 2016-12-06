@@ -190,7 +190,7 @@ void ParticleSystem::render() {
 		shader->setUniformVector3("Camera_Right", Vector3f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2)));
 		shader->setUniformVector3("Camera_Up", Vector3f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2)));
 
-		shader->setUniformMatrix4("MVPMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
+		shader->setUniformMatrix4("ProjectionViewMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
 
 		if (textureAtlas)
 			shader->setUniformi("Texture", Renderer::bindTexture(textureAtlas->getTexture()));

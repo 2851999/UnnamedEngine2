@@ -27,6 +27,8 @@
 #include "../core/render/Renderer.h"
 #include "../utils/GLUtils.h"
 
+#include "../experimental/Billboard.h"
+
 class Test : public BaseTest3D {
 private:
 	ParticleEmitter* particleEmitter;

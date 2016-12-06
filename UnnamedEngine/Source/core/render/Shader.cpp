@@ -92,8 +92,8 @@ void Shader::destroy() {
 
 void Shader::addUniform(std::string id, std::string name) {
 	GLint location = glGetUniformLocation(program, name.c_str());
-	if (location == -1)
-		Logger::log("Could not find uniform with the name '" + name + "'", "Shader", LogType::Warning);
+	//if (location == -1)
+		//Logger::log("Could not find uniform with the name '" + name + "'", "Shader", LogType::Warning);
 	if (uniforms.find(id) == uniforms.end())
 		uniforms.insert(std::pair<std::string, GLint>(id, location));
 	else
@@ -102,8 +102,8 @@ void Shader::addUniform(std::string id, std::string name) {
 
 void Shader::addAttribute(std::string id, std::string name) {
 	GLint location = glGetAttribLocation(program, name.c_str());
-	if (location == -1)
-		Logger::log("Could not find attribute with the name '" + name + "'", "Shader", LogType::Warning);
+	//if (location == -1)
+		//Logger::log("Could not find attribute with the name '" + name + "'", "Shader", LogType::Warning);
 	if (attributes.find(id) == attributes.end())
 		attributes.insert(std::pair<std::string, GLint>(id, location));
 	else

@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 1 | Experimental 2
+
+* Removed errors from shaders when a uniform/attribute is
+  not found as many of these occur when the compiler
+  removed unnecessary variables
+
+* More shader cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 1 | Experimental 1
 
 * Changed shaders to use #map duplicates to replace the

@@ -24,8 +24,8 @@
 
 class Billboard : public GameObject3D {
 public:
-	Billboard(float width, float height) : GameObject3D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad3D(width, height)) }, "Billboard", width, height) {
-		getMaterial()->setDiffuseColour(Colour::RED);
+	Billboard(float width, float height) : GameObject3D(new Mesh(MeshBuilder::createQuad3D(width, height)), "Billboard", width, height) {
+		getMaterial()->diffuseColour = Colour::RED;
 	}
 
 	virtual void update() override {}
@@ -37,15 +37,14 @@ public:
 		Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
 
 		shader->setUniformVector3("Camera_Right", Vector3f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2)));
-		shader->setUniformVector3("Camera_Up", Vector3f(-matrix.get(1, 0), -matrix.get(1, 1), -matrix.get(1, 2)));
+		shader->setUniformVector3("Camera_Up", Vector3f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2)));
 		shader->setUniformVector2("Billboard_Size", Vector2f(getSize().getX(), getSize().getY()));
 		shader->setUniformVector3("Billboard_Centre", getPosition());
-
 		shader->setUniformMatrix4("ProjectionViewMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
 		//Renderer::saveTextures();
 		//getMaterial()->setUniforms(getRenderShader());
 
-		Renderer::render(getMeshes(), getModelMatrix(), getRenderShader());
+		Renderer::render(getMesh(), getModelMatrix(), getRenderShader());
 
 		//Renderer::releaseNewTextures();
 	}
