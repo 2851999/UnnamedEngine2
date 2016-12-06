@@ -2,5 +2,5 @@
 #include "Material.fs"
 
 void main() {
-	FragColour = ue_getMaterialDiffuse(frag_textureCoord);
+	ue_FragColour = ueGetMaterialDiffuse(ue_frag_textureCoord);
 }

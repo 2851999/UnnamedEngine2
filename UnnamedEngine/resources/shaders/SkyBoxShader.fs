@@ -1,9 +1,9 @@
 #include "Core.fs"
 
-#map uniform Material_DiffuseTexture tex
+#map uniform Material_DiffuseTexture ue_tex
 
-uniform samplerCube tex;
+uniform samplerCube ue_tex;
 
 void main() {
-	FragColour = texture(tex, frag_position);
+	ue_FragColour = texture(ue_tex, ue_frag_position);
 }

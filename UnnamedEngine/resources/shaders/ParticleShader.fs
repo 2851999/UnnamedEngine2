@@ -1,14 +1,14 @@
 #include "Core.fs"
 
-#map uniform Texture tex
+#map uniform Texture ue_tex
 
 //The texture for the particles
-uniform sampler2D tex;
+uniform sampler2D ue_tex;
 
 //Data from the vertex shader
-in vec4 frag_colour;
+in vec4 ue_frag_colour;
 
 void main() {
 	//Assign the colour
-	FragColour = frag_colour * texture2D(tex, frag_textureCoord);
+	ue_FragColour = ue_frag_colour * texture2D(ue_tex, ue_frag_textureCoord);
 }

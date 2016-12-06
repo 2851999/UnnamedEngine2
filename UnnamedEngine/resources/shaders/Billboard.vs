@@ -1,11 +1,11 @@
-#map uniform ProjectionViewMatrix projectionViewMatrix
-#map uniform Camera_Right cameraRight
-#map uniform Camera_Up cameraUp
+#map uniform ProjectionViewMatrix ue_projectionViewMatrix
+#map uniform Camera_Right ue_cameraRight
+#map uniform Camera_Up ue_cameraUp
 
-uniform mat4 projectionViewMatrix;
-uniform vec3 cameraRight;
-uniform vec3 cameraUp;
+uniform mat4 ue_projectionViewMatrix;
+uniform vec3 ue_cameraRight;
+uniform vec3 ue_cameraUp;
 
-vec4 ue_getBillboardPosition(vec3 cent, vec3 pos, vec2 size) {
-	return projectionViewMatrix * vec4(cent + ((cameraRight * pos.x * size.x) + (cameraUp * pos.y * size.y)), 1.0);
+vec4 ueGetBillboardPosition(vec3 cent, vec3 pos, vec2 size) {
+	return ue_projectionViewMatrix * vec4(cent + ((ue_cameraRight * pos.x * size.x) + (ue_cameraUp * pos.y * size.y)), 1.0);
 }

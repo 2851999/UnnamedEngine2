@@ -1,15 +1,15 @@
 #include "Core.vs"
 #include "Skinning.vs"
 
-#map uniform LightSpaceMatrix mat
+#map uniform LightSpaceMatrix ue_mat
 
-uniform mat4 mat;
+uniform mat4 ue_mat;
 
 void main() {
 	//Assign the vertex position
-	if (useSkinning) {
-		gl_Position = mat * ue_getBoneTransform() * vec4(position, 1.0);
+	if (ue_useSkinning) {
+		gl_Position = ue_mat * ueGetBoneTransform() * vec4(ue_position, 1.0);
 	} else {
-		gl_Position = mat * vec4(position, 1.0);
+		gl_Position = ue_mat * vec4(ue_position, 1.0);
 	}
 }

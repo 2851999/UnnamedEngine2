@@ -1,7 +1,7 @@
 #include "Core.vs"
 
 void main() {
-	ue_assignTextureCoord();
+	ueAssignTextureCoord();
 	
-	gl_Position = vec4(position.x, position.y, 0.0, 1.0);
+	gl_Position = vec4(ue_position.x, ue_position.y, 0.0, 1.0);
 }

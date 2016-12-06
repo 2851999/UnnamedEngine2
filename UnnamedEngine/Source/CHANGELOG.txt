@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 1 | Experimental 3
+
+* More shader cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 1 | Experimental 2
 
 * Removed errors from shaders when a uniform/attribute is

@@ -1,19 +1,19 @@
 #include "Lighting.fs"
 
 void main() {
-	vec3 ambientColour = ue_getMaterialAmbient(frag_textureCoord);
-	vec4 diffuseColour = ue_getMaterialDiffuse(frag_textureCoord);
-	vec3 specularColour = ue_getMaterialSpecular(frag_textureCoord);
+	vec3 ambientColour = ueGetMaterialAmbient(ue_frag_textureCoord);
+	vec4 diffuseColour = ueGetMaterialDiffuse(ue_frag_textureCoord);
+	vec3 specularColour = ueGetMaterialSpecular(ue_frag_textureCoord);
 	
 	vec3 normal;
 	
-	if (useNormalMap) {
-		normal = normalize(frag_tbnMatrix * ue_getMaterialNormal(frag_textureCoord));
+	if (ue_useNormalMap) {
+		normal = normalize(ue_frag_tbnMatrix * ueGetMaterialNormal(ue_frag_textureCoord));
 	} else {
-		normal = normalize(frag_normal);
+		normal = normalize(ue_frag_normal);
 	}
 	
-	vec3 light = ue_getLighting(normal, ambientColour, diffuseColour.xyz, specularColour);
+	vec3 light = ueGetLighting(normal, ambientColour, diffuseColour.xyz, specularColour);
 
-	FragColour = vec4(light, diffuseColour.a);
+	ue_FragColour = vec4(light, diffuseColour.a);
 }

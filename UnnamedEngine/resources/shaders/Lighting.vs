@@ -1,53 +1,47 @@
 #include "Core.vs"
 #include "Skinning.vs"
 
-uniform mat4 lightSpaceMatrix;
-uniform bool useNormalMap;
+uniform mat4 ue_lightSpaceMatrix;
+uniform bool ue_useNormalMap;
 
-in vec3 normal;
-in vec3 tangent;
-in vec3 bitangent;
+out vec4 ue_frag_pos_lightspace;
+out mat3 ue_frag_tbnMatrix;
 
-out vec3 frag_normal;
-out vec4 frag_pos_lightspace;
-out mat3 frag_tbnMatrix;
-
-void ue_assignLightingData() {
-	//Assign the needed data for the fragment shader
-	frag_position = vec3(modelMatrix * vec4(position, 1.0));
-	frag_normal = normalMatrix * normal;
-
+void ueAssignLightingData() {
 	mat4 boneTransform;
-	if (useSkinning) {
-		boneTransform = ue_getBoneTransform();
+	if (ue_useSkinning) {
+		boneTransform = ueGetBoneTransform();
 		
-		frag_position = vec3(modelMatrix * boneTransform * vec4(position, 1.0));
+		ue_frag_position = vec3(ue_modelMatrix * boneTransform * vec4(ue_position, 1.0));
 		
-		frag_normal = normalMatrix * vec3(boneTransform * vec4(normal, 0.0));
+		ue_frag_normal = ue_normalMatrix * vec3(boneTransform * vec4(ue_normal, 0.0));
+	} else {
+		ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
+		ue_frag_normal = ue_normalMatrix * ue_normal;
 	}
 	
-	frag_pos_lightspace = lightSpaceMatrix * vec4(frag_position, 1.0);
+	ue_frag_pos_lightspace = ue_lightSpaceMatrix * vec4(ue_frag_position, 1.0);
 	
-	if (useNormalMap) {
+	if (ue_useNormalMap) {
 		vec3 T;
 		vec3 B;
 		
-		if (useSkinning) {
-			T = normalize(normalMatrix * vec3(boneTransform * vec4(tangent, 0.0)));
-			B = normalize(normalMatrix * vec3(boneTransform * vec4(bitangent, 0.0)));
+		if (ue_useSkinning) {
+			T = normalize(ue_normalMatrix * vec3(boneTransform * vec4(ue_tangent, 0.0)));
+			B = normalize(ue_normalMatrix * vec3(boneTransform * vec4(ue_bitangent, 0.0)));
 		} else {
-			T = normalize(normalMatrix * tangent);
-			B = normalize(normalMatrix * bitangent);
+			T = normalize(ue_normalMatrix * ue_tangent);
+			B = normalize(ue_normalMatrix * ue_bitangent);
 		}
-		vec3 N = normalize(frag_normal);
+		vec3 N = normalize(ue_frag_normal);
 	
-		frag_tbnMatrix = mat3(T, B, N);
+		ue_frag_tbnMatrix = mat3(T, B, N);
 	}
 	
 	//Assign the vertex position
-	ue_calculatePosition();
-	
-	if (useSkinning) {
-		gl_Position = mvpMatrix * boneTransform * vec4(position, 1.0);
+	if (ue_useSkinning) {
+		gl_Position = ue_mvpMatrix * boneTransform * vec4(ue_position, 1.0);
+	} else {
+		ueCalculatePosition();
 	}
 }

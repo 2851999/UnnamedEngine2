@@ -1,11 +1,11 @@
 #include "Core.fs"
 
-#map uniform Texture tex
+#map uniform Texture ue_tex
 
 //The texture to display
-uniform sampler2D tex;
+uniform sampler2D ue_tex;
 
 void main() {
 	//Assign the colour
-	FragColour = texture(tex, frag_textureCoord);
+	ue_FragColour = texture(ue_tex, ue_frag_textureCoord);
 }
