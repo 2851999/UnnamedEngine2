@@ -27,6 +27,8 @@
 #include "../core/render/Renderer.h"
 #include "../utils/GLUtils.h"
 
+#include "../experimental/Billboard.h"
+
 class Test : public BaseTest3D {
 private:
 	ParticleEmitter* particleEmitter;
@@ -51,7 +53,7 @@ void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane.obj"), "Lighting");
+	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.obj"), "Lighting");
 	plane->update();
 
 	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), "Lighting");
@@ -83,7 +85,8 @@ void Test::onCreated() {
 	renderScene->add(model2);
 	renderScene->add(model3);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.2f);
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, 0.0001f);
+	//plane->getMesh()->getMaterial(1)->diffuseTexture = light0->getDepthBuffer()->getFramebufferTexture(0);
 	light0->update();
 	renderScene->addLight(light0);
 

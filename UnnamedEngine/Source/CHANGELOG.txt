@@ -1,4 +1,53 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 (V0.1.9)
+
+* Added parallax occlusion mapping
+
+* Changed shaders to use #map duplicates to replace the
+  previous assignment
+* Changed shadows to work with skeletal animation
+
+* Removed errors from shaders when a uniform/attribute is
+  not found as many of these occur when the compiler
+  removed unnecessary variables
+  
+* Fixed bug: Shadows would render properly in certain
+             circumstances
+             
+* More shader cleanup
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 1 | Experimental 4
+
+* Added parallax occlusion mapping
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 1 | Experimental 3
+
+* More shader cleanup
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 1 | Experimental 2
+
+* Removed errors from shaders when a uniform/attribute is
+  not found as many of these occur when the compiler
+  removed unnecessary variables
+
+* More shader cleanup
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 1 | Experimental 1
+
+* Changed shaders to use #map duplicates to replace the
+  previous assignment
+* Changed shadows to work with skeletal animation
+  
+* Fixed bug: Shadows would render properly in certain
+             circumstances
+             
+* More shader cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 1 (V0.1.8)
 
 * Added BoneAnimationData

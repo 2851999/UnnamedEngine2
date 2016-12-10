@@ -32,8 +32,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.1.8";
-	const std::string DateCreated = "02/12/2016";
+	const std::string Version     = "V0.1.9";
+	const std::string DateCreated = "10/12/2016";
 	const std::string Build       = "Development";
 }
 

@@ -127,6 +127,13 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 		} else
 			shader->setUniformi("UseNormalMap", 0);
 
+		if (material->parallaxMap) {
+			shader->setUniformi("Material_ParallaxMap", bindTexture(material->parallaxMap));
+			shader->setUniformf("Material_ParallaxScale", material->parallaxScale);
+			shader->setUniformi("UseParallaxMap", 1);
+		} else
+			shader->setUniformi("UseParallaxMap", 0);
+
 		shader->setUniformf("Material_Shininess", material->shininess);
 	}
 }
@@ -207,51 +214,38 @@ using namespace StrUtils;
 void Renderer::addRenderShader(std::string id, Shader* shader) {
 	shader->use();
 	if (id == "Lighting") {
-		shader->addUniform("MVPMatrix", "mvpMatrix");
-		shader->addUniform("Material_AmbientColour", "material.ambientColour");
-		shader->addUniform("Material_DiffuseColour", "material.diffuseColour");
-		shader->addUniform("Material_SpecularColour", "material.specularColour");
-		shader->addUniform("Material_DiffuseTexture", "material.diffuseTexture");
-		shader->addUniform("Material_SpecularTexture", "material.specularTexture");
-		shader->addUniform("Material_NormalMap", "material.normalMap");
-		shader->addUniform("Material_Shininess", "material.shininess");
-		shader->addUniform("UseNormalMap", "useNormalMap");
+		shader->addUniform("UseNormalMap", "ue_useNormalMap");
+		shader->addUniform("LightSpaceMatrix", "ue_lightSpaceMatrix");
 
-		shader->addUniform("ModelMatrix", "modelMatrix");
-		shader->addUniform("NormalMatrix", "normalMatrix");
-		shader->addUniform("LightSpaceMatrix", "lightSpaceMatrix");
-
-		shader->addUniform("UseShadowMap", "useShadowMap");
-		shader->addUniform("ShadowMap", "shadowMap");
+		shader->addUniform("UseShadowMap", "ue_useShadowMap");
+		shader->addUniform("ShadowMap", "ue_shadowMap");
+		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
 
 		for (unsigned int i = 0; i < 6; i++) {
-			shader->addUniform("Light_Type["           + str(i) + "]", "lights[" + str(i) + "].type");
-			shader->addUniform("Light_Position["       + str(i) + "]", "lights[" + str(i) + "].position");
-			shader->addUniform("Light_Direction["      + str(i) + "]", "lights[" + str(i) + "].direction");
-			shader->addUniform("Light_DiffuseColour["  + str(i) + "]", "lights[" + str(i) + "].diffuseColour");
-			shader->addUniform("Light_SpecularColour[" + str(i) + "]", "lights[" + str(i) + "].specularColour");
-			shader->addUniform("Light_Constant["       + str(i) + "]", "lights[" + str(i) + "].constant");
-			shader->addUniform("Light_Linear["         + str(i) + "]", "lights[" + str(i) + "].linear");
-			shader->addUniform("Light_Quadratic["      + str(i) + "]", "lights[" + str(i) + "].quadratic");
-			shader->addUniform("Light_Cutoff["         + str(i) + "]", "lights[" + str(i) + "].cutoff");
-			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "lights[" + str(i) + "].outerCutoff");
+			shader->addUniform("Light_Type["           + str(i) + "]", "ue_lights[" + str(i) + "].type");
+			shader->addUniform("Light_Position["       + str(i) + "]", "ue_lights[" + str(i) + "].position");
+			shader->addUniform("Light_Direction["      + str(i) + "]", "ue_lights[" + str(i) + "].direction");
+			shader->addUniform("Light_DiffuseColour["  + str(i) + "]", "ue_lights[" + str(i) + "].diffuseColour");
+			shader->addUniform("Light_SpecularColour[" + str(i) + "]", "ue_lights[" + str(i) + "].specularColour");
+			shader->addUniform("Light_Constant["       + str(i) + "]", "ue_lights[" + str(i) + "].constant");
+			shader->addUniform("Light_Linear["         + str(i) + "]", "ue_lights[" + str(i) + "].linear");
+			shader->addUniform("Light_Quadratic["      + str(i) + "]", "ue_lights[" + str(i) + "].quadratic");
+			shader->addUniform("Light_Cutoff["         + str(i) + "]", "ue_lights[" + str(i) + "].cutoff");
+			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].outerCutoff");
 		}
 
 		for (unsigned int i = 0; i < 80; i++)
-			shader->addUniform("Bones[" + str(i) + "]", "bones[" + str(i) + "]");
+			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
 
-		shader->addUniform("NumLights", "numLights");
-		shader->addUniform("Light_Ambient", "light_ambient");
-		shader->addUniform("Camera_Position", "camera_position");
+		shader->addUniform("NumLights", "ue_numLights");
+		shader->addUniform("Light_Ambient", "ue_light_ambient");
+		shader->addUniform("Camera_Position", "ue_camera_position");
 
-		shader->addUniform("EnvironmentMap", "environmentMap");
-		shader->addUniform("UseEnvironmentMap", "useEnvironmentMap");
-
-		shader->addAttribute("Position", "position");
-		shader->addAttribute("TextureCoordinate", "textureCoord");
-		shader->addAttribute("Normal", "normal");
-		shader->addAttribute("Tangent", "tangent");
-		shader->addAttribute("Bitangent", "bitangent");
+		shader->addUniform("EnvironmentMap", "ue_environmentMap");
+		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
+	} else if (id == "ShadowMap") {
+		for (unsigned int i = 0; i < 80; i++)
+			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
 	}
 
 	shader->stopUsing();

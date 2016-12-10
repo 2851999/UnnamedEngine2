@@ -1,35 +1,15 @@
-#version 140
+#include "Core.vs"
+#include "Billboard.vs"
 
-#map uniform MVPMatrix mvpMatrix
-#map uniform ProjectionViewMatrix projectionViewMatrix
-#map uniform Camera_Right cameraRight
-#map uniform Camera_Up cameraUp
-#map uniform Billboard_Size billboardSize
-#map uniform Billboard_Centre centre
-#map attribute Position position
-#map attribute TextureCoordinate textureCoord
+#map uniform Billboard_Size ue_billboardSize
+#map uniform Billboard_Centre ue_centre
 
-//Matrices
-uniform mat4 mvpMatrix;
-uniform mat4 projectionViewMatrix;
-
-//Billboarding data
-uniform vec3 cameraRight;
-uniform vec3 cameraUp;
-uniform vec2 billboardSize;
-uniform vec3 centre;
-
-//Mesh data
-in vec3 position;
-in vec2 textureCoord;
-
-//Data for the fragment shader
-out vec2 frag_textureCoord;
+uniform vec2 ue_billboardSize;
+uniform vec3 ue_centre;
 
 void main() {
-	//Pass the needed data to the fragment shader
-	frag_textureCoord = textureCoord;
+	ueAssignTextureCoord();
 	
 	//Assign the vertex position
-	gl_Position = projectionViewMatrix * vec4(centre + ((cameraRight * position.x * billboardSize.x) + (cameraUp * position.y * billboardSize.y)), 1.0);
+	gl_Position = ueGetBillboardPosition(ue_centre, ue_position, ue_billboardSize);
 }

@@ -178,7 +178,7 @@ BoneAnimationData* Animation::getBoneAnimationData(unsigned int boneIndex) {
 			return boneData[i];
 	}
 	//Log an error
-	Logger::log("BoneAnimationData with the index '" + StrUtils::str(boneIndex) + "' was not found in the animation with the name '" + name + "'", "Animation", LogType::Error);
+	//Logger::log("BoneAnimationData with the index '" + StrUtils::str(boneIndex) + "' was not found in the animation with the name '" + name + "'", "Animation", LogType::Error);
 	//Return NULL if not found
 	return NULL;
 }
