@@ -637,6 +637,9 @@ Material* Mesh::loadMaterial(std::string path, std::string fileName, const aiMat
 	else if (StrUtils::strEndsWith(fileName, ".obj") && (mat->GetTextureCount(aiTextureType_HEIGHT) != 0))
 		material->normalMap = loadTexture(path, mat, aiTextureType_HEIGHT);
 
+	if (mat->GetTextureCount(aiTextureType_DISPLACEMENT) != 0)
+		material->parallaxMap = loadTexture(path, mat, aiTextureType_DISPLACEMENT);
+
 	//Load and assign the colours
 	material->ambientColour  = loadColour(mat, AI_MATKEY_COLOR_AMBIENT);
 	material->diffuseColour  = loadColour(mat, AI_MATKEY_COLOR_DIFFUSE);

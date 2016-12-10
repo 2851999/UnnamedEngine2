@@ -1,14 +1,23 @@
 #include "Lighting.fs"
 
 void main() {
-	vec3 ambientColour = ueGetMaterialAmbient(ue_frag_textureCoord);
-	vec4 diffuseColour = ueGetMaterialDiffuse(ue_frag_textureCoord);
-	vec3 specularColour = ueGetMaterialSpecular(ue_frag_textureCoord);
+	vec2 textureCoord = ue_frag_textureCoord;
+	
+	if (ue_useParallaxMap && ue_light_ambient.x == 0) {
+		textureCoord = ueGetMaterialParallax(ue_frag_textureCoord, normalize(ue_tangentViewPos - ue_tangentFragPos));
+		
+		if(textureCoord.x > 1.0 || textureCoord.y > 1.0 || textureCoord.x < 0.0 || textureCoord.y < 0.0)
+			discard;
+	}
+
+	vec3 ambientColour = ueGetMaterialAmbient(textureCoord);
+	vec4 diffuseColour = ueGetMaterialDiffuse(textureCoord);
+	vec3 specularColour = ueGetMaterialSpecular(textureCoord);
 	
 	vec3 normal;
 	
 	if (ue_useNormalMap) {
-		normal = normalize(ue_frag_tbnMatrix * ueGetMaterialNormal(ue_frag_textureCoord));
+		normal = normalize(ue_frag_tbnMatrix * ueGetMaterialNormal(textureCoord));
 	} else {
 		normal = normalize(ue_frag_normal);
 	}

@@ -3,9 +3,13 @@
 
 uniform mat4 ue_lightSpaceMatrix;
 uniform bool ue_useNormalMap;
+uniform bool ue_useParallaxMap;
 
 out vec4 ue_frag_pos_lightspace;
 out mat3 ue_frag_tbnMatrix;
+
+out vec3 ue_tangentViewPos;
+out vec3 ue_tangentFragPos;
 
 void ueAssignLightingData() {
 	mat4 boneTransform;
@@ -36,6 +40,11 @@ void ueAssignLightingData() {
 		vec3 N = normalize(ue_frag_normal);
 	
 		ue_frag_tbnMatrix = mat3(T, B, N);
+		
+		if (ue_useParallaxMap) {
+			ue_tangentViewPos = ue_frag_tbnMatrix * ue_camera_position;
+			ue_tangentFragPos = ue_frag_tbnMatrix * ue_frag_position;
+		}
 	}
 	
 	//Assign the vertex position

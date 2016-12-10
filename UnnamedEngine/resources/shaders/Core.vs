@@ -3,6 +3,7 @@
 #map uniform MVPMatrix ue_mvpMatrix
 #map uniform ModelMatrix ue_modelMatrix
 #map uniform NormalMatrix ue_normalMatrix
+#map uniform Camera_Position ue_camera_position
 #map attribute Position ue_position
 #map attribute TextureCoordinate ue_textureCoord
 #map attribute Normal ue_normal
@@ -20,6 +21,8 @@
 uniform mat4 ue_mvpMatrix;
 uniform mat4 ue_modelMatrix;
 uniform mat3 ue_normalMatrix;
+
+uniform vec3 ue_camera_position;
 
 layout(location = UE_LOCATION_POSITION) in vec3 ue_position;
 layout(location = UE_LOCATION_TEXTURE_COORD) in vec2 ue_textureCoord;

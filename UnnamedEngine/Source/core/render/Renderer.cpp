@@ -127,6 +127,13 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 		} else
 			shader->setUniformi("UseNormalMap", 0);
 
+		if (material->parallaxMap) {
+			shader->setUniformi("Material_ParallaxMap", bindTexture(material->parallaxMap));
+			shader->setUniformf("Material_ParallaxScale", material->parallaxScale);
+			shader->setUniformi("UseParallaxMap", 1);
+		} else
+			shader->setUniformi("UseParallaxMap", 0);
+
 		shader->setUniformf("Material_Shininess", material->shininess);
 	}
 }
@@ -212,6 +219,7 @@ void Renderer::addRenderShader(std::string id, Shader* shader) {
 
 		shader->addUniform("UseShadowMap", "ue_useShadowMap");
 		shader->addUniform("ShadowMap", "ue_shadowMap");
+		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
 
 		for (unsigned int i = 0; i < 6; i++) {
 			shader->addUniform("Light_Type["           + str(i) + "]", "ue_lights[" + str(i) + "].type");

@@ -29,12 +29,16 @@ uniform vec3 ue_light_ambient;
 uniform samplerCube ue_environmentMap;
 uniform bool ue_useEnvironmentMap;
 uniform bool ue_useNormalMap;
+uniform bool ue_useParallaxMap;
 
 uniform sampler2D ue_shadowMap;
 uniform bool ue_useShadowMap;
 
 in vec4 ue_frag_pos_lightspace;
 in mat3 ue_frag_tbnMatrix;
+
+in vec3 ue_tangentViewPos;
+in vec3 ue_tangentFragPos;
 
 //Returns the result of directional lighting calculations
 vec3 ueCalculateDirectionalLight(UELight light, vec3 diffuseColour, vec3 specularColour, vec3 normal) {
