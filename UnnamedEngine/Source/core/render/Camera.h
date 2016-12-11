@@ -21,7 +21,7 @@
 
 #include "SkyBox.h"
 #include "../Object.h"
-//#include "../../experimental/Frustum.h"
+#include "../../experimental/Frustum.h"
 
 /*****************************************************************************
  * The Camera class contains the base functionality of a camera
@@ -94,7 +94,7 @@ private:
 	Vector3f cameraUp    = Vector3f(0.0f, 1.0f, 0.0f);
 	Vector3f cameraRight = Vector3f(1.0f, 0.0f, 0.0f);
 
-//	Frustum frustum;
+	Frustum frustum;
 public:
 	/* Various constructors */
 	Camera3D() {}
@@ -167,7 +167,7 @@ public:
 	inline bool hasSkyBox() { return skyBox; }
 	inline bool isFlying() { return flying; }
 
-	//inline Frustum& getFrustum() { return frustum; }
+	inline Frustum& getFrustum() { return frustum; }
 };
 
 #endif /* CORE_RENDER_CAMERA_H_ */

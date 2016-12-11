@@ -400,6 +400,16 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 
 	//Ensure the data was loaded successfully
 	if (scene != NULL) {
+
+		//For frustum culling, we need a bounding sphere that contains all of the mesh within it, so to do this we need
+		//to calculate the max/min extents of each x, y and z coordinate of the vertices in the mesh
+		float minX =  1000000000;
+		float maxX = -1000000000;
+		float minY =  1000000000;
+		float maxY = -1000000000;
+		float minZ =  1000000000;
+		float maxZ = -1000000000;
+
 		//Go through each loaded mesh
 		for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
 			//Pointer to the current mesh being read
@@ -412,6 +422,15 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 				//Add all of the position data
 				aiVector3D& position = currentMesh->mVertices[i];
 				currentData->addPosition(Vector3f(position.x, position.y, position.z));
+
+				//Update the min/max values
+				minX = MathsUtils::min(minX, position.x);
+				maxX = MathsUtils::max(maxX, position.x);
+				minY = MathsUtils::min(minY, position.y);
+				maxY = MathsUtils::max(maxY, position.y);
+				minZ = MathsUtils::min(minZ, position.z);
+				maxZ = MathsUtils::max(maxZ, position.z);
+
 				//Add the texture coordinates data if it exists
 				if (currentMesh->HasTextureCoords(0)) {
 					aiVector3D& textureCoord = currentMesh->mTextureCoords[0][i];
@@ -450,6 +469,20 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			numIndices += currentMesh->mNumFaces * 3;
 			numVertices += currentMesh->mNumVertices;
 		}
+
+		//Calculate the find the lengths between the mesh, and also find the largest one
+		float lengthX = maxX - minX;
+		float lengthY = maxY - minY;
+		float lengthZ = maxZ - minZ;
+		float largestLength = Vector3f(lengthX, lengthY, lengthZ).length();
+
+		//Calculate the centre and radius of the bound sphere
+		Vector3f boundingSphereCentre = Vector3f((maxX + minX) / 2.0f, (maxY + minY) / 2.0f, (maxZ + minZ) / 2.0f);
+		float    boundingSphereRadius = largestLength / 2.0f;
+
+		//Assign the bounding sphere properties
+		currentData->setCentre(boundingSphereCentre);
+		currentData->setRadius(boundingSphereRadius);
 
 		//The skeleton instance
 		Skeleton* skeleton = NULL;

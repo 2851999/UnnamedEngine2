@@ -1,4 +1,35 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 | Experimental 1
+
+* Added proper frustum culling of models added to a
+  RenderScene3D instance
+* Added method to pre-multiply a vector by a matrix
+* Added constructor conversions between vectors of similar
+  sizes
+
+* Changed FrustumPlane to a structure
+
+* Rewritten Frustum class
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 (V0.1.9)
+
+* Added parallax occlusion mapping
+
+* Changed shaders to use #map duplicates to replace the
+  previous assignment
+* Changed shadows to work with skeletal animation
+
+* Removed errors from shaders when a uniform/attribute is
+  not found as many of these occur when the compiler
+  removed unnecessary variables
+  
+* Fixed bug: Shadows would render properly in certain
+             circumstances
+             
+* More shader cleanup
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 1 | Experimental 4
 
 * Added parallax occlusion mapping

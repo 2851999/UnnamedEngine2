@@ -20,36 +20,16 @@
 #define CORE_RENDER_FRUSTUM_H_
 
 #include "../core/Vector.h"
+#include "../core/Matrix.h"
 
 /*****************************************************************************
- * The FrustumPlane class helps represent the 6 planes of a Frustum
+ * The FrustumPlane structure helps represent a plane that forms part of a
+ * frustum
  *****************************************************************************/
 
-class FrustumPlane {
-private:
-	Vector3f p;
-	Vector3f n;
-	float d = 0;
-public:
-	FrustumPlane() {}
-
-	void init(Vector3f p0, Vector3f p1, Vector3f p2) {
-		Vector3f v = p1 - p0;
-		Vector3f u = p2 - p0;
-		n = v.cross(u).normalise();
-		p = p0;
-		d = -n.dot(p);
-	}
-
-	void init(Vector3f normal, Vector3f point) {
-		n = normal.normalise();
-		d = -n.dot(point);
-		p = point;
-	}
-
-	float distance(Vector3f other) {
-		return d + n.dot(other);
-	}
+struct FrustumPlane {
+	//Coefficients for the plane's equation (ax + bx + cx + d = 0)
+	float a, b, c, d;
 };
 
 /*****************************************************************************
@@ -58,68 +38,26 @@ public:
 
 class Frustum {
 private:
+	/* The 6 planes forming this frustum */
 	FrustumPlane planes[6];
 
-	Vector3f ntl,ntr,nbl,nbr,ftl,ftr,fbl,fbr;
-	float zNear = 0, zFar = 0, aspect = 0, fov = 0, tang = 0;
-	float nw = 0, nh = 0, fw = 0, fh = 0;
-
+	/* Method called to calculate and return a plane */
+	FrustumPlane calculatePlane(float a, float b, float c, float z);
 public:
+	/* The constructor */
 	Frustum() {}
 
-	void setProjection(float fov, float aspect, float zNear, float zFar) {
-		this->fov = fov;
-		this->aspect = aspect;
-		this->zNear = zNear;
-		this->zFar = zFar;
+	/* The destructor */
+	virtual ~Frustum() {}
 
-		tang = (float) tan(MathsUtils::toRadians(fov) * 0.5) ;
-		nh = zNear * tang;
-		nw = nh * aspect;
-		fh = zFar  * tang;
-		fw = fh * aspect;
-	}
+	/* Method called to update this frustum given the projection view matrix */
+	void update(Matrix4f pvm);
 
-	void setView(Vector3f eye, Vector3f centre, Vector3f up) {
-		Vector3f dir, nc, fc, X, Y, Z;
+	/* Method called to check whether a sphere is within this frustum */
+	bool sphereInFrustum(Vector3f centre, float radius);
 
-		Z = eye - centre;
-		Z.normalise();
-
-		X = up.cross(Z);
-		X.normalise();
-
-		Y = Z.cross(X);
-
-		nc = eye - Z * zNear;
-		fc = eye - Z * zFar;
-
-		ntl = nc + Y * nh - X * nw;
-		ntr = nc + Y * nh + X * nw;
-		nbl = nc - Y * nh - X * nw;
-		nbr = nc - Y * nh + X * nw;
-
-		ftl = fc + Y * fh - X * fw;
-		ftr = fc + Y * fh + X * fw;
-		fbl = fc - Y * fh - X * fw;
-		fbr = fc - Y * fh + X * fw;
-
-		planes[0].init(ntr, ntl, ftl);
-		planes[1].init(nbl, nbr, fbr);
-		planes[2].init(ntl, nbl, fbl);
-		planes[3].init(nbr, ntr, fbr);
-		planes[4].init(ntl, ntr, nbr);
-		planes[5].init(ftr, ftl, fbl);
-	}
-
-	bool testSphere(Vector3f position, float radius) {
-		for (int i = 0; i < 6; i++) {
-			float distance = planes[i].distance(position);
-			if (distance < -radius)
-				return false;
-		}
-		return true;
-	}
+	/* Method called to check whether a point is within this frustum */
+	bool pointInFrustum(Vector3f point);
 };
 
 #endif /* CORE_RENDER_FRUSTUM_H_ */

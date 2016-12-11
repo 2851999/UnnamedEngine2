@@ -58,12 +58,14 @@ void RenderScene3D::render() {
 //				Renderer::getCamera()->setProjectionMatrix(lights[i]->getLightProjectionMatrix());
 
 				for (unsigned int j = 0; j < objects.size(); j++) {
-					shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * objects[j]->getModelMatrix());
-					objects[j]->getRenderShader()->addForwardShader(shadowMapShader);
+					if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[j]->getModelMatrix() * Vector4f(objects[j]->getMesh()->getData()->getCentre(), 1.0f)), objects[j]->getMesh()->getData()->getRadius())) {
+						shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * objects[j]->getModelMatrix());
+						objects[j]->getRenderShader()->addForwardShader(shadowMapShader);
 
-					objects[j]->render();
+						objects[j]->render();
 
-					objects[j]->getRenderShader()->removeForwardShader(shadowMapShader);
+						objects[j]->getRenderShader()->removeForwardShader(shadowMapShader);
+					}
 				}
 
 				shadowMapShader->stopUsing();
@@ -91,7 +93,7 @@ void RenderScene3D::render() {
 		lightingShader->setUniformi("UseEnvironmentMap", 0);
 
 		for (unsigned int i = 0; i < objects.size(); i++) {
-			//if (((Camera3D*) Renderer::getCamera())->getFrustum().testSphere(((GameObject3D*) objects[i])->getPosition(), 1.0f))
+			if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[i]->getModelMatrix() * Vector4f(objects[i]->getMesh()->getData()->getCentre(), 1.0f)), objects[i]->getMesh()->getData()->getRadius()))
 				objects[i]->render();
 		}
 
@@ -120,14 +122,14 @@ void RenderScene3D::render() {
 
 			//Go through the objects in the scene
 			for (unsigned int o = 0; o < objects.size(); o++) {
-				//if (((Camera3D*) Renderer::getCamera())->getFrustum().testSphere(((GameObject3D*) objects[o])->getPosition(), 1.0f)) {
+				if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[o]->getModelMatrix() * Vector4f(objects[o]->getMesh()->getData()->getCentre(), 1.0f)), objects[o]->getMesh()->getData()->getRadius())) {
 					Matrix4f modelMatrix = objects[o]->getModelMatrix();
 
 					lightingShader->setUniformMatrix4("ModelMatrix", modelMatrix);
 					lightingShader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
 
 					objects[o]->render();
-				//}
+				}
 			}
 
 			if (lights[b]->hasDepthBuffer())

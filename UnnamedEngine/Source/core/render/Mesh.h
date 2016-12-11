@@ -79,6 +79,12 @@ private:
 	std::vector<unsigned int>   boneIDs;
 	std::vector<float> 		    boneWeights;
 
+	/* The centre of this mesh */
+	Vector3f centre;
+
+	/* The radius of this mesh's bounding sphere */
+	float radius = 1.0f;
+
 	/* Various data about how the data is stored */
 	unsigned int numDimensions = 0;
 
@@ -181,6 +187,9 @@ public:
 	unsigned int getNumBones()         { return numBones;         }
 	unsigned int getNumDimensions()    { return numDimensions;    }
 
+	inline void setCentre(Vector3f centre) { this->centre = centre; }
+	inline void setRadius(float radius)    { this->radius = radius; }
+
 	std::vector<float>& getPositions()      { return positions;     }
 	std::vector<float>& getColours()        { return colours;       }
 	std::vector<float>& getTextureCoords()  { return textureCoords; }
@@ -194,6 +203,8 @@ public:
 	inline bool hasSubData() { return subData.size() > 0; }
 	inline unsigned int getSubDataCount() { return subData.size(); }
 	inline SubData& getSubData(unsigned int index) { return subData[index]; }
+	inline Vector3f getCentre() { return centre; }
+	inline float getRadius() { return radius; }
 private:
 	/* The flags being used */
 	Flag flags = Flag::NONE;

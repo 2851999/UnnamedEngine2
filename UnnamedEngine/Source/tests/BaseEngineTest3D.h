@@ -34,6 +34,7 @@ private:
 	ParticleEmitter* particleEmitter;
 	ParticleSystem* particleSystem;
 
+	GameObject3D* plane;
 	GameObject3D* model1;
 	GameObject3D* model2;
 	GameObject3D* model3;
@@ -53,7 +54,7 @@ void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.obj"), "Lighting");
+	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.obj"), "Lighting");
 	plane->update();
 
 	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), "Lighting");
@@ -68,7 +69,7 @@ void Test::onCreated() {
 	model2->setRotation(0.0f, 180.0f, 0.0f);
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
-//
+
 //	model2->getMesh()->getSkeleton()->startAnimation("");
 	//model2->getMesh()->getSkeleton()->stopAnimation();
 

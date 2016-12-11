@@ -142,6 +142,18 @@ public:
 		return result;
 	}
 
+	/* Returns the result of multiplying this matrix a vector */
+	inline Vector<T, N> operator*(const Vector<T, N>& vector) const {
+		Vector<T, N> result;
+		for (unsigned int i = 0; i < N; i++) {
+			result[i] = 0;
+			for (unsigned int j = 0; j < N; j++) {
+				result[i] += vector[j] * get(i, j);
+			}
+		}
+		return result;
+	}
+
 	/* Multiplies this matrix by another */
 	inline Matrix<T, N>& operator*=(const Matrix<T, N>& other) {
 		//Calculate the result of multiplying this matrix by the other one
