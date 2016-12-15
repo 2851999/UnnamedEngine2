@@ -28,8 +28,8 @@
 
 RenderScene3D::RenderScene3D() {
 	//Get the required shaders
-	shadowMapShader = Renderer::getRenderShader("ShadowMap")->getShader();
-	lightingShader = Renderer::getRenderShader("Lighting")->getShader();
+	shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getShader();
+	lightingShader = Renderer::getRenderShader(Renderer::SHADER_LIGHTING)->getShader();
 }
 
 RenderScene3D::~RenderScene3D() {
@@ -58,7 +58,7 @@ void RenderScene3D::render() {
 //				Renderer::getCamera()->setProjectionMatrix(lights[i]->getLightProjectionMatrix());
 
 				for (unsigned int j = 0; j < objects.size(); j++) {
-					if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[j]->getModelMatrix() * Vector4f(objects[j]->getMesh()->getData()->getCentre(), 1.0f)), objects[j]->getMesh()->getData()->getRadius())) {
+					if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[j]->getModelMatrix() * Vector4f(objects[j]->getMesh()->getBoundingSphereCentre(), 1.0f)), objects[j]->getMesh()->getBoundingSphereRadius())) {
 						shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * objects[j]->getModelMatrix());
 						objects[j]->getRenderShader()->addForwardShader(shadowMapShader);
 
@@ -93,7 +93,7 @@ void RenderScene3D::render() {
 		lightingShader->setUniformi("UseEnvironmentMap", 0);
 
 		for (unsigned int i = 0; i < objects.size(); i++) {
-			if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[i]->getModelMatrix() * Vector4f(objects[i]->getMesh()->getData()->getCentre(), 1.0f)), objects[i]->getMesh()->getData()->getRadius()))
+			if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[i]->getModelMatrix() * Vector4f(objects[i]->getMesh()->getBoundingSphereCentre(), 1.0f)), objects[i]->getMesh()->getBoundingSphereRadius()))
 				objects[i]->render();
 		}
 
@@ -122,7 +122,7 @@ void RenderScene3D::render() {
 
 			//Go through the objects in the scene
 			for (unsigned int o = 0; o < objects.size(); o++) {
-				if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[o]->getModelMatrix() * Vector4f(objects[o]->getMesh()->getData()->getCentre(), 1.0f)), objects[o]->getMesh()->getData()->getRadius())) {
+				if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[o]->getModelMatrix() * Vector4f(objects[o]->getMesh()->getBoundingSphereCentre(), 1.0f)), objects[o]->getMesh()->getBoundingSphereRadius())) {
 					Matrix4f modelMatrix = objects[o]->getModelMatrix();
 
 					lightingShader->setUniformMatrix4("ModelMatrix", modelMatrix);

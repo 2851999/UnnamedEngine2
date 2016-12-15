@@ -470,20 +470,6 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			numVertices += currentMesh->mNumVertices;
 		}
 
-		//Calculate the find the lengths between the mesh, and also find the largest one
-		float lengthX = maxX - minX;
-		float lengthY = maxY - minY;
-		float lengthZ = maxZ - minZ;
-		float largestLength = Vector3f(lengthX, lengthY, lengthZ).length();
-
-		//Calculate the centre and radius of the bound sphere
-		Vector3f boundingSphereCentre = Vector3f((maxX + minX) / 2.0f, (maxY + minY) / 2.0f, (maxZ + minZ) / 2.0f);
-		float    boundingSphereRadius = largestLength / 2.0f;
-
-		//Assign the bounding sphere properties
-		currentData->setCentre(boundingSphereCentre);
-		currentData->setRadius(boundingSphereRadius);
-
 		//The skeleton instance
 		Skeleton* skeleton = NULL;
 
@@ -632,6 +618,20 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			skeleton->setGlobalInverseTransform(toMatrix4f(matrix.Inverse()));
 		//Assign the mesh's skeleton
 		mesh->setSkeleton(skeleton);
+
+		//Calculate the find the lengths between the mesh, and also find the largest one
+		float lengthX = maxX - minX;
+		float lengthY = maxY - minY;
+		float lengthZ = maxZ - minZ;
+		float largestLength = Vector3f(lengthX, lengthY, lengthZ).length();
+
+		//Calculate the centre and radius of the bound sphere
+		Vector3f boundingSphereCentre = Vector3f((maxX + minX) / 2.0f, (maxY + minY) / 2.0f, (maxZ + minZ) / 2.0f);
+		float    boundingSphereRadius = largestLength / 2.0f;
+
+		//Assign the bounding sphere properties
+		mesh->setBoundingSphereCentre(boundingSphereCentre);
+		mesh->setBoundingSphereRadius(boundingSphereRadius);
 
 		//Load and add the materials
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {

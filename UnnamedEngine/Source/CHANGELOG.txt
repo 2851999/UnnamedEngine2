@@ -1,4 +1,17 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 | Experimental 2
+
+* Added SHADER_ constants in Renderer to represent various
+  shader ID's
+* Added translate and scale methods to Transform
+  
+* Moved centre and radius from MeshData to Mesh
+
+* Fixed bug: Transform didn't update its position, rotation
+             and scale when a new parent transform was
+             assigned
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 2 | Experimental 1
 
 * Added proper frustum culling of models added to a

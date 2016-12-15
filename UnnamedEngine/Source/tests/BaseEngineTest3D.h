@@ -47,17 +47,18 @@ public:
 };
 
 void Test::onInitialise() {
-
+//	getSettings().videoVSync = false;
+//	getSettings().videoMaxFPS = 0;
 }
 
 void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.obj"), "Lighting");
+	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.obj"), Renderer::SHADER_LIGHTING);
 	plane->update();
 
-	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), "Lighting");
+	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), Renderer::SHADER_LIGHTING);
 	model1->setRotation(0.0f, 180.0f, 0.0f);
 	model1->setPosition(-2.0f, 0.8f, 0.0f);
 	model1->update();
@@ -65,7 +66,7 @@ void Test::onCreated() {
 	model1->getMesh()->getSkeleton()->startAnimation("");
 	//model1->getMesh()->getSkeleton()->stopAnimation();
 
-	model2 = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Lighting");
+	model2 = new GameObject3D(resourceLoader.loadModel("teapot.obj"), Renderer::SHADER_LIGHTING);
 	model2->setRotation(0.0f, 180.0f, 0.0f);
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
@@ -73,7 +74,7 @@ void Test::onCreated() {
 //	model2->getMesh()->getSkeleton()->startAnimation("");
 	//model2->getMesh()->getSkeleton()->stopAnimation();
 
-	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.dae"), "Lighting");
+	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.dae"), Renderer::SHADER_LIGHTING);
 	model3->setRotation(0.0f, 180.0f, 0.0f);
 	model3->setPosition(2.0f, 0.8f, 0.0f);
 	model3->update();
@@ -111,13 +112,13 @@ void Test::onUpdate() {
 	particleSystem->update(getDeltaSeconds(), camera->getPosition());
 
 	if (Keyboard::isPressed(GLFW_KEY_UP))
-		particleEmitter->getTransform()->translate(Vector3f(0.0f, 0.0f, -0.008f * getDelta()));
+		particleEmitter->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
 	else if (Keyboard::isPressed(GLFW_KEY_DOWN))
-		particleEmitter->getTransform()->translate(Vector3f(0.0f, 0.0f, 0.008f * getDelta()));
+		particleEmitter->getTransform()->translate(0.0f, 0.0f, 0.008f * getDelta());
 	if (Keyboard::isPressed(GLFW_KEY_LEFT))
-		particleEmitter->getTransform()->translate(Vector3f(-0.008f * getDelta(), 0.0f, 0.0f));
+		particleEmitter->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
-		particleEmitter->getTransform()->translate(Vector3f(0.008f * getDelta(), 0.0f, 0.0f));
+		particleEmitter->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 
 	model1->getMesh()->getSkeleton()->update(getDeltaSeconds());
 	//model2->getMesh()->getSkeleton()->update(getDeltaSeconds());

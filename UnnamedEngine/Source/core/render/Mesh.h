@@ -79,12 +79,6 @@ private:
 	std::vector<unsigned int>   boneIDs;
 	std::vector<float> 		    boneWeights;
 
-	/* The centre of this mesh */
-	Vector3f centre;
-
-	/* The radius of this mesh's bounding sphere */
-	float radius = 1.0f;
-
 	/* Various data about how the data is stored */
 	unsigned int numDimensions = 0;
 
@@ -187,9 +181,6 @@ public:
 	unsigned int getNumBones()         { return numBones;         }
 	unsigned int getNumDimensions()    { return numDimensions;    }
 
-	inline void setCentre(Vector3f centre) { this->centre = centre; }
-	inline void setRadius(float radius)    { this->radius = radius; }
-
 	std::vector<float>& getPositions()      { return positions;     }
 	std::vector<float>& getColours()        { return colours;       }
 	std::vector<float>& getTextureCoords()  { return textureCoords; }
@@ -203,8 +194,6 @@ public:
 	inline bool hasSubData() { return subData.size() > 0; }
 	inline unsigned int getSubDataCount() { return subData.size(); }
 	inline SubData& getSubData(unsigned int index) { return subData[index]; }
-	inline Vector3f getCentre() { return centre; }
-	inline float getRadius() { return radius; }
 private:
 	/* The flags being used */
 	Flag flags = Flag::NONE;
@@ -298,6 +287,12 @@ private:
 
 	/* The skeleton for this mesh */
 	Skeleton* skeleton = NULL;
+
+	/* The centre of this mesh */
+	Vector3f centre;
+
+	/* The radius of this mesh's bounding sphere */
+	float radius = 1.0f;
 public:
 	/* The constructor */
 	Mesh(MeshData* data);
@@ -323,6 +318,8 @@ public:
 			materials[index] = material;
 	}
 	inline void setSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
+	inline void setBoundingSphereCentre(Vector3f centre) { this->centre = centre; }
+	inline void setBoundingSphereRadius(float radius)    { this->radius = radius; }
 
 	inline Matrix4f getMatrix() { return transform; }
 	inline MeshData* getData() { return data; }
@@ -334,6 +331,8 @@ public:
 	inline bool hasMaterial() { return materials.size() > 0; }
 	inline Skeleton* getSkeleton() { return skeleton; }
 	inline bool hasSkeleton() { return skeleton; }
+	inline Vector3f getBoundingSphereCentre() { return centre; }
+	inline float getBoundingSphereRadius() { return radius; }
 
 	static void addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes);
 	static const aiNode* findMeshNode(const aiNode* parent);

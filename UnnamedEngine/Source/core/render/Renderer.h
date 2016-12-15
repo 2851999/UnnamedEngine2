@@ -41,6 +41,18 @@ private:
 	 * called */
 	static unsigned int boundTexturesOldSize;
 public:
+	/* The names of default shaders loaded into the engine */
+	static const std::string SHADER_MATERIAL;
+	static const std::string SHADER_SKY_BOX;
+	static const std::string SHADER_FONT;
+	static const std::string SHADER_BILLBOARD;
+	static const std::string SHADER_PARTICLE;
+	static const std::string SHADER_LIGHTING;
+	static const std::string SHADER_FRAMEBUFFER;
+	static const std::string SHADER_ENVIRONMENT_MAP;
+	static const std::string SHADER_SHADOW_MAP;
+	static const std::string SHADER_BILLBOARDED_FONT;
+
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
 	static void addCamera(Camera* camera);
