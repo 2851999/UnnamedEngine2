@@ -22,6 +22,10 @@
 #include "../core/Object.h"
 #include "../core/render/Renderer.h"
 
+/*****************************************************************************
+ * The FrustumPlane class helps represent a view frustum
+ *****************************************************************************/
+
 class Billboard : public GameObject3D {
 public:
 	Billboard(float width, float height) : GameObject3D(new Mesh(MeshBuilder::createQuad3D(width, height)), "Billboard", width, height) {

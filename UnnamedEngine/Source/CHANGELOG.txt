@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 | Experimental 3
+
+* Moved Frustum.h and Frustum.cpp to core
+
+* Fixed bug: getForward in Quaternion returned a vector
+             pointing the wrong way (As OpenGL has -Z into
+             the screen)
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 2 | Experimental 2
 
 * Added SHADER_ constants in Renderer to represent various

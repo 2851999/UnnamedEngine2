@@ -19,9 +19,9 @@
 #ifndef CORE_RENDER_CAMERA_H_
 #define CORE_RENDER_CAMERA_H_
 
+#include "../Frustum.h"
 #include "SkyBox.h"
 #include "../Object.h"
-#include "../../experimental/Frustum.h"
 
 /*****************************************************************************
  * The Camera class contains the base functionality of a camera

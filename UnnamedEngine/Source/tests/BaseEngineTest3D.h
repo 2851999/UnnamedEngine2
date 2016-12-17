@@ -59,7 +59,6 @@ void Test::onCreated() {
 	plane->update();
 
 	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), Renderer::SHADER_LIGHTING);
-	model1->setRotation(0.0f, 180.0f, 0.0f);
 	model1->setPosition(-2.0f, 0.8f, 0.0f);
 	model1->update();
 
@@ -67,7 +66,6 @@ void Test::onCreated() {
 	//model1->getMesh()->getSkeleton()->stopAnimation();
 
 	model2 = new GameObject3D(resourceLoader.loadModel("teapot.obj"), Renderer::SHADER_LIGHTING);
-	model2->setRotation(0.0f, 180.0f, 0.0f);
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
 
@@ -75,7 +73,6 @@ void Test::onCreated() {
 	//model2->getMesh()->getSkeleton()->stopAnimation();
 
 	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.dae"), Renderer::SHADER_LIGHTING);
-	model3->setRotation(0.0f, 180.0f, 0.0f);
 	model3->setPosition(2.0f, 0.8f, 0.0f);
 	model3->update();
 
