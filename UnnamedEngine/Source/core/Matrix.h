@@ -294,9 +294,9 @@ public:
 		Matrix3f result;
 
 		//Assign each value letters to make the calculation easier to follow
-		float a = this->get(0, 0); float b = this->get(0, 1); float c = this->get(0, 2);
-		float d = this->get(1, 0); float e = this->get(1, 1); float f = this->get(1, 2);
-		float g = this->get(2, 0); float h = this->get(2, 1); float i = this->get(2, 2);
+		float a = get(0, 0); float b = get(0, 1); float c = get(0, 2);
+		float d = get(1, 0); float e = get(1, 1); float f = get(1, 2);
+		float g = get(2, 0); float h = get(2, 1); float i = get(2, 2);
 
 		//Now calculate the matrix of cofactors, using capital letters in the
 		//same order as the lower case ones

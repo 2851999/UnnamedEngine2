@@ -68,6 +68,7 @@ void AsteroidsGame::created() {
 
 	//Load the sounds
 	soundSystem->createListener();
+	soundSystem->addMusic("Background", resources.getAudioBackground());
 
 	//Create the InputBindings instance
 	inputBindings = new InputBindings();
@@ -158,12 +159,13 @@ void AsteroidsGame::changeState(GameState newState) {
 			pauseMenu->hide();
 
 		//Check the new state
-		if (newState == MAIN_MENU)
+		if (newState == MAIN_MENU) {
 			//Show the main menu
 			mainMenu->show();
-		else if (newState == GAME_PLAYING && currentState != GAME_PAUSED)
+		} else if (newState == GAME_PLAYING && currentState != GAME_PAUSED) {
 			mainGame->start();
-		else if (newState == GAME_PLAYING && currentState == GAME_PAUSED)
+			soundSystem->play("Background");
+		} else if (newState == GAME_PLAYING && currentState == GAME_PAUSED)
 			soundSystem->resumeAll();
 		else if (newState == GAME_PAUSED) {
 			pauseMenu->show();

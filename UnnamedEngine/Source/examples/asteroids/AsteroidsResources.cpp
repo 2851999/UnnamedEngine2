@@ -39,4 +39,5 @@ void AsteroidsResources::setup(ResourceLoader& loader) {
 
 	audioLaser = loader.loadAudio("lasermono.wav");
 	audioExplosion = loader.loadAudio("explosion.wav");
+	audioBackground = loader.loadAudio("background.wav");
 }

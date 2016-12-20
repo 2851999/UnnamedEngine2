@@ -52,13 +52,10 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	vboVertices->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
 	renderData->addVBO(vboVertices);
 
-	//Assign the data about the particles
-	for (unsigned int i = 0; i < maxParticles * 4; i++)
-		particlePositionSizeData.push_back(0);
-	for (unsigned int i = 0; i < maxParticles * 4; i++)
-		particleColourData.push_back(0);
-	for (unsigned int i = 0; i < maxParticles * 4; i++)
-		particleTextureData.push_back(0);
+	//Assign the size for the data about the particles
+	particlePositionSizeData.resize(maxParticles * 4);
+	particleColourData.resize(maxParticles * 4);
+	particleTextureData.resize(maxParticles * 4);
 
 	vboPositionSizeData = new VBO<GLfloat>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(GLfloat), particlePositionSizeData, GL_STREAM_DRAW, true);
 	vboPositionSizeData->addAttribute(shader->getAttributeLocation("PositionsData"), 4, 1);

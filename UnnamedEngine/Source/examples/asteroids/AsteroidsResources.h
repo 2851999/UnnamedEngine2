@@ -43,6 +43,7 @@ private:
 	/* Various sounds */
 	AudioData* audioLaser = NULL;
 	AudioData* audioExplosion = NULL;
+	AudioData* audioBackground = NULL;
 public:
 	/* The constructor */
 	AsteroidsResources();
@@ -65,6 +66,7 @@ public:
 
 	inline AudioData* getAudioLaser() const { return audioLaser; }
 	inline AudioData* getAudioExplosion() const { return audioExplosion; }
+	inline AudioData* getAudioBackground() const { return audioBackground; }
 };
 
 #endif /* EXAMPLES_ASTEROIDS_ASTEROIDSRESOURCES_H_ */
