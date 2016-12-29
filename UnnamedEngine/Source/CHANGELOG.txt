@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 | Experimental 4
+
+* Added method to calculate and return the bounding sphere for
+  a Mesh in MeshData
+
+* Changed Shader to store attached shaders in a vector
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 2 | Experimental 3
 
 * Moved Frustum.h and Frustum.cpp to core

@@ -65,6 +65,12 @@ public:
 			}
 		}
 	};
+
+	/* Data for a bounding sphere (for frustum culling) */
+	struct BoundingSphere {
+		Vector3f centre;
+		float radius;
+	};
 private:
 	/* The raw data stored for this mesh */
 	std::vector<float> positions;
@@ -95,6 +101,14 @@ private:
 
 	/* The sub data instances */
 	std::vector<SubData> subData;
+
+	/* We need to calculate the max/min extents of each x, y and z coordinate of the vertices in the mesh for bounding spheres, so store that info here */
+	float minX =  1000000000;
+	float maxX = -1000000000;
+	float minY =  1000000000;
+	float maxY = -1000000000;
+	float minZ =  1000000000;
+	float maxZ = -1000000000;
 public:
 	static const unsigned int DIMENSIONS_2D = 2;
 	static const unsigned int DIMENSIONS_3D = 3;
@@ -114,6 +128,9 @@ public:
 		this->numDimensions = numDimensions;
 		this->flags = flags;
 	}
+
+	/* Method to calculate and return a bounding sphere for this mesh */
+	BoundingSphere calculateBoundingSphere();
 
 	/* Method called to setup the bones structures */
 	void setupBones(unsigned int numVertices);
