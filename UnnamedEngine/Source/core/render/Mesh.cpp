@@ -25,6 +25,23 @@
  * The MeshData class
  *****************************************************************************/
 
+MeshData::BoundingSphere MeshData::calculateBoundingSphere() {
+	//The bounding sphere
+	BoundingSphere sphere;
+	//Calculate the find the lengths between the mesh, and also find the largest one
+	float lengthX = maxX - minX;
+	float lengthY = maxY - minY;
+	float lengthZ = maxZ - minZ;
+	float largestLength = Vector3f(lengthX, lengthY, lengthZ).length();
+
+	//Calculate the centre and radius of the bound sphere
+	sphere.centre = Vector3f((maxX + minX) / 2.0f, (maxY + minY) / 2.0f, (maxZ + minZ) / 2.0f);
+	sphere.radius = largestLength / 2.0f;
+
+	//Return the sphere
+	return sphere;
+}
+
 void MeshData::addPosition(Vector2f position) {
 	//Check to see whether it should be separated
 	if (separatePositions()) {
@@ -48,6 +65,16 @@ void MeshData::addPosition(Vector3f position) {
 		others.push_back(position.getX());
 		others.push_back(position.getY());
 		others.push_back(position.getZ());
+	}
+
+	//Check whether data for a bounding sphere should be calculated
+	if (numDimensions == 3) {
+		minX = MathsUtils::min(minX, position.getX());
+		maxX = MathsUtils::max(maxX, position.getX());
+		minY = MathsUtils::min(minY, position.getY());
+		maxY = MathsUtils::max(maxY, position.getY());
+		minZ = MathsUtils::min(minZ, position.getZ());
+		maxZ = MathsUtils::max(maxZ, position.getZ());
 	}
 
 	numPositions++;
@@ -412,6 +439,7 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 				//Add all of the position data
 				aiVector3D& position = currentMesh->mVertices[i];
 				currentData->addPosition(Vector3f(position.x, position.y, position.z));
+
 				//Add the texture coordinates data if it exists
 				if (currentMesh->HasTextureCoords(0)) {
 					aiVector3D& textureCoord = currentMesh->mTextureCoords[0][i];
@@ -599,6 +627,12 @@ Mesh* Mesh::loadModel(std::string path, std::string fileName) {
 			skeleton->setGlobalInverseTransform(toMatrix4f(matrix.Inverse()));
 		//Assign the mesh's skeleton
 		mesh->setSkeleton(skeleton);
+
+		//Calculate the bounding sphere for the mesh
+		MeshData::BoundingSphere sphere = currentData->calculateBoundingSphere();
+		//Assign the bounding sphere properties
+		mesh->setBoundingSphereCentre(sphere.centre);
+		mesh->setBoundingSphereRadius(sphere.radius);
 
 		//Load and add the materials
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {

@@ -35,6 +35,17 @@ MeshRenderData* Renderer::screenTextureMesh;
 
 unsigned int Renderer::boundTexturesOldSize;
 
+const std::string Renderer::SHADER_MATERIAL         = "Material";
+const std::string Renderer::SHADER_SKY_BOX          = "SkyBox";
+const std::string Renderer::SHADER_FONT             = "Font";
+const std::string Renderer::SHADER_BILLBOARD        = "Billboard";
+const std::string Renderer::SHADER_PARTICLE         = "Particle";
+const std::string Renderer::SHADER_LIGHTING         = "Lighting";
+const std::string Renderer::SHADER_FRAMEBUFFER      = "Framebuffer";
+const std::string Renderer::SHADER_ENVIRONMENT_MAP  = "EnvironmentMap";
+const std::string Renderer::SHADER_SHADOW_MAP       = "ShadowMap";
+const std::string Renderer::SHADER_BILLBOARDED_FONT = "BillboardedFont";
+
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
 }
@@ -80,16 +91,16 @@ void Renderer::initialise() {
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the shaders
-	addRenderShader("Material", Shader::loadShader("resources/shaders/MaterialShader"));
-	addRenderShader("SkyBox", Shader::loadShader("resources/shaders/SkyBoxShader"));
-	addRenderShader("Font", Shader::loadShader("resources/shaders/FontShader"));
-	addRenderShader("Billboard", Shader::loadShader("resources/shaders/BillboardShader"));
-	addRenderShader("Particle", Shader::loadShader("resources/shaders/ParticleShader"));
-	addRenderShader("Lighting", Shader::loadShader("resources/shaders/LightingShader"));
-	addRenderShader("Framebuffer", Shader::loadShader("resources/shaders/FramebufferShader"));
-	addRenderShader("EnvironmentMap", Shader::loadShader("resources/shaders/EnvironmentMapShader"));
-	addRenderShader("ShadowMap", Shader::loadShader("resources/shaders/ShadowMapShader"));
-	addRenderShader("BillboardedFont", Shader::loadShader("resources/shaders/BillboardedFontShader"));
+	addRenderShader(SHADER_MATERIAL,         Shader::loadShader("resources/shaders/MaterialShader"));
+	addRenderShader(SHADER_SKY_BOX,          Shader::loadShader("resources/shaders/SkyBoxShader"));
+	addRenderShader(SHADER_FONT,             Shader::loadShader("resources/shaders/FontShader"));
+	addRenderShader(SHADER_BILLBOARD,        Shader::loadShader("resources/shaders/BillboardShader"));
+	addRenderShader(SHADER_PARTICLE,         Shader::loadShader("resources/shaders/ParticleShader"));
+	addRenderShader(SHADER_LIGHTING,         Shader::loadShader("resources/shaders/LightingShader"));
+	addRenderShader(SHADER_FRAMEBUFFER,      Shader::loadShader("resources/shaders/FramebufferShader"));
+	addRenderShader(SHADER_ENVIRONMENT_MAP,  Shader::loadShader("resources/shaders/EnvironmentMapShader"));
+	addRenderShader(SHADER_SHADOW_MAP,       Shader::loadShader("resources/shaders/ShadowMapShader"));
+	addRenderShader(SHADER_BILLBOARDED_FONT, Shader::loadShader("resources/shaders/BillboardedFontShader"));
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
@@ -99,7 +110,7 @@ void Renderer::initialise() {
 	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
 	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
 	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
-	screenTextureMesh = new MeshRenderData(meshData, getRenderShader("Framebuffer"));
+	screenTextureMesh = new MeshRenderData(meshData, getRenderShader(SHADER_FRAMEBUFFER));
 }
 
 void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Material* material) {
@@ -111,7 +122,7 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 		shader->setUniformi("Material_DiffuseTexture", bindTexture(Renderer::getBlankTexture()));
 
 	//Check to see whether the shader is for lighting
-	if (shaderName == "Lighting") {
+	if (shaderName == SHADER_LIGHTING) {
 		//Assign other lighting specific properties
 		shader->setUniformColourRGB("Material_AmbientColour", material->ambientColour);
 		shader->setUniformColourRGB("Material_SpecularColour", material->specularColour);
@@ -193,7 +204,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 void Renderer::render(FramebufferTexture* texture, Shader* shader) {
 	if (shader == NULL)
-		shader = getRenderShader("Framebuffer")->getShader();
+		shader = getRenderShader(SHADER_LIGHTING)->getShader();
 
 	shader->use();
 
@@ -213,7 +224,7 @@ void Renderer::destroy() {
 using namespace StrUtils;
 void Renderer::addRenderShader(std::string id, Shader* shader) {
 	shader->use();
-	if (id == "Lighting") {
+	if (id == SHADER_LIGHTING) {
 		shader->addUniform("UseNormalMap", "ue_useNormalMap");
 		shader->addUniform("LightSpaceMatrix", "ue_lightSpaceMatrix");
 
@@ -243,7 +254,7 @@ void Renderer::addRenderShader(std::string id, Shader* shader) {
 
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");
 		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
-	} else if (id == "ShadowMap") {
+	} else if (id == SHADER_SHADOW_MAP) {
 		for (unsigned int i = 0; i < 80; i++)
 			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
 	}

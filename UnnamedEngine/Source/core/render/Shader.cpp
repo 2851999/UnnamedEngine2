@@ -31,9 +31,6 @@ Shader* Shader::currentShader = NULL;
 
 Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 	this->program = glCreateProgram();
-	this->vertexShader = vertexShader;
-	this->geometryShader = geometryShader;
-	this->fragmentShader = fragmentShader;
 
 	attach(vertexShader);
 	if (geometryShader)
@@ -46,6 +43,9 @@ Shader::~Shader() {
 }
 
 void Shader::attach(GLuint shader) {
+	//Add the shader
+	attachedShaders.push_back(shader);
+
 	glAttachShader(program, shader);
 	glLinkProgram(program);
 
@@ -69,6 +69,9 @@ void Shader::attach(GLuint shader) {
 }
 
 void Shader::detach(GLuint shader) {
+	//Remove the shader
+	attachedShaders.erase(std::remove(attachedShaders.begin(), attachedShaders.end(), shader), attachedShaders.end());
+
 	glDetachShader(program, shader);
 }
 
@@ -86,8 +89,10 @@ void Shader::stopUsing() {
 
 void Shader::destroy() {
 	glDeleteProgram(program);
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	//Go through each attached shader and delete them
+	for (unsigned int i = 0; i < attachedShaders.size(); i++)
+		glDeleteShader(attachedShaders[i]);
+	attachedShaders.clear();
 }
 
 void Shader::addUniform(std::string id, std::string name) {

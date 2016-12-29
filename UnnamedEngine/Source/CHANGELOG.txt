@@ -1,4 +1,75 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 3 (V0.2.0)
+
+* Added proper frustum culling of models added to a
+  RenderScene3D instance
+* Added method to pre-multiply a vector by a matrix
+* Added constructor conversions between vectors of similar
+  sizes
+* Added SHADER_ constants in Renderer to represent various
+  shader ID's
+* Added translate and scale methods to Transform
+* Added method to calculate and return the bounding sphere for
+  a Mesh in MeshData
+
+* Changed FrustumPlane to a structure
+* Changed Shader to store attached shaders in a vector
+
+* Moved Frustum.h to core
+
+* Rewritten Frustum class
+
+* Fixed bug: Transform didn't update its position, rotation
+             and scale when a new parent transform was
+             assigned
+* Fixed bug: getForward in Quaternion returned a vector
+             pointing the wrong way (As OpenGL has -Z into
+             the screen)
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 | Experimental 4
+
+* Added method to calculate and return the bounding sphere for
+  a Mesh in MeshData
+
+* Changed Shader to store attached shaders in a vector
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 | Experimental 3
+
+* Moved Frustum.h and Frustum.cpp to core
+
+* Fixed bug: getForward in Quaternion returned a vector
+             pointing the wrong way (As OpenGL has -Z into
+             the screen)
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 | Experimental 2
+
+* Added SHADER_ constants in Renderer to represent various
+  shader ID's
+* Added translate and scale methods to Transform
+  
+* Moved centre and radius from MeshData to Mesh
+
+* Fixed bug: Transform didn't update its position, rotation
+             and scale when a new parent transform was
+             assigned
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 2 | Experimental 1
+
+* Added proper frustum culling of models added to a
+  RenderScene3D instance
+* Added method to pre-multiply a vector by a matrix
+* Added constructor conversions between vectors of similar
+  sizes
+
+* Changed FrustumPlane to a structure
+
+* Rewritten Frustum class
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 2 (V0.1.9)
 
 * Added parallax occlusion mapping

@@ -83,11 +83,11 @@ public:
 	Vector3f toEuler();
 
 	inline Vector3f getForward() const {
-		return rotate(Vector3f(0.0f, 0.0f, 1.0f), (*this));
+		return rotate(Vector3f(0.0f, 0.0f, -1.0f), (*this));
 	}
 
 	inline Vector3f getBackward() const {
-		return rotate(Vector3f(0.0f, 0.0f, -1.0f), (*this));
+		return rotate(Vector3f(0.0f, 0.0f, 1.0f), (*this));
 	}
 
 	inline Vector3f getUp() const {

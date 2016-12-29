@@ -34,11 +34,11 @@ class Shader : public Resource {
 private:
 	static Shader* currentShader;
 
-	/* OpenGL shader stuff */
+	/* The shader program */
 	GLint program = -1;
-	GLint vertexShader = -1;
-	GLint geometryShader = -1;
-	GLint fragmentShader = -1;
+
+	/* The attached shaders */
+	std::vector<GLuint> attachedShaders;
 
 	/* Maps with locations of the variables in the shaders */
 	std::map<std::string, GLint> uniforms;

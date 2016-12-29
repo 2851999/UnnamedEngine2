@@ -142,6 +142,18 @@ public:
 		return result;
 	}
 
+	/* Returns the result of multiplying this matrix a vector */
+	inline Vector<T, N> operator*(const Vector<T, N>& vector) const {
+		Vector<T, N> result;
+		for (unsigned int i = 0; i < N; i++) {
+			result[i] = 0;
+			for (unsigned int j = 0; j < N; j++) {
+				result[i] += vector[j] * get(i, j);
+			}
+		}
+		return result;
+	}
+
 	/* Multiplies this matrix by another */
 	inline Matrix<T, N>& operator*=(const Matrix<T, N>& other) {
 		//Calculate the result of multiplying this matrix by the other one
@@ -485,10 +497,10 @@ public:
 		Vector3f side = forward.cross(u).normalise();
 		u = side.cross(forward);
 
-		set(0, 0, side.getX()); set(0, 1, side.getY()); set(0, 2, side.getZ()); set(0, 3, -side.dot(eye));
-		set(1, 0, u.getX()); set(1, 1, u.getY()); set(1, 2, u.getZ()); set(1, 3, -up.dot(eye));
+		set(0, 0, side.getX());     set(0, 1, side.getY());     set(0, 2, side.getZ());     set(0, 3, -side.dot(eye));
+		set(1, 0, u.getX());        set(1, 1, u.getY());        set(1, 2, u.getZ());        set(1, 3, -up.dot(eye));
 		set(2, 0, -forward.getX()); set(2, 1, -forward.getY()); set(2, 2, -forward.getZ()); set(2, 3, forward.dot(eye));
-		set(3, 0, 0); set(3, 1, 0); set(3, 2, 0); set(3, 3, 1);
+		set(3, 0, 0);               set(3, 1, 0);               set(3, 2, 0);               set(3, 3, 1);
 
 		return (*this);
 	}

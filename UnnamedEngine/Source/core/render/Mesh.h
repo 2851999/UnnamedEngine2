@@ -65,6 +65,12 @@ public:
 			}
 		}
 	};
+
+	/* Data for a bounding sphere (for frustum culling) */
+	struct BoundingSphere {
+		Vector3f centre;
+		float radius;
+	};
 private:
 	/* The raw data stored for this mesh */
 	std::vector<float> positions;
@@ -95,6 +101,14 @@ private:
 
 	/* The sub data instances */
 	std::vector<SubData> subData;
+
+	/* We need to calculate the max/min extents of each x, y and z coordinate of the vertices in the mesh for bounding spheres, so store that info here */
+	float minX =  1000000000;
+	float maxX = -1000000000;
+	float minY =  1000000000;
+	float maxY = -1000000000;
+	float minZ =  1000000000;
+	float maxZ = -1000000000;
 public:
 	static const unsigned int DIMENSIONS_2D = 2;
 	static const unsigned int DIMENSIONS_3D = 3;
@@ -114,6 +128,9 @@ public:
 		this->numDimensions = numDimensions;
 		this->flags = flags;
 	}
+
+	/* Method to calculate and return a bounding sphere for this mesh */
+	BoundingSphere calculateBoundingSphere();
 
 	/* Method called to setup the bones structures */
 	void setupBones(unsigned int numVertices);
@@ -287,6 +304,12 @@ private:
 
 	/* The skeleton for this mesh */
 	Skeleton* skeleton = NULL;
+
+	/* The centre of this mesh */
+	Vector3f centre;
+
+	/* The radius of this mesh's bounding sphere */
+	float radius = 1.0f;
 public:
 	/* The constructor */
 	Mesh(MeshData* data);
@@ -312,6 +335,8 @@ public:
 			materials[index] = material;
 	}
 	inline void setSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
+	inline void setBoundingSphereCentre(Vector3f centre) { this->centre = centre; }
+	inline void setBoundingSphereRadius(float radius)    { this->radius = radius; }
 
 	inline Matrix4f getMatrix() { return transform; }
 	inline MeshData* getData() { return data; }
@@ -323,6 +348,8 @@ public:
 	inline bool hasMaterial() { return materials.size() > 0; }
 	inline Skeleton* getSkeleton() { return skeleton; }
 	inline bool hasSkeleton() { return skeleton; }
+	inline Vector3f getBoundingSphereCentre() { return centre; }
+	inline float getBoundingSphereRadius() { return radius; }
 
 	static void addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes);
 	static const aiNode* findMeshNode(const aiNode* parent);

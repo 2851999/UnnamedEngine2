@@ -71,7 +71,7 @@ void DebugCamera::update(float delta) {
 	currentDelta = delta;
 	//Move the camera
 	moveForward(axis0->getValue() * currentDelta * movementSpeed);
-	moveLeft(axis1->getValue() * currentDelta * movementSpeed);
+	moveRight(axis1->getValue() * currentDelta * movementSpeed);
 
 	//Orientate the camera
 	getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -axis3->getValue() * lookSensitivityX * currentDelta);
@@ -89,5 +89,5 @@ void DebugCamera::onMouseMoved(double x, double y, double dx, double dy) {
 	if (dx != 0)
 		getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -dx * mouseSensitivityX * currentDelta);
 	if (dy != 0)
-		getTransform()->rotate(getTransform()->getRotation().getRight(), dy * mouseSensitivityY * currentDelta);
+		getTransform()->rotate(getTransform()->getRotation().getRight(), -dy * mouseSensitivityY * currentDelta);
 }

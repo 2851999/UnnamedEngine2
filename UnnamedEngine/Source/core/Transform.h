@@ -105,6 +105,7 @@ public:
 	/* Methods used to translate the position of this transform */
 	inline void translate(const Vector3f& amount) { setPosition(this->localPosition + amount); }
 	inline void translate(const Vector2f& amount) { translate(Vector3f(amount)); }
+	inline void translate(float x, float y, float z = 0) { translate(Vector3f(x, y, z)); }
 
 	/* Methods used to rotate the rotation vector by some amount */
 	void rotate(const Quaternion& angle);
@@ -116,6 +117,7 @@ public:
 	inline void scale(const Vector3f& amount) { setScale(this->localScale * amount); }
 	inline void scale(const Vector2f& amount) { scale(Vector3f(amount)); }
 	inline void scale(const float& amount) { scale(Vector3f(amount)); }
+	inline void scale(float x, float y, float z = 0.0f) { scale(Vector3f(x, y, z)); }
 
 	/* Various getters and setters */
 	inline void setPosition(Vector3f position) {
@@ -136,7 +138,7 @@ public:
 		this->rotation = localRotation;
 		//Check whether there is a parent
 		if (parent)
-			this->rotation = parent->getRotation() * this->localRotation;
+			this->rotation = parent->getRotation() * this->rotation;
 		//Assign the child rotations
 		for (unsigned int i = 0; i < children.size(); i++)
 			children[i]->setRotation(children[i]->getLocalRotation());
@@ -171,6 +173,17 @@ public:
 			parent->getChildren().push_back(this);
 		//Assign the parent of this transform
 		this->parent = parent;
+
+		//Assign this transforms position, rotation and scale based on the new parent (if there is one)
+		this->position = this->localPosition;
+		this->rotation = this->localRotation;
+		this->m_scale = this->localScale;
+		if (parent) {
+			this->position += parent->getPosition();
+			this->rotation = parent->getRotation() * this->rotation;
+			this->m_scale = localScale * parent->getScale();
+		}
+
 		//Update this transform
 		for (unsigned int i = 0; i < children.size(); i++)
 			children[i]->setPosition(children[i]->getLocalPosition());

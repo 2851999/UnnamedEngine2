@@ -105,14 +105,14 @@ void Font::setup(std::string path, unsigned int size, Colour colour, TexturePara
 	//Check whether this font is billboarded or not (i.e. Is it going to be used in the 3D world or not)
 	if (billboarded) {
 		//Create the GameObject3D instance and assign the texture
-		object3D = new GameObject3D({ new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "BillboardedFont");
+		object3D = new GameObject3D({ new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, Renderer::SHADER_BILLBOARDED_FONT);
 		object3D->getMaterial()->diffuseColour = colour;
 		object3D->getMaterial()->diffuseTexture = textureAtlas;
 		object3D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE, 1.0f);
 		object3D->update();
 	} else {
 		//Create the GameObject2D instance and assign the texture
-		object2D = new GameObject2D({ new Mesh(MeshBuilder::createQuad(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "Font");
+		object2D = new GameObject2D({ new Mesh(MeshBuilder::createQuad(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, Renderer::SHADER_FONT);
 		object2D->getMaterial()->diffuseColour = colour;
 		object2D->getMaterial()->diffuseTexture = textureAtlas;
 		object2D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE);
