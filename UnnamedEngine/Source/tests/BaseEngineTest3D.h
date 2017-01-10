@@ -51,6 +51,9 @@ void Test::onInitialise() {
 //	getSettings().videoMaxFPS = 0;
 }
 
+#include <fstream>
+#include <iomanip>
+
 void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
@@ -103,6 +106,35 @@ void Test::onCreated() {
 
 	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
 	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
+
+//	std::vector<double> test;
+//	test.push_back(10.0);
+//	test.push_back(3.2);
+//	test.push_back(3.141592653589793238);
+//	test.push_back(123.21);
+//	test.push_back(42.0);
+//	test.push_back(42.42);
+//
+//	std::ofstream output;
+//	output.open("H:/Storage/Users/Joel/Desktop/test.dat", std::ofstream::binary);
+//	size_t size = test.size();
+//	output.write(reinterpret_cast<char*>(&size), sizeof(size));
+//	output.write(reinterpret_cast<char*>(test.data()), test.size() * sizeof(test[0]));
+//	output.close();
+
+//	std::ifstream input;
+//	input.open("H:/Storage/Users/Joel/Desktop/test.dat", std::ifstream::binary);
+//	size_t size;
+//	input.read(reinterpret_cast<char*>(&size), sizeof(size));
+//	test.resize(size);
+//	input.read(reinterpret_cast<char*>(test.data()), test.size() * sizeof(test[0]));
+//	input.close();
+//	for (unsigned int i = 0; i < test.size(); i++) {
+//		std::cout << std::setprecision(20) << test[i] << std::endl;
+//	}
+
+	//MeshLoader::saveCustomModel(resourceLoader.getAbsPathModels() + "bob/", "Test.model", model1->getMesh());
+	MeshLoader::loadCustomModel(resourceLoader.getAbsPathModels() + "bob/", "Test.model");
 }
 
 void Test::onUpdate() {

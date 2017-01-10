@@ -77,6 +77,17 @@ public:
 	inline void setKeyframeScale(unsigned int index, const Vector3f& scale, const float time) { keyframeScales[index] = scale; keyframeScalesTimes[index] = time; }
 
 	inline unsigned int getBoneIndex() { return boneIndex; }
+
+	inline Vector3f& getKeyframePosition(unsigned int index) { return keyframePositions[index]; }
+	inline float getKeyframePositionTime(unsigned int index) { return keyframePositionsTimes[index]; }
+	inline Quaternion& getKeyframeRotation(unsigned int index) { return keyframeRotations[index]; }
+	inline float getKeyframeRotationTime(unsigned int index) { return keyframeRotationsTimes[index]; }
+	inline Vector3f& getKeyframeScale(unsigned int index) { return keyframeScales[index]; }
+	inline float getKeyframeScaleTime(unsigned int index) { return keyframeScalesTimes[index]; }
+
+	inline unsigned int getNumKeyframePositions() { return keyframePositions.size(); }
+	inline unsigned int getNumKeyframeRotations() { return keyframeRotations.size(); }
+	inline unsigned int getNumKeyframeScales() { return keyframeScales.size(); }
 };
 
 /*****************************************************************************
@@ -161,6 +172,8 @@ public:
 	inline float getTicksPerSecond() { return ticksPerSecond; }
 	inline float getDuration() { return duration; }
 	BoneAnimationData* getBoneAnimationData(unsigned int boneIndex);
+	inline BoneAnimationData* getBoneAnimationDataByIndex(unsigned int index) { return boneData[index]; }
+	inline unsigned int getNumBoneAnimationData() { return boneData.size(); }
 };
 
 /*****************************************************************************
@@ -224,9 +237,12 @@ public:
 	inline void setRootBone(unsigned int rootBoneIndex) { this->rootBoneIndex = rootBoneIndex; }
 
 	inline const Matrix4f& getGlobalInverseTransform() { return globalInverseTransform; }
+	inline unsigned int getNumAnimations() { return animations.size(); }
 	Animation* getAnimation(std::string name);
+	inline Animation* getAnimation(unsigned int index) { return animations[index]; }
 	inline unsigned int getNumBones() { return bones.size(); }
 	inline Bone* getBone(unsigned int index) { return bones[index]; }
+	inline unsigned int getRootBoneIndex() { return rootBoneIndex; }
 };
 
 #endif /* CORE_RENDER_SKINNING_H_ */

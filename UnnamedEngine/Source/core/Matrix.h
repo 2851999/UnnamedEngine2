@@ -233,6 +233,9 @@ public:
 	/* Returns a pointer to the front of the values stored in this matrix */
 	inline const T* front() { return &values[0][0]; }
 
+	/* Returns a pointer to the data array */
+	inline T* data() { return values[0]; }
+
 	/* Returns the number of values stored in this matrix */
 	inline int getNumElements() { return N * N; }
 	/* Returns the size of this matrix (in bytes) */

@@ -26,18 +26,9 @@
 #include "Skinning.h"
 #include "VBO.h"
 
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/mesh.h>
-#include <assimp/vector3.h>
-#include <assimp/matrix4x4.h>
-
 /*****************************************************************************
  * The MeshData class stores information about a mesh
  *****************************************************************************/
-
-struct aiScene;
 
 #define NUM_BONES_PER_VERTEX 4
 
@@ -343,6 +334,7 @@ public:
 	inline bool hasData() { return data; }
 	inline MeshRenderData* getRenderData() { return renderData; }
 	inline bool hasRenderData() { return renderData; }
+	inline unsigned int getNumMaterials() { return materials.size(); }
 	inline Material* getMaterial(unsigned int index = 0) { return materials[index]; }
 	inline std::vector<Material*>& getMaterials() { return materials; }
 	inline bool hasMaterial() { return materials.size() > 0; }
@@ -350,27 +342,6 @@ public:
 	inline bool hasSkeleton() { return skeleton; }
 	inline Vector3f getBoundingSphereCentre() { return centre; }
 	inline float getBoundingSphereRadius() { return radius; }
-
-	static void addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes);
-	static const aiNode* findMeshNode(const aiNode* parent);
-	static const aiMatrix4x4 calculateMatrix(const aiNode* current, aiMatrix4x4 currentMatrix);
-
-	/* Static method called to read a file and load a model's meshes */
-	static Mesh* loadModel(std::string path, std::string fileName);
-
-	/* Static method called to load a material */
-	static Material* loadMaterial(std::string path, std::string fileName, const aiMaterial* material);
-
-	/* Static method called to load a texture */
-	static Texture* loadTexture(std::string path, const aiMaterial* material, const aiTextureType type);
-
-	/* Static method called to load a colour (If not assigned, returns WHITE instead) */
-	static Colour loadColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx);
-
-	static Vector3f toVector3f(aiVector3D vec);
-	static Quaternion toQuaternion(aiQuaternion quat);
-	static Matrix4f toMatrix4f(aiMatrix4x4 mat);
-	static Matrix4f toMatrix4f(aiMatrix3x3 mat);
 };
 
 /*****************************************************************************

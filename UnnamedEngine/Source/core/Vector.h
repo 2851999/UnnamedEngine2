@@ -242,6 +242,12 @@ public:
 		}
 		return value + ")";
 	}
+
+	/* Retruns a pointer to the data array */
+	inline T* data() { return values; }
+
+	/* Returns the number of elements stored by this vector */
+	inline unsigned int getNumElements() { return N; }
 };
 
 /*****************************************************************************
