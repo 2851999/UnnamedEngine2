@@ -54,6 +54,13 @@ const aiMatrix4x4 MeshLoader::calculateMatrix(const aiNode* current, aiMatrix4x4
 }
 
 Mesh* MeshLoader::loadModel(std::string path, std::string fileName) {
+	if (StrUtils::strEndsWith(fileName, ".model"))
+		return loadEngineModel(path, fileName);
+	else
+		return loadAssimpModel(path, fileName);
+}
+
+Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName) {
 	//Load the file using Assimp
 	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
 	//The MeshData instance used to store the data for the current mesh
@@ -275,7 +282,7 @@ Mesh* MeshLoader::loadModel(std::string path, std::string fileName) {
 		//Load and add the materials
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
 			//Load the current material
-			Material* material = loadMaterial(path, fileName, scene->mMaterials[i]);
+			Material* material = loadAssimpMaterial(path, fileName, scene->mMaterials[i]);
 
 			if (i == 0)
 				mesh->setMaterial(material);
@@ -294,33 +301,33 @@ Mesh* MeshLoader::loadModel(std::string path, std::string fileName) {
 	}
 }
 
-Material* MeshLoader::loadMaterial(std::string path, std::string fileName, const aiMaterial* mat) {
+Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName, const aiMaterial* mat) {
 	//Create the material instance
 	Material* material = new Material();
 
 	//Load and assign the textures
-	material->ambientTexture  = loadTexture(path, mat, aiTextureType_AMBIENT);
-	material->diffuseTexture  = loadTexture(path, mat, aiTextureType_DIFFUSE);
-	material->specularTexture = loadTexture(path, mat, aiTextureType_SPECULAR);
+	material->ambientTexture  = loadAssimpTexture(path, mat, aiTextureType_AMBIENT);
+	material->diffuseTexture  = loadAssimpTexture(path, mat, aiTextureType_DIFFUSE);
+	material->specularTexture = loadAssimpTexture(path, mat, aiTextureType_SPECULAR);
 
 	//Check to see whether the material has a normal map
 	if (mat->GetTextureCount(aiTextureType_NORMALS) != 0)
-		material->normalMap = loadTexture(path, mat, aiTextureType_NORMALS);
+		material->normalMap = loadAssimpTexture(path, mat, aiTextureType_NORMALS);
 	else if (StrUtils::strEndsWith(fileName, ".obj") && (mat->GetTextureCount(aiTextureType_HEIGHT) != 0))
-		material->normalMap = loadTexture(path, mat, aiTextureType_HEIGHT);
+		material->normalMap = loadAssimpTexture(path, mat, aiTextureType_HEIGHT);
 
 	if (mat->GetTextureCount(aiTextureType_DISPLACEMENT) != 0)
-		material->parallaxMap = loadTexture(path, mat, aiTextureType_DISPLACEMENT);
+		material->parallaxMap = loadAssimpTexture(path, mat, aiTextureType_DISPLACEMENT);
 
 	//Load and assign the colours
-	material->ambientColour  = loadColour(mat, AI_MATKEY_COLOR_AMBIENT);
-	material->diffuseColour  = loadColour(mat, AI_MATKEY_COLOR_DIFFUSE);
-	material->specularColour = loadColour(mat, AI_MATKEY_COLOR_SPECULAR);
+	material->ambientColour  = loadAssimpColour(mat, AI_MATKEY_COLOR_AMBIENT);
+	material->diffuseColour  = loadAssimpColour(mat, AI_MATKEY_COLOR_DIFFUSE);
+	material->specularColour = loadAssimpColour(mat, AI_MATKEY_COLOR_SPECULAR);
 
 	return material;
 }
 
-Texture* MeshLoader::loadTexture(std::string path, const aiMaterial* material, const aiTextureType type) {
+Texture* MeshLoader::loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type) {
 	//Check whether the texture is defined
 	if (material->GetTextureCount(type) != 0) {
 		//Get the path of the texture
@@ -332,7 +339,7 @@ Texture* MeshLoader::loadTexture(std::string path, const aiMaterial* material, c
 		return NULL;
 }
 
-Colour MeshLoader::loadColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx) {
+Colour MeshLoader::loadAssimpColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx) {
 	//The colour
 	aiColor4D colour;
 	//Attempt to load the colour
@@ -372,7 +379,7 @@ Matrix4f MeshLoader::toMatrix4f(aiMatrix3x3 mat) {
 	return m;
 }
 
-void MeshLoader::saveCustomModel(std::string path, std::string fileName, Mesh* mesh) {
+void MeshLoader::saveEngineModel(std::string path, std::string fileName, Mesh* mesh) {
 	//Open the file
 	std::ofstream output;
 	output.open(path + fileName, std::ifstream::binary);
@@ -380,12 +387,21 @@ void MeshLoader::saveCustomModel(std::string path, std::string fileName, Mesh* m
 	//Save specific mesh data
 	float radius = mesh->getBoundingSphereRadius();
 	writeVector3f(output, mesh->getBoundingSphereCentre());
-	output.write((char*) &radius, sizeof(float));
+	writeFloat(output, radius);
 
-	//Now save the actual mesh data
+	//Mesh Data
 	MeshData* data = mesh->getData();
 
 	unsigned int numSubData = data->getSubDataCount();
+
+	writeUInt(output, data->getNumPositions());
+	writeUInt(output, data->getNumColours());
+	writeUInt(output, data->getNumTextureCoords());
+	writeUInt(output, data->getNumNormals());
+	writeUInt(output, data->getNumTangents());
+	writeUInt(output, data->getNumBitangents());
+	writeUInt(output, data->getNumIndices());
+	writeUInt(output, data->getNumBones());
 
 	writeVectorDataFloat(output, data->getPositions());
 	writeVectorDataFloat(output, data->getColours());
@@ -419,7 +435,7 @@ void MeshLoader::saveCustomModel(std::string path, std::string fileName, Mesh* m
 
 	//Skeleton
 	if (mesh->hasSkeleton()) {
-		output << "TRUE";
+		writeUInt(output, 1);
 
 		Skeleton* skeleton = mesh->getSkeleton();
 		unsigned int numAnimations = skeleton->getNumAnimations();
@@ -433,10 +449,10 @@ void MeshLoader::saveCustomModel(std::string path, std::string fileName, Mesh* m
 
 			unsigned int numBoneAnimationData = currentAnimation->getNumBoneAnimationData();
 
-			output << currentAnimation->getName();
+			writeString(output, currentAnimation->getName());
 			writeFloat(output, currentAnimation->getTicksPerSecond());
 			writeFloat(output, currentAnimation->getDuration());
-			writeFloat(output, numBoneAnimationData);
+			writeUInt(output, numBoneAnimationData);
 
 			for (unsigned int j = 0; j < numBoneAnimationData; j++) {
 				BoneAnimationData* currentBoneAnimData = currentAnimation->getBoneAnimationDataByIndex(j);
@@ -476,7 +492,7 @@ void MeshLoader::saveCustomModel(std::string path, std::string fileName, Mesh* m
 		for (unsigned int i = 0; i < numBones; i++) {
 			Bone* bone = skeleton->getBone(i);
 
-			output << bone->getName();
+			writeString(output, bone->getName());
 			writeMatrix4f(output, bone->getTransform());
 			writeMatrix4f(output, bone->getOffset());
 
@@ -489,13 +505,15 @@ void MeshLoader::saveCustomModel(std::string path, std::string fileName, Mesh* m
 
 		writeUInt(output, skeleton->getRootBoneIndex());
 	} else
-		output << "FALSE";
+		writeUInt(output, 0);
+
+	writeMatrix4f(output, mesh->getMatrix());
 
 	//Close the file
 	output.close();
 }
 
-void MeshLoader::loadCustomModel(std::string path, std::string fileName) {
+Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 	//Open the file
 	std::ifstream input;
 	input.open(path + fileName, std::ifstream::binary);
@@ -504,13 +522,210 @@ void MeshLoader::loadCustomModel(std::string path, std::string fileName) {
 	Vector3f boundingSphereCentre;
 	float boundingSphereRadius;
 	readVector3f(input, boundingSphereCentre);
-	input.read((char*) &boundingSphereRadius, sizeof(float));
+	readFloat(input, boundingSphereRadius);
 
-	std::cout << boundingSphereCentre.toString() << std::endl;
-	std::cout << boundingSphereRadius << std::endl;
+	std::vector<Material*> materials;
+
+	//Mesh Data
+	MeshData* data = new MeshData(3);
+
+	unsigned int numPositions, numColours, numTextureCoords, numNormals, numTangents, numBitangents, numIndices, numBones;
+
+	readUInt(input, numPositions);
+	readUInt(input, numColours);
+	readUInt(input, numTextureCoords);
+	readUInt(input, numNormals);
+	readUInt(input, numTangents);
+	readUInt(input, numBitangents);
+	readUInt(input, numIndices);
+	readUInt(input, numBones);
+
+	data->setNumPositions(numPositions);
+	data->setNumColours(numColours);
+	data->setNumTextureCoords(numTextureCoords);
+	data->setNumNormals(numNormals);
+	data->setNumTangents(numTangents);
+	data->setNumBitangents(numBitangents);
+	data->setNumIndices(numIndices);
+	data->setNumBones(numBones);
+
+	readVectorDataFloat(input, data->getPositions());
+	readVectorDataFloat(input, data->getColours());
+	readVectorDataFloat(input, data->getTextureCoords());
+	readVectorDataFloat(input, data->getNormals());
+	readVectorDataFloat(input, data->getTangents());
+	readVectorDataFloat(input, data->getBitangents());
+	readVectorDataFloat(input, data->getOthers());
+	readVectorDataUInt(input, data->getIndices());
+	readVectorDataUInt(input, data->getBoneIDs());
+	readVectorDataFloat(input, data->getBoneWeights());
+
+	//Sub Data
+	unsigned int numSubData;
+	readUInt(input, numSubData);
+
+	for (unsigned int i = 0; i < numSubData; i++) {
+		MeshData::SubData currentSubData;
+		readUInt(input, currentSubData.baseIndex);
+		readUInt(input, currentSubData.baseVertex);
+		readUInt(input, currentSubData.count);
+		readUInt(input, currentSubData.materialIndex);
+		data->addSubData(currentSubData);
+	}
+
+	//Materials
+	unsigned int numMaterials;
+
+	readUInt(input, numMaterials);
+
+	for (unsigned int i = 0; i < numMaterials; i++)
+		readMaterial(input, materials, path);
+
+	unsigned int hasSkeleton;
+	readUInt(input, hasSkeleton);
+
+	//Skeleton
+	Skeleton* skeleton = NULL;
+
+	if (hasSkeleton) {
+		skeleton = new Skeleton();
+
+		unsigned int numAnimations;
+		Matrix4f globalInverseTransform;
+
+		readMatrix4f(input, globalInverseTransform);
+		readUInt(input, numAnimations);
+		skeleton->setGlobalInverseTransform(globalInverseTransform);
+
+		std::vector<Animation*> animations;
+
+		//Animations
+		for (unsigned int i = 0; i < numAnimations; i++) {
+			std::string name;
+			float ticksPerSecond;
+			float duration;
+			unsigned int numBoneAnimationData;
+
+			readString(input, name);
+			readFloat(input, ticksPerSecond);
+			readFloat(input, duration);
+			readUInt(input, numBoneAnimationData);
+
+			Animation* currentAnimation = new Animation(name, ticksPerSecond, duration);
+			std::vector<BoneAnimationData*> boneAnimData;
+
+			for (unsigned int j = 0; j < numBoneAnimationData; j++) {
+				unsigned int boneIndex;
+				readUInt(input, boneIndex);
+
+				BoneAnimationData* currentBoneAnimData = new BoneAnimationData(boneIndex);
+
+				unsigned int numKeyframesPosition, numKeyframesRotation, numKeyramesScale;
+
+				std::vector<Vector3f>   keyframesPositions;
+				std::vector<float>      keyframesPositionsTimes;
+				std::vector<Quaternion> keyframesRotations;
+				std::vector<float>      keyframesRotationsTimes;
+				std::vector<Vector3f>   keyframesScales;
+				std::vector<float>      keyframesScalesTimes;
+
+				readUInt(input, numKeyframesPosition);
+
+				keyframesPositions.resize(numKeyframesPosition);
+				keyframesPositionsTimes.resize(numKeyframesPosition);
+
+				for (unsigned int k = 0; k < numKeyframesPosition; k++) {
+					readVector3f(input, keyframesPositions[k]);
+					readFloat(input, keyframesPositionsTimes[k]);
+				}
+
+				readUInt(input, numKeyframesRotation);
+
+				keyframesRotations.resize(numKeyframesRotation);
+				keyframesRotationsTimes.resize(numKeyframesRotation);
+
+				for (unsigned int k = 0; k < numKeyframesRotation; k++) {
+					readVector4f(input, keyframesRotations[k]);
+					readFloat(input, keyframesRotationsTimes[k]);
+				}
+
+				readUInt(input, numKeyramesScale);
+
+				keyframesScales.resize(numKeyramesScale);
+				keyframesScalesTimes.resize(numKeyramesScale);
+
+				for (unsigned int k = 0; k < numKeyramesScale; k++) {
+					readVector3f(input, keyframesScales[k]);
+					readFloat(input, keyframesScalesTimes[k]);
+				}
+
+				currentBoneAnimData->setKeyframePositions(keyframesPositions);
+				currentBoneAnimData->setKeyframePositionsTimes(keyframesPositionsTimes);
+				currentBoneAnimData->setKeyframeRotations(keyframesRotations);
+				currentBoneAnimData->setKeyframeRotationsTimes(keyframesRotationsTimes);
+				currentBoneAnimData->setKeyframeScales(keyframesScales);
+				currentBoneAnimData->setKeyframeScalesTimes(keyframesScalesTimes);
+
+				boneAnimData.push_back(currentBoneAnimData);
+			}
+			currentAnimation->setBoneData(boneAnimData);
+			animations.push_back(currentAnimation);
+		}
+		skeleton->setAnimations(animations);
+
+		//Bones
+		unsigned int numBones;
+		readUInt(input, numBones);
+
+		std::vector<Bone*> bones;
+
+		for (unsigned int i = 0; i < numBones; i++) {
+			std::string name;
+			Matrix4f transform;
+			Matrix4f offset;
+
+			readString(input, name);
+			readMatrix4f(input, transform);
+			readMatrix4f(input, offset);
+
+			Bone* currentBone = new Bone(name, transform);
+			currentBone->setOffset(offset);
+
+			std::vector<unsigned int> children;
+
+			unsigned int numChildren;
+			readUInt(input, numChildren);
+			children.resize(numChildren);
+			for (unsigned int j = 0; j < numChildren; j++)
+				readUInt(input, children[j]);
+
+			currentBone->setChildren(children);
+
+			bones.push_back(currentBone);
+		}
+		skeleton->setBones(bones);
+
+		unsigned int rootBoneIndex;
+		readUInt(input, rootBoneIndex);
+		skeleton->setRootBone(rootBoneIndex);
+	}
+
+	Matrix4f meshTransform;
+
+	readMatrix4f(input, meshTransform);
 
 	//Close the file
 	input.close();
+
+	//Create the mesh
+	Mesh* mesh = new Mesh(data);
+	mesh->setSkeleton(skeleton);
+	mesh->setMaterials(materials);
+	mesh->setBoundingSphereCentre(boundingSphereCentre);
+	mesh->setBoundingSphereRadius(boundingSphereRadius);
+	mesh->setMatrix(meshTransform);
+
+	return mesh;
 }
 
 void MeshLoader::writeUInt(std::ofstream& output, unsigned int value) {
@@ -524,13 +739,15 @@ void MeshLoader::writeFloat(std::ofstream& output, float value) {
 void MeshLoader::writeVectorDataFloat(std::ofstream& output, std::vector<float>& data) {
 	unsigned int numItems = data.size();
 	writeUInt(output, numItems);
-	output.write(reinterpret_cast<char*>(data.data()), numItems * sizeof(float));
+	if (numItems > 0)
+		output.write(reinterpret_cast<char*>(data.data()), numItems * sizeof(float));
 }
 
 void MeshLoader::writeVectorDataUInt(std::ofstream& output, std::vector<unsigned int>& data) {
 	unsigned int numItems = data.size();
 	output.write(reinterpret_cast<char*>(&numItems), sizeof(unsigned int));
-	output.write(reinterpret_cast<char*>(data.data()), numItems * sizeof(unsigned int));
+	if (numItems > 0)
+		output.write(reinterpret_cast<char*>(data.data()), numItems * sizeof(unsigned int));
 }
 
 void MeshLoader::writeMaterial(std::ofstream& output, Material* material, std::string path) {
@@ -542,15 +759,15 @@ void MeshLoader::writeMaterial(std::ofstream& output, Material* material, std::s
 	writeTexture(output, material->specularTexture, path);
 	writeTexture(output, material->normalMap, path);
 	writeTexture(output, material->parallaxMap, path);
-	output.write(reinterpret_cast<char*>(&material->parallaxScale), sizeof(float));
-	output.write(reinterpret_cast<char*>(&material->shininess), sizeof(float));
+	writeFloat(output, material->parallaxScale);
+	writeFloat(output, material->shininess);
 }
 
 void MeshLoader::writeTexture(std::ofstream& output, Texture* texture, std::string path) {
 	if (texture == NULL)
-		output << "NULL";
+		writeString(output, "NULL");
 	else
-		output << StrUtils::remove(texture->getPath(), path);
+		writeString(output, StrUtils::remove(texture->getPath(), path));
 }
 
 void MeshLoader::writeVector3f(std::ofstream& output, Vector3f vector) {
@@ -563,6 +780,54 @@ void MeshLoader::writeVector4f(std::ofstream& output, Vector4f vector) {
 
 void MeshLoader::writeMatrix4f(std::ofstream& output, Matrix4f matrix) {
 	output.write(reinterpret_cast<char*>(matrix.data()), 16 * sizeof(float));
+}
+
+void MeshLoader::writeString(std::ofstream& output, std::string string) {
+	size_t length = string.size();
+	output.write(reinterpret_cast<char*>(&length), sizeof(size_t));
+	output.write(string.c_str(), length);
+}
+
+void MeshLoader::readVectorDataFloat(std::ifstream& input, std::vector<float>& data) {
+	unsigned int numItems = data.size();
+	readUInt(input, numItems);
+	if (numItems > 0) {
+		data.resize(numItems);
+		input.read(reinterpret_cast<char*>(data.data()), numItems * sizeof(float));
+	}
+}
+
+void MeshLoader::readVectorDataUInt(std::ifstream& input, std::vector<unsigned int>& data) {
+	unsigned int numItems = data.size();
+	readUInt(input, numItems);
+	if (numItems > 0) {
+		data.resize(numItems);
+		input.read(reinterpret_cast<char*>(data.data()), numItems * sizeof(unsigned int));
+	}
+}
+
+void MeshLoader::readMaterial(std::ifstream& input, std::vector<Material*>& materials, std::string path) {
+	Material* material = new Material();
+	readVector4f(input, material->ambientColour);
+	readVector4f(input, material->diffuseColour);
+	readVector4f(input, material->specularColour);
+	material->ambientTexture = readTexture(input, path);
+	material->diffuseTexture = readTexture(input, path);
+	material->specularTexture = readTexture(input, path);
+	material->normalMap = readTexture(input, path);
+	material->parallaxMap = readTexture(input, path);
+	readFloat(input, material->parallaxScale);
+	readFloat(input, material->shininess);
+	materials.push_back(material);
+}
+
+Texture* MeshLoader::readTexture(std::ifstream& input, std::string path) {
+	std::string value;
+	readString(input, value);
+	if (value == std::string("NULL"))
+		return NULL;
+	else
+		return Texture::loadTexture(path + value);
 }
 
 void MeshLoader::readUInt(std::ifstream& input, unsigned int& value) {
@@ -584,5 +849,15 @@ void MeshLoader::readVector4f(std::ifstream& input, Vector4f& vector) {
 
 void MeshLoader::readMatrix4f(std::ifstream& input, Matrix4f& matrix) {
 	input.read(reinterpret_cast<char*>(matrix.data()), 16 * sizeof(float));
+}
+
+void MeshLoader::readString(std::ifstream& input, std::string& string) {
+	size_t length;
+	input.read(reinterpret_cast<char*>(&length), sizeof(size_t));
+	char* temp = new char[length + 1];
+	input.read(temp, length);
+	temp[length] = '\0';
+	string = temp;
+	delete [] temp;
 }
 

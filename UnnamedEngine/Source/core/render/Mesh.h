@@ -139,6 +139,16 @@ public:
 
 	void addBoneData(unsigned int boneID, float boneWeight);
 
+	inline void setNumPositions(unsigned int numPositions) { this->numPositions = numPositions; }
+	inline void setNumColours(unsigned int numColours) { this->numColours = numColours; }
+	inline void setNumTextureCoords(unsigned int numTextureCoords) { this->numTextureCoords = numTextureCoords; }
+	inline void setNumNormals(unsigned int numNormals) { this->numNormals = numNormals; }
+	inline void setNumTangents(unsigned int numTangents) { this->numTangents = numTangents; }
+	inline void setNumBitangents(unsigned int numBitangents) { this->numBitangents = numBitangents; }
+	inline void setNumIndices(unsigned int numIndices) { this->numIndices = numIndices; }
+	inline void setNumBones(unsigned int numBones) { this->numBones = numBones; }
+
+
 	/* Methods used to add a sub data structure */
 	inline void addSubData(SubData& data) { subData.push_back(data); }
 	inline void addSubData(unsigned int baseIndex, unsigned int baseVertex, unsigned int count, unsigned int materialIndex = 0) {
@@ -325,6 +335,7 @@ public:
 		else
 			materials[index] = material;
 	}
+	inline void setMaterials(std::vector<Material*>& materials) { this->materials = materials; }
 	inline void setSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
 	inline void setBoundingSphereCentre(Vector3f centre) { this->centre = centre; }
 	inline void setBoundingSphereRadius(float radius)    { this->radius = radius; }

@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 3 | Experimental 2
+
+* Added saving/loading of a custom model format (currently
+  uses .model file extension)
+
+* Renamed loadModel to loadAssimpModel
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 3 | Experimental 1
 
 * Added MeshLoader

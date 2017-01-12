@@ -58,24 +58,24 @@ void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.obj"), Renderer::SHADER_LIGHTING);
+	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), Renderer::SHADER_LIGHTING);
 	plane->update();
 
-	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), Renderer::SHADER_LIGHTING);
+	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob.model"), Renderer::SHADER_LIGHTING);
 	model1->setPosition(-2.0f, 0.8f, 0.0f);
 	model1->update();
 
 	model1->getMesh()->getSkeleton()->startAnimation("");
 	//model1->getMesh()->getSkeleton()->stopAnimation();
 
-	model2 = new GameObject3D(resourceLoader.loadModel("teapot.obj"), Renderer::SHADER_LIGHTING);
+	model2 = new GameObject3D(resourceLoader.loadModel("teapot.model"), Renderer::SHADER_LIGHTING);
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
 
 //	model2->getMesh()->getSkeleton()->startAnimation("");
 	//model2->getMesh()->getSkeleton()->stopAnimation();
 
-	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.dae"), Renderer::SHADER_LIGHTING);
+	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.model"), Renderer::SHADER_LIGHTING);
 	model3->setPosition(2.0f, 0.8f, 0.0f);
 	model3->update();
 
@@ -107,6 +107,10 @@ void Test::onCreated() {
 	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
 	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
 
+//	double start = TimeUtils::getSeconds();
+//	GameObject3D* sponza = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.model"), Renderer::SHADER_LIGHTING);
+//	std::cout << (TimeUtils::getSeconds() - start) << std::endl;
+
 //	std::vector<double> test;
 //	test.push_back(10.0);
 //	test.push_back(3.2);
@@ -133,8 +137,9 @@ void Test::onCreated() {
 //		std::cout << std::setprecision(20) << test[i] << std::endl;
 //	}
 
-	//MeshLoader::saveCustomModel(resourceLoader.getAbsPathModels() + "bob/", "Test.model", model1->getMesh());
-	MeshLoader::loadCustomModel(resourceLoader.getAbsPathModels() + "bob/", "Test.model");
+//	MeshLoader::saveEngineModel(resourceLoader.getAbsPathModels() + "crytek-sponza/", "sponza.model", sponza->getMesh());
+//	MeshLoader::saveEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.model", model3->getMesh());
+	//Mesh* mesh = MeshLoader::loadCustomModel(resourceLoader.getAbsPathModels() + "bob/", "Test.model");
 }
 
 void Test::onUpdate() {

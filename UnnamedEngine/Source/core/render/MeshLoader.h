@@ -45,13 +45,13 @@ private:
 	static const aiMatrix4x4 calculateMatrix(const aiNode* current, aiMatrix4x4 currentMatrix);
 
 	/* Static method called to load a material */
-	static Material* loadMaterial(std::string path, std::string fileName, const aiMaterial* material);
+	static Material* loadAssimpMaterial(std::string path, std::string fileName, const aiMaterial* material);
 
 	/* Static method called to load a texture */
-	static Texture* loadTexture(std::string path, const aiMaterial* material, const aiTextureType type);
+	static Texture* loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type);
 
 	/* Static method called to load a colour (If not assigned, returns WHITE instead) */
-	static Colour loadColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx);
+	static Colour loadAssimpColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx);
 
 	static Vector3f toVector3f(aiVector3D vec);
 	static Quaternion toQuaternion(aiQuaternion quat);
@@ -69,21 +69,31 @@ private:
 	static void writeVector3f(std::ofstream& output, Vector3f vector);
 	static void writeVector4f(std::ofstream& output, Vector4f vector);
 	static void writeMatrix4f(std::ofstream& output, Matrix4f matrix);
+	static void writeString(std::ofstream& output, std::string string);
+
+	static void readVectorDataFloat(std::ifstream& input, std::vector<float>& data);
+	static void readVectorDataUInt(std::ifstream& input, std::vector<unsigned int>& data);
+	static void readMaterial(std::ifstream& input, std::vector<Material*>& materials, std::string path);
+	static Texture* readTexture(std::ifstream& input, std::string path);
 
 	static void readUInt(std::ifstream& output, unsigned int& value);
 	static void readFloat(std::ifstream& output, float& value);
 	static void readVector3f(std::ifstream& input, Vector3f& vector);
 	static void readVector4f(std::ifstream& input, Vector4f& vector);
 	static void readMatrix4f(std::ifstream& input, Matrix4f& matrix);
+	static void readString(std::ifstream& input, std::string& string);
 public:
 	/* Static method called to read a file and load a model's meshes */
 	static Mesh* loadModel(std::string path, std::string fileName);
 
+	/* Static method called to read a file and load a model's meshes using Assimp */
+	static Mesh* loadAssimpModel(std::string path, std::string fileName);
+
 	/* Static method called to write a model to a file in a custom engine format */
-	static void saveCustomModel(std::string path, std::string fileName, Mesh* mesh);
+	static void saveEngineModel(std::string path, std::string fileName, Mesh* mesh);
 
 	/* Static method called to read a model from a file in a custom engine format */
-	static void loadCustomModel(std::string path, std::string fileName);
+	static Mesh* loadEngineModel(std::string path, std::string fileName);
 };
 
 #endif /* CORE_RENDER_MESHLOADER_H_ */

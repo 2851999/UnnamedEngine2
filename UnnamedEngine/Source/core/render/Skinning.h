@@ -53,6 +53,7 @@ private:
 	unsigned int lastScalesIndex    = 0;
 public:
 	/* The constructor */
+	BoneAnimationData(unsigned int boneIndex);
 	BoneAnimationData(unsigned int boneIndex, unsigned int numKeyframePositions, unsigned int numKeyframeRotations, unsigned int numKeyframeScales);
 
 	/* The destructor */
@@ -75,6 +76,13 @@ public:
 	inline void setKeyframePosition(unsigned int index, const Vector3f& position, const float time) { keyframePositions[index] = position; keyframePositionsTimes[index] = time; }
 	inline void setKeyframeRotation(unsigned int index, const Quaternion& rotation, const float time) { keyframeRotations[index] = rotation; keyframeRotationsTimes[index] = time; }
 	inline void setKeyframeScale(unsigned int index, const Vector3f& scale, const float time) { keyframeScales[index] = scale; keyframeScalesTimes[index] = time; }
+
+	inline void setKeyframePositions(std::vector<Vector3f>& positions) { this->keyframePositions = positions; }
+	inline void setKeyframePositionsTimes(std::vector<float>& positionsTimes) { this->keyframePositionsTimes = positionsTimes; }
+	inline void setKeyframeRotations(std::vector<Quaternion>& rotations) { this->keyframeRotations = rotations; }
+	inline void setKeyframeRotationsTimes(std::vector<float>& rotationsTimes) { this->keyframeRotationsTimes = rotationsTimes; }
+	inline void setKeyframeScales(std::vector<Vector3f>& scales) { this->keyframeScales = scales; }
+	inline void setKeyframeScalesTimes(std::vector<float>& scalesTimes) { this->keyframeScalesTimes = scalesTimes; }
 
 	inline unsigned int getBoneIndex() { return boneIndex; }
 
@@ -127,6 +135,7 @@ public:
 	inline void setOffset(const Matrix4f& offset) { this->offset = offset; }
 	inline void setFinalTransform(const Matrix4f& finalTransform) { this->finalTransform = finalTransform; }
 	inline void addChild(unsigned int childIndex) { children.push_back(childIndex); }
+	inline void setChildren(std::vector<unsigned int>& children) { this->children = children; }
 	inline void setAnimationData(BoneAnimationData* animationData) { this->animationData = animationData; }
 
 	inline std::string getName() { return name; }
