@@ -20,6 +20,7 @@
 #include "AsteroidsGame.h"
 #include "Enemy.h"
 
+
 /*****************************************************************************
  * The Player class
  *****************************************************************************/
@@ -43,8 +44,8 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 
 	game->getWindow()->getInputManager()->addListener(this);
 
-	setHealth(5);
-	setShield(2);
+	setHealth(MAX_HEALTH);
+	setShield(MAX_SHIELD);
 
 	setMass(100.0f);
 	setRestitution(1.0f);
@@ -59,9 +60,9 @@ void Player::reset() {
 	Ship::reset();
 
 	score = 0;
-	setHealth(5);
-	setShield(2);
-	setShieldMax(2);
+	setHealth(MAX_HEALTH);
+	setShield(MAX_SHIELD);
+	setShieldMax(MAX_SHIELD);
 	setShieldRegenRate(4.0f);
 	setMaximumSpeed(10.0f);
 	getLasers()->setCooldown(2.0f);

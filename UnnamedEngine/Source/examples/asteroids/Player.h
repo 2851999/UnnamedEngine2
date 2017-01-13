@@ -50,6 +50,10 @@ private:
 
 	/* Reference to the list of enemies */
 	std::vector<Enemy*>& enemies;
+
+	/* The maximum health and shield values */
+	static const unsigned int MAX_HEALTH = 5;
+	static const unsigned int MAX_SHIELD = 2;
 public:
 	/* The constructor */
 	Player(AsteroidsGame* mainGame, std::vector<Enemy*>& enemies);
