@@ -1,4 +1,49 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 4 (V0.2.1)
+
+* Added MeshLoader
+* Added 'path' to Texture to determine where textures have
+  come from (if loaded from a specific location)
+* Added custom model format
+* Added method in MeshLoader to convert a model into the
+  custom model format (currently uses .model file extension)
+* Added culling setting in GameObject
+  
+* Changed light to calculate the projection view matrix when
+  update is called
+
+* Renamed loadModel to loadAssimpModel
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 3 | Experimental 3
+
+* Added method in MeshLoader to convert a model into the
+  custom engine format
+* Added support for other numbers of dimensions in the model
+  format
+* Added culling setting in GameObject
+  
+* Changed light to calculate the projection view matrix when
+  update is called
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 3 | Experimental 2
+
+* Added saving/loading of a custom model format (currently
+  uses .model file extension)
+
+* Renamed loadModel to loadAssimpModel
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 3 | Experimental 1
+
+* Added MeshLoader
+* Added 'path' to Texture to determine where textures have
+  come from (if loaded from a specific location)
+  
+* Started adding a custom model format
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 3 (V0.2.0)
 
 * Added proper frustum culling of models added to a

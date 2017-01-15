@@ -53,6 +53,9 @@ private:
 	/* The light projection and view matrices */
 	Matrix4f lightProjection;
 	Matrix4f lightView;
+
+	/* Combination of the above matrices, assigned in the update method */
+	Matrix4f lightProjectionView;
 public:
 	/* Various light types */
 	static const unsigned int TYPE_DIRECTIONAL = 1;
@@ -120,7 +123,7 @@ public:
 	inline bool hasDepthBuffer() { return depthBuffer; }
 	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
 	inline Matrix4f getLightViewMatrix() { return lightView; }
-	inline Matrix4f getLightSpaceMatrix() { return lightProjection * lightView; }
+	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }
 };
 
 #endif /* CORE_RENDER_LIGHT_H_ */

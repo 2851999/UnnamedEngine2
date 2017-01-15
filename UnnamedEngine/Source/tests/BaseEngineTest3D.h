@@ -55,24 +55,29 @@ void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.obj"), Renderer::SHADER_LIGHTING);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae");
+
+	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), Renderer::SHADER_LIGHTING);
 	plane->update();
 
-	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.md5mesh"), Renderer::SHADER_LIGHTING);
+	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.model"), Renderer::SHADER_LIGHTING);
 	model1->setPosition(-2.0f, 0.8f, 0.0f);
 	model1->update();
 
 	model1->getMesh()->getSkeleton()->startAnimation("");
 	//model1->getMesh()->getSkeleton()->stopAnimation();
 
-	model2 = new GameObject3D(resourceLoader.loadModel("teapot.obj"), Renderer::SHADER_LIGHTING);
+	model2 = new GameObject3D(resourceLoader.loadModel("teapot.model"), Renderer::SHADER_LIGHTING);
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
 
 //	model2->getMesh()->getSkeleton()->startAnimation("");
 	//model2->getMesh()->getSkeleton()->stopAnimation();
 
-	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.dae"), Renderer::SHADER_LIGHTING);
+	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.model"), Renderer::SHADER_LIGHTING);
 	model3->setPosition(2.0f, 0.8f, 0.0f);
 	model3->update();
 

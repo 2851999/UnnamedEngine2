@@ -106,6 +106,15 @@ namespace StrUtils {
 		}
 		return str;
 	}
+
+	std::string remove(const std::string &s, const std::string &substr) {
+		size_t start = s.find(substr);
+		std::string str = s;
+
+		if (start != std::string::npos)
+		   str.erase(start, substr.length());
+		return str;
+	}
 }
 
 /*****************************************************************************

@@ -107,6 +107,7 @@ Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bo
 	texture->setWidth(w);
 	texture->setHeight(h);
 	texture->setNumComponents(numComponents);
+	texture->setPath(path);
 
 	//Bind the texture and then pass the texture data to OpenGL
 	texture->bind();

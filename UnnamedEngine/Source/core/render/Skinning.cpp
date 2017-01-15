@@ -24,6 +24,10 @@
  * The BoneAnimationData class
  *****************************************************************************/
 
+BoneAnimationData::BoneAnimationData(unsigned int boneIndex) {
+	this->boneIndex = boneIndex;
+}
+
 BoneAnimationData::BoneAnimationData(unsigned int boneIndex, unsigned int numKeyframePositions, unsigned int numKeyframeRotations, unsigned int numKeyframeScales) {
 	this->boneIndex = boneIndex;
 

@@ -29,6 +29,8 @@ void Light::update() {
 		Vector3f up = right.cross(direction).normalise();
 
 		lightView.initLookAt(direction * -5, (direction * 5) + direction, up);
+
+		lightProjectionView = lightProjection * lightView;
 	}
 }
 
