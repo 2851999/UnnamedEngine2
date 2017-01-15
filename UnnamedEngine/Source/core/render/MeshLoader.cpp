@@ -394,6 +394,8 @@ void MeshLoader::saveEngineModel(std::string path, std::string fileName, Mesh* m
 
 	unsigned int numSubData = data->getSubDataCount();
 
+	writeUInt(output, data->getNumDimensions());
+
 	writeUInt(output, data->getNumPositions());
 	writeUInt(output, data->getNumColours());
 	writeUInt(output, data->getNumTextureCoords());
@@ -526,8 +528,11 @@ Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 
 	std::vector<Material*> materials;
 
+	unsigned int numDimensions;
+	readUInt(input, numDimensions);
+
 	//Mesh Data
-	MeshData* data = new MeshData(3);
+	MeshData* data = new MeshData(numDimensions);
 
 	unsigned int numPositions, numColours, numTextureCoords, numNormals, numTangents, numBitangents, numIndices, numBones;
 
@@ -728,6 +733,13 @@ Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 	return mesh;
 }
 
+void MeshLoader::convertToEngineModel(std::string path, std::string fileName) {
+	std::string newFileName = fileName.substr(0, fileName.find_last_of(".")) + ".model";
+	Mesh* mesh = loadModel(path, fileName);
+	saveEngineModel(path, newFileName, mesh);
+	delete mesh;
+}
+
 void MeshLoader::writeUInt(std::ofstream& output, unsigned int value) {
 	output.write(reinterpret_cast<char*>(&value), sizeof(unsigned int));
 }
@@ -860,4 +872,3 @@ void MeshLoader::readString(std::ifstream& input, std::string& string) {
 	string = temp;
 	delete [] temp;
 }
-

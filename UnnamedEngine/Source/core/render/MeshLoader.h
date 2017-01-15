@@ -94,6 +94,9 @@ public:
 
 	/* Static method called to read a model from a file in a custom engine format */
 	static Mesh* loadEngineModel(std::string path, std::string fileName);
+
+	/* Static method called to convert a model to the engine format and save it in the same location */
+	static void convertToEngineModel(std::string path, std::string fileName);
 };
 
 #endif /* CORE_RENDER_MESHLOADER_H_ */

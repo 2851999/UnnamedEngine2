@@ -311,6 +311,9 @@ private:
 
 	/* The radius of this mesh's bounding sphere */
 	float radius = 1.0f;
+
+	/* Boolean that states whether this mesh should be culled where possible */
+	bool culling = true;
 public:
 	/* The constructor */
 	Mesh(MeshData* data);
@@ -339,6 +342,7 @@ public:
 	inline void setSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
 	inline void setBoundingSphereCentre(Vector3f centre) { this->centre = centre; }
 	inline void setBoundingSphereRadius(float radius)    { this->radius = radius; }
+	inline void setCullingEnabled(bool enabled) { this->culling = enabled; }
 
 	inline Matrix4f getMatrix() { return transform; }
 	inline MeshData* getData() { return data; }
@@ -353,6 +357,8 @@ public:
 	inline bool hasSkeleton() { return skeleton; }
 	inline Vector3f getBoundingSphereCentre() { return centre; }
 	inline float getBoundingSphereRadius() { return radius; }
+	inline bool cullingEnabled() { return data->getNumDimensions() == MeshData::DIMENSIONS_3D && culling; }
+	inline bool isCullingEnabled() { return culling; }
 };
 
 /*****************************************************************************

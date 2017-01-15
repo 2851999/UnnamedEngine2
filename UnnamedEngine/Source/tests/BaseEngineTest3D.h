@@ -51,17 +51,19 @@ void Test::onInitialise() {
 //	getSettings().videoMaxFPS = 0;
 }
 
-#include <fstream>
-#include <iomanip>
-
 void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae");
+
 	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), Renderer::SHADER_LIGHTING);
 	plane->update();
 
-	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob.model"), Renderer::SHADER_LIGHTING);
+	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.model"), Renderer::SHADER_LIGHTING);
 	model1->setPosition(-2.0f, 0.8f, 0.0f);
 	model1->update();
 
@@ -106,40 +108,6 @@ void Test::onCreated() {
 
 	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
 	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
-
-//	double start = TimeUtils::getSeconds();
-//	GameObject3D* sponza = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.model"), Renderer::SHADER_LIGHTING);
-//	std::cout << (TimeUtils::getSeconds() - start) << std::endl;
-
-//	std::vector<double> test;
-//	test.push_back(10.0);
-//	test.push_back(3.2);
-//	test.push_back(3.141592653589793238);
-//	test.push_back(123.21);
-//	test.push_back(42.0);
-//	test.push_back(42.42);
-//
-//	std::ofstream output;
-//	output.open("H:/Storage/Users/Joel/Desktop/test.dat", std::ofstream::binary);
-//	size_t size = test.size();
-//	output.write(reinterpret_cast<char*>(&size), sizeof(size));
-//	output.write(reinterpret_cast<char*>(test.data()), test.size() * sizeof(test[0]));
-//	output.close();
-
-//	std::ifstream input;
-//	input.open("H:/Storage/Users/Joel/Desktop/test.dat", std::ifstream::binary);
-//	size_t size;
-//	input.read(reinterpret_cast<char*>(&size), sizeof(size));
-//	test.resize(size);
-//	input.read(reinterpret_cast<char*>(test.data()), test.size() * sizeof(test[0]));
-//	input.close();
-//	for (unsigned int i = 0; i < test.size(); i++) {
-//		std::cout << std::setprecision(20) << test[i] << std::endl;
-//	}
-
-//	MeshLoader::saveEngineModel(resourceLoader.getAbsPathModels() + "crytek-sponza/", "sponza.model", sponza->getMesh());
-//	MeshLoader::saveEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.model", model3->getMesh());
-	//Mesh* mesh = MeshLoader::loadCustomModel(resourceLoader.getAbsPathModels() + "bob/", "Test.model");
 }
 
 void Test::onUpdate() {

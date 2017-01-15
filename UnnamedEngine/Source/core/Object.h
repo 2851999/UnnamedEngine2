@@ -72,6 +72,7 @@ public:
 	inline Transform* getTransform() { return transform; }
 	inline RenderShader* getRenderShader() { return renderShader; }
 	inline Shader* getShader() { return renderShader->getShader(); }
+	virtual bool shouldCull() { return false; }
 };
 
 /*****************************************************************************
@@ -135,6 +136,9 @@ class GameObject3D : public GameObject {
 protected:
 	/* Various information about this object */
 	Vector3f size;
+
+	/* The centre of this object used for culling purposes */
+	Vector3f cullingCentre;
 public:
 	/* The constructors */
 	GameObject3D(float width = 0, float height = 0, float depth = 0);
@@ -179,6 +183,8 @@ public:
 	inline float getLocalHeight() { return size.getY(); }
 	inline float getDepth() { return size.getZ() * getScale().getZ(); }
 	inline float getLocalDepth() { return size.getZ(); }
+
+	virtual bool shouldCull() override;
 };
 
 #endif /* CORE_OBJECT_H_ */

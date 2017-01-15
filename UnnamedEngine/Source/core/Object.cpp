@@ -36,8 +36,10 @@ GameObject::~GameObject() {
 
 void GameObject::render() {
 	if (hasMesh()) {
-		renderShader->getShader()->use();
-		Renderer::render(mesh, getModelMatrix(), renderShader);
+		if (! shouldCull()) {
+			renderShader->getShader()->use();
+			Renderer::render(mesh, getModelMatrix(), renderShader);
+		}
 	}
 }
 
@@ -80,9 +82,19 @@ void GameObject3D::update() {
 	if (hasMesh() && transform->hasChanged()) {
 		transform->calculateMatrix();
 		transform->setMatrix(transform->getMatrix() * getMesh()->getMatrix());
+
+		if (getMesh()->cullingEnabled())
+			cullingCentre = Vector3f(getModelMatrix() * Vector4f(getMesh()->getBoundingSphereCentre(), 1.0f));
 	}
 }
 
 Vector3f GameObject3D::getSize() {
 	return size * getScale();
+}
+
+bool GameObject3D::shouldCull() {
+	if (hasMesh() && getMesh()->cullingEnabled()) {
+		return ! ((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(cullingCentre, getMesh()->getBoundingSphereRadius());
+	}
+	return false;
 }

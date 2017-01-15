@@ -1,4 +1,16 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 3 | Experimental 3
+
+* Added method in MeshLoader to convert a model into the
+  custom engine format
+* Added support for other numbers of dimensions in the model
+  format
+* Added culling setting in GameObject
+  
+* Changed light to calculate the projection view matrix when
+  update is called
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 3 | Experimental 2
 
 * Added saving/loading of a custom model format (currently

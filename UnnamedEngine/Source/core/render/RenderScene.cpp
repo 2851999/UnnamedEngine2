@@ -92,10 +92,8 @@ void RenderScene3D::render() {
 		lightingShader->setUniformi("EnvironmentMap", Renderer::bindTexture(((Camera3D*) Renderer::getCamera())->getSkyBox()->getCubemap()));
 		lightingShader->setUniformi("UseEnvironmentMap", 0);
 
-		for (unsigned int i = 0; i < objects.size(); i++) {
-			if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[i]->getModelMatrix() * Vector4f(objects[i]->getMesh()->getBoundingSphereCentre(), 1.0f)), objects[i]->getMesh()->getBoundingSphereRadius()))
-				objects[i]->render();
-		}
+		for (unsigned int i = 0; i < objects.size(); i++)
+			objects[i]->render();
 
 		//Setup blending
 		glEnable(GL_BLEND);
@@ -122,14 +120,12 @@ void RenderScene3D::render() {
 
 			//Go through the objects in the scene
 			for (unsigned int o = 0; o < objects.size(); o++) {
-				if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[o]->getModelMatrix() * Vector4f(objects[o]->getMesh()->getBoundingSphereCentre(), 1.0f)), objects[o]->getMesh()->getBoundingSphereRadius())) {
-					Matrix4f modelMatrix = objects[o]->getModelMatrix();
+				Matrix4f modelMatrix = objects[o]->getModelMatrix();
 
-					lightingShader->setUniformMatrix4("ModelMatrix", modelMatrix);
-					lightingShader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
+				lightingShader->setUniformMatrix4("ModelMatrix", modelMatrix);
+				lightingShader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
 
-					objects[o]->render();
-				}
+				objects[o]->render();
 			}
 
 			if (lights[b]->hasDepthBuffer())
