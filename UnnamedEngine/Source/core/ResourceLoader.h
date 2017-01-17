@@ -20,7 +20,7 @@
 #define CORE_RESOURCELOADER_H_
 
 #include "audio/Audio.h"
-#include "render/Mesh.h"
+#include "render/MeshLoader.h"
 #include "render/Shader.h"
 #include "render/Texture.h"
 #include "gui/Font.h"
@@ -60,8 +60,8 @@ public:
 
 	inline Shader* loadShader(std::string fileName) const { return sLoadShader(getAbsPathShaders() + fileName); }
 
-	inline std::vector<Mesh*> loadModel(std::string fileName) const { return sLoadModel(getAbsPathModels(), fileName); }
-	inline std::vector<Mesh*> loadModel(std::string folder, std::string fileName) const { return sLoadModel(getAbsPathModels() + folder, fileName); }
+	inline Mesh* loadModel(std::string fileName) const { return sLoadModel(getAbsPathModels(), fileName); }
+	inline Mesh* loadModel(std::string folder, std::string fileName) const { return sLoadModel(getAbsPathModels() + folder, fileName); }
 
 	inline Font* loadFont(std::string fileName, int size = 18, Colour colour = Colour::WHITE) const { return sLoadFont(getAbsPathFonts() + fileName, size, colour); }
 
@@ -94,7 +94,7 @@ public:
 
 	inline static Shader* sLoadShader(std::string path) { return Shader::loadShader(path); }
 
-	inline static std::vector<Mesh*> sLoadModel(std::string path, std::string fileName) { return Mesh::loadModel(path, fileName); }
+	inline static Mesh* sLoadModel(std::string path, std::string fileName) { return MeshLoader::loadModel(path, fileName); }
 
 	inline static Font* sLoadFont(std::string path, int size = 18, Colour colour = Colour::WHITE) { return new Font(path, size, colour); }
 };

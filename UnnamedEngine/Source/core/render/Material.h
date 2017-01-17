@@ -40,6 +40,9 @@ struct Material {
 	Texture* specularTexture = NULL;
 
 	Texture* normalMap = NULL;
+	Texture* parallaxMap = NULL;
+
+	float parallaxScale = 0.05f;
 
 	/* The shininess value */
 	float shininess = 32.0f;

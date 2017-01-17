@@ -102,32 +102,27 @@ void Font::setup(std::string path, unsigned int size, Colour colour, TexturePara
 
 	FT_Done_Face(face);
 
-	//Check whether this font is billboarded or not (i.e. Is it going to be used in the 3D world or not)
-	if (billboarded) {
-		//Create the GameObject3D instance and assign the texture
-		object3D = new GameObject3D({ new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "BillboardedFont");
-		object3D->getMaterial()->diffuseColour = colour;
-		object3D->getMaterial()->diffuseTexture = textureAtlas;
-		object3D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE, 1.0f);
-		object3D->update();
-	} else {
-		//Create the GameObject2D instance and assign the texture
-		object2D = new GameObject2D({ new Mesh(MeshBuilder::createQuad(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)) }, "Font");
-		object2D->getMaterial()->diffuseColour = colour;
-		object2D->getMaterial()->diffuseTexture = textureAtlas;
-		object2D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE);
-		object2D->update();
-	}
+	//The shader type to use
+	std::string shaderType;
+	if (! billboarded)
+		shaderType = Renderer::SHADER_FONT;
+	else
+		shaderType = Renderer::SHADER_BILLBOARDED_FONT;
+
+	//Create the GameObject3D instance and assign the texture
+	object3D = new GameObject3D(new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)), shaderType);
+	object3D->getMaterial()->diffuseColour = colour;
+	object3D->getMaterial()->diffuseTexture = textureAtlas;
+	object3D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE, 1.0f);
+	object3D->getMesh()->setCullingEnabled(false);
+	object3D->update();
 }
 
 void Font::update(std::string text) {
 	//The pointer to the MeshData instance in the object
 	MeshData* data;
 
-	if (billboarded)
-		data = object3D->getMeshes()[0]->getData();
-	else
-		data = object2D->getMeshes()[0]->getData();
+	data = object3D->getMesh()->getData();
 
 	//Clear the previous data
 	data->clearPositions();
@@ -166,17 +161,10 @@ void Font::update(std::string text) {
 			float width = info.glyphWidth;
 			float height = info.glyphHeight;
 
-			if (billboarded) {
-				data->addPosition(Vector3f(xPos, yPos, 0.0f));
-				data->addPosition(Vector3f(xPos + width, yPos, 0.0f));
-				data->addPosition(Vector3f(xPos + width, yPos + height, 0.0f));
-				data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
-			} else {
-				data->addPosition(Vector2f(xPos, yPos));
-				data->addPosition(Vector2f(xPos + width, yPos));
-				data->addPosition(Vector2f(xPos + width, yPos + height));
-				data->addPosition(Vector2f(xPos, yPos + height));
-			}
+			data->addPosition(Vector3f(xPos, yPos, 0.0f));
+			data->addPosition(Vector3f(xPos + width, yPos, 0.0f));
+			data->addPosition(Vector3f(xPos + width, yPos + height, 0.0f));
+			data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
 
 			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, 0.0f));
 			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth), 0.0f));
@@ -195,33 +183,23 @@ void Font::update(std::string text) {
 			currentX += (info.advanceX / 64.0f);
 		}
 	}
-	if (billboarded) {
-		object3D->getMeshes()[0]->getRenderData()->updatePositions(data);
-		object3D->getMeshes()[0]->getRenderData()->updateTextureCoords();
-		object3D->getMeshes()[0]->getRenderData()->updateIndices(data);
-	} else {
-		object2D->getMeshes()[0]->getRenderData()->updatePositions(data);
-		object2D->getMeshes()[0]->getRenderData()->updateTextureCoords();
-		object2D->getMeshes()[0]->getRenderData()->updateIndices(data);
-	}
+	object3D->getMesh()->getRenderData()->updatePositions(data);
+	object3D->getMesh()->getRenderData()->updateTextureCoords();
+	object3D->getMesh()->getRenderData()->updateIndices(data);
 }
 
 void Font::update(std::string text, Vector2f position) {
 	update(text);
 
-	if (! billboarded) {
-		object2D->setPosition(position);
-		object2D->update();
-	}
+	object3D->setPosition(Vector3f(position));
+	object3D->update();
 }
 
 void Font::update(std::string text, Vector3f position) {
 	update(text);
 
-	if (billboarded) {
-		object3D->setPosition(position);
-		object3D->update();
-	}
+	object3D->setPosition(position);
+	object3D->update();
 }
 
 void Font::render() {
@@ -242,14 +220,11 @@ void Font::render() {
 
 		shader->stopUsing();
 	} else
-		object2D->render();
+		object3D->render();
 }
 
 void Font::destroy() {
-	if (billboarded)
-		delete object3D;
-	else
-		delete object2D;
+	delete object3D;
 }
 
 float Font::getWidth(std::string text) {

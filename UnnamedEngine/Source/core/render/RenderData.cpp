@@ -28,9 +28,14 @@ void RenderData::setup() {
 	glBindVertexArray(vao);
 
 	//Go through each VBO and set it up
-	for (unsigned int i = 0; i < vbos.size(); i++) {
-		vbos[i]->setup();
-		vbos[i]->startRendering();
+	for (unsigned int i = 0; i < vbosFloat.size(); i++) {
+		vbosFloat[i]->setup();
+		vbosFloat[i]->startRendering();
+	}
+
+	for (unsigned int i = 0; i < vbosUInteger.size(); i++) {
+		vbosUInteger[i]->setup();
+		vbosUInteger[i]->startRendering();
 	}
 
 	//Now setup the indices VBO if assigned
@@ -42,10 +47,7 @@ void RenderData::setup() {
 	glBindVertexArray(0);
 }
 
-void RenderData::render() {
-	//Use the VAO
-	glBindVertexArray(vao);
-
+void RenderData::renderWithoutBinding() {
 	//Check for instancing
 	if (primcount > 0) {
 		//Check for indices
@@ -60,6 +62,13 @@ void RenderData::render() {
 		else
 			glDrawArrays(mode, 0, count);
 	}
+}
 
-	glBindVertexArray(0);
+void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset, unsigned int baseVertex) {
+	//Check for instancing
+	if (primcount == -1) {
+		//Check for indices
+		if (vboIndices)
+			glDrawElementsBaseVertex(mode, count, GL_UNSIGNED_INT, (void*) indicesOffset, baseVertex);
+	}
 }

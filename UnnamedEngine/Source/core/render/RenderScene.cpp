@@ -28,8 +28,8 @@
 
 RenderScene3D::RenderScene3D() {
 	//Get the required shaders
-	shadowMapShader = Renderer::getRenderShader("ShadowMap")->getShader();
-	lightingShader = Renderer::getRenderShader("Lighting")->getShader();
+	shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getShader();
+	lightingShader = Renderer::getRenderShader(Renderer::SHADER_LIGHTING)->getShader();
 }
 
 RenderScene3D::~RenderScene3D() {
@@ -46,20 +46,26 @@ void RenderScene3D::render() {
 				FBO* depthBuffer = lights[i]->getDepthBuffer();
 
 				depthBuffer->bind();
+				glEnable(GL_DEPTH_TEST);
 				glClear(GL_DEPTH_BUFFER_BIT);
 				glViewport(0, 0, 1024, 1024);
 
 				shadowMapShader->use();
 
 				Matrix4f lightSpaceMatrix = lights[i]->getLightSpaceMatrix();
+//
+//				Renderer::getCamera()->setViewMatrix(lights[i]->getLightViewMatrix());
+//				Renderer::getCamera()->setProjectionMatrix(lights[i]->getLightProjectionMatrix());
 
 				for (unsigned int j = 0; j < objects.size(); j++) {
-					shadowMapShader->setUniformMatrix4("LightSpaceMatrix", (lightSpaceMatrix * objects[j]->getModelMatrix()));
-					objects[i]->getRenderShader()->addForwardShader(shadowMapShader);
+					if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[j]->getModelMatrix() * Vector4f(objects[j]->getMesh()->getBoundingSphereCentre(), 1.0f)), objects[j]->getMesh()->getBoundingSphereRadius())) {
+						shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * objects[j]->getModelMatrix());
+						objects[j]->getRenderShader()->addForwardShader(shadowMapShader);
 
-					objects[i]->render();
+						objects[j]->render();
 
-					objects[i]->getRenderShader()->removeForwardShader(shadowMapShader);
+						objects[j]->getRenderShader()->removeForwardShader(shadowMapShader);
+					}
 				}
 
 				shadowMapShader->stopUsing();
@@ -86,10 +92,8 @@ void RenderScene3D::render() {
 		lightingShader->setUniformi("EnvironmentMap", Renderer::bindTexture(((Camera3D*) Renderer::getCamera())->getSkyBox()->getCubemap()));
 		lightingShader->setUniformi("UseEnvironmentMap", 0);
 
-		for (unsigned int i = 0; i < objects.size(); i++) {
-			//if (((Camera3D*) Renderer::getCamera())->getFrustum().testSphere(((GameObject3D*) objects[i])->getPosition(), 1.0f))
-				objects[i]->render();
-		}
+		for (unsigned int i = 0; i < objects.size(); i++)
+			objects[i]->render();
 
 		//Setup blending
 		glEnable(GL_BLEND);
@@ -116,14 +120,12 @@ void RenderScene3D::render() {
 
 			//Go through the objects in the scene
 			for (unsigned int o = 0; o < objects.size(); o++) {
-				//if (((Camera3D*) Renderer::getCamera())->getFrustum().testSphere(((GameObject3D*) objects[o])->getPosition(), 1.0f)) {
-					Matrix4f modelMatrix = objects[o]->getModelMatrix();
+				Matrix4f modelMatrix = objects[o]->getModelMatrix();
 
-					lightingShader->setUniformMatrix4("ModelMatrix", modelMatrix);
-					lightingShader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
+				lightingShader->setUniformMatrix4("ModelMatrix", modelMatrix);
+				lightingShader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
 
-					objects[o]->render();
-				//}
+				objects[o]->render();
 			}
 
 			if (lights[b]->hasDepthBuffer())

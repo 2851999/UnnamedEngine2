@@ -57,6 +57,7 @@ namespace StrUtils {
 	}
 
 	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement);
+	std::string remove(const std::string &s, const std::string &substr);
 };
 
 #include <cmath>

@@ -55,10 +55,7 @@ private:
 	/* States whether this font is billboarded or not */
 	bool billboarded = false;
 
-	/* The GameObject2D instance for this font */
-	GameObject2D* object2D = NULL;
-
-	/* The GameObject3D instance for this font (For 3D billboarded text rendering) */
+	/* The GameObject3D instance for this font */
 	GameObject3D* object3D = NULL;
 
 	/* The method used to setup this Font instance given the font name and size */

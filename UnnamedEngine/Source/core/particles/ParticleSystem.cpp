@@ -53,12 +53,9 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	renderData->addVBO(vboVertices);
 
 	//Assign the data about the particles
-	for (unsigned int i = 0; i < maxParticles * 4; i++)
-		particlePositionSizeData.push_back(0);
-	for (unsigned int i = 0; i < maxParticles * 4; i++)
-		particleColourData.push_back(0);
-	for (unsigned int i = 0; i < maxParticles * 4; i++)
-		particleTextureData.push_back(0);
+	particlePositionSizeData.resize(maxParticles * 4);
+	particleColourData.resize(maxParticles * 4);
+	particleTextureData.resize(maxParticles * 4);
 
 	vboPositionSizeData = new VBO<GLfloat>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(GLfloat), particlePositionSizeData, GL_STREAM_DRAW, true);
 	vboPositionSizeData->addAttribute(shader->getAttributeLocation("PositionsData"), 4, 1);
@@ -72,12 +69,7 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	vboTextureData->addAttribute(shader->getAttributeLocation("TextureData"), 4, 1);
 	renderData->addVBO(vboTextureData);
 
-	for (unsigned int i = 0; i < maxParticles; i++) {
-		particles.push_back(Particle());
-		particles[i].colour = Colour::WHITE;
-		particles[i].size = 1.0f;
-		particles[i].life = -1.0f;
-	}
+	particles.resize(maxParticles);
 
 	renderData->setup();
 }
@@ -101,8 +93,8 @@ void ParticleSystem::reset() {
 	//Go through all of the particles
 	for (unsigned int i = 0; i < particles.size(); i++) {
 		//Assign their life and camera distance
-		particles[i].life = -1;
-		particles[i].cameraDistance = -1;
+		particles[i].life = -1.0f;
+		particles[i].cameraDistance = -1.0f;
 	}
 	//Sort the particles
 	std::sort(&particles.front(), &particles.back());
@@ -115,9 +107,10 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 	emitter->update(delta);
 	//Reset the particle count
 	particleCount = 0;
+	//The offset for the indices of the current particle
+	unsigned int offset = 0;
 	//Go through the maximum number of particles
 	for (unsigned int i = 0; i < maxParticles; i++) {
-
 		//Make sure the current particle is alive
 		if (particles[i].life >= 0) {
 			//Subtract the delta from its life
@@ -128,7 +121,7 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 				//Assign the camera distance
 				particles[i].cameraDistance = -1.0f;
 
-			if (particles[i].life >  0) {
+			if (particles[i].life > 0) {
 				if (effect)
 					effect->update(particles[i], emitter);
 
@@ -139,19 +132,22 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 				//Update the distance of the particle from the camera
 				particles[i].cameraDistance = (particles[i].position - cameraPosition).length();
 
+				//Calculate the offset
+				offset = 4 * particleCount;
+
 				//Assign the current particle's position data
-				particlePositionSizeData[4 * particleCount + 0] = particles[i].position.getX();
-				particlePositionSizeData[4 * particleCount + 1] = particles[i].position.getY();
-				particlePositionSizeData[4 * particleCount + 2] = particles[i].position.getZ();
+				particlePositionSizeData[offset + 0] = particles[i].position.getX();
+				particlePositionSizeData[offset + 1] = particles[i].position.getY();
+				particlePositionSizeData[offset + 2] = particles[i].position.getZ();
 
 				//Assign the current particle's size
-				particlePositionSizeData[4 * particleCount + 3] = particles[i].size;
+				particlePositionSizeData[offset + 3] = particles[i].size;
 
 				//Assign the current particle's colour
-				particleColourData[4 * particleCount + 0] = particles[i].colour.getR();
-				particleColourData[4 * particleCount + 1] = particles[i].colour.getG();
-				particleColourData[4 * particleCount + 2] = particles[i].colour.getB();
-				particleColourData[4 * particleCount + 3] = particles[i].colour.getA();
+				particleColourData[offset + 0] = particles[i].colour.getR();
+				particleColourData[offset + 1] = particles[i].colour.getG();
+				particleColourData[offset + 2] = particles[i].colour.getB();
+				particleColourData[offset + 3] = particles[i].colour.getA();
 
 				//Check for a texture
 				if (textureAtlas) {
@@ -162,11 +158,11 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 					textureAtlas->getSides(particles[i].textureIndex, top, left, bottom, right);
 
 					//Assign the texture data
-					particleTextureData[4 * particleCount + 0] = top;
-					particleTextureData[4 * particleCount + 1] = left;
+					particleTextureData[offset + 0] = top;
+					particleTextureData[offset + 1] = left;
 
-					particleTextureData[4 * particleCount + 2] = bottom;
-					particleTextureData[4 * particleCount + 3] = right;
+					particleTextureData[offset + 2] = bottom;
+					particleTextureData[offset + 3] = right;
 				}
 
 				//Increment the active particle count
@@ -194,7 +190,7 @@ void ParticleSystem::render() {
 		shader->setUniformVector3("Camera_Right", Vector3f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2)));
 		shader->setUniformVector3("Camera_Up", Vector3f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2)));
 
-		shader->setUniformMatrix4("MVPMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
+		shader->setUniformMatrix4("ProjectionViewMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
 
 		if (textureAtlas)
 			shader->setUniformi("Texture", Renderer::bindTexture(textureAtlas->getTexture()));

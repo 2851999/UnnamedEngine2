@@ -31,9 +31,6 @@ Shader* Shader::currentShader = NULL;
 
 Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 	this->program = glCreateProgram();
-	this->vertexShader = vertexShader;
-	this->geometryShader = geometryShader;
-	this->fragmentShader = fragmentShader;
 
 	attach(vertexShader);
 	if (geometryShader)
@@ -46,6 +43,9 @@ Shader::~Shader() {
 }
 
 void Shader::attach(GLuint shader) {
+	//Add the shader
+	attachedShaders.push_back(shader);
+
 	glAttachShader(program, shader);
 	glLinkProgram(program);
 
@@ -69,6 +69,9 @@ void Shader::attach(GLuint shader) {
 }
 
 void Shader::detach(GLuint shader) {
+	//Remove the shader
+	attachedShaders.erase(std::remove(attachedShaders.begin(), attachedShaders.end(), shader), attachedShaders.end());
+
 	glDetachShader(program, shader);
 }
 
@@ -86,22 +89,30 @@ void Shader::stopUsing() {
 
 void Shader::destroy() {
 	glDeleteProgram(program);
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	//Go through each attached shader and delete them
+	for (unsigned int i = 0; i < attachedShaders.size(); i++)
+		glDeleteShader(attachedShaders[i]);
+	attachedShaders.clear();
 }
 
 void Shader::addUniform(std::string id, std::string name) {
 	GLint location = glGetUniformLocation(program, name.c_str());
-	if (location == -1)
-		Logger::log("Could not find uniform with the name '" + name + "'", "Shader", LogType::Warning);
-	uniforms.insert(std::pair<std::string, GLint>(id, location));
+	//if (location == -1)
+		//Logger::log("Could not find uniform with the name '" + name + "'", "Shader", LogType::Warning);
+	if (uniforms.find(id) == uniforms.end())
+		uniforms.insert(std::pair<std::string, GLint>(id, location));
+	else
+		uniforms[id] = location;
 }
 
 void Shader::addAttribute(std::string id, std::string name) {
 	GLint location = glGetAttribLocation(program, name.c_str());
-	if (location == -1)
-		Logger::log("Could not find attribute with the name '" + name + "'", "Shader", LogType::Warning);
-	attributes.insert(std::pair<std::string, GLint>(id, location));
+	//if (location == -1)
+		//Logger::log("Could not find attribute with the name '" + name + "'", "Shader", LogType::Warning);
+	if (attributes.find(id) == attributes.end())
+		attributes.insert(std::pair<std::string, GLint>(id, location));
+	else
+		attributes[id] = location;
 }
 
 GLint Shader::getUniformLocation(std::string id) {

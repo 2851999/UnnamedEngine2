@@ -35,19 +35,19 @@ struct Particle {
 	Vector3f position, velocity;
 
 	/* The colour of the particle */
-	Colour colour;
+	Colour colour = Colour::WHITE;
 
 	/* The size of the particle */
-	float size;
+	float size = 1.0f;
 
 	/* The time the particle is updated for (in seconds) */
-	float life;
+	float life = -1.0f;
 
 	/* The distance to the camera of the particle */
-	float cameraDistance;
+	float cameraDistance = -1.0f;
 
 	/* The texture index if this is animated */
-	unsigned int textureIndex;
+	unsigned int textureIndex = 0;
 
 	/* Used when sorting to place the particles closer to the camera/ones
 	 * with -1.0, to the front */

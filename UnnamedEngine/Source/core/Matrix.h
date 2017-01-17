@@ -142,6 +142,18 @@ public:
 		return result;
 	}
 
+	/* Returns the result of multiplying this matrix a vector */
+	inline Vector<T, N> operator*(const Vector<T, N>& vector) const {
+		Vector<T, N> result;
+		for (unsigned int i = 0; i < N; i++) {
+			result[i] = 0;
+			for (unsigned int j = 0; j < N; j++) {
+				result[i] += vector[j] * get(i, j);
+			}
+		}
+		return result;
+	}
+
 	/* Multiplies this matrix by another */
 	inline Matrix<T, N>& operator*=(const Matrix<T, N>& other) {
 		//Calculate the result of multiplying this matrix by the other one
@@ -221,6 +233,9 @@ public:
 	/* Returns a pointer to the front of the values stored in this matrix */
 	inline const T* front() { return &values[0][0]; }
 
+	/* Returns a pointer to the data array */
+	inline T* data() { return values[0]; }
+
 	/* Returns the number of values stored in this matrix */
 	inline int getNumElements() { return N * N; }
 	/* Returns the size of this matrix (in bytes) */
@@ -295,9 +310,9 @@ public:
 		Matrix3f result;
 
 		//Assign each value letters to make the calculation easier to follow
-		float a = this->get(0, 0); float b = this->get(0, 1); float c = this->get(0, 2);
-		float d = this->get(1, 0); float e = this->get(1, 1); float f = this->get(1, 2);
-		float g = this->get(2, 0); float h = this->get(2, 1); float i = this->get(2, 2);
+		float a = get(0, 0); float b = get(0, 1); float c = get(0, 2);
+		float d = get(1, 0); float e = get(1, 1); float f = get(1, 2);
+		float g = get(2, 0); float h = get(2, 1); float i = get(2, 2);
 
 		//Now calculate the matrix of cofactors, using capital letters in the
 		//same order as the lower case ones
@@ -313,13 +328,17 @@ public:
 
 		//From this, the inverse of the determinant is calculated so it
 		//can be multiplied by the transpose of the matrix of cofactors
-		//to get the determinant
-		float invDet = 1.0f / (a * A + b * B + c * C);
+		//to get the inverse
+		float det = (a * A + b * B + c * C);
+		//Prevent a divide by 0 error
+		if (det != 0.0f) {
+			float invDet = 1.0f / (a * A + b * B + c * C);
 
-		//Finally assign the result
-		result.set(0, 0, invDet * A); result.set(0, 1, invDet * D); result.set(0, 2, invDet * G);
-		result.set(1, 0, invDet * B); result.set(1, 1, invDet * E); result.set(1, 2, invDet * H);
-		result.set(2, 0, invDet * C); result.set(2, 1, invDet * F); result.set(2, 2, invDet * I);
+			//Finally assign the result
+			result.set(0, 0, invDet * A); result.set(0, 1, invDet * D); result.set(0, 2, invDet * G);
+			result.set(1, 0, invDet * B); result.set(1, 1, invDet * E); result.set(1, 2, invDet * H);
+			result.set(2, 0, invDet * C); result.set(2, 1, invDet * F); result.set(2, 2, invDet * I);
+		}
 
 		return result;
 	}
@@ -481,10 +500,10 @@ public:
 		Vector3f side = forward.cross(u).normalise();
 		u = side.cross(forward);
 
-		set(0, 0, side.getX()); set(0, 1, side.getY()); set(0, 2, side.getZ()); set(0, 3, -side.dot(eye));
-		set(1, 0, u.getX()); set(1, 1, u.getY()); set(1, 2, u.getZ()); set(1, 3, -up.dot(eye));
+		set(0, 0, side.getX());     set(0, 1, side.getY());     set(0, 2, side.getZ());     set(0, 3, -side.dot(eye));
+		set(1, 0, u.getX());        set(1, 1, u.getY());        set(1, 2, u.getZ());        set(1, 3, -up.dot(eye));
 		set(2, 0, -forward.getX()); set(2, 1, -forward.getY()); set(2, 2, -forward.getZ()); set(2, 3, forward.dot(eye));
-		set(3, 0, 0); set(3, 1, 0); set(3, 2, 0); set(3, 3, 1);
+		set(3, 0, 0);               set(3, 1, 0);               set(3, 2, 0);               set(3, 3, 1);
 
 		return (*this);
 	}

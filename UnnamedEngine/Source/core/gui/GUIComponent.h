@@ -55,13 +55,13 @@ public:
 	/* The constructors */
 	GUIComponentRenderer() {}
 	GUIComponentRenderer(float width, float height) :
-		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)) }, "Material", width, height) { setup(); }
+		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)), Renderer::SHADER_MATERIAL, width, height) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Colour> colours) :
-		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)) }, "Material", width, height), colours(colours) { setup(); }
+		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, MESH_DATA_FLAGS)), Renderer::SHADER_MATERIAL, width, height), colours(colours) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Texture*> textures) :
-		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)) }, "Material", width, height), textures(textures) { setup(); }
+		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)), Renderer::SHADER_MATERIAL, width, height), textures(textures) { setup(); }
 	GUIComponentRenderer(float width, float height, std::vector<Colour> colours, std::vector<Texture*> textures) :
-		GameObject2D(std::vector<Mesh*> { new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)) }, "Material", width, height), colours(colours), textures(textures) { setup(); }
+		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)), Renderer::SHADER_MATERIAL, width, height), colours(colours), textures(textures) { setup(); }
 
 	/* Destructor */
 	virtual ~GUIComponentRenderer() {}

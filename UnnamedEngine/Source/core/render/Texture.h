@@ -85,6 +85,9 @@ private:
 	/* The number of colour components in this texture e.g.
 	 * 3 = RGB, 4 = RGBA */
 	unsigned int numComponents = 0;
+
+	/* The path this texture was loaded from (if applicable) */
+	std::string path;
 protected:
 	/* The texture parameters for this texture */
 	TextureParameters parameters;
@@ -134,6 +137,7 @@ public:
 	inline void setHeight(unsigned int height) { this->height = height; }
 	inline void setSize(unsigned int width, unsigned int height) { this->width = width; this->height = height; }
 	inline void setNumComponents(unsigned int numComponents) { this->numComponents = numComponents; }
+	inline void setPath(std::string path) { this->path = path; }
 
 	inline GLuint getHandle() { return texture; }
 	inline TextureParameters& getParameters() { return parameters; }
@@ -141,6 +145,8 @@ public:
 	inline unsigned int getHeight() { return height; }
 	inline int getNumComponents() { return numComponents; }
 	inline bool hasTexture() { return texture > 0; }
+	inline std::string getPath() { return path; }
+	inline bool hasPath() { return path.length() > 0; }
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */

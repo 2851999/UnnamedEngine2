@@ -39,12 +39,12 @@ private:
 	Colour specularColour = Colour::WHITE;
 
 	/* The constant, linear and quadratic terms for point lights */
-	float constant = 0;
-	float linear = 0;
-	float quadratic = 0;
+	float constant  = 0.0f;
+	float linear    = 0.0f;
+	float quadratic = 1.0f;
 
 	/* The cutoff and outer cutoff values for spot lights */
-	float cutoff = 0;
+	float cutoff      = 0;
 	float outerCutoff = 0;
 
 	/* The FBO if assigned for shadow mapping */
@@ -53,6 +53,9 @@ private:
 	/* The light projection and view matrices */
 	Matrix4f lightProjection;
 	Matrix4f lightView;
+
+	/* Combination of the above matrices, assigned in the update method */
+	Matrix4f lightProjectionView;
 public:
 	/* Various light types */
 	static const unsigned int TYPE_DIRECTIONAL = 1;
@@ -79,7 +82,7 @@ public:
 
 				depthBuffer->setup();
 
-				lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 8.0f);
+				lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
 			}
 		}
 	}
@@ -118,7 +121,9 @@ public:
 
 	inline FBO* getDepthBuffer() { return depthBuffer; }
 	inline bool hasDepthBuffer() { return depthBuffer; }
-	inline Matrix4f getLightSpaceMatrix() { return lightProjection * lightView; }
+	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
+	inline Matrix4f getLightViewMatrix() { return lightView; }
+	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }
 };
 
 #endif /* CORE_RENDER_LIGHT_H_ */

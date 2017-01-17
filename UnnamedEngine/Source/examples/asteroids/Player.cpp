@@ -90,21 +90,21 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		//Check the bounds
 		if (getPosition().getX() < -200 && getVelocity().getX() < 0)
 			//Ensure we are not moving in this direction
-			getRelVelocity().setX(0);
+			getLocalVelocity().setX(0);
 		else if (getPosition().getX() > 200 && getVelocity().getX() > 0)
-			getRelVelocity().setX(0);
+			getLocalVelocity().setX(0);
 
 		if (getPosition().getY() < -200 && getVelocity().getY() < 0)
 			//Ensure we are not moving in this direction
-			getRelVelocity().setY(0);
+			getLocalVelocity().setY(0);
 		else if (getPosition().getY() > 200 && getVelocity().getY() > 0)
-			getRelVelocity().setY(0);
+			getLocalVelocity().setY(0);
 
 		if (getPosition().getZ() < -200 && getVelocity().getZ() < 0)
 			//Ensure we are not moving in this direction
-			getRelVelocity().setZ(0);
+			getLocalVelocity().setZ(0);
 		else if (getPosition().getZ() > 200 && getVelocity().getZ() > 0)
-			getRelVelocity().setZ(0);
+			getLocalVelocity().setZ(0);
 
 		camera->update();
 
@@ -161,7 +161,7 @@ void Player::onMouseMoved(double x, double y, double dx, double dy) {
 		if (dx != 0)
 			getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -dx * 10.0f * currentDelta);
 		if (dy != 0)
-			getTransform()->rotate(getTransform()->getRotation().getRight(), dy * 10.0f * currentDelta);
+			getTransform()->rotate(getTransform()->getRotation().getRight(), -dy * 10.0f * currentDelta);
 	}
 }
 

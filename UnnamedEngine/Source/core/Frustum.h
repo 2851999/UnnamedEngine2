@@ -16,33 +16,48 @@
  *
  *****************************************************************************/
 
-#include "Camera.h"
-#include "../../utils/Utils.h"
+#ifndef CORE_RENDER_FRUSTUM_H_
+#define CORE_RENDER_FRUSTUM_H_
+
+#include "../core/Vector.h"
+#include "../core/Matrix.h"
 
 /*****************************************************************************
- * The Camera2D class
+ * The FrustumPlane structure helps represent a plane that forms part of a
+ * frustum
  *****************************************************************************/
 
-void Camera2D::update() {
-	//Setup the view matrix
-	getViewMatrix().setIdentity();
-	getViewMatrix().transformR(getPosition(), getRotation(), getScale());
-}
+struct FrustumPlane {
+	//Coefficients for the plane's equation (ax + bx + cx + d = 0)
+	float a, b, c, d;
+};
 
 /*****************************************************************************
- * The Camera3D class
+ * The FrustumPlane class helps represent a view frustum
  *****************************************************************************/
 
-void Camera3D::update() {
-	cameraFront = getTransform()->getRotation().getForward();
-	cameraRight = getTransform()->getRotation().getRight();
-	Vector3f up = getTransform()->getRotation().getUp();
+class Frustum {
+private:
+	/* The 6 planes forming this frustum */
+	FrustumPlane planes[6];
 
-	getViewMatrix().initLookAt(getPosition(), getPosition() + cameraFront, up);
+	/* Method called to calculate and return a plane */
+	FrustumPlane calculatePlane(float a, float b, float c, float z);
+public:
+	/* The constructor */
+	Frustum() {}
 
-	frustum.update(getProjectionViewMatrix());
+	/* The destructor */
+	virtual ~Frustum() {}
 
-	//Update the SkyBox if there is one
-	if (skyBox)
-		skyBox->update(getPosition());
-}
+	/* Method called to update this frustum given the projection view matrix */
+	void update(Matrix4f pvm);
+
+	/* Method called to check whether a sphere is within this frustum */
+	bool sphereInFrustum(Vector3f centre, float radius);
+
+	/* Method called to check whether a point is within this frustum */
+	bool pointInFrustum(Vector3f point);
+};
+
+#endif /* CORE_RENDER_FRUSTUM_H_ */

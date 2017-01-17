@@ -27,10 +27,19 @@
 #include "../core/render/Renderer.h"
 #include "../utils/GLUtils.h"
 
+#include "../experimental/Billboard.h"
+
 class Test : public BaseTest3D {
 private:
 	ParticleEmitter* particleEmitter;
 	ParticleSystem* particleSystem;
+
+	GameObject3D* plane;
+	GameObject3D* model1;
+	GameObject3D* model2;
+	GameObject3D* model3;
+
+	Font* font;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -40,22 +49,50 @@ public:
 };
 
 void Test::onInitialise() {
-
+//	getSettings().videoVSync = false;
+//	getSettings().videoMaxFPS = 0;
 }
 
 void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	GameObject3D* teapot = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Lighting");
-	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane.obj"), "Lighting");
-	teapot->setPosition(0.0f, 0.8f, 0.0f);
-	teapot->update();
-	plane->update();
-	renderScene->add(teapot);
-	renderScene->add(plane);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae");
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, -0.2f);
+	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), Renderer::SHADER_LIGHTING);
+	plane->update();
+
+	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.model"), Renderer::SHADER_LIGHTING);
+	model1->setPosition(-2.0f, 0.8f, 0.0f);
+	model1->update();
+
+	model1->getMesh()->getSkeleton()->startAnimation("");
+	//model1->getMesh()->getSkeleton()->stopAnimation();
+
+	model2 = new GameObject3D(resourceLoader.loadModel("teapot.model"), Renderer::SHADER_LIGHTING);
+	model2->setPosition(0.0f, 0.8f, 2.0f);
+	model2->update();
+
+//	model2->getMesh()->getSkeleton()->startAnimation("");
+	//model2->getMesh()->getSkeleton()->stopAnimation();
+
+	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.model"), Renderer::SHADER_LIGHTING);
+	model3->setPosition(2.0f, 0.8f, 0.0f);
+	model3->update();
+
+	model3->getMesh()->getSkeleton()->startAnimation("");
+	//model3->getMesh()->getSkeleton()->stopAnimation();
+
+	renderScene->add(plane);
+	renderScene->add(model1);
+	renderScene->add(model2);
+	renderScene->add(model3);
+
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, 0.0001f);
+	//plane->getMesh()->getMaterial(1)->diffuseTexture = light0->getDepthBuffer()->getFramebufferTexture(0);
 	light0->update();
 	renderScene->addLight(light0);
 
@@ -73,25 +110,33 @@ void Test::onCreated() {
 
 	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
 	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
+
+	font = new Font("resources/fonts/CONSOLA.TTF", 64, Colour::WHITE, true, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
+	font->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
 }
 
 void Test::onUpdate() {
 	particleSystem->update(getDeltaSeconds(), camera->getPosition());
 
 	if (Keyboard::isPressed(GLFW_KEY_UP))
-		particleEmitter->getTransform()->translate(Vector3f(0.0f, 0.0f, -0.008f * getDelta()));
+		particleEmitter->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
 	else if (Keyboard::isPressed(GLFW_KEY_DOWN))
-		particleEmitter->getTransform()->translate(Vector3f(0.0f, 0.0f, 0.008f * getDelta()));
+		particleEmitter->getTransform()->translate(0.0f, 0.0f, 0.008f * getDelta());
 	if (Keyboard::isPressed(GLFW_KEY_LEFT))
-		particleEmitter->getTransform()->translate(Vector3f(-0.008f * getDelta(), 0.0f, 0.0f));
+		particleEmitter->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
-		particleEmitter->getTransform()->translate(Vector3f(0.008f * getDelta(), 0.0f, 0.0f));
+		particleEmitter->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
+
+	model1->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	//model2->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	model3->getMesh()->getSkeleton()->update(getDeltaSeconds());
 }
 
 void Test::onRender() {
 	GLUtils::setupSimple3DView(true);
 
 	particleSystem->render();
+	font->render();
 }
 
 void Test::onDestroy() {
