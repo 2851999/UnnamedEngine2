@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 0 | Beta 3 | Development 4 | Experimental 2
+
+* Changed splash screen to be white background with black text
+  (Also now deletes the resources used to produce it)
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 4 | Experimental 1
 
 * Added genNormals option in loadAssimpModel and

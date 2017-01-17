@@ -18,7 +18,10 @@
 
 #include "MeshLoader.h"
 
+#include <fstream>
 #include "../../utils/Logging.h"
+
+using std::__basic_file;
 
 void MeshLoader::addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes) {
 	if (nodes.count(node) == 0)
