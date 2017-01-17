@@ -38,6 +38,8 @@ private:
 	GameObject3D* model1;
 	GameObject3D* model2;
 	GameObject3D* model3;
+
+	Font* font;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -108,6 +110,9 @@ void Test::onCreated() {
 
 	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
 	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
+
+	font = new Font("resources/fonts/CONSOLA.TTF", 64, Colour::WHITE, true, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
+	font->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
 }
 
 void Test::onUpdate() {
@@ -131,6 +136,7 @@ void Test::onRender() {
 	GLUtils::setupSimple3DView(true);
 
 	particleSystem->render();
+	font->render();
 }
 
 void Test::onDestroy() {

@@ -60,9 +60,12 @@ Mesh* MeshLoader::loadModel(std::string path, std::string fileName) {
 		return loadAssimpModel(path, fileName);
 }
 
-Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName) {
+Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool genNormals) {
 	//Load the file using Assimp
-	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
+	unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices;
+	if (genNormals)
+		flags = flags | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
+	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), flags); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality
 	//The MeshData instance used to store the data for the current mesh
 	MeshData* currentData = new MeshData(MeshData::DIMENSIONS_3D);
 	//The current and last number of indices added
@@ -733,9 +736,9 @@ Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 	return mesh;
 }
 
-void MeshLoader::convertToEngineModel(std::string path, std::string fileName) {
+void MeshLoader::convertToEngineModel(std::string path, std::string fileName, bool genNormals) {
 	std::string newFileName = fileName.substr(0, fileName.find_last_of(".")) + ".model";
-	Mesh* mesh = loadModel(path, fileName);
+	Mesh* mesh = loadAssimpModel(path, fileName, genNormals);
 	saveEngineModel(path, newFileName, mesh);
 	delete mesh;
 }

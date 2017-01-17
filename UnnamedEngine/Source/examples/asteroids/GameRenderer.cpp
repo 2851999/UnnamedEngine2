@@ -151,13 +151,13 @@ void GameRenderer::render() {
 	Renderer::saveTextures();
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
 	if (useLighting) {
-		Renderer::setMaterialUniforms(shader, "Lighting", mesh->getMaterial());
+		Renderer::setMaterialUniforms(shader, Renderer::SHADER_LIGHTING, mesh->getMaterial(1));
 		shader->setUniformVector3("Light_Direction", Vector3f(0.0f, -1.0f, -1.0f));
 		shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));
 		shader->setUniformColourRGB("Light_SpecularColour", Colour(1.0f, 1.0f, 1.0f));
 		shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
 	} else {
-		Renderer::setMaterialUniforms(shader, "Material", mesh->getMaterial());
+		Renderer::setMaterialUniforms(shader, Renderer::SHADER_MATERIAL, mesh->getMaterial(1));
 	}
 
 	glEnable(GL_CULL_FACE);

@@ -161,7 +161,7 @@ void Player::onMouseMoved(double x, double y, double dx, double dy) {
 		if (dx != 0)
 			getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -dx * 10.0f * currentDelta);
 		if (dy != 0)
-			getTransform()->rotate(getTransform()->getRotation().getRight(), dy * 10.0f * currentDelta);
+			getTransform()->rotate(getTransform()->getRotation().getRight(), -dy * 10.0f * currentDelta);
 	}
 }
 
