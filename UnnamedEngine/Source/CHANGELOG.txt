@@ -1,4 +1,103 @@
 --------------------------------------------------------------
+Release 0 | Beta 4 | Development 0 | Experimental 1
+
+* Added enable and disable methods in KeyboardShortcuts
+  (disabled by default)
+  
+* Changed GUITextBox to only have the KeyboardShortcuts
+  instance enabled when it is selected
+  
+* Fixed bug: Couldn't change a text box's cursor's colour
+
+--------------------------------------------------------------
+Release 0 | Beta 4 (V0.2.2)
+
+* Added BoneAnimationData
+* Added Bone
+* Added Animation
+* Added Skeleton
+* Added MeshLoader
+* Added 'wireframe' command to DebugConsole
+* Added renderWithoutBinding method in RenderData
+* Added SubData struct in RenderData
+* Added the ability to have multiple meshes in a single VBO
+* Added skeletal animation
+* Added parallax occlusion mapping
+* Added proper frustum culling of models added to a
+  RenderScene3D instance
+* Added method to pre-multiply a vector by a matrix
+* Added constructor conversions between vectors of similar
+  sizes
+* Added SHADER_ constants in Renderer to represent various
+  shader ID's
+* Added translate and scale methods to Transform
+* Added method to calculate and return the bounding sphere for
+  a Mesh in MeshData
+* Added 'path' to Texture to determine where textures have
+  come from (if loaded from a specific location)
+* Added custom model format
+* Added method in MeshLoader to convert a model into the
+  custom model format (currently uses .model file extension)
+* Added culling setting in GameObject
+
+* Changed Mesh to load a default colour of white if a
+  material colour is not defined
+* Changed Mesh to load the normal map as a height map from
+  an OBJ file
+* Changed shaders to use #map duplicates to replace the
+  previous assignment
+* Changed shadows to work with skeletal animation
+* Changed FrustumPlane to a structure
+* Changed Shader to store attached shaders in a vector
+* Changed light to calculate the projection view matrix when
+  update is called
+* Changed font to work in 3D without bill-boarding being
+  applied
+* Changed splash screen to be white background with black text
+  (Also now deletes the resources used to produce it)
+  
+* Moved Frustum.h to core
+* Moved the SubData structure to MeshData
+
+* Renamed loadModel to loadAssimpModel
+
+* Rewritten Frustum class
+
+* Removed errors from shaders when a uniform/attribute is
+  not found as many of these occur when the compiler
+  removed unnecessary variables
+  
+* Fixed bug: Trying to get the inverse of a Matrix3f with a
+             determinant of 0 would cause a crash
+* Fixed bug: Pasting text into a text box with new line
+             characters caused the text to render incorrectly
+* Fixed bug: Models didn't always have the correct orientation
+* Fixed bug: Shadows would render properly in certain
+             circumstances
+* Fixed bug: Transform didn't update its position, rotation
+             and scale when a new parent transform was
+             assigned
+* Fixed bug: getForward in Quaternion returned a vector
+             pointing the wrong way (As OpenGL has -Z into
+             the screen)
+             
+* Note: At the moment any loaded models assume the file being
+        loaded only has one model within it
+ 
+* More shader cleanup
+
+--------------------------------------------------------------
+Release 0 | Beta 3 | Development 5 (V0.2.2)
+
+* Added genNormals option in loadAssimpModel and
+  convertToEngineModel
+
+* Changed font to work in 3D without bill-boarding being
+  applied
+* Changed splash screen to be white background with black text
+  (Also now deletes the resources used to produce it)
+
+--------------------------------------------------------------
 Release 0 | Beta 3 | Development 4 | Experimental 2
 
 * Changed splash screen to be white background with black text
@@ -670,464 +769,3 @@ Release 0 | Beta 2 | Development 0 | Experimental 1
              enabled
 
 * Note: Started shader cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 2 (V0.1.3)
-
-* Added MLAttribute
-* Added MLElement
-* Added MLDocument
-* Added MLParser
-* Added Mouse
-* Added Keyboard
-* Added GUIGroup
-* Added GUIRadioCheckBox
-* Added methods in Window to set the cursor position and
-  centre the cursor
-* Added new Camera2D and 3D constructors
-* Added getCursorPosition in Window
-* Added save and load methods in InputBindings to allow input
-  bindings to be saved/loaded from an ML file
-* Added re-written BaseEngineTest3D using a new BaseTest3D
-  class
-* Added new GameObject2D and GameObject3D constructors
-* Added some examples:
-	- BasicSetup
-	- BasicInput
-	- BasicRendering
-* Added createButton in GUIDropDownMenu
-* Added new GameObject2D and 3D constructors
-* Added new PhysicsObject2D and 3D constructors
-* Added geometry shader support
-* Added onButtonAssigned and onAxisAssigned methods in the
-  InputBindingListener class
-* Added waitForInputPos and waitForInputNeg methods in the
-  InputBindingAxis class
-* Added methods to remove a controller from an InputManager
-  as well as to release all controllers
-  
-* Changed Font so that it now creates a bigger bitmap font
-  than required and scales it down, improving quality
-* Changed GUIComponent so that setActive will now reset
-  the render index to 0
-* Changed setColour and setTexture methods in
-  GUIComponentRenderer
-* Changed writeToFile and readFromFile methods in
-  SettingsUtils to use ML
-* Changed DebugCamera's constructor to allow a custom
-  InputBindings instance to be provided
-* Changed Light so that it has its diffuse and specular
-  colours set to Colour::WHITE by default
-* Changed GUIPanel to inherit from GUIGroup
-  
-* Moved Frustum.h to the experimental folder
-* Moved loadModel from Model to Mesh
-
-* Removed Cubemap.h (Contents moved to Texture.h)
-* Removed Cubemap.cpp (Contents moved to Texture.cpp)
-* Removed the 'name' variable in PhysicsObject
-* Removed glValue and boolValue in GLUtils
-* Removed Model
-  
-* Fixed bug: Shadows didn't work
-* Fixed bug: InputBindings getButtonBinding and
-             getAxisBinding methods caused a crash if the
-             binding wasn't found
-* Fixed bug: A high FPS meant that the delta would become 0,
-             so it couldn't be used to regulate movement,
-             this is now fixed but will mean that the FPS
-             reading for PER_FRAME is not very accurate
-             at high frame rates
-
-* More asteroids development
-
-* Note: Cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 5 (V0.1.3)
-
-* Added methods to remove a controller from an InputManager
-  as well as to release all controllers
-
-* Fixed bug: InputBindings assigned the keyboard key for an
-             InputBindingButton to the mouse button when
-             loading
-* Fixed bug: InputBindings assigned the keyboard key for an
-             InputBindingButton to the mouse button when
-             loading
-             
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 4 | Experimental 3
-
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 4 | Experimental 2
-
-* Added methods to remove a controller from an InputManager
-  as well as to release all controllers
-
-* Fixed bug: InputBinding's continued to wait for input even
-             after receiving it
-             
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 4 | Experimental 1
-
-* Fixed bug: InputBindings assigned the keyboard key for an
-             InputBindingButton to the mouse button when
-             loading
-             
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 4 (V0.1.2)
-
-* Added GUIGroup
-* Added GUIRadioCheckBox
-* Added createButton in GUIDropDownMenu
-* Added new GameObject2D constructors
-* Added new GameObject3D constructors
-* Added new PhysicsObject2D constructors
-* Added new PhysicsObject3D constructors
-* Added geometry shader support
-* Added onButtonAssigned and onAxisAssigned methods in the
-  InputBindingListener class
-* Added waitForInputPos and waitForInputNeg methods in the
-  InputBindingAxis class
-
-* Changed GUIPanel to inherit from GUIGroup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 3 | Experimental 3
-
-* Added geometry shader support
-* Added onButtonAssigned and onAxisAssigned methods in the
-  InputBindingListener class
-* Added waitForInputPos and waitForInputNeg methods in the
-  InputBindingAxis class
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 3 | Experimental 2
-
-* Added createButton in GUIDropDownMenu
-* Added new GameObject2D constructors
-* Added new GameObject3D constructors
-* Added new PhysicsObject2D constructors
-* Added new PhysicsObject3D constructors
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 3 | Experimental 1
-
-* Added GUIGroup
-* Added GUIRadioCheckBox
-
-* Changed GUIPanel to inherit from GUIGroup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 3 (V0.1.1)
-
-* Added re-written BaseEngineTest3D using a new BaseTest3D
-  class
-* Added new GameObject2D and GameObject3D constructors
-* Added some examples:
-	- BasicSetup
-	- BasicInput
-	- BasicRendering
-  
-* Changed Light so that it has its diffuse and specular
-  colours set to Colour::WHITE by default
-
-* Moved loadModel from Model to Mesh
-
-* Removed glValue and boolValue in GLUtils
-* Removed Model
-
-* More cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 2 | Experimental 4
-
-* Added new GameObject2D and GameObject3D constructors
-* Added some examples:
-	- BasicSetup
-	- BasicInput
-	- BasicRendering
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 2 | Experimental 3
-
-* More cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 2 | Experimental 2
-
-* Added re-written BaseEngineTest3D using a new BaseTest3D
-  class
-  
-* Changed Light so that it has its diffuse and specular
-  colours set to Colour::WHITE by default
-
-* More cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 2 | Experimental 1
-
-* Moved loadModel from Model to Mesh
-
-* Removed glValue and boolValue in GLUtils
-* Removed Model
-
-* More cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 2 (V0.1.0)
-
-* Added Mouse
-* Added Keyboard
-* Added new Camera2D and 3D constructors
-* Added getCursorPosition in Window
-* Added save and load methods in InputBindings to allow input
-  bindings to be saved/loaded from an ML file
-  
-* Changed DebugCamera's constructor to allow a custom
-  InputBindings instance to be provided
-
-* Moved Frustum.h to the experimental folder
-
-* Removed Cubemap.h (Contents moved to Texture.h)
-* Removed Cubemap.cpp (Contents moved to Texture.cpp)
-* Removed the 'name' variable in PhysicsObject
-
-* Fixed bug: InputBindings getButtonBinding and
-             getAxisBinding methods caused a crash if the
-             binding wasn't found
-* Fixed bug: A high FPS meant that the delta would become 0,
-             so it couldn't be used to regulate movement,
-             this is now fixed but will mean that the FPS
-             reading for PER_FRAME is not very accurate
-             at high frame rates
-* Fixed bug: Loading InputBindings would crash when a
-             controller index didn't have any controller
-             present
-             
-* Note: Started cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 1 | Experimental 5
-
-* Removed Cubemap.h (Contents moved to Texture.h)
-* Removed Cubemap.cpp (Contents moved to Texture.cpp)
-* Removed the 'name' variable in PhysicsObject
-
-* Moved Frustum.h to the experimental folder
-
-* More cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 1 | Experimental 4
-
-* More cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 1 | Experimental 3
-
-* Added Mouse
-* Added Keyboard
-* Added new Camera2D and 3D constructors
-* Added getCursorPosition in Window
-
-* More cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 1 | Experimental 2
-
-* Fixed bug: A high FPS meant that the delta would become 0,
-             so it couldn't be used to regulate movement,
-             this is now fixed but will mean that the FPS
-             reading for PER_FRAME is not very accurate
-             at high frame rates
-* Fixed bug: Loading InputBindings would crash when a
-             controller index didn't have any controller
-             present
-             
-* Note: Started cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 1 | Experimental 1
-
-* Added save and load methods in InputBindings to allow input
-  bindings to be saved/loaded from an ML file
-  
-* Changed DebugCamera's constructor to allow a custom
-  InputBindings instance to be provided
-
-* Fixed bug: InputBindings getButtonBinding and
-             getAxisBinding methods caused a crash if the
-             binding wasn't found
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 1 (V0.0.9)
-
-* Added MLAttribute
-* Added MLElement
-* Added MLDocument
-* Added MLParser
-* Added methods in Window to set the cursor position and
-  centre the cursor
-  
-* Changed Font so that it now creates a bigger bitmap font
-  than required and scales it down, improving quality
-* Changed GUIComponent so that setActive will now reset
-  the render index to 0
-* Changed setColour and setTexture methods in
-  GUIComponentRenderer
-* Changed writeToFile and readFromFile methods in
-  SettingsUtils to use ML
-  
-* Fixed bug: Shadows didn't work
-
-* More asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 0 | Experimental 4
-
-* Added toString() methods to MLAttribute, MLElement and
-  MLDocument
-* Added save method in MLDocument
-
-* Changed writeToFile and readFromFile methods in
-  SettingsUtils to use ML
-
-* Fixed bug: Data in an ML attribute was not parsed correctly
-             if it contained a space
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 0 | Experimental 3
-
-* Added MLAttribute
-* Added MLElement
-* Added MLDocument
-* Added MLParser
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 0 | Experimental 2
-
-* Changed Font so that it now creates a bigger bitmap font
-  than required and scales it down, improving quality
-* Changed GUIComponent so that setActive will now reset
-  the render index to 0
-* Changed setColour and setTexture methods in
-  GUIComponentRenderer
-
-* More asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 1 | Development 0 | Experimental 1
-
-* Added methods in Window to set the cursor position and
-  centre the cursor
-  
-* Fixed bug: Shadows didn't work
-
-* More asteroids development
-  
---------------------------------------------------------------
-Release 0 | Beta 1 (V0.0.8)
-
-First beta commit. Since starting the development branch,
-here are the changes:
-
-* Added GUIComponentListener
-* Added GUIDropDownMenu
-* Added GUIDropDownList
-* Added GUIPanel
-* Added GUIPanelGroup
-* Added GUILabel
-* Added GUISlider
-* Added GUITextBox
-* Added GUITextBoxCursor
-* Added GUITextBoxSelection
-* Added InputBinding
-* Added InputBindingButton
-* Added InputBindingAxis
-* Added InputBindingsListener
-* Added InputBindings
-* Added DebugCamera
-* Added Timer
-* Added KeyboardShortcuts
-
-* Added billboarded font support
-* Added windowAspectRatio in Settings that is assigned when
-  the Window is created
-* Added methods to directly obtain the current frame delta
-  in seconds
-* Added loadFont method in ResourceLoader
-* Added 'active' value in ParticleEmitter
-* Added emitParticles() method in Particle emitter to
-  activate a particle emitter to emit a specified number of
-  particles
-* Added methods to get input bindings given their name
-* Added methods in SoundSystem to allow the listener to be
-  moved after being created
-* Added methods to pause/resume/stop all currently playing
-  audio in SoundSystem
-* Added methods to save and load the Settings structure
-  to and from files
-* Added min() and max() to Vectors
-* Added setCurrentStage() method in GUILoadingBar
-* Added ability for GUIComponents to be attached to
-  GUIComponents
-
-* Renamed Scene to RenderScene3D
-
-* Changed ResourceManager so that it now has instances of
-  resource manager allowing greater control of when resources
-  are released
-* Changed Texture::loadTexture() to return NULL instead of an
-  an empty Texture instance when an image can't be loaded
-* Changed Shader so the current shader is stored, and a new
-  one will only be used if necessary
-  
-* Removed the overrideShader variable everywhere
-
-* Fixed bug: GUIButton still displayed it's text when its
-             visible property was set to false
-* Fixed bug: GUICheckBox still displayed it's text when its
-             visible property was set to false
-* Fixed bug: ParticleEmitter wouldn't spawn particles if the
-             delta * particleSpawnRate was < 1 in several
-             frame
-* Fixed bug: The VSync setting didn't have any effect
-* Fixed bug: Weird font glitch 
-* Fixed bug: InputBindingAxis could get stuck with a value
-             when using keyboard keys
-* Fixed bug: Sorting order for particles was wrong
-* Fixed bug: ParticleSystem still a particle even though the
-             particle count was 0
-* Fixed bug: GUIComponent didn't check whether the mouse
-             was hovering over it when it entered the window
-* Fixed bug: GUILoadingBar still rendered it's fill even
-             when visible was set to false
-* Fixed bug: GUIComponents placed right next to each other
-             could be selected at the same time
-* Fixed bug: The length() method in vectors didn't stop a
-             divide by 0
-* Fixed bug: Font getHeight() didn't take into account new
-             lines
-* Fixed bug: Calling onMousePressed() in a GUIComponent
-             would have changed its clicked state to false if
-             called twice
-
-* Note: RenderScene3D doesn't have an update method, so objects
-        that move should always be updated manually/added
-        to a PhysicsScene3D instance
-* Note: GUIComponents now have an enable/disable method which
-        adds/removes their input listener from the current
-        input manager, by default they are disabled, so
-        enable() should be called on all objects that need
-        to receive input once created
-* Note: Writing game using engine in the examples

@@ -67,13 +67,21 @@ unsigned int GUIComponentRenderer::getMaxRenderIndex() {
 }
 
 void GUIComponentRenderer::setColour(Colour colour) {
-	for (unsigned int i = 0; i < colours.size(); i++)
-		colours[i] = colour;
+	if (colours.size() == 0)
+		colours.push_back(colour);
+	else {
+		for (unsigned int i = 0; i < colours.size(); i++)
+			colours[i] = colour;
+	}
 }
 
 void GUIComponentRenderer::setTexture(Texture* texture) {
-	for (unsigned int i = 0; i < textures.size(); i++)
-		textures[i] = texture;
+	if (textures.size() == 0)
+		textures.push_back(texture);
+	else {
+		for (unsigned int i = 0; i < textures.size(); i++)
+			textures[i] = texture;
+	}
 }
 
 /*****************************************************************************

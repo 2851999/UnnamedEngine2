@@ -84,6 +84,7 @@ void GUITextBoxCursor::render() {
 		float y = (p.getY() + (textBox->getHeight() / 2)) - (getHeight() / 2);
 		//Assign the cursor position
 		setPosition(x, y);
+
 		//Update and render the cursor
 		GUIComponentRenderer::update();
 		GUIComponentRenderer::render();
@@ -101,7 +102,7 @@ void GUITextBoxCursor::showCursor() {
  *****************************************************************************/
 
 GUITextBoxSelection::GUITextBoxSelection(GUITextBox* textBox) : GUIFill(textBox->getWidth(), textBox->getHeight(), Colour::BLACK) {
-	//Setup this selecion
+	//Setup this selection
 	setup(textBox);
 }
 
@@ -590,11 +591,15 @@ void GUITextBox::onChar(int key, char character) {
 
 void GUITextBox::onMousePressed(int button) {
 	GUIComponent::onMousePressed(button);
-	if (! isMouseHovering())
+	if (! isMouseHovering()) {
 		selected = false;
-	else if (selected && button == GLFW_MOUSE_BUTTON_LEFT) {
+		//Disable the keyboard shortcuts
+		shortcuts->disable();
+	} else if (selected && button == GLFW_MOUSE_BUTTON_LEFT) {
 		moveCursor(Window::getCurrentInstance()->getInputManager()->getCursorData().lastX);
 		resetSelection();
+		//Enable the keybaord shortcuts
+		shortcuts->enable();
 	}
 }
 
