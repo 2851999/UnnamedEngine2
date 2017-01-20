@@ -26,7 +26,7 @@
  * Tutorial Name: Input
  * Engine Version: V0.1.0 (0::1::2::3)
  * Date Created: 17/10/2016
- * Date Updated: 17/10/2016
+ * Date Updated: 19/01/2017
  *
  * Description: Demonstrates how to receive user input.
  *****************************************************************************/
@@ -86,11 +86,11 @@ void Tutorial::initialise() {
 void Tutorial::created() {
 	//The below code is to add an input listener to the input manager
 	//attached to the window, this only needs to be called if you are
-	//inherting InputListener directly
+	//inheriting InputListener directly
 	//getWindow()->getInputManager()->addListener(this);
 
 	//For controllers, things can be a bit more complicated but here is an example
-	//of finding and creating a controller instance, and settting it up for event-driven
+	//of finding and creating a controller instance, and setting it up for event-driven
 	//input
 	/*
 	Controller* controller = new Controller(ControllerUtils::getControllerIndexByName("INSERT_NAME_HERE"));

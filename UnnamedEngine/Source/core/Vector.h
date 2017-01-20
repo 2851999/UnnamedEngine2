@@ -243,7 +243,7 @@ public:
 		return value + ")";
 	}
 
-	/* Retruns a pointer to the data array */
+	/* Returns a pointer to the data array */
 	inline T* data() { return values; }
 
 	/* Returns the number of elements stored by this vector */

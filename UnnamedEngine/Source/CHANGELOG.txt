@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 0 | Beta 4 | Development 0 | Experimental 2
+
+* Added BinaryFile
+
+* Changed Timer to use an enum for its current state
+* Changed MeshLoader to use BinaryFile to read/write
+
+--------------------------------------------------------------
 Release 0 | Beta 4 | Development 0 | Experimental 1
 
 * Added enable and disable methods in KeyboardShortcuts
