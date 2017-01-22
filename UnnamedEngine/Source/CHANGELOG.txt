@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 1 (V0.2.3)
+
+* First release build of Unnamed Engine 2 (Still doesn't have
+  a name)
+
+--------------------------------------------------------------
 Release 0 | Beta 5 (V0.2.3)
 
 * Added BinaryFile
