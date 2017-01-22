@@ -73,6 +73,14 @@ KeyboardShortcuts::~KeyboardShortcuts() {
 
 }
 
+void KeyboardShortcuts::enable() {
+	Window::getCurrentInstance()->getInputManager()->addListener(this);
+}
+
+void KeyboardShortcuts::disable() {
+	Window::getCurrentInstance()->getInputManager()->removeListener(this);
+}
+
 void KeyboardShortcuts::addListener(KeyboardShortcutListener* listener) {
 	listeners.push_back(listener);
 }

@@ -96,6 +96,14 @@ public:
 	/* The destructor */
 	virtual ~KeyboardShortcuts();
 
+	/* Method to enable the input listener by adding it to the current window
+	 * instance */
+	void enable();
+
+	/* Method to disable the input listener by adding it to the current window
+	 * instance */
+	void disable();
+
 	/* Method used to add a keyboard shortcut */
 	inline void add(KeyboardShortcut* shortcut) { shortcuts.push_back(shortcut); }
 
