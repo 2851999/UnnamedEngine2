@@ -30,6 +30,7 @@ DebugConsole::DebugConsole(BaseEngine* baseEngine) : baseEngine(baseEngine) {
 	textBox = new GUITextBox(Colour(0.1f, 0.1f, 0.1f, 0.6f), baseEngine->getSettings().windowWidth, 20.0f);
 	textBox->setPosition(0.0f, baseEngine->getSettings().windowHeight - textBox->getHeight());
 	textBox->selection->setColour(Colour(0.1f, 0.1f, 0.1f, 0.4f));
+	textBox->cursor->setColour(Colour::WHITE);
 
 	//Add the components
 	add(textBox);

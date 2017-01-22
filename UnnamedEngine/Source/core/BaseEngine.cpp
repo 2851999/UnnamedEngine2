@@ -159,7 +159,7 @@ void BaseEngine::renderDebuggingInfo() {
 							"Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
 							"----------- AUDIO -----------\n" +
 							"Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
-							"SFX Volume     : " + str(getSettings().audioMusicVolume) + "\n" +
+							"SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
 							"-----------------------------"
 							, 2, 16);
 	//Render the debug console if needed

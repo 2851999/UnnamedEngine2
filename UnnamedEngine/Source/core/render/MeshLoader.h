@@ -19,9 +19,7 @@
 #ifndef CORE_RENDER_MESHLOADER_H_
 #define CORE_RENDER_MESHLOADER_H_
 
-#include <string>
 #include <map>
-#include <fstream>
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -31,6 +29,8 @@
 #include <assimp/matrix4x4.h>
 
 #include "Mesh.h"
+
+#include "../../utils/BinaryFile.h"
 
 struct aiScene;
 
@@ -59,29 +59,11 @@ private:
 	static Matrix4f toMatrix4f(aiMatrix3x3 mat);
 
 	/* Various read/write methods */
-	static void writeVectorDataFloat(std::ofstream& output, std::vector<float>& data);
-	static void writeVectorDataUInt(std::ofstream& output, std::vector<unsigned int>& data);
-	static void writeMaterial(std::ofstream& output, Material* material, std::string path);
-	static void writeTexture(std::ofstream& output, Texture* texture, std::string path);
+	static void writeMaterial(BinaryFile& file, Material* material, std::string path);
+	static void writeTexture(BinaryFile& file, Texture* texture, std::string path);
 
-	static void writeUInt(std::ofstream& output, unsigned int value);
-	static void writeFloat(std::ofstream& output, float value);
-	static void writeVector3f(std::ofstream& output, Vector3f vector);
-	static void writeVector4f(std::ofstream& output, Vector4f vector);
-	static void writeMatrix4f(std::ofstream& output, Matrix4f matrix);
-	static void writeString(std::ofstream& output, std::string string);
-
-	static void readVectorDataFloat(std::ifstream& input, std::vector<float>& data);
-	static void readVectorDataUInt(std::ifstream& input, std::vector<unsigned int>& data);
-	static void readMaterial(std::ifstream& input, std::vector<Material*>& materials, std::string path);
-	static Texture* readTexture(std::ifstream& input, std::string path);
-
-	static void readUInt(std::ifstream& output, unsigned int& value);
-	static void readFloat(std::ifstream& output, float& value);
-	static void readVector3f(std::ifstream& input, Vector3f& vector);
-	static void readVector4f(std::ifstream& input, Vector4f& vector);
-	static void readMatrix4f(std::ifstream& input, Matrix4f& matrix);
-	static void readString(std::ifstream& input, std::string& string);
+	static void readMaterial(BinaryFile& file, std::vector<Material*>& materials, std::string path);
+	static Texture* readTexture(BinaryFile& file, std::string path);
 public:
 	/* Static method called to read a file and load a model's meshes */
 	static Mesh* loadModel(std::string path, std::string fileName);

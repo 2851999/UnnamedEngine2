@@ -18,6 +18,10 @@
 
 #include "../core/Frustum.h"
 
+/*****************************************************************************
+ * The Frustum class
+ *****************************************************************************/
+
 FrustumPlane Frustum::calculatePlane(float a, float b, float c, float d) {
 	float t = sqrt(a * a + b * b + c * c);
 	FrustumPlane plane;
