@@ -214,6 +214,10 @@ MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup*
 	GUILabel* headerResolution = new GUILabel("Resolution", headingFont);
 	headerResolution->setPosition(windowWidth / 2 - headerResolution->getWidth() / 2, 110.0f);
 
+	//Setup the FOV header
+	GUILabel* headerFOV = new GUILabel("FOV", headingFont);
+	headerFOV->setPosition(windowWidth / 2 - headerFOV->getWidth() / 2, 280.0f);
+
 	//Get the button textures
 	std::vector<Texture*> texturesButtons = game->getResources().getTexturesButtons();
 
@@ -234,6 +238,12 @@ MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup*
 
 	checkBoxVSync = new GUICheckBox("VSync", 20, 20, texturesButtons);
 	checkBoxVSync->setPosition(dropDownListResolutions->getPosition().getX() + checkBoxFullscreen->getFont()->getWidth("Fullscreen") * 1.1f, 210.0f);
+
+//	GUIButton* sliderButton = new GUIButton("", 10, 30, texturesButtons);
+//	sliderFOV = new GUISlider(sliderButton, GUISlider::HORIZONTAL, 400, 10, Colour(Colour::WHITE, 0.75f));
+//	sliderFOV->setPosition(dropDownListResolutions->getPosition().getX(), 330.0f);
+//	sliderFOV->setValueMin(60.0f);
+//	sliderFOV->setValueMax(200.0f);
 
 	//Setup the notice label
 	GUILabel* noticeLabel = new GUILabel("Note: Changes require restart", headingFont);
@@ -256,6 +266,8 @@ MainMenuSettingsVideo::MainMenuSettingsVideo(AsteroidsGame* game, GUIPanelGroup*
 	add(checkBoxBorderless);
 	add(checkBoxVSync);
 	add(dropDownListResolutions);
+//	add(headerFOV);
+//	add(sliderFOV);
 	add(noticeLabel);
 	add(buttonApply);
 	add(buttonBack);
@@ -318,6 +330,9 @@ MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanel
 	GUILabel* headerShootButton = new GUILabel("Shoot Button", headingFont);
 	headerShootButton->setPosition(windowWidth / 2 - headerShootButton->getWidth() / 2, 350.0f);
 
+	GUILabel* headerUpgradesButton = new GUILabel("Upgrades Button", headingFont);
+	headerUpgradesButton->setPosition(windowWidth / 2 - headerShootButton->getWidth() / 2, 430.0f);
+
 	//Get the button textures
 	std::vector<Texture*> texturesButtons = game->getResources().getTexturesButtons();
 
@@ -343,6 +358,9 @@ MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanel
 	buttonShoot = new GUIButton("", 200, 30, texturesButtons);
 	buttonShoot->setPosition(windowWidth / 2 + - buttonShoot->getWidth() / 2, 380);
 
+	buttonUpgrades = new GUIButton("", 200, 30, texturesButtons);
+	buttonUpgrades->setPosition(windowWidth / 2 + - buttonShoot->getWidth() / 2, 460);
+
 	buttonSave = new GUIButton("Save", 195, 30, texturesButtons);
 	buttonSave->setPosition(windowWidth / 2 - 200, windowHeight - 50);
 	buttonSave->addListener(this);
@@ -358,6 +376,7 @@ MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanel
 	add(headerLookXAxis);
 	add(headerLookYAxis);
 	add(headerShootButton);
+	add(headerUpgradesButton);
 	add(buttonForwardPos);
 	add(buttonForwardNeg);
 	add(buttonLookXPos);
@@ -365,6 +384,7 @@ MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanel
 	add(buttonLookYPos);
 	add(buttonLookYNeg);
 	add(buttonShoot);
+	add(buttonUpgrades);
 	add(buttonSave);
 	add(buttonBack);
 
@@ -396,6 +416,9 @@ void MainMenuSettingsControls::updateGUI() {
 
 	InputBindingButton* shootButton = bindings->getButtonBinding("Shoot");
 	buttonShoot->setText("Key: '" + StrUtils::str((char) shootButton->getKeyboardKey()) + "', Button: " + StrUtils::str(shootButton->getControllerButton()));
+
+	InputBindingButton* upgradesButton = bindings->getButtonBinding("Upgrades");
+	buttonUpgrades->setText("Key: '" + StrUtils::str((char) upgradesButton->getKeyboardKey()) + "', Button: " + StrUtils::str(upgradesButton->getControllerButton()));
 }
 
 void MainMenuSettingsControls::onComponentClicked(GUIComponent* component) {
@@ -421,6 +444,8 @@ void MainMenuSettingsControls::onComponentClicked(GUIComponent* component) {
 		bindings->getAxisBinding("LookY")->waitForInputNeg();
 	else if (component == buttonShoot)
 		bindings->getButtonBinding("Shoot")->waitForInput();
+	else if (component == buttonUpgrades)
+		bindings->getButtonBinding("Upgrades")->waitForInput();
 }
 
 void MainMenuSettingsControls::onButtonAssigned(InputBindingButton* button) {

@@ -26,6 +26,7 @@
 #include "../../core/gui/GUIDropDownList.h"
 #include "../../core/gui/GUICheckBox.h"
 #include "../../core/gui/GUILabel.h"
+//#include "../../core/gui/GUISlider.h"
 #include "../../core/input/InputBindings.h"
 
 class AsteroidsGame;
@@ -106,6 +107,7 @@ private:
 	GUICheckBox* checkBoxFullscreen;
 	GUICheckBox* checkBoxBorderless;
 	GUICheckBox* checkBoxVSync;
+//	GUISlider* sliderFOV;
 	/* The buttons on the menu */
 	GUIButton* buttonApply;
 public:
@@ -140,6 +142,7 @@ private:
 	GUIButton* buttonLookYPos;
 	GUIButton* buttonLookYNeg;
 	GUIButton* buttonShoot;
+	GUIButton* buttonUpgrades;
 	GUIButton* buttonSave;
 
 	/* Method used to update the GUI */
