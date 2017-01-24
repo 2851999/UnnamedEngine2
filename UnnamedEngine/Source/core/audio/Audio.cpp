@@ -32,9 +32,9 @@
 
 AudioData* AudioLoader::loadFile(std::string path) {
 	//Check the file type based on the file extension
-	if (StrUtils::strEndsWith(path, ".wav"))
+	if (utils_string::strEndsWith(path, ".wav"))
 		return loadWaveFile(path);
-	else if (StrUtils::strEndsWith(path, ".ogg"))
+	else if (utils_string::strEndsWith(path, ".ogg"))
 		return loadOggFile(path);
 	else {
 		Logger::log("Unknown audio file type of file '" + path + "'", "AudioLoader", LogType::Error);

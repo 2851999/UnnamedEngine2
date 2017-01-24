@@ -28,22 +28,22 @@ Timer::Timer() {
 }
 
 void Timer::start() {
-	startTime = TimeUtils::getMilliseconds();
+	startTime = utils_time::getMilliseconds();
 	state = State::RUNNING;
 }
 
 void Timer::pause() {
-	pauseStart = TimeUtils::getMilliseconds();
+	pauseStart = utils_time::getMilliseconds();
 	state = State::PAUSED;
 }
 
 void Timer::resume() {
-	pauseTotal += TimeUtils::getMilliseconds() - pauseStart;
+	pauseTotal += utils_time::getMilliseconds() - pauseStart;
 	state = State::RUNNING;
 }
 
 void Timer::stop() {
-	endTime = TimeUtils::getMilliseconds();
+	endTime = utils_time::getMilliseconds();
 	state = State::STOPPED;
 }
 
@@ -61,7 +61,7 @@ long Timer::getTime() {
 	else if (state == State::PAUSED)
 		return pauseStart - startTime - pauseTotal;
 	else if (state == State::RUNNING)
-		return TimeUtils::getMilliseconds() - startTime - pauseTotal;
+		return utils_time::getMilliseconds() - startTime - pauseTotal;
 	else
 		return 0;
 }

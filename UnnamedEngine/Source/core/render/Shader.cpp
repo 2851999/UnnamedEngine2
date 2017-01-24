@@ -55,7 +55,7 @@ void Shader::attach(GLuint shader) {
 	if (! status) {
 		GLchar error[1024];
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
-		Logger::log("Error linking shader" + StrUtils::str(error), "Shader", LogType::Error);
+		Logger::log("Error linking shader" + utils_string::str(error), "Shader", LogType::Error);
 	}
 
 	status = 0;
@@ -64,7 +64,7 @@ void Shader::attach(GLuint shader) {
 	if (! status) {
 		GLchar error[1024];
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
-		Logger::log("Error validating shader program " + StrUtils::str(error), "Shader", LogType::Error);
+		Logger::log("Error validating shader program " + utils_string::str(error), "Shader", LogType::Error);
 	}
 }
 
@@ -180,7 +180,7 @@ GLint Shader::createShader(std::string source, GLenum type) {
 	if (! status) {
 		GLchar error[1024];
 		glGetShaderInfoLog(shader, sizeof(error), NULL, error);
-		Logger::log("Error compiling shader: " + StrUtils::str(error) + " Source:\n" + source, "Shader", LogType::Error);
+		Logger::log("Error compiling shader: " + utils_string::str(error) + " Source:\n" + source, "Shader", LogType::Error);
 
 		glDeleteShader(shader);
 
@@ -238,12 +238,12 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path) {
 	Shader::ShaderSource source;
 
 	//Get the file text
-	std::vector<std::string> fileText = FileUtils::readFile(path);
+	std::vector<std::string> fileText = utils_file::readFile(path);
 
 	//Go through each line of file text
 	for (unsigned int i = 0; i < fileText.size(); i++) {
 		//Check for directives
-		if (StrUtils::strStartsWith(fileText[i], "#include ")) {
+		if (utils_string::strStartsWith(fileText[i], "#include ")) {
 			//The directory the shader is in
 			std::string dir = "";
 			size_t pos = path.rfind("/") + 1;
@@ -252,16 +252,16 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path) {
 			//The file name (removes the "")
 			std::string fileName = fileText[i].substr(fileText[i].find("\"") + 1, fileText[i].rfind("\"") - fileText[i].find("\"") - 1);
 			//Get the new text
-			std::vector<std::string> newText = FileUtils::readFile(dir + fileName);
+			std::vector<std::string> newText = utils_file::readFile(dir + fileName);
 			//Insert the new text into the file text
 			fileText.insert(fileText.begin() + i + 1, newText.begin(), newText.end());
 			//Remove the current line
 			fileText.erase(fileText.begin() + i);
 
 			i -= 1;
-		} else if (StrUtils::strStartsWith(fileText[i], "#map ")) {
+		} else if (utils_string::strStartsWith(fileText[i], "#map ")) {
 			//Split up the line by a space
-			std::vector<std::string> line = StrUtils::strSplit(fileText[i], ' ');
+			std::vector<std::string> line = utils_string::strSplit(fileText[i], ' ');
 			//Check the type and add the values
 			if (line[1] == "uniform")
 				source.uniforms.insert(std::pair<std::string, std::string>(line[2], line[3]));

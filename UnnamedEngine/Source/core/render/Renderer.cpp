@@ -171,7 +171,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 			if (mesh->hasSkeleton()) {
 				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); i++)
-					shader->setUniformMatrix4("Bones[" + StrUtils::str(i) + "]", mesh->getSkeleton()->getBone(i)->getFinalTransform());
+					shader->setUniformMatrix4("Bones[" + utils_string::str(i) + "]", mesh->getSkeleton()->getBone(i)->getFinalTransform());
 				shader->setUniformi("UseSkinning", 1);
 			} else
 				shader->setUniformi("UseSkinning", 0);
@@ -221,7 +221,7 @@ void Renderer::destroy() {
 	delete screenTextureMesh;
 }
 
-using namespace StrUtils;
+using namespace utils_string;
 void Renderer::addRenderShader(std::string id, Shader* shader) {
 	shader->use();
 	if (id == SHADER_LIGHTING) {

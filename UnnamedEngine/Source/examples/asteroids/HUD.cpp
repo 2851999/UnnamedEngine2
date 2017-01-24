@@ -77,7 +77,7 @@ void HUD::update() {
 		barPlayerHealth->setCurrentStage(player->getHealth());
 	if (barPlayerShield->getCurrentStage() != player->getShield())
 		barPlayerShield->setCurrentStage(player->getShield());
-	labelScore->setText("Score: " + StrUtils::str(player->getScore()));
+	labelScore->setText("Score: " + utils_string::str(player->getScore()));
 }
 
 void HUD::render() {

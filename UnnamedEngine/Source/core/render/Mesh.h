@@ -25,6 +25,7 @@
 #include "Shader.h"
 #include "Skinning.h"
 #include "VBO.h"
+#include "../Sphere.h"
 
 /*****************************************************************************
  * The MeshData class stores information about a mesh
@@ -121,7 +122,7 @@ public:
 	}
 
 	/* Method to calculate and return a bounding sphere for this mesh */
-	BoundingSphere calculateBoundingSphere();
+	Sphere calculateBoundingSphere();
 
 	/* Method called to setup the bones structures */
 	void setupBones(unsigned int numVertices);
@@ -306,11 +307,8 @@ private:
 	/* The skeleton for this mesh */
 	Skeleton* skeleton = NULL;
 
-	/* The centre of this mesh */
-	Vector3f centre;
-
-	/* The radius of this mesh's bounding sphere */
-	float radius = 1.0f;
+	/* The bounding sphere for this mesh */
+	Sphere boundingSphere;
 
 	/* Boolean that states whether this mesh should be culled where possible */
 	bool culling = true;
@@ -340,8 +338,7 @@ public:
 	}
 	inline void setMaterials(std::vector<Material*>& materials) { this->materials = materials; }
 	inline void setSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
-	inline void setBoundingSphereCentre(Vector3f centre) { this->centre = centre; }
-	inline void setBoundingSphereRadius(float radius)    { this->radius = radius; }
+	inline void setBoundingSphere(Sphere sphere) { this->boundingSphere = sphere; }
 	inline void setCullingEnabled(bool enabled) { this->culling = enabled; }
 
 	inline Matrix4f getMatrix() { return transform; }
@@ -355,8 +352,8 @@ public:
 	inline bool hasMaterial() { return materials.size() > 0; }
 	inline Skeleton* getSkeleton() { return skeleton; }
 	inline bool hasSkeleton() { return skeleton; }
-	inline Vector3f getBoundingSphereCentre() { return centre; }
-	inline float getBoundingSphereRadius() { return radius; }
+	inline Vector3f getBoundingSphereCentre() { return boundingSphere.centre; }
+	inline float getBoundingSphereRadius() { return boundingSphere.radius; }
 	inline bool cullingEnabled() { return data->getNumDimensions() == MeshData::DIMENSIONS_3D && culling; }
 	inline bool isCullingEnabled() { return culling; }
 };

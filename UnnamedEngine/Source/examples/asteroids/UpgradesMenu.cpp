@@ -24,7 +24,7 @@
  * The UpgradesMenu class
  *****************************************************************************/
 
-using namespace StrUtils;
+using namespace utils_string;
 
 UpgradesMenu::UpgradesMenu(AsteroidsGame* game, AsteroidsMainGame* mainGame) : game(game), mainGame(mainGame) {
 	//The window width/height

@@ -69,7 +69,7 @@ void GUISlider::onComponentRender() {
 	if (direction == VERTICAL) {
 		float pos = position;
 		if (interval != 0.0f)
-			pos = MathsUtils::clampToClosestInterval(position, ((getHeight() - buttonHeight) * interval) / (valueMax - valueMin));
+			pos = utils_maths::clampToClosestInterval(position, ((getHeight() - buttonHeight) * interval) / (valueMax - valueMin));
 
 		//Assign the position
 		button->setPosition(0.0f, pos);
@@ -79,7 +79,7 @@ void GUISlider::onComponentRender() {
 	} else if (direction == HORIZONTAL) {
 		float pos = position;
 		if (interval != 0.0f)
-			pos = MathsUtils::clampToClosestInterval(position, ((getWidth() - buttonWidth) * interval) / (valueMax - valueMin));
+			pos = utils_maths::clampToClosestInterval(position, ((getWidth() - buttonWidth) * interval) / (valueMax - valueMin));
 
 		//Assign the position
 		button->setPosition(pos, 0.0f);
@@ -113,20 +113,20 @@ void GUISlider::onMouseDragged(double x, double y, double dx, double dy) {
 			//Check the direction of this slider
 			if (direction == VERTICAL) {
 				position += dy;
-				position = MathsUtils::clamp(position, 0.0f, height - button->getHeight());
+				position = utils_maths::clamp(position, 0.0f, height - button->getHeight());
 				//Set the slider value
 				value = valueMin + (button->getLocalPosition().getY() / (height - button->getHeight())) * (valueMax - valueMin);
 			} else if (direction == HORIZONTAL) {
 				position += dx;
-				position = MathsUtils::clamp(position, 0.0f, width - button->getWidth());
+				position = utils_maths::clamp(position, 0.0f, width - button->getWidth());
 				//Set the slider value
 				value = valueMin + (button->getLocalPosition().getX() / (width - button->getWidth())) * (valueMax - valueMin);
 			}
 			//Check whether the value needs to be clamped to an interval
 			if (interval != 0.0f)
-				value = MathsUtils::clampToClosestInterval(value, interval);
+				value = utils_maths::clampToClosestInterval(value, interval);
 			//Clamp the slider value
-			MathsUtils::clamp(value, valueMin, valueMax);
+			utils_maths::clamp(value, valueMin, valueMax);
 		}
 	}
 }

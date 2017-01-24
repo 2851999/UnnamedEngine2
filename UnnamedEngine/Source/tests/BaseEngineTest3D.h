@@ -133,7 +133,7 @@ void Test::onUpdate() {
 }
 
 void Test::onRender() {
-	GLUtils::setupSimple3DView(true);
+	utils_gl::setupSimple3DView(true);
 
 	particleSystem->render();
 	font->render();

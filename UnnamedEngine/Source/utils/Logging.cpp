@@ -51,7 +51,7 @@ void Logger::log(std::string message, LogType type) {
 	if (shouldLog(type)) {
 		std::string m = "[" + logTypeString(type) + "]" + message;
 		if (includeTimeStamp)
-			m = "[" + TimeUtils::getTimeAsString() + "]" + m;
+			m = "[" + utils_time::getTimeAsString() + "]" + m;
 		std::cout << m << std::endl;
 		//Check whether the same message should be output to a file
 		if (saveLogsToFile) {

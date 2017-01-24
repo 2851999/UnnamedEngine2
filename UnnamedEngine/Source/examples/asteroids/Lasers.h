@@ -99,7 +99,7 @@ public:
 	void fire(Vector3f position, Quaternion rotation, Vector3f front, Vector3f currentVelocity);
 
 	/* Returns whether the lasers can fire */
-	inline bool canFire() { return TimeUtils::getSeconds() - timeLastLaserFired > cooldown; }
+	inline bool canFire() { return utils_time::getSeconds() - timeLastLaserFired > cooldown; }
 
 	/* Setters and getters */
 	inline double getCooldown() { return this->cooldown; }

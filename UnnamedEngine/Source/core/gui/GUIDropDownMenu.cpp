@@ -36,7 +36,7 @@ void GUIDropDownMenu::setupMenu() {
 		//Go through each button added
 		for (unsigned int i = 0; i < buttons.size(); i++) {
 			//Assign the width to the maximum width
-			width = MathsUtils::max(width, buttons[i]->getWidth());
+			width = utils_maths::max(width, buttons[i]->getWidth());
 			//Add onto the height
 			height += buttons[i]->getHeight();
 

@@ -24,9 +24,9 @@
  * The MeshData class
  *****************************************************************************/
 
-MeshData::BoundingSphere MeshData::calculateBoundingSphere() {
+Sphere MeshData::calculateBoundingSphere() {
 	//The bounding sphere
-	BoundingSphere sphere;
+	Sphere sphere;
 	//Calculate the find the lengths between the mesh, and also find the largest one
 	float lengthX = maxX - minX;
 	float lengthY = maxY - minY;
@@ -68,12 +68,12 @@ void MeshData::addPosition(Vector3f position) {
 
 	//Check whether data for a bounding sphere should be calculated
 	if (numDimensions == 3) {
-		minX = MathsUtils::min(minX, position.getX());
-		maxX = MathsUtils::max(maxX, position.getX());
-		minY = MathsUtils::min(minY, position.getY());
-		maxY = MathsUtils::max(maxY, position.getY());
-		minZ = MathsUtils::min(minZ, position.getZ());
-		maxZ = MathsUtils::max(maxZ, position.getZ());
+		minX = utils_maths::min(minX, position.getX());
+		maxX = utils_maths::max(maxX, position.getX());
+		minY = utils_maths::min(minY, position.getY());
+		maxY = utils_maths::max(maxY, position.getY());
+		minZ = utils_maths::min(minZ, position.getZ());
+		maxZ = utils_maths::max(maxZ, position.getZ());
 	}
 
 	numPositions++;

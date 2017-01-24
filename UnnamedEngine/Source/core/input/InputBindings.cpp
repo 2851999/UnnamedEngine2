@@ -171,7 +171,7 @@ void InputBindingAxis::onControllerAxis(Controller* controller, int axis, float 
 	if (waitingForInput) {
 		//Ensure the value is other a certain threshold - prevents random noise from
 		//causing an assignment
-		if (MathsUtils::abs(value) >= 0.2f) {
+		if (utils_maths::abs(value) >= 0.2f) {
 			//Assign the controller
 			this->controller = controller;
 			controllerAxis = axis;
@@ -185,7 +185,7 @@ void InputBindingAxis::onControllerAxis(Controller* controller, int axis, float 
 	} else {
 		if (this->controller == controller && controllerAxis == axis) {
 			//Check whether the value should be assigned
-			if (MathsUtils::abs(value) > controllerAxisDeadZone) {
+			if (utils_maths::abs(value) > controllerAxisDeadZone) {
 				if (controllerAxisInverted)
 					this->value = -value;
 				else
@@ -265,9 +265,9 @@ void InputBindings::save(MLDocument& document) {
 
 		//Add the required attributes
 		buttonBinding.add(MLAttribute("name", elem.first));
-		buttonBinding.add(MLAttribute("keyboardKey", StrUtils::str(button->getKeyboardKey())));
-		buttonBinding.add(MLAttribute("mouseButton", StrUtils::str(button->getMouseButton())));
-		buttonBinding.add(MLAttribute("controllerButton", StrUtils::str(button->getControllerButton())));
+		buttonBinding.add(MLAttribute("keyboardKey", utils_string::str(button->getKeyboardKey())));
+		buttonBinding.add(MLAttribute("mouseButton", utils_string::str(button->getMouseButton())));
+		buttonBinding.add(MLAttribute("controllerButton", utils_string::str(button->getControllerButton())));
 
 		//Check whether a controller element is needed
 		if (button->hasController()) {
@@ -275,7 +275,7 @@ void InputBindings::save(MLDocument& document) {
 			MLElement controller("controller");
 
 			//Add the required attributes
-			controller.add(MLAttribute("index", StrUtils::str(button->getController()->getIndex())));
+			controller.add(MLAttribute("index", utils_string::str(button->getController()->getIndex())));
 			controller.add(MLAttribute("name", button->getController()->getName()));
 
 			//Add the controller element to the button binding
@@ -294,11 +294,11 @@ void InputBindings::save(MLDocument& document) {
 
 		//Add the required attributes
 		axisBinding.add(MLAttribute("name", elem.first));
-		axisBinding.add(MLAttribute("keyboardKeyPos", StrUtils::str(axis->getKeyboardKeyPos())));
-		axisBinding.add(MLAttribute("keyboardKeyNeg", StrUtils::str(axis->getKeyboardKeyNeg())));
-		axisBinding.add(MLAttribute("controllerAxis", StrUtils::str(axis->getControllerAxis())));
-		axisBinding.add(MLAttribute("controllerAxisInverted", StrUtils::str(axis->getControllerAxisInverted())));
-		axisBinding.add(MLAttribute("controllerAxisDeadZone", StrUtils::str(axis->getControllerAxisDeadZone())));
+		axisBinding.add(MLAttribute("keyboardKeyPos", utils_string::str(axis->getKeyboardKeyPos())));
+		axisBinding.add(MLAttribute("keyboardKeyNeg", utils_string::str(axis->getKeyboardKeyNeg())));
+		axisBinding.add(MLAttribute("controllerAxis", utils_string::str(axis->getControllerAxis())));
+		axisBinding.add(MLAttribute("controllerAxisInverted", utils_string::str(axis->getControllerAxisInverted())));
+		axisBinding.add(MLAttribute("controllerAxisDeadZone", utils_string::str(axis->getControllerAxisDeadZone())));
 
 		//Check whether a controller element is needed
 		if (axis->hasController()) {
@@ -306,7 +306,7 @@ void InputBindings::save(MLDocument& document) {
 			MLElement controller("controller");
 
 			//Add the required attributes
-			controller.add(MLAttribute("index", StrUtils::str(axis->getController()->getIndex())));
+			controller.add(MLAttribute("index", utils_string::str(axis->getController()->getIndex())));
 			controller.add(MLAttribute("name", axis->getController()->getName()));
 
 			//Add the controller element to the axis binding
@@ -358,7 +358,7 @@ void InputBindings::load(MLDocument& document, InputManager* inputManager) {
 							name = attrib.getData();
 					}
 					//Get the controller index
-					index = ControllerUtils::findController(index, name);
+					index = utils_controller::findController(index, name);
 					//Add the controller if found
 					if (index > -1 ) {
 						if (controllers.count(index) < 1) {
