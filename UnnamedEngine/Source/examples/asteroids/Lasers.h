@@ -98,6 +98,9 @@ public:
 	/* The method used to fire this set of lasers */
 	void fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f currentVelocity);
 
+	/* Method used to hide al of the lasers in the renderer */
+	void hideAll();
+
 	/* Returns whether the lasers can fire */
 	inline bool canFire() { return TimeUtils::getSeconds() - timeLastLaserFired > cooldown; }
 
