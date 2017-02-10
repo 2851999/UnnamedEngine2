@@ -26,16 +26,6 @@
 #include "render/Camera.h"
 #include "../utils/FPSUtils.h"
 
-namespace Engine {
-	/* Various engine values
-	 * Version     - Should change every development version
-	 * DateCreated - Should change every development version
-	 */
-	const std::string Version     = "V0.1.5";
-	const std::string DateCreated = "28/10/2016";
-	const std::string Build       = "Experimental";
-}
-
 /*****************************************************************************
  * The BaseEngine class provides basic engine functionality
  *****************************************************************************/

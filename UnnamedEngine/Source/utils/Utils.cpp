@@ -292,10 +292,6 @@ namespace SettingsUtils {
 		input.add(MLAttribute("repeatMouseEvents", StrUtils::str(settings.inputRepeatMouseEvents)));
 		root.add(input);
 
-		MLElement engine("engine");
-		engine.add(MLAttribute("splashScreen", StrUtils::str(settings.engineSplashScreen)));
-		root.add(engine);
-
 		MLElement debugging("debugging");
 		debugging.add(MLAttribute("showInformation", StrUtils::str(settings.debuggingShowInformation)));
 		root.add(debugging);
@@ -362,10 +358,6 @@ namespace SettingsUtils {
 						settings.inputRepeatKeyboardEvents = attrib.getDataAsBool();
 					else if (attrib.getName() == "repeatMouseEvents")
 						settings.inputRepeatMouseEvents = attrib.getDataAsBool();
-				} else if (child.getName() == "engine") {
-					//Check the attribute name
-					if (attrib.getName() == "splashScreen")
-						settings.engineSplashScreen = attrib.getDataAsBool();
 				} else if (child.getName() == "debugging") {
 					//Check the attribute name
 					if (attrib.getName() == "showInformation")

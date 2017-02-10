@@ -49,7 +49,6 @@ void AsteroidsGame::initialise() {
 	//Setup the settings
 	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
-	getSettings().debuggingShowInformation = false;
 
 	//Setup the high scores
 	highScores.setPath(resourceLoader.getPath() + "highscores.txt");

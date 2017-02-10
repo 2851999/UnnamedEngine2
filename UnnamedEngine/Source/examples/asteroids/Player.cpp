@@ -110,9 +110,10 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		if (buttonShoot->isPressed())
 			//FIRE THE LASERS!!!
 			fireLasers(camera->getFront());
+
+		//Update the lasers
+		Ship::update(currentDelta, closestAsteroids);
 	}
-	//Update the lasers
-	Ship::update(currentDelta, closestAsteroids);
 }
 
 void Player::render() {
@@ -121,6 +122,10 @@ void Player::render() {
 
 	//Render the lasers
 	Ship::render();
+}
+
+void Player::onDestroyed() {
+	getLasers()->hideAll();
 }
 
 /* Called when an asteroid has been destroyed by this ship's lasers */

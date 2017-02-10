@@ -70,6 +70,9 @@ public:
 	/* Method to use the player's view and render the lasers */
 	void render();
 
+	/* Called when the player is destroyed */
+	void onDestroyed();
+
 	/* Called when an asteroid has been destroyed by this ship's lasers */
 	void onAsteroidDestroyed(GameObject3D* asteroid) override;
 

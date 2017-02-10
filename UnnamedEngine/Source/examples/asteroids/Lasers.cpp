@@ -195,3 +195,7 @@ void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f
 			nextIndex = 0;
 	}
 }
+
+void Lasers::hideAll() {
+	renderer->hideAll();
+}

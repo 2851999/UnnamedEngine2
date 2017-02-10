@@ -87,9 +87,11 @@ bool Enemy::checkCollision(PhysicsObject3D* laser) {
 		if (distance < 2.0f) {
 			//Remove health
 			player->removeHealth(1);
-			if (! player->isAlive())
+			if (! player->isAlive()) {
 				//Create an explosion
 				getLasers()->explode(player->getPosition(), 1.0f);
+				player->onDestroyed();
+			}
 			return true;
 		}
 	}

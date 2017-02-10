@@ -52,7 +52,7 @@ void VBO<T>::setup() {
 		//The stride to use
 		GLint stride = 0;
 
-		//Go through all of their attributes
+		//Go through all of their attributes and add onto the stride
 		for (unsigned int i = 0; i < attributes.size(); i++)
 			stride += attributes[i].size;
 		stride *= sizeof(data[0]);
