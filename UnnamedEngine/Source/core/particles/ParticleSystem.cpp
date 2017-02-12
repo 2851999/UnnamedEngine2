@@ -18,11 +18,11 @@
 
 #include "ParticleSystem.h"
 
-#include <algorithm>
-
 #include "ParticleEmitter.h"
 #include "ParticleEffect.h"
 #include "../render/Renderer.h"
+
+#include "../../utils/Sorting.h"
 
 /*****************************************************************************
  * The ParticleSystem class
@@ -172,7 +172,8 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 		}
 	}
 	//Sort the particles
-	std::sort(&particles.front(), &particles.back());
+	Sorting::sort(particles);
+	//std::sort(&particles.front(), &particles.back());
 }
 
 void ParticleSystem::render() {

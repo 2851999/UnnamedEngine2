@@ -21,6 +21,7 @@
 #include <fstream>
 
 #include "../../utils/Logging.h"
+#include "../../utils/Sorting.h"
 
 /*****************************************************************************
  * The AsteroidsGame class
