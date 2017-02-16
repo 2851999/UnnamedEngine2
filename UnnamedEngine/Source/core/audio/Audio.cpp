@@ -47,14 +47,14 @@ AudioData* AudioLoader::loadWaveFile(std::string path) {
 	std::ifstream input;
 
 	//Structures to store the data from the file
-	Wave_RIFF	 waveRiff;
-	Wave_fmt	waveFmt;
-	Wave_data	 waveData;
+	Wave_RIFF waveRiff;
+	Wave_fmt  waveFmt;
+	Wave_data waveData;
 
 	//The audio data
 	AudioData* data = NULL;
 
-	//Open the file
+	//Open the file in the binary mode
 	input.open(path.c_str(), std::ios::binary);
 
 	//Read the RIFF data
@@ -116,7 +116,6 @@ AudioData* AudioLoader::loadWaveFile(std::string path) {
 			data->format = AL_FORMAT_STEREO16;
 	}
 
-	//Close the input file
 	input.close();
 
 	return data;
@@ -132,7 +131,7 @@ AudioData* AudioLoader::loadOggFile(std::string path) {
 	//Read the file and assign the size of it in bytes
 	data->size = stb_vorbis_decode_filename(path.c_str(), &numChannels, &data->frequency, &data->data) * sizeof(short);
 
-	//Assign the format
+	//Assign the correct format
 	if (numChannels == 1)
 		data->format = AL_FORMAT_MONO16;
 	else if (numChannels == 2)
@@ -149,12 +148,16 @@ AudioSource::AudioSource(AudioData* data, unsigned int type) {
 	//Ensure there is an audio context before attempting to setup the audio
 	if (AudioManager::hasContext()) {
 		this->type = type;
+		//Create the OpenAL objects
 		alGenSources(1, &sourceHandle);
 		alGenBuffers(1, &bufferHandle);
+
 		pitch = 1.0f;
+		//Assign the current volume setting
 		updateVolume();
 		loop = false;
 
+		//Pass the audio data to OpenAL
 		alBufferData(bufferHandle, data->format, (void*) data->data, data->size, data->frequency);
 		alSourcei(sourceHandle, AL_BUFFER, bufferHandle);
 
@@ -163,6 +166,7 @@ AudioSource::AudioSource(AudioData* data, unsigned int type) {
 }
 
 void AudioSource::updateVolume() {
+	//Check the type of source this is to assign the correct volume (default is the maximum - 1.0f)
 	if (type == TYPE_SOUND_EFFECT)
 		gain = ((float) Window::getCurrentInstance()->getSettings().audioSoundEffectVolume) / 100.0f;
 	else if (type == TYPE_MUSIC)
@@ -178,7 +182,7 @@ void AudioSource::update() {
 		Vector3f sourcePosition = getPosition();
 		//Vector3f sourceRotation = this.getRotation();
 		Vector3f sourceVelocity = getVelocity();
-		//Update all of the source values
+		//Update all of the OpenAL source values
 		alSource3f(sourceHandle, AL_POSITION, sourcePosition.getX(), sourcePosition.getY(), sourcePosition.getZ());
 		alSource3f(sourceHandle, AL_VELOCITY, sourceVelocity.getX(), sourceVelocity.getY(), sourceVelocity.getZ());
 		alSourcef(sourceHandle, AL_PITCH, pitch);
@@ -238,11 +242,11 @@ bool AudioSource::isPaused() {
 
 void AudioListener::update() {
 	if (AudioManager::hasContext()) {
-		//Get the needed values
 		Vector3f listenerPosition = getPosition();
 		Vector3f listenerRotation = getRotation();
 		Vector3f listenerVelocity = getVelocity();
-		float xDirection = (float) sin(MathsUtils::toRadians(listenerRotation.getY()));
+		//Calculate the values needed by OpenAL to corretly orientate te listener
+		float xDirection = (float)  sin(MathsUtils::toRadians(listenerRotation.getY()));
 		float zDirection = (float) -cos(MathsUtils::toRadians(listenerRotation.getY()));
 		//Setup OpenAL
 		alListener3f(AL_POSITION, listenerPosition.getX(), listenerPosition.getY(), listenerPosition.getZ());
@@ -270,6 +274,7 @@ void AudioManager::remove(AudioSource* source) {
 
 
 void AudioManager::initialise() {
+	//Setup OpenAL
 	device = alcOpenDevice(NULL);
 	context = alcCreateContext(device, NULL);
 	alcMakeContextCurrent(context);

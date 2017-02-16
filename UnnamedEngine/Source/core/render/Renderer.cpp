@@ -26,14 +26,15 @@
  * The Renderer class
  *****************************************************************************/
 
+/* Define all the static values */
+
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
 std::map<std::string, RenderShader*> Renderer::renderShaders;
 Texture* Renderer::blank;
-
 MeshRenderData* Renderer::screenTextureMesh;
-
 unsigned int Renderer::boundTexturesOldSize;
+
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -61,6 +62,7 @@ GLuint Renderer::bindTexture(Texture* texture) {
 		//It has so return the correct active texture
 		return loc;
 	} else {
+		//Bind the texture in the next available texture unit
 		glActiveTexture(GL_TEXTURE0 + boundTextures.size());
 		texture->bind();
 		boundTextures.push_back(texture);
@@ -69,6 +71,7 @@ GLuint Renderer::bindTexture(Texture* texture) {
 }
 
 void Renderer::unbindTexture() {
+	//Unbind the texture in the last used texture unit
 	glActiveTexture(GL_TEXTURE0 + boundTextures.size() - 1);
 	boundTextures[boundTextures.size() - 1]->unbind();
 	boundTextures.pop_back();
@@ -137,26 +140,21 @@ void Renderer::render(std::vector<Mesh*>& meshes, Matrix4f& modelMatrix, RenderS
 		//Get the shader for rendering
 		Shader* shader = renderShader->getShader();
 
-//		//Get the map of uniforms within the Shader
-//		std::map<std::string, GLint>& uniforms = shader->getUniforms();
-//
-//		//Go through each uniform in the map
-//		for (auto& iterator : uniforms) {
-//			//Check the uniform name
-//			if (iterator.first == "MVPMatrix")
-//				shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
-//		}
+		//Assign the model view projection matrix in the shader (has to be calculated for each model/camera)
 		shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
 
 		for (unsigned int i = 0; i < meshes.size(); i++) {
 			if (meshes[i]->getRenderData()) {
-
+				//Keep any currently bound textures
 				saveTextures();
 
+				//Assign all material values in the shader
 				setMaterialUniforms(renderShader->getShader(), renderShader->getName(), meshes[i]->getMaterial());
 
+				//Render the current mesh
 				meshes[i]->getRenderData()->render();
 
+				//Release all of the new textures bound since the saveTextures() call
 				releaseNewTextures();
 			}
 		}
@@ -168,8 +166,11 @@ void Renderer::destroy() {
 }
 
 using namespace StrUtils;
+
 void Renderer::addRenderShader(std::string id, Shader* shader) {
 	shader->use();
+	//Add all of the appropriate uniforms for lighting shaders
+	//(avoids having to write Light_Type[0, 1, 2, ...] etc in the shader)
 	if (id == "Lighting") {
 		shader->addUniform("MVPMatrix", "mvpMatrix");
 		shader->addUniform("Material_AmbientColour", "material.ambientColour");
@@ -226,8 +227,9 @@ void Renderer::addRenderShader(RenderShader* renderShader) {
 }
 
 RenderShader* Renderer::getRenderShader(std::string id) {
+	//Ensure there is a render shader
 	if (renderShaders.count(id) > 0)
-		return renderShaders.at(id);
+		return renderShaders[id];
 	else {
 		Logger::log("The RenderShader with the id '" + id + "' could not be found", "Renderer", LogType::Error);
 		return NULL;

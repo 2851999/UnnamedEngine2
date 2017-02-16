@@ -47,6 +47,7 @@ GameObject::~GameObject() {
 
 void GameObject::render() {
 	if (hasMesh()) {
+		//Render the mesh's associated with this object using the appropriate shader
 		renderShader->getShader()->use();
 		Renderer::render(meshes, getModelMatrix(), renderShader);
 	}
@@ -87,6 +88,10 @@ void GameObject2D::update() {
 
 		modelMatrix.setIdentity();
 
+		//Apply the transform to the model matrix
+
+		//Offset is used to displace the transform to ensure rotations
+		//are about the centre of the object
 		Vector2f offset = Vector2f(getWidth() / 2, getHeight() / 2);
 
 		modelMatrix.translate(offset + getPosition());

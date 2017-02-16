@@ -24,6 +24,8 @@
 
 void GUIButton::onChangeState() {
 	unsigned int maxRenderIndex = getMaxRenderIndex();
+	//Assign the appropriate index for the colour/texture
+	//that this button should display
 	if (mouseClicked) {
 		if (maxRenderIndex == 1)
 			renderIndex = 0;

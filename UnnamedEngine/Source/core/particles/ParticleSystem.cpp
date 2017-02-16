@@ -178,6 +178,7 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 
 void ParticleSystem::render() {
 	if (particleCount > 0) {
+		//Update the buffer streams for OpenGL based in the number of currently active particles
 		vboPositionSizeData->updateStream(particleCount * sizeof(GLfloat) * 4);
 		vboColours->updateStream(particleCount * sizeof(GLfloat) * 4);
 		vboTextureData->updateStream(particleCount * sizeof(GLfloat) * 4);

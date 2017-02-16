@@ -173,6 +173,8 @@ void GUIDropDownMenu::onMousePressed(int button) {
 	if (active && menuOpen) {
 		InputManager::CursorData& data = Window::getCurrentInstance()->getInputManager()->getCursorData();
 
+		//Check whether the mouse was clicked outside of the menu button and close this menu if it is
+		//(the menu should close if one of the buttons within this drop down menu is clicked)
 		if (! contains(data.lastX, data.lastY)) {
 			menuOpen = false;
 			setupMenu();

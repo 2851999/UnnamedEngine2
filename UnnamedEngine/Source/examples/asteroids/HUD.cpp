@@ -86,15 +86,12 @@ void HUD::render() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//Add the camera
 	Renderer::addCamera(game->getCamera2D());
 
-	//Render the panel
+	//Render
 	GUIPanel::render();
-
-	//Render the cross hair
 	crossHair->render();
 
-	//Remove the camera
+	//Restore the previous camera to the current one
 	Renderer::removeCamera();
 }

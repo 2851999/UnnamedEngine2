@@ -31,7 +31,7 @@ UpgradesMenu::UpgradesMenu(AsteroidsGame* game, AsteroidsMainGame* mainGame) : g
 	float windowWidth = game->getSettings().windowWidth;
 	float windowHeight = game->getSettings().windowHeight;
 
-	//Setup the background
+	//Setup the GUI
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
 	background->getMaterial()->diffuseTexture = backgroundTexture;
@@ -53,7 +53,6 @@ UpgradesMenu::UpgradesMenu(AsteroidsGame* game, AsteroidsMainGame* mainGame) : g
 	//Get the heading font
 	Font* headingFont = game->getResources().getFontHeading();
 
-	//Create the label's
 	GUILabel* labelTitle = new GUILabel("Upgrades", titleFont);
 	labelTitle->setPosition(windowWidth / 2 - labelTitle->getWidth() / 2, 40.0f);
 
@@ -75,14 +74,20 @@ UpgradesMenu::~UpgradesMenu() {
 }
 
 void UpgradesMenu::show() {
+	//As the cursor was locked to the window, it is common practise to centre it
+	//after enabling it again to use this upgrades menu as it may be off centre
 	game->getWindow()->enableCursor();
 	game->getWindow()->centreCursor();
+	//Update the menu based on the players current state in the game
 	updateMenu();
+
 	GUIPanel::show();
 }
 
 void UpgradesMenu::hide() {
+	//Disable the cursor again as the game is about to continue
 	game->getWindow()->disableCursor();
+
 	GUIPanel::hide();
 }
 
@@ -92,16 +97,12 @@ void UpgradesMenu::render() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//Add the camera
 	Renderer::addCamera(game->getCamera2D());
 
-	//Render the background
+	//Render
 	background->render();
-
-	//Render the panel
 	GUIPanel::render();
 
-	//Remove the camera
 	Renderer::removeCamera();
 }
 
@@ -138,10 +139,15 @@ void UpgradesMenu::updateMenu() {
 }
 
 void UpgradesMenu::onComponentClicked(GUIComponent* component) {
+	//Ensure the upgrades menu is visible
 	if (mainGame->showingUpgrades()) {
+		//Check what button was clicked and take the appropriate action
 		if (component == buttonBack)
 			mainGame->hideUpgrades();
 		else if (component == buttonUpgradeMovementSpeed) {
+			//In this case, remove points and increase the players maximum speed by 2
+			//this cannot happen indefinitely as updateMenu() disables the button when
+			//maximum value has been reached
 			mainGame->getPlayer()->removePoints(2000);
 			mainGame->getPlayer()->setMaximumSpeed(mainGame->getPlayer()->getMaximumSpeed() + 2);
 			updateMenu();

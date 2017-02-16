@@ -116,7 +116,6 @@ void GUIPanelGroup::update() {
 }
 
 void GUIPanelGroup::render() {
-	//Check whether there is a current panel
 	if (current)
 		current->render();
 }

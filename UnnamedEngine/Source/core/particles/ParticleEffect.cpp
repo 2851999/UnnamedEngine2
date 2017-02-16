@@ -23,5 +23,6 @@
  *****************************************************************************/
 
 void ParticleEffectColourChange::update(Particle& particle, ParticleEmitter* emitter) {
+	//Change the colour based on the current life of the particle (linear interpolation)
 	particle.colour = static_cast<Colour>((colourEnd - colourStart) * ((emitter->particleLifeSpan - particle.life) / emitter->particleLifeSpan) + colourStart);
 }

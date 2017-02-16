@@ -34,7 +34,7 @@ private:
 	std::vector<std::string> names;
 	std::vector<unsigned int> scores;
 	/* The maximum number of high scores stored */
-	unsigned int maxHighScores;
+	static const unsigned int MAX_HIGH_SCORES = 5;
 public:
 	/* The constructor */
 	HighScores();

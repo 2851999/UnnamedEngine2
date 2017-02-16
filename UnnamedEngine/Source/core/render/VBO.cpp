@@ -23,6 +23,7 @@
  *****************************************************************************/
 template <typename T>
 void VBO<T>::addAttribute(GLint location, GLint size, GLuint divisor) {
+	//Create and assign the attribute (with default values)
 	Attribute attrib;
 	attrib.location = location;
 	attrib.size     = size;

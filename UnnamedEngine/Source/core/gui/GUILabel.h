@@ -40,7 +40,8 @@ public:
 	/* Override the setText() method to assign the label size as well */
 	inline void setText(std::string text) {
 		GUIComponent::setText(text);
-		//Assign the size
+		//Assign the size of this label based off of the size of the new text
+		//when it is rendered
 		setSize(getFont()->getWidth(text), getFont()->getHeight(text));
 	}
 };

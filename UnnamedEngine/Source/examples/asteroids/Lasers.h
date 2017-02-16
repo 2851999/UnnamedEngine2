@@ -77,6 +77,10 @@ private:
 	/* The last time a laser was fired (in seconds) */
 	float timeLastLaserFired;
 public:
+	/* The speed of lasers when they are shot (relative to
+	 * the velocity of the place they are fired from */
+	static const float LASER_SPEED;
+
 	/* The constructor */
 	Lasers(AsteroidsGame* game, Ship* ship);
 

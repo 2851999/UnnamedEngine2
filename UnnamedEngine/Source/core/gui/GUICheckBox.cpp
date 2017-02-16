@@ -55,5 +55,6 @@ void GUICheckBox::onChangeState() {
 }
 
 void GUICheckBox::onComponentRender() {
+	//Render the text of this checkbox to the left of it
 	renderText(text, Vector2f(-getFont()->getWidth(text) * 1.1f, getHeight() / 2 + getFont()->getHeight(text) / 2));
 }

@@ -21,7 +21,6 @@
 #include <fstream>
 
 #include "../../utils/Logging.h"
-#include "../../utils/Sorting.h"
 
 /*****************************************************************************
  * The AsteroidsGame class
@@ -155,8 +154,10 @@ void AsteroidsGame::changeState(GameState newState) {
 		else if (currentState == GAME_PLAYING && newState != GAME_PAUSED) {
 			mainGame->stop();
 			soundSystem->stopAll();
-		} else if (currentState == GAME_PAUSED)
+		} else if (currentState == GAME_PAUSED) {
 			pauseMenu->hide();
+			mainGame->resume();
+		}
 
 		//Check the new state
 		if (newState == MAIN_MENU) {
@@ -168,6 +169,7 @@ void AsteroidsGame::changeState(GameState newState) {
 		} else if (newState == GAME_PLAYING && currentState == GAME_PAUSED)
 			soundSystem->resumeAll();
 		else if (newState == GAME_PAUSED) {
+			mainGame->pause();
 			pauseMenu->show();
 			soundSystem->pauseAll();
 		}

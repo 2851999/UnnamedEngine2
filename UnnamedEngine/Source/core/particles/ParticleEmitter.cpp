@@ -31,7 +31,8 @@ void ParticleEmitter::reset() {
 void ParticleEmitter::update(float delta) {
 	//Check whether this emitter is active
 	if (active && system) {
-		//Cumulate the delta
+		//Cumulate the delta to ensure particles are still emitted even if delta frequently comes
+		//close to 0
 		cumulativeDelta += delta;
 
 		//Calculate the number of particles to spawn on this update

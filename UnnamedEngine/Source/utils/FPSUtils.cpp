@@ -92,7 +92,6 @@ void FPSCalculator::reset() {
  *****************************************************************************/
 
 void FPSLimiter::setMaxFPS(unsigned int maxFPS) {
-	//Assign the maximum FPS
 	this->maxFPS = maxFPS;
 	//Prevent a divide by 0
 	if (maxFPS != 0)

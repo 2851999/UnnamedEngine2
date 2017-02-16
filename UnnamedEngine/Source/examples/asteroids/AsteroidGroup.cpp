@@ -47,10 +47,13 @@ void AsteroidGroup::setup() {
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		//Setup the current asteroid
 		objects[i]->setPosition(position + Vector3f(RandomUtils::randomFloat(-20, 20), RandomUtils::randomFloat(-20, 20), RandomUtils::randomFloat(-20, 20)));
+
 		float s = RandomUtils::randomFloat(0.2f, 1.0f);
+
 		objects[i]->setScale(s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f));
 		objects[i]->setRotation(RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360));
 		objects[i]->setAngularVelocity(RandomUtils::randomFloat(0.0f, 20.0f), RandomUtils::randomFloat(0.0f, 20.0f), RandomUtils::randomFloat(0.0f, 20.0f));
+		//Assign the mass based on its scale
 		objects[i]->setMass(100.0f * s);
 		objects[i]->setRestitution(1.0f);
 	}

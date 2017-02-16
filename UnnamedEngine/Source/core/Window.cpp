@@ -41,6 +41,7 @@ bool Window::create() {
 	//Setup the window
 	glfwDefaultWindowHints();
 
+	//Assign the values needed before the creation of the window
 	setResizable(settings.windowResizable);
 	setDecorated(settings.windowDecorated);
 	setSamples(settings.videoSamples);
@@ -50,9 +51,11 @@ bool Window::create() {
 	Vector2i targetRes = settings.videoResolution;
 	GLFWmonitor* monitor = NULL;
 
+	//If the window should be fullscreen, the monitor instance needs to be assigned
 	if (settings.windowFullscreen) {
 		monitor = glfwGetPrimaryMonitor();
 
+		//Check for borderless fullscreen and apply it as required
 		if (settings.windowBorderless) {
 			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
@@ -65,6 +68,7 @@ bool Window::create() {
 
 	instance = glfwCreateWindow(targetRes.getX(), targetRes.getY(), settings.windowTitle.c_str(), monitor, NULL);
 
+	//Stop everything if the window creation was unsuccessful
 	if (! instance) {
 		Logger::log("Failed to create the window", "Window", LogType::Error);
 		glfwTerminate();
@@ -73,9 +77,11 @@ bool Window::create() {
 
 	makeCurrent();
 
-	//Set the VSync setting
+	//Set the VSync setting (Has to be assigned after the creation of the windwo
 	setVSync(settings.videoVSync);
 
+	//Get the actual size of the renderable part of the window (in case the desired size was not
+	//supported by the monitor)
 	int width, height;
 	glfwGetFramebufferSize(instance, &width, &height);
 	settings.windowWidth = width;
@@ -163,7 +169,7 @@ Window* Window::getCurrentInstance() {
 	return currentInstance;
 }
 
-/* Various callbacks */
+/* Various callbacks from GLFW */
 void Window::windowKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	currentInstance->getInputManager()->keyCallback(key, scancode, action, mods);
 }

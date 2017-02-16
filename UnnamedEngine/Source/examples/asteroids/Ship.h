@@ -58,6 +58,10 @@ public:
 	/* Method called to reset this ship */
 	virtual void reset();
 
+	/* Methods to pause and resume the shield timer for this ship */
+	inline void pause() { shieldTimer.pause(); }
+	inline void resume() { shieldTimer.resume(); }
+
 	/* Update and render methods */
 	virtual void update(float deltaSeconds, AsteroidGroup& closestGroup);
 	void render();

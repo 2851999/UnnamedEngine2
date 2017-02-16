@@ -46,28 +46,20 @@ void Enemy::reset() {
 
 void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	if (isAlive()) {
-		//AI stuff
-//		Vector3f directionToPlayer = (player->getPosition() - getPosition()).normalise();
-//
-//		thrust(directionToPlayer);
-//
-//		float laserSpeed = 20.0f;
-//		float currentDistance = (player->getPosition() - getPosition()).length();
-//		float timeToReach = currentDistance / laserSpeed;
-//
-//		Vector3f newPosition = player->getPosition() + ((player->getVelocity() - getVelocity()) * timeToReach);
-//
-//		fireLasers((newPosition - getPosition()).normalise());
-
-		//Since rotation is a bit hard without quaternions at the moment, enemies are SPHERES OF DEATH
+		//Since rotation is a bit too hard without quaternions at the moment, enemies are SPHERES OF DEATH
 
 		Vector3f relPos = player->getPosition() - getPosition();
+		//Go torwards the player
 		thrust(relPos.normalise());
+
+		//Fire the lasers if their cooldown period has ended
 		if (getLasers()->canFire()) {
-			float laserSpeed = 20.0f + getVelocity().length();
+			//Calculate the direction to shoot to intersect the player's path (assuming they travel at a constant velocity)
+			float laserSpeed = Lasers::LASER_SPEED + getVelocity().length();
 			float currentDistance = relPos.length();
 			float timeToReach = currentDistance / laserSpeed;
 			Vector3f direction = ((player->getPosition() + player->getVelocity() * timeToReach) - (getPosition() + getVelocity() * timeToReach)).normalise();
+
 			fireLasers(direction);
 		}
 	}
@@ -76,7 +68,6 @@ void Enemy::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 	Ship::update(deltaSeconds, closestGroup);
 }
 
-/* Method used to check whether a laser has collided with anything */
 bool Enemy::checkCollision(PhysicsObject3D* laser) {
 	//Check the player
 	if (player->isAlive()) {
@@ -84,7 +75,7 @@ bool Enemy::checkCollision(PhysicsObject3D* laser) {
 		float distance = (laser->getPosition() - player->getPosition()).length();
 
 		//Check for an intersection with the player
-		if (distance < 2.0f) {
+		if (distance < 2.0f) { //For now the player and enemy is assumed to be a sphere with radius 1.0f
 			//Remove health
 			player->removeHealth(1);
 			if (! player->isAlive()) {

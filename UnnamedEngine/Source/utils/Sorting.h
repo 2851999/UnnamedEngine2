@@ -64,7 +64,7 @@ namespace Sorting {
 		}
 	}
 
-	/* Method used to apply quicksort to a vector */
+	/* Method used to apply quicksort to an std::vector */
 	template<typename T>
 	void sort(std::vector<T>& data) {
 		Sorting::sort(data, 0, static_cast<unsigned int>(data.size()));

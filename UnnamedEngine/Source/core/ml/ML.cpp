@@ -157,8 +157,7 @@ void MLParser::parse(std::string line) {
 					//Add the element onto the currently opened elements
 					elements.push_back(element);
 				} else {
-					//An old element has been closed
-					//Get it's name
+					//An old element has been closed, get it's name
 					std::string name = tag.substr(1);
 					//Remove the last element, but ensure it is the intended one
 					//otherwise print a warning message
@@ -191,14 +190,12 @@ MLElement MLParser::parseElement(std::string line) {
 	MLElement element;
 	//Locate a space (if there are any attributes this is the end of the element name)
 	std::size_t nameEndLoc = line.find(" ");
-	//Assign the name
 	element.setName(line.substr(0, nameEndLoc));
 	//Now check for any attributes in the element declaration
 	if (nameEndLoc != std::string::npos) {
 		//Get a string containing all of the attribute declarations
 		std::string attributes = line.substr(nameEndLoc + 1);
 
-		//Go through each attribute
 		while (attributes.length() > 0) {
 			//Find the end of the current attribute
 			std::size_t endOfAttrib = attributes.find("\" ");

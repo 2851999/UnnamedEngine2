@@ -135,7 +135,7 @@ void Player::onAsteroidDestroyed(GameObject3D* asteroid) {
 
 /* Method used to check whether a laser has collided with anything */
 bool Player::checkCollision(PhysicsObject3D* laser) {
-	//Go through the enemies
+	//Check for a collision between a laser and all of the enemies
 	for (unsigned int i = 0; i < enemies.size(); i++) {
 		if (enemies[i]->isAlive()) {
 			//Get the distance between the current laser object and the current enemy object
@@ -160,13 +160,14 @@ bool Player::checkCollision(PhysicsObject3D* laser) {
 
 void Player::onMouseMoved(double x, double y, double dx, double dy) {
 	if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING && ! game->getMainGame()->showingUpgrades()) {
-		//Orientate the camera
+		//Orientate the camera based on the mouse movement
 		getRelRotation() += Vector3f(-dy, dx, 0) * 10.0f * currentDelta;
 		getRelRotation().setX(MathsUtils::clamp(camera->getRotation().getX(), -89.0f, 89.0f));
 	}
 }
 
 void Player::removePoints(unsigned int points) {
+	//Remove points as long as there are enough (to prevent it from going negative - which would be undefined for an unsigned integer)
 	if (points > score)
 		score = 0;
 	else

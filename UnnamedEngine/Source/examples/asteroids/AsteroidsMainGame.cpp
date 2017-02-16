@@ -32,14 +32,12 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	//Setup the HUD
 	hud = new HUD(game, player);
 
-	//Setup the game over menu
+	//Setup the menu's
 	gameOverMenu = new GameOverMenu(game, player);
 
-	//Setup the upgrades menu
 	upgradesMenu = new UpgradesMenu(game, this);
 	showUpgradesMenu = false;
 
-	//Get the resource loader
 	ResourceLoader& loader = game->getResourceLoader();
 
 	//Setup the asteroid renderer
@@ -176,13 +174,28 @@ AsteroidGroup& AsteroidsMainGame::findClosestAsteroids(const Vector3f& position)
 	return asteroidGroups[closestIndex];
 }
 
+void AsteroidsMainGame::pause() {
+	player->pause();
+	for (unsigned int i = 0; i < enemies.size(); i++) {
+		if (enemies[i]->isAlive() && enemiesRenderer->isVisible(i))
+			enemies[i]->pause();
+	}
+}
+
+void AsteroidsMainGame::resume() {
+	player->resume();
+	for (unsigned int i = 0; i < enemies.size(); i++) {
+		if (enemies[i]->isAlive() && enemiesRenderer->isVisible(i))
+			enemies[i]->resume();
+	}
+}
+
 void AsteroidsMainGame::update() {
 	if (showUpgradesMenu)
 		upgradesMenu->update();
 	else {
-		//Get the closest asteroids to the player
 		AsteroidGroup& playerClosestAsteroids = findClosestAsteroids(player->getCamera()->getPosition());
-		//Update the player
+		//Update the player with the closest asteroids to them
 		player->update(game->getDeltaSeconds(), playerClosestAsteroids);
 
 		//Update the closest asteroids to the player
@@ -205,6 +218,7 @@ void AsteroidsMainGame::update() {
 		//Update the enemies renderer
 		enemiesRenderer->updateAll();
 
+		//Show the game over menu if needed
 		if (! player->isAlive()) {
 			if (! gameOverMenu->isVisible())
 				gameOverMenu->show();
@@ -212,7 +226,6 @@ void AsteroidsMainGame::update() {
 		}
 	}
 
-	//Update the HUD
 	hud->update();
 }
 
@@ -241,29 +254,26 @@ void AsteroidsMainGame::render() {
 //	glEnable(GL_BLEND);
 //	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	//Setup alpha transparency
 	glEnable(GL_MULTISAMPLE_ARB);
 	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
 
-	//Render the player
+	//Render the player, asteroids and enemies
 	player->render();
-
-	//Render the asteroids
 	asteroidRenderer->render();
-
-	//Render the enemies
 	enemiesRenderer->render();
 	for (unsigned int i = 0; i < enemies.size(); i++)
 			enemies[i]->render();
 
-	//Render the HUD
 	hud->render();
 
+	//Render the menu's that are visible
 	if (! player->isAlive()) {
 		gameOverMenu->render();
+	} else {
+		if (showUpgradesMenu)
+			upgradesMenu->render();
 	}
-
-	if (showUpgradesMenu)
-		upgradesMenu->render();
 }
 
 void AsteroidsMainGame::showUpgrades() {
@@ -277,7 +287,9 @@ void AsteroidsMainGame::hideUpgrades() {
 }
 
 void AsteroidsMainGame::onButtonReleased(InputBindingButton* button) {
+	//Ensure the game is still playing
 	if (player->getHealth() > 0) {
+		//Change the state as required for the pause menu/upgrades menu
 		if (button == pauseButton && ! showUpgradesMenu) {
 			if (game->getCurrentState() == AsteroidsGame::GAME_PLAYING)
 				game->changeState(AsteroidsGame::GAME_PAUSED);

@@ -30,6 +30,7 @@ GameRenderer::GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, 
 	//Setup the render data
 	renderData = new RenderData(GL_TRIANGLES, meshData->getNumIndices());
 
+	//Setup the VBO's depending on the data needed
 	vboVerticesData = new VBO<GLfloat>(GL_ARRAY_BUFFER, meshData->getOthers().size() * sizeof(meshData->getOthers()[0]), meshData->getOthers(), GL_STATIC_DRAW, true);
 	vboVerticesData->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
 	if (useTextureCoords)
@@ -46,23 +47,25 @@ GameRenderer::GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, 
 	vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, meshData->getNumIndices() * sizeof(meshData->getIndices()[0]), meshData->getIndices(), GL_STATIC_DRAW);
 	renderData->setIndicesVBO(vboIndices);
 
-
+	//Go through all of the objects and add their initial matrices and normal matrices
 	for (unsigned int i = 0; i < numObjects; i++) {
 		matricesData.push_back(Matrix4f().initIdentity());
-		normalMatricesData.push_back(Matrix3f().initIdentity());
 
+		//Do the same for the 'raw' data that is passed directly to OpenGL
 		for (unsigned int x = 0; x < 4; x++) {
-			for (unsigned int y = 0; y < 4; y++) {
+			for (unsigned int y = 0; y < 4; y++)
 				matricesDataRaw.push_back(matricesData[i].get(x, y));
+		}
+
+		if (useLighting) {
+			normalMatricesData.push_back(Matrix3f().initIdentity());
+			for (unsigned int x = 0; x < 3; x++) {
+				for (unsigned int y = 0; y < 3; y++)
+					normalMatricesDataRaw.push_back(normalMatricesData[i].get(x, y));
 			}
 		}
 
-		for (unsigned int x = 0; x < 3; x++) {
-			for (unsigned int y = 0; y < 3; y++) {
-				normalMatricesDataRaw.push_back(0);
-			}
-		}
-
+		//And then the values that determine whether each instance of the object is visible or not
 		visibleData.push_back(1);
 	}
 
@@ -115,13 +118,16 @@ void GameRenderer::hide(unsigned int index) {
 
 void GameRenderer::update(unsigned int startIndex, unsigned int endIndex) {
 	for (unsigned int i = startIndex; i < endIndex; i++) {
+		//Assign the model matrix for the current object
 		matricesData[i].initIdentity();
 		matricesData[i].translate(objects[i]->getPosition());
 		matricesData[i].rotate(objects[i]->getRotation());
 		matricesData[i].scale(objects[i]->getScale());
 
+		//The current index within the raw data
 		int pos = i * 16;
 
+		//Assign the matrices data
 		for (unsigned int x = 0; x < 4; x++) {
 			for (unsigned int y = 0; y < 4; y++) {
 				matricesDataRaw[pos] = matricesData[i].get(y, x);
@@ -129,6 +135,7 @@ void GameRenderer::update(unsigned int startIndex, unsigned int endIndex) {
 			}
 		}
 
+		//Assign the normal matrices data (if needed)
 		if (useLighting) {
 			normalMatricesData[i] = matricesData[i].to3x3().inverse().transpose();
 			pos = i * 9;
@@ -140,13 +147,14 @@ void GameRenderer::update(unsigned int startIndex, unsigned int endIndex) {
 			}
 		}
 	}
+	//Update the matrix's VBO's
 	vboMatricesData->updateStream(numObjects * 16 * sizeof(GLfloat));
 	if (useLighting)
 		vboNormalMatricesData->updateStream(numObjects * 9 * sizeof(GLfloat));
 }
 
 void GameRenderer::render() {
-	//Use the shader
+	//Use the shader, and assign the uniforms required while binding the needed textures
 	shader->use();
 	Renderer::saveTextures();
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
@@ -160,25 +168,29 @@ void GameRenderer::render() {
 		Renderer::setMaterialUniforms(shader, "Material", mesh->getMaterial());
 	}
 
+	//Enable back-face culling to stop the backs of polygons being rendered - increases performance
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
+
 	renderData->render();
+
 	glDisable(GL_CULL_FACE);
 
+	//Clean up the textures, and stop using the shader (stops any issues with forgetting
+	//culling is enabled when rendering 2D objects)
 	Renderer::releaseNewTextures();
 	shader->stopUsing();
 }
 
 void GameRenderer::showAll() {
-	//Go through all of the visible data
+	//Assign and update the visible data VBO
 	for (unsigned int i = 0; i < visibleData.size(); i++)
 		visibleData[i] = 1.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
 
 void GameRenderer::hideAll() {
-	//Go through all of the visible data
 	for (unsigned int i = 0; i < visibleData.size(); i++)
 		visibleData[i] = 0.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));

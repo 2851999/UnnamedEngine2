@@ -125,11 +125,10 @@ void GameOverMenu::render() {
 void GameOverMenu::onComponentClicked(GUIComponent* component) {
 	//Check whether any buttons were clicked
 	if (component == buttonExit) {
-		//Check whether a highscore should be added
+		//Check whether a high score should be added
 		if (nameTextBox->isActive() && nameTextBox->getText().length() > 0) {
-			//Add the score
+			//Add the score and save them
 			game->getHighScores().add(nameTextBox->getText(), player->getScore());
-			//Save the high scores
 			game->getHighScores().save();
 		}
 		//Go to the main menu

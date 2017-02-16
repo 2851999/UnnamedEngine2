@@ -396,7 +396,6 @@ MainMenuSettingsControls::MainMenuSettingsControls(AsteroidsGame* game, GUIPanel
 void MainMenuSettingsControls::show() {
 	GUIPanel::show();
 
-	//Update the GUI
 	updateGUI();
 }
 
@@ -500,15 +499,12 @@ void AsteroidsMainMenu::show() {
 }
 
 void AsteroidsMainMenu::hide() {
-	//Remove the camera
 	Renderer::removeCamera();
 
-	//Hide the panel group
 	panelGroup->hideCurrent();
 }
 
 void AsteroidsMainMenu::update() {
-	//Update the panel group
 	panelGroup->update();
 }
 
@@ -518,9 +514,7 @@ void AsteroidsMainMenu::render() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//Render the background
+	//Render the background and GUI
 	background->render();
-
-	//Render the panel group
 	panelGroup->render();
 }

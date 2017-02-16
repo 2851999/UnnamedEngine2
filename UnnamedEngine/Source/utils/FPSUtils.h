@@ -26,10 +26,10 @@
 class FPSCalculator {
 private:
 	/* Time data, measured in milliseconds */
-	long lastFrame = 0;
-	long currentDelta = 0;
+	long  lastFrame = 0;
+	long  currentDelta = 0; //(Delta is the time between two frames)
 	float currentDeltaSeconds = 0;
-	long lastFPSCountUpdate = 0;
+	long  lastFPSCountUpdate = 0;
 	/* The current FPS count used in PER_SECOND */
 	unsigned int fpsCount = 0;
 	bool started = false;

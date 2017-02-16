@@ -35,9 +35,4 @@ const Colour Colour::BLUE       = Colour(0.0f, 0.0f, 1.0f, 1.0f);
 const Colour Colour::LIGHT_BLUE = Colour(0.0f, 1.0f, 1.0f, 1.0f);
 const Colour Colour::WHITE      = Colour(1.0f, 1.0f, 1.0f, 1.0f);
 
-//const Colour Colour::ARRAY_RGB[]     = { Colour::RED, Colour::GREEN, Colour::BLUE    };
-//const Colour Colour::ARRAY_GREY[]    = { Colour::GREY, Colour::LIGHT_GREY            };
-//const Colour Colour::ARRAY_BLUE[]    = { Colour::BLUE, Colour::LIGHT_BLUE            };
-//const Colour Colour::ARRAY_SUNSET[]  = { Colour::RED, Colour::ORANGE, Colour::YELLOW };
-
 

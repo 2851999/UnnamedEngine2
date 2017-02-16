@@ -289,7 +289,7 @@ float Font::getHeight(std::string text) {
 		} else {
 			//Get the character data for the current character
 			GlyphInfo info = glyphs[((int) text.at(i)) - ASCII_START];
-			//Assign the height
+			//Assign the height to the height of the tallest character
 			lineHeight = MathsUtils::max(lineHeight, info.glyphHeight + (info.glyphTop - info.glyphHeight));
 		}
 	}

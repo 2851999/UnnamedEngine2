@@ -34,13 +34,13 @@ public:
 	 * attribute within a shader */
 	struct Attribute {
 		/* Various pieces of data for OpenGL */
-		GLint  location;
-		GLint  size; //This is not literal size, but the number of
-					 //components
-		GLuint offset;
-		GLuint stride;
+		GLint  location; //Location of this attribute (within a shader program)
+		GLint  size;     //This is not literal size, but the number of
+					     //components
+		GLuint offset;   //Offset of the first component of the vertex attribute
+		GLuint stride;   //Byte offset between consecutive vertex attributes
 
-		GLuint divisor;
+		GLuint divisor;   //Number of instances that will pass between updates of this attribute
 	};
 private:
 	/* Various pieces of data for OpenGL */
@@ -50,7 +50,7 @@ private:
 	std::vector<T>& data;
 	GLenum                usage;
 
-	bool                 instanced;
+	bool                  instanced;
 
 	/* The attributes this VBO supplies */
 	std::vector<Attribute> attributes;

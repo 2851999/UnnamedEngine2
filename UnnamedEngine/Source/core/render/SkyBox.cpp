@@ -24,9 +24,9 @@
  *****************************************************************************/
 
 SkyBox::SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom, float size) {
-	//Create the skybox
+	//Create the skybox object
 	box = new GameObject3D({ new Mesh(MeshBuilder::createCube(size, size, size)) }, Renderer::getRenderShader("SkyBox"));
-	//Load the texture
+	//Load the cubemap from the textures
 	cubemap = new Cubemap(path, { right, left, top, bottom, back, front });
 	//Assign the texture in the skybox
 	box->getMaterial()->diffuseTexture = cubemap;
@@ -39,9 +39,11 @@ void SkyBox::update(Vector3f cameraPosition) {
 }
 
 void SkyBox::render() {
+	//Disable the depth buffer so the skybox is always behind any rendered objects
 	glDepthMask(false);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	box->render();
+	//Restor the default value
 	glDepthMask(true);
 }
 

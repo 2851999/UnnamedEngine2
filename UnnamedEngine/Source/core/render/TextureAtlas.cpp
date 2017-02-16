@@ -28,6 +28,7 @@ TextureAtlas::TextureAtlas(Texture* texture, unsigned int numColumns, unsigned i
 	this->numRows = numRows;
 	this->numTextures = numTextures;
 
+	//Calculate the width and height of each sub texture in the texture atlas (assumes all sub-textures are the same size)
 	textureWidth = (float) texture->getWidth() / (float) numColumns;
 	textureHeight = (float) texture->getHeight() / (float) numRows;
 }
@@ -37,7 +38,7 @@ void TextureAtlas::getSides(unsigned int textureIndex, float& top, float& left, 
 	float x = (textureIndex % numColumns) * textureWidth;
 	float y = (textureIndex / numRows) * textureHeight;
 
-	//Assign the texture coordinates
+	//Assign the texture coordinates (In range 0 - 1)
 	top = y / (float) texture->getWidth();
 	left = x / (float) texture->getHeight();
 	bottom =  top + (textureHeight / (float) texture->getHeight());

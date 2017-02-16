@@ -79,16 +79,13 @@ void AsteroidsPauseMenu::render() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//Add the camera
+	//Add the camera for rendering 2D
 	Renderer::addCamera(game->getCamera2D());
 
-	//Render the background
+	//Render the background and GUI
 	background->render();
-
-	//Render the panel
 	GUIPanel::render();
 
-	//Remove the camera
 	Renderer::removeCamera();
 }
 

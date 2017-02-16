@@ -76,7 +76,7 @@ namespace StrUtils {
 	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter) {
 		std::vector<std::string> split;
 
-		//The location of the delimter found
+		//The location of the delimiter found
 		size_t loc;
 
 		//The location of the last delimiter found
@@ -86,7 +86,7 @@ namespace StrUtils {
 			//Add the previous text
 			split.push_back(text.substr(last, loc - last));
 			//Set the last position (But prevent finding the same one by adding
-			//the length of the delemiter to the location)
+			//the length of the delimiter to the location)
 			last = loc + delimeter.size();
 		}
 

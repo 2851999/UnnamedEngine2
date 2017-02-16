@@ -97,6 +97,10 @@ public:
 	/* Method used to spawn another enemy (if possible) */
 	void spawnEnemy();
 
+	/* Methods to pause and resume the game */
+	void pause();
+	void resume();
+
 	/* The update and render methods */
 	void update();
 	void render();

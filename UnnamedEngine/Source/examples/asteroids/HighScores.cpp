@@ -25,7 +25,7 @@
  *****************************************************************************/
 
 HighScores::HighScores() {
-	maxHighScores = 5;
+
 }
 
 HighScores::~HighScores() {
@@ -34,9 +34,8 @@ HighScores::~HighScores() {
 }
 
 void HighScores::save() {
-	//The file text to save
 	std::vector<std::string> fileText;
-	//Go through each name
+	//Go through each name and add their score
 	for (unsigned int i = 0; i < names.size(); i++)
 		fileText.push_back(names[i] + ": " + StrUtils::str(scores[i]));
 	//Write to the high scores file
@@ -47,7 +46,7 @@ void HighScores::load() {
 	//Ensure the names and scores are clear
 	names.clear();
 	scores.clear();
-	//Get the file text from the file
+
 	std::vector<std::string> fileText = FileUtils::readFile(filePath);
 	//Go through each line in the file
 	for (unsigned int i = 0; i < fileText.size(); i++) {
@@ -63,11 +62,11 @@ void HighScores::add(std::string name, unsigned int score) {
 	bool added = false;
 	//Ensure the name will not break anything
 	name = StrUtils::replaceAll(name, ": ", "");
-	//Go through the current scores
+
 	for (unsigned int i = 0; i < scores.size(); i++) {
 		//Check the current score
 		if (scores[i] < score && ! added) {
-			//Add the score
+			//Add the score (as it is now in the correct place)
 			names.insert(names.begin() + i, name);
 			scores.insert(scores.begin() + i, score);
 			added = true;
@@ -76,13 +75,13 @@ void HighScores::add(std::string name, unsigned int score) {
 	//Check whether the score was added
 	if (! added) {
 		//Check the length of the scores
-		if (scores.size() < maxHighScores) {
+		if (scores.size() < MAX_HIGH_SCORES) {
 			names.push_back(name);
 			scores.push_back(score);
 		}
 	} else {
 		//Check whether the number of scores stored is now too big
-		if (scores.size() > maxHighScores) {
+		if (scores.size() > MAX_HIGH_SCORES) {
 			//Remove the last ones
 			names.pop_back();
 			scores.pop_back();
@@ -99,12 +98,11 @@ bool HighScores::isHighScore(unsigned int score) {
 
 bool HighScores::isOnTable(unsigned int score) {
 	//Check how many scores are stored
-	if (scores.size() < maxHighScores)
+	if (scores.size() < MAX_HIGH_SCORES)
 		return true;
 	else {
-		//Go through the scores
-		for (unsigned int i = 0; i < maxHighScores; i++) {
-			//Check the score agains the currrent one
+		//Go through the scores and check whether the given score is higher than any of them
+		for (unsigned int i = 0; i < MAX_HIGH_SCORES; i++) {
 			if (score > scores[i])
 				return true;
 		}

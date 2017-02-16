@@ -25,16 +25,19 @@
  *****************************************************************************/
 
 GUIDropDownList::GUIDropDownList(GUIButton* menuButton, Texture* overlayClosedTexture, Texture* overlayOpenedTexture) : GUIDropDownMenu(menuButton) {
+	//Create the overlay for the drop down using the texture
 	overlay = new GameObject2D({ new Mesh(MeshBuilder::createQuad(menuButton->getWidth(), menuButton->getHeight(), overlayClosedTexture)) }, "Material");
 	overlay->setParent(this);
 	overlay->setSize(menuButton->getSize());
 
 	this->overlayClosedTexture = overlayClosedTexture;
+	//Account for the case that the closed texture is not assigned
 	if (overlayOpenedTexture)
 		this->overlayOpenedTexture = overlayOpenedTexture;
 	else
 		this->overlayOpenedTexture = overlayClosedTexture;
 
+	//Assign the texture to show initially
 	overlay->getMaterial()->diffuseTexture = overlayClosedTexture;
 }
 
@@ -46,6 +49,7 @@ void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 		//Setup the menu
 		setupMenu();
 
+		//Change the overlay texture if it can
 		if (overlayClosedTexture) {
 			if (menuOpen)
 				overlay->getMaterial()->diffuseTexture = overlayOpenedTexture;
@@ -85,6 +89,8 @@ void GUIDropDownList::onMousePressed(int button) {
 	if (active && menuOpen) {
 		InputManager::CursorData& data = Window::getCurrentInstance()->getInputManager()->getCursorData();
 
+		//Check whether the mouse was clicked outside of the menu button and close this menu if it is
+		//(the menu should close if one of the buttons within this drop down menu is clicked)
 		if (! contains(data.lastX, data.lastY)) {
 			menuOpen = false;
 			if (overlayClosedTexture)

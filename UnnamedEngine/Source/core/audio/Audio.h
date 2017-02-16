@@ -167,9 +167,11 @@ private:
 
 	unsigned int type = 0;
 
+	/* The frequency and volume values for this source */
 	float pitch = 0;
 	float gain  = 0;
 
+	/* Used to make this source repeat */
 	bool loop = false;
 public:
 	static const unsigned int TYPE_SOUND_EFFECT = 1;
@@ -193,6 +195,7 @@ public:
 
 	void updateVolume();
 
+	/* Assigns position and velocity information for OpenAL */
 	void update();
 
 	/* Various audio related methods */

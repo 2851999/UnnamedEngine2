@@ -24,6 +24,7 @@
  *****************************************************************************/
 
 unsigned int Lasers::numInstances = 0;
+const float Lasers::LASER_SPEED = 20.0f;
 
 Lasers::Lasers(AsteroidsGame* game, Ship* ship) : soundSystem(game->getSoundSystem()), ship(ship) {
 	//Increment the instance number
@@ -179,7 +180,7 @@ void Lasers::fire(Vector3f position, Vector3f rotation, Vector3f front, Vector3f
 		timeLastLaserFired = TimeUtils::getSeconds();
 		//Assign the object's properties
 		objects[nextIndex]->setPosition(position);
-		objects[nextIndex]->setVelocity(currentVelocity + (front * 20.0f));
+		objects[nextIndex]->setVelocity(currentVelocity + (front * LASER_SPEED));
 		//objects[nextIndex]->setRotation(rotation * Vector3f(0.0f, -1.0f, 0.0f));
 		timesLeft[nextIndex] = 3.0f;
 

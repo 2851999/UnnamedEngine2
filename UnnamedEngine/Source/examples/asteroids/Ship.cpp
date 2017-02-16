@@ -73,21 +73,29 @@ void Ship::update(float deltaSeconds, AsteroidGroup& closestGroup) {
 }
 
 void Ship::render() {
-	//Render the lasers
 	lasers->render();
 }
 
 void Ship::removeHealth(unsigned int amount) {
-	//Remove health if possible
+	//Need to remove shield instead of health if there is some
 	if (shield > 0) {
+		//Record the previous amount of shield
 		unsigned int old = shield;
+		//Remove the amount from the shield, ensuring it does not go below 0
 		shield = MathsUtils::max(shield - amount, 0u);
+		//Take away the amount that the shiled has taken of the damage so it can be taken
+		//away from the health
 		amount -= (old - shield);
-	} else if (amount > 0) {
+	}
+	//Check whether anything needs to be taken off of the health of the ship
+	if (amount > 0) {
+		//Take it away from the health, but ensure it doesn't go below 0
 		if (health > amount)
 			health -= amount;
 		else
 			health = 0;
 	}
+	//Since the player has just taken damage, the timer for the shield regeneration need
+	//to be reset
 	shieldTimer.restart();
 }

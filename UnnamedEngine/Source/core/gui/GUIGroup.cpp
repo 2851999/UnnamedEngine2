@@ -72,9 +72,8 @@ void GUIGroup::hide() {
 		//This is done to ensure the component is updated as if the mouse is leaving it
 		//so that if it is shown again, it has an updated state
 		components[i]->onMouseLeave();
-		//Disable the current component
+
 		components[i]->disable();
-		//Ensure the component is not visible
 		components[i]->setVisible(false);
 	}
 }
@@ -82,7 +81,7 @@ void GUIGroup::hide() {
 void GUIGroup::update() {
 	//Ensure this group is active
 	if (active) {
-		//Go through and update all of the components in this group
+		//Go through and update all of the components in this group and update them
 		for (unsigned int i = 0; i < components.size(); i++)
 			components[i]->update();
 	}
@@ -91,7 +90,6 @@ void GUIGroup::update() {
 void GUIGroup::render() {
 	//Ensure this group is visible
 	if (visible) {
-		//Go through and render all of the components in this group
 		for (unsigned int i = 0; i < components.size(); i++)
 			components[i]->render();
 	}
