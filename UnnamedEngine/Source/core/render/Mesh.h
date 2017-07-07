@@ -64,6 +64,9 @@ public:
 		float radius;
 	};
 private:
+	/* The rendering mode to use */
+	GLenum renderMode = GL_TRIANGLES;
+
 	/* The raw data stored for this mesh */
 	std::vector<float> positions;
 	std::vector<float> colours;
@@ -140,6 +143,7 @@ public:
 
 	void addBoneData(unsigned int boneID, float boneWeight);
 
+	inline void setRenderMode(GLenum mode) { this->renderMode = mode; }
 	inline void setNumPositions(unsigned int numPositions) { this->numPositions = numPositions; }
 	inline void setNumColours(unsigned int numColours) { this->numColours = numColours; }
 	inline void setNumTextureCoords(unsigned int numTextureCoords) { this->numTextureCoords = numTextureCoords; }
@@ -190,6 +194,7 @@ public:
 	inline bool hasBones()         { return numBones > 0;         }
 
 	/* Methods to get the data */
+	GLenum       getRenderMode()       { return renderMode;       }
 	unsigned int getNumPositions()     { return numPositions;     }
 	unsigned int getNumColours()       { return numColours;       }
 	unsigned int getNumTextureCoords() { return numTextureCoords; }
@@ -230,6 +235,9 @@ class MeshRenderData {
 private:
 	/* The render data for this mesh */
 	RenderData* renderData = NULL;
+
+	/* The shader used when assigning attribute locations */
+	RenderShader* setupShader = NULL;
 
 	/* The various Vertex Buffer Objects for this mesh */
 	VBO<GLfloat>* vboPositions     = NULL;
@@ -285,6 +293,7 @@ public:
 
 	/* Setters and getters */
 	inline RenderData* getRenderData() { return renderData; }
+	inline RenderShader* getSetupShader() { return setupShader; }
 };
 
 /*****************************************************************************

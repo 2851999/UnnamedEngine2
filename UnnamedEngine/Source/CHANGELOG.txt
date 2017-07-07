@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 0 | Experimental 2
+
+* Added method 'setMesh' in GameObject
+* Added 'renderMode' to MeshData
+* Added 'setupShader' to MeshRenderData
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 0 | Experimental 1
 
 * Added Sphere

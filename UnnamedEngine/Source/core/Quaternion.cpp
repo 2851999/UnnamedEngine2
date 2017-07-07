@@ -129,14 +129,14 @@ Vector3f Quaternion::toEuler() {
     float sqx = getX() * getX();
     float sqy = getY() * getY();
     float sqz = getZ() * getZ();
-	float unit = sqx + sqy + sqz + sqw; //If this quaternion is normalised, this is one
+	float unit = sqx + sqy + sqz + sqw;
 	float test = getX() * getY() + getZ() * getW();
 	float h, a, b;
-	if (test > 0.499f * unit) { //Singularity at north pole
+	if (test > 0.499f * unit) {
 		h = 2 * atan2f(getX(),getW());
 		a = utils_maths::PI / 2.0f;
 		b = 0;
-	} else if (test < -0.499f * unit) { //Singularity at south pole
+	} else if (test < -0.499f * unit) {
 		h = -2 * atan2f(getX(),getW());
 		a = -utils_maths::PI / 2.0f;
 		b = 0;

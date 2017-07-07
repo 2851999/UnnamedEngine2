@@ -28,6 +28,7 @@
 #include "../utils/GLUtils.h"
 
 #include "../experimental/Billboard.h"
+#include "../experimental/terrain/Terrain.h"
 
 class Test : public BaseTest3D {
 private:
@@ -40,6 +41,9 @@ private:
 	GameObject3D* model3;
 
 	Font* font;
+
+	Terrain* terrain;
+//	Terrain* terrain2;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -79,7 +83,7 @@ void Test::onCreated() {
 //	model2->getMesh()->getSkeleton()->startAnimation("");
 	//model2->getMesh()->getSkeleton()->stopAnimation();
 
-	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.model"), Renderer::SHADER_LIGHTING);
+	model3 = new GameObject3D(resourceLoader.loadModel("deformablesphere.dae"), Renderer::SHADER_LIGHTING);
 	model3->setPosition(2.0f, 0.8f, 0.0f);
 	model3->update();
 
@@ -113,6 +117,19 @@ void Test::onCreated() {
 
 	font = new Font("resources/fonts/CONSOLA.TTF", 64, Colour::WHITE, true, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
 	font->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
+
+	terrain = new Terrain();
+	terrain->setup("H:/Storage/Users/Joel/Desktop/heightmap.jpg", 8);
+	terrain->setScale(Vector3f(0.1f, 0.1f, 0.1f));
+	terrain->update();
+
+//	terrain2 = new Terrain();
+//	terrain2->setup("H:/Storage/Users/Joel/Desktop/heightmap.png", 8);
+//	terrain2->setScale(Vector3f(0.1f, 0.1f, 0.1f));
+//	terrain2->getMaterial()->diffuseColour = Colour::RED;
+//	terrain2->update();
+
+//	renderScene->add(terrain);
 }
 
 void Test::onUpdate() {
@@ -137,6 +154,8 @@ void Test::onRender() {
 
 	particleSystem->render();
 	font->render();
+	terrain->render();
+//	terrain2->render();
 }
 
 void Test::onDestroy() {

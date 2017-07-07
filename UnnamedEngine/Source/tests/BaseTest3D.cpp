@@ -30,7 +30,8 @@ void BaseTest3D::initialise() {
 	settings.windowTitle = "Test";
 	settings.videoMaxAnisotropicSamples = 16;
 	settings.videoSamples = 16;
-	settings.videoVSync = false;
+	settings.videoVSync = true;
+	settings.videoMaxFPS = 0;
 
 	onInitialise();
 }

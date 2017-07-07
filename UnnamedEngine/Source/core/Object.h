@@ -37,7 +37,7 @@ private:
 	/* The RenderShader used when rendering */
 	RenderShader* renderShader;
 protected:
-	/* Tranform for this object */
+	/* Transform for this object */
 	Transform* transform = new Transform();
 public:
 	/* The constructors */
@@ -60,6 +60,11 @@ public:
 	inline Matrix4f& getModelMatrix() { return transform->getMatrix(); }
 
 	inline void setRenderShader(RenderShader* renderShader) { this->renderShader = renderShader; }
+
+	/* Used to set the internal mesh, previous will be deleted if there was one,
+	 * if a shader is supplied, then setup will be called on it otherwise it is assumed
+	 * it has already been setup */
+	void setMesh(Mesh* mesh, RenderShader* shader = NULL);
 
 	inline bool hasMesh() { return mesh; }
 	inline Mesh* getMesh() { return mesh; }

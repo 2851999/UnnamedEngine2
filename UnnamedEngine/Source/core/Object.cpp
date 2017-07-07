@@ -24,7 +24,8 @@
  *****************************************************************************/
 
 GameObject::GameObject(Mesh* mesh, RenderShader* shader) : mesh(mesh), renderShader(shader) {
-	if (this->mesh)
+	//Setup the mesh if needed
+	if (this->mesh && shader)
 		this->mesh->setup(shader);
 }
 
@@ -40,6 +41,16 @@ void GameObject::render() {
 			renderShader->getShader()->use();
 			Renderer::render(mesh, getModelMatrix(), renderShader);
 		}
+	}
+}
+
+void GameObject::setMesh(Mesh* mesh, RenderShader* shader) {
+	if (this->mesh != NULL)
+		delete this->mesh;
+	this->mesh = mesh;
+	if (shader) {
+		mesh->setup(shader);
+		this->renderShader = shader;
 	}
 }
 

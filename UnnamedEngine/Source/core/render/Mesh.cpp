@@ -165,7 +165,9 @@ void MeshData::addBoneData(unsigned int boneID, float boneWeight) {
  *****************************************************************************/
 
 void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
-	//The shader used for rendering
+	//Assign the shader used during the setup
+	this->setupShader = renderShader;
+	//The shader used for the setup
 	Shader* shader = renderShader->getShader();
 	//Determine the number of vertices
 	if (data->hasIndices()) {
@@ -179,7 +181,7 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 	}
 
 	//Create the RenderData instance
-	renderData = new RenderData(GL_TRIANGLES, numVertices);
+	renderData = new RenderData(data->getRenderMode(), numVertices);
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
