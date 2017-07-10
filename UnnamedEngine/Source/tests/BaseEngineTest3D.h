@@ -28,7 +28,7 @@
 #include "../utils/GLUtils.h"
 
 #include "../experimental/Billboard.h"
-#include "../experimental/terrain/Terrain.h"
+#include "../experimental/terrain/HeightMapTerrain.h"
 
 class Test : public BaseTest3D {
 private:
@@ -39,11 +39,14 @@ private:
 	GameObject3D* model1;
 	GameObject3D* model2;
 	GameObject3D* model3;
+//	GameObject3D* box;
 
 	Font* font;
 
-	Terrain* terrain;
-//	Terrain* terrain2;
+	HeightMapTerrain* terrain;
+
+//	bool test = false;
+//	HeightMapTerrain* terrain2;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -118,18 +121,25 @@ void Test::onCreated() {
 	font = new Font("resources/fonts/CONSOLA.TTF", 64, Colour::WHITE, true, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
 	font->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
 
-	terrain = new Terrain();
-	terrain->setup("H:/Storage/Users/Joel/Desktop/heightmap.jpg", 8);
+	terrain = new HeightMapTerrain();
+	terrain->setup("D:/Storage/Users/Joel/Desktop/heightmap.jpg", 8);
 	terrain->setScale(Vector3f(0.1f, 0.1f, 0.1f));
 	terrain->update();
 
-//	terrain2 = new Terrain();
+//	terrain2 = new HeightMapTerrain();
 //	terrain2->setup("H:/Storage/Users/Joel/Desktop/heightmap.png", 8);
 //	terrain2->setScale(Vector3f(0.1f, 0.1f, 0.1f));
 //	terrain2->getMaterial()->diffuseColour = Colour::RED;
 //	terrain2->update();
 
 //	renderScene->add(terrain);
+
+//	box = new GameObject3D(new Mesh(MeshBuilder::createCube(1.0f, 1.0f, 1.0f)), Renderer::SHADER_MATERIAL);
+//	box->getMaterial()->diffuseColour = Colour::BLUE;
+//	//box->getMesh()->setBoundingSphere(box->getMesh()->getData()->calculateBoundingSphere());
+//	box->update();
+
+	camera->setMovementSpeed(10.0f);
 }
 
 void Test::onUpdate() {
@@ -144,9 +154,9 @@ void Test::onUpdate() {
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		particleEmitter->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 
-	model1->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	model1->getMesh()->updateAnimation(getDeltaSeconds());
 	//model2->getMesh()->getSkeleton()->update(getDeltaSeconds());
-	model3->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	model3->getMesh()->updateAnimation(getDeltaSeconds());
 }
 
 void Test::onRender() {
@@ -155,6 +165,22 @@ void Test::onRender() {
 	particleSystem->render();
 	font->render();
 	terrain->render();
+
+//	box->render();
+
+//	if (camera->getFrustum().AABBInFrustum(Vector3f(-0.5f, -0.5f, -0.5f), Vector3f(0.5f, 0.5f, 0.5f))) {
+//		box->render();
+//		if (test) {
+//			std::cout << "In view" << std::endl;
+//			test = false;
+//		}
+//	} else {
+//		if (! test) {
+//			std::cout << "Out of view" << std::endl;
+//			test = true;
+//		}
+//	}
+
 //	terrain2->render();
 }
 

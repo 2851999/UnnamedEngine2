@@ -282,6 +282,7 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 
 		//Calculate and assign the bounding sphere for the mesh
 		mesh->setBoundingSphere(currentData->calculateBoundingSphere());
+		mesh->setCullingEnabled(true);
 
 		//Load and add the materials
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
@@ -730,6 +731,7 @@ Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 	Mesh* mesh = new Mesh(data);
 	mesh->setSkeleton(skeleton);
 	mesh->setMaterials(materials);
+	mesh->setCullingEnabled(true);
 	mesh->setBoundingSphere(Sphere(boundingSphereCentre, boundingSphereRadius));
 	mesh->setMatrix(meshTransform);
 

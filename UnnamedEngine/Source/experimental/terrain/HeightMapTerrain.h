@@ -16,24 +16,22 @@
  *
  *****************************************************************************/
 
-#ifndef EXPERIMENTAL_TERRAIN_TERRAIN_H_
-#define EXPERIMENTAL_TERRAIN_TERRAIN_H_
+#ifndef EXPERIMENTAL_TERRAIN_HEIGHTMAPTERRAIN_H_
+#define EXPERIMENTAL_TERRAIN_HEIGHTMAPTERRAIN_H_
 
 #include "../../core/Object.h"
 
-class Terrain : public GameObject3D {
+class HeightMapTerrain : public GameObject3D {
 public:
 	/* The constructor */
-	Terrain() {}
+	HeightMapTerrain() {}
 
 	/* The destructor */
-	virtual ~Terrain() {}
+	virtual ~HeightMapTerrain() {}
 
 	/* Method used to setup and create the terrain */
 	void setup(std::string filePath, unsigned int bitsPerPixel);
-
-	virtual bool shouldCull() override { return false; }
 };
 
 
-#endif /* EXPERIMENTAL_TERRAIN_TERRAIN_H_ */
+#endif /* EXPERIMENTAL_TERRAIN_HEIGHTMAPTERRAIN_H_ */

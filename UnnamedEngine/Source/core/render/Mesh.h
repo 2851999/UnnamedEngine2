@@ -320,7 +320,7 @@ private:
 	Sphere boundingSphere;
 
 	/* Boolean that states whether this mesh should be culled where possible */
-	bool culling = true;
+	bool culling = false;
 public:
 	/* The constructor */
 	Mesh(MeshData* data);
@@ -332,6 +332,9 @@ public:
 	inline void setup(RenderShader* renderShader) {
 		this->renderData = new MeshRenderData(this->data, renderShader);
 	}
+
+	/* Method called to update the animation of this mesh */
+	void updateAnimation(float deltaSeconds);
 
 	/* Method to add a material */
 	inline void addMaterial(Material* material) { materials.push_back(material); }

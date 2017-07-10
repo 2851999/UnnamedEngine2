@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <fstream>
 
+#define _MSC_VER
 #include <stb/stb_vorbis.h>
 
 #include "../Window.h"

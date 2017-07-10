@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 0 | Experimental 3
+
+* Added 'AABBInFrustum' method in Frustum
+* Added 'updateAnimation' in Mesh
+* Added some getters and setters to DebugCamera
+
+* Changed default value of 'culling' in Mesh to false, and
+  changed all models to assign this value to true
+* Changed 'updateBones' to be prinvate in Skeleton
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 0 | Experimental 2
 
 * Added method 'setMesh' in GameObject

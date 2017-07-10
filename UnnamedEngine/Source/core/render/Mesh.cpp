@@ -19,6 +19,7 @@
 #include "Mesh.h"
 
 #include "Renderer.h"
+#include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The MeshData class
@@ -381,6 +382,15 @@ Mesh::~Mesh() {
 	}
 	delete renderData;
 	delete data;
+}
+
+void Mesh::updateAnimation(float deltaSeconds) {
+	//Ensure there is a skeleton with an animation
+	if (skeleton)
+		//Update the skeleton
+		skeleton->update(deltaSeconds);
+	else
+		Logger::log("No skeleton instance to update", "Mesh", LogType::Error);
 }
 
 /*****************************************************************************

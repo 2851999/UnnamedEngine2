@@ -16,10 +16,11 @@
  *
  *****************************************************************************/
 
+#include "HeightMapTerrain.h"
+
 #include "../../core/render/Mesh.h"
 #include "../../core/render/Renderer.h"
 
-#include "Terrain.h"
 
 //https://www.3dgep.com/multi-textured-terrain-in-opengl/
 
@@ -38,7 +39,7 @@ inline float getHeightValue(const unsigned char* data, unsigned int numBytes) {
 	return 0.0f;
 }
 
-void Terrain::setup(std::string filePath, unsigned int bitsPerPixel) {
+void HeightMapTerrain::setup(std::string filePath, unsigned int bitsPerPixel) {
 	MeshData* meshData = new MeshData(3, MeshData::SEPARATE_POSITIONS); //| MeshData::SEPARATE_NORMALS);
 	meshData->setRenderMode(GL_TRIANGLES);
 
@@ -138,5 +139,5 @@ void Terrain::setup(std::string filePath, unsigned int bitsPerPixel) {
 	Texture::freeTexture(image);
 
 	//Assign the new mesh
-	setMesh(new Mesh(meshData), Renderer::getRenderShader("Material"));
+	setMesh(new Mesh(meshData), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
 }

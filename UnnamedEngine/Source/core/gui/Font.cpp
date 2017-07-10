@@ -44,8 +44,8 @@ void Font::setup(std::string path, unsigned int size, Colour colour, TexturePara
 	FT_GlyphSlot glyphSlot = face->glyph;
 
 	//The width and height of the final texture produced for OpenGL
-	unsigned int width  = 0;
-	unsigned int height = 0;
+	int width  = 0;
+	int height = 0;
 
 	//Go through each character required's ASCII code starting at 32 (space) and ending at 126 (~)
 	for (unsigned int i = ASCII_START; i <= ASCII_END; i++) {
