@@ -68,7 +68,7 @@ void PhysicsScene3D::resolveCollision(CollisionData3D& data, PhysicsObject3D* ob
 		return;
 
 	//Pick the coefficient of restitution from one of the objects
-	float e = MathsUtils::min(objectA->getRestitution(), objectB->getRestitution());
+	float e = utils_maths::min(objectA->getRestitution(), objectB->getRestitution());
 
 	//Calculate the inverse of each mass
 	float invMassA = 1.0f / objectA->getMass();

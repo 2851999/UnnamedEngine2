@@ -44,21 +44,21 @@ void Font::setup(std::string path, unsigned int size, Colour colour, TexturePara
 	FT_GlyphSlot glyphSlot = face->glyph;
 
 	//The width and height of the final texture produced for OpenGL
-	unsigned int width  = 0;
-	unsigned int height = 0;
+	int width  = 0;
+	int height = 0;
 
 	//Go through each character required's ASCII code starting at 32 (space) and ending at 126 (~)
 	for (unsigned int i = ASCII_START; i <= ASCII_END; i++) {
 		//Attempt to load the current character
 		if (FT_Load_Char(face, i, FT_LOAD_RENDER)) {
 			//An error occurred loading the character so log an error
-			Logger::log("Failed to load the character'" + StrUtils::str((char) i) + "' in the font face '" + path + "'", "Font", LogType::Error);
+			Logger::log("Failed to load the character'" + utils_string::str((char) i) + "' in the font face '" + path + "'", "Font", LogType::Error);
 			return;
 		}
 		//Add onto the width
 		width += glyphSlot->bitmap.width;
 		//Update the height to make it the same as the tallest letter
-		height = MathsUtils::max(height, glyphSlot->bitmap.rows);
+		height = utils_maths::max(height, glyphSlot->bitmap.rows);
 	}
 	//Assign the texture atlas width/height variables
 	textureAtlasWidth  = width;
@@ -245,7 +245,7 @@ float Font::getWidth(std::string text) {
 			lineWidth = 0;
 
 		//Find the maximum width
-		width = MathsUtils::max(width, lineWidth);
+		width = utils_maths::max(width, lineWidth);
 	}
 	//Return the width
 	return width * (1.0f / (float) FONT_SCALE);
@@ -265,7 +265,7 @@ float Font::getHeight(std::string text) {
 			//Get the character data for the current character
 			GlyphInfo info = glyphs[((int) text.at(i)) - ASCII_START];
 			//Assign the height
-			lineHeight = MathsUtils::max(lineHeight, info.glyphHeight + (info.glyphTop - info.glyphHeight));
+			lineHeight = utils_maths::max(lineHeight, info.glyphHeight + (info.glyphTop - info.glyphHeight));
 		}
 	}
 	if (height == 0)

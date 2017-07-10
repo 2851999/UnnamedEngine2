@@ -77,7 +77,7 @@ void DebugCamera::update(float delta) {
 	getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -axis3->getValue() * lookSensitivityX * currentDelta);
 	getTransform()->rotate(getTransform()->getRotation().getRight(), axis2->getValue() * lookSensitivityY * currentDelta);
 	Vector3f currentRot = getTransform()->getLocalRotation().toEuler();
-	currentRot.setX(MathsUtils::clamp(currentRot.getX(), -89.0f, 89.0f));
+	currentRot.setX(utils_maths::clamp(currentRot.getX(), -89.0f, 89.0f));
 	getTransform()->setRotation(currentRot);
 
 	//Update the camera

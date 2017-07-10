@@ -105,11 +105,11 @@ void RenderScene3D::render() {
 
 		//Go through each batch of lights
 		for (unsigned int b = 0; b < lights.size(); b += 6) {
-			lightingShader->setUniformi("NumLights", MathsUtils::min(6u, lights.size() - b));
+			lightingShader->setUniformi("NumLights", utils_maths::min(6u, lights.size() - b));
 
 			//Go through the lights in this batch
 			for (unsigned int l = b; (l < b + 6) && (l < lights.size()); l++)
-				lights[l]->setUniforms(lightingShader, "[" + StrUtils::str(l - b) + "]");
+				lights[l]->setUniforms(lightingShader, "[" + utils_string::str(l - b) + "]");
 
 			if (lights[b]->hasDepthBuffer()) {
 				lightingShader->setUniformMatrix4("LightSpaceMatrix", lights[b]->getLightSpaceMatrix());

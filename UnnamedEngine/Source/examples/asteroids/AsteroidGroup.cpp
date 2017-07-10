@@ -46,11 +46,11 @@ void AsteroidGroup::setup() {
 	//Go through all of the asteroids
 	for (unsigned int i = 0; i < objects.size(); i++) {
 		//Setup the current asteroid
-		objects[i]->setPosition(position + Vector3f(RandomUtils::randomFloat(-20, 20), RandomUtils::randomFloat(-20, 20), RandomUtils::randomFloat(-20, 20)));
-		float s = RandomUtils::randomFloat(0.2f, 1.0f);
-		objects[i]->setScale(s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f), s * RandomUtils::randomFloat(1.0f, 1.5f));
-		objects[i]->setRotation(RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360), RandomUtils::randomFloat(0, 360));
-		objects[i]->setAngularVelocity(RandomUtils::randomFloat(0.0f, 20.0f), RandomUtils::randomFloat(0.0f, 20.0f), RandomUtils::randomFloat(0.0f, 20.0f));
+		objects[i]->setPosition(position + Vector3f(utils_random::randomFloat(-20, 20), utils_random::randomFloat(-20, 20), utils_random::randomFloat(-20, 20)));
+		float s = utils_random::randomFloat(0.2f, 1.0f);
+		objects[i]->setScale(s * utils_random::randomFloat(1.0f, 1.5f), s * utils_random::randomFloat(1.0f, 1.5f), s * utils_random::randomFloat(1.0f, 1.5f));
+		objects[i]->setRotation(utils_random::randomFloat(0, 360), utils_random::randomFloat(0, 360), utils_random::randomFloat(0, 360));
+		objects[i]->setAngularVelocity(utils_random::randomFloat(0.0f, 20.0f), utils_random::randomFloat(0.0f, 20.0f), utils_random::randomFloat(0.0f, 20.0f));
 		objects[i]->setMass(100.0f * s);
 		objects[i]->setRestitution(1.0f);
 	}
@@ -78,7 +78,7 @@ void AsteroidGroup::update(float deltaSeconds, Player* player) {
 
 				if (velAlongNormal < 0) {
 					//Get a value for the restitution of the collision
-					float e = MathsUtils::min(player->getRestitution(), objects[i]->getRestitution());
+					float e = utils_maths::min(player->getRestitution(), objects[i]->getRestitution());
 
 					float playerInvMass = 1.0f / player->getMass();
 					float asteroidInvMass = 1.0f / objects[i]->getMass();

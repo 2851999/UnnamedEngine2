@@ -58,7 +58,7 @@ const aiMatrix4x4 MeshLoader::calculateMatrix(const aiNode* current, aiMatrix4x4
 }
 
 Mesh* MeshLoader::loadModel(std::string path, std::string fileName) {
-	if (StrUtils::strEndsWith(fileName, ".model"))
+	if (utils_string::strEndsWith(fileName, ".model"))
 		return loadEngineModel(path, fileName);
 	else
 		return loadAssimpModel(path, fileName);
@@ -280,11 +280,9 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 		//Assign the mesh's skeleton
 		mesh->setSkeleton(skeleton);
 
-		//Calculate the bounding sphere for the mesh
-		MeshData::BoundingSphere sphere = currentData->calculateBoundingSphere();
-		//Assign the bounding sphere properties
-		mesh->setBoundingSphereCentre(sphere.centre);
-		mesh->setBoundingSphereRadius(sphere.radius);
+		//Calculate and assign the bounding sphere for the mesh
+		mesh->setBoundingSphere(currentData->calculateBoundingSphere());
+		mesh->setCullingEnabled(true);
 
 		//Load and add the materials
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
@@ -320,7 +318,7 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 	//Check to see whether the material has a normal map
 	if (mat->GetTextureCount(aiTextureType_NORMALS) != 0)
 		material->normalMap = loadAssimpTexture(path, mat, aiTextureType_NORMALS);
-	else if (StrUtils::strEndsWith(fileName, ".obj") && (mat->GetTextureCount(aiTextureType_HEIGHT) != 0))
+	else if (utils_string::strEndsWith(fileName, ".obj") && (mat->GetTextureCount(aiTextureType_HEIGHT) != 0))
 		material->normalMap = loadAssimpTexture(path, mat, aiTextureType_HEIGHT);
 
 	if (mat->GetTextureCount(aiTextureType_DISPLACEMENT) != 0)
@@ -341,7 +339,7 @@ Texture* MeshLoader::loadAssimpTexture(std::string path, const aiMaterial* mater
 		aiString p;
 		material->GetTexture(type, 0, &p);
 		//Return the loaded texture
-		return Texture::loadTexture(path + StrUtils::str(p.C_Str()));
+		return Texture::loadTexture(path + utils_string::str(p.C_Str()));
 	} else
 		return NULL;
 }
@@ -733,8 +731,8 @@ Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 	Mesh* mesh = new Mesh(data);
 	mesh->setSkeleton(skeleton);
 	mesh->setMaterials(materials);
-	mesh->setBoundingSphereCentre(boundingSphereCentre);
-	mesh->setBoundingSphereRadius(boundingSphereRadius);
+	mesh->setCullingEnabled(true);
+	mesh->setBoundingSphere(Sphere(boundingSphereCentre, boundingSphereRadius));
 	mesh->setMatrix(meshTransform);
 
 	return mesh;
@@ -764,7 +762,7 @@ void MeshLoader::writeTexture(BinaryFile& file, Texture* texture, std::string pa
 	if (texture == NULL)
 		file.writeString("NULL");
 	else
-		file.writeString(StrUtils::remove(texture->getPath(), path));
+		file.writeString(utils_string::remove(texture->getPath(), path));
 }
 
 void MeshLoader::readMaterial(BinaryFile& file, std::vector<Material*>& materials, std::string path) {

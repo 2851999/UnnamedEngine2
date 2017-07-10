@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2017 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,19 +16,22 @@
  *
  *****************************************************************************/
 
-#include "Settings.h"
+#ifndef EXPERIMENTAL_TERRAIN_HEIGHTMAPTERRAIN_H_
+#define EXPERIMENTAL_TERRAIN_HEIGHTMAPTERRAIN_H_
 
-namespace VideoResolution {
-	/* Used to convert a Vector2i into a string representing a resolution */
-	std::string toString(Vector2i resolution) {
-		return utils_string::str(utils_string::str(resolution.getX()) + " x " + utils_string::str(resolution.getY()));
-	}
+#include "../../core/Object.h"
 
-	/* Used to convert a string into a Vector2i representing a resolution */
-	Vector2i toVector(std::string resolution) {
-		std::vector<std::string> split = utils_string::strSplit(resolution, " x ");
-		return Vector2i(utils_string::strToInt(split[0]), utils_string::strToInt(split[1]));
-	}
-}
+class HeightMapTerrain : public GameObject3D {
+public:
+	/* The constructor */
+	HeightMapTerrain() {}
+
+	/* The destructor */
+	virtual ~HeightMapTerrain() {}
+
+	/* Method used to setup and create the terrain */
+	void setup(std::string filePath, unsigned int bitsPerPixel);
+};
 
 
+#endif /* EXPERIMENTAL_TERRAIN_HEIGHTMAPTERRAIN_H_ */

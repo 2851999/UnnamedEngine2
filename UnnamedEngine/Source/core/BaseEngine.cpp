@@ -137,7 +137,7 @@ void BaseEngine::create() {
 	delete window;
 }
 
-using namespace StrUtils;
+using namespace utils_string;
 
 void BaseEngine::renderDebuggingInfo() {
 	glEnable(GL_TEXTURE_2D);

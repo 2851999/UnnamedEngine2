@@ -81,7 +81,7 @@ void Ship::removeHealth(unsigned int amount) {
 	//Remove health if possible
 	if (shield > 0) {
 		unsigned int old = shield;
-		shield = MathsUtils::max(shield - amount, 0u);
+		shield = utils_maths::max(shield - amount, 0u);
 		amount -= (old - shield);
 	} else if (amount > 0) {
 		if (health > amount)

@@ -19,14 +19,15 @@
 #include "Mesh.h"
 
 #include "Renderer.h"
+#include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The MeshData class
  *****************************************************************************/
 
-MeshData::BoundingSphere MeshData::calculateBoundingSphere() {
+Sphere MeshData::calculateBoundingSphere() {
 	//The bounding sphere
-	BoundingSphere sphere;
+	Sphere sphere;
 	//Calculate the find the lengths between the mesh, and also find the largest one
 	float lengthX = maxX - minX;
 	float lengthY = maxY - minY;
@@ -68,12 +69,12 @@ void MeshData::addPosition(Vector3f position) {
 
 	//Check whether data for a bounding sphere should be calculated
 	if (numDimensions == 3) {
-		minX = MathsUtils::min(minX, position.getX());
-		maxX = MathsUtils::max(maxX, position.getX());
-		minY = MathsUtils::min(minY, position.getY());
-		maxY = MathsUtils::max(maxY, position.getY());
-		minZ = MathsUtils::min(minZ, position.getZ());
-		maxZ = MathsUtils::max(maxZ, position.getZ());
+		minX = utils_maths::min(minX, position.getX());
+		maxX = utils_maths::max(maxX, position.getX());
+		minY = utils_maths::min(minY, position.getY());
+		maxY = utils_maths::max(maxY, position.getY());
+		minZ = utils_maths::min(minZ, position.getZ());
+		maxZ = utils_maths::max(maxZ, position.getZ());
 	}
 
 	numPositions++;
@@ -165,7 +166,9 @@ void MeshData::addBoneData(unsigned int boneID, float boneWeight) {
  *****************************************************************************/
 
 void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
-	//The shader used for rendering
+	//Assign the shader used during the setup
+	this->setupShader = renderShader;
+	//The shader used for the setup
 	Shader* shader = renderShader->getShader();
 	//Determine the number of vertices
 	if (data->hasIndices()) {
@@ -179,7 +182,7 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 	}
 
 	//Create the RenderData instance
-	renderData = new RenderData(GL_TRIANGLES, numVertices);
+	renderData = new RenderData(data->getRenderMode(), numVertices);
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
@@ -379,6 +382,15 @@ Mesh::~Mesh() {
 	}
 	delete renderData;
 	delete data;
+}
+
+void Mesh::updateAnimation(float deltaSeconds) {
+	//Ensure there is a skeleton with an animation
+	if (skeleton)
+		//Update the skeleton
+		skeleton->update(deltaSeconds);
+	else
+		Logger::log("No skeleton instance to update", "Mesh", LogType::Error);
 }
 
 /*****************************************************************************

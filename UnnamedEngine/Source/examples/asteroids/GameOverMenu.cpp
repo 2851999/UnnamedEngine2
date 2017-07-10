@@ -80,11 +80,11 @@ void GameOverMenu::show() {
 	HighScores& highScores = game->getHighScores();
 
 	if (highScores.isHighScore(player->getScore())) {
-		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - A new highscore! :)");
+		labelScore->setText("You scored " + utils_string::str(player->getScore()) + " - A new highscore! :)");
 		nameTextBox->setActive(true);
 		nameTextBox->setVisible(true);
 	} else if (highScores.isOnTable(player->getScore())) {
-		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - You're on the highscore table!");
+		labelScore->setText("You scored " + utils_string::str(player->getScore()) + " - You're on the highscore table!");
 		nameTextBox->setActive(true);
 		nameTextBox->setVisible(true);
 	} else {
@@ -92,7 +92,7 @@ void GameOverMenu::show() {
 		nameTextBox->setActive(false);
 		nameTextBox->setVisible(false);
 
-		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " :(");
+		labelScore->setText("You scored " + utils_string::str(player->getScore()) + " :(");
 	}
 
 	labelScore->setPosition(game->getSettings().windowWidth / 2 - labelScore->getWidth() / 2, labelGameOver->getPosition().getY() + labelGameOver->getHeight() + 10.0f);

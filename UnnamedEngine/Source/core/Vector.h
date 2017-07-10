@@ -152,7 +152,7 @@ public:
 	inline static Vector<T, N> slerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) {
 		//https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
 		float dot = a.dot(b);
-		dot = MathsUtils::clamp(dot, -1.0f, 1.0f);
+		dot = utils_maths::clamp(dot, -1.0f, 1.0f);
 		float theta = acosf(dot) * factor;
 		Vector<T, N> relative = b - a * dot;
 		relative.normalise();
@@ -236,7 +236,7 @@ public:
 	std::string toString() {
 		std::string value = "(";
 		for (unsigned int i = 0; i < N; i++) {
-			value += StrUtils::str(values[i]);
+			value += utils_string::str(values[i]);
 			if (i != N - 1)
 				value += ",";
 		}

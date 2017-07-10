@@ -124,7 +124,7 @@ void MainMenuHighScores::show() {
 	//Go through the highScores
 	for (unsigned int i = 0; i < highScores.getNumHighScores(); i++) {
 		//Add onto the text
-		text += StrUtils::str(i + 1) + ". ";
+		text += utils_string::str(i + 1) + ". ";
 		//Get the current name's length
 		currentNameLength = highScores.getName(i).length();
 		//Check the length
@@ -139,7 +139,7 @@ void MainMenuHighScores::show() {
 				text += " ";
 		}
 		//Add the score
-		text += "    " + StrUtils::str(highScores.getScore(i)) + "\n";
+		text += "    " + utils_string::str(highScores.getScore(i)) + "\n";
 	}
 
 	highScoresLabel->setText(text);
@@ -282,7 +282,7 @@ void MainMenuSettingsVideo::onComponentClicked(GUIComponent* component) {
 		game->getSettings().videoVSync = checkBoxVSync->isChecked();
 
 		//Save the new settings
-		SettingsUtils::writeToFile(game->getResourceLoader().getPath() + "settings/settings.txt", game->getSettings());
+		utils_settings::writeToFile(game->getResourceLoader().getPath() + "settings/settings.txt", game->getSettings());
 	}
 }
 
@@ -383,19 +383,19 @@ void MainMenuSettingsControls::show() {
 void MainMenuSettingsControls::updateGUI() {
 	//Setup the buttons
 	InputBindingAxis* forwardAxis = bindings->getAxisBinding("Forward");
-	buttonForwardPos->setText("Key: '" + StrUtils::str((char) forwardAxis->getKeyboardKeyPos()) + "', Axis: " + StrUtils::str(forwardAxis->getControllerAxis()));
-	buttonForwardNeg->setText("Key: '" + StrUtils::str((char) forwardAxis->getKeyboardKeyNeg()) + "', Axis: " + StrUtils::str(forwardAxis->getControllerAxis()));
+	buttonForwardPos->setText("Key: '" + utils_string::str((char) forwardAxis->getKeyboardKeyPos()) + "', Axis: " + utils_string::str(forwardAxis->getControllerAxis()));
+	buttonForwardNeg->setText("Key: '" + utils_string::str((char) forwardAxis->getKeyboardKeyNeg()) + "', Axis: " + utils_string::str(forwardAxis->getControllerAxis()));
 
 	InputBindingAxis* lookXAxis = bindings->getAxisBinding("LookX");
-	buttonLookXPos->setText("Key: '" + StrUtils::str(lookXAxis->getKeyboardKeyPos()) + "', Axis: " + StrUtils::str(lookXAxis->getControllerAxis()));
-	buttonLookXNeg->setText("Key: '" + StrUtils::str(lookXAxis->getKeyboardKeyNeg()) + "', Axis: " + StrUtils::str(lookXAxis->getControllerAxis()));
+	buttonLookXPos->setText("Key: '" + utils_string::str(lookXAxis->getKeyboardKeyPos()) + "', Axis: " + utils_string::str(lookXAxis->getControllerAxis()));
+	buttonLookXNeg->setText("Key: '" + utils_string::str(lookXAxis->getKeyboardKeyNeg()) + "', Axis: " + utils_string::str(lookXAxis->getControllerAxis()));
 
 	InputBindingAxis* lookYAxis = bindings->getAxisBinding("LookY");
-	buttonLookYPos->setText("Key: '" + StrUtils::str(lookYAxis->getKeyboardKeyPos()) + "', Axis: " + StrUtils::str(lookYAxis->getControllerAxis()));
-	buttonLookYNeg->setText("Key: '" + StrUtils::str(lookYAxis->getKeyboardKeyNeg()) + "', Axis: " + StrUtils::str(lookYAxis->getControllerAxis()));
+	buttonLookYPos->setText("Key: '" + utils_string::str(lookYAxis->getKeyboardKeyPos()) + "', Axis: " + utils_string::str(lookYAxis->getControllerAxis()));
+	buttonLookYNeg->setText("Key: '" + utils_string::str(lookYAxis->getKeyboardKeyNeg()) + "', Axis: " + utils_string::str(lookYAxis->getControllerAxis()));
 
 	InputBindingButton* shootButton = bindings->getButtonBinding("Shoot");
-	buttonShoot->setText("Key: '" + StrUtils::str((char) shootButton->getKeyboardKey()) + "', Button: " + StrUtils::str(shootButton->getControllerButton()));
+	buttonShoot->setText("Key: '" + utils_string::str((char) shootButton->getKeyboardKey()) + "', Button: " + utils_string::str(shootButton->getControllerButton()));
 }
 
 void MainMenuSettingsControls::onComponentClicked(GUIComponent* component) {

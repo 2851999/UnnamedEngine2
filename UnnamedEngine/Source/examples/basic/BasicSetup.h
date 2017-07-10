@@ -24,9 +24,9 @@
  *
  * Tutorial Number: 1
  * Tutorial Name: Basic Setup
- * Engine Version: V0.1.0 (0::1::2::3)
+ * Engine Version: V0.2.3 (1::0::0::1)
  * Date Created: 16/10/2016
- * Date Updated: 16/10/2016
+ * Date Updated: 24/01/2017
  *
  * Description: Demonstrates the setup process to use the engine.
  *****************************************************************************/
@@ -88,7 +88,7 @@ void Tutorial::render() {
 	//When rendering some OpenGL stuff needs to be performed, but
 	//in this case the below can be used so we do not need to worry
 	//about it
-	GLUtils::setupSimple2DView();
+	utils_gl::setupSimple2DView();
 }
 
 void Tutorial::destroy() {}

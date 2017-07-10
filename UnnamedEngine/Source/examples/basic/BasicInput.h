@@ -24,9 +24,9 @@
  *
  * Tutorial Number: 2
  * Tutorial Name: Input
- * Engine Version: V0.1.0 (0::1::2::3)
+ * Engine Version: V0.2.3 (1::0::0::1)
  * Date Created: 17/10/2016
- * Date Updated: 19/01/2017
+ * Date Updated: 24/01/2017
  *
  * Description: Demonstrates how to receive user input.
  *****************************************************************************/
@@ -113,7 +113,7 @@ void Tutorial::update() {
 
 void Tutorial::render() {
 	//Seen from the last tutorial
-	GLUtils::setupSimple2DView();
+	utils_gl::setupSimple2DView();
 }
 
 #endif /* EXAMPLES_BASIC_BASICSETUP_H_ */

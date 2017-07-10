@@ -224,7 +224,7 @@ void AsteroidsMainGame::spawnEnemy() {
 			enemiesRenderer->show(i);
 
 			//Assign the time until the next enemy
-			timeForNextEnemy = RandomUtils::randomFloat(10.0f, 60.0f);
+			timeForNextEnemy = utils_random::randomFloat(10.0f, 60.0f);
 
 			//Reset the timer
 			timer->restart();

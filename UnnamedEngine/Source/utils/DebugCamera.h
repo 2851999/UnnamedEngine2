@@ -72,6 +72,24 @@ public:
 	InputBindingAxis* getLookXAxis() { return axis2; }
 	InputBindingAxis* getLookYAxis() { return axis3; }
 	InputBindings* getInputBindings() { return inputBindings; }
+
+	inline void setMovementSpeed(float speed) { this->movementSpeed = speed; }
+	inline void setMouseSensitivityX(float x) { this->mouseSensitivityX = x; }
+	inline void setMouseSensitivityY(float y) { this->mouseSensitivityY = y; }
+	inline void setMouseSensitivity(float x, float y) { setMouseSensitivityX(x); setMouseSensitivityY(y); }
+	inline void setLookSensitivityX(float x) { this->lookSensitivityX = x; }
+	inline void setLookSensitivityY(float y) { this->lookSensitivityY = y; }
+	inline void setLookSensitivity(float x, float y) { setLookSensitivityX(x); setLookSensitivityY(y); }
+	inline void setMaxRotationX(float angle) { this->maxRotationX = angle; }
+
+	inline float getMovementSpeed() { return movementSpeed; }
+	inline float getMouseSensitivityX() { return mouseSensitivityX; }
+	inline float getMouseSensitivityY() { return mouseSensitivityY; }
+	inline float getLookSensitivityX() { return lookSensitivityX; }
+	inline float getLookSensitivityY() { return lookSensitivityY; }
+	inline float getMaxRotationX() { return maxRotationX; }
+
+
 };
 
 #endif /* UTILS_DEBUGCAMERA_H_ */

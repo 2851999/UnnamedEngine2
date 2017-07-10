@@ -24,9 +24,9 @@
  *
  * Tutorial Number: 3
  * Tutorial Name: Basic Rendering
- * Engine Version: V0.1.9 (0::3::2::2)
+ * Engine Version: V0.2.3 (1::0::0::1)
  * Date Created: 17/10/2016
- * Date Updated: 13/12/2016
+ * Date Updated: 24/01/2017
  *
  * Description: Demonstrates how to start rendering in 2D
  *****************************************************************************/
@@ -129,7 +129,7 @@ void Tutorial::update() {
 }
 
 void Tutorial::render() {
-	GLUtils::setupSimple2DView();
+	utils_gl::setupSimple2DView();
 
 	//Now render the object
 	object->render();

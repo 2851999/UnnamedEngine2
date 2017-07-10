@@ -217,7 +217,7 @@ public:
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++) {
 				//Add the current value onto the string
-				value += StrUtils::str(get(row, col));
+				value += utils_string::str(get(row, col));
 				//Check whether a comma should be added, and if so, add one
 				if (col != N - 1)
 					value += ",";
@@ -422,7 +422,7 @@ public:
 	}
 
 	const Matrix4f& initPerspective(float fovy, float aspect, float zNear, float zFar) {
-		float scale = (tan(fovy / 2 * (MathsUtils::PI / 360)));
+		float scale = (tan(fovy / 2 * (utils_maths::PI / 360)));
 
 		set(0, 0, 1.0f / (aspect * scale)); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
 		set(1, 0, 0); set(1, 1, 1.0f / scale); set(1, 2, 0); set(1, 3, 0);
@@ -451,8 +451,8 @@ public:
 	}
 
 	const Matrix4& initRotation(float angle, bool x, bool y, bool z) {
-		float c = (float) cos(MathsUtils::toRadians(angle));
-		float s = (float) sin(MathsUtils::toRadians(angle));
+		float c = (float) cos(utils_maths::toRadians(angle));
+		float s = (float) sin(utils_maths::toRadians(angle));
 
 		if (x) {
 			set(0, 0, 1); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);

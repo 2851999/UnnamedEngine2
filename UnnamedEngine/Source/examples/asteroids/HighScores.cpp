@@ -38,9 +38,9 @@ void HighScores::save() {
 	std::vector<std::string> fileText;
 	//Go through each name
 	for (unsigned int i = 0; i < names.size(); i++)
-		fileText.push_back(names[i] + ": " + StrUtils::str(scores[i]));
+		fileText.push_back(names[i] + ": " + utils_string::str(scores[i]));
 	//Write to the high scores file
-	FileUtils::writeFile(filePath, fileText);
+	utils_file::writeFile(filePath, fileText);
 }
 
 void HighScores::load() {
@@ -48,21 +48,21 @@ void HighScores::load() {
 	names.clear();
 	scores.clear();
 	//Get the file text from the file
-	std::vector<std::string> fileText = FileUtils::readFile(filePath);
+	std::vector<std::string> fileText = utils_file::readFile(filePath);
 	//Go through each line in the file
 	for (unsigned int i = 0; i < fileText.size(); i++) {
 		//Split up the current line
-		std::vector<std::string> split = StrUtils::strSplit(fileText[i], ": ");
+		std::vector<std::string> split = utils_string::strSplit(fileText[i], ": ");
 		//Add the name and score
 		names.push_back(split[0]);
-		scores.push_back(StrUtils::strToUInt(split[1]));
+		scores.push_back(utils_string::strToUInt(split[1]));
 	}
 }
 
 void HighScores::add(std::string name, unsigned int score) {
 	bool added = false;
 	//Ensure the name will not break anything
-	name = StrUtils::replaceAll(name, ": ", "");
+	name = utils_string::replaceAll(name, ": ", "");
 	//Go through the current scores
 	for (unsigned int i = 0; i < scores.size(); i++) {
 		//Check the current score
