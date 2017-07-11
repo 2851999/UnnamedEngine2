@@ -39,6 +39,7 @@ void SkyBox::update(Vector3f cameraPosition) {
 }
 
 void SkyBox::render() {
+	//To work the skybox must be drawn before anything else
 	glDepthMask(false);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	box->render();

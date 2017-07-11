@@ -93,26 +93,21 @@ void Texture::freeTexture(unsigned char* texture) {
 	stbi_image_free(texture);
 }
 
-Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bool applyParameters) {
-	//The data needed for the texture
-	int numComponents, w, h, format;
-	//Obtain the texture data
-	unsigned char* image = loadTexture(path, numComponents, w, h, format);
-
-	if (image == NULL)
+Texture* Texture::createTexture(std::string path, unsigned char* data, int numComponents, GLsizei width, GLsizei height, GLint format, TextureParameters parameters, bool applyParameters) {
+	if (data == NULL)
 		return NULL;
 
 	//Create the Texture instance and set it up
 	Texture* texture = new Texture(parameters);
-	texture->setWidth(w);
-	texture->setHeight(h);
+	texture->setWidth(width);
+	texture->setHeight(height);
 	texture->setNumComponents(numComponents);
 	texture->setPath(path);
 
 	//Bind the texture and then pass the texture data to OpenGL
 	texture->bind();
 
-	glTexImage2D(parameters.getTarget(), 0, format, w, h, 0, format, GL_UNSIGNED_BYTE, image);
+	glTexImage2D(parameters.getTarget(), 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
 	//Apply the parameters if requested, but don't need to bind the texture again,
 	//and it doesn't need to unbind either
@@ -120,6 +115,18 @@ Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bo
 		texture->applyParameters(false, false);
 
 	texture->unbind();
+
+	return texture;
+}
+
+Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bool applyParameters) {
+	//The data needed for the texture
+	int numComponents, w, h, format;
+	//Obtain the texture data
+	unsigned char* image = loadTexture(path, numComponents, w, h, format);
+
+	//Create the texture - case where image is NULL is handled by this as well
+	Texture* texture = createTexture(path, image, numComponents, w, h, format, parameters, applyParameters);
 
 	//Free the image data as it is no longer needed
 	stbi_image_free(image);

@@ -1,0 +1,56 @@
+#version 330
+
+#map uniform ProjectionMatrix projectionMatrix
+#map uniform ViewMatrix viewMatrix
+#map uniform HeightMap heightMap
+#map uniform CameraPosition cameraPosition
+#map uniform Translation translation
+#map uniform Scale scale
+#map uniform Range range
+#map uniform GridSize gridSize
+#map attribute Position position
+
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
+uniform sampler2D heightMap;
+uniform vec3 cameraPosition;
+uniform vec3 translation;
+uniform float scale;
+uniform float range;
+uniform vec2 gridSize;
+
+in vec3 position;
+
+out vec4 frag_position;
+out vec3 frag_worldPosition;
+out float frag_distance;
+out vec2 frag_screenPos;
+out float frag_morph;
+
+vec2 morphVertex(vec2 gridPos, vec2 vertex, float morphK) {
+	vec2 fracPart = fract(gridPos.xy * gridSize.xy * 0.5) * 2.0 / gridSize.xy;
+	return vertex.xy - fracPart * scale * morphK;
+}
+
+float getHeight(vec2 pos) {
+	return 10.0 * (texture(heightMap, (pos / 256.0) + vec2(0.5, 0.5)).r); //   100????
+}
+
+void main() {
+	float morphStart = 0.0;
+	float morphEnd = 0.25;
+	
+	frag_worldPosition = scale * position + translation;
+	float height = getHeight(frag_worldPosition.xz);
+	frag_worldPosition.y = height;
+	float dist = distance(cameraPosition, frag_worldPosition);
+	float nextLevelThreshold = ((range - dist) / scale);
+	float morphK = 1.0 - smoothstep(morphStart, morphEnd, nextLevelThreshold);
+	frag_morph = height / 10.0;
+	frag_worldPosition.xz = morphVertex(position.xz, frag_worldPosition.xz, morphK);
+	frag_worldPosition.y = getHeight(frag_worldPosition.xz);
+	frag_position = viewMatrix * vec4(frag_worldPosition, 1.0);
+	frag_distance = dist;
+	gl_Position = projectionMatrix * frag_position;
+	frag_screenPos = gl_Position.xy;
+}

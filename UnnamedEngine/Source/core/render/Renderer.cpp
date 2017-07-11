@@ -45,6 +45,7 @@ const std::string Renderer::SHADER_FRAMEBUFFER      = "Framebuffer";
 const std::string Renderer::SHADER_ENVIRONMENT_MAP  = "EnvironmentMap";
 const std::string Renderer::SHADER_SHADOW_MAP       = "ShadowMap";
 const std::string Renderer::SHADER_BILLBOARDED_FONT = "BillboardedFont";
+const std::string Renderer::SHADER_CDLOD_TERRAIN    = "CDLODTerrain";
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -101,6 +102,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_ENVIRONMENT_MAP,  Shader::loadShader("resources/shaders/EnvironmentMapShader"));
 	addRenderShader(SHADER_SHADOW_MAP,       Shader::loadShader("resources/shaders/ShadowMapShader"));
 	addRenderShader(SHADER_BILLBOARDED_FONT, Shader::loadShader("resources/shaders/BillboardedFontShader"));
+	addRenderShader(SHADER_CDLOD_TERRAIN,    Shader::loadShader("resources/shaders/CDLODTerrain"));
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);

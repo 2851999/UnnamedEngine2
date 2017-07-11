@@ -19,6 +19,7 @@
 #include "BaseTest3D.h"
 
 #include "../core/render/Renderer.h"
+#include "../utils/GLUtils.h"
 
 void BaseTest3D::initialise() {
 	resourceLoader.setPath("C:/UnnamedEngine/");
@@ -67,9 +68,11 @@ void BaseTest3D::update() {
 }
 
 void BaseTest3D::render() {
+	utils_gl::setupSimple3DView(true);
+	camera->useView();
+
 	onRender();
 
-	camera->useView();
 	renderScene->render();
 }
 
