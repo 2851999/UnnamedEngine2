@@ -8,6 +8,8 @@
 #map uniform Scale scale
 #map uniform Range range
 #map uniform GridSize gridSize
+#map uniform HeightScale heightScale
+#map uniform Size size
 #map attribute Position position
 
 uniform mat4 projectionMatrix;
@@ -18,6 +20,8 @@ uniform vec3 translation;
 uniform float scale;
 uniform float range;
 uniform vec2 gridSize;
+uniform float heightScale;
+uniform float size;
 
 in vec3 position;
 
@@ -25,7 +29,7 @@ out vec4 frag_position;
 out vec3 frag_worldPosition;
 out float frag_distance;
 out vec2 frag_screenPos;
-out float frag_morph;
+out float frag_colour;
 
 vec2 morphVertex(vec2 gridPos, vec2 vertex, float morphK) {
 	vec2 fracPart = fract(gridPos.xy * gridSize.xy * 0.5) * 2.0 / gridSize.xy;
@@ -33,7 +37,7 @@ vec2 morphVertex(vec2 gridPos, vec2 vertex, float morphK) {
 }
 
 float getHeight(vec2 pos) {
-	return 10.0 * (texture(heightMap, (pos / 256.0) + vec2(0.5, 0.5)).r); //   100????
+	return ((texture(heightMap, (pos / size) + vec2(0.5, 0.5)).r) - 0.5) * heightScale;
 }
 
 void main() {
@@ -46,7 +50,9 @@ void main() {
 	float dist = distance(cameraPosition, frag_worldPosition);
 	float nextLevelThreshold = ((range - dist) / scale);
 	float morphK = 1.0 - smoothstep(morphStart, morphEnd, nextLevelThreshold);
-	frag_morph = height / 10.0;
+	frag_colour = (height / heightScale) + 0.5;
+	//frag_colour = range / dist;
+	//frag_colour = morphK;
 	frag_worldPosition.xz = morphVertex(position.xz, frag_worldPosition.xz, morphK);
 	frag_worldPosition.y = getHeight(frag_worldPosition.xz);
 	frag_position = viewMatrix * vec4(frag_worldPosition, 1.0);

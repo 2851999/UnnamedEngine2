@@ -30,10 +30,28 @@ CDLODHeightMap::CDLODHeightMap(std::string path) {
 	int numComponents, w, h, format;
 	//Load the height map data
 	this->data = Texture::loadTexture(path, numComponents, w, h, format);
+	//Setup this height map
+	setup(data, numComponents, w, h, format);
+}
+
+CDLODHeightMap::CDLODHeightMap(unsigned char* data, int numComponents, int width, int height, int format) {
+	this->data = data;
+	//Setup this height map
+	setup(data, numComponents, width, height, format);
+}
+
+CDLODHeightMap::~CDLODHeightMap() {
+	//Free the texture data
+	Texture::freeTexture(data);
+}
+
+void CDLODHeightMap::setup(unsigned char* data, int numComponents, int width, int height, int format) {
 	//Ensure the data is valid i.e. the height map is a square with sides a power of 2
-	if (w == h && w != 0 && (w & (w - 1)) == 0) {
+	if (width == height && width != 0 && (width & (width - 1)) == 0) {
 		//Assign the width and height values
-		this->size = w;
+		this->size = width;
+		//Assign the default height scale
+		this->heightScale = 40.0f;
 		//Assign the number of components per pixel
 		this->numComponentsPerPixel = numComponents;
 		//Create the texture instance
@@ -41,16 +59,11 @@ CDLODHeightMap::CDLODHeightMap(std::string path) {
 		p.setFilter(GL_LINEAR);
 		p.setClamp(GL_REPEAT);
 		p.setShouldClamp(true);
-		this->texture = Texture::createTexture(path, data, numComponents, w, h, format);
+		this->texture = Texture::createTexture("", data, numComponents, width, width, format);
 	} else {
 		//Output an error message
-		Logger::log("HeightMap with the path " + path + " is invalid", "CDLODHeightMap", LogType::Error);
+		Logger::log("HeightMap is invalid", "CDLODHeightMap", LogType::Error);
 	}
-}
-
-CDLODHeightMap::~CDLODHeightMap() {
-	//Free the texture data
-	Texture::freeTexture(data);
 }
 
 float CDLODHeightMap::getHeight(float x, float y) {
@@ -70,7 +83,7 @@ float CDLODHeightMap::getValue(int mapX, int mapY) {
 		//Calculate the actual index
 		unsigned int valueIndex = pixelIndex * numComponentsPerPixel;
 		//Get the height value and return it
-		return (((float) data[valueIndex]) / 255.0f) * 10.0f;
+		return ((((float) data[valueIndex]) / 255.0f) - 0.5f) * heightScale;
 	} else {
 		Logger::log("Location (" + utils_string::str(mapX) + "," + utils_string::str(mapY) + ") is outside of the height map", "CDLODHeightMap", LogType::Debug);
 		return 0.0f;
@@ -87,8 +100,8 @@ float CDLODHeightMap::getMinHeight(float x, float y, float areaSize) {
 	float endY   = y + areaSize / 2.0f;
 
 	//Go through each coordinate in the area (taking into account the nodeSize)
-	for (float currentY = startY; currentY < endY; currentY++) {
-		for (float currentX = startX; currentX < endX; currentX++) {
+	for (float currentY = startY; currentY <= endY; currentY++) {
+		for (float currentX = startX; currentX <= endX; currentX++) {
 			//Assign the value
 			min = utils_maths::min(min, getHeight(currentX, currentY));
 		}
@@ -106,8 +119,8 @@ float CDLODHeightMap::getMaxHeight(float x, float y, float areaSize) {
 	float startY = y - areaSize / 2.0f;
 	float endY   = y + areaSize / 2.0f;
 	//Go through each coordinate in the area (taking into account the nodeSize)
-	for (float currentY = startY; currentY < endY; currentY++) {
-		for (float currentX = startX; currentX < endX; currentX++) {
+	for (float currentY = startY; currentY <= endY; currentY++) {
+		for (float currentX = startX; currentX <= endX; currentX++) {
 			//Assign the value
 			max = utils_maths::max(max, getHeight(currentX, currentY));
 		}

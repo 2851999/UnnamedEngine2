@@ -16,51 +16,29 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_TERRAIN_CDLODTERRAIN_H_
-#define CORE_TERRAIN_CDLODTERRAIN_H_
+#ifndef EXPERIMENTAL_TERRAIN_HEIGHTMAPGENERATOR_H_
+#define EXPERIMENTAL_TERRAIN_HEIGHTMAPGENERATOR_H_
 
-#include "CDLODHeightMap.h"
-#include "CDLODQuadTree.h"
-
-#include "../render/Renderer.h"
+#include "SimplexNoise.h"
 
 /*****************************************************************************
- * The CDLODTerrain class handles the terrain creation and rendering
+ * The HeightMapGenerator class is used to procedurally generate the data for
+ * a height map
  *****************************************************************************/
 
-class CDLODTerrain {
+class HeightMapGenerator {
 private:
-	/* The height map for this terrain */
-	CDLODHeightMap* heightMap;
-
-	/* The root node of the quad-tree */
-	CDLODQuadTreeNode* root;
-
-	/* The ranges */
-	std::vector<int> ranges;
-
-	/* The mesh for this terrain */
-	Mesh* mesh;
-
-	/* The parameters for the quad-tree */
-	float leafNodeSize = 1.0f;
-	int   lodDepth = 8;
-
-	/* The terrain shader */
-	RenderShader* terrainShader;
+	/* Noise generator */
+	SimplexNoise noiseGen;
 public:
 	/* The constructor */
-	CDLODTerrain(CDLODHeightMap* heightMap);
-	CDLODTerrain(std::string heightMapPath);
+	HeightMapGenerator() {}
 
 	/* The destructor */
-	virtual ~CDLODTerrain();
+	virtual ~HeightMapGenerator() {}
 
-	/* The method used to render this terrain */
-	void render();
-
-	/* Static method that returns a mesh of vertices for CDLOD terrain (does not have heights applied) */
-	static MeshData* createMeshData(int width, int height);
+	/* Method used to create a height map and return its data */
+	unsigned char* generate(int width, int height);
 };
 
-#endif /* CORE_TERRAIN_CDLODTERRAIN_H_ */
+#endif /* EXPERIMENTAL_TERRAIN_HEIGHTMAPGENERATOR_H_ */

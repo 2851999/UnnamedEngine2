@@ -18,22 +18,29 @@
 
 #include "CDLODTerrain.h"
 
+#include "../../utils/GLUtils.h"
+
 /*****************************************************************************
  * The CDLODTerrain class
  *****************************************************************************/
 
-CDLODTerrain::CDLODTerrain(std::string heightMapPath) {
+CDLODTerrain::CDLODTerrain(std::string heightMapPath) : CDLODTerrain(new CDLODHeightMap(heightMapPath)) {}
+
+CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	//Create the height map
-	heightMap = new CDLODHeightMap(heightMapPath);
+	this->heightMap = heightMap;
 
 	//Setup the ranges
-	for (int i = 0; i < lodDepth; i++) {
-		ranges.push_back(pow(2, i));
+	ranges.push_back(1.0f);
+	for (int i = 1; i < lodDepth; i++) {
+		ranges.push_back(ranges[i - 1] + pow(2, i));
 	}
 
 	//Calculate the root node size
-	//float rootNodeSize = leafNodeSize * pow(2, lodDepth - 1);
-	float rootNodeSize = heightMap->getSize();
+	float rootNodeSize = leafNodeSize * pow(2, lodDepth - 1);
+	//float rootNodeSize = heightMap->getSize();
+
+	std::cout << rootNodeSize << std::endl;
 
 	//Create the quad-tree
 	root = new CDLODQuadTreeNode(heightMap, rootNodeSize, lodDepth - 1, 0.0f, 0.0f);
@@ -42,7 +49,7 @@ CDLODTerrain::CDLODTerrain(std::string heightMapPath) {
 	terrainShader = Renderer::getRenderShader(Renderer::SHADER_CDLOD_TERRAIN);
 
 	//Create the mesh
-	mesh = new Mesh(createMeshData(heightMap->getSize(), heightMap->getSize()));
+	mesh = new Mesh(createMeshData(64, 64));
 	mesh->setup(terrainShader);
 }
 
@@ -60,6 +67,11 @@ void CDLODTerrain::render() {
 	std::vector<CDLODQuadTreeNode*> selectionList;
 	root->LODSelect(ranges, lodDepth - 1, camera, selectionList);
 
+//	utils_gl::enableWireframe();
+//	for (CDLODQuadTreeNode* node : selectionList)
+//		node->debug();
+//	utils_gl::disableWireframe();
+
 	//Use the terrain shader
 	Shader* shader = terrainShader->getShader();
 	shader->use();
@@ -67,8 +79,13 @@ void CDLODTerrain::render() {
 	shader->setUniformMatrix4("ProjectionMatrix", camera->getProjectionMatrix());
 	shader->setUniformMatrix4("ViewMatrix", camera->getViewMatrix());
 	shader->setUniformVector3("CameraPosition", camera->getPosition());
+	shader->setUniformf("HeightScale", heightMap->getHeightScale());
+	shader->setUniformf("Size", heightMap->getSize());
 
 	shader->setUniformi("HeightMap", Renderer::bindTexture(heightMap->getTexture()));
+
+//	long numPolygons = (selectionList.size() * mesh->getData()->getNumIndices()) / 3;
+//	std::cout << numPolygons << std::endl;
 
 	//Go through each node to render
 	while (! selectionList.empty()) {
@@ -79,9 +96,10 @@ void CDLODTerrain::render() {
 		shader->setUniformVector3("Translation", Vector3f(currentNode->getX(), 0.0f, currentNode->getZ()));
 		shader->setUniformf("Scale", currentNode->getSize());
 		shader->setUniformf("Range", currentNode->getRange());
-		shader->setUniformVector2("GridSize", Vector2f(256, 256));
+		shader->setUniformVector2("GridSize", Vector2f(64, 64)); //??????
 
-		//std::cout << currentNode->getSize() << std::endl;
+//		std::cout << currentNode->getSize() << std::endl;
+//		std::cout << currentNode->getRange() << std::endl;
 
 		mesh->getRenderData()->render();
 	}

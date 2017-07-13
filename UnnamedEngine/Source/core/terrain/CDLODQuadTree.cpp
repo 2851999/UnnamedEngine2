@@ -20,6 +20,8 @@
 
 #include "../../utils/Utils.h"
 
+#include "../render/Renderer.h"
+
 /*****************************************************************************
  * The CDLODQuadTree class
  *****************************************************************************/
@@ -42,6 +44,10 @@ CDLODQuadTreeNode::CDLODQuadTreeNode(CDLODHeightMap* heightMap, float nodeSize, 
 		//Assign the minimum and maximum height values
 		minHeight = heightMap->getMinHeight(x, z, nodeSize);
 		maxHeight = heightMap->getMaxHeight(x, z, nodeSize);
+
+//		std::cout << "NODE" << std::endl;
+//		std::cout << minHeight << std::endl;
+//		std::cout << maxHeight << std::endl;
 	} else {
 		isLeafNode = false;
 
@@ -58,6 +64,10 @@ CDLODQuadTreeNode::CDLODQuadTreeNode(CDLODHeightMap* heightMap, float nodeSize, 
 		minHeight = utils_maths::min(utils_maths::min(children[0]->getMinHeight(), children[1]->getMinHeight()), utils_maths::min(children[2]->getMinHeight(), children[3]->getMinHeight()));
 		maxHeight = utils_maths::max(utils_maths::max(children[0]->getMaxHeight(), children[1]->getMaxHeight()), utils_maths::max(children[2]->getMaxHeight(), children[3]->getMaxHeight()));
 	}
+
+	debugMesh = new GameObject3D(new Mesh(MeshBuilder::createCube(nodeSize, maxHeight - minHeight, nodeSize)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	debugMesh->setPosition(Vector3f(x, (maxHeight + minHeight) / 2.0f, z));
+	debugMesh->update();
 }
 
 CDLODQuadTreeNode::~CDLODQuadTreeNode() {

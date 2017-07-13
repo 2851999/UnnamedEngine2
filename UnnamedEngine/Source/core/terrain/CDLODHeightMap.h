@@ -29,15 +29,25 @@ class CDLODHeightMap {
 private:
 	/* The data from the height map */
 	unsigned char* data;
+
 	/* The size of the height map (its width/height) */
 	float size;
+
+	/* The scale factor for the heights */
+	float heightScale;
+
 	/* The number of components per pixel */
 	unsigned int numComponentsPerPixel;
+
 	/* The texture instance for the height map */
 	Texture* texture;
+
+	/* Method used to setup this height map */
+	void setup(unsigned char* data, int numComponents, int width, int height, int format);
 public:
-	/* The constructor */
+	/* The constructors */
 	CDLODHeightMap(std::string path);
+	CDLODHeightMap(unsigned char* data, int numComponents, int width, int height, int format);
 
 	/* The destructor */
 	virtual ~CDLODHeightMap();
@@ -52,8 +62,11 @@ public:
 	float getMinHeight(float x, float y, float areaSize);
 	float getMaxHeight(float x, float y, float areaSize);
 
-	/* Getters */
+	/* Setters and getters */
+	inline void setHeightScale(float scale) { this->heightScale = scale; }
+
 	inline unsigned int getSize() { return size; }
+	inline float getHeightScale() { return heightScale; }
 	inline Texture* getTexture() { return texture; }
 };
 

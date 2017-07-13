@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 1 | Experimental 2
+
+* Added 'heightScale' in CDLODHeightMap
+
+* Fixed bug: Maximum and minimum heights for the smallest
+             CDLODQuadTreeNode's were not assigned correctly
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 1 | Experimental 1
 
 * Added CDLODHeightMap

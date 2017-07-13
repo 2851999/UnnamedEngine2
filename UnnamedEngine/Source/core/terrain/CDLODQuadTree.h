@@ -48,6 +48,8 @@ private:
 
 	/* Pointers to the 4 child nodes of this node (If assigned) */
 	CDLODQuadTreeNode* children[4];
+
+	GameObject3D* debugMesh;
 public:
 	/* The constructor */
 	CDLODQuadTreeNode(CDLODHeightMap* heightMap, float nodeSize, int lod, float x, float z);
@@ -60,6 +62,8 @@ public:
 
 	/* Returns whether the bounds of this node (an AABB) intersects a sphere */
 	bool intersectsSphere(Vector3f position, float radius);
+
+	inline void debug() { debugMesh->render(); }
 
 	/* Getters */
 	inline float getMinHeight() { return minHeight; }
