@@ -1,4 +1,51 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 2 (V0.2.5)
+
+* Added CDLODHeightMap
+* Added CDLODQuadTreeNode
+* Added CDLODTerrain
+* Added HeightMapGenerator
+* Added SimplexNoise
+* Added 'createTexture' method in Texture
+
+* Changed resources so that they remove themselves from their
+  ResourceManager when deleted
+
+* Fixed bug: Not all resources were deleted when the engine
+             stopped
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 1 | Experimental 3
+
+* Added HeightMapGenerator
+* Added SimplexNoise
+* Added 'meshSize' to CDLODTerrain
+
+* Changed resources so that they remove themselves from their
+  ResourceManager when deleted
+  
+* Fixed bug: Not all resources were deleted when the engine
+             stopped
+* Fixed bug: CDLODTerrain didn't unbind the height map
+             texture
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 1 | Experimental 2
+
+* Added 'heightScale' in CDLODHeightMap
+
+* Fixed bug: Maximum and minimum heights for the smallest
+             CDLODQuadTreeNode's were not assigned correctly
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 1 | Experimental 1
+
+* Added CDLODHeightMap
+* Added CDLODQuadTreeNode
+* Added CDLODTerrain
+* Added 'createTexture' method in Texture
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 1 (V0.2.4)
 
 * Added Sphere

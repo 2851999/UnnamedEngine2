@@ -139,7 +139,7 @@ void Test::onCreated() {
 //	//box->getMesh()->setBoundingSphere(box->getMesh()->getData()->calculateBoundingSphere());
 //	box->update();
 
-	camera->setMovementSpeed(10.0f);
+	camera->setMovementSpeed(5.0f);
 }
 
 void Test::onUpdate() {
@@ -160,8 +160,6 @@ void Test::onUpdate() {
 }
 
 void Test::onRender() {
-	utils_gl::setupSimple3DView(true);
-
 	particleSystem->render();
 	font->render();
 	terrain->render();

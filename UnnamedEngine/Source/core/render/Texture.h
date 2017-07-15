@@ -152,6 +152,9 @@ public:
 	 * be called once the image data is no longer needed */
 	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& format);
 
+	/* Returns a texture instance created using the data given */
+	static Texture* createTexture(std::string path, unsigned char* data, int numComponents, GLsizei width, GLsizei height, GLint format, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
+
 	/* Calls stbi_image_free */
 	static void freeTexture(unsigned char* texture);
 

@@ -40,9 +40,8 @@ void ResourceManager::remove(Resource* resource) {
 
 void ResourceManager::destroyAll() {
 	//Go through and delete all resource added to this manager
-	for (unsigned int i = 0; i < resources.size(); i++)
-		delete resources[i];
-	resources.clear();
+	while (resources.size() != 0)
+		delete resources[0];
 }
 
 void ResourceManager::removeResourceManager() {
