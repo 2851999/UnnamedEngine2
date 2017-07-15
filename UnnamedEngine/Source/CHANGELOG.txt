@@ -1,4 +1,19 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 1 | Experimental 3
+
+* Added HeightMapGenerator
+* Added SimplexNoise
+* Added 'meshSize' to CDLODTerrain
+
+* Changed resources so that they remove themselves from their
+  ResourceManager when deleted
+  
+* Fixed bug: Not all resources were deleted when the engine
+             stopped
+* Fixed bug: CDLODTerrain didn't unbind the height map
+             texture
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 1 | Experimental 2
 
 * Added 'heightScale' in CDLODHeightMap

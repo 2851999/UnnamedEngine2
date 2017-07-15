@@ -16,8 +16,8 @@
  *
  *****************************************************************************/
 
-#ifndef EXPERIMENTAL_TERRAIN_SIMPLEXNOISE_H_
-#define EXPERIMENTAL_TERRAIN_SIMPLEXNOISE_H_
+#ifndef UTILS_SIMPLEXNOISE_H_
+#define UTILS_SIMPLEXNOISE_H_
 
 //http://weber.itn.liu.se/~stegu/simplexnoise/SimplexNoise.java
 
@@ -73,4 +73,4 @@ public:
 	double noise(double xin, double yin);
 };
 
-#endif /* EXPERIMENTAL_TERRAIN_SIMPLEXNOISE_H_ */
+#endif /* UTILS_SIMPLEXNOISE_H_ */

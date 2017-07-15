@@ -24,7 +24,7 @@
 #include "../core/render/Renderer.h"
 
 #include "../core/terrain/CDLODTerrain.h"
-#include "../experimental/terrain/HeightMapGenerator.h"
+#include "../core/terrain/HeightMapGenerator.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_write.h>
@@ -41,8 +41,8 @@ public:
 };
 
 void Test::onInitialise() {
-	getSettings().videoVSync = false;
-	getSettings().videoMaxFPS = 0;
+//	getSettings().videoVSync = false;
+//	getSettings().videoMaxFPS = 0;
 }
 
 void Test::onCreated() {
@@ -52,10 +52,10 @@ void Test::onCreated() {
 
 	camera->setMovementSpeed(5.0f);
 
-	terrain = new CDLODTerrain(resourceLoader.getAbsPathTextures() + "heightmap.jpg");
-//	HeightMapGenerator generator;
-//	terrain = new CDLODTerrain(new CDLODHeightMap(generator.generate(256, 256), 1, 256, 256, GL_RED));
-//	stbi_write_bmp((resourceLoader.getAbsPathTextures() + "heightmapgen.bmp").c_str(), 256, 256, 1, generator.generate(256, 256));
+	//terrain = new CDLODTerrain(resourceLoader.getAbsPathTextures() + "heightmap.jpg");
+	HeightMapGenerator generator;
+	terrain = new CDLODTerrain(new CDLODHeightMap(generator.generate(512, 512), 1, 512, 512, GL_RED));
+	//stbi_write_bmp("D:/Storage/Users/Joel/Desktop/heightmapgen.bmp", 512, 512, 1, generator.generate(512, 512));
 }
 
 void Test::onUpdate() {

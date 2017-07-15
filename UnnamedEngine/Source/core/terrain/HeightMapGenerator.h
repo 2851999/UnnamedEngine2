@@ -16,10 +16,10 @@
  *
  *****************************************************************************/
 
-#ifndef EXPERIMENTAL_TERRAIN_HEIGHTMAPGENERATOR_H_
-#define EXPERIMENTAL_TERRAIN_HEIGHTMAPGENERATOR_H_
+#ifndef CORE_TERRAIN_HEIGHTMAPGENERATOR_H_
+#define CORE_TERRAIN_HEIGHTMAPGENERATOR_H_
 
-#include "SimplexNoise.h"
+#include "../../utils/SimplexNoise.h"
 
 /*****************************************************************************
  * The HeightMapGenerator class is used to procedurally generate the data for
@@ -30,6 +30,15 @@ class HeightMapGenerator {
 private:
 	/* Noise generator */
 	SimplexNoise noiseGen;
+
+	/* A 'seed' for modifying the output */
+	int seed = 42;
+
+	/* A scale for modifying the output */
+	double scale = 0.015;
+
+	/* Method used to add together noise at different frequencies */
+	double noiseOctaves(int iterations, int x, int y, float persistence, float low, float high);
 public:
 	/* The constructor */
 	HeightMapGenerator() {}
@@ -39,6 +48,13 @@ public:
 
 	/* Method used to create a height map and return its data */
 	unsigned char* generate(int width, int height);
+
+	/* Setters and getters */
+	inline void setSeed(int seed) { this->seed = seed; }
+	inline void setScale(double scale) { this->scale = scale; }
+
+	inline int getSeed() { return seed; }
+	inline double getScale() { return scale; }
 };
 
-#endif /* EXPERIMENTAL_TERRAIN_HEIGHTMAPGENERATOR_H_ */
+#endif /* CORE_TERRAIN_HEIGHTMAPGENERATOR_H_ */

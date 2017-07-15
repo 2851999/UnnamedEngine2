@@ -65,9 +65,9 @@ CDLODQuadTreeNode::CDLODQuadTreeNode(CDLODHeightMap* heightMap, float nodeSize, 
 		maxHeight = utils_maths::max(utils_maths::max(children[0]->getMaxHeight(), children[1]->getMaxHeight()), utils_maths::max(children[2]->getMaxHeight(), children[3]->getMaxHeight()));
 	}
 
-	debugMesh = new GameObject3D(new Mesh(MeshBuilder::createCube(nodeSize, maxHeight - minHeight, nodeSize)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
-	debugMesh->setPosition(Vector3f(x, (maxHeight + minHeight) / 2.0f, z));
-	debugMesh->update();
+//	debugMesh = new GameObject3D(new Mesh(MeshBuilder::createCube(nodeSize, maxHeight - minHeight, nodeSize)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+//	debugMesh->setPosition(Vector3f(x, (maxHeight + minHeight) / 2.0f, z));
+//	debugMesh->update();
 }
 
 CDLODQuadTreeNode::~CDLODQuadTreeNode() {

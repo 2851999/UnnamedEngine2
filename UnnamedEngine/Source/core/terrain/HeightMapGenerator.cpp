@@ -18,9 +18,30 @@
 
 #include "HeightMapGenerator.h"
 
+#include <math.h>
+
 /*****************************************************************************
  * The HeightMapGenerator class
  *****************************************************************************/
+
+double HeightMapGenerator::noiseOctaves(int iterations, int x, int y, float persistence, float low, float high) {
+	double maxAmplitude = 0;
+	double amplitude = 1;
+	double frequency = scale;
+	double noise = 0;
+
+	for (int i = 0; i < iterations; i++) {
+		noise += noiseGen.noise(x * frequency, y * frequency) * amplitude;
+		maxAmplitude += amplitude;
+		amplitude *= persistence;
+		frequency *= 2;
+	}
+
+	noise /= maxAmplitude;
+	noise = noise * (high - low) / 2 + (high + low) / 2;
+
+	return noise;
+}
 
 unsigned char* HeightMapGenerator::generate(int width, int height) {
 	//The size of the data array
@@ -32,11 +53,11 @@ unsigned char* HeightMapGenerator::generate(int width, int height) {
 		for (int x = 0; x < width; x++) {
 			//Get the index in the data
 			int index = y * height + x;
-			//The x and y positions to use for the noise
-			double nx = ((double) x / (double) width) - 0.5;
-			double ny = ((double) y / (double) height) - 0.5;
+			//The x and y positions to use
+			double nx = seed + x;
+			double ny = seed + y;
 			//Assign the data
-			data[index] = (unsigned int) ((noiseGen.noise(nx, ny) + 1.0) / 2.0 * 255.0);
+			data[index] = (unsigned int) noiseOctaves(16, nx, ny, 0.5, 0, 255);
 		}
 	}
 	//Return the data

@@ -48,7 +48,7 @@ const double SimplexNoise::G4 = (5.0 - sqrt(5.0)) / 20.0;
 SimplexNoise::SimplexNoise() {
 	for(int i = 0; i < 512; i++) {
 		perm[i] = p[i & 255];
-		permMod12[i] = (short)(perm[i] % 12);
+		permMod12[i] = (short) (perm[i] % 12);
 	}
 }
 
@@ -73,12 +73,12 @@ double SimplexNoise::noise(double xin, double yin) {
 	int jj = j & 255;
 	int gi0 = permMod12[ii + perm[jj]];
 	int gi1 = permMod12[ii + i1 + perm[jj + j1]];
-	int gi2 = permMod12[ii + 1 + perm[jj] + 1];
+	int gi2 = permMod12[ii + 1 + perm[jj + 1]];
 	double t0 = 0.5 - x0 * x0 - y0 * y0;
 	if(t0 < 0) n0 = 0.0;
 	else {
 		t0 *= t0;
-		n0 = t0 * t0 * dot(grad3[gi0], x0, y0);  // (x,y) of grad3 used for 2D gradient
+		n0 = t0 * t0 * dot(grad3[gi0], x0, y0);
 	}
 	double t1 = 0.5 - x1 * x1 - y1 * y1;
 	if(t1 < 0) n1 = 0.0;

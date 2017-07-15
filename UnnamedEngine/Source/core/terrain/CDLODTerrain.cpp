@@ -40,7 +40,7 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	float rootNodeSize = leafNodeSize * pow(2, lodDepth - 1);
 	//float rootNodeSize = heightMap->getSize();
 
-	std::cout << rootNodeSize << std::endl;
+//	std::cout << rootNodeSize << std::endl;
 
 	//Create the quad-tree
 	root = new CDLODQuadTreeNode(heightMap, rootNodeSize, lodDepth - 1, 0.0f, 0.0f);
@@ -49,8 +49,12 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	terrainShader = Renderer::getRenderShader(Renderer::SHADER_CDLOD_TERRAIN);
 
 	//Create the mesh
-	mesh = new Mesh(createMeshData(64, 64));
+	mesh = new Mesh(createMeshData(meshSize, meshSize));
 	mesh->setup(terrainShader);
+
+//	texture1 = Texture::loadTexture("C:/UnnamedEngine/textures/grass.png");
+//	texture2 = Texture::loadTexture("C:/UnnamedEngine/textures/snow.jpg");
+//	texture3 = Texture::loadTexture("C:/UnnamedEngine/textures/stone.jpg");
 }
 
 CDLODTerrain::~CDLODTerrain() {
@@ -83,6 +87,9 @@ void CDLODTerrain::render() {
 	shader->setUniformf("Size", heightMap->getSize());
 
 	shader->setUniformi("HeightMap", Renderer::bindTexture(heightMap->getTexture()));
+//	shader->setUniformi("GrassTexture", Renderer::bindTexture(texture1));
+//	shader->setUniformi("SnowTexture", Renderer::bindTexture(texture2));
+//	shader->setUniformi("StoneTexture", Renderer::bindTexture(texture3));
 
 //	long numPolygons = (selectionList.size() * mesh->getData()->getNumIndices()) / 3;
 //	std::cout << numPolygons << std::endl;
@@ -96,13 +103,18 @@ void CDLODTerrain::render() {
 		shader->setUniformVector3("Translation", Vector3f(currentNode->getX(), 0.0f, currentNode->getZ()));
 		shader->setUniformf("Scale", currentNode->getSize());
 		shader->setUniformf("Range", currentNode->getRange());
-		shader->setUniformVector2("GridSize", Vector2f(64, 64)); //??????
+		shader->setUniformVector2("GridSize", Vector2f(meshSize, meshSize));
 
 //		std::cout << currentNode->getSize() << std::endl;
 //		std::cout << currentNode->getRange() << std::endl;
 
 		mesh->getRenderData()->render();
 	}
+
+	Renderer::unbindTexture();
+//	Renderer::unbindTexture();
+//	Renderer::unbindTexture();
+//	Renderer::unbindTexture();
 
 	//Stop using the shader
 	shader->stopUsing();
