@@ -32,6 +32,7 @@
 class Test : public BaseTest3D {
 private:
 	CDLODTerrain* terrain;
+	CDLODHeightMap* heightMap;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -41,8 +42,10 @@ public:
 };
 
 void Test::onInitialise() {
-//	getSettings().videoVSync = false;
-//	getSettings().videoMaxFPS = 0;
+	getSettings().videoVSync = false;
+	getSettings().videoMaxFPS = 0;
+	getSettings().windowFullscreen = true;
+	getSettings().videoResolution = VideoResolution::RES_1920x1080;
 }
 
 void Test::onCreated() {
@@ -54,12 +57,20 @@ void Test::onCreated() {
 
 	//terrain = new CDLODTerrain(resourceLoader.getAbsPathTextures() + "heightmap.jpg");
 	HeightMapGenerator generator;
-	terrain = new CDLODTerrain(new CDLODHeightMap(generator.generate(512, 512), 1, 512, 512, GL_RED));
+	heightMap = new CDLODHeightMap(generator.generate(512, 512), 1, 512, 512, GL_RED);
+	terrain = new CDLODTerrain(heightMap);
 	//stbi_write_bmp("D:/Storage/Users/Joel/Desktop/heightmapgen.bmp", 512, 512, 1, generator.generate(512, 512));
+	//std::cout << glfwGetJoystickName(0) << std::endl;
 }
 
 void Test::onUpdate() {
-
+	if (Keyboard::isPressed(GLFW_KEY_LEFT_SHIFT)) {
+		camera->setMovementSpeed(50.0f);
+	} else {
+		camera->setMovementSpeed(5.0f);
+	}
+	Vector3f pos = camera->getPosition();
+	camera->setY(heightMap->getHeight(pos.getX(), pos.getZ()) + 1.0f);
 }
 
 void Test::onRender() {

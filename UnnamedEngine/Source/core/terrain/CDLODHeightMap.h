@@ -34,7 +34,7 @@ private:
 	float size;
 
 	/* The scale factor for the heights */
-	float heightScale;
+	float heightScale = 40.0f;;
 
 	/* The number of components per pixel */
 	unsigned int numComponentsPerPixel;
@@ -61,6 +61,9 @@ public:
 	/* Methods used to get the minimum and maximum heights over a certain area of the height map */
 	float getMinHeight(float x, float y, float areaSize);
 	float getMaxHeight(float x, float y, float areaSize);
+
+	/* Method used to check if a location is within the height map or not */
+	bool isInMap(int mapX, int mapY);
 
 	/* Setters and getters */
 	inline void setHeightScale(float scale) { this->heightScale = scale; }

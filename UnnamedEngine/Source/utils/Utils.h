@@ -111,6 +111,9 @@ namespace utils_maths {
 			return value;
 	}
 
+	template<typename T>
+	inline T lerp(T a, T b, T factor) { return (a + ((b - a) * factor)); }
+
 	/* Returns a value that is a multiple of the interval, closest to the
 	 * value given */
 	float clampToClosestInterval(float value, float interval);

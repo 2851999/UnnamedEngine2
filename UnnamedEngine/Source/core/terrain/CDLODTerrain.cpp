@@ -20,6 +20,8 @@
 
 #include "../../utils/GLUtils.h"
 
+#include "../render/Light.h"
+
 /*****************************************************************************
  * The CDLODTerrain class
  *****************************************************************************/
@@ -31,9 +33,9 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	this->heightMap = heightMap;
 
 	//Setup the ranges
-	ranges.push_back(1.0f);
+	ranges.push_back(leafNodeSize*1.5f);
 	for (int i = 1; i < lodDepth; i++) {
-		ranges.push_back(ranges[i - 1] + pow(2, i));
+		ranges.push_back((ranges[i - 1] + pow(2, i)*leafNodeSize)*1.5f); //Multiplier resolves clamping issue
 	}
 
 	//Calculate the root node size
@@ -52,9 +54,9 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	mesh = new Mesh(createMeshData(meshSize, meshSize));
 	mesh->setup(terrainShader);
 
-//	texture1 = Texture::loadTexture("C:/UnnamedEngine/textures/grass.png");
-//	texture2 = Texture::loadTexture("C:/UnnamedEngine/textures/snow.jpg");
-//	texture3 = Texture::loadTexture("C:/UnnamedEngine/textures/stone.jpg");
+	texture1 = Texture::loadTexture("C:/UnnamedEngine/textures/grass.png");
+	texture2 = Texture::loadTexture("C:/UnnamedEngine/textures/snow.jpg");
+	texture3 = Texture::loadTexture("C:/UnnamedEngine/textures/stone.jpg");
 }
 
 CDLODTerrain::~CDLODTerrain() {
@@ -87,9 +89,20 @@ void CDLODTerrain::render() {
 	shader->setUniformf("Size", heightMap->getSize());
 
 	shader->setUniformi("HeightMap", Renderer::bindTexture(heightMap->getTexture()));
-//	shader->setUniformi("GrassTexture", Renderer::bindTexture(texture1));
-//	shader->setUniformi("SnowTexture", Renderer::bindTexture(texture2));
-//	shader->setUniformi("StoneTexture", Renderer::bindTexture(texture3));
+
+//	shader->setUniformi("NumLights", 1);
+//	shader->setUniformColourRGB("Light_Ambient", Colour(0.1f, 0.1f, 0.1f));
+//	shader->setUniformVector3("Camera_Position", ((Camera3D*) Renderer::getCamera())->getPosition());
+//	shader->setUniformi("UseEnvironmentMap", 0);
+//	shader->setUniformi("UseShadowMap", 0);
+//
+//	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f);
+//	light0->setUniforms(shader, "[0]");
+//	delete light0;
+
+	shader->setUniformi("GrassTexture", Renderer::bindTexture(texture1));
+	shader->setUniformi("SnowTexture", Renderer::bindTexture(texture2));
+	shader->setUniformi("StoneTexture", Renderer::bindTexture(texture3));
 
 //	long numPolygons = (selectionList.size() * mesh->getData()->getNumIndices()) / 3;
 //	std::cout << numPolygons << std::endl;
@@ -112,9 +125,9 @@ void CDLODTerrain::render() {
 	}
 
 	Renderer::unbindTexture();
-//	Renderer::unbindTexture();
-//	Renderer::unbindTexture();
-//	Renderer::unbindTexture();
+	Renderer::unbindTexture();
+	Renderer::unbindTexture();
+	Renderer::unbindTexture();
 
 	//Stop using the shader
 	shader->stopUsing();

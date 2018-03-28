@@ -43,18 +43,18 @@ private:
 	Mesh* mesh;
 
 	/* The mesh size */
-	float meshSize = 64.0f;
+	float meshSize = 32.0f;
 
 	/* The parameters for the quad-tree */
-	float leafNodeSize = 1.0f;
+	float leafNodeSize = 4.0f;
 	int   lodDepth = 8;
 
 	/* The terrain shader */
 	RenderShader* terrainShader;
 
-//	Texture* texture1;
-//	Texture* texture2;
-//	Texture* texture3;
+	Texture* texture1;
+	Texture* texture2;
+	Texture* texture3;
 public:
 	/* The constructor */
 	CDLODTerrain(CDLODHeightMap* heightMap);

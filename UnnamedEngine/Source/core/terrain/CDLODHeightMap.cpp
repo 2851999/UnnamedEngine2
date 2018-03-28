@@ -50,8 +50,6 @@ void CDLODHeightMap::setup(unsigned char* data, int numComponents, int width, in
 	if (width == height && width != 0 && (width & (width - 1)) == 0) {
 		//Assign the width and height values
 		this->size = width;
-		//Assign the default height scale
-		this->heightScale = 40.0f;
 		//Assign the number of components per pixel
 		this->numComponentsPerPixel = numComponents;
 		//Create the texture instance
@@ -67,17 +65,50 @@ void CDLODHeightMap::setup(unsigned char* data, int numComponents, int width, in
 }
 
 float CDLODHeightMap::getHeight(float x, float y) {
-	//Calculate the coordinates in the height map for the location (with the centre at (0,0))
-	int mapX = (int) (x + size / 2.0f);
-	int mapY = (int) (y + size / 2.0f);
+	//The x and y locations in the map
+	float mapX = (x + size / 2.0f);
+	float mapY = (y + size / 2.0f);
+
+	//The maximum/minimum grid values possible
+	int mapMaxX = (int) ceil(mapX);
+	int mapMinX = (int) floor(mapX);
+	int mapMaxY = (int) ceil(mapY);
+	int mapMinY = (int) floor(mapY);
+
+	//Height values at each corner of the potential quad
+	float v1 = getValue(mapMinX, mapMaxY);
+	float v2 = getValue(mapMaxX, mapMaxY);
+	float v3 = getValue(mapMinX, mapMinY);
+	float v4 = getValue(mapMaxX, mapMinY);
+
+	//Interpolate in the x direction
+	float fxy1;
+	if (mapMaxX == mapMinX)
+		fxy1 = v3;
+	else
+		fxy1 = ((mapMaxX - mapX)/(mapMaxX - mapMinX)) * v3 + ((mapX - mapMinX)/(mapMaxX - mapMinX)) * v4;
+
+	float fxy2;
+	if (mapMaxX == mapMinX)
+		fxy2 = v1;
+	else
+		fxy2 = ((mapMaxX - mapX)/(mapMaxX - mapMinX)) * v1 + ((mapX - mapMinX)/(mapMaxX - mapMinX)) * v2;
+
+	//Interpolate in y direction
+	float height;
+	if (mapMaxY == mapMinY)
+		height = fxy1;
+	else
+		height = ((mapMaxY - mapY)/(mapMaxY - mapMinY)) * fxy1 + ((mapY - mapMinY)/(mapMaxY - mapMinY)) * fxy2;
+
 	//Return the height
-	return getValue(mapX, mapY);
+	return height;
 }
 
 //If changed to float's can interpolate or something
 float CDLODHeightMap::getValue(int mapX, int mapY) {
 	//Ensure the position is valid within the terrain
-	if (mapX >= 0.0f && mapX <= size && mapY >= 0.0f && mapY <= size) {
+	if (isInMap(mapX, mapY)) {
 		//Calculate the index of the pixel in the texture that needs to be looked up
 		unsigned int pixelIndex = (int) ((mapY * size) + mapX);
 		//Calculate the actual index
@@ -127,5 +158,9 @@ float CDLODHeightMap::getMaxHeight(float x, float y, float areaSize) {
 	}
 	//Return the value
 	return max;
+}
+
+bool CDLODHeightMap::isInMap(int mapX, int mapY) {
+	return mapX >= 0.0f && mapX <= size && mapX >= 0.0f && mapX <= size;
 }
 

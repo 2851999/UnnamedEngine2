@@ -99,9 +99,12 @@ void Test::onCreated() {
 	renderScene->add(model3);
 
 	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, 0.0001f);
+	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(0.0f, 1.0f, 0.0f), false))->setDiffuseColour(Colour::RED);
 	//plane->getMesh()->getMaterial(1)->diffuseTexture = light0->getDepthBuffer()->getFramebufferTexture(0);
 	light0->update();
+	light1->update();
 	renderScene->addLight(light0);
+	renderScene->addLight(light1);
 
 	particleEmitter = new SphericalParticleEmitter(1.0f);
 	particleEmitter->particleSpawnRate = 120;
