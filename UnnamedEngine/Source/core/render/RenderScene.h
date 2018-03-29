@@ -38,7 +38,16 @@ private:
 	/* Various shaders that might be needed */
 	Shader* shadowMapShader;
 	Shader* lightingShader;
+
+	/* Method used to render the shadow map of a light */
+	void renderShadowMap(Light* light);
+
+	/* Method used to render the scene with the available lights */
+	void renderWithLights();
 public:
+	/* The number of lights in each batch */
+	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
+
 	/* The constructor */
 	RenderScene3D();
 

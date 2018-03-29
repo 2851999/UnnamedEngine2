@@ -63,29 +63,7 @@ public:
 	static const unsigned int TYPE_SPOT        = 3;
 
 	/* The constructor */
-	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false) : type(type) {
-		setPosition(position);
-
-		if (type == TYPE_DIRECTIONAL) {
-			if (castShadows) {
-				depthBuffer = new FBO(GL_FRAMEBUFFER);
-
-				depthBuffer->attach(new FramebufferTexture(
-						GL_TEXTURE_2D,
-						GL_DEPTH_COMPONENT,
-						1024,
-						1024,
-						GL_DEPTH_COMPONENT,
-						GL_FLOAT,
-						GL_DEPTH_ATTACHMENT
-				));
-
-				depthBuffer->setup();
-
-				lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
-			}
-		}
-	}
+	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false);
 
 	/* The destructor */
 	virtual ~Light() { delete depthBuffer; }

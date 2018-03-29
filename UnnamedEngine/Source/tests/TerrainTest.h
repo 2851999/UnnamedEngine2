@@ -31,6 +31,7 @@
 
 class Test : public BaseTest3D {
 private:
+	RenderScene3D* scene;
 	CDLODTerrain* terrain;
 	CDLODHeightMap* heightMap;
 public:
@@ -44,12 +45,12 @@ public:
 void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
-	getSettings().windowFullscreen = true;
-	getSettings().videoResolution = VideoResolution::RES_1920x1080;
+	//getSettings().windowFullscreen = true;
+	//getSettings().videoResolution = VideoResolution::RES_1920x1080;
 }
 
 void Test::onCreated() {
-	camera->setViewMatrix(Matrix4f().initPerspective(110.0f, getSettings().windowAspectRatio, 0.1f, 1000.0f));
+	camera->setViewMatrix(Matrix4f().initPerspective(110.0f, getSettings().windowAspectRatio, 0.01f, 1000.0f));
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
@@ -59,6 +60,19 @@ void Test::onCreated() {
 	HeightMapGenerator generator;
 	heightMap = new CDLODHeightMap(generator.generate(512, 512), 1, 512, 512, GL_RED);
 	terrain = new CDLODTerrain(heightMap);
+	terrain->getMaterial()->shininess = 1.0f;
+	terrain->update();
+
+	scene = new RenderScene3D();
+	scene->add(terrain);
+
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0.2f, -1.0f, 0.0001f);
+	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(1.0f, heightMap->getHeight(0, 0) + 0.5f, 0.0f), false))->setDiffuseColour(Colour::RED);
+	light0->update();
+	light1->update();
+	scene->addLight(light0);
+	scene->addLight(light1);
+
 	//stbi_write_bmp("D:/Storage/Users/Joel/Desktop/heightmapgen.bmp", 512, 512, 1, generator.generate(512, 512));
 	//std::cout << glfwGetJoystickName(0) << std::endl;
 }
@@ -70,19 +84,24 @@ void Test::onUpdate() {
 		camera->setMovementSpeed(5.0f);
 	}
 	Vector3f pos = camera->getPosition();
-	camera->setY(heightMap->getHeight(pos.getX(), pos.getZ()) + 1.0f);
+	camera->setY(heightMap->getHeight(pos.getX(), pos.getZ()) + 1.5f);
+
+	//terrain->getTransform()->rotate(terrain->getTransform()->getRotation().getUp(), 0.1f * getDelta());
+	//terrain->setScale(10.0f, 10.0f, 10.0f);
+	//terrain->update();
 }
 
 void Test::onRender() {
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CW);
 	glCullFace(GL_BACK);
-	terrain->render();
+	scene->render();
 	glDisable(GL_CULL_FACE);
 }
 
 void Test::onDestroy() {
-	delete terrain;
+	//delete terrain;
+	delete scene;
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

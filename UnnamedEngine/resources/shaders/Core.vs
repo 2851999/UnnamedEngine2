@@ -2,8 +2,10 @@
 
 #map uniform MVPMatrix ue_mvpMatrix
 #map uniform ModelMatrix ue_modelMatrix
+#map uniform ViewMatrix ue_viewMatrix
+#map uniform ProjectionMatrix ue_projectionMatrix
 #map uniform NormalMatrix ue_normalMatrix
-#map uniform Camera_Position ue_camera_position
+#map uniform CameraPosition ue_cameraPosition
 #map attribute Position ue_position
 #map attribute TextureCoordinate ue_textureCoord
 #map attribute Normal ue_normal
@@ -20,9 +22,11 @@
 
 uniform mat4 ue_mvpMatrix;
 uniform mat4 ue_modelMatrix;
+uniform mat4 ue_viewMatrix;
+uniform mat4 ue_projectionMatrix;
 uniform mat3 ue_normalMatrix;
 
-uniform vec3 ue_camera_position;
+uniform vec3 ue_cameraPosition;
 
 layout(location = UE_LOCATION_POSITION) in vec3 ue_position;
 layout(location = UE_LOCATION_TEXTURE_COORD) in vec2 ue_textureCoord;
@@ -35,6 +39,7 @@ out vec2 ue_frag_textureCoord;
 out vec3 ue_frag_normal;
 
 void ueAssignPosition() {
+	//Might want to change like CDLOD terrain
 	ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
 }
 

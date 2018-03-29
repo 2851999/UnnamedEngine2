@@ -28,7 +28,7 @@
 #include "../utils/GLUtils.h"
 
 #include "../experimental/Billboard.h"
-#include "../experimental/terrain/HeightMapTerrain.h"
+//#include "../experimental/terrain/HeightMapTerrain.h"
 
 class Test : public BaseTest3D {
 private:
@@ -43,7 +43,7 @@ private:
 
 	Font* font;
 
-	HeightMapTerrain* terrain;
+//	HeightMapTerrain* terrain;
 
 //	bool test = false;
 //	HeightMapTerrain* terrain2;
@@ -56,8 +56,8 @@ public:
 };
 
 void Test::onInitialise() {
-//	getSettings().videoVSync = false;
-//	getSettings().videoMaxFPS = 0;
+	getSettings().videoVSync = false;
+	getSettings().videoMaxFPS = 0;
 }
 
 void Test::onCreated() {
@@ -70,6 +70,8 @@ void Test::onCreated() {
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae");
 
 	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), Renderer::SHADER_LIGHTING);
+	//plane = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj"), Renderer::SHADER_LIGHTING);
+	//plane->setScale(0.15f, 0.15f, 0.15f);
 	plane->update();
 
 	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.model"), Renderer::SHADER_LIGHTING);
@@ -100,11 +102,14 @@ void Test::onCreated() {
 
 	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, 0.0001f);
 	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(0.0f, 1.0f, 0.0f), false))->setDiffuseColour(Colour::RED);
+	Light* light2 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.5f, -1.0f, 0.0001f);
 	//plane->getMesh()->getMaterial(1)->diffuseTexture = light0->getDepthBuffer()->getFramebufferTexture(0);
 	light0->update();
 	light1->update();
+	light2->update();
 	renderScene->addLight(light0);
 	renderScene->addLight(light1);
+	renderScene->addLight(light2);
 
 	particleEmitter = new SphericalParticleEmitter(1.0f);
 	particleEmitter->particleSpawnRate = 120;
@@ -124,10 +129,10 @@ void Test::onCreated() {
 	font = new Font("resources/fonts/CONSOLA.TTF", 64, Colour::WHITE, true, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
 	font->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
 
-	terrain = new HeightMapTerrain();
-	terrain->setup("D:/Storage/Users/Joel/Desktop/heightmap.jpg", 8);
-	terrain->setScale(Vector3f(0.1f, 0.1f, 0.1f));
-	terrain->update();
+//	terrain = new HeightMapTerrain();
+//	terrain->setup("D:/Storage/Users/Joel/Desktop/heightmap.jpg", 8);
+//	terrain->setScale(Vector3f(0.1f, 0.1f, 0.1f));
+//	terrain->update();
 
 //	terrain2 = new HeightMapTerrain();
 //	terrain2->setup("H:/Storage/Users/Joel/Desktop/heightmap.png", 8);
@@ -160,12 +165,15 @@ void Test::onUpdate() {
 	model1->getMesh()->updateAnimation(getDeltaSeconds());
 	//model2->getMesh()->getSkeleton()->update(getDeltaSeconds());
 	model3->getMesh()->updateAnimation(getDeltaSeconds());
+
+	model2->getTransform()->rotate(model2->getTransform()->getRotation().getUp(), 0.1f * getDelta());
+	model2->update();
 }
 
 void Test::onRender() {
 	particleSystem->render();
 	font->render();
-	terrain->render();
+//	terrain->render();
 
 //	box->render();
 

@@ -36,9 +36,9 @@ private:
 
 	GLuint  rbo;
 public:
-	/* The constructor */
-	FramebufferTexture(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum attachment) :
-			Texture(0, TextureParameters(target, GL_LINEAR, GL_CLAMP_TO_EDGE, false)){
+	/* The constructors */
+	FramebufferTexture(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum attachment, GLuint filter, GLuint clamp, bool shouldClamp) :
+			Texture(0, TextureParameters(target, filter, clamp, shouldClamp)) {
 		this->internalFormat = internalFormat;
 		setWidth(width);
 		setHeight(height);
@@ -48,6 +48,8 @@ public:
 
 		this->rbo = 0;
 	}
+
+	FramebufferTexture(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum attachment) : FramebufferTexture(target, internalFormat, width, height, format, type, attachment, GL_LINEAR, GL_CLAMP_TO_EDGE, false) {}
 
 	/* The destructor */
 	virtual ~FramebufferTexture() {

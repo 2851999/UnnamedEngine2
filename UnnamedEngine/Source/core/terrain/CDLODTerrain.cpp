@@ -33,9 +33,9 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	this->heightMap = heightMap;
 
 	//Setup the ranges
-	ranges.push_back(leafNodeSize*1.5f);
+	ranges.push_back(leafNodeSize*1.25f);
 	for (int i = 1; i < lodDepth; i++) {
-		ranges.push_back((ranges[i - 1] + pow(2, i)*leafNodeSize)*1.5f); //Multiplier resolves clamping issue
+		ranges.push_back((ranges[i - 1] + pow(2, i)*leafNodeSize)*1.25f); //Multiplier resolves clamping issue
 	}
 
 	//Calculate the root node size
@@ -47,12 +47,9 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	//Create the quad-tree
 	root = new CDLODQuadTreeNode(heightMap, rootNodeSize, lodDepth - 1, 0.0f, 0.0f);
 
-	//Assign the shader
-	terrainShader = Renderer::getRenderShader(Renderer::SHADER_CDLOD_TERRAIN);
-
-	//Create the mesh
-	mesh = new Mesh(createMeshData(meshSize, meshSize));
-	mesh->setup(terrainShader);
+	//Create and assign the mesh
+	Mesh* terrainMesh = new Mesh(createMeshData(meshSize, meshSize));
+	setMesh(terrainMesh, Renderer::getRenderShader(Renderer::SHADER_TERRAIN));
 
 	texture1 = Texture::loadTexture("C:/UnnamedEngine/textures/grass.png");
 	texture2 = Texture::loadTexture("C:/UnnamedEngine/textures/snow.jpg");
@@ -62,7 +59,6 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 CDLODTerrain::~CDLODTerrain() {
 	delete heightMap;
 	delete root;
-	delete mesh;
 }
 
 void CDLODTerrain::render() {
@@ -79,11 +75,9 @@ void CDLODTerrain::render() {
 //	utils_gl::disableWireframe();
 
 	//Use the terrain shader
-	Shader* shader = terrainShader->getShader();
+	Shader* shader = getShader();
 	shader->use();
 
-	shader->setUniformMatrix4("ProjectionMatrix", camera->getProjectionMatrix());
-	shader->setUniformMatrix4("ViewMatrix", camera->getViewMatrix());
 	shader->setUniformVector3("CameraPosition", camera->getPosition());
 	shader->setUniformf("HeightScale", heightMap->getHeightScale());
 	shader->setUniformf("Size", heightMap->getSize());
@@ -121,7 +115,8 @@ void CDLODTerrain::render() {
 //		std::cout << currentNode->getSize() << std::endl;
 //		std::cout << currentNode->getRange() << std::endl;
 
-		mesh->getRenderData()->render();
+		//mesh->getRenderData()->render();
+		Renderer::render(getMesh(), getModelMatrix(), getRenderShader());
 	}
 
 	Renderer::unbindTexture();

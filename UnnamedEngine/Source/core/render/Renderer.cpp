@@ -21,6 +21,7 @@
 #include <algorithm>
 
 #include "../../utils/Logging.h"
+#include "RenderScene.h"
 
 /*****************************************************************************
  * The Renderer class
@@ -45,7 +46,7 @@ const std::string Renderer::SHADER_FRAMEBUFFER      = "Framebuffer";
 const std::string Renderer::SHADER_ENVIRONMENT_MAP  = "EnvironmentMap";
 const std::string Renderer::SHADER_SHADOW_MAP       = "ShadowMap";
 const std::string Renderer::SHADER_BILLBOARDED_FONT = "BillboardedFont";
-const std::string Renderer::SHADER_CDLOD_TERRAIN    = "CDLODTerrain";
+const std::string Renderer::SHADER_TERRAIN          = "Terrain";
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -102,7 +103,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_ENVIRONMENT_MAP,  Shader::loadShader("resources/shaders/EnvironmentMapShader"));
 	addRenderShader(SHADER_SHADOW_MAP,       Shader::loadShader("resources/shaders/ShadowMapShader"));
 	addRenderShader(SHADER_BILLBOARDED_FONT, Shader::loadShader("resources/shaders/BillboardedFontShader"));
-	addRenderShader(SHADER_CDLOD_TERRAIN,    Shader::loadShader("resources/shaders/CDLODTerrain"));
+	addRenderShader(SHADER_TERRAIN,          Shader::loadShader("resources/shaders/Terrain"));
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
@@ -124,7 +125,7 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 		shader->setUniformi("Material_DiffuseTexture", bindTexture(Renderer::getBlankTexture()));
 
 	//Check to see whether the shader is for lighting
-	if (shaderName == SHADER_LIGHTING) {
+	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN) {
 		//Assign other lighting specific properties
 		shader->setUniformColourRGB("Material_AmbientColour", material->ambientColour);
 		shader->setUniformColourRGB("Material_SpecularColour", material->specularColour);
@@ -226,15 +227,15 @@ void Renderer::destroy() {
 using namespace utils_string;
 void Renderer::addRenderShader(std::string id, Shader* shader) {
 	shader->use();
-	if (id == SHADER_LIGHTING) {
+	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN) {
 		shader->addUniform("UseNormalMap", "ue_useNormalMap");
-		shader->addUniform("LightSpaceMatrix", "ue_lightSpaceMatrix");
 
 		shader->addUniform("UseShadowMap", "ue_useShadowMap");
 		shader->addUniform("ShadowMap", "ue_shadowMap");
 		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
 
-		for (unsigned int i = 0; i < 6; i++) {
+		for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_BATCH; i++) {
+			shader->addUniform("LightSpaceMatrix["     + str(i) + "]", "ue_lightSpaceMatrix[" + str(i) + "]");
 			shader->addUniform("Light_Type["           + str(i) + "]", "ue_lights[" + str(i) + "].type");
 			shader->addUniform("Light_Position["       + str(i) + "]", "ue_lights[" + str(i) + "].position");
 			shader->addUniform("Light_Direction["      + str(i) + "]", "ue_lights[" + str(i) + "].direction");
@@ -245,14 +246,16 @@ void Renderer::addRenderShader(std::string id, Shader* shader) {
 			shader->addUniform("Light_Quadratic["      + str(i) + "]", "ue_lights[" + str(i) + "].quadratic");
 			shader->addUniform("Light_Cutoff["         + str(i) + "]", "ue_lights[" + str(i) + "].cutoff");
 			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].outerCutoff");
+			shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lights[" + str(i) + "].shadowMap");
+			shader->addUniform("Light_UseShadowMap["   + str(i) + "]", "ue_lights[" + str(i) + "].useShadowMap");
 		}
 
 		for (unsigned int i = 0; i < 80; i++)
 			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
 
 		shader->addUniform("NumLights", "ue_numLights");
-		shader->addUniform("Light_Ambient", "ue_light_ambient");
-		shader->addUniform("Camera_Position", "ue_camera_position");
+		shader->addUniform("LightAmbient", "ue_lightAmbient");
+		shader->addUniform("CameraPosition", "ue_cameraPosition");
 
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");
 		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");

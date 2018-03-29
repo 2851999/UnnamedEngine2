@@ -1,4 +1,17 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 2 | Experimental 2
+
+* Added support for more than one shadow map in a render
+  scene batch
+* Added an alternative constructor for FramebufferTexture
+  
+* Fixed bug: Frustum culling did not take into account the
+             scale of the object
+             
+* Fixed bug: Shadow's would repeat themselves if far enough
+             away
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 2 | Experimental 1
 
 * Improved CDLODTerrain

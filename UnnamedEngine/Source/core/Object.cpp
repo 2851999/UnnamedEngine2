@@ -105,7 +105,7 @@ Vector3f GameObject3D::getSize() {
 
 bool GameObject3D::shouldCull() {
 	if (hasMesh() && getMesh()->cullingEnabled()) {
-		return ! ((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(cullingCentre, getMesh()->getBoundingSphereRadius());
+		return ! ((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(cullingCentre, getMesh()->getBoundingSphereRadius() * getScale().max());
 	}
 	return false;
 }

@@ -3,7 +3,7 @@
 void main() {
 	vec2 textureCoord = ue_frag_textureCoord;
 	
-	if (ue_useParallaxMap && ue_light_ambient.x == 0) {
+	if (ue_useParallaxMap) {
 		textureCoord = ueGetMaterialParallax(ue_frag_textureCoord, normalize(ue_tangentViewPos - ue_tangentFragPos));
 		
 		if(textureCoord.x > 1.0 || textureCoord.y > 1.0 || textureCoord.x < 0.0 || textureCoord.y < 0.0)
