@@ -34,7 +34,7 @@ private:
 	float size;
 
 	/* The scale factor for the heights */
-	float heightScale = 40.0f;;
+	float heightScale = 30.0f;
 
 	/* The number of components per pixel */
 	unsigned int numComponentsPerPixel;

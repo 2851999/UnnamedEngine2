@@ -157,7 +157,7 @@ namespace utils_time {
 	double getSeconds();
 
 	/* Returns the time elapsed in milliseconds (rounded) since the GLFW was initialised */
-	inline long getMilliseconds() { return (long) (getSeconds() * 1000); }
+	inline float getMilliseconds() { return (float) (getSeconds() * 1000); }
 
 	/* Pauses the thread for a set amount of time given in milliseconds */
 	void sleep(long milliseconds);

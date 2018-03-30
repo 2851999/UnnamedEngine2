@@ -41,7 +41,7 @@ void FPSCalculator::update() {
 	//Only calculate everything if necessary
 	if (mode != OFF) {
 		//Obtain the current time in milliseconds
-		long current = getMilliseconds();
+		float current = getMilliseconds();
 
 		//With a high FPS the delta will become 0, but to stop this causing issues
 		//the current delta will only be assigned when this is not the case and

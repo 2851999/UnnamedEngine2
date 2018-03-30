@@ -35,15 +35,18 @@ void main() {
 	} else {
 		mat_diffuseColour = texture(snowTexture, ue_frag_textureCoord).rgb;
 	}
+
+	vec3 normal = normalize(ue_frag_normal);
+
+	// float upness = dot(ue_frag_normal, normalize(vec3(0.0, 1.0, 0.0))); //1 when directly upwards
+
+	// mat_diffuseColour = texture(grassTexture, ue_frag_textureCoord).rgb * upness + texture(stoneTexture, ue_frag_textureCoord).rgb * (1 - upness);
 	
 	//ue_FragColour = vec4(ue_frag_normal, 1.0);
 	
 	vec3 ambientColour = mat_diffuseColour;
 	vec3 diffuseColour = mat_diffuseColour;
 	vec3 specularColour = 0.5 * mat_diffuseColour;
-
-	vec3 normal = normalize(ue_frag_normal);
-
 	vec3 light = ueGetLighting(normal, ambientColour, diffuseColour, specularColour);
 
 	ue_FragColour = vec4(light, 1.0);

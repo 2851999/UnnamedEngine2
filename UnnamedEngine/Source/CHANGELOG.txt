@@ -1,4 +1,17 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 2 | Experimental 3
+
+* Changed getDelta() methods to be of type float to be
+  more accurate
+
+* Fixed bug: Terrain normals were incorrectly calculated
+* Fixed bug: DebugCamera was incorrectly calculating mouse
+             movement
+* Fixed bug: GUIDropDownMenu and hence GUIDropDownList did
+             not assign added button's transform
+* Fixed bug: Horizontal GUISlider did not work correctly
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 2 | Experimental 2
 
 * Added support for more than one shadow map in a render

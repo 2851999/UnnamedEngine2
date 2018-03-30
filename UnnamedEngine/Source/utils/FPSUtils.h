@@ -26,8 +26,8 @@
 class FPSCalculator {
 private:
 	/* Time data, measured in milliseconds */
-	long lastFrame = 0;
-	long currentDelta = 0;
+	float lastFrame = 0;
+	float currentDelta = 0;
 	float currentDeltaSeconds = 0;
 	long lastFPSCountUpdate = 0;
 	/* The current FPS count used in PER_SECOND */
@@ -67,7 +67,7 @@ public:
 	void setMode(Mode mode) { this->mode = mode; }
 
 	Mode getMode() { return mode; }
-	long getDelta() { return currentDelta; }
+	float getDelta() { return currentDelta; }
 	float getDeltaSeconds() { return currentDeltaSeconds; }
 	unsigned int getFPS() { return currentFPS; }
 private:

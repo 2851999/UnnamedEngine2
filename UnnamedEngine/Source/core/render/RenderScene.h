@@ -39,6 +39,12 @@ private:
 	Shader* shadowMapShader;
 	Shader* lightingShader;
 
+	/* The ambient light used in lighting */
+	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
+
+	/* Boolean to determine whether lighting should be used or not */
+	bool lightingEnabled = true;
+
 	/* Method used to render the shadow map of a light */
 	void renderShadowMap(Light* light);
 
@@ -62,6 +68,13 @@ public:
 
 	/* Used to add a light to this scene */
 	inline void addLight(Light* light) { lights.push_back(light); }
+
+	/* Getters and setters */
+	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
+	inline void enableLighting() { lightingEnabled = true; }
+	inline void disableLighting() { lightingEnabled = false; }
+	inline Colour getAmbientLight() { return ambientLight; }
+	inline bool isLightingEnabled() { return lightingEnabled; }
 };
 
 #endif /* CORE_RENDER_RENDERSCENE_H_ */

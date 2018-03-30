@@ -40,7 +40,7 @@ RenderScene3D::~RenderScene3D() {
 
 void RenderScene3D::render() {
 	//Check for lighting
-	if (lights.size() > 0) {
+	if (lights.size() > 0 && lightingEnabled) {
 		//Go through all the lights and render the shadow map for it if necessary
 		for (unsigned int i = 0; i < lights.size(); i++) {
 			if (lights[i]->hasDepthBuffer())
@@ -79,7 +79,7 @@ void RenderScene3D::renderWithLights() {
 
 		//Don't use blending until 2nd batch
 		if (b == 0)
-			uniformLightAmbient = Colour(0.01f, 0.01f, 0.01f);
+			uniformLightAmbient = ambientLight;
 		else if (b == NUM_LIGHTS_IN_BATCH) {
 			blendNeeded = true;
 

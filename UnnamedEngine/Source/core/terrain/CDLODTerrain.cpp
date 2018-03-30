@@ -33,9 +33,9 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	this->heightMap = heightMap;
 
 	//Setup the ranges
-	ranges.push_back(leafNodeSize*1.25f);
+	ranges.push_back(leafNodeSize * RANGE_MULTIPLIER);
 	for (int i = 1; i < lodDepth; i++) {
-		ranges.push_back((ranges[i - 1] + pow(2, i)*leafNodeSize)*1.25f); //Multiplier resolves clamping issue
+		ranges.push_back((ranges[i - 1] + pow(2, i)*leafNodeSize) * RANGE_MULTIPLIER); //Multiplier resolves clamping issue
 	}
 
 	//Calculate the root node size
@@ -78,7 +78,6 @@ void CDLODTerrain::render() {
 	Shader* shader = getShader();
 	shader->use();
 
-	shader->setUniformVector3("CameraPosition", camera->getPosition());
 	shader->setUniformf("HeightScale", heightMap->getHeightScale());
 	shader->setUniformf("Size", heightMap->getSize());
 
@@ -149,13 +148,13 @@ MeshData* CDLODTerrain::createMeshData(int width, int height) {
 	//Assign the indices
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			meshIndices.push_back((width + 1) * (y + 0) + x);
+			meshIndices.push_back((width + 1) * (y + 1) + (x + 1));
 			meshIndices.push_back((width + 1) * y + (x + 1));
-			meshIndices.push_back((width + 1) * (y + 1) + (x + 1));
+			meshIndices.push_back((width + 1) * (y + 0) + x);
 
-			meshIndices.push_back((width + 1) * (y + 1) + (x + 1));
-			meshIndices.push_back((width + 1) * (y + 1) + x);
 			meshIndices.push_back((width + 1) * y + x);
+			meshIndices.push_back((width + 1) * (y + 1) + x);
+			meshIndices.push_back((width + 1) * (y + 1) + (x + 1));
 		}
 	}
 

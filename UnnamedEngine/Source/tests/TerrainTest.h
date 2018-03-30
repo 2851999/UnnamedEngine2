@@ -34,6 +34,8 @@ private:
 	RenderScene3D* scene;
 	CDLODTerrain* terrain;
 	CDLODHeightMap* heightMap;
+
+	GameObject3D* model1;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -66,12 +68,19 @@ void Test::onCreated() {
 	scene = new RenderScene3D();
 	scene->add(terrain);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0.2f, -1.0f, 0.0001f);
-	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(1.0f, heightMap->getHeight(0, 0) + 0.5f, 0.0f), false))->setDiffuseColour(Colour::RED);
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(1.0f, -1.0f, 0.0001f);
 	light0->update();
-	light1->update();
 	scene->addLight(light0);
+
+	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(1.0f, terrain->getHeight(0, 0) + 0.5f, 0.0f), false))->setDiffuseColour(Colour::RED);
+	light1->update();
 	scene->addLight(light1);
+
+	model1 = new GameObject3D(resourceLoader.loadModel("teapot.model"), Renderer::SHADER_LIGHTING);
+	model1->setPosition(0.0f, terrain->getHeight(0.0f, 4.0f) + 1.0f, 6.0f);
+	model1->update();
+
+	scene->add(model1);
 
 	//stbi_write_bmp("D:/Storage/Users/Joel/Desktop/heightmapgen.bmp", 512, 512, 1, generator.generate(512, 512));
 	//std::cout << glfwGetJoystickName(0) << std::endl;
@@ -93,7 +102,7 @@ void Test::onUpdate() {
 
 void Test::onRender() {
 	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CW);
+	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
 	scene->render();
 	glDisable(GL_CULL_FACE);

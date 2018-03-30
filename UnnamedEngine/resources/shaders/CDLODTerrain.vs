@@ -1,4 +1,9 @@
-#include "Core.vs"
+#include "Lighting.vs"
+
+//Assign these as constants for now
+#define UE_TERRAIN_NORMAL_LOOK_UP_OFFSET 1.0
+#define UE_TERRAIN_VERTEX_MORPH_START 0.0
+#define UE_TERRAIN_VERTEX_MORPH_END 0.40
 
 #map uniform HeightMap ue_heightMap
 #map uniform Translation ue_translation
@@ -30,16 +35,15 @@ float ueTerrainGetHeight(vec2 pos) {
 vec3 ueTerrainCalculateNormal(vec2 pos) {
 	vec3 normal;
 
-	float offset = 1.0;
-	vec3 off = vec3(offset, offset, 0.0);
+	vec3 off = vec3(UE_TERRAIN_NORMAL_LOOK_UP_OFFSET, UE_TERRAIN_NORMAL_LOOK_UP_OFFSET, 0.0);
 	float hL = ueTerrainGetHeight(pos - off.xz);
 	float hR = ueTerrainGetHeight(pos + off.xz);
 	float hD = ueTerrainGetHeight(pos - off.zy);
 	float hU = ueTerrainGetHeight(pos + off.zy);
 
 	normal.x = hL - hR;
-	normal.y = hD - hU;
-	normal.z = 2.0 * offset;
+	normal.y = 2.0 * UE_TERRAIN_NORMAL_LOOK_UP_OFFSET;
+	normal.z = hD - hU;
 	normal = normalize(normal);
 
 	return normal;
@@ -62,10 +66,7 @@ vec3 ueTerrainCalculateWorldPosition(vec3 position, vec3 translation, float scal
 }
 
 void ueTerrainAssignTerrainData() {
-	float morphStart = 0.0;
-	float morphEnd = 0.40;
-
-	vec3 worldPosition = ueTerrainCalculateWorldPosition(ue_position, ue_translation, ue_scale, morphStart, morphEnd);
+	vec3 worldPosition = ueTerrainCalculateWorldPosition(ue_position, ue_translation, ue_scale, UE_TERRAIN_VERTEX_MORPH_START, UE_TERRAIN_VERTEX_MORPH_END);
 	
 	ue_frag_height = (worldPosition.y / ue_heightScale) + 0.5;
 	

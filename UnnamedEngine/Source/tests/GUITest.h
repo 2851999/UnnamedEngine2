@@ -82,6 +82,13 @@ void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
 //	getSettings().videoVSync = false;
 //	getSettings().videoMaxFPS = 0;
+
+//	Settings& settings = getSettings();
+//	settings.windowTitle = "Test";
+//	settings.videoMaxAnisotropicSamples = 16;
+//	settings.videoSamples = 16;
+//	settings.videoVSync = true;
+//	settings.videoMaxFPS = 0;
 }
 
 void Test::created() {
@@ -186,7 +193,7 @@ void Test::created() {
 void Test::update() {
 	panel->update();
 
-	//std::cout << verticalSlider->getValue() << std::endl;
+	//std::cout << horizontalSlider->getValue() << std::endl;
 }
 
 void Test::render() {

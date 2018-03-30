@@ -150,7 +150,7 @@ void BaseEngine::renderDebuggingInfo() {
 							"Engine Version : " + str(Engine::Version) + "\n" +
 							"Engine Date    : " + str(Engine::DateCreated) + "\n" +
 							"Engine Build   : " + str(Engine::Build) + "\n" +
-							"Current Delta  : " + str(getDelta()) + "\n" +
+							"Current Delta  : " + str((int) getDelta()) + "\n" +
 							"Current FPS    : " + str(getFPS()) + "\n" +
 							"----------- VIDEO -----------\n" +
 							"Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +

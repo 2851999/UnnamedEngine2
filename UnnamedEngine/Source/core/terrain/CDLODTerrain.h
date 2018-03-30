@@ -46,6 +46,9 @@ private:
 	float leafNodeSize = 4.0f;
 	int   lodDepth = 8;
 
+	/* Range multiplier to help resolve seams between nodes */
+	const float RANGE_MULTIPLIER = 1.25f;
+
 	Texture* texture1;
 	Texture* texture2;
 	Texture* texture3;
@@ -59,6 +62,9 @@ public:
 
 	/* The method used to render this terrain */
 	virtual void render() override;
+
+	/* Method used to get the height at a particular location (in world coordinates) */
+	inline float getHeight(float x, float y) { return heightMap->getHeight(x, y); }
 
 	/* Static method that returns a mesh of vertices for CDLOD terrain (does not have heights applied) */
 	static MeshData* createMeshData(int width, int height);

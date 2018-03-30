@@ -111,7 +111,7 @@ float ueCalculateShadow(UELight light, vec4 fragPosLightSpace, vec3 normal) {
 	//Perspective divide
 	vec3 projectedCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	projectedCoords = projectedCoords * 0.5 + 0.5;
-	float closestDepth = texture(light.shadowMap, projectedCoords.xy).r;
+	//float closestDepth = texture(light.shadowMap, projectedCoords.xy).r;
 	float currentDepth = projectedCoords.z;
 	
 	float bias = max(0.01 * (1.0 - dot(normal, light.direction)), 0.005);
@@ -160,6 +160,6 @@ vec3 ueGetLighting(vec3 normal, vec3 ambientColour, vec3 diffuseColour, vec3 spe
 		else if (ue_lights[i].type == 3)
 			otherLight += ueCalculateSpotLight(ue_lights[i], diffuseColour, specularColour, normal);
 	}
-	
+
 	return ambientLight + otherLight;
 }
