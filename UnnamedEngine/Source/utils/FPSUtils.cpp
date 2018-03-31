@@ -97,7 +97,7 @@ void FPSLimiter::setMaxFPS(unsigned int maxFPS) {
 	//Prevent a divide by 0
 	if (maxFPS != 0)
 		//Calculate the target delta to achieve the desired frame rate
-		targetDelta = (long) (1000.0f / (float) maxFPS);
+		targetDelta = (1000.0f / (float) maxFPS);
 }
 
 void FPSLimiter::startFrame() {
@@ -109,7 +109,7 @@ void FPSLimiter::endFrame() {
 	//Ensure there is a frame cap
 	if (maxFPS > 0) {
 		//Calculate the difference in the target delta, and the current one
-		long difference = targetDelta - (getMilliseconds() - startOfFrame);
+		float difference = targetDelta - (getMilliseconds() - startOfFrame);
 
 		//Pause the thread for the time necessary
 		if (difference > 0)

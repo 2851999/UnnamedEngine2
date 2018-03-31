@@ -33,9 +33,29 @@ RenderScene3D::RenderScene3D() {
 }
 
 RenderScene3D::~RenderScene3D() {
-	for (unsigned int i = 0; i < objects.size(); i++)
-		delete objects[i];
-	objects.clear();
+	for (unsigned int i = 0; i < batches.size(); i++) {
+		for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
+			delete batches[i].objects[j];
+		}
+	}
+	batches.clear();
+}
+
+void RenderScene3D::add(GameObject3D* object) {
+	Shader* objectShader = object->getShader();
+
+	//Try and add the object to a batch with the same shader
+	for (unsigned int i = 0; i < batches.size(); i++) {
+		if (batches[i].shader == objectShader) {
+			batches[i].objects.push_back(object);
+			return;
+		}
+	}
+
+	RenderBatch newBatch;
+	newBatch.shader = objectShader;
+	newBatch.objects.push_back(object);
+	batches.push_back(newBatch);
 }
 
 void RenderScene3D::render() {
@@ -53,13 +73,14 @@ void RenderScene3D::render() {
 
 //		Renderer::render(lights[0]->getDepthBuffer()->getFramebufferTexture(0), NULL);
 	} else {
-		for (unsigned int i = 0; i < objects.size(); i++) {
-			Shader* shader = objects[i]->getShader();
+		for (unsigned int i = 0; i < batches.size(); i++) {
+			Shader* shader = batches[i].shader;
 
 			shader->use();
 			shader->setUniformi("NumLights", 0);
 
-			objects[i]->render();
+			for (unsigned int j = 0; j < batches[i].objects.size(); j++)
+				batches[i].objects[j]->render();
 		}
 	}
 }
@@ -93,12 +114,10 @@ void RenderScene3D::renderWithLights() {
 			glDepthFunc(GL_LEQUAL);
 		}
 
-		//Go through the objects in the scene
-		for (unsigned int o = 0; o < objects.size(); o++) {
-			Matrix4f modelMatrix = objects[o]->getModelMatrix();
-
-			//Get the shader for the current object
-			Shader* shader = objects[o]->getShader();
+		//Go through the batches
+		for (unsigned int i = 0; i < batches.size(); i++) {
+			//Get the shader for the current batch
+			Shader* shader = batches[i].shader;
 
 			shader->use();
 
@@ -113,7 +132,6 @@ void RenderScene3D::renderWithLights() {
 
 			unsigned int numDepthMaps = 0;
 			unsigned int lightNumInBatch = 0;
-
 
 			//Go through the lights in this batch
 			for (unsigned int l = b; (l < b + NUM_LIGHTS_IN_BATCH) && (l < lights.size()); l++) {
@@ -131,16 +149,22 @@ void RenderScene3D::renderWithLights() {
 					shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightNumInBatch) + "]", 0);
 			}
 
+			//Go through the objects in the batch
+			for (unsigned int o = 0; o < batches[i].objects.size(); o++) {
+				Matrix4f modelMatrix = batches[i].objects[o]->getModelMatrix();
 
-			shader->setUniformMatrix4("ModelMatrix", modelMatrix);
-			shader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
 
-			objects[o]->render();
+				shader->setUniformMatrix4("ModelMatrix", modelMatrix);
+				shader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
 
-			for (unsigned int i = 0; i < numDepthMaps; i++)
-				Renderer::unbindTexture();
+				batches[i].objects[o]->render();
+			}
+
 
 			if (useEnvironmentMap)
+				Renderer::unbindTexture();
+
+			for (unsigned int i = 0; i < numDepthMaps; i++)
 				Renderer::unbindTexture();
 
 			shader->stopUsing();
@@ -171,14 +195,16 @@ void RenderScene3D::renderShadowMap(Light* light) {
 //	Renderer::getCamera()->setViewMatrix(lights[i]->getLightViewMatrix());
 //	Renderer::getCamera()->setProjectionMatrix(lights[i]->getLightProjectionMatrix());
 
-	for (unsigned int j = 0; j < objects.size(); j++) {
-		if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(objects[j]->getModelMatrix() * Vector4f(objects[j]->getMesh()->getBoundingSphereCentre(), 1.0f)), objects[j]->getMesh()->getBoundingSphereRadius())) {
-			shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * objects[j]->getModelMatrix());
-			objects[j]->getRenderShader()->addForwardShader(shadowMapShader);
+	for (unsigned int i = 0; i < batches.size(); i++) {
+		for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
+			if (((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(Vector3f(batches[i].objects[j]->getModelMatrix() * Vector4f(batches[i].objects[j]->getMesh()->getBoundingSphereCentre(), 1.0f)), batches[i].objects[j]->getMesh()->getBoundingSphereRadius())) {
+				shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * batches[i].objects[j]->getModelMatrix());
+				batches[i].objects[j]->getRenderShader()->addForwardShader(shadowMapShader);
 
-			objects[j]->render();
+				batches[i].objects[j]->render();
 
-			objects[j]->getRenderShader()->removeForwardShader(shadowMapShader);
+				batches[i].objects[j]->getRenderShader()->removeForwardShader(shadowMapShader);
+			}
 		}
 	}
 

@@ -49,9 +49,9 @@ private:
 	/* Range multiplier to help resolve seams between nodes */
 	const float RANGE_MULTIPLIER = 1.25f;
 
-	Texture* texture1;
-	Texture* texture2;
-	Texture* texture3;
+//	Texture* texture1;
+//	Texture* texture2;
+//	Texture* texture3;
 public:
 	/* The constructor */
 	CDLODTerrain(CDLODHeightMap* heightMap);

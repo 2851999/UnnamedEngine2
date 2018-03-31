@@ -85,10 +85,10 @@ private:
 	unsigned int maxFPS = 0;
 
 	/* The time at the start of the current frame */
-	long startOfFrame = 0;
+	float startOfFrame = 0;
 
 	/* The delta when at the maximum FPS */
-	long targetDelta = 0;
+	float targetDelta = 0;
 public:
 	/* The constructor */
 	FPSLimiter(unsigned int maxFPS = 0) { setMaxFPS(maxFPS); }

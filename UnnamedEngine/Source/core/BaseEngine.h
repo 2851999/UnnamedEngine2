@@ -83,7 +83,10 @@ public:
 	virtual void destroy() {}
 
 	/* Method called to render debugging information */
-	void renderDebuggingInfo();
+	void renderDebugInfo();
+
+	/* Method called to render the debug console */
+	void renderDebugConsole();
 
 	/* This will end the main game loop */
 	void requestClose() { closeRequested = true; }

@@ -321,9 +321,9 @@ namespace utils_settings {
 		engine.add(MLAttribute("splashScreen", utils_string::str(settings.engineSplashScreen)));
 		settingsElement.add(engine);
 
-		MLElement debugging("debugging");
-		debugging.add(MLAttribute("showInformation", utils_string::str(settings.debuggingShowInformation)));
-		debugging.add(MLAttribute("consoleEnabled", utils_string::str(settings.debuggingConsoleEnabled)));
+		MLElement debugging("debug");
+		debugging.add(MLAttribute("showInformation", utils_string::str(settings.debugShowInformation)));
+		debugging.add(MLAttribute("consoleEnabled", utils_string::str(settings.debugConsoleEnabled)));
 		settingsElement.add(debugging);
 
 		//Add the settings element, or replace the current one if one already exists
@@ -405,12 +405,12 @@ namespace utils_settings {
 						//Check the attribute name
 						if (attrib.getName() == "splashScreen")
 							settings.engineSplashScreen = attrib.getDataAsBool();
-					} else if (child.getName() == "debugging") {
+					} else if (child.getName() == "debug") {
 						//Check the attribute name
 						if (attrib.getName() == "showInformation")
-							settings.debuggingShowInformation = attrib.getDataAsBool();
+							settings.debugShowInformation = attrib.getDataAsBool();
 						else if (attrib.getName() == "consoleEnabled")
-							settings.debuggingConsoleEnabled = attrib.getDataAsBool();
+							settings.debugConsoleEnabled = attrib.getDataAsBool();
 					}
 				}
 			}

@@ -41,6 +41,9 @@ private:
 
 	/* List of functions to be called to process a command */
 	std::vector<std::function<void(std::vector<std::string>)>> functions;
+
+	/* States whether the wireframe mode is on */
+	bool wireframeMode = false;
 public:
 	/* The constructor */
 	DebugConsole(BaseEngine* baseEngine);
@@ -57,6 +60,9 @@ public:
 	/* Input methods */
 	virtual void onKeyPressed(int key) override;
 	virtual void onKeyReleased(int key) override;
+
+	/* Getters */
+	inline bool isWireframeEnabled() { return wireframeMode; }
 };
 
 #endif /* UTILS_DEBUGCONSOLE_H_ */

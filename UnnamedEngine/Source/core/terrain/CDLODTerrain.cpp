@@ -51,9 +51,9 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	Mesh* terrainMesh = new Mesh(createMeshData(meshSize, meshSize));
 	setMesh(terrainMesh, Renderer::getRenderShader(Renderer::SHADER_TERRAIN));
 
-	texture1 = Texture::loadTexture("C:/UnnamedEngine/textures/grass.png");
-	texture2 = Texture::loadTexture("C:/UnnamedEngine/textures/snow.jpg");
-	texture3 = Texture::loadTexture("C:/UnnamedEngine/textures/stone.jpg");
+//	texture1 = Texture::loadTexture("C:/UnnamedEngine/textures/grass.png");
+//	texture2 = Texture::loadTexture("C:/UnnamedEngine/textures/snow.jpg");
+//	texture3 = Texture::loadTexture("C:/UnnamedEngine/textures/stone.jpg");
 }
 
 CDLODTerrain::~CDLODTerrain() {
@@ -93,9 +93,9 @@ void CDLODTerrain::render() {
 //	light0->setUniforms(shader, "[0]");
 //	delete light0;
 
-	shader->setUniformi("GrassTexture", Renderer::bindTexture(texture1));
-	shader->setUniformi("SnowTexture", Renderer::bindTexture(texture2));
-	shader->setUniformi("StoneTexture", Renderer::bindTexture(texture3));
+//	shader->setUniformi("GrassTexture", Renderer::bindTexture(texture1));
+//	shader->setUniformi("SnowTexture", Renderer::bindTexture(texture2));
+//	shader->setUniformi("StoneTexture", Renderer::bindTexture(texture3));
 
 //	long numPolygons = (selectionList.size() * mesh->getData()->getNumIndices()) / 3;
 //	std::cout << numPolygons << std::endl;
@@ -118,9 +118,9 @@ void CDLODTerrain::render() {
 		Renderer::render(getMesh(), getModelMatrix(), getRenderShader());
 	}
 
-	Renderer::unbindTexture();
-	Renderer::unbindTexture();
-	Renderer::unbindTexture();
+//	Renderer::unbindTexture();
+//	Renderer::unbindTexture();
+//	Renderer::unbindTexture();
 	Renderer::unbindTexture();
 
 	//Stop using the shader

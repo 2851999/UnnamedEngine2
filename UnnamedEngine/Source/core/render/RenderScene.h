@@ -29,8 +29,14 @@
 
 class RenderScene3D {
 private:
-	/* The GameObjects in this scene */
-	std::vector<GameObject3D*> objects;
+	/* Structure used to group together objects with the same shader */
+	struct RenderBatch {
+		Shader* shader;
+		std::vector<GameObject3D*> objects;
+	};
+
+	/* The RenderBatches in this scene */
+	std::vector<RenderBatch> batches;
 
 	/* The lights in this scene */
 	std::vector<Light*> lights;
@@ -64,7 +70,7 @@ public:
 	void render();
 
 	/* Used to add an object to this scene */
-	inline void add(GameObject3D* object) { objects.push_back(object); }
+	void add(GameObject3D* object);
 
 	/* Used to add a light to this scene */
 	inline void addLight(Light* light) { lights.push_back(light); }
