@@ -29,6 +29,11 @@
 RenderScene3D::RenderScene3D() {
 	//Get the required shaders
 	shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getShader();
+
+	//Create the goemetry buffer
+	if (deferred) {
+		gBuffer = new GeometryBuffer();
+	}
 }
 
 RenderScene3D::~RenderScene3D() {
@@ -38,6 +43,8 @@ RenderScene3D::~RenderScene3D() {
 		}
 	}
 	batches.clear();
+	if (deferred)
+		delete gBuffer;
 }
 
 void RenderScene3D::add(GameObject3D* object) {
@@ -58,35 +65,160 @@ void RenderScene3D::add(GameObject3D* object) {
 }
 
 void RenderScene3D::render() {
-	//Check for lighting
-	if (lights.size() > 0 && lightingEnabled) {
-		//Go through all the lights and render the shadow map for it if necessary
-		for (unsigned int i = 0; i < lights.size(); i++) {
-			if (lights[i]->hasDepthBuffer())
-				renderShadowMap(lights[i]);
-		}
+	//Check for deferred rendering
+	if (deferred) {
+		gBuffer->bind();
 
-		glViewport(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
 
-		renderWithLights();
+		geometryPass = true;
+		renderWithoutLights();
+		geometryPass = false;
 
-//		Renderer::render(lights[0]->getDepthBuffer()->getFramebufferTexture(0), NULL);
-	} else {
-		for (unsigned int i = 0; i < batches.size(); i++) {
-			Shader* shader = batches[i].shader;
+		gBuffer->unbind();
+
+		//Renderer::render(gBuffer->getFramebufferTexture(2));
+
+		bool blendNeeded = false;
+
+		//Uniform values that need to be assigned in the object specific shader before rendering
+		int uniformNumLights = 0;
+		Colour uniformLightAmbient;
+
+		//Go through each batch of lights
+		for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
+			uniformNumLights = utils_maths::min(NUM_LIGHTS_IN_BATCH, lights.size() - b);
+
+			//Don't use blending until 2nd batch
+			if (b == 0)
+				uniformLightAmbient = ambientLight;
+			else if (b == NUM_LIGHTS_IN_BATCH) {
+				blendNeeded = true;
+
+				//Blend the other batches on top, and don't use the ambient light again
+				uniformLightAmbient = Colour(0.0f, 0.0f, 0.0f);
+
+				//Setup blending
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ZERO);
+				glDepthMask(false);
+				glDepthFunc(GL_LEQUAL);
+			}
+			//Get the shader for the current batch
+			Shader* shader = Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING)->getShader();
 
 			shader->use();
-			shader->setUniformi("NumLights", 0);
 
-			for (unsigned int j = 0; j < batches[i].objects.size(); j++)
-				batches[i].objects[j]->render();
+			shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+
+			shader->setUniformi("NumLights", uniformNumLights);
+			shader->setUniformColourRGB("LightAmbient", uniformLightAmbient);
+
+			unsigned int numDepthMaps = 0;
+			unsigned int lightNumInBatch = 0;
+
+			//Go through the lights in this batch
+			for (unsigned int l = b; (l < b + NUM_LIGHTS_IN_BATCH) && (l < lights.size()); l++) {
+				lightNumInBatch = l - b;
+
+				lights[l]->setUniforms(shader, "[" + utils_string::str(lightNumInBatch) + "]");
+
+				if (lights[l]->hasDepthBuffer()) {
+					shader->setUniformMatrix4("LightSpaceMatrix[" + utils_string::str(lightNumInBatch) + "]", lights[l]->getLightSpaceMatrix());
+					shader->setUniformi("Light_ShadowMap[" + utils_string::str(lightNumInBatch) + "]", Renderer::bindTexture(lights[l]->getDepthBuffer()->getFramebufferTexture(0)));
+					shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightNumInBatch) + "]", 1);
+
+					numDepthMaps++;
+				} else
+					shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightNumInBatch) + "]", 0);
+			}
+
+			//Bind the buffers
+			shader->setUniformi("PositionBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(0)));
+			shader->setUniformi("NormalBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(1)));
+			shader->setUniformi("AlbedoBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(2)));
+
+			//Render
+			Renderer::getScreenTextureMesh()->render();
+
+			Renderer::unbindTexture();
+			Renderer::unbindTexture();
+			Renderer::unbindTexture();
+
+			for (unsigned int i = 0; i < numDepthMaps; i++)
+				Renderer::unbindTexture();
+
+			shader->stopUsing();
+		}
+
+		if (blendNeeded) {
+			//Disable blending
+			glDepthFunc(GL_LESS);
+			glDepthMask(true);
+			glDisable(GL_BLEND);
+		}
+	} else {
+		//Check for lighting
+		if (lights.size() > 0 && lightingEnabled) {
+			//Go through all the lights and render the shadow map for it if necessary
+			for (unsigned int i = 0; i < lights.size(); i++) {
+				if (lights[i]->hasDepthBuffer())
+					renderShadowMap(lights[i]);
+			}
+
+			glViewport(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight);
+
+			renderWithLights();
+
+			//Renderer::render(lights[0]->getDepthBuffer()->getFramebufferTexture(0), NULL);
+		} else {
+			renderWithoutLights();
+		}
+	}
+}
+
+void RenderScene3D::renderWithoutLights() {
+	for (unsigned int i = 0; i < batches.size(); i++) {
+		Shader* shader;
+		if (geometryPass)
+			shader = Renderer::getRenderShader(Renderer::SHADER_DEFERRED_GEOMETRY)->getShader();
+		else
+			 shader = batches[i].shader;
+
+		shader->use();
+
+		if (geometryPass) {
+			shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+
+			if (useEnvironmentMap)
+				shader->setUniformi("EnvironmentMap", Renderer::bindTexture(((Camera3D*) Renderer::getCamera())->getSkyBox()->getCubemap()));
+			shader->setUniformi("UseEnvironmentMap", useEnvironmentMap);
+		}
+
+		shader->setUniformi("NumLights", 0);
+
+		for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
+			if (geometryPass) {
+				Matrix4f modelMatrix = batches[i].objects[j]->getModelMatrix();
+				shader->setUniformMatrix4("ModelMatrix", modelMatrix);
+				shader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
+
+				batches[i].objects[j]->getRenderShader()->addForwardShader(shader);
+			}
+			batches[i].objects[j]->render();
+			if (geometryPass) {
+				batches[i].objects[j]->getRenderShader()->removeLastForwardShader();
+			}
+		}
+
+		if (geometryPass && useEnvironmentMap) {
+			Renderer::unbindTexture();
 		}
 	}
 }
 
 void RenderScene3D::renderWithLights() {
-	bool useEnvironmentMap = false;
-
 	bool blendNeeded = false;
 
 	//Uniform values that need to be assigned in the object specific shader before rendering

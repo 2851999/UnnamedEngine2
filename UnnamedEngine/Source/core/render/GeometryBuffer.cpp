@@ -31,10 +31,13 @@ GeometryBuffer::GeometryBuffer() : FBO(GL_FRAMEBUFFER) {
 	attach(createBuffer(GL_TEXTURE_2D, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT0));
 
 	//Normal buffer
-	attach(createBuffer(GL_TEXTURE_2D, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT1));
+	attach(createBuffer(GL_TEXTURE_2D, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT1));
 
-	//Colour/Specular buffer
-	attach(createBuffer(GL_TEXTURE_2D, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, GL_COLOR_ATTACHMENT2));
+	//Albedo buffer
+	attach(createBuffer(GL_TEXTURE_2D, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT2));
+
+	//Depth buffer
+	attach(createBuffer(GL_TEXTURE_2D, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT));
 
 	//Setup this buffer
 	setup();

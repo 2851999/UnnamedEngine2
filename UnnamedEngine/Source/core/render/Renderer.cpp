@@ -48,6 +48,8 @@ const std::string Renderer::SHADER_SHADOW_MAP        = "ShadowMap";
 const std::string Renderer::SHADER_BILLBOARDED_FONT  = "BillboardedFont";
 const std::string Renderer::SHADER_TERRAIN           = "Terrain";
 const std::string Renderer::SHADER_DEFERRED_GEOMETRY = "Geometry";
+const std::string Renderer::SHADER_PLAIN_TEXTURE     = "PlainTexture";
+const std::string Renderer::SHADER_DEFERRED_LIGHTING = "DeferredLighting";
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -106,6 +108,8 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_BILLBOARDED_FONT,  Shader::loadShader("resources/shaders/BillboardedFontShader"));
 	addRenderShader(SHADER_TERRAIN,           Shader::loadShader("resources/shaders/Terrain"));
 	addRenderShader(SHADER_DEFERRED_GEOMETRY, Shader::loadShader("resources/shaders/GeometryShader"));
+	addRenderShader(SHADER_PLAIN_TEXTURE,     Shader::loadShader("resources/shaders/PlainTexture"));
+	addRenderShader(SHADER_DEFERRED_LIGHTING, Shader::loadShader("resources/shaders/DeferredLighting"));
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
@@ -209,7 +213,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 void Renderer::render(FramebufferTexture* texture, Shader* shader) {
 	if (shader == NULL)
-		shader = getRenderShader(SHADER_LIGHTING)->getShader();
+		shader = getRenderShader(SHADER_PLAIN_TEXTURE)->getShader();
 
 	shader->use();
 
@@ -229,7 +233,7 @@ void Renderer::destroy() {
 using namespace utils_string;
 void Renderer::addRenderShader(std::string id, Shader* shader) {
 	shader->use();
-	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN) {
+	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_GEOMETRY || id == SHADER_DEFERRED_LIGHTING) {
 		shader->addUniform("UseNormalMap", "ue_useNormalMap");
 
 		shader->addUniform("UseShadowMap", "ue_useShadowMap");
@@ -257,20 +261,6 @@ void Renderer::addRenderShader(std::string id, Shader* shader) {
 
 		shader->addUniform("NumLights", "ue_numLights");
 		shader->addUniform("LightAmbient", "ue_lightAmbient");
-		shader->addUniform("CameraPosition", "ue_cameraPosition");
-
-		shader->addUniform("EnvironmentMap", "ue_environmentMap");
-		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
-	} else if (id == SHADER_DEFERRED_GEOMETRY) {
-		shader->addUniform("UseNormalMap", "ue_useNormalMap");
-
-		shader->addUniform("UseShadowMap", "ue_useShadowMap");
-		shader->addUniform("ShadowMap", "ue_shadowMap");
-		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
-
-		for (unsigned int i = 0; i < 80; i++)
-			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
-
 		shader->addUniform("CameraPosition", "ue_cameraPosition");
 
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");

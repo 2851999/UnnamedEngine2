@@ -20,6 +20,7 @@
 #define CORE_RENDER_RENDERSCENE_H_
 
 #include "Light.h"
+#include "GeometryBuffer.h"
 #include "../Object.h"
 
 /*****************************************************************************
@@ -29,6 +30,8 @@
 
 class RenderScene3D {
 private:
+	static const bool deferred = true;
+
 	/* Structure used to group together objects with the same shader */
 	struct RenderBatch {
 		Shader* shader;
@@ -50,8 +53,20 @@ private:
 	/* Boolean to determine whether lighting should be used or not */
 	bool lightingEnabled = true;
 
+	/* The geometry buffer used in deferred rendering */
+	GeometryBuffer* gBuffer;
+
+	/* States whether the geometry pass is being rendered */
+	bool geometryPass = false;
+
+	/* States whether the skybox should be used as an environment map */
+	bool useEnvironmentMap = false;
+
 	/* Method used to render the shadow map of a light */
 	void renderShadowMap(Light* light);
+
+	/* Method used to render the scene without the lights */
+	void renderWithoutLights();
 
 	/* Method used to render the scene with the available lights */
 	void renderWithLights();

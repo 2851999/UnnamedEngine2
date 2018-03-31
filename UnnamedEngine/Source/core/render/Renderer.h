@@ -54,6 +54,8 @@ public:
 	static const std::string SHADER_BILLBOARDED_FONT;
 	static const std::string SHADER_TERRAIN;
 	static const std::string SHADER_DEFERRED_GEOMETRY;
+	static const std::string SHADER_PLAIN_TEXTURE;
+	static const std::string SHADER_DEFERRED_LIGHTING;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -117,6 +119,9 @@ public:
 
 	/* Returns the blank texture */
 	static inline Texture* getBlankTexture() { return blank; }
+
+	/* Returns the screen texture mesh */
+	static inline MeshRenderData* getScreenTextureMesh() { return screenTextureMesh; }
 };
 
 #endif /* CORE_RENDER_RENDERER_H_ */
