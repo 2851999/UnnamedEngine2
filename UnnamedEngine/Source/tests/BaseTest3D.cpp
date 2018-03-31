@@ -71,9 +71,9 @@ void BaseTest3D::render() {
 	utils_gl::setupSimple3DView(true);
 	camera->useView();
 
-	onRender();
-
 	renderScene->render();
+
+	onRender();
 }
 
 void BaseTest3D::destroy() {

@@ -67,6 +67,15 @@ void RenderScene3D::add(GameObject3D* object) {
 void RenderScene3D::render() {
 	//Check for deferred rendering
 	if (deferred) {
+
+		//Go through all the lights and render the shadow map for it if necessary
+		for (unsigned int i = 0; i < lights.size(); i++) {
+			if (lights[i]->hasDepthBuffer())
+				renderShadowMap(lights[i]);
+		}
+
+		glViewport(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight);
+
 		gBuffer->bind();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -158,6 +167,13 @@ void RenderScene3D::render() {
 			glDepthMask(true);
 			glDisable(GL_BLEND);
 		}
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->getHandle());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		unsigned int windowWidth = Window::getCurrentInstance()->getSettings().windowWidth;
+		unsigned int windowHeight = Window::getCurrentInstance()->getSettings().windowHeight;
+		glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	} else {
 		//Check for lighting
 		if (lights.size() > 0 && lightingEnabled) {

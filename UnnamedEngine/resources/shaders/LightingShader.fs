@@ -11,7 +11,7 @@ void main() {
 	
 	vec3 normal = ueCalculateNormal(textureCoord);
 	
-	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour.xyz, specularColour, ue_material.shininess);
+	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour.xyz, specularColour, ue_material.shininess, ue_frag_pos_lightspace);
 
 	ue_FragColour = vec4(light, diffuseColour.a);
 }

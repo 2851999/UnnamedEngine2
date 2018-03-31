@@ -132,7 +132,7 @@ float ueCalculateShadow(UELight light, vec4 fragPosLightSpace, vec3 normal) {
 }
 
 //Returns the result of applying all lighting calculations
-vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseColour, vec3 specularColour, float matShininess) {
+vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseColour, vec3 specularColour, float matShininess, vec4 fragPosLightSpace[MAX_LIGHTS]) {
 	//The ambient light
 	vec3 ambientLight = ue_lightAmbient * ambientColour;
 	
@@ -153,7 +153,7 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 		//Check the light type
 		if (ue_lights[i].type == 1) {
 			if (ue_lights[i].useShadowMap)
-				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(ue_lights[i], ue_frag_pos_lightspace[i], normal));
+				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(ue_lights[i], fragPosLightSpace[i], normal));
 			else
 				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
 		} else if (ue_lights[i].type == 2)

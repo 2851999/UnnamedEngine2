@@ -7,7 +7,8 @@
 uniform sampler2D ue_gPosition;
 uniform sampler2D ue_gNormal;
 uniform sampler2D ue_gAlbedo;
-uniform sampler2D ue_gSpecular;
+
+uniform mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
 
 in vec2 frag_textureCoord;
 
@@ -24,8 +25,13 @@ void main() {
 	vec4 normalShin = texture(ue_gNormal, frag_textureCoord);
 	vec3 normal = normalShin.rgb;
 	float shininess = normalShin.a;
+
+	vec4 fragPosLigtSpace[MAX_LIGHTS];
+
+	for (int i = 0; i < ue_numLights; i++)
+		fragPosLigtSpace[i] = ue_lightSpaceMatrix[i] * vec4(fragPosition, 1.0);
 	
-	vec3 light = ueGetLighting(normal, fragPosition, ambientColour, diffuseColour, specularColour, shininess);
+	vec3 light = ueGetLighting(normal, fragPosition, ambientColour, diffuseColour, specularColour, shininess, fragPosLigtSpace);
 
 	ue_FragColour = vec4(light, albedo.a);
 }

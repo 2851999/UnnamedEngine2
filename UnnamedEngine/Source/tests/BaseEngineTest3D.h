@@ -100,9 +100,9 @@ void Test::onCreated() {
 	renderScene->add(model2);
 	renderScene->add(model3);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f);
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, 0.0001f);
 	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(0.0f, 1.0f, 0.0f), false))->setDiffuseColour(Colour::RED);
-	Light* light2 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0.5f, -1.0f, 0.0001f);
+	Light* light2 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.5f, -1.0f, 0.0001f);
 	//plane->getMesh()->getMaterial(1)->diffuseTexture = light0->getDepthBuffer()->getFramebufferTexture(0);
 	light0->update();
 	light1->update();

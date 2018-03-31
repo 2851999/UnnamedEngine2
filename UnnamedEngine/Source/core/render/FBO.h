@@ -116,6 +116,9 @@ public:
 
 	/* The method used to unbind this framebuffer */
 	inline void unbind() { glBindFramebuffer(target, 0); }
+
+	/* Getters */
+	inline GLuint getHandle() { return framebuffer; }
 };
 
 

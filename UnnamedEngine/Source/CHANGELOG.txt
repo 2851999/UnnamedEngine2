@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 3 | Experimental 3
+
+* Added shadow mapping to deferred lighting
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 3 | Experimental 2
 
 * Added deferred rendering in RenderScene3D

@@ -49,7 +49,7 @@ void main() {
 	vec3 ambientColour = mat_diffuseColour;
 	vec3 diffuseColour = mat_diffuseColour;
 	vec3 specularColour = 0.5 * mat_diffuseColour;
-	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour, specularColour, ue_material.shininess);
+	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour, specularColour, ue_material.shininess, ue_frag_pos_lightspace);
 
 	ue_FragColour = vec4(light, 1.0);
 	
