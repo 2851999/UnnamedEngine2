@@ -6,6 +6,8 @@
 uniform vec4 ue_colour;
 uniform sampler2D ue_tex;
 
+out vec4 ue_FragColour;
+
 void main() {
 	//Assign the final colour
 	ue_FragColour = ue_colour * texture(ue_tex, ue_frag_textureCoord);

@@ -36,17 +36,18 @@ MeshRenderData* Renderer::screenTextureMesh;
 
 unsigned int Renderer::boundTexturesOldSize;
 
-const std::string Renderer::SHADER_MATERIAL         = "Material";
-const std::string Renderer::SHADER_SKY_BOX          = "SkyBox";
-const std::string Renderer::SHADER_FONT             = "Font";
-const std::string Renderer::SHADER_BILLBOARD        = "Billboard";
-const std::string Renderer::SHADER_PARTICLE         = "Particle";
-const std::string Renderer::SHADER_LIGHTING         = "Lighting";
-const std::string Renderer::SHADER_FRAMEBUFFER      = "Framebuffer";
-const std::string Renderer::SHADER_ENVIRONMENT_MAP  = "EnvironmentMap";
-const std::string Renderer::SHADER_SHADOW_MAP       = "ShadowMap";
-const std::string Renderer::SHADER_BILLBOARDED_FONT = "BillboardedFont";
-const std::string Renderer::SHADER_TERRAIN          = "Terrain";
+const std::string Renderer::SHADER_MATERIAL          = "Material";
+const std::string Renderer::SHADER_SKY_BOX           = "SkyBox";
+const std::string Renderer::SHADER_FONT              = "Font";
+const std::string Renderer::SHADER_BILLBOARD         = "Billboard";
+const std::string Renderer::SHADER_PARTICLE          = "Particle";
+const std::string Renderer::SHADER_LIGHTING          = "Lighting";
+const std::string Renderer::SHADER_FRAMEBUFFER       = "Framebuffer";
+const std::string Renderer::SHADER_ENVIRONMENT_MAP   = "EnvironmentMap";
+const std::string Renderer::SHADER_SHADOW_MAP        = "ShadowMap";
+const std::string Renderer::SHADER_BILLBOARDED_FONT  = "BillboardedFont";
+const std::string Renderer::SHADER_TERRAIN           = "Terrain";
+const std::string Renderer::SHADER_DEFERRED_GEOMETRY = "Geometry";
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -93,17 +94,18 @@ void Renderer::initialise() {
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the shaders
-	addRenderShader(SHADER_MATERIAL,         Shader::loadShader("resources/shaders/MaterialShader"));
-	addRenderShader(SHADER_SKY_BOX,          Shader::loadShader("resources/shaders/SkyBoxShader"));
-	addRenderShader(SHADER_FONT,             Shader::loadShader("resources/shaders/FontShader"));
-	addRenderShader(SHADER_BILLBOARD,        Shader::loadShader("resources/shaders/BillboardShader"));
-	addRenderShader(SHADER_PARTICLE,         Shader::loadShader("resources/shaders/ParticleShader"));
-	addRenderShader(SHADER_LIGHTING,         Shader::loadShader("resources/shaders/LightingShader"));
-	addRenderShader(SHADER_FRAMEBUFFER,      Shader::loadShader("resources/shaders/FramebufferShader"));
-	addRenderShader(SHADER_ENVIRONMENT_MAP,  Shader::loadShader("resources/shaders/EnvironmentMapShader"));
-	addRenderShader(SHADER_SHADOW_MAP,       Shader::loadShader("resources/shaders/ShadowMapShader"));
-	addRenderShader(SHADER_BILLBOARDED_FONT, Shader::loadShader("resources/shaders/BillboardedFontShader"));
-	addRenderShader(SHADER_TERRAIN,          Shader::loadShader("resources/shaders/Terrain"));
+	addRenderShader(SHADER_MATERIAL,          Shader::loadShader("resources/shaders/MaterialShader"));
+	addRenderShader(SHADER_SKY_BOX,           Shader::loadShader("resources/shaders/SkyBoxShader"));
+	addRenderShader(SHADER_FONT,              Shader::loadShader("resources/shaders/FontShader"));
+	addRenderShader(SHADER_BILLBOARD,         Shader::loadShader("resources/shaders/BillboardShader"));
+	addRenderShader(SHADER_PARTICLE,          Shader::loadShader("resources/shaders/ParticleShader"));
+	addRenderShader(SHADER_LIGHTING,          Shader::loadShader("resources/shaders/LightingShader"));
+	addRenderShader(SHADER_FRAMEBUFFER,       Shader::loadShader("resources/shaders/FramebufferShader"));
+	addRenderShader(SHADER_ENVIRONMENT_MAP,   Shader::loadShader("resources/shaders/EnvironmentMapShader"));
+	addRenderShader(SHADER_SHADOW_MAP,        Shader::loadShader("resources/shaders/ShadowMapShader"));
+	addRenderShader(SHADER_BILLBOARDED_FONT,  Shader::loadShader("resources/shaders/BillboardedFontShader"));
+	addRenderShader(SHADER_TERRAIN,           Shader::loadShader("resources/shaders/Terrain"));
+	addRenderShader(SHADER_DEFERRED_GEOMETRY, Shader::loadShader("resources/shaders/GeometryShader"));
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
@@ -255,6 +257,20 @@ void Renderer::addRenderShader(std::string id, Shader* shader) {
 
 		shader->addUniform("NumLights", "ue_numLights");
 		shader->addUniform("LightAmbient", "ue_lightAmbient");
+		shader->addUniform("CameraPosition", "ue_cameraPosition");
+
+		shader->addUniform("EnvironmentMap", "ue_environmentMap");
+		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
+	} else if (id == SHADER_DEFERRED_GEOMETRY) {
+		shader->addUniform("UseNormalMap", "ue_useNormalMap");
+
+		shader->addUniform("UseShadowMap", "ue_useShadowMap");
+		shader->addUniform("ShadowMap", "ue_shadowMap");
+		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
+
+		for (unsigned int i = 0; i < 80; i++)
+			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
+
 		shader->addUniform("CameraPosition", "ue_cameraPosition");
 
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");

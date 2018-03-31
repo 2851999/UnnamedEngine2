@@ -29,7 +29,6 @@
 RenderScene3D::RenderScene3D() {
 	//Get the required shaders
 	shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getShader();
-	lightingShader = Renderer::getRenderShader(Renderer::SHADER_LIGHTING)->getShader();
 }
 
 RenderScene3D::~RenderScene3D() {

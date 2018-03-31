@@ -53,6 +53,7 @@ public:
 	static const std::string SHADER_SHADOW_MAP;
 	static const std::string SHADER_BILLBOARDED_FONT;
 	static const std::string SHADER_TERRAIN;
+	static const std::string SHADER_DEFERRED_GEOMETRY;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

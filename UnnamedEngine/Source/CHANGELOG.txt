@@ -1,4 +1,38 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 3 | Experimental 1
+
+* Added GeometryBuffer
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 3 (V0.2.6)
+
+* Improved CDLODTerrain
+* Improved accuracy of FPSLimiter
+
+* Added convenience methods for setting the x, y and z
+  positions of a transform/object separately
+* Added support for more than one shadow map in a render
+  scene batch
+* Added an alternative constructor for FramebufferTexture
+* Added batch system to RenderScene to avoid repeatedly
+  assigning the same uniforms
+  
+* Changed getDelta() methods to be of type float to be
+  more accurate
+* Changed debugging settings to debug
+    
+* Fixed bug: Frustum culling did not take into account the
+             scale of the object
+* Fixed bug: Shadow's would repeat themselves if far enough
+             away
+* Fixed bug: Terrain normals were incorrectly calculated
+* Fixed bug: DebugCamera was incorrectly calculating mouse
+             movement
+* Fixed bug: GUIDropDownMenu and hence GUIDropDownList did
+             not assign added button's transform
+* Fixed bug: Horizontal GUISlider did not work correctly
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 2 | Experimental 4
 
 * Added batch system to RenderScene to avoid repeatedly

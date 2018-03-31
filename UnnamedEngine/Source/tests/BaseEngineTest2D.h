@@ -93,7 +93,7 @@ void Test::update() {
 }
 
 void Test::render() {
-	GLUtils::setupSimple2DView();
+	utils_gl::setupSimple2DView();
 
 	object->render();
 
