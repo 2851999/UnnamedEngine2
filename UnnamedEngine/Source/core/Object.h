@@ -101,6 +101,8 @@ public:
 
 	/* Setters and getters */
 	inline void setPosition(Vector2f position) { transform->setPosition(position); }
+	inline void setX(float x) { transform->setX(x); }
+	inline void setY(float y) { transform->setY(y); }
 	inline void setPosition(float x, float y)  { transform->setPosition(x, y); }
 	inline void setRotation(Quaternion rotation) { transform->setRotation(rotation); }
 	inline void setRotation(float rotation)    { transform->setRotation(rotation); }
@@ -158,6 +160,9 @@ public:
 	/* Setters and getters */
 	inline void setPosition(Vector3f position) { transform->setPosition(position); }
 	inline void setPosition(float x, float y, float z)  { transform->setPosition(x, y, z); }
+	inline void setX(float x) { transform->setX(x); }
+	inline void setY(float y) { transform->setY(y); }
+	inline void setZ(float z) { transform->setZ(z); }
 	inline void setRotation(Quaternion rotation) { transform->setRotation(rotation); }
 	inline void setRotation(Vector3f rotation) { transform->setRotation(rotation); }
 	inline void setRotation(float x, float y, float z) { transform->setRotation(x, y, z); }

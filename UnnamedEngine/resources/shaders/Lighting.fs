@@ -18,23 +18,23 @@ struct UELight {
 	
 	float cutoff;
 	float outerCutoff;
+
+	sampler2D shadowMap;
+	bool useShadowMap;
 };
 
 uniform UELight ue_lights[MAX_LIGHTS];
 
 uniform int ue_numLights;
 
-uniform vec3 ue_light_ambient;
+uniform vec3 ue_lightAmbient;
 
 uniform samplerCube ue_environmentMap;
 uniform bool ue_useEnvironmentMap;
 uniform bool ue_useNormalMap;
 uniform bool ue_useParallaxMap;
 
-uniform sampler2D ue_shadowMap;
-uniform bool ue_useShadowMap;
-
-in vec4 ue_frag_pos_lightspace;
+in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 in mat3 ue_frag_tbnMatrix;
 
 in vec3 ue_tangentViewPos;
@@ -47,7 +47,7 @@ vec3 ueCalculateDirectionalLight(UELight light, vec3 diffuseColour, vec3 specula
 	float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
 	vec3 diffuseLight = diffuseStrength * (light.diffuseColour * diffuseColour);
 	
-	vec3 viewDirection = normalize(ue_camera_position - ue_frag_position);
+	vec3 viewDirection = normalize(ue_cameraPosition - ue_frag_position);
 	vec3 halfwayDirection = normalize(lightDirection + viewDirection);
 	
 	float specularStrength = pow(max(dot(normal, halfwayDirection), 0.0), ue_material.shininess);
@@ -63,7 +63,7 @@ vec3 ueCalculatePointLight(UELight light, vec3 diffuseColour, vec3 specularColou
 	float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
 	vec3 diffuseLight = diffuseStrength * (light.diffuseColour * diffuseColour);
 	
-	vec3 viewDirection = normalize(ue_camera_position - ue_frag_position);
+	vec3 viewDirection = normalize(ue_cameraPosition - ue_frag_position);
 	vec3 halfwayDirection = normalize(lightDirection + viewDirection);
 		
 	float specularStrength = pow(max(dot(normal, halfwayDirection), 0.0), ue_material.shininess);
@@ -91,7 +91,7 @@ vec3 ueCalculateSpotLight(UELight light, vec3 diffuseColour, vec3 specularColour
 		float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
 		vec3 diffuseLight = diffuseStrength * (light.diffuseColour * diffuseColour);
 		
-		vec3 viewDirection = normalize(ue_camera_position - ue_frag_position);
+		vec3 viewDirection = normalize(ue_cameraPosition - ue_frag_position);
 		vec3 halfwayDirection = normalize(lightDirection + viewDirection);
 		
 		float specularStrength = pow(max(dot(normal, halfwayDirection), 0.0), ue_material.shininess);
@@ -107,22 +107,22 @@ vec3 ueCalculateSpotLight(UELight light, vec3 diffuseColour, vec3 specularColour
 }
 
 //Returns a float value which states how much in shadow a particular fragment is
-float ueCalculateShadow(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal) {
+float ueCalculateShadow(UELight light, vec4 fragPosLightSpace, vec3 normal) {
 	//Perspective divide
 	vec3 projectedCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	projectedCoords = projectedCoords * 0.5 + 0.5;
-	float closestDepth = texture(ue_shadowMap, projectedCoords.xy).r;
+	//float closestDepth = texture(light.shadowMap, projectedCoords.xy).r;
 	float currentDepth = projectedCoords.z;
 	
-	float bias = max(0.01 * (1.0 - dot(normal, lightDir)), 0.005);
+	float bias = max(0.01 * (1.0 - dot(normal, light.direction)), 0.005);
 	
 	//float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 	
 	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(ue_shadowMap, 0);
+	vec2 texelSize = 1.0 / textureSize(light.shadowMap, 0);
 	for(int x = -1; x <= 1; ++x) {
 		for(int y = -1; y <= 1; ++y) {
-			float pcfDepth = texture(ue_shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r; 
+			float pcfDepth = texture(light.shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r; 
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
 		}    
 	}
@@ -133,13 +133,13 @@ float ueCalculateShadow(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal) {
 
 vec3 ueGetLighting(vec3 normal, vec3 ambientColour, vec3 diffuseColour, vec3 specularColour) {
 	//The ambient light
-	vec3 ambientLight = ue_light_ambient * ambientColour;
+	vec3 ambientLight = ue_lightAmbient * ambientColour;
 	
 	//The diffuse and specular light from the lighting calculations
 	vec3 otherLight = vec3(0.0);
 	
 	if (ue_useEnvironmentMap) {
-		vec3 I = normalize(ue_frag_position - ue_camera_position);
+		vec3 I = normalize(ue_frag_position - ue_cameraPosition);
 		vec3 R = reflect(I, normalize(ue_frag_normal));
 		
 		ambientColour *= texture(ue_environmentMap, R).rgb;
@@ -151,8 +151,8 @@ vec3 ueGetLighting(vec3 normal, vec3 ambientColour, vec3 diffuseColour, vec3 spe
 	for (int i = 0; i < ue_numLights; i++) {
 		//Check the light type
 		if (ue_lights[i].type == 1) {
-			if (ue_useShadowMap)
-				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal) * (1.0 - ueCalculateShadow(ue_frag_pos_lightspace, ue_lights[i].direction, normal));
+			if (ue_lights[i].useShadowMap)
+				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal) * (1.0 - ueCalculateShadow(ue_lights[i], ue_frag_pos_lightspace[i], normal));
 			else
 				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal);
 		} else if (ue_lights[i].type == 2)
@@ -160,6 +160,6 @@ vec3 ueGetLighting(vec3 normal, vec3 ambientColour, vec3 diffuseColour, vec3 spe
 		else if (ue_lights[i].type == 3)
 			otherLight += ueCalculateSpotLight(ue_lights[i], diffuseColour, specularColour, normal);
 	}
-	
+
 	return ambientLight + otherLight;
 }

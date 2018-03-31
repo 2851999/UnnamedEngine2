@@ -28,7 +28,7 @@
  * The CDLODTerrain class handles the terrain creation and rendering
  *****************************************************************************/
 
-class CDLODTerrain {
+class CDLODTerrain : public GameObject3D {
 private:
 	/* The height map for this terrain */
 	CDLODHeightMap* heightMap;
@@ -39,18 +39,15 @@ private:
 	/* The ranges */
 	std::vector<int> ranges;
 
-	/* The mesh for this terrain */
-	Mesh* mesh;
-
 	/* The mesh size */
-	float meshSize = 64.0f;
+	float meshSize = 32.0f;
 
 	/* The parameters for the quad-tree */
-	float leafNodeSize = 1.0f;
+	float leafNodeSize = 4.0f;
 	int   lodDepth = 8;
 
-	/* The terrain shader */
-	RenderShader* terrainShader;
+	/* Range multiplier to help resolve seams between nodes */
+	const float RANGE_MULTIPLIER = 1.25f;
 
 //	Texture* texture1;
 //	Texture* texture2;
@@ -64,7 +61,10 @@ public:
 	virtual ~CDLODTerrain();
 
 	/* The method used to render this terrain */
-	void render();
+	virtual void render() override;
+
+	/* Method used to get the height at a particular location (in world coordinates) */
+	inline float getHeight(float x, float y) { return heightMap->getHeight(x, y); }
 
 	/* Static method that returns a mesh of vertices for CDLOD terrain (does not have heights applied) */
 	static MeshData* createMeshData(int width, int height);

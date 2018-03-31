@@ -46,12 +46,16 @@ void DebugConsole::process(std::string command) {
 		if (split[0] == "exit")
 			//Request the engine to stop
 			baseEngine->requestClose();
-		else if (split[0] == "wireframe") {
-			if (split[1] == "enable")
-				utils_gl::enableWireframe();
-			else if (split[1] == "disable")
-				utils_gl::disableWireframe();
-		}
+		else if (command == "enable wireframe") {
+			utils_gl::enableWireframe();
+			wireframeMode = true;
+		} else if (command == "disable wireframe") {
+			utils_gl::disableWireframe();
+			wireframeMode = false;
+		} else if (command == "show info")
+			baseEngine->getSettings().debugShowInformation = true;
+		else if (command == "hide info")
+			baseEngine->getSettings().debugShowInformation = false;
 
 		//Go through the functions and attempt to process the data
 		for (unsigned int i = 0; i < functions.size(); i++)

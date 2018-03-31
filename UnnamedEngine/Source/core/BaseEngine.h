@@ -32,8 +32,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.2.5";
-	const std::string DateCreated = "15/07/2017";
+	const std::string Version     = "V0.2.6";
+	const std::string DateCreated = "31/03/2018";
 	const std::string Build       = "Development";
 }
 
@@ -83,7 +83,10 @@ public:
 	virtual void destroy() {}
 
 	/* Method called to render debugging information */
-	void renderDebuggingInfo();
+	void renderDebugInfo();
+
+	/* Method called to render the debug console */
+	void renderDebugConsole();
 
 	/* This will end the main game loop */
 	void requestClose() { closeRequested = true; }
@@ -97,7 +100,7 @@ public:
 	bool hasDebugConsole() { return debugConsole; }
 
 	unsigned int getFPS() { return fpsCalculator.getFPS(); }
-	long getDelta() { return fpsCalculator.getDelta(); }
+	float getDelta() { return fpsCalculator.getDelta(); }
 	float getDeltaSeconds() { return fpsCalculator.getDeltaSeconds(); }
 
 	/* Input methods */

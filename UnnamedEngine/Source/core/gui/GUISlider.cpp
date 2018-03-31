@@ -85,7 +85,7 @@ void GUISlider::onComponentRender() {
 		button->setPosition(pos, 0.0f);
 
 		//Make sure the button is in the middle
-		button->setPosition(button->getLocalPosition().getY(), -buttonHeight / 2 + height / 2);
+		button->setPosition(button->getLocalPosition().getX(), -buttonHeight / 2 + height / 2);
 	}
 }
 

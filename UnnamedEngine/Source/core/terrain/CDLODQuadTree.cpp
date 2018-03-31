@@ -82,7 +82,7 @@ CDLODQuadTreeNode::~CDLODQuadTreeNode() {
 bool CDLODQuadTreeNode::LODSelect(std::vector<int> ranges, int lodLevel, Camera3D* camera, std::vector<CDLODQuadTreeNode*>& selectionList) {
 	currentRange = ranges[lodLevel];
 
-	if (! intersectsSphere(camera->getPosition(), ranges[lodLevel])) {
+	if (! intersectsSphere(camera->getPosition(), currentRange)) {
 		return false;
 	}
 

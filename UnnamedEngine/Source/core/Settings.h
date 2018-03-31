@@ -78,8 +78,8 @@ struct Settings {
 	bool         engineSplashScreen = false;
 
 	/* Various debugging settings */
-	bool         debuggingShowInformation = true;
-	bool         debuggingConsoleEnabled  = true;
+	bool         debugShowInformation = true;
+	bool         debugConsoleEnabled  = true;
 };
 
 #endif /* CORE_SETTINGS_H_ */

@@ -20,6 +20,7 @@
 #include "render/Renderer.h"
 #include "audio/Audio.h"
 #include "gui/GUIComponent.h"
+#include "../utils/GLUtils.h"
 
 /*****************************************************************************
  * The BaseEngine class
@@ -62,7 +63,7 @@ void BaseEngine::create() {
 	GUIComponentRenderer::DEFAULT_FONT = defaultFont;
 
 	//Create the debug console
-	if (getSettings().debuggingConsoleEnabled) {
+	if (getSettings().debugConsoleEnabled) {
 		debugConsole = new DebugConsole(this);
 		debugConsole->enable();
 		debugConsole->hide();
@@ -113,8 +114,10 @@ void BaseEngine::create() {
 			update();
 		render();
 
-		if (getSettings().debuggingShowInformation)
-			renderDebuggingInfo();
+		if (getSettings().debugShowInformation)
+			renderDebugInfo();
+		if (getSettings().debugConsoleEnabled)
+			renderDebugConsole();
 
 		window->update();
 
@@ -139,18 +142,22 @@ void BaseEngine::create() {
 
 using namespace utils_string;
 
-void BaseEngine::renderDebuggingInfo() {
+void BaseEngine::renderDebugInfo() {
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	Renderer::addCamera(debugCamera);
-	defaultFont->render(str("--------- DEBUGGING ---------\n") +
+
+	if (debugConsole->isWireframeEnabled())
+		utils_gl::disableWireframe();
+
+	defaultFont->render(str("----------- DEBUG -----------\n") +
 							"Engine Version : " + str(Engine::Version) + "\n" +
 							"Engine Date    : " + str(Engine::DateCreated) + "\n" +
 							"Engine Build   : " + str(Engine::Build) + "\n" +
-							"Current Delta  : " + str(getDelta()) + "\n" +
+							"Current Delta  : " + str((int) getDelta()) + "\n" +
 							"Current FPS    : " + str(getFPS()) + "\n" +
 							"----------- VIDEO -----------\n" +
 							"Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
@@ -162,13 +169,38 @@ void BaseEngine::renderDebuggingInfo() {
 							"SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
 							"-----------------------------"
 							, 2, 16);
-	//Render the debug console if needed
-	if (debugConsole && debugConsole->isVisible()) {
-		debugConsole->update();
-		debugConsole->render();
-	}
+
 	Renderer::removeCamera();
+
+	if (debugConsole->isWireframeEnabled())
+		utils_gl::enableWireframe();
 
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
+}
+
+void BaseEngine::renderDebugConsole() {
+	//Render the debug console if needed
+	if (debugConsole->isVisible()) {
+		glEnable(GL_TEXTURE_2D);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		Renderer::addCamera(debugCamera);
+
+		if (debugConsole->isWireframeEnabled())
+			utils_gl::disableWireframe();
+
+		debugConsole->update();
+		debugConsole->render();
+
+		if (debugConsole->isWireframeEnabled())
+			utils_gl::enableWireframe();
+
+		Renderer::removeCamera();
+
+		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+	}
 }

@@ -75,17 +75,17 @@ void Tutorial::created() {
 	//use when rendering it (in this case the 'Material' shader)
 	object = new GameObject2D(mesh, Renderer::SHADER_MATERIAL, 100, 100);
 
+	//The last two parameters above are to assign the width and height values of the
+	//object, which ensures that rotations performed on it will always occur about
+	//it's centre due to the way the MeshBuilder creates the mesh using window
+	//coordinates
+
 	//We can also change the material using the game object:
 	object->getMaterial()->diffuseColour = Colour::RED;
 
 	//But when using more complex objects with multiple meshes, this will
 	//only assign the material of the first mesh added, so will only work
 	//properly in a case such as this where there is only one mesh
-
-	//The last two parameters above are to assign the width and height values of the
-	//object, which ensures that rotations performed on it will always occur about
-	//it's centre due to the way the MeshBuilder creates the mesh using window
-	//coordinates
 
 	//Now we can change various properties of the object
 	object->setPosition(400, 200);

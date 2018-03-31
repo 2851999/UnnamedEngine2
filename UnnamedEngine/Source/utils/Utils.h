@@ -111,6 +111,9 @@ namespace utils_maths {
 			return value;
 	}
 
+	template<typename T>
+	inline T lerp(T a, T b, T factor) { return (a + ((b - a) * factor)); }
+
 	/* Returns a value that is a multiple of the interval, closest to the
 	 * value given */
 	float clampToClosestInterval(float value, float interval);
@@ -154,7 +157,7 @@ namespace utils_time {
 	double getSeconds();
 
 	/* Returns the time elapsed in milliseconds (rounded) since the GLFW was initialised */
-	inline long getMilliseconds() { return (long) (getSeconds() * 1000); }
+	inline float getMilliseconds() { return (float) (getSeconds() * 1000); }
 
 	/* Pauses the thread for a set amount of time given in milliseconds */
 	void sleep(long milliseconds);

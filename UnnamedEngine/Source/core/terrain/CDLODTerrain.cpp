@@ -20,6 +20,8 @@
 
 #include "../../utils/GLUtils.h"
 
+#include "../render/Light.h"
+
 /*****************************************************************************
  * The CDLODTerrain class
  *****************************************************************************/
@@ -31,9 +33,9 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	this->heightMap = heightMap;
 
 	//Setup the ranges
-	ranges.push_back(1.0f);
+	ranges.push_back(leafNodeSize * RANGE_MULTIPLIER);
 	for (int i = 1; i < lodDepth; i++) {
-		ranges.push_back(ranges[i - 1] + pow(2, i));
+		ranges.push_back((ranges[i - 1] + pow(2, i)*leafNodeSize) * RANGE_MULTIPLIER); //Multiplier resolves clamping issue
 	}
 
 	//Calculate the root node size
@@ -45,12 +47,9 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 	//Create the quad-tree
 	root = new CDLODQuadTreeNode(heightMap, rootNodeSize, lodDepth - 1, 0.0f, 0.0f);
 
-	//Assign the shader
-	terrainShader = Renderer::getRenderShader(Renderer::SHADER_CDLOD_TERRAIN);
-
-	//Create the mesh
-	mesh = new Mesh(createMeshData(meshSize, meshSize));
-	mesh->setup(terrainShader);
+	//Create and assign the mesh
+	Mesh* terrainMesh = new Mesh(createMeshData(meshSize, meshSize));
+	setMesh(terrainMesh, Renderer::getRenderShader(Renderer::SHADER_TERRAIN));
 
 //	texture1 = Texture::loadTexture("C:/UnnamedEngine/textures/grass.png");
 //	texture2 = Texture::loadTexture("C:/UnnamedEngine/textures/snow.jpg");
@@ -60,7 +59,6 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
 CDLODTerrain::~CDLODTerrain() {
 	delete heightMap;
 	delete root;
-	delete mesh;
 }
 
 void CDLODTerrain::render() {
@@ -77,16 +75,24 @@ void CDLODTerrain::render() {
 //	utils_gl::disableWireframe();
 
 	//Use the terrain shader
-	Shader* shader = terrainShader->getShader();
+	Shader* shader = getShader();
 	shader->use();
 
-	shader->setUniformMatrix4("ProjectionMatrix", camera->getProjectionMatrix());
-	shader->setUniformMatrix4("ViewMatrix", camera->getViewMatrix());
-	shader->setUniformVector3("CameraPosition", camera->getPosition());
 	shader->setUniformf("HeightScale", heightMap->getHeightScale());
 	shader->setUniformf("Size", heightMap->getSize());
 
 	shader->setUniformi("HeightMap", Renderer::bindTexture(heightMap->getTexture()));
+
+//	shader->setUniformi("NumLights", 1);
+//	shader->setUniformColourRGB("Light_Ambient", Colour(0.1f, 0.1f, 0.1f));
+//	shader->setUniformVector3("Camera_Position", ((Camera3D*) Renderer::getCamera())->getPosition());
+//	shader->setUniformi("UseEnvironmentMap", 0);
+//	shader->setUniformi("UseShadowMap", 0);
+//
+//	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f);
+//	light0->setUniforms(shader, "[0]");
+//	delete light0;
+
 //	shader->setUniformi("GrassTexture", Renderer::bindTexture(texture1));
 //	shader->setUniformi("SnowTexture", Renderer::bindTexture(texture2));
 //	shader->setUniformi("StoneTexture", Renderer::bindTexture(texture3));
@@ -108,13 +114,14 @@ void CDLODTerrain::render() {
 //		std::cout << currentNode->getSize() << std::endl;
 //		std::cout << currentNode->getRange() << std::endl;
 
-		mesh->getRenderData()->render();
+		//mesh->getRenderData()->render();
+		Renderer::render(getMesh(), getModelMatrix(), getRenderShader());
 	}
 
+//	Renderer::unbindTexture();
+//	Renderer::unbindTexture();
+//	Renderer::unbindTexture();
 	Renderer::unbindTexture();
-//	Renderer::unbindTexture();
-//	Renderer::unbindTexture();
-//	Renderer::unbindTexture();
 
 	//Stop using the shader
 	shader->stopUsing();
@@ -141,13 +148,13 @@ MeshData* CDLODTerrain::createMeshData(int width, int height) {
 	//Assign the indices
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			meshIndices.push_back((width + 1) * (y + 0) + x);
+			meshIndices.push_back((width + 1) * (y + 1) + (x + 1));
 			meshIndices.push_back((width + 1) * y + (x + 1));
-			meshIndices.push_back((width + 1) * (y + 1) + (x + 1));
+			meshIndices.push_back((width + 1) * (y + 0) + x);
 
-			meshIndices.push_back((width + 1) * (y + 1) + (x + 1));
-			meshIndices.push_back((width + 1) * (y + 1) + x);
 			meshIndices.push_back((width + 1) * y + x);
+			meshIndices.push_back((width + 1) * (y + 1) + x);
+			meshIndices.push_back((width + 1) * (y + 1) + (x + 1));
 		}
 	}
 

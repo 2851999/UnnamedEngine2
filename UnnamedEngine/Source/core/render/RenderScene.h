@@ -29,8 +29,14 @@
 
 class RenderScene3D {
 private:
-	/* The GameObjects in this scene */
-	std::vector<GameObject3D*> objects;
+	/* Structure used to group together objects with the same shader */
+	struct RenderBatch {
+		Shader* shader;
+		std::vector<GameObject3D*> objects;
+	};
+
+	/* The RenderBatches in this scene */
+	std::vector<RenderBatch> batches;
 
 	/* The lights in this scene */
 	std::vector<Light*> lights;
@@ -38,7 +44,22 @@ private:
 	/* Various shaders that might be needed */
 	Shader* shadowMapShader;
 	Shader* lightingShader;
+
+	/* The ambient light used in lighting */
+	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
+
+	/* Boolean to determine whether lighting should be used or not */
+	bool lightingEnabled = true;
+
+	/* Method used to render the shadow map of a light */
+	void renderShadowMap(Light* light);
+
+	/* Method used to render the scene with the available lights */
+	void renderWithLights();
 public:
+	/* The number of lights in each batch */
+	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
+
 	/* The constructor */
 	RenderScene3D();
 
@@ -49,10 +70,17 @@ public:
 	void render();
 
 	/* Used to add an object to this scene */
-	inline void add(GameObject3D* object) { objects.push_back(object); }
+	void add(GameObject3D* object);
 
 	/* Used to add a light to this scene */
 	inline void addLight(Light* light) { lights.push_back(light); }
+
+	/* Getters and setters */
+	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
+	inline void enableLighting() { lightingEnabled = true; }
+	inline void disableLighting() { lightingEnabled = false; }
+	inline Colour getAmbientLight() { return ambientLight; }
+	inline bool isLightingEnabled() { return lightingEnabled; }
 };
 
 #endif /* CORE_RENDER_RENDERSCENE_H_ */
