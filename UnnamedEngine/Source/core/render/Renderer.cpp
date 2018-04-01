@@ -129,7 +129,7 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 		shader->setUniformi("Material_DiffuseTexture", bindTexture(Renderer::getBlankTexture()));
 
 	//Check to see whether the shader is for lighting
-	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN) {
+	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == "PBRShader") {
 		//Assign other lighting specific properties
 		shader->setUniformColourRGB("Material_AmbientColour", material->ambientColour);
 		shader->setUniformColourRGB("Material_SpecularColour", material->specularColour);
@@ -236,7 +236,7 @@ Shader* Renderer::loadEngineShader(std::string path) {
 
 void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 	shader->use();
-	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING) {
+	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == "PBRShader") {
 		shader->addUniform("UseNormalMap", "ue_useNormalMap");
 
 		shader->addUniform("UseShadowMap", "ue_useShadowMap");
