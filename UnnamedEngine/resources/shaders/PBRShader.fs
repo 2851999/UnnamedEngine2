@@ -4,11 +4,13 @@
 #map uniform Metallic metallicMap
 #map uniform Roughness roughnessMap
 #map uniform AO aoMap
+#map uniform irradianceMap irradianceMap
 
 uniform sampler2D albedoMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;
+uniform samplerCube irradianceMap;
 
 out vec4 ue_FragColour;
 
@@ -17,6 +19,10 @@ const float PI = 3.14159265359;
 //Returns ratio of light that gets reflected on a surface (k_S)
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 float distributionGGX(vec3 N, vec3 H, float roughness) {
@@ -92,14 +98,23 @@ void main() {
     vec3 kS = F;
     vec3 kD = vec3(1.0) - kS; //Ratio of refraction
 
-    kD *= 1.0 -metallic;
+    kD *= 1.0 - metallic;
 
     float NdotL = max(dot(N, L), 0.0);
     Lo += (kD * albedo / PI + specular) * radiance * NdotL;
 
     //----------------------------------------------------------------
 
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    //vec3 ambient = vec3(0.03) * albedo * ao;
+
+    //Ambient lighting
+    vec3 kS2 = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 kD2 = 1.0 - kS2;
+    kD2 *= 1.0 - metallic;
+    vec3 irradiance = texture(irradianceMap, N).rgb;
+    vec3 diffuse = irradiance * albedo;
+    vec3 ambient = (kD2 * diffuse) * ao;
+
     vec3 colour = ambient + Lo;
 
     colour = ueGammaCorrect(ueReinhardToneMapping(colour));

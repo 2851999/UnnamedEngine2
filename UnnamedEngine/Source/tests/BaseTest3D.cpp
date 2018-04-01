@@ -43,7 +43,7 @@ void BaseTest3D::created() {
 	InputBindings* bindings = new InputBindings();
 	bindings->load(resourceLoader.getPath() + "config/Controller.xml", getWindow()->getInputManager());
 
-	camera = new DebugCamera(110.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
+	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
 
 	physicsScene = new PhysicsScene3D();
 	renderScene = new RenderScene3D();

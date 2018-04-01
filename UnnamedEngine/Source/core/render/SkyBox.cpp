@@ -23,12 +23,11 @@
  * The SkyBox class
  *****************************************************************************/
 
-SkyBox::SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom, float size) {
+SkyBox::SkyBox(Cubemap* cubemap, float size) {
 	//Create the skybox
 	box = new GameObject3D({ new Mesh(MeshBuilder::createCube(size, size, size)) }, Renderer::getRenderShader("SkyBox"));
-	//Load the texture
-	cubemap = new Cubemap(path, { right, left, top, bottom, back, front });
-	//Assign the texture in the skybox
+	//Assign the cubemap
+	this->cubemap = cubemap;
 	box->getMaterial()->diffuseTexture = cubemap;
 }
 

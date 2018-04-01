@@ -173,8 +173,9 @@ public:
 
 class Cubemap : public Texture {
 public:
-	/* The constructor */
+	/* The constructors */
 	Cubemap(std::string path, std::vector<std::string> faces);
+	Cubemap(GLuint handle) : Texture(handle, TextureParameters().setTarget(GL_TEXTURE_CUBE_MAP)) {}
 };
 
 #endif /* CORE_RENDER_TEXTURE_H_ */

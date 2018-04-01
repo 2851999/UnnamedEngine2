@@ -23,6 +23,7 @@
 
 #include "../core/render/Renderer.h"
 #include "../utils/GLUtils.h"
+#include "../experimental/pbr/EquiToCube.h"
 
 class Test : public BaseTest3D {
 private:
@@ -35,6 +36,8 @@ private:
 	Texture* ao;
 
 	RenderShader* pbrRenderShader;
+	Cubemap* environmentMap;
+	Cubemap* irradianceMap;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -51,7 +54,22 @@ void Test::onInitialise() {
 void Test::onCreated() {
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");
-	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
+
+	unsigned int envMap, irMap;
+
+	EquiToCube::generateCubemapAndIrradiance(resourceLoader.getAbsPathTextures() + "PBR/Newport_Loft_Ref.hdr", envMap, irMap);
+
+	environmentMap = new Cubemap(envMap);
+	irradianceMap = new Cubemap(irMap);
+
+	//Cubemap* environmentMap = EquiToCube::generateCubemap(resourceLoader.getAbsPathTextures() + "PBR/WinterForest_Ref.hdr");
+	//Cubemap* irradianceMap = EquiToCube::generateIrradianceMap(environmentMap);
+
+//	std::cout << environmentMap->getHandle() << std::endl;
+//	std::cout << irradianceMap->getHandle() << std::endl;
+
+	camera->setSkyBox(new SkyBox(environmentMap, 100.0f));
+	//camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
 	pbrRenderShader = new RenderShader("PBRShader", Renderer::loadEngineShader("PBRShader"), NULL);
@@ -73,7 +91,7 @@ void Test::onCreated() {
 
 		int x = i % 4;
 		int y = (int) (i / 4.0f);
-		sphere->setPosition(0.5f * x, 0.5f * y, 0.5f);
+		sphere->setPosition(0.5f * x, 0.5f * y, -0.5f);
 		sphere->setScale(0.25f, 0.25f, 0.25f);
 
 		sphere->update();
@@ -107,6 +125,7 @@ void Test::onRender() {
 	shader->setUniformi("Metallic", Renderer::bindTexture(metallic));
 	shader->setUniformi("Roughness", Renderer::bindTexture(roughness));
 	shader->setUniformi("AO", Renderer::bindTexture(ao));
+	shader->setUniformi("IrradianceMap", Renderer::bindTexture(irradianceMap));
 
 	for (unsigned int i = 0; i < spheres.size(); i++) {
 
@@ -118,6 +137,7 @@ void Test::onRender() {
 		spheres[i]->render();
 	}
 
+	Renderer::unbindTexture();
 	Renderer::unbindTexture();
 	Renderer::unbindTexture();
 	Renderer::unbindTexture();

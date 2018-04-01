@@ -1,7 +1,15 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 | Experimental 2
+
+* More PBR in PBRTest
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 4 | Experimental 1
 
 * Added PBRTest
+
+* Fixed bug: Matrix4f used half the value it should have for
+             the fov
 
 --------------------------------------------------------------
 Release 1 | Beta 0 | Development 4 (V0.2.7)
