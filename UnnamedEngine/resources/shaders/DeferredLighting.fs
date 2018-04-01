@@ -32,6 +32,7 @@ void main() {
 		fragPosLigtSpace[i] = ue_lightSpaceMatrix[i] * vec4(fragPosition, 1.0);
 	
 	vec3 light = ueGetLighting(normal, fragPosition, ambientColour, diffuseColour, specularColour, shininess, fragPosLigtSpace);
+	light = ueGammaCorrect(ueExposureToneMap(1.0, light));
 
 	ue_FragColour = vec4(light, albedo.a);
 }

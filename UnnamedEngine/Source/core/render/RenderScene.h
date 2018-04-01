@@ -30,11 +30,9 @@
 
 class RenderScene3D {
 private:
-	static const bool deferred = true;
-
 	/* Structure used to group together objects with the same shader */
 	struct RenderBatch {
-		Shader* shader;
+		RenderShader* shader;
 		std::vector<GameObject3D*> objects;
 	};
 
@@ -53,8 +51,11 @@ private:
 	/* Boolean to determine whether lighting should be used or not */
 	bool lightingEnabled = true;
 
+	/* States whether deferred rendering should be used */
+	bool deferredRendering = false;
+
 	/* The geometry buffer used in deferred rendering */
-	GeometryBuffer* gBuffer;
+	GeometryBuffer* gBuffer = NULL;
 
 	/* States whether the geometry pass is being rendered */
 	bool geometryPass = false;
@@ -62,8 +63,21 @@ private:
 	/* States whether the skybox should be used as an environment map */
 	bool useEnvironmentMap = false;
 
+	/* Method used to perform rendering for deferred and forward rendering with lighting */
+	void renderWithLights(unsigned int uniformNumLights, Colour uniformLightAmbient, unsigned int lightStartIndex);
+
+	/* Method used to set the lighting uniforms common to both forward and deferred lighting */
+	void setLightingUniforms(Shader* shader, unsigned int uniformNumLights, Colour uniformLightAmbient);
+
+	/* Method used to set all of the uniforms for the lights - numDepthMaps stores
+	 * the number of depth textures that were bound in the process */
+	void setLightUniforms(Shader* shader, unsigned int startIndex, unsigned int maxLightsInBatch, unsigned int &numDepthMaps);
+
 	/* Method used to render the shadow map of a light */
 	void renderShadowMap(Light* light);
+
+	/* Method used to render all of the shadow maps as required */
+	void renderShadowMaps();
 
 	/* Method used to render the scene without the lights */
 	void renderWithoutLights();
@@ -79,6 +93,9 @@ public:
 
 	/* The destructor */
 	virtual ~RenderScene3D();
+
+	/* Method used to enable deferred rendering */
+	void enableDeferred();
 
 	/* The method used to render all of the objects */
 	void render();

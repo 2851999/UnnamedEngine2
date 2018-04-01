@@ -311,6 +311,26 @@ void RenderShader::removeLastForwardShader() {
 	forwardShaders.pop_back();
 }
 
+void RenderShader::addDeferredGeomShader(Shader* deferredGeomShader) {
+	deferredGeomShaders.push_back(deferredGeomShader);
+}
+
+void RenderShader::removeDeferredGeomShader(Shader* deferredGeomShader) {
+	deferredGeomShaders.erase(std::remove(deferredGeomShaders.begin(), deferredGeomShaders.end(), deferredGeomShader), deferredGeomShaders.end());
+}
+
+void RenderShader::removeLastDeferredGeomShader() {
+	deferredGeomShaders.pop_back();
+}
+
 Shader* RenderShader::getShader() {
-	return forwardShaders.back();
+	if (useDeferredGeom) {
+		if (deferredGeomShaders.size() > 0)
+			return getDeferredGeomShader();
+		else {
+			Logger::log("Deferred geometry shader requested but not assigned", "Shader getShader()", LogType::Error);
+			return NULL;
+		}
+	} else
+		return getForwardShader();
 }

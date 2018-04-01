@@ -29,7 +29,7 @@ CDLODHeightMap::CDLODHeightMap(std::string path) {
 	//Places to store data about the height map texture
 	int numComponents, w, h, format;
 	//Load the height map data
-	this->data = Texture::loadTexture(path, numComponents, w, h, format);
+	this->data = Texture::loadTexture(path, numComponents, w, h, format, false);
 	//Setup this height map
 	setup(data, numComponents, w, h, format);
 }

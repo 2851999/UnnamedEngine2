@@ -105,17 +105,37 @@ private:
 	/* The shaders used for forward rendering - will always use the last
 	 * shader that was added for rendering to allow them to be overridden */
 	std::vector<Shader*> forwardShaders;
+	/* The shaders used for the geometry pass of deferred rendering */
+	std::vector<Shader*> deferredGeomShaders;
+	/* Boolean that states whether the deferred geometry shader should be used */
+	bool useDeferredGeom = false;
 public:
 	/* Various constructors */
-	RenderShader(std::string name, Shader* forwardShader) : name(name) { addForwardShader(forwardShader); }
+	RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader) : name(name) {
+		if (forwardShader)
+			addForwardShader(forwardShader);
+		if (deferredGeomShader)
+			addDeferredGeomShader(deferredGeomShader);
+	}
 
 	/* Methods used to add/remove a forward shader */
 	void addForwardShader(Shader* forwardShader);
 	void removeForwardShader(Shader* forwardShader);
 	void removeLastForwardShader();
 
+	/* Methods used to add/remove a deferred geometry shader */
+	void addDeferredGeomShader(Shader* deferredGeomShader);
+	void removeDeferredGeomShader(Shader* deferredGeomShader);
+	void removeLastDeferredGeomShader();
+
 	/* The method used to get the shader that should be used */
 	Shader* getShader();
+
+	/* The method used to get the forward and deferred geometry shaders */
+	inline Shader* getForwardShader() { return forwardShaders.back(); }
+	inline Shader* getDeferredGeomShader() { return deferredGeomShaders.back(); }
+
+	inline void useGeometryShader(bool use) { useDeferredGeom = use; }
 
 	/* Returns the name of the RenderShader */
 	std::string getName() { return name; }

@@ -3,12 +3,10 @@
 #define UE_LOCATION_GEOMETRY_POSITION 0
 #define UE_LOCATION_GEOMETRY_NORMAL 1
 #define UE_LOCATION_GEOMETRY_ALBEDO 2
-#define UE_LOCATION_GEOMETRY_SPECULAR 3
 
 layout (location = UE_LOCATION_GEOMETRY_POSITION) out vec3 ue_gPosition;
 layout (location = UE_LOCATION_GEOMETRY_NORMAL) out vec4 ue_gNormal;
 layout (location = UE_LOCATION_GEOMETRY_ALBEDO) out vec4 ue_gAlbedo;
-layout (location = UE_LOCATION_GEOMETRY_SPECULAR) out float ue_gSpecular;
 
 void main() {
 	vec2 textureCoord = ueCalculateTextureCoord();

@@ -32,6 +32,7 @@ GLuint TextureParameters::DEFAULT_TARGET = GL_TEXTURE_2D;
 GLuint TextureParameters::DEFAULT_FILTER = GL_NEAREST;
 GLuint TextureParameters::DEFAULT_CLAMP  = GL_CLAMP_TO_EDGE;
 bool   TextureParameters::DEFAULT_SHOULD_CLAMP = false;
+bool   TextureParameters::DEFAULT_SRGB   = false;
 
 void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
 	//Bind the texture if necessary
@@ -65,7 +66,7 @@ void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
  * The Texture class
  *****************************************************************************/
 
-unsigned char* Texture::loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei& height, GLint& format) {
+unsigned char* Texture::loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei& height, GLint& format, bool srgb) {
 	//Load the data using stb_image
 	unsigned char* image = stbi_load(path.c_str(), &width, &height, &numComponents, 0);
 
@@ -81,10 +82,17 @@ unsigned char* Texture::loadTexture(std::string path, int& numComponents, GLsize
 		format = GL_RED;
 	else if (numComponents == 2)
 		format = GL_RG;
-	else if (numComponents == 3)
-		format = GL_RGB;
-	else if (numComponents == 4)
-		format = GL_RGBA;
+	else if (numComponents == 3) {
+		if (srgb)
+			format = GL_SRGB;
+		else
+			format = GL_RGB;
+	} else if (numComponents == 4) {
+		if (srgb)
+			format = GL_SRGB_ALPHA;
+		else
+			format = GL_RGBA;
+	}
 
 	return image;
 }
@@ -107,7 +115,15 @@ Texture* Texture::createTexture(std::string path, unsigned char* data, int numCo
 	//Bind the texture and then pass the texture data to OpenGL
 	texture->bind();
 
-	glTexImage2D(parameters.getTarget(), 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	GLint format2 = format;
+	if (format == GL_SRGB)
+		format2 = GL_RGB;
+	if (format == GL_SRGB_ALPHA)
+		format2 = GL_RGBA;
+
+	//SRGB corrects incoming textures to a linear colour space
+
+	glTexImage2D(parameters.getTarget(), 0, format, width, height, 0, format2, GL_UNSIGNED_BYTE, data);
 
 	//Apply the parameters if requested, but don't need to bind the texture again,
 	//and it doesn't need to unbind either
@@ -123,7 +139,7 @@ Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bo
 	//The data needed for the texture
 	int numComponents, w, h, format;
 	//Obtain the texture data
-	unsigned char* image = loadTexture(path, numComponents, w, h, format);
+	unsigned char* image = loadTexture(path, numComponents, w, h, format, parameters.getSRGB());
 
 	//Create the texture - case where image is NULL is handled by this as well
 	Texture* texture = createTexture(path, image, numComponents, w, h, format, parameters, applyParameters);
@@ -157,7 +173,7 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 		//Go through each face
 		for (unsigned int i = 0; i < faces.size(); i++) {
 			//Load the image for the current face
-			image = Texture::loadTexture(path + faces[i], numComponents, width, height, format);
+			image = Texture::loadTexture(path + faces[i], numComponents, width, height, format, parameters.getSRGB());
 			//Setup the texture
 			glTexImage2D(
 				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,

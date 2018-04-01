@@ -1,4 +1,19 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 3 | Experimental 4
+
+* Added geometry shader support in RenderShader for use with
+  deferred rendering
+* Added srgb setting in TextureParameters
+* Added gamma correction in lighting shaders
+* Added enableDeferred method in RenderScene3D
+
+* Changed ModelLoader to load diffuse textures as SRGB by
+  default with the variable 'loadDiffuseTexturesAsSRGB' to
+  change this when loading a model
+  
+* Cleaned up RenderScene3D
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 3 | Experimental 3
 
 * Added shadow mapping to deferred lighting
