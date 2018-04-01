@@ -1,6 +1,8 @@
 #include "Lighting.fs"
 #include "CDLODTerrain.fs"
 
+out vec4 ue_FragColour;
+
 // #map uniform GrassTexture grassTexture
 // #map uniform SnowTexture snowTexture
 // #map uniform StoneTexture stoneTexture
@@ -47,7 +49,9 @@ void main() {
 	vec3 ambientColour = mat_diffuseColour;
 	vec3 diffuseColour = mat_diffuseColour;
 	vec3 specularColour = 0.5 * mat_diffuseColour;
-	vec3 light = ueGetLighting(normal, ambientColour, diffuseColour, specularColour);
+	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour, specularColour, ue_material.shininess, ue_frag_pos_lightspace);
+
+	light = ueGammaCorrect(ueExposureToneMap(1.0, light));
 
 	ue_FragColour = vec4(light, 1.0);
 	

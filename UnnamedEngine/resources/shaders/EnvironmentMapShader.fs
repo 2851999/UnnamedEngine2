@@ -9,6 +9,8 @@ uniform samplerCube ue_environmentMap;
 //The current camera position
 uniform vec3 ue_cameraPos;
 
+out vec4 ue_FragColour;
+
 void main() {
 	//Calculate the incident vector
 	vec3 I = normalize(ue_frag_position - ue_cameraPos);

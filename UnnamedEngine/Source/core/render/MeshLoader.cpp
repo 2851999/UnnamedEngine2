@@ -24,6 +24,8 @@
  * The MeshLoader class
  *****************************************************************************/
 
+bool MeshLoader::loadDiffuseTexturesAsSRGB = true;
+
 void MeshLoader::addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes) {
 	if (nodes.count(node) == 0)
 		nodes.insert(std::pair<const aiNode*, const aiBone*>(node, NULL));
@@ -312,7 +314,7 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 
 	//Load and assign the textures
 	material->ambientTexture  = loadAssimpTexture(path, mat, aiTextureType_AMBIENT);
-	material->diffuseTexture  = loadAssimpTexture(path, mat, aiTextureType_DIFFUSE);
+	material->diffuseTexture  = loadAssimpTexture(path, mat, aiTextureType_DIFFUSE, loadDiffuseTexturesAsSRGB);
 	material->specularTexture = loadAssimpTexture(path, mat, aiTextureType_SPECULAR);
 
 	//Check to see whether the material has a normal map
@@ -332,14 +334,15 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 	return material;
 }
 
-Texture* MeshLoader::loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type) {
+Texture* MeshLoader::loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type, bool srgb) {
 	//Check whether the texture is defined
 	if (material->GetTextureCount(type) != 0) {
 		//Get the path of the texture
 		aiString p;
 		material->GetTexture(type, 0, &p);
+
 		//Return the loaded texture
-		return Texture::loadTexture(path + utils_string::str(p.C_Str()));
+		return Texture::loadTexture(path + utils_string::str(p.C_Str()), TextureParameters().setSRGB(srgb));
 	} else
 		return NULL;
 }
@@ -771,7 +774,7 @@ void MeshLoader::readMaterial(BinaryFile& file, std::vector<Material*>& material
 	file.readVector4f(material->diffuseColour);
 	file.readVector4f(material->specularColour);
 	material->ambientTexture = readTexture(file, path);
-	material->diffuseTexture = readTexture(file, path);
+	material->diffuseTexture = readTexture(file, path, loadDiffuseTexturesAsSRGB);
 	material->specularTexture = readTexture(file, path);
 	material->normalMap = readTexture(file, path);
 	material->parallaxMap = readTexture(file, path);
@@ -780,11 +783,11 @@ void MeshLoader::readMaterial(BinaryFile& file, std::vector<Material*>& material
 	materials.push_back(material);
 }
 
-Texture* MeshLoader::readTexture(BinaryFile& file, std::string path) {
+Texture* MeshLoader::readTexture(BinaryFile& file, std::string path, bool srgb) {
 	std::string value;
 	file.readString(value);
 	if (value == std::string("NULL"))
 		return NULL;
 	else
-		return Texture::loadTexture(path + value);
+		return Texture::loadTexture(path + value, TextureParameters().setSRGB(srgb));
 }

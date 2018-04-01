@@ -48,7 +48,7 @@ private:
 	static Material* loadAssimpMaterial(std::string path, std::string fileName, const aiMaterial* material);
 
 	/* Static method called to load a texture */
-	static Texture* loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type);
+	static Texture* loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type, bool srgb = false);
 
 	/* Static method called to load a colour (If not assigned, returns WHITE instead) */
 	static Colour loadAssimpColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx);
@@ -63,8 +63,10 @@ private:
 	static void writeTexture(BinaryFile& file, Texture* texture, std::string path);
 
 	static void readMaterial(BinaryFile& file, std::vector<Material*>& materials, std::string path);
-	static Texture* readTexture(BinaryFile& file, std::string path);
+	static Texture* readTexture(BinaryFile& file, std::string path, bool srgb = false);
 public:
+	static bool loadDiffuseTexturesAsSRGB;
+
 	/* Static method called to read a file and load a model's meshes */
 	static Mesh* loadModel(std::string path, std::string fileName);
 

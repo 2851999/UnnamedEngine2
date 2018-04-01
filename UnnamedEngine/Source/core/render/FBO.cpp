@@ -56,15 +56,28 @@ void FBO::setup() {
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(target, framebuffer);
 
+	//List of all of the colour attachments being used
+	std::vector<unsigned int> colourAttachments;
+
 	//Go though each attached FramebufferTexture
-	for (unsigned int i = 0; i < textures.size(); i++)
+	for (unsigned int i = 0; i < textures.size(); i++) {
 		//Setup the current texture
 		textures[i]->setup(target);
 
-	if (textures.size() == 1 && textures[0]->getAttachment() == GL_DEPTH_ATTACHMENT) {
-		//Assume no colour attachment
+		//Assume that if it is not a depth attachment then it is a colour attachment
+		if (textures[i]->getAttachment() != GL_DEPTH_ATTACHMENT)
+			colourAttachments.push_back(textures[i]->getAttachment());
+	}
+
+	if (colourAttachments.size() == 0) {
+		//No colour attachment
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
+	} else {
+		unsigned int attachments[colourAttachments.size()];
+		for (unsigned int i = 0; i < colourAttachments.size(); i++)
+			attachments[i] = colourAttachments[i];
+		glDrawBuffers(colourAttachments.size(), attachments);
 	}
 
 	//Check to see whether the setup was successful

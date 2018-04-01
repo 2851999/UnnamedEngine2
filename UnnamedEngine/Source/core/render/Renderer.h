@@ -53,6 +53,8 @@ public:
 	static const std::string SHADER_SHADOW_MAP;
 	static const std::string SHADER_BILLBOARDED_FONT;
 	static const std::string SHADER_TERRAIN;
+	static const std::string SHADER_PLAIN_TEXTURE;
+	static const std::string SHADER_DEFERRED_LIGHTING;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -104,9 +106,18 @@ public:
 	/* Method use to destroy any objects that were created */
 	static void destroy();
 
+	/* Loads and returns an engine shader from the resources */
+	static Shader* loadEngineShader(std::string path);
+
+	/* Method used to prepare a shader by adding its required uniforms provided the id is recognised */
+	static void prepareForwardShader(std::string id, Shader* shader);
+
+	/* Method used to prepare a shader by adding its required uniforms provided the id is recognised */
+	static void prepareDeferredGeomShader(std::string id, Shader* shader);
+
 	/* Method used to add a RenderShader given a Shader - this method will also setup the shader
 	 * providing the id is recognised */
-	static void addRenderShader(std::string id, Shader* shader);
+	static void addRenderShader(std::string id, Shader* forwardShader, Shader* deferredGeomShader = NULL);
 
 	/* Method used to add a RenderShader */
 	static void addRenderShader(RenderShader* renderShader);
@@ -116,6 +127,9 @@ public:
 
 	/* Returns the blank texture */
 	static inline Texture* getBlankTexture() { return blank; }
+
+	/* Returns the screen texture mesh */
+	static inline MeshRenderData* getScreenTextureMesh() { return screenTextureMesh; }
 };
 
 #endif /* CORE_RENDER_RENDERER_H_ */

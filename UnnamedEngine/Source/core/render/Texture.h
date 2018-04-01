@@ -36,12 +36,15 @@ private:
 	GLuint filter = DEFAULT_FILTER;
 	GLuint clamp  = DEFAULT_CLAMP;
 	bool shouldClamp = DEFAULT_SHOULD_CLAMP;
+
+	bool srgb = DEFAULT_SRGB;
 public:
 	/* The default values which are assigned unless otherwise specified */
 	static GLuint DEFAULT_TARGET;
 	static GLuint DEFAULT_FILTER;
 	static GLuint DEFAULT_CLAMP;
 	static bool   DEFAULT_SHOULD_CLAMP;
+	static bool   DEFAULT_SRGB;
 
 	/* Various constructors */
 	TextureParameters() {}
@@ -62,11 +65,13 @@ public:
 	inline TextureParameters setFilter(GLuint filter) { this->filter = filter; return (*this); }
 	inline TextureParameters setClamp(GLuint clamp)   { this->clamp  = clamp;  return (*this); }
 	inline TextureParameters setShouldClamp(bool shouldClamp) { this->shouldClamp = shouldClamp; return (*this); }
+	inline TextureParameters setSRGB(bool srgb) { this->srgb = srgb; return (*this); }
 
 	inline GLuint getTarget() { return target; }
 	inline GLuint getFilter() { return filter; }
 	inline GLuint getClamp()  { return clamp;  }
 	inline bool getShouldClamp() { return shouldClamp; }
+	inline bool getSRGB() { return srgb; }
 };
 
 /*****************************************************************************
@@ -150,7 +155,7 @@ public:
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */
-	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& format);
+	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& format, bool srgb);
 
 	/* Returns a texture instance created using the data given */
 	static Texture* createTexture(std::string path, unsigned char* data, int numComponents, GLsizei width, GLsizei height, GLint format, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
