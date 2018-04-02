@@ -29,6 +29,7 @@ HDRTexture::HDRTexture(std::string path) {
 	//Bind this cubemap
 	bind();
 
+	stbi_set_flip_vertically_on_load(true);
 	//Data required for setting up
 	int numComponents, width, height;
 	//Load the texture
@@ -47,6 +48,8 @@ HDRTexture::HDRTexture(std::string path) {
 	);
 	//Free the loaded image data
 	stbi_image_free(data);
+
+	stbi_set_flip_vertically_on_load(false);
 
 	//Now that the cubemap is fully loaded, apply the texture parameters
 	applyParameters(false, false);

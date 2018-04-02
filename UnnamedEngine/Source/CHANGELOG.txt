@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 | Experimental 3
+
+* More PBR
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 4 | Experimental 2
 
 * More PBR in PBRTest

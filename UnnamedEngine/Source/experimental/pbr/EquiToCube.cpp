@@ -21,12 +21,20 @@
 #include "../../core/render/Renderer.h"
 #include "../../core/render/Shader.h"
 
-void EquiToCube::generateCubemapAndIrradiance(std::string path, unsigned int &cubemap, unsigned int &irMap) {
+void EquiToCube::generateCubemapAndIrradiance(std::string path, unsigned int &cubemap, unsigned int &irMap, unsigned int &prefilMap, unsigned int &brdfLUTMap) {
+	//Ensure enabled
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
 	RenderShader* renderShader1 = new RenderShader("EquiToCube", Renderer::loadEngineShader("EquiToCube"), NULL);
 	Shader* shader1 = renderShader1->getForwardShader();
 	RenderShader* renderShader2 = new RenderShader("Irradiance", Renderer::loadEngineShader("Irradiance"), NULL);
 	Shader* shader2 = renderShader2->getForwardShader();
+	RenderShader* renderShader3 = new RenderShader("PreFilter", Renderer::loadEngineShader("PreFilter"), NULL);
+	Shader* shader3 = renderShader3->getForwardShader();
+	RenderShader* renderShader4 = new RenderShader("BRDF", Renderer::loadEngineShader("BRDF"), NULL);
+	Shader* shader4 = renderShader4->getForwardShader();
 	MeshRenderData* cubeMesh = new MeshRenderData(MeshBuilder::createCube(1.0f, 1.0f, 1.0f), renderShader1);
+	MeshRenderData* quadMesh = new MeshRenderData(MeshBuilder::createQuad(Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(1.0f, 1.0f), Vector2f(-1.0f, 1.0f), NULL), renderShader4);
 
 	unsigned int captureFBO;
 	unsigned int captureRBO;
@@ -49,24 +57,24 @@ void EquiToCube::generateCubemapAndIrradiance(std::string path, unsigned int &cu
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	Matrix4f captureProjection = Matrix4f().initPerspective(90.0f, 1.0f, 0.1f, 10.0f);
 	Matrix4f captureViews[] = {
-	        /*Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f)),
+	        Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(-1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  1.0f,  0.0f), Vector3f(0.0f,  0.0f,  1.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f, -1.0f,  0.0f), Vector3f(0.0f,  0.0f, -1.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  0.0f,  1.0f), Vector3f(0.0f, -1.0f,  0.0f)),
-			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  0.0f, -1.0f), Vector3f(0.0f, -1.0f,  0.0f)) */ // UPSIDE DOWN
+			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  0.0f, -1.0f), Vector3f(0.0f, -1.0f,  0.0f)) // UPSIDE DOWN
 
-	        Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 1.0f,  0.0f,  0.0f), Vector3f(0.0f, 1.0f,  0.0f)),
+	        /*Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 1.0f,  0.0f,  0.0f), Vector3f(0.0f, 1.0f,  0.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(-1.0f,  0.0f,  0.0f), Vector3f(0.0f, 1.0f,  0.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f, -1.0f,  0.0f), Vector3f(0.0f, 0.0f, -1.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  1.0f,  0.0f), Vector3f(0.0f, 0.0f,  1.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  0.0f, -1.0f), Vector3f(0.0f, 1.0f,  0.0f)),
-			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  0.0f,  1.0f), Vector3f(0.0f, 1.0f,  0.0f))
+			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  0.0f,  1.0f), Vector3f(0.0f, 1.0f,  0.0f))*/
 	};
 
 	shader1->use();
@@ -88,6 +96,10 @@ void EquiToCube::generateCubemapAndIrradiance(std::string path, unsigned int &cu
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     shader1->stopUsing();
+
+    //Generate mip map as now assigned the texture
+    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 	unsigned int irradianceMap;
 	glGenTextures(1, &irradianceMap);
@@ -125,6 +137,80 @@ void EquiToCube::generateCubemapAndIrradiance(std::string path, unsigned int &cu
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	unsigned int prefilterMap;
+	glGenTextures(1, &prefilterMap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+	for (unsigned int i = 0; i < 6; i++) {
+	    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT, nullptr);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+	shader3->use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+	shader3->setUniformi("EnvMap", 0);
+	shader3->setUniformMatrix4("ProjectionMatrix", captureProjection);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	unsigned int maxMipLevels = 5;
+
+	for (unsigned int mip = 0; mip < maxMipLevels; mip++) {
+		//Resize framebuffer based on number of levels
+		unsigned int mipWidth = 128 * pow(0.5, mip);
+		unsigned int mipHeight = mipWidth;
+
+	    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+	    glViewport(0, 0, mipWidth, mipHeight);
+
+	    float roughness = (float) mip / (float) (maxMipLevels - 1);
+	    shader3->setUniformf("Roughness", roughness);
+	    for (unsigned int i = 0; i < 6; i++) {
+			shader3->setUniformMatrix4("ViewMatrix", captureViews[i]);
+	        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterMap, mip);
+
+	        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			cubeMesh->render();
+	    }
+	}
+
+	shader3->stopUsing();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    unsigned int brdfLUTTexture;
+    glGenTextures(1, &brdfLUTTexture);
+
+    // pre-allocate enough memory for the LUT texture.
+    glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+    // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
+    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTTexture, 0);
+
+    glViewport(0, 0, 512, 512);
+    shader4->use();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    quadMesh->render();
+
+    shader4->stopUsing();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 //	glActiveTexture(GL_TEXTURE0);
 //    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 //
@@ -141,6 +227,8 @@ void EquiToCube::generateCubemapAndIrradiance(std::string path, unsigned int &cu
 
 	cubemap = envCubemap;
 	irMap = irradianceMap;
+	prefilMap = prefilterMap;
+	brdfLUTMap = brdfLUTTexture;
 }
 
 Cubemap* EquiToCube::generateIrradianceMap(Cubemap* cubeMap) {

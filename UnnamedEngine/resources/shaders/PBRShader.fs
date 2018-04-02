@@ -4,13 +4,17 @@
 #map uniform Metallic metallicMap
 #map uniform Roughness roughnessMap
 #map uniform AO aoMap
-#map uniform irradianceMap irradianceMap
+#map uniform IrradianceMap irradianceMap
+#map uniform PrefilterMap prefilterMap
+#map uniform BRDFLUT brdfLUT
 
 uniform sampler2D albedoMap;
 uniform sampler2D metallicMap;
 uniform sampler2D roughnessMap;
 uniform sampler2D aoMap;
 uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D   brdfLUT; 
 
 out vec4 ue_FragColour;
 
@@ -72,6 +76,8 @@ void main() {
     //View direction
     vec3 V = normalize(ue_cameraPosition - ue_frag_position);
 
+    vec3 R = reflect(-V, N); 
+
     //Surface reflection at 0 incidence (how much surface reflects looking directly at the surface)
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
@@ -108,12 +114,19 @@ void main() {
     //vec3 ambient = vec3(0.03) * albedo * ao;
 
     //Ambient lighting
-    vec3 kS2 = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 F2 = fresnelSchlickRoughness(max(dot(N, V), 0.0), F0, roughness);
+    vec3 kS2 = F2;
     vec3 kD2 = 1.0 - kS2;
     kD2 *= 1.0 - metallic;
     vec3 irradiance = texture(irradianceMap, N).rgb;
     vec3 diffuse = irradiance * albedo;
-    vec3 ambient = (kD2 * diffuse) * ao;
+
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(brdfLUT, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    vec3 specular2 = prefilteredColor * (F2 * brdf.x + brdf.y);
+
+    vec3 ambient = (kD2 * diffuse + specular2) * ao;
 
     vec3 colour = ambient + Lo;
 

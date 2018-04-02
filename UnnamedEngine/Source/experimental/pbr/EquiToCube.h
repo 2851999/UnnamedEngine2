@@ -23,7 +23,7 @@
 
 class EquiToCube {
 public:
-	static void generateCubemapAndIrradiance(std::string path, unsigned int &cubemap, unsigned int &irMap);
+	static void generateCubemapAndIrradiance(std::string path, unsigned int &cubemap, unsigned int &irMap, unsigned int &prefilMap, unsigned int &brdfLUTMap);
 	static Cubemap* generateIrradianceMap(Cubemap* map);
 };
 

@@ -384,6 +384,8 @@ public:
 
 	/* Method used to create a MeshData instance for a quad, given its 4 corners */
 	static MeshData* createQuad(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags = MeshData::NONE);
+	/* Method used to create a MeshData instance for a quad, given its 4 corners and texture */
+	static MeshData* createQuad(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture, MeshData::Flag flags = MeshData::NONE);
 	/* Method used to create a MeshData instance for a quad (rectangle/square in this case) given its width and height */
 	static MeshData* createQuad(float width, float height, MeshData::Flag flags = MeshData::NONE);
 	/* Method used to create a MeshData instance for a textured quad (rectangle/square in this case) given its width and height */
