@@ -1,5 +1,5 @@
 #include "Core.vs"
-#include "Billboard.vs"
+#include "billboard/Billboard.vs"
 
 #map attribute PositionsData ue_positionsData
 #map attribute TextureData ue_textureData

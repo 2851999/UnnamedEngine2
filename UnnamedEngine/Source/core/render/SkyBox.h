@@ -35,9 +35,9 @@ private:
 	GameObject3D* box;
 public:
 	/* The constructors */
-	SkyBox(Cubemap* cubemap, float size);
-	SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom, float size) : SkyBox(new Cubemap(path, { right, left, top, bottom, back, front }), size) {}
-	SkyBox(std::string path, std::string fileExtension, float size) : SkyBox(path, "front" + fileExtension, "back" + fileExtension, "left" + fileExtension, "right" + fileExtension, "top" + fileExtension, "bottom" + fileExtension, size) {}
+	SkyBox(Cubemap* cubemap);
+	SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom) : SkyBox(new Cubemap(path, { right, left, top, bottom, back, front })) {}
+	SkyBox(std::string path, std::string fileExtension) : SkyBox(path, "front" + fileExtension, "back" + fileExtension, "left" + fileExtension, "right" + fileExtension, "top" + fileExtension, "bottom" + fileExtension) {}
 
 	/* The destructor */
 	virtual ~SkyBox() { destroy(); }

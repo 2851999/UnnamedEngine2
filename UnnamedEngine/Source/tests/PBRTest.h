@@ -72,11 +72,11 @@ void Test::onCreated() {
 //	std::cout << environmentMap->getHandle() << std::endl;
 //	std::cout << irradianceMap->getHandle() << std::endl;
 
-	camera->setSkyBox(new SkyBox(environmentMap, 100.0f));
+	camera->setSkyBox(new SkyBox(environmentMap));
 	//camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	pbrRenderShader = new RenderShader("PBRShader", Renderer::loadEngineShader("PBRShader"), NULL);
+	pbrRenderShader = new RenderShader("PBRShader", Renderer::loadEngineShader("pbr/PBRShader"), NULL);
 	Renderer::prepareForwardShader("PBRShader", pbrRenderShader->getForwardShader());
 
 	std::string path = "C:/UnnamedEngine/textures/PBR/";
@@ -84,10 +84,14 @@ void Test::onCreated() {
 //	normal = Texture::loadTexture(path + "tile-normal.png");
 //	metallic = Texture::loadTexture(path + "tile-metalness.png");
 //	roughness = Texture::loadTexture(path + "tile-roughness.png");
+//	ao = Texture::loadTexture(path + "streakedmetal-metalness.png");
+
 //	albedo = Texture::loadTexture(path + "granite/albedo.jpg");
 //	normal = Texture::loadTexture(path + "granite/normal.jpg");
 //	metallic = Texture::loadTexture(path + "granite/metalness.png");
 //	roughness = Texture::loadTexture(path + "granite/roughness.jpg");
+//	ao = Texture::loadTexture(path + "granite/ao.jpg");
+
 	albedo = Texture::loadTexture(path + "streakedmetal-albedo.png");
 	//normal = Texture::loadTexture(path + "normal.png");
 	metallic = Texture::loadTexture(path + "streakedmetal-metalness.png");
@@ -103,8 +107,8 @@ void Test::onCreated() {
 
 		int x = i % 4;
 		int y = (int) (i / 4.0f);
-		sphere->setPosition(0.5f * x, 0.5f * y, -0.5f);
-		sphere->setScale(0.25f, 0.25f, 0.25f);
+		sphere->setPosition(x * 2, y * 2, -0.5f);
+		//sphere->setScale(0.25f, 0.25f, 0.25f);
 
 		sphere->update();
 

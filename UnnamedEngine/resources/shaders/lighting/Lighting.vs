@@ -1,5 +1,5 @@
-#include "Core.vs"
-#include "Skinning.vs"
+#include "../Core.vs"
+#include "../Skinning.vs"
 
 #define MAX_LIGHTS 6
 

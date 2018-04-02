@@ -1,4 +1,4 @@
-#include "Lighting.fs"
+#include "../lighting/Lighting.fs"
 #include "CDLODTerrain.fs"
 
 #define UE_LOCATION_GEOMETRY_POSITION 0

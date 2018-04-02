@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 | Experimental 4
+
+* Added support for "../" in include paths for shaders
+
+* Moved some of the shaders around
+
+* Removed size parameter for SkyBox
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 4 | Experimental 3
 
 * More PBR

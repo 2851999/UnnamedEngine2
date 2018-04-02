@@ -1,4 +1,4 @@
-#include "Core.vs"
+#include "../Core.vs"
 #include "Billboard.vs"
 
 #map uniform Billboard_Size ue_billboardSize

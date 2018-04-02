@@ -1,4 +1,4 @@
-#include "Lighting.fs"
+#include "../lighting/Lighting.fs"
 #include "CDLODTerrain.fs"
 
 out vec4 ue_FragColour;

@@ -43,6 +43,9 @@ private:
 	/* Maps with locations of the variables in the shaders */
 	std::map<std::string, GLint> uniforms;
 	std::map<std::string, GLint> attributes;
+
+	/* Loads and returns an included file */
+	static std::vector<std::string> loadInclude(std::string path, std::string line);
 public:
 	/* The ShaderSource struct stores information about Shader source code */
 	struct ShaderSource {
@@ -90,6 +93,7 @@ public:
 	static Shader* createShader(ShaderSource vertexSource, ShaderSource geometrySource, ShaderSource fragmentSource);
 
 	/* Methods used to load a shader */
+	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source);
 	static ShaderSource loadShaderSource(std::string path);
 	static Shader* loadShader(std::string path);
 };

@@ -25,13 +25,13 @@ void EquiToCube::generateCubemapAndIrradiance(std::string path, unsigned int &cu
 	//Ensure enabled
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-	RenderShader* renderShader1 = new RenderShader("EquiToCube", Renderer::loadEngineShader("EquiToCube"), NULL);
+	RenderShader* renderShader1 = new RenderShader("EquiToCube", Renderer::loadEngineShader("pbr/EquiToCube"), NULL);
 	Shader* shader1 = renderShader1->getForwardShader();
-	RenderShader* renderShader2 = new RenderShader("Irradiance", Renderer::loadEngineShader("Irradiance"), NULL);
+	RenderShader* renderShader2 = new RenderShader("Irradiance", Renderer::loadEngineShader("pbr/Irradiance"), NULL);
 	Shader* shader2 = renderShader2->getForwardShader();
-	RenderShader* renderShader3 = new RenderShader("PreFilter", Renderer::loadEngineShader("PreFilter"), NULL);
+	RenderShader* renderShader3 = new RenderShader("PreFilter", Renderer::loadEngineShader("pbr/PreFilter"), NULL);
 	Shader* shader3 = renderShader3->getForwardShader();
-	RenderShader* renderShader4 = new RenderShader("BRDF", Renderer::loadEngineShader("BRDF"), NULL);
+	RenderShader* renderShader4 = new RenderShader("BRDF", Renderer::loadEngineShader("pbr/BRDF"), NULL);
 	Shader* shader4 = renderShader4->getForwardShader();
 	MeshRenderData* cubeMesh = new MeshRenderData(MeshBuilder::createCube(1.0f, 1.0f, 1.0f), renderShader1);
 	MeshRenderData* quadMesh = new MeshRenderData(MeshBuilder::createQuad(Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(1.0f, 1.0f), Vector2f(-1.0f, 1.0f), NULL), renderShader4);

@@ -1,4 +1,4 @@
-#include "Lighting.fs"
+#include "../lighting/Lighting.fs"
 
 #map uniform Albedo albedoMap
 #map uniform Metallic metallicMap
@@ -62,7 +62,7 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
 }
 
 void main() {
-	vec3 lightPosition = vec3(0.5, 0.5, 2.0);
+	vec3 lightPosition = vec3(0.5, 2.0, 2.0);
 	vec3 lightColor = vec3(23.47, 21.31, 20.79);
 
 	vec3 albedo = texture(albedoMap, ue_frag_textureCoord).rgb;

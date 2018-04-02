@@ -98,16 +98,16 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_MATERIAL,          loadEngineShader("MaterialShader"),        NULL);
 	addRenderShader(SHADER_SKY_BOX,           loadEngineShader("SkyBoxShader"),          NULL);
 	addRenderShader(SHADER_FONT,              loadEngineShader("FontShader"),            NULL);
-	addRenderShader(SHADER_BILLBOARD,         loadEngineShader("BillboardShader"),       NULL);
+	addRenderShader(SHADER_BILLBOARD,         loadEngineShader("billboard/BillboardShader"),       NULL);
 	addRenderShader(SHADER_PARTICLE,          loadEngineShader("ParticleShader"),        NULL);
-	addRenderShader(SHADER_LIGHTING,          loadEngineShader("LightingShader"),        loadEngineShader("LightingDeferredGeom"));
+	addRenderShader(SHADER_LIGHTING,          loadEngineShader("lighting/LightingShader"),        loadEngineShader("lighting/LightingDeferredGeom"));
 	addRenderShader(SHADER_FRAMEBUFFER,       loadEngineShader("FramebufferShader"),     NULL);
 	addRenderShader(SHADER_ENVIRONMENT_MAP,   loadEngineShader("EnvironmentMapShader"),  NULL);
-	addRenderShader(SHADER_SHADOW_MAP,        loadEngineShader("ShadowMapShader"),       NULL);
-	addRenderShader(SHADER_BILLBOARDED_FONT,  loadEngineShader("BillboardedFontShader"), NULL);
-	addRenderShader(SHADER_TERRAIN,           loadEngineShader("Terrain"),               loadEngineShader("TerrainDeferredGeom"));
+	addRenderShader(SHADER_SHADOW_MAP,        loadEngineShader("lighting/ShadowMapShader"),       NULL);
+	addRenderShader(SHADER_BILLBOARDED_FONT,  loadEngineShader("billboard/BillboardedFontShader"), NULL);
+	addRenderShader(SHADER_TERRAIN,           loadEngineShader("terrain/Terrain"),       loadEngineShader("terrain/TerrainDeferredGeom"));
 	addRenderShader(SHADER_PLAIN_TEXTURE,     loadEngineShader("PlainTexture"),          NULL);
-	addRenderShader(SHADER_DEFERRED_LIGHTING, loadEngineShader("DeferredLighting"),      NULL);
+	addRenderShader(SHADER_DEFERRED_LIGHTING, loadEngineShader("lighting/DeferredLighting"),      NULL);
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
