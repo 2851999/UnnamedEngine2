@@ -5,9 +5,11 @@ out vec4 FragColor;
 in vec3 localPos;
 
 #map uniform EnvMap environmentMap
+#map uniform EnvMapSize envMapSize
 #map uniform Roughness roughness
 
 uniform samplerCube environmentMap;
+uniform float envMapSize;
 uniform float roughness;
 
 const float PI = 3.14159265359;
@@ -84,7 +86,7 @@ void main() {
             float pdf = D * NdotH / (4.0 * HdotV) + 0.0001; 
 
             //Resolution of source cubemap
-            float resolution = 512.0;
+            float resolution = envMapSize;
             float saTexel  = 4.0 * PI / (6.0 * resolution * resolution);
             float saSample = 1.0 / (float(SAMPLE_COUNT) * pdf + 0.0001);
 

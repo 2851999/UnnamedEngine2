@@ -23,7 +23,7 @@
 
 #include "../core/render/Renderer.h"
 #include "../utils/GLUtils.h"
-#include "../experimental/pbr/EquiToCube.h"
+#include "../core/render/pbr/EnvironmentDataGenerator.h"
 
 class Test : public BaseTest3D {
 private:
@@ -57,14 +57,16 @@ void Test::onCreated() {
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");
 
-	unsigned int envMap, irMap, prefilMap, brdfLUTMap;
+	//unsigned int envMap, irMap, prefilMap, brdfLUTMap;
 
-	EquiToCube::generateCubemapAndIrradiance(resourceLoader.getAbsPathTextures() + "PBR/Newport_Loft_Ref.hdr", envMap, irMap, prefilMap, brdfLUTMap);
+	EnvironmentDataGenerator generator;
+	generator.loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr");
+	//EquiToCube::generateCubemapAndIrradiance(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr", envMap, irMap, prefilMap, brdfLUTMap);
 
-	environmentMap = new Cubemap(envMap);
-	irradianceMap = new Cubemap(irMap);
-	prefilterMap = new Cubemap(prefilMap); 	//PREFIL MAP UPSIDE DOWN
-	brdfLUTTexture = new Texture(brdfLUTMap);
+	environmentMap = generator.getEnvironmentCubemap();
+	irradianceMap = generator.getIrradianceCubemap();
+	prefilterMap = generator.getPrefilterCubemap();
+	brdfLUTTexture = generator.getBRDFLUTTexture();
 
 	//Cubemap* environmentMap = EquiToCube::generateCubemap(resourceLoader.getAbsPathTextures() + "PBR/WinterForest_Ref.hdr");
 	//Cubemap* irradianceMap = EquiToCube::generateIrradianceMap(environmentMap);
@@ -92,15 +94,21 @@ void Test::onCreated() {
 //	roughness = Texture::loadTexture(path + "granite/roughness.jpg");
 //	ao = Texture::loadTexture(path + "granite/ao.jpg");
 
-	albedo = Texture::loadTexture(path + "streakedmetal-albedo.png");
-	//normal = Texture::loadTexture(path + "normal.png");
-	metallic = Texture::loadTexture(path + "streakedmetal-metalness.png");
-	roughness = Texture::loadTexture(path + "streakedmetal-roughness.png");
-	ao = Texture::loadTexture(path + "streakedmetal-metalness.png");
+//	albedo = Texture::loadTexture(path + "streakedmetal-albedo.png");
+//	//normal = Texture::loadTexture(path + "normal.png");
+//	metallic = Texture::loadTexture(path + "streakedmetal-metalness.png");
+//	roughness = Texture::loadTexture(path + "streakedmetal-roughness.png");
+//	ao = Texture::loadTexture(path + "streakedmetal-metalness.png");
+
+	albedo = Texture::loadTexture(path + "bamboo-wood-semigloss-albedo.png");
+	normal = Texture::loadTexture(path + "bamboo-wood-semigloss-normal.png");
+	metallic = Texture::loadTexture(path + "bamboo-wood-semigloss-metal.png");
+	roughness = Texture::loadTexture(path + "bamboo-wood-semigloss-roughness.png");
+	ao = Texture::loadTexture(path + "bamboo-wood-semigloss-ao.png");
 
 	for (int i = 0; i < 16; i++) {
 		GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("", "SimpleSphere.obj"), pbrRenderShader);
-		//sphere->getMesh()->getMaterial(1)->normalMap = normal;
+		sphere->getMesh()->getMaterial(1)->normalMap = normal;
 
 		//resourceLoader.loadModel("", "SimpleSphere.model") //Normals not smooth????
 		//MeshLoader::loadModel("resources/objects/", "plain_sphere.model")

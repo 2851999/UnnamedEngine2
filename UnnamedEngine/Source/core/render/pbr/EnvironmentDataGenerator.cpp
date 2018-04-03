@@ -1,0 +1,191 @@
+/*****************************************************************************
+ *
+ *   Copyright 2018 Joel Davies
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ *****************************************************************************/
+
+#include "EnvironmentDataGenerator.h"
+
+#include "../Renderer.h"
+#include "../../Window.h"
+#include "../../../utils/Utils.h"
+
+/*****************************************************************************
+ * The EnvironmentDataGenerator class
+ *****************************************************************************/
+
+void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
+	//For now these are the sizes of the maps (for cubemaps this is the size of each side)
+	const unsigned int ENVIRONMENT_MAP_SIZE  = 512;
+	const unsigned int IRRADIANCE_MAP_SIZE   = 32;
+	const unsigned int PREFILTER_MAP_SIZE    = 128;
+	const unsigned int BRDF_LUT_TEXTURE_SIZE = 512;
+
+	//Calculate the max size for allocating the required data
+	unsigned int maxSize = utils_maths::max(ENVIRONMENT_MAP_SIZE, utils_maths::max(IRRADIANCE_MAP_SIZE, utils_maths::max(PREFILTER_MAP_SIZE, BRDF_LUT_TEXTURE_SIZE)));
+
+	//Get the shaders
+	RenderShader* renderShader1 = Renderer::getRenderShader(Renderer::SHADER_PBR_EQUI_TO_CUBE);
+	RenderShader* renderShader2 = Renderer::getRenderShader(Renderer::SHADER_PBR_IRRADIANCE);
+	RenderShader* renderShader3 = Renderer::getRenderShader(Renderer::SHADER_PBR_PREFILTER);
+	RenderShader* renderShader4 = Renderer::getRenderShader(Renderer::SHADER_PBR_BRDF);
+
+	Shader* shader1 = renderShader1->getForwardShader();
+	Shader* shader2 = renderShader2->getForwardShader();
+	Shader* shader3 = renderShader3->getForwardShader();
+	Shader* shader4 = renderShader4->getForwardShader();
+
+	//Create meshes to render a cubemap and 2D texture
+	MeshRenderData* cubeMesh = new MeshRenderData(MeshBuilder::createCube(1.0f, 1.0f, 1.0f), renderShader1);
+	MeshRenderData* quadMesh = new MeshRenderData(MeshBuilder::createQuad(Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(1.0f, 1.0f), Vector2f(-1.0f, 1.0f), NULL), renderShader4);
+
+	unsigned int captureFBO;
+	unsigned int captureRBO;
+	glGenFramebuffers(1, &captureFBO);
+	glGenRenderbuffers(1, &captureRBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, maxSize, maxSize);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+
+	Texture::setFlipVerticallyOnLoad(true);
+	Texture* texture = Texture::loadTexturef(path, TextureParameters(GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, true));
+	Texture::setFlipVerticallyOnLoad(false);
+
+	TextureParameters envMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
+	envMapParameters.setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+	envMapParameters.preventGenerateMipMaps();
+	environmentCubemap = Cubemap::createCubemap(ENVIRONMENT_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, envMapParameters);
+
+	shader1->use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture->getHandle());
+	shader1->setUniformi("EquiMap", 0);
+	shader1->setUniformMatrix4("ProjectionMatrix", captureProjection);
+
+	glViewport(0, 0, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE);
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	for (unsigned int i = 0; i < 6; ++i) {
+		shader1->setUniformMatrix4("ViewMatrix", captureViews[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, environmentCubemap->getHandle(), 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		cubeMesh->render();
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	shader1->stopUsing();
+
+	//Generate mip map as now assigned the texture
+	environmentCubemap->bind();
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+	TextureParameters irMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
+	irradianceCubemap = Cubemap::createCubemap(IRRADIANCE_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, irMapParameters);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE);
+
+	shader2->use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubemap->getHandle());
+	shader2->setUniformi("EnvMap", 0);
+	shader2->setUniformMatrix4("ProjectionMatrix", captureProjection);
+
+	glViewport(0, 0, IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE);
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	for (unsigned int i = 0; i < 6; i++) {
+		shader2->setUniformMatrix4("ViewMatrix", captureViews[i]);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceCubemap->getHandle(), 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		cubeMesh->render();
+	}
+
+	shader2->stopUsing();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	TextureParameters prefilMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
+	prefilMapParameters.setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+	prefilMapParameters.preventGenerateMipMaps();
+	prefilterCubemap = Cubemap::createCubemap(PREFILTER_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, prefilMapParameters);
+
+	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, Window::getCurrentInstance()->getSettings().videoMaxAnisotropicSamples);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP); //Allocate required memory
+
+	shader3->use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubemap->getHandle());
+	shader3->setUniformi("EnvMap", 0);
+	shader3->setUniformMatrix4("ProjectionMatrix", captureProjection);
+	shader3->setUniformf("EnvMapSize", ENVIRONMENT_MAP_SIZE);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	const unsigned int maxMipLevels = 5;
+
+	for (unsigned int mip = 0; mip < maxMipLevels; mip++) {
+		//Resize framebuffer based on number of levels
+		unsigned int mipWidth = PREFILTER_MAP_SIZE * pow(0.5, mip);
+		unsigned int mipHeight = mipWidth;
+
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+		glViewport(0, 0, mipWidth, mipHeight);
+
+		float roughness = (float) mip / (float) (maxMipLevels - 1);
+		shader3->setUniformf("Roughness", roughness);
+		for (unsigned int i = 0; i < 6; i++) {
+			shader3->setUniformMatrix4("ViewMatrix", captureViews[i]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterCubemap->getHandle(), mip);
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			cubeMesh->render();
+		}
+	}
+
+	shader3->stopUsing();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	brdfLUTTexture = new Texture(TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true));
+	brdfLUTTexture->bind();
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, 0, GL_RG, GL_FLOAT, 0);
+
+	brdfLUTTexture->applyParameters(false);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTTexture->getHandle(), 0);
+
+	glViewport(0, 0, BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE);
+	shader4->use();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	quadMesh->render();
+
+	shader4->stopUsing();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glViewport(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight);
+
+	delete cubeMesh;
+	delete quadMesh;
+}

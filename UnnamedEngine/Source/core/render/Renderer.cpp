@@ -50,6 +50,11 @@ const std::string Renderer::SHADER_TERRAIN           = "Terrain";
 const std::string Renderer::SHADER_PLAIN_TEXTURE     = "PlainTexture";
 const std::string Renderer::SHADER_DEFERRED_LIGHTING = "DeferredLighting";
 
+const std::string Renderer::SHADER_PBR_EQUI_TO_CUBE = "PBREquiToCube";
+const std::string Renderer::SHADER_PBR_IRRADIANCE   = "PBRIrradiance";
+const std::string Renderer::SHADER_PBR_PREFILTER    = "PBRPrefilter";
+const std::string Renderer::SHADER_PBR_BRDF         = "PBRBRDF";
+
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
 }
@@ -95,19 +100,24 @@ void Renderer::initialise() {
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the shaders
-	addRenderShader(SHADER_MATERIAL,          loadEngineShader("MaterialShader"),        NULL);
-	addRenderShader(SHADER_SKY_BOX,           loadEngineShader("SkyBoxShader"),          NULL);
-	addRenderShader(SHADER_FONT,              loadEngineShader("FontShader"),            NULL);
+	addRenderShader(SHADER_MATERIAL,          loadEngineShader("MaterialShader"),                  NULL);
+	addRenderShader(SHADER_SKY_BOX,           loadEngineShader("SkyBoxShader"),                    NULL);
+	addRenderShader(SHADER_FONT,              loadEngineShader("FontShader"),                      NULL);
 	addRenderShader(SHADER_BILLBOARD,         loadEngineShader("billboard/BillboardShader"),       NULL);
-	addRenderShader(SHADER_PARTICLE,          loadEngineShader("ParticleShader"),        NULL);
+	addRenderShader(SHADER_PARTICLE,          loadEngineShader("ParticleShader"),                  NULL);
 	addRenderShader(SHADER_LIGHTING,          loadEngineShader("lighting/LightingShader"),        loadEngineShader("lighting/LightingDeferredGeom"));
-	addRenderShader(SHADER_FRAMEBUFFER,       loadEngineShader("FramebufferShader"),     NULL);
-	addRenderShader(SHADER_ENVIRONMENT_MAP,   loadEngineShader("EnvironmentMapShader"),  NULL);
-	addRenderShader(SHADER_SHADOW_MAP,        loadEngineShader("lighting/ShadowMapShader"),       NULL);
+	addRenderShader(SHADER_FRAMEBUFFER,       loadEngineShader("FramebufferShader"),               NULL);
+	addRenderShader(SHADER_ENVIRONMENT_MAP,   loadEngineShader("EnvironmentMapShader"),            NULL);
+	addRenderShader(SHADER_SHADOW_MAP,        loadEngineShader("lighting/ShadowMapShader"),        NULL);
 	addRenderShader(SHADER_BILLBOARDED_FONT,  loadEngineShader("billboard/BillboardedFontShader"), NULL);
-	addRenderShader(SHADER_TERRAIN,           loadEngineShader("terrain/Terrain"),       loadEngineShader("terrain/TerrainDeferredGeom"));
-	addRenderShader(SHADER_PLAIN_TEXTURE,     loadEngineShader("PlainTexture"),          NULL);
-	addRenderShader(SHADER_DEFERRED_LIGHTING, loadEngineShader("lighting/DeferredLighting"),      NULL);
+	addRenderShader(SHADER_TERRAIN,           loadEngineShader("terrain/Terrain"),                 loadEngineShader("terrain/TerrainDeferredGeom"));
+	addRenderShader(SHADER_PLAIN_TEXTURE,     loadEngineShader("PlainTexture"),                    NULL);
+	addRenderShader(SHADER_DEFERRED_LIGHTING, loadEngineShader("lighting/DeferredLighting"),       NULL);
+	addRenderShader(SHADER_PBR_EQUI_TO_CUBE,  loadEngineShader("pbr/EquiToCube"),                  NULL);
+	addRenderShader(SHADER_PBR_IRRADIANCE,    loadEngineShader("pbr/Irradiance"),                  NULL);
+	addRenderShader(SHADER_PBR_PREFILTER,     loadEngineShader("pbr/Prefilter"),                   NULL);
+	addRenderShader(SHADER_PBR_BRDF,          loadEngineShader("pbr/BRDF"),                        NULL);
+
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);

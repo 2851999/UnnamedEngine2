@@ -19,7 +19,7 @@
 #ifndef EXPERIMENTAL_PBR_EQUITOCUBE_H_
 #define EXPERIMENTAL_PBR_EQUITOCUBE_H_
 
-#include "HDRTexture.h"
+#include "../../core/render/Texture.h"
 
 class EquiToCube {
 public:

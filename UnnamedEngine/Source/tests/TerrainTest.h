@@ -60,7 +60,7 @@ void Test::onCreated() {
 
 	//terrain = new CDLODTerrain(resourceLoader.getAbsPathTextures() + "heightmap.jpg");
 	HeightMapGenerator generator;
-	heightMap = new CDLODHeightMap(generator.generate(512, 512), 1, 512, 512, GL_RED);
+	heightMap = new CDLODHeightMap(generator.generate(512, 512), 1, 512, 512, GL_RED, GL_RED);
 	terrain = new CDLODTerrain(heightMap);
 	terrain->getMaterial()->shininess = 1.0f;
 	terrain->update();

@@ -55,6 +55,10 @@ public:
 	static const std::string SHADER_TERRAIN;
 	static const std::string SHADER_PLAIN_TEXTURE;
 	static const std::string SHADER_DEFERRED_LIGHTING;
+	static const std::string SHADER_PBR_EQUI_TO_CUBE;
+	static const std::string SHADER_PBR_IRRADIANCE;
+	static const std::string SHADER_PBR_PREFILTER;
+	static const std::string SHADER_PBR_BRDF;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

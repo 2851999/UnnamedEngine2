@@ -43,11 +43,11 @@ private:
 	Texture* texture;
 
 	/* Method used to setup this height map */
-	void setup(unsigned char* data, int numComponents, int width, int height, int format);
+	void setup(unsigned char* data, int numComponents, int width, int height, int internalFormat, int format);
 public:
 	/* The constructors */
 	CDLODHeightMap(std::string path);
-	CDLODHeightMap(unsigned char* data, int numComponents, int width, int height, int format);
+	CDLODHeightMap(unsigned char* data, int numComponents, int width, int height, int internalFormat, int format);
 
 	/* The destructor */
 	virtual ~CDLODHeightMap();
