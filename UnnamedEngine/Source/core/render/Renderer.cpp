@@ -29,7 +29,7 @@
 
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
-std::map<std::string, RenderShader*> Renderer::renderShaders;
+std::unordered_map<std::string, RenderShader*> Renderer::renderShaders;
 Texture* Renderer::blank;
 
 MeshRenderData* Renderer::screenTextureMesh;

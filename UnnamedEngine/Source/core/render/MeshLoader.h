@@ -19,7 +19,7 @@
 #ifndef CORE_RENDER_MESHLOADER_H_
 #define CORE_RENDER_MESHLOADER_H_
 
-#include <map>
+#include <unordered_map>
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -40,7 +40,7 @@ struct aiScene;
 
 class MeshLoader {
 private:
-	static void addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes);
+	static void addChildren(const aiNode* node, std::unordered_map<const aiNode*, const aiBone*>& nodes);
 	static const aiNode* findMeshNode(const aiNode* parent);
 	static const aiMatrix4x4 calculateMatrix(const aiNode* current, aiMatrix4x4 currentMatrix);
 

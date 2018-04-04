@@ -65,6 +65,8 @@ void Test::onCreated() {
 	camera->setFlying(true);
 
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane.obj");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane3.obj");
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh");
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj");
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae");

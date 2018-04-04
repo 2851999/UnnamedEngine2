@@ -19,6 +19,7 @@
 #ifndef CORE_RENDER_RENDERER_H_
 #define CORE_RENDER_RENDERER_H_
 
+#include <unordered_map>
 #include "Camera.h"
 #include "FBO.h"
 
@@ -30,7 +31,7 @@ class Renderer {
 private:
 	static std::vector<Camera*> cameras;
 	static std::vector<Texture*> boundTextures;
-	static std::map<std::string, RenderShader*> renderShaders;
+	static std::unordered_map<std::string, RenderShader*> renderShaders;
 	static Texture* blank;
 
 	/* This mesh is used to render a FramebufferTexture to the screen - useful

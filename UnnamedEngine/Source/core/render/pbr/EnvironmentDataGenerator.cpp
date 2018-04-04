@@ -51,6 +51,7 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 	MeshRenderData* cubeMesh = new MeshRenderData(MeshBuilder::createCube(1.0f, 1.0f, 1.0f), renderShader1);
 	MeshRenderData* quadMesh = new MeshRenderData(MeshBuilder::createQuad(Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(1.0f, 1.0f), Vector2f(-1.0f, 1.0f), NULL), renderShader4);
 
+	//Create and setup the FBO and RBO for rendering
 	unsigned int captureFBO;
 	unsigned int captureRBO;
 	glGenFramebuffers(1, &captureFBO);
@@ -61,24 +62,30 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, maxSize, maxSize);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
+	//Load the texture for the equirectangular map ensuring it's the right way up
 	Texture::setFlipVerticallyOnLoad(true);
 	Texture* texture = Texture::loadTexturef(path, TextureParameters(GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, true));
 	Texture::setFlipVerticallyOnLoad(false);
 
+	//---------------------------------- RENDER ENVIRONMENT CUBEMAP FROM EQUIRECTANGULAR MAP ----------------------------------
+
+	//Create the environment cubemap
 	TextureParameters envMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
 	envMapParameters.setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 	envMapParameters.preventGenerateMipMaps();
 	environmentCubemap = Cubemap::createCubemap(ENVIRONMENT_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, envMapParameters);
 
 	shader1->use();
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture->getHandle());
+
 	shader1->setUniformi("EquiMap", 0);
 	shader1->setUniformMatrix4("ProjectionMatrix", captureProjection);
 
 	glViewport(0, 0, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	for (unsigned int i = 0; i < 6; ++i) {
+	for (unsigned int i = 0; i < 6; i++) {
 		shader1->setUniformMatrix4("ViewMatrix", captureViews[i]);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, environmentCubemap->getHandle(), 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -87,12 +94,13 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	shader1->stopUsing();
 
 	//Generate mip map as now assigned the texture
 	environmentCubemap->bind();
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+	//---------------------------------- RENDER IRRADIANCE CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP ----------------------------------
 
 	TextureParameters irMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
 	irradianceCubemap = Cubemap::createCubemap(IRRADIANCE_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, irMapParameters);
@@ -120,6 +128,8 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 	shader2->stopUsing();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//--------------------- RENDER PREFILTER CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP (SPLIT SUM APPROXIMATION) ---------------------
 
 	TextureParameters prefilMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
 	prefilMapParameters.setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
@@ -163,6 +173,8 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	//-------------------------------------------------- RENDER BDRF INTEGRATION MAP --------------------------------------------------
+
 	brdfLUTTexture = new Texture(TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true));
 	brdfLUTTexture->bind();
 
@@ -184,7 +196,14 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	//Reset the normal view port
 	glViewport(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight);
+
+	//Delete the resources created
+	glDeleteFramebuffers(1, &captureFBO);
+	glDeleteRenderbuffers(1, &captureRBO);
 
 	delete cubeMesh;
 	delete quadMesh;

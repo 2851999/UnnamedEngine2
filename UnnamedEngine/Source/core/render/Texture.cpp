@@ -150,7 +150,7 @@ Texture* Texture::createTexture(std::string path, void* data, int numComponents,
 	//Bind the texture and then pass the texture data to OpenGL
 	texture->bind();
 
-	glTexImage2D(parameters.getTarget(), 0, format, width, height, 0, internalFormat, type, data);
+	glTexImage2D(parameters.getTarget(), 0, internalFormat, width, height, 0, format, type, data);
 
 	//Apply the parameters if requested, but don't need to bind the texture again,
 	//and it doesn't need to unbind either
@@ -225,7 +225,7 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 			glTexImage2D(
 				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 				0,
-				format,
+				internalFormat,
 				width,
 				height,
 				0,

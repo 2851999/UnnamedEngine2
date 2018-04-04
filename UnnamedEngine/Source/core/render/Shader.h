@@ -20,7 +20,7 @@
 #define CORE_RENDER_SHADER_H_
 
 #include <GL/glew.h>
-#include <map>
+#include <unordered_map>
 
 #include "Colour.h"
 #include "../Matrix.h"
@@ -41,8 +41,8 @@ private:
 	std::vector<GLuint> attachedShaders;
 
 	/* Maps with locations of the variables in the shaders */
-	std::map<std::string, GLint> uniforms;
-	std::map<std::string, GLint> attributes;
+	std::unordered_map<std::string, GLint> uniforms;
+	std::unordered_map<std::string, GLint> attributes;
 
 	/* Loads and returns an included file */
 	static std::vector<std::string> loadInclude(std::string path, std::string line);
@@ -50,8 +50,8 @@ public:
 	/* The ShaderSource struct stores information about Shader source code */
 	struct ShaderSource {
 		std::string source;
-		std::map<std::string, std::string> uniforms;
-		std::map<std::string, std::string> attributes;
+		std::unordered_map<std::string, std::string> uniforms;
+		std::unordered_map<std::string, std::string> attributes;
 	};
 
 	/* Constructors and destructors */
@@ -85,7 +85,7 @@ public:
 
 	/* Method to get a reference to the map of uniforms for assigning in
 	 * the Renderer */
-	std::map<std::string, GLint>& getUniforms() { return uniforms; }
+	std::unordered_map<std::string, GLint>& getUniforms() { return uniforms; }
 
 	/* Methods to create a shader */
 	static GLint createShader(std::string source, GLenum type);

@@ -20,7 +20,7 @@
 #define CORE_INPUT_KEYBOARDSHORTCUTS_H_
 
 #include <string>
-#include <vector>
+#include <unordered_map>
 #include <map>
 
 #include "Input.h"
@@ -41,7 +41,7 @@ private:
 public:
 	/* The keys that make up this shortcut - made up of their key code and
 	 * whether they are currently pressed */
-	std::map<int, bool> keys;
+	std::unordered_map<int, bool> keys;
 
 	/* The constructor */
 	KeyboardShortcut(std::string name, std::vector<int> keys);

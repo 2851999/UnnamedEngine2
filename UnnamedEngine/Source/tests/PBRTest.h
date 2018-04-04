@@ -54,6 +54,7 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
+	MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");
 
@@ -105,7 +106,6 @@ void Test::onCreated() {
 	metallic = Texture::loadTexture(path + "bamboo-wood-semigloss-metal.png");
 	roughness = Texture::loadTexture(path + "bamboo-wood-semigloss-roughness.png");
 	ao = Texture::loadTexture(path + "bamboo-wood-semigloss-ao.png");
-
 	for (int i = 0; i < 16; i++) {
 		GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("", "SimpleSphere.obj"), pbrRenderShader);
 		sphere->getMesh()->getMaterial(1)->normalMap = normal;

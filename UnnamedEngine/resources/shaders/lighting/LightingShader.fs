@@ -13,7 +13,8 @@ void main() {
 	
 	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour.xyz, specularColour, ue_material.shininess, ue_frag_pos_lightspace);
 
-	light = ueGammaCorrect(ueExposureToneMap(1.0, light));
+	//light = ueGammaCorrect(ueExposureToneMap(1.0, light));
+	light = (ueExposureToneMap(1.0, light));
 
 	ue_FragColour = vec4(light, diffuseColour.a);
 }
