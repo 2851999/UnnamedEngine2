@@ -29,11 +29,11 @@ class Test : public BaseTest3D {
 private:
 	std::vector<GameObject3D*> spheres;
 
-	Texture* albedo;
-	Texture* normal;
-	Texture* metallic;
-	Texture* roughness;
-	Texture* ao;
+//	Texture* albedo;
+//	Texture* normal;
+//	Texture* metallic;
+//	Texture* roughness;
+//	Texture* ao;
 
 	RenderShader* pbrRenderShader;
 	Cubemap* environmentMap;
@@ -58,10 +58,8 @@ void Test::onCreated() {
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");
 
-	//unsigned int envMap, irMap, prefilMap, brdfLUTMap;
-
 	EnvironmentDataGenerator generator;
-	generator.loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr");
+	generator.loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Newport_Loft_Ref.hdr");
 	//EquiToCube::generateCubemapAndIrradiance(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr", envMap, irMap, prefilMap, brdfLUTMap);
 
 	environmentMap = generator.getEnvironmentCubemap();
@@ -69,68 +67,38 @@ void Test::onCreated() {
 	prefilterMap = generator.getPrefilterCubemap();
 	brdfLUTTexture = generator.getBRDFLUTTexture();
 
-	//Cubemap* environmentMap = EquiToCube::generateCubemap(resourceLoader.getAbsPathTextures() + "PBR/WinterForest_Ref.hdr");
-	//Cubemap* irradianceMap = EquiToCube::generateIrradianceMap(environmentMap);
-
-//	std::cout << environmentMap->getHandle() << std::endl;
-//	std::cout << irradianceMap->getHandle() << std::endl;
-
 	camera->setSkyBox(new SkyBox(environmentMap));
-	//camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
 	camera->setFlying(true);
 
-	pbrRenderShader = new RenderShader("PBRShader", Renderer::loadEngineShader("pbr/PBRShader"), NULL);
-	Renderer::prepareForwardShader("PBRShader", pbrRenderShader->getForwardShader());
+	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
 
 	std::string path = "C:/UnnamedEngine/textures/PBR/";
-//	albedo = Texture::loadTexture(path + "tile-basecolour.png");
-//	normal = Texture::loadTexture(path + "tile-normal.png");
-//	metallic = Texture::loadTexture(path + "tile-metalness.png");
-//	roughness = Texture::loadTexture(path + "tile-roughness.png");
-//	ao = Texture::loadTexture(path + "streakedmetal-metalness.png");
 
-//	albedo = Texture::loadTexture(path + "granite/albedo.jpg");
-//	normal = Texture::loadTexture(path + "granite/normal.jpg");
-//	metallic = Texture::loadTexture(path + "granite/metalness.png");
-//	roughness = Texture::loadTexture(path + "granite/roughness.jpg");
-//	ao = Texture::loadTexture(path + "granite/ao.jpg");
+	for (int i = 0; i < 1; i++) {
+		GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("SimpleSphere/", "SimpleSphere.obj", true), pbrRenderShader);
+		//GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj", true), pbrRenderShader);
+		//sphere->setScale(0.15f, 0.15f, 0.15f);
+		//Material* material = sphere->getMesh()->getMaterial(1);
 
-//	albedo = Texture::loadTexture(path + "streakedmetal-albedo.png");
-//	//normal = Texture::loadTexture(path + "normal.png");
-//	metallic = Texture::loadTexture(path + "streakedmetal-metalness.png");
-//	roughness = Texture::loadTexture(path + "streakedmetal-roughness.png");
-//	ao = Texture::loadTexture(path + "streakedmetal-metalness.png");
-
-	albedo = Texture::loadTexture(path + "bamboo-wood-semigloss-albedo.png");
-	normal = Texture::loadTexture(path + "bamboo-wood-semigloss-normal.png");
-	metallic = Texture::loadTexture(path + "bamboo-wood-semigloss-metal.png");
-	roughness = Texture::loadTexture(path + "bamboo-wood-semigloss-roughness.png");
-	ao = Texture::loadTexture(path + "bamboo-wood-semigloss-ao.png");
-	for (int i = 0; i < 16; i++) {
-		GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("", "SimpleSphere.obj"), pbrRenderShader);
-		sphere->getMesh()->getMaterial(1)->normalMap = normal;
+		//material->setAO(1.0f);
 
 		//resourceLoader.loadModel("", "SimpleSphere.model") //Normals not smooth????
 		//MeshLoader::loadModel("resources/objects/", "plain_sphere.model")
 
 		int x = i % 4;
 		int y = (int) (i / 4.0f);
+
 		sphere->setPosition(x * 2, y * 2, -0.5f);
 		//sphere->setScale(0.25f, 0.25f, 0.25f);
+
+//		material->setAlbedo(Colour(0.5f, 0.0f, 0.0f));
+//		material->setMetalness(x * (1.0f / 3.0f));
+//		material->setRoughness(utils_maths::clamp(y * (1.0f / 3.0f), 0.05f, 1.0f));
 
 		sphere->update();
 
 		spheres.push_back(sphere);
 	}
-
-	//renderScene->add(sphere);
-
-	//Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f); //->setDiffuseColour(Colour(200.0f, 200.0f, 200.0f));
-	//Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(0.0f, 1.0f, 0.0f), false))->setDiffuseColour(Colour::RED);
-	//light0->update();
-	//light1->update();
-	//renderScene->addLight(light0);
-	//renderScene->addLight(light1);
 
 	camera->setMovementSpeed(5.0f);
 }
@@ -145,10 +113,6 @@ void Test::onRender() {
 
 	shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
 
-	shader->setUniformi("Albedo", Renderer::bindTexture(albedo));
-	shader->setUniformi("Metallic", Renderer::bindTexture(metallic));
-	shader->setUniformi("Roughness", Renderer::bindTexture(roughness));
-	shader->setUniformi("AO", Renderer::bindTexture(ao));
 	shader->setUniformi("IrradianceMap", Renderer::bindTexture(irradianceMap));
 	shader->setUniformi("PrefilterMap", Renderer::bindTexture(prefilterMap));
 	shader->setUniformi("BRDFLUT", Renderer::bindTexture(brdfLUTTexture));
@@ -163,10 +127,6 @@ void Test::onRender() {
 		spheres[i]->render();
 	}
 
-	Renderer::unbindTexture();
-	Renderer::unbindTexture();
-	Renderer::unbindTexture();
-	Renderer::unbindTexture();
 	Renderer::unbindTexture();
 	Renderer::unbindTexture();
 	Renderer::unbindTexture();

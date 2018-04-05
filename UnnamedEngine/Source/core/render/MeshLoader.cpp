@@ -59,14 +59,14 @@ const aiMatrix4x4 MeshLoader::calculateMatrix(const aiNode* current, aiMatrix4x4
 	return currentMatrix;
 }
 
-Mesh* MeshLoader::loadModel(std::string path, std::string fileName) {
+Mesh* MeshLoader::loadModel(std::string path, std::string fileName, bool pbr) {
 	if (utils_string::strEndsWith(fileName, ".model"))
 		return loadEngineModel(path, fileName);
 	else
-		return loadAssimpModel(path, fileName);
+		return loadAssimpModel(path, fileName, pbr);
 }
 
-Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool genNormals) {
+Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool pbr, bool genNormals) {
 	//Load the file using Assimp
 	unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices;
 	if (genNormals)
@@ -289,7 +289,7 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 		//Load and add the materials
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
 			//Load the current material
-			Material* material = loadAssimpMaterial(path, fileName, scene->mMaterials[i]);
+			Material* material = loadAssimpMaterial(path, fileName, scene->mMaterials[i], pbr);
 
 			if (i == 0)
 				mesh->setMaterial(material);
@@ -308,15 +308,16 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 	}
 }
 
-Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName, const aiMaterial* mat) {
+Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName, const aiMaterial* mat, bool pbr) {
 	//Create the material instance
-	Material* material = new Material();
+	Material* material = new Material(pbr);
 
 	//Load and assign the textures
 	material->ambientTexture  = loadAssimpTexture(path, mat, aiTextureType_AMBIENT);
 	material->diffuseTexture  = loadAssimpTexture(path, mat, aiTextureType_DIFFUSE, loadDiffuseTexturesAsSRGB);
 	material->specularTexture = loadAssimpTexture(path, mat, aiTextureType_SPECULAR);
-	material->shininessTexture = loadAssimpTexture(path, mat, aiTextureType_SHININESS);
+	if (pbr)
+		material->shininessTexture = loadAssimpTexture(path, mat, aiTextureType_SHININESS); //No standard way of using this for phong shading
 
 	//Check to see whether the material has a normal map
 	if (mat->GetTextureCount(aiTextureType_NORMALS) != 0)
@@ -333,8 +334,11 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 	material->specularColour = loadAssimpColour(mat, AI_MATKEY_COLOR_SPECULAR);
 
 	float value;
-	if ((mat->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS) && value != 0.0f)
+	if ((mat->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS) && value != 0.0f) {
+		if (pbr)
+			value /= 4.0f; //Assimp multiplies this by 4
 		material->shininess = value;
+	}
 
 	return material;
 }
@@ -746,9 +750,9 @@ Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 	return mesh;
 }
 
-void MeshLoader::convertToEngineModel(std::string path, std::string fileName, bool genNormals) {
+void MeshLoader::convertToEngineModel(std::string path, std::string fileName, bool pbr, bool genNormals) {
 	std::string newFileName = fileName.substr(0, fileName.find_last_of(".")) + ".model";
-	Mesh* mesh = loadAssimpModel(path, fileName, genNormals);
+	Mesh* mesh = loadAssimpModel(path, fileName, pbr, genNormals);
 	saveEngineModel(path, newFileName, mesh);
 	delete mesh;
 }

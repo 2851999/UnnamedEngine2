@@ -24,29 +24,16 @@
 #include "Texture.h"
 
 /*****************************************************************************
- * The Material structure stores data about a material and can apply them to a
- * shader
+ * The Material class stores data about a material
+ *
+ * NOTE:
+ * For PBR components are as follows:
+ * AMBIENT -> METALNESS
+ * DIFFUSE -> ALBEDO
+ * NORMAL -> NORMAL
+ * SPECULAR -> AO
+ * SHININESS -> ROUGHNESS
  *****************************************************************************/
-
-//struct Material {
-//	/* The colours */
-//	Colour ambientColour  = Colour(0.1f, 0.1f, 0.1f);
-//	Colour diffuseColour  = Colour::WHITE;
-//	Colour specularColour = Colour::WHITE;
-//
-//	/* The textures */
-//	Texture* ambientTexture  = NULL;
-//	Texture* diffuseTexture  = NULL;
-//	Texture* specularTexture = NULL;
-//
-//	Texture* normalMap = NULL;
-//	Texture* parallaxMap = NULL;
-//
-//	float parallaxScale = 0.05f;
-//
-//	/* The shininess value */
-//	float shininess = 32.0f;
-//};
 
 class Material {
 public:
@@ -70,10 +57,13 @@ public:
 	float shininess = 32.0f;
 
 	/* The constructor */
-	Material() {}
+	Material(bool pbr = false) { setDefault(pbr); }
 
 	/* The destructor */
 	virtual ~Material() {}
+
+	/* Method called to set the default values */
+	void setDefault(bool pbr = false);
 
 	/* Getters and setters */
 	void setAmbient(Colour ambientColour) { this->ambientColour = ambientColour; }
@@ -109,7 +99,17 @@ public:
 	void setMetalness(Texture* metalnessTexture) { this->ambientTexture = metalnessTexture; }
 	void setAlbedo(Texture* albedoTexture) { this->diffuseTexture = albedoTexture; }
 	void setRoughness(Texture* roughnessTexture) { this->shininessTexture = roughnessTexture; }
-	void setAO(Texture* aoTexture) { this->shininessTexture = aoTexture; }
+	void setAO(Texture* aoTexture) { this->specularTexture = aoTexture; }
+
+	Texture* getMetalnessTexture() { return this->ambientTexture; }
+	Texture* getAlbedoTexture() { return this->diffuseTexture; }
+	Texture* getRoughnessTexture() { return this->shininessTexture; }
+	Texture* getAOTexture() { return this->specularTexture; }
+
+	float getMetalnessValue() { return this->ambientColour.getR(); }
+	Colour getAlbedoColour() { return this->diffuseColour; }
+	float getRoughnessValue() { return this->shininess; }
+	float getAOValue() { return this->specularColour.getR(); }
 };
 
 

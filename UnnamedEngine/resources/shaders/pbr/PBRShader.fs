@@ -1,17 +1,9 @@
 #include "../lighting/Lighting.fs"
 
-#map uniform Albedo albedoMap
-#map uniform Metallic metallicMap
-#map uniform Roughness roughnessMap
-#map uniform AO aoMap
 #map uniform IrradianceMap irradianceMap
 #map uniform PrefilterMap prefilterMap
 #map uniform BRDFLUT brdfLUT
 
-uniform sampler2D albedoMap;
-uniform sampler2D metallicMap;
-uniform sampler2D roughnessMap;
-uniform sampler2D aoMap;
 uniform samplerCube irradianceMap;
 uniform samplerCube prefilterMap;
 uniform sampler2D   brdfLUT; 
@@ -65,11 +57,11 @@ void main() {
 	vec3 lightPosition = vec3(0.5, 2.0, 2.0);
 	vec3 lightColor = vec3(23.47, 21.31, 20.79);
 
-	vec3 albedo = texture(albedoMap, ue_frag_textureCoord).rgb;
+	vec3 albedo = ueGetMaterialDiffuse(ue_frag_textureCoord).rgb;
 	vec3 normal = ueCalculateNormal(ue_frag_textureCoord);
-	float metallic = texture(metallicMap, ue_frag_textureCoord).r;
-	float roughness = texture(roughnessMap, ue_frag_textureCoord).r;
-	float ao = texture(aoMap, ue_frag_textureCoord).r;
+	float metallic = ueGetMaterialAmbient(ue_frag_textureCoord).r;
+	float roughness = ueGetMaterialShininess(ue_frag_textureCoord);
+	float ao = ueGetMaterialSpecular(ue_frag_textureCoord).r;
 
 	//Normal
     vec3 N = normalize(normal);

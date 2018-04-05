@@ -175,7 +175,7 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 
 	//-------------------------------------------------- RENDER BDRF INTEGRATION MAP --------------------------------------------------
 
-	brdfLUTTexture = new Texture(TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true));
+	brdfLUTTexture = new Texture(TextureParameters(GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, true));
 	brdfLUTTexture->bind();
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, 0, GL_RG, GL_FLOAT, 0);

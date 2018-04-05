@@ -54,6 +54,7 @@ const std::string Renderer::SHADER_PBR_EQUI_TO_CUBE = "PBREquiToCube";
 const std::string Renderer::SHADER_PBR_IRRADIANCE   = "PBRIrradiance";
 const std::string Renderer::SHADER_PBR_PREFILTER    = "PBRPrefilter";
 const std::string Renderer::SHADER_PBR_BRDF         = "PBRBRDF";
+const std::string Renderer::SHADER_PBR_LIGHTING     = "PBRLighting";
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -117,6 +118,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_PBR_IRRADIANCE,    loadEngineShader("pbr/Irradiance"),                  NULL);
 	addRenderShader(SHADER_PBR_PREFILTER,     loadEngineShader("pbr/Prefilter"),                   NULL);
 	addRenderShader(SHADER_PBR_BRDF,          loadEngineShader("pbr/BRDF"),                        NULL);
+	addRenderShader(SHADER_PBR_LIGHTING,      loadEngineShader("pbr/PBRShader"),                   NULL);
 
 
 	//Setup the screen texture mesh
@@ -130,24 +132,28 @@ void Renderer::initialise() {
 	screenTextureMesh = new MeshRenderData(meshData, getRenderShader(SHADER_FRAMEBUFFER));
 }
 
+void Renderer::assignMatTexture(Shader* shader, std::string type, Texture* texture) {
+	type += "Texture";
+	if (texture)
+		//Bind the texture
+		shader->setUniformi("Material_" + type, bindTexture(texture));
+	shader->setUniformi("Material_Has" + type, texture != NULL);
+}
+
 void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Material* material) {
 	shader->setUniformColourRGBA("Material_DiffuseColour", material->diffuseColour);
 
-	if (material->diffuseTexture)
-		shader->setUniformi("Material_DiffuseTexture", bindTexture(material->diffuseTexture));
-	else
-		shader->setUniformi("Material_DiffuseTexture", bindTexture(Renderer::getBlankTexture()));
+	assignMatTexture(shader, "Diffuse", material->diffuseTexture);
 
 	//Check to see whether the shader is for lighting
-	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == "PBRShader") {
+	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == SHADER_PBR_LIGHTING) {
 		//Assign other lighting specific properties
 		shader->setUniformColourRGB("Material_AmbientColour", material->ambientColour);
 		shader->setUniformColourRGB("Material_SpecularColour", material->specularColour);
 
-		if (material->specularTexture)
-			shader->setUniformi("Material_SpecularTexture", bindTexture(material->specularTexture));
-		else
-			shader->setUniformi("Material_SpecularTexture", Renderer::bindTexture(Renderer::getBlankTexture()));
+		assignMatTexture(shader, "Ambient", material->ambientTexture);
+		assignMatTexture(shader, "Specular", material->specularTexture);
+		assignMatTexture(shader, "Shininess", material->shininessTexture);
 
 		if (material->normalMap) {
 			shader->setUniformi("Material_NormalMap", bindTexture(material->normalMap));
@@ -246,7 +252,7 @@ Shader* Renderer::loadEngineShader(std::string path) {
 
 void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 	shader->use();
-	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == "PBRShader") {
+	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == SHADER_PBR_LIGHTING) {
 		shader->addUniform("UseNormalMap", "ue_useNormalMap");
 
 		shader->addUniform("UseShadowMap", "ue_useShadowMap");
