@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 | Experimental 8
+
+* Cleaned up PBR shaders a bit
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 4 | Experimental 7
 
 * Fixed bug: BRDFLUT texture wasn't created properly
