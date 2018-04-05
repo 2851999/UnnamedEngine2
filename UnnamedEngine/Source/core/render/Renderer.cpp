@@ -144,6 +144,10 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 	shader->setUniformColourRGBA("Material_DiffuseColour", material->diffuseColour);
 
 	assignMatTexture(shader, "Diffuse", material->diffuseTexture);
+	if (material->diffuseTexture)
+		shader->setUniformi("Material_DiffuseTextureSRGB", material->diffuseTexture->getParameters().getSRGB());
+	else
+		shader->setUniformi("Material_DiffuseTextureSRGB", 0);
 
 	//Check to see whether the shader is for lighting
 	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == SHADER_PBR_LIGHTING) {

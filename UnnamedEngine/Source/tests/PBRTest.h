@@ -23,12 +23,10 @@
 
 #include "../core/render/Renderer.h"
 #include "../utils/GLUtils.h"
-#include "../core/render/pbr/EnvironmentDataGenerator.h"
+#include "../core/render/pbr/PBREnvironment.h"
 
 class Test : public BaseTest3D {
 private:
-	std::vector<GameObject3D*> spheres;
-
 //	Texture* albedo;
 //	Texture* normal;
 //	Texture* metallic;
@@ -36,10 +34,9 @@ private:
 //	Texture* ao;
 
 	RenderShader* pbrRenderShader;
-	Cubemap* environmentMap;
-	Cubemap* irradianceMap;
-	Cubemap* prefilterMap;
-	Texture* brdfLUTTexture;
+	PBREnvironment* environment;
+
+	Light* light0;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -58,80 +55,85 @@ void Test::onCreated() {
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");
 
-	EnvironmentDataGenerator generator;
-	generator.loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Newport_Loft_Ref.hdr");
+	environment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Milkyway_small.hdr");
 	//EquiToCube::generateCubemapAndIrradiance(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr", envMap, irMap, prefilMap, brdfLUTMap);
 
-	environmentMap = generator.getEnvironmentCubemap();
-	irradianceMap = generator.getIrradianceCubemap();
-	prefilterMap = generator.getPrefilterCubemap();
-	brdfLUTTexture = generator.getBRDFLUTTexture();
-
-	camera->setSkyBox(new SkyBox(environmentMap));
+	camera->setSkyBox(new SkyBox(environment->getEnvironmentCubemap()));
 	camera->setFlying(true);
 
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
+	renderScene->enablePBR();
+	renderScene->setPBREnvironment(environment);
 
-	std::string path = "C:/UnnamedEngine/textures/PBR/";
+	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	renderScene->addLight(light0);
+	//renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 
-	for (int i = 0; i < 1; i++) {
-		GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("SimpleSphere/", "SimpleSphere.obj", true), pbrRenderShader);
-		//GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj", true), pbrRenderShader);
-		//sphere->setScale(0.15f, 0.15f, 0.15f);
-		//Material* material = sphere->getMesh()->getMaterial(1);
+	//std::string path = "C:/UnnamedEngine/textures/PBR/";
 
-		//material->setAO(1.0f);
-
-		//resourceLoader.loadModel("", "SimpleSphere.model") //Normals not smooth????
-		//MeshLoader::loadModel("resources/objects/", "plain_sphere.model")
+	for (int i = 0; i < 16; i++) {
+		GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
+		Material* material = sphere->getMesh()->getMaterial(1);
 
 		int x = i % 4;
 		int y = (int) (i / 4.0f);
 
 		sphere->setPosition(x * 2, y * 2, -0.5f);
-		//sphere->setScale(0.25f, 0.25f, 0.25f);
 
-//		material->setAlbedo(Colour(0.5f, 0.0f, 0.0f));
-//		material->setMetalness(x * (1.0f / 3.0f));
-//		material->setRoughness(utils_maths::clamp(y * (1.0f / 3.0f), 0.05f, 1.0f));
+		material->setAlbedo(Colour(0.5f, 0.0f, 0.0f));
+		material->setMetalness(x * (1.0f / 3.0f));
+		material->setRoughness(utils_maths::clamp(y * (1.0f / 3.0f), 0.05f, 1.0f));
 
 		sphere->update();
 
-		spheres.push_back(sphere);
+		renderScene->add(sphere);
 	}
+
+	//resourceLoader.loadModel("", "SimpleSphere.model") //Normals not smooth????
+	//MeshLoader::loadModel("resources/objects/", "plain_sphere.model")
+
+	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
+//	GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj", true), pbrRenderShader);
+//	sphere->setScale(0.15f, 0.15f, 0.15f);
+	sphere->update();
+	renderScene->add(sphere);
+
+	GameObject3D* testObject = new GameObject3D(resourceLoader.loadPBRModel("pbr/", "Cerberus_LP.FBX"), pbrRenderShader);
+	testObject->setScale(0.05f, 0.05f, 0.05f);
+	testObject->setPosition(0.0f, -6.0f, 0.0f);
+	testObject->update();
+	Material* mat = testObject->getMesh()->getMaterial(0);
+
+	mat->setAlbedo(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_A.tga", TextureParameters().setSRGB(true)));
+	mat->setMetalness(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_M.tga"));
+	mat->setRoughness(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_R.tga"));
+	mat->setNormalMap(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_N.tga"));
+	mat->setAlbedo(Colour(1.0f, 1.0f, 1.0f));
+	mat->setRoughness(1.0f);
+	mat->setMetalness(1.0f);
+	mat->setAO(1.0f);
+
+	//testObject->getMesh()->getMaterials()[1] = mat;
+
+	renderScene->add(testObject);
 
 	camera->setMovementSpeed(5.0f);
 }
 
 void Test::onUpdate() {
-
+	if (Keyboard::isPressed(GLFW_KEY_UP))
+		light0->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
+	else if (Keyboard::isPressed(GLFW_KEY_DOWN))
+		light0->getTransform()->translate(0.0f, 0.0f, 0.008f * getDelta());
+	if (Keyboard::isPressed(GLFW_KEY_LEFT))
+		light0->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
+	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
+		light0->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
+	light0->update();
 }
 
 void Test::onRender() {
-	Shader* shader = pbrRenderShader->getShader();
-	shader->use();
 
-	shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
-
-	shader->setUniformi("IrradianceMap", Renderer::bindTexture(irradianceMap));
-	shader->setUniformi("PrefilterMap", Renderer::bindTexture(prefilterMap));
-	shader->setUniformi("BRDFLUT", Renderer::bindTexture(brdfLUTTexture));
-
-	for (unsigned int i = 0; i < spheres.size(); i++) {
-
-		Matrix4f modelMatrix = spheres[i]->getModelMatrix();
-
-		shader->setUniformMatrix4("ModelMatrix", modelMatrix);
-		shader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
-
-		spheres[i]->render();
-	}
-
-	Renderer::unbindTexture();
-	Renderer::unbindTexture();
-	Renderer::unbindTexture();
-
-	shader->stopUsing();
 }
 
 void Test::onDestroy() {

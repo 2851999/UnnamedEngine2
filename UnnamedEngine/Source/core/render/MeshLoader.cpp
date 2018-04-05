@@ -24,7 +24,7 @@
  * The MeshLoader class
  *****************************************************************************/
 
-bool MeshLoader::loadDiffuseTexturesAsSRGB = false;
+bool MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 void MeshLoader::addChildren(const aiNode* node, std::unordered_map<const aiNode*, const aiBone*>& nodes) {
 	if (nodes.count(node) == 0)

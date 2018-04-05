@@ -64,21 +64,23 @@ void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
 
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane.obj");
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj");
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane3.obj");
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh");
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj");
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane.obj", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane3.obj", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae", false);
 
 	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), Renderer::SHADER_LIGHTING);
 	//plane = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj"), Renderer::SHADER_LIGHTING);
 	//plane->setScale(0.15f, 0.15f, 0.15f);
 	plane->update();
 
+	MeshLoader::loadDiffuseTexturesAsSRGB = false;
 	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.model"), Renderer::SHADER_LIGHTING);
 	model1->setPosition(-2.0f, 0.8f, 0.0f);
 	model1->update();
+	MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 	model1->getMesh()->getSkeleton()->startAnimation("");
 	//model1->getMesh()->getSkeleton()->stopAnimation();

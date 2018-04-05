@@ -4,6 +4,7 @@
 #map uniform Material_DiffuseColour ue_material.diffuseColour
 #map uniform Material_DiffuseTexture ue_material.diffuseTexture
 #map uniform Material_HasDiffuseTexture ue_material.hasDiffuseTexture
+#map uniform Material_DiffuseTextureSRGB ue_material.diffuseTextureSRGB
 #map uniform Material_SpecularColour ue_material.specularColour
 #map uniform Material_SpecularTexture ue_material.specularTexture
 #map uniform Material_HasSpecularTexture ue_material.hasSpecularTexture
@@ -25,6 +26,7 @@ struct UEMaterial {
 
 	sampler2D diffuseTexture;
 	bool hasDiffuseTexture;
+	bool diffuseTextureSRGB;
 
 	sampler2D specularTexture;
 	bool hasSpecularTexture;
@@ -53,8 +55,13 @@ vec3 ueGetMaterialAmbient(vec2 textureCoord) {
 
 vec4 ueGetMaterialDiffuse(vec2 textureCoord) {
 	vec4 diffuseColour = ue_material.diffuseColour;
-	if (ue_material.hasDiffuseTexture)
+	if (ue_material.hasDiffuseTexture) {
+		// vec4 tex = texture(ue_material.diffuseTexture, textureCoord);
+		// if (ue_material.diffuseTextureSRGB)
+		// 	tex = pow(tex, vec4(2.2));
+		// diffuseColour *= tex;
 		diffuseColour *= texture(ue_material.diffuseTexture, textureCoord);
+	}
 	return diffuseColour;
 }
 

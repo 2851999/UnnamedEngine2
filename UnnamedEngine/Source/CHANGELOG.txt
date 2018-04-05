@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 | Experimental 9
+
+* Replaced EnvironmentDataGenerator with PBREnvironment
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 4 | Experimental 8
 
 * Cleaned up PBR shaders a bit

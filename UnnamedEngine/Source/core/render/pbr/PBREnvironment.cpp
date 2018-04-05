@@ -16,17 +16,18 @@
  *
  *****************************************************************************/
 
-#include "EnvironmentDataGenerator.h"
+#include "PBREnvironment.h"
 
+#include "../../Matrix.h"
 #include "../Renderer.h"
 #include "../../Window.h"
 #include "../../../utils/Utils.h"
 
 /*****************************************************************************
- * The EnvironmentDataGenerator class
+ * The PBREnvironment class
  *****************************************************************************/
 
-void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
+PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	//For now these are the sizes of the maps (for cubemaps this is the size of each side)
 	const unsigned int ENVIRONMENT_MAP_SIZE  = 512;
 	const unsigned int IRRADIANCE_MAP_SIZE   = 32;
@@ -35,6 +36,17 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 
 	//Calculate the max size for allocating the required data
 	unsigned int maxSize = utils_maths::max(ENVIRONMENT_MAP_SIZE, utils_maths::max(IRRADIANCE_MAP_SIZE, utils_maths::max(PREFILTER_MAP_SIZE, BRDF_LUT_TEXTURE_SIZE)));
+
+	/* The projection and view matrices used in rendering a cubemap's individual faces */
+	const Matrix4f captureProjection = Matrix4f().initPerspective(90.0f, 1.0f, 0.1f, 10.0f);
+	const Matrix4f captureViews[6] = {
+			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f)),
+			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(-1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f)),
+			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  1.0f,  0.0f), Vector3f(0.0f,  0.0f,  1.0f)),
+			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f, -1.0f,  0.0f), Vector3f(0.0f,  0.0f, -1.0f)),
+			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  0.0f,  1.0f), Vector3f(0.0f, -1.0f,  0.0f)),
+			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f( 0.0f,  0.0f, -1.0f), Vector3f(0.0f, -1.0f,  0.0f))
+	};
 
 	//Get the shaders
 	RenderShader* renderShader1 = Renderer::getRenderShader(Renderer::SHADER_PBR_EQUI_TO_CUBE);
@@ -73,7 +85,7 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 	TextureParameters envMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
 	envMapParameters.setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 	envMapParameters.preventGenerateMipMaps();
-	environmentCubemap = Cubemap::createCubemap(ENVIRONMENT_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, envMapParameters);
+	Cubemap* environmentCubemap = Cubemap::createCubemap(ENVIRONMENT_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, envMapParameters);
 
 	shader1->use();
 
@@ -103,7 +115,7 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 	//---------------------------------- RENDER IRRADIANCE CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP ----------------------------------
 
 	TextureParameters irMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
-	irradianceCubemap = Cubemap::createCubemap(IRRADIANCE_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, irMapParameters);
+	Cubemap* irradianceCubemap = Cubemap::createCubemap(IRRADIANCE_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, irMapParameters);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
@@ -134,7 +146,7 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 	TextureParameters prefilMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
 	prefilMapParameters.setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
 	prefilMapParameters.preventGenerateMipMaps();
-	prefilterCubemap = Cubemap::createCubemap(PREFILTER_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, prefilMapParameters);
+	Cubemap* prefilterCubemap = Cubemap::createCubemap(PREFILTER_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, prefilMapParameters);
 
 	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, Window::getCurrentInstance()->getSettings().videoMaxAnisotropicSamples);
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP); //Allocate required memory
@@ -175,7 +187,7 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 
 	//-------------------------------------------------- RENDER BDRF INTEGRATION MAP --------------------------------------------------
 
-	brdfLUTTexture = new Texture(TextureParameters(GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, true));
+	Texture* brdfLUTTexture = new Texture(TextureParameters(GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, true));
 	brdfLUTTexture->bind();
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, 0, GL_RG, GL_FLOAT, 0);
@@ -207,4 +219,6 @@ void EnvironmentDataGenerator::loadAndGenerate(std::string path) {
 
 	delete cubeMesh;
 	delete quadMesh;
+
+	return new PBREnvironment(environmentCubemap, irradianceCubemap, prefilterCubemap, brdfLUTTexture);
 }
