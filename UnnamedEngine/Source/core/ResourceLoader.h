@@ -62,6 +62,8 @@ public:
 
 	inline Mesh* loadModel(std::string fileName) const { return sLoadModel(getAbsPathModels(), fileName); }
 	inline Mesh* loadModel(std::string folder, std::string fileName) const { return sLoadModel(getAbsPathModels() + folder, fileName); }
+	inline Mesh* loadPBRModel(std::string fileName) const { return sLoadPBRModel(getAbsPathModels(), fileName); }
+	inline Mesh* loadPBRModel(std::string folder, std::string fileName) const { return sLoadPBRModel(getAbsPathModels() + folder, fileName); }
 
 	inline Font* loadFont(std::string fileName, int size = 18, Colour colour = Colour::WHITE) const { return sLoadFont(getAbsPathFonts() + fileName, size, colour); }
 
@@ -94,7 +96,8 @@ public:
 
 	inline static Shader* sLoadShader(std::string path) { return Shader::loadShader(path); }
 
-	inline static Mesh* sLoadModel(std::string path, std::string fileName) { return MeshLoader::loadModel(path, fileName); }
+	inline static Mesh* sLoadModel(std::string path, std::string fileName) { return MeshLoader::loadModel(path, fileName, false); }
+	inline static Mesh* sLoadPBRModel(std::string path, std::string fileName) { return MeshLoader::loadModel(path, fileName, true); }
 
 	inline static Font* sLoadFont(std::string path, int size = 18, Colour colour = Colour::WHITE) { return new Font(path, size, colour); }
 };

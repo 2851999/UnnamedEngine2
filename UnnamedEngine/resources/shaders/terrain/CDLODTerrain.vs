@@ -1,4 +1,4 @@
-#include "Lighting.vs"
+#include "../lighting/Lighting.vs"
 
 //Assign these as constants for now
 #define UE_TERRAIN_NORMAL_LOOK_UP_OFFSET 1.0

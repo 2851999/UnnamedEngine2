@@ -339,7 +339,7 @@ void InputBindings::load(MLDocument& document, InputManager* inputManager) {
 	//Check whether the settings element was found
 	if (index >= 0) {
 		//The currently loaded controllers
-		std::map<int, Controller*> controllers;
+		std::unordered_map<int, Controller*> controllers;
 		//Go through all of the child elements within the root
 		for (MLElement& child : document.getRoot().getChild(index).getChildren()) {
 			//The current controller

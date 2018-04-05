@@ -52,15 +52,15 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
-	camera->setViewMatrix(Matrix4f().initPerspective(110.0f, getSettings().windowAspectRatio, 0.01f, 1000.0f));
-	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
+	camera->setProjectionMatrix(Matrix4f().initPerspective(80.0f, getSettings().windowAspectRatio, 0.01f, 1000.0f));
+	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
 
 	camera->setMovementSpeed(5.0f);
 
 	//terrain = new CDLODTerrain(resourceLoader.getAbsPathTextures() + "heightmap.jpg");
 	HeightMapGenerator generator;
-	heightMap = new CDLODHeightMap(generator.generate(512, 512), 1, 512, 512, GL_RED);
+	heightMap = new CDLODHeightMap(generator.generate(512, 512), 1, 512, 512, GL_RED, GL_RED);
 	terrain = new CDLODTerrain(heightMap);
 	terrain->getMaterial()->shininess = 1.0f;
 	terrain->update();
@@ -92,8 +92,8 @@ void Test::onUpdate() {
 	} else {
 		camera->setMovementSpeed(5.0f);
 	}
-	Vector3f pos = camera->getPosition();
-	camera->setY(heightMap->getHeight(pos.getX(), pos.getZ()) + 1.5f);
+	//Vector3f pos = camera->getPosition();
+	//camera->setY(heightMap->getHeight(pos.getX(), pos.getZ()) + 1.5f);
 
 	//terrain->getTransform()->rotate(terrain->getTransform()->getRotation().getUp(), 0.1f * getDelta());
 	//terrain->setScale(10.0f, 10.0f, 10.0f);

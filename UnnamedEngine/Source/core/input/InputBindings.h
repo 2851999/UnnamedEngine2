@@ -246,10 +246,10 @@ public:
 class InputBindings {
 private:
 	/* The button bindings */
-	std::map<std::string, InputBindingButton*> buttonBindings;
+	std::unordered_map<std::string, InputBindingButton*> buttonBindings;
 
 	/* The axis bindings */
-	std::map<std::string, InputBindingAxis*> axisBindings;
+	std::unordered_map<std::string, InputBindingAxis*> axisBindings;
 
 	/* The bindings listeners */
 	std::vector<InputBindingsListener*> listeners;

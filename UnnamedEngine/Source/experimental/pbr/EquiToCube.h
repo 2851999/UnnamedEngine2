@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2018 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@
  *
  *****************************************************************************/
 
-#include "tests/PBRTest.h"
-//#include "examples/basic/BasicRendering.h"
-//#include "examples/asteroids/AsteroidsGame.h"
+#ifndef EXPERIMENTAL_PBR_EQUITOCUBE_H_
+#define EXPERIMENTAL_PBR_EQUITOCUBE_H_
 
-int main() {
-	Test test;
-	test.create();
-//	AsteroidsGame asteroids;
-//	asteroids.create();
+#include "../../core/render/Texture.h"
 
-//	Tutorial tutorial;
-//	tutorial.create();
+class EquiToCube {
+public:
+	static void generateCubemapAndIrradiance(std::string path, unsigned int &cubemap, unsigned int &irMap, unsigned int &prefilMap, unsigned int &brdfLUTMap);
+	static Cubemap* generateIrradianceMap(Cubemap* map);
+};
 
-	return 0;
-}
+#endif /* EXPERIMENTAL_PBR_EQUITOCUBE_H_ */

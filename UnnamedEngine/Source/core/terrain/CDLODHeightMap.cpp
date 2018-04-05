@@ -27,17 +27,17 @@
 
 CDLODHeightMap::CDLODHeightMap(std::string path) {
 	//Places to store data about the height map texture
-	int numComponents, w, h, format;
+	int numComponents, w, h, internalFormat, format;
 	//Load the height map data
-	this->data = Texture::loadTexture(path, numComponents, w, h, format, false);
+	this->data = Texture::loadTexture(path, numComponents, w, h, internalFormat, format, false);
 	//Setup this height map
-	setup(data, numComponents, w, h, format);
+	setup(data, numComponents, w, h, internalFormat, format);
 }
 
-CDLODHeightMap::CDLODHeightMap(unsigned char* data, int numComponents, int width, int height, int format) {
+CDLODHeightMap::CDLODHeightMap(unsigned char* data, int numComponents, int width, int height, int internalFormat, int format) {
 	this->data = data;
 	//Setup this height map
-	setup(data, numComponents, width, height, format);
+	setup(data, numComponents, width, height, internalFormat, format);
 }
 
 CDLODHeightMap::~CDLODHeightMap() {
@@ -45,7 +45,7 @@ CDLODHeightMap::~CDLODHeightMap() {
 	Texture::freeTexture(data);
 }
 
-void CDLODHeightMap::setup(unsigned char* data, int numComponents, int width, int height, int format) {
+void CDLODHeightMap::setup(unsigned char* data, int numComponents, int width, int height, int internalFormat, int format) {
 	//Ensure the data is valid i.e. the height map is a square with sides a power of 2
 	if (width == height && width != 0 && (width & (width - 1)) == 0) {
 		//Assign the width and height values
@@ -57,7 +57,7 @@ void CDLODHeightMap::setup(unsigned char* data, int numComponents, int width, in
 		p.setFilter(GL_LINEAR);
 		p.setClamp(GL_REPEAT);
 		p.setShouldClamp(true);
-		this->texture = Texture::createTexture("", data, numComponents, width, width, format);
+		this->texture = Texture::createTexture("", data, numComponents, width, width, internalFormat, format, GL_UNSIGNED_BYTE);
 	} else {
 		//Output an error message
 		Logger::log("HeightMap is invalid", "CDLODHeightMap", LogType::Error);

@@ -1,5 +1,5 @@
-#include "Core.fs"
-#include "Material.fs"
+#include "../Core.fs"
+#include "../Material.fs"
 
 #define MAX_LIGHTS 6
 

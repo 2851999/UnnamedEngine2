@@ -24,20 +24,29 @@
 #include "Texture.h"
 
 /*****************************************************************************
- * The Material structure stores data about a material and can apply them to a
- * shader
+ * The Material class stores data about a material
+ *
+ * NOTE:
+ * For PBR components are as follows:
+ * AMBIENT -> METALNESS
+ * DIFFUSE -> ALBEDO
+ * NORMAL -> NORMAL
+ * SPECULAR -> AO
+ * SHININESS -> ROUGHNESS
  *****************************************************************************/
 
-struct Material {
+class Material {
+public:
 	/* The colours */
 	Colour ambientColour  = Colour(0.1f, 0.1f, 0.1f);
 	Colour diffuseColour  = Colour::WHITE;
 	Colour specularColour = Colour::WHITE;
 
 	/* The textures */
-	Texture* ambientTexture  = NULL;
-	Texture* diffuseTexture  = NULL;
-	Texture* specularTexture = NULL;
+	Texture* ambientTexture   = NULL;
+	Texture* diffuseTexture   = NULL;
+	Texture* specularTexture  = NULL;
+	Texture* shininessTexture = NULL;
 
 	Texture* normalMap = NULL;
 	Texture* parallaxMap = NULL;
@@ -46,6 +55,63 @@ struct Material {
 
 	/* The shininess value */
 	float shininess = 32.0f;
+
+	/* The constructor */
+	Material(bool pbr = false) { setDefault(pbr); }
+
+	/* The destructor */
+	virtual ~Material() {}
+
+	/* Method called to set the default values */
+	void setDefault(bool pbr = false);
+
+	/* Getters and setters */
+	void setAmbient(Colour ambientColour) { this->ambientColour = ambientColour; }
+	void setDiffuse(Colour diffuseColour) { this->diffuseColour = diffuseColour; }
+	void setSpecular(Colour specularColour) { this->specularColour = specularColour; }
+	void setAmbient(Texture* ambientTexture) { this->ambientTexture = ambientTexture; }
+	void setDiffuse(Texture* diffuseTexture) { this->diffuseTexture = diffuseTexture; }
+	void setSpecular(Texture* specularTexture) { this->specularTexture = specularTexture; }
+	void setShininess(Texture* shininessTexture) { this->shininessTexture = shininessTexture; }
+	void setNormalMap(Texture* normalMap) { this->normalMap = normalMap; }
+	void setParallaxMap(Texture* parallaxMap) { this->parallaxMap = parallaxMap; }
+	void setParallaxScale(float parallaxScale) { this->parallaxScale = parallaxScale; }
+	void setShininess(float shininess) { this->shininess = shininess; }
+
+	Colour getAmbientColour() { return ambientColour; }
+	Colour getDiffuseColour() { return diffuseColour; }
+	Colour getSpecularColour() { return specularColour; }
+	Texture* getAmbientTexture() { return ambientTexture; }
+	Texture* getDiffuseTexture() { return diffuseTexture; }
+	Texture* getSpecularTexture() { return specularTexture; }
+	Texture* getShininessTexture() { return shininessTexture; }
+	Texture* getNormalMap() { return normalMap; }
+	Texture* getParallaxMap() { return parallaxMap; }
+	float getParallaxScale() { return parallaxScale; }
+	float getShininess() { return shininess; }
+
+	/* Setters for PBR properties (Although they use the same properties, the naming could be confusing) */
+	void setMetalness(float metalness) { this->ambientColour = Colour(metalness); }
+	void setAlbedo(Colour albedoColour) { this->diffuseColour = albedoColour; }
+	void setRoughness(float roughness) { this->shininess = roughness; }
+	void setAO(float ao) { this->specularColour = Colour(ao); }
+
+	void setMetalness(Texture* metalnessTexture) { this->ambientTexture = metalnessTexture; }
+	void setAlbedo(Texture* albedoTexture) { this->diffuseTexture = albedoTexture; }
+	void setRoughness(Texture* roughnessTexture) { this->shininessTexture = roughnessTexture; }
+	void setAO(Texture* aoTexture) { this->specularTexture = aoTexture; }
+
+	Texture* getMetalnessTexture() { return this->ambientTexture; }
+	Texture* getAlbedoTexture() { return this->diffuseTexture; }
+	Texture* getRoughnessTexture() { return this->shininessTexture; }
+	Texture* getAOTexture() { return this->specularTexture; }
+
+	float getMetalnessValue() { return this->ambientColour.getR(); }
+	Colour getAlbedoColour() { return this->diffuseColour; }
+	float getRoughnessValue() { return this->shininess; }
+	float getAOValue() { return this->specularColour.getR(); }
 };
+
+
 
 #endif /* CORE_RENDER_MATERIAL_H_ */

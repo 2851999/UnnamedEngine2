@@ -60,7 +60,7 @@ void Test::onCreated() {
 
 	physicsScene->setCollisionCallback(std::bind(onCollision, this, 0, 0));
 
-	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
+	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
 }
 

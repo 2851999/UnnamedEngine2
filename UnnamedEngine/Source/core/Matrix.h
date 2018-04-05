@@ -421,16 +421,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initPerspective(float fovy, float aspect, float zNear, float zFar) {
-		float scale = (tan(fovy / 2 * (utils_maths::PI / 360)));
-
-		set(0, 0, 1.0f / (aspect * scale)); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
-		set(1, 0, 0); set(1, 1, 1.0f / scale); set(1, 2, 0); set(1, 3, 0);
-		set(2, 0, 0); set(2, 1, 0); set(2, 2, -(zFar + zNear) / (zFar - zNear)); set(2, 3, -(2 * zFar * zNear) / (zFar - zNear));
-		set(3, 0, 0); set(3, 1, 0); set(3, 2, -1); set(3, 3, 1);
-
-		return (*this);
-	}
+	const Matrix4f& initPerspective(float fovy, float aspect, float zNear, float zFar);
 
 	const Matrix4f& initTranslation(const Vector2f& vector) {
 		set(0, 0, 1); set(0, 1, 0); set(0, 2, 0); set(0, 3, vector.getX());
@@ -492,21 +483,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initLookAt(const Vector3f& eye, const Vector3f& centre, const Vector3f& up) {
-		//EXPLANATION: http://stackoverflow.com/questions/21152556/an-inconsistency-in-my-understanding-of-the-glm-lookat-function
-
-		Vector3f forward = (centre - eye).normalise();
-		Vector3f u = up.normalised();
-		Vector3f side = forward.cross(u).normalise();
-		u = side.cross(forward);
-
-		set(0, 0, side.getX());     set(0, 1, side.getY());     set(0, 2, side.getZ());     set(0, 3, -side.dot(eye));
-		set(1, 0, u.getX());        set(1, 1, u.getY());        set(1, 2, u.getZ());        set(1, 3, -up.dot(eye));
-		set(2, 0, -forward.getX()); set(2, 1, -forward.getY()); set(2, 2, -forward.getZ()); set(2, 3, forward.dot(eye));
-		set(3, 0, 0);               set(3, 1, 0);               set(3, 2, 0);               set(3, 3, 1);
-
-		return (*this);
-	}
+	const Matrix4f& initLookAt(const Vector3f& eye, const Vector3f& centre, const Vector3f& up);
 
 	inline void translate(Vector2f vector) { (*this) *= Matrix4f().initTranslation(vector); }
 	inline void translate(Vector3f vector) { (*this) *= Matrix4f().initTranslation(vector); }

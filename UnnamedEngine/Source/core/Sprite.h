@@ -114,7 +114,7 @@ public:
 class Sprite2D : public GameObject2D {
 private:
 	/* The animations for this sprite */
-	std::map<std::string, Animation2D*> animations;
+	std::unordered_map<std::string, Animation2D*> animations;
 
 	/* The current animation being played */
 	Animation2D* currentAnimation = NULL;

@@ -14,6 +14,7 @@ void main() {
 	//vec3 ambientColour = ueGetMaterialAmbient(textureCoord);
 	vec4 diffuseColour = ueGetMaterialDiffuse(textureCoord);
 	//vec3 specularColour = ueGetMaterialSpecular(textureCoord);
+	float shininess = ueGetMaterialShininess(textureCoord);
 	
 	vec3 normal = ueCalculateNormal(textureCoord);
 	
@@ -22,6 +23,6 @@ void main() {
 	//ue_FragColour = vec4(light, diffuseColour.a);
 
 	ue_gPosition = ue_frag_position;
-	ue_gNormal = vec4(normal, ue_material.shininess);
+	ue_gNormal = vec4(normal, shininess);
 	ue_gAlbedo = diffuseColour;
 }

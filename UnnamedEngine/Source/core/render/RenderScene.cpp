@@ -152,9 +152,18 @@ void RenderScene3D::renderWithLights(unsigned int uniformNumLights, Colour unifo
 
 			shader->use();
 
-			if (useEnvironmentMap)
-				shader->setUniformi("EnvironmentMap", Renderer::bindTexture(((Camera3D*) Renderer::getCamera())->getSkyBox()->getCubemap()));
-			shader->setUniformi("UseEnvironmentMap", useEnvironmentMap);
+			if (! pbr) {
+				if (useEnvironmentMap)
+					shader->setUniformi("EnvironmentMap", Renderer::bindTexture(((Camera3D*) Renderer::getCamera())->getSkyBox()->getCubemap()));
+				shader->setUniformi("UseEnvironmentMap", useEnvironmentMap);
+			} else {
+				//Check if the PBREnvironment has been assigned and assign the textures for it
+				if (pbrEnvironment) {
+					shader->setUniformi("IrradianceMap", Renderer::bindTexture(pbrEnvironment->getIrradianceCubemap()));
+					shader->setUniformi("PrefilterMap", Renderer::bindTexture(pbrEnvironment->getPrefilterCubemap()));
+					shader->setUniformi("BRDFLUT", Renderer::bindTexture(pbrEnvironment->getBRDFLUTTexture()));
+				}
+			}
 
 			setLightingUniforms(shader, uniformNumLights, uniformLightAmbient);
 
@@ -173,9 +182,16 @@ void RenderScene3D::renderWithLights(unsigned int uniformNumLights, Colour unifo
 				batches[i].objects[o]->render();
 			}
 
-
-			if (useEnvironmentMap)
-				Renderer::unbindTexture();
+			if (! pbr) {
+				if (useEnvironmentMap)
+					Renderer::unbindTexture();
+			} else {
+				if (pbrEnvironment) {
+					Renderer::unbindTexture();
+					Renderer::unbindTexture();
+					Renderer::unbindTexture();
+				}
+			}
 
 			for (unsigned int i = 0; i < numDepthMaps; i++)
 				Renderer::unbindTexture();

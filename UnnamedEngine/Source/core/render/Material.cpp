@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2018 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,18 +16,24 @@
  *
  *****************************************************************************/
 
-#include "tests/PBRTest.h"
-//#include "examples/basic/BasicRendering.h"
-//#include "examples/asteroids/AsteroidsGame.h"
+#include "Material.h"
 
-int main() {
-	Test test;
-	test.create();
-//	AsteroidsGame asteroids;
-//	asteroids.create();
+/*****************************************************************************
+ * The Material class
+ ******************************************************************************/
 
-//	Tutorial tutorial;
-//	tutorial.create();
+void Material::setDefault(bool pbr) {
+	if (! pbr) {
+		ambientColour  = Colour(0.1f, 0.1f, 0.1f);
+		diffuseColour  = Colour::WHITE;
+		specularColour = Colour::WHITE;
+		shininess = 32.0f;
+	} else {
+		ambientColour  = Colour(0.0f);
+		diffuseColour  = Colour::WHITE;
+		specularColour = Colour(1.0f);
+		shininess = 0.0f;
+	}
 
-	return 0;
+	parallaxScale = 0.05f;
 }

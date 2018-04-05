@@ -1,5 +1,5 @@
-#include "Core.vs"
-#include "Skinning.vs"
+#include "../Core.vs"
+#include "../Skinning.vs"
 
 #map uniform LightSpaceMatrix ue_mat
 

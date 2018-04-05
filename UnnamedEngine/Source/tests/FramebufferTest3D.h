@@ -47,7 +47,7 @@ void Test::onCreated() {
 
 	renderScene->add(object);
 
-	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
+	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
 
 	processor = new PostProcessor("resources/shaders/postprocessing/GrayScaleShader");

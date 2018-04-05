@@ -21,6 +21,7 @@
 
 #include "Light.h"
 #include "GeometryBuffer.h"
+#include "pbr/PBREnvironment.h"
 #include "../Object.h"
 
 /*****************************************************************************
@@ -63,6 +64,12 @@ private:
 	/* States whether the skybox should be used as an environment map */
 	bool useEnvironmentMap = false;
 
+	/* States whether PBR should be used */
+	bool pbr = false;
+
+	/* The environment used for PBR */
+	PBREnvironment* pbrEnvironment = NULL;
+
 	/* Method used to perform rendering for deferred and forward rendering with lighting */
 	void renderWithLights(unsigned int uniformNumLights, Colour uniformLightAmbient, unsigned int lightStartIndex);
 
@@ -97,6 +104,9 @@ public:
 	/* Method used to enable deferred rendering */
 	void enableDeferred();
 
+	/* Method used to enable pbr rendering */
+	inline void enablePBR() { pbr = true; }
+
 	/* The method used to render all of the objects */
 	void render();
 
@@ -110,8 +120,10 @@ public:
 	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
 	inline void enableLighting() { lightingEnabled = true; }
 	inline void disableLighting() { lightingEnabled = false; }
+	inline void setPBREnvironment(PBREnvironment* environment) { this->pbrEnvironment = environment; }
 	inline Colour getAmbientLight() { return ambientLight; }
 	inline bool isLightingEnabled() { return lightingEnabled; }
+	inline PBREnvironment* getPBREnvironment() { return pbrEnvironment; }
 };
 
 #endif /* CORE_RENDER_RENDERSCENE_H_ */
