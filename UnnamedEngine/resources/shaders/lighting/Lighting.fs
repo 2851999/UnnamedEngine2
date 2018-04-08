@@ -16,7 +16,7 @@ struct UELight {
 	float linear;
 	float quadratic;
 	
-	float cutoff;
+	float innerCutoff;
 	float outerCutoff;
 
 	sampler2D shadowMap;
@@ -85,7 +85,7 @@ vec3 ueCalculateSpotLight(UELight light, vec3 diffuseColour, vec3 specularColour
 	float theta = dot(lightDirection, normalize(-light.direction));
 	
 	if (theta > light.outerCutoff) {
-		float e = light.cutoff - light.outerCutoff;
+		float e = light.innerCutoff - light.outerCutoff;
 		float intensity = clamp((theta - light.outerCutoff) / e, 0.0, 1.0);
 
 		float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
@@ -96,9 +96,13 @@ vec3 ueCalculateSpotLight(UELight light, vec3 diffuseColour, vec3 specularColour
 		
 		float specularStrength = pow(max(dot(normal, halfwayDirection), 0.0), matShininess);
 		vec3 specularLight = specularStrength * (light.specularColour * specularColour);
+
+		//Calculate attenuation
+		float distanceToLight = length(light.position - fragPos);
+		float attentuation = 1.0 / (light.constant + light.linear * distanceToLight + light.quadratic * distanceToLight * distanceToLight);
 		
-		diffuseLight *= intensity;
-		specularLight *= intensity;
+		diffuseLight *= intensity * attentuation;
+		specularLight *= intensity * attentuation;
 		
 		return diffuseLight + specularLight;
 	} else {
@@ -200,7 +204,7 @@ vec3 ueReinhardToneMapping(vec3 colour) {
 	return mapped;
 }
 
-vec3 ueExposureToneMap(float exposure, vec3 colour) {
+vec3 ueExposureToneMapping(float exposure, vec3 colour) {
 	vec3 mapped = vec3(1.0) - exp(-colour * exposure);
 
 	return mapped;

@@ -43,8 +43,8 @@ private:
 	float linear    = 0.0f;
 	float quadratic = 1.0f;
 
-	/* The cutoff and outer cutoff values for spot lights */
-	float cutoff      = 0;
+	/* The inner and outer cutoff values for spot lights (taken in degrees) */
+	float innerCutoff      = 0;
 	float outerCutoff = 0;
 
 	/* The FBO if assigned for shadow mapping */
@@ -84,7 +84,7 @@ public:
 	inline Light* setConstantAttenuation(float value) { constant = value; return this; }
 	inline Light* setLinearAttenuation(float value) { linear = value; return this; }
 	inline Light* setQuadraticAttenuation(float value) { quadratic = value; return this; }
-	inline Light* setCutoff(float cutoff) { this->cutoff = cutoff; return this; }
+	inline Light* setInnerCutoff(float innerCutoff) { this->innerCutoff = innerCutoff; return this; }
 	inline Light* setOuterCutoff(float outerCutoff) { this->outerCutoff = outerCutoff; return this; }
 
 	inline int getType() { return type; }
@@ -94,7 +94,7 @@ public:
 	inline float getConstantAttenuation() { return constant; }
 	inline float getLinearAttenuation() { return linear; }
 	inline float getQuadraticAttenuation() { return quadratic; }
-	inline float getCutoff() { return cutoff; }
+	inline float getInnerCutoff() { return innerCutoff; }
 	inline float getOuterCutoff() { return outerCutoff; }
 
 	inline FBO* getDepthBuffer() { return depthBuffer; }

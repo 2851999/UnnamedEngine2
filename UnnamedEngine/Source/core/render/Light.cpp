@@ -70,7 +70,7 @@ void Light::setUniforms(Shader* shader, std::string suffix) {
 	shader->setUniformf("Light_Constant" + suffix, constant);
 	shader->setUniformf("Light_Linear" + suffix, linear);
 	shader->setUniformf("Light_Quadratic" + suffix, quadratic);
-	shader->setUniformf("Light_Cutoff" + suffix, cutoff);
-	shader->setUniformf("Light_OuterCutoff" + suffix, outerCutoff);
+	shader->setUniformf("Light_InnerCutoff" + suffix, cos(utils_maths::toRadians(innerCutoff)));
+	shader->setUniformf("Light_OuterCutoff" + suffix, cos(utils_maths::toRadians(outerCutoff)));
 }
 

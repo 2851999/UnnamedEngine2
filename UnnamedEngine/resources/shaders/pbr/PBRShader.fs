@@ -12,6 +12,106 @@ uniform sampler2D   brdfLUT;
 
 out vec4 ue_FragColour;
 
+vec3 ueCalculateDirectionalLightPBR(UELight light, vec3 normal, vec3 viewDirection, vec3 fragPos, vec3 albedo, float metalness, float roughness, vec3 F0) {
+    vec3 lightColor = light.diffuseColour;
+
+    //Calculate radiance
+    vec3 L = normalize(-light.direction);
+    vec3 H = normalize(viewDirection + L);
+    vec3 radiance = lightColor;
+
+    //Cook-torrance brdf
+    float NDF = distributionGGX(normal, H, roughness);
+    float G = geometrySmith(normal, viewDirection, L, roughness);
+    vec3 F = fresnelSchlick(max(dot(H, viewDirection), 0.0), F0);
+
+    vec3 numerator = NDF * G * F;
+    float denominator = 4.0 * max(dot(normal, viewDirection), 0.0) * max(dot(normal, L), 0.0);
+    vec3 specular = numerator / max(denominator, 0.001);
+
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS; //Ratio of refraction
+
+    kD *= 1.0 - metalness;
+
+    float NdotL = max(dot(normal, L), 0.0);
+
+    return  (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
+vec3 ueCalculatePointLightPBR(UELight light, vec3 normal, vec3 viewDirection, vec3 fragPos, vec3 albedo, float metalness, float roughness, vec3 F0) {
+    vec3 lightPosition = light.position;
+    vec3 lightColor = light.diffuseColour;
+
+    //Calculate radiance
+    vec3 L = normalize(lightPosition - fragPos);
+    vec3 H = normalize(viewDirection + L);
+    float distance = length(lightPosition - fragPos);
+    float attenuation = 1 / (distance * distance); //Inverse square - need gamma correction
+    vec3 radiance = lightColor * attenuation;
+
+    //Cook-torrance brdf
+    float NDF = distributionGGX(normal, H, roughness);
+    float G = geometrySmith(normal, viewDirection, L, roughness);
+    vec3 F = fresnelSchlick(max(dot(H, viewDirection), 0.0), F0);
+
+    vec3 numerator = NDF * G * F;
+    float denominator = 4.0 * max(dot(normal, viewDirection), 0.0) * max(dot(normal, L), 0.0);
+    vec3 specular = numerator / max(denominator, 0.001);
+
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS; //Ratio of refraction
+
+    kD *= 1.0 - metalness;
+
+    float NdotL = max(dot(normal, L), 0.0);
+
+    return  (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
+vec3 ueCalculateSpotLightPBR(UELight light, vec3 normal, vec3 viewDirection, vec3 fragPos, vec3 albedo, float metalness, float roughness, vec3 F0) {
+    vec3 lightPosition = light.position;
+    vec3 lightColor = light.diffuseColour;
+
+    //Calculate radiance
+    vec3 L = normalize(lightPosition - fragPos);
+
+    float theta = dot(L, normalize(-light.direction));
+
+    if (theta > light.outerCutoff) {
+        float e = light.innerCutoff - light.outerCutoff;
+        float intensity = clamp((theta - light.outerCutoff) / e, 0.0, 1.0);
+
+        vec3 H = normalize(viewDirection + L);
+
+        //Attenuation
+        float distance = length(lightPosition - fragPos);
+        float attenuation = 1 / (distance * distance); //Inverse square - need gamma correction
+
+        vec3 radiance = lightColor * intensity * attenuation;
+
+        //Cook-torrance brdf
+        float NDF = distributionGGX(normal, H, roughness);
+        float G = geometrySmith(normal, viewDirection, L, roughness);
+        vec3 F = fresnelSchlick(max(dot(H, viewDirection), 0.0), F0);
+
+        vec3 numerator = NDF * G * F;
+        float denominator = 4.0 * max(dot(normal, viewDirection), 0.0) * max(dot(normal, L), 0.0);
+        vec3 specular = numerator / max(denominator, 0.001);
+
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS; //Ratio of refraction
+
+        kD *= 1.0 - metalness;
+
+        float NdotL = max(dot(normal, L), 0.0);
+
+        return  (kD * albedo / PI + specular) * radiance * NdotL;
+    } else {
+        return vec3(0.0);
+    }
+}
+
 void main() {
 	vec3 albedo = ueGetMaterialDiffuse(ue_frag_textureCoord).rgb;
 	vec3 normal = ueCalculateNormal(ue_frag_textureCoord);
@@ -33,37 +133,12 @@ void main() {
     vec3 Lo = vec3(0.0);
 
     for (int i = 0; i < ue_numLights; i++) {
-        if (ue_lights[i].type == 2) {
-            //PER LIGHT STUFF ------------------------------------------------
-            vec3 lightPosition = ue_lights[i].position;
-            vec3 lightColor = ue_lights[i].diffuseColour;
-
-            //Calculate radiance
-            vec3 L = normalize(lightPosition - ue_frag_position);
-            vec3 H = normalize(V + L);
-            float distance = length(lightPosition - ue_frag_position);
-            float attenuation = 1 / (distance * distance); //Inverse square - need gamma correction
-            vec3 radiance = lightColor * attenuation;
-
-            //Cook-torrance brdf
-            float NDF = distributionGGX(N, H, roughness);
-            float G = geometrySmith(N, V, L, roughness);
-            vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-            vec3 numerator = NDF * G * F;
-            float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-            vec3 specular = numerator / max(denominator, 0.001);
-
-            vec3 kS = F;
-            vec3 kD = vec3(1.0) - kS; //Ratio of refraction
-
-            kD *= 1.0 - metallic;
-
-            float NdotL = max(dot(N, L), 0.0);
-            Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-
-            //----------------------------------------------------------------
-        }
+        if (ue_lights[i].type == 1)
+            Lo += ueCalculateDirectionalLightPBR(ue_lights[i], N, V, ue_frag_position, albedo, metallic, roughness, F0);
+        else if (ue_lights[i].type == 2)
+            Lo += ueCalculatePointLightPBR(ue_lights[i], N, V, ue_frag_position, albedo, metallic, roughness, F0);
+        else if (ue_lights[i].type == 3)
+            Lo += ueCalculateSpotLightPBR(ue_lights[i], N, V, ue_frag_position, albedo, metallic, roughness, F0);
     }
 
     //vec3 ambient = vec3(0.03) * albedo * ao;

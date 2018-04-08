@@ -273,7 +273,7 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 			shader->addUniform("Light_Constant["       + str(i) + "]", "ue_lights[" + str(i) + "].constant");
 			shader->addUniform("Light_Linear["         + str(i) + "]", "ue_lights[" + str(i) + "].linear");
 			shader->addUniform("Light_Quadratic["      + str(i) + "]", "ue_lights[" + str(i) + "].quadratic");
-			shader->addUniform("Light_Cutoff["         + str(i) + "]", "ue_lights[" + str(i) + "].cutoff");
+			shader->addUniform("Light_InnerCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].innerCutoff");
 			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].outerCutoff");
 			shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lights[" + str(i) + "].shadowMap");
 			shader->addUniform("Light_UseShadowMap["   + str(i) + "]", "ue_lights[" + str(i) + "].useShadowMap");

@@ -1,4 +1,37 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 1
+
+* Added directional and spot light support for PBR lighting
+
+* Renamed cutoff to innerCutoff in Light
+
+* Fixed bug: Was incorrectly calculating spot lights
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 (V0.2.8)
+
+* Added PBRTest
+* Added PBREnvironment
+* Added support for "../" in include paths for shaders
+* Added loadTexturef in Texture to load textures with float
+  data
+* Added separate minFilter and magFilter properties in
+  TextureParameters (when filter supplied both assigned)
+  
+* Changed Material structure to a class
+
+* Moved some of the shaders around
+
+* Replaced all instances of std::map with std::unordered_map
+  as the order was not necessary
+
+* Removed size parameter for SkyBox
+
+* Fixed bug: Matrix4f used half the value it should have for
+             the fov
+* Fixed bug: Shininess value was not loaded from materials
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 4 | Experimental 9
 
 * Replaced EnvironmentDataGenerator with PBREnvironment

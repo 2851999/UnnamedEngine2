@@ -114,6 +114,7 @@ void Test::onCreated() {
 	renderScene->addLight(light0);
 	renderScene->addLight(light1);
 	renderScene->addLight(light2);
+	//renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.0f, 2.0f, 0.0f), false))->setDirection(0, -1.0f, 0.0001f)->setInnerCutoff(12.5f)->setOuterCutoff(17.5f));
 
 	//renderScene->enableDeferred();
 
