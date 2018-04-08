@@ -32,7 +32,7 @@ private:
 	FramebufferTexture* createBuffer(GLenum target, GLint internalFormat, GLenum format, GLenum type, GLenum attachment);
 public:
 	/* The constructor */
-	GeometryBuffer();
+	GeometryBuffer(bool pbr);
 
 	/* The destructor */
 	virtual ~GeometryBuffer() {}

@@ -69,9 +69,10 @@ void BaseTest3D::update() {
 
 void BaseTest3D::render() {
 	utils_gl::setupSimple3DView(true);
-	camera->useView();
 
 	renderScene->render();
+
+	camera->useView(); //In case of deferred rendering forward rendered objects should be rendered after the deferred
 
 	onRender();
 }

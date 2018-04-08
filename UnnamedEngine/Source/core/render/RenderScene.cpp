@@ -48,7 +48,7 @@ void RenderScene3D::enableDeferred() {
 
 	//Create the geometry buffer
 	if (! gBuffer)
-		gBuffer = new GeometryBuffer();
+		gBuffer = new GeometryBuffer(pbr);
 }
 
 void RenderScene3D::add(GameObject3D* object) {
@@ -114,7 +114,11 @@ void RenderScene3D::render() {
 void RenderScene3D::renderWithLights(unsigned int uniformNumLights, Colour uniformLightAmbient, unsigned int lightStartIndex) {
 	if (deferredRendering) {
 		//Get the shader for the current batch
-		Shader* shader = Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING)->getShader();
+		Shader* shader;
+		if (! pbr)
+			shader = Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING)->getShader();
+		else
+			shader = Renderer::getRenderShader(Renderer::SHADER_PBR_DEFERRED_LIGHTING)->getShader();
 
 		shader->use();
 
@@ -133,12 +137,33 @@ void RenderScene3D::renderWithLights(unsigned int uniformNumLights, Colour unifo
 		shader->setUniformi("NormalBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(1)));
 		shader->setUniformi("AlbedoBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(2)));
 
+		if (pbr) {
+			//Bind the last buffer
+			shader->setUniformi("MetalnessAOBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(3)));
+
+			//Check if the PBREnvironment has been assigned and assign the textures for it
+			if (pbrEnvironment) {
+				shader->setUniformi("IrradianceMap", Renderer::bindTexture(pbrEnvironment->getIrradianceCubemap()));
+				shader->setUniformi("PrefilterMap", Renderer::bindTexture(pbrEnvironment->getPrefilterCubemap()));
+				shader->setUniformi("BRDFLUT", Renderer::bindTexture(pbrEnvironment->getBRDFLUTTexture()));
+			}
+		}
+
 		//Render
 		Renderer::getScreenTextureMesh()->render();
 
 		Renderer::unbindTexture();
 		Renderer::unbindTexture();
 		Renderer::unbindTexture();
+
+		if (pbr) {
+			Renderer::unbindTexture();
+			if (pbrEnvironment) {
+				Renderer::unbindTexture();
+				Renderer::unbindTexture();
+				Renderer::unbindTexture();
+			}
+		}
 
 		for (unsigned int i = 0; i < numDepthMaps; i++)
 			Renderer::unbindTexture();
@@ -212,7 +237,7 @@ void RenderScene3D::renderWithoutLights() {
 		if (geometryPass) {
 			shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
 
-			if (useEnvironmentMap)
+			if (useEnvironmentMap && (! pbr))
 				shader->setUniformi("EnvironmentMap", Renderer::bindTexture(((Camera3D*) Renderer::getCamera())->getSkyBox()->getCubemap()));
 			shader->setUniformi("UseEnvironmentMap", useEnvironmentMap);
 		}
@@ -228,7 +253,7 @@ void RenderScene3D::renderWithoutLights() {
 			batches[i].objects[j]->render();
 		}
 
-		if (geometryPass && useEnvironmentMap) {
+		if (geometryPass && (! pbr) && useEnvironmentMap) {
 			Renderer::unbindTexture();
 		}
 

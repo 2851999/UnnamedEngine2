@@ -64,6 +64,7 @@ void Test::onCreated() {
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
 	renderScene->enablePBR();
 	renderScene->setPBREnvironment(environment);
+	renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
@@ -142,7 +143,7 @@ void Test::onUpdate() {
 }
 
 void Test::onRender() {
-
+	//std::cout << glGetError() << std::endl;
 }
 
 void Test::onDestroy() {

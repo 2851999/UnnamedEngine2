@@ -65,6 +65,7 @@ public:
 	static const std::string SHADER_PBR_PREFILTER;
 	static const std::string SHADER_PBR_BRDF;
 	static const std::string SHADER_PBR_LIGHTING;
+	static const std::string SHADER_PBR_DEFERRED_LIGHTING;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

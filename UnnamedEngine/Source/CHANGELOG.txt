@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 3
+
+* Added support for deferred PBR rendering using
+  RenderScene3D
+  
+* Cleaned up some shaders
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 5 | Experimental 2
 
 * Added support for changing the attentuation parameters in

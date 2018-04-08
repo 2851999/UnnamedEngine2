@@ -26,12 +26,12 @@ void main() {
 	vec3 normal = normalShin.rgb;
 	float shininess = normalShin.a;
 
-	vec4 fragPosLigtSpace[MAX_LIGHTS];
+	vec4 fragPosLightSpace[MAX_LIGHTS];
 
 	for (int i = 0; i < ue_numLights; i++)
-		fragPosLigtSpace[i] = ue_lightSpaceMatrix[i] * vec4(fragPosition, 1.0);
+		fragPosLightSpace[i] = ue_lightSpaceMatrix[i] * vec4(fragPosition, 1.0);
 	
-	vec3 light = ueGetLighting(normal, fragPosition, ambientColour, diffuseColour, specularColour, shininess);
+	vec3 light = ueGetLighting(normal, fragPosition, ambientColour, diffuseColour, specularColour, shininess, fragPosLightSpace);
 	light = (ueExposureToneMapping(1.0, light));
 
 	ue_FragColour = vec4(light, albedo.a);

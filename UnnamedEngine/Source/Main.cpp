@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "tests/PBRTest.h"
+#include "tests/BaseEngineTest3D.h"
 //#include "examples/basic/BasicRendering.h"
 //#include "examples/asteroids/AsteroidsGame.h"
 
