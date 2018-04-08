@@ -44,7 +44,7 @@ private:
 	float quadratic = 1.0f;
 
 	/* The inner and outer cutoff values for spot lights (taken in degrees) */
-	float innerCutoff      = 0;
+	float innerCutoff = 0;
 	float outerCutoff = 0;
 
 	/* The FBO if assigned for shadow mapping */

@@ -12,7 +12,7 @@ void main() {
 	
 	vec3 normal = ueCalculateNormal(textureCoord);
 	
-	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour.xyz, specularColour, shininess, ue_frag_pos_lightspace);
+	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour.xyz, specularColour, shininess);
 
 	//light = ueGammaCorrect(ueExposureToneMapping(1.0, light));
 	light = (ueReinhardToneMapping(light));

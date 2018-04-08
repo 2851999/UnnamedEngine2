@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 2
+
+* Added support for changing the attentuation parameters in
+  PBR lighting
+* Added parallax displacement mapping for PBR
+* Added shadow support for directional lights in PBR
+
+* Made light shaders a bit neater
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 5 | Experimental 1
 
 * Added directional and spot light support for PBR lighting
