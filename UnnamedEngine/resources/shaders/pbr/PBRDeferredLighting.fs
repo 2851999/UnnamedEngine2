@@ -31,8 +31,10 @@ void main() {
 
 	vec4 fragPosLightSpace[MAX_LIGHTS];
 
-	for (int i = 0; i < ue_numLights; i++)
-		fragPosLightSpace[i] = ue_lightSpaceMatrix[i] * vec4(fragPosition, 1.0);
+	for (int i = 0; i < ue_numLights; i++) {
+		if (ue_lights[i].useShadowMap)
+			fragPosLightSpace[i] = ue_lightSpaceMatrix[i] * vec4(fragPosition, 1.0);
+	}
 	
     vec3 colour = ueGetLightingPBR(normal, fragPosition, albedo, metalness, roughness, ao, fragPosLightSpace);
 

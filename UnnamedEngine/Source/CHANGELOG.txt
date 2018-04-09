@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 4
+
+* Improved deferred lighting performance slightly
+
+* Fixed bug: Last commit broke PBR lighting when forward
+             rendering
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 5 | Experimental 3
 
 * Added support for deferred PBR rendering using
