@@ -69,12 +69,11 @@ void RenderScene3D::add(GameObject3D* object) {
 }
 
 void RenderScene3D::render() {
+	//Check for lighting and render the necessary shadow maps
+	if (lightingEnabled && lights.size() > 0)
+		renderShadowMaps();
 	//Check for deferred rendering
 	if (deferredRendering) {
-
-		//Render the shadow maps as required
-		renderShadowMaps();
-
 		gBuffer->bind();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -98,16 +97,10 @@ void RenderScene3D::render() {
 		//Renderer::render(gBuffer->getFramebufferTexture(2));
 	} else {
 		//Check for lighting
-		if (lights.size() > 0 && lightingEnabled) {
-			//Render the shadow maps as required
-			renderShadowMaps();
-
+		if (lights.size() > 0 && lightingEnabled)
 			renderWithLights();
-
-			//Renderer::render(lights[0]->getDepthBuffer()->getFramebufferTexture(0), NULL);
-		} else {
+		else
 			renderWithoutLights();
-		}
 	}
 }
 

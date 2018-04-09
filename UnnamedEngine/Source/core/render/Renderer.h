@@ -38,9 +38,9 @@ private:
 	 * for post processing effects */
 	static MeshRenderData* screenTextureMesh;
 
-	/* The size of the boundTextures array, at the moment saveTextures() is
+	/* Stores the sizes of the boundTextures array, at the moment saveTextures() is
 	 * called */
-	static unsigned int boundTexturesOldSize;
+	static std::vector<unsigned int> boundTexturesOldSize;
 
 	/* Assigns texture uniforms for a material */
 	static void assignMatTexture(Shader* shader, std::string type, Texture* texture);
@@ -86,20 +86,14 @@ public:
 
 	/* Used to store the current number of boundTextures so new textures
 	 * can be released later */
-	static inline void saveTextures() {
-		boundTexturesOldSize = boundTextures.size();
-	}
-
-	static inline unsigned int getNumBoundTextures() {
-		return boundTextures.size();
-	}
+	static void saveTextures();
 
 	/* Releases extra textures so that the boundTextures size is the same
-	 * as it was when saveTextures() was called */
-	static inline void releaseNewTextures() {
-		while (boundTextures.size() > boundTexturesOldSize)
-			unbindTexture();
-		boundTexturesOldSize = boundTextures.size();
+	 * as it was when saveTextures() was last called */
+	static void releaseNewTextures();
+
+	static unsigned int getNumBoundTextures() {
+		return boundTextures.size();
 	}
 
 	/* Method used to initialise the rendering system */

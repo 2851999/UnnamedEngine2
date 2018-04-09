@@ -34,7 +34,7 @@ Texture* Renderer::blank;
 
 MeshRenderData* Renderer::screenTextureMesh;
 
-unsigned int Renderer::boundTexturesOldSize;
+std::vector<unsigned int> Renderer::boundTexturesOldSize;
 
 const std::string Renderer::SHADER_MATERIAL          = "Material";
 const std::string Renderer::SHADER_SKY_BOX           = "SkyBox";
@@ -94,6 +94,19 @@ void Renderer::unbindTexture() {
 	glActiveTexture(GL_TEXTURE0 + boundTextures.size() - 1);
 	boundTextures[boundTextures.size() - 1]->unbind();
 	boundTextures.pop_back();
+}
+
+void Renderer::saveTextures() {
+	boundTexturesOldSize.push_back(boundTextures.size());
+}
+
+void Renderer::releaseNewTextures() {
+	//Get the previous size
+	unsigned int previousSize = boundTexturesOldSize[boundTexturesOldSize.size() - 1];
+	boundTexturesOldSize.pop_back();
+
+	while (boundTextures.size() > previousSize)
+		unbindTexture();
 }
 
 void Renderer::initialise() {
