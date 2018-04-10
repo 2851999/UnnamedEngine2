@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 7
+
+* Renamed some of the PBR shaders
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 5 | Experimental 6
 
 * Rewritten render method in RenderScene

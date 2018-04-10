@@ -49,10 +49,10 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	};
 
 	//Get the shaders
-	RenderShader* renderShader1 = Renderer::getRenderShader(Renderer::SHADER_PBR_EQUI_TO_CUBE);
-	RenderShader* renderShader2 = Renderer::getRenderShader(Renderer::SHADER_PBR_IRRADIANCE);
-	RenderShader* renderShader3 = Renderer::getRenderShader(Renderer::SHADER_PBR_PREFILTER);
-	RenderShader* renderShader4 = Renderer::getRenderShader(Renderer::SHADER_PBR_BRDF);
+	RenderShader* renderShader1 = Renderer::getRenderShader(Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN);
+	RenderShader* renderShader2 = Renderer::getRenderShader(Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN);
+	RenderShader* renderShader3 = Renderer::getRenderShader(Renderer::SHADER_PBR_PREFILTER_MAP_GEN);
+	RenderShader* renderShader4 = Renderer::getRenderShader(Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN);
 
 	Shader* shader1 = renderShader1->getForwardShader();
 	Shader* shader2 = renderShader2->getForwardShader();

@@ -60,10 +60,10 @@ public:
 	static const std::string SHADER_PLAIN_TEXTURE;
 	static const std::string SHADER_DEFERRED_LIGHTING;
 
-	static const std::string SHADER_PBR_EQUI_TO_CUBE;
-	static const std::string SHADER_PBR_IRRADIANCE;
-	static const std::string SHADER_PBR_PREFILTER;
-	static const std::string SHADER_PBR_BRDF;
+	static const std::string SHADER_PBR_EQUI_TO_CUBE_GEN;
+	static const std::string SHADER_PBR_IRRADIANCE_MAP_GEN;
+	static const std::string SHADER_PBR_PREFILTER_MAP_GEN;
+	static const std::string SHADER_PBR_BRDF_INTEGRATION_MAP_GEN;
 	static const std::string SHADER_PBR_LIGHTING;
 	static const std::string SHADER_PBR_DEFERRED_LIGHTING;
 
