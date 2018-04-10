@@ -181,20 +181,3 @@ vec3 ueCalculateNormal(vec2 textureCoord) {
 
 	return normal;
 }
-
-vec3 ueGammaCorrect(vec3 colour) {
-	const float gamma = 2.2;
-	return pow(colour, vec3(1.0 / gamma));
-}
-
-vec3 ueReinhardToneMapping(vec3 colour) {
-	vec3 mapped = colour / (colour + vec3(1.0));
-
-	return mapped;
-}
-
-vec3 ueExposureToneMapping(float exposure, vec3 colour) {
-	vec3 mapped = vec3(1.0) - exp(-colour * exposure);
-
-	return mapped;
-}

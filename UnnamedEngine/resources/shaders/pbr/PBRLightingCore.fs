@@ -2,13 +2,15 @@
 
 #include "PBRCore.fs"
 
-#map uniform IrradianceMap irradianceMap
-#map uniform PrefilterMap prefilterMap
-#map uniform BRDFLUT brdfLUT
+#map uniform IrradianceMap ue_irradianceMap
+#map uniform PrefilterMap ue_prefilterMap
+#map uniform BRDFLUT ue_brdfLUT
+#map uniform UseAmbient ue_useAmbient
 
-uniform samplerCube irradianceMap;
-uniform samplerCube prefilterMap;
-uniform sampler2D   brdfLUT; 
+uniform samplerCube ue_irradianceMap;
+uniform samplerCube ue_prefilterMap;
+uniform sampler2D   ue_brdfLUT; 
+uniform bool ue_useAmbient;
 
 vec3 ueCalculateLightPBR(UELight light, vec3 lightDirection, vec3 normal, vec3 viewDirection, vec3 fragPos, vec3 albedo, float metalness, float roughness, vec3 F0) {
     vec3 lightColor = light.diffuseColour;
@@ -51,7 +53,7 @@ vec3 ueCalculatePointLightPBR(UELight light, vec3 normal, vec3 viewDirection, ve
     vec3 radiance = ueCalculateLightPBR(light, lightDirection, normal, viewDirection, fragPos, albedo, metalness, roughness, F0);
 
     float distanceToLight = length(lightPosition - fragPos);
-    float attenuation = 1 / (light.constant + light.linear * distanceToLight + light.quadratic * distanceToLight * distanceToLight); //Inverse square - need gamma correction
+    float attenuation = 1.0 / (light.constant + light.linear * distanceToLight + light.quadratic * distanceToLight * distanceToLight); //Inverse square - need gamma correction
 
     radiance *= attenuation;
 
@@ -72,7 +74,7 @@ vec3 ueCalculateSpotLightPBR(UELight light, vec3 normal, vec3 viewDirection, vec
 
         //Attenuation
         float distanceToLight = length(lightPosition - fragPos);
-        float attenuation = 1 / (light.constant + light.linear * distanceToLight + light.quadratic * distanceToLight * distanceToLight); //Inverse square - need gamma correction
+        float attenuation = 1.0 / (light.constant + light.linear * distanceToLight + light.quadratic * distanceToLight * distanceToLight); //Inverse square - need gamma correction
 
         vec3 radiance = ueCalculateLightPBR(light, lightDirection, normal, viewDirection, fragPos, albedo, metalness, roughness, F0);
         radiance *= intensity * attenuation;
@@ -111,19 +113,23 @@ vec3 ueGetLightingPBR(vec3 normal, vec3 fragPos, vec3 albedo, float metalness, f
     //vec3 ambient = vec3(0.03) * albedo * ao;
 
     //Ambient lighting
-    vec3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, roughness);
-    vec3 kS = F;
-    vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metalness;
-    vec3 irradiance = texture(irradianceMap, normal).rgb;
-    vec3 diffuse = irradiance * albedo;
+    vec3 ambient = vec3(0.0);
 
-    const float MAX_REFLECTION_LOD = 4.0;
-    vec3 prefilteredColor = textureLod(prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;    
-    vec2 brdf  = texture(brdfLUT, vec2(max(dot(normal, V), 0.0), roughness)).rg;
-    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+    if (ue_useAmbient) {
+	    vec3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, roughness);
+	    vec3 kS = F;
+	    vec3 kD = 1.0 - kS;
+	    kD *= 1.0 - metalness;
+	    vec3 irradiance = texture(ue_irradianceMap, normal).rgb;
+	    vec3 diffuse = irradiance * albedo;
 
-    vec3 ambient = (kD * diffuse + specular) * ao;
+	    const float MAX_REFLECTION_LOD = 4.0;
+	    vec3 prefilteredColor = textureLod(ue_prefilterMap, R, roughness * MAX_REFLECTION_LOD).rgb;    
+	    vec2 brdf  = texture(ue_brdfLUT, vec2(max(dot(normal, V), 0.0), roughness)).rg;
+	    vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+	    ambient = (kD * diffuse + specular) * ao;
+	}
 
     return ambient + Lo;
 }

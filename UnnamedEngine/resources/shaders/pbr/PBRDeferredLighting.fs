@@ -38,7 +38,5 @@ void main() {
 	
     vec3 colour = ueGetLightingPBR(normal, fragPosition, albedo, metalness, roughness, ao, fragPosLightSpace);
 
-    colour = ueGammaCorrect(ueReinhardToneMapping(colour));
-
 	ue_FragColour = vec4(colour, 1.0);
 }

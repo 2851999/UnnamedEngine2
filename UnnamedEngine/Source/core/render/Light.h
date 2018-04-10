@@ -50,6 +50,9 @@ private:
 	/* The FBO if assigned for shadow mapping */
 	FBO* depthBuffer = NULL;
 
+	/* The size of the shadow map (width and height) */
+	unsigned int shadowMapSize = 1024;
+
 	/* The light projection and view matrices */
 	Matrix4f lightProjection;
 	Matrix4f lightView;
@@ -99,6 +102,7 @@ public:
 
 	inline FBO* getDepthBuffer() { return depthBuffer; }
 	inline bool hasDepthBuffer() { return depthBuffer; }
+	inline unsigned int getShadowMapSize() { return shadowMapSize; }
 	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
 	inline Matrix4f getLightViewMatrix() { return lightView; }
 	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }

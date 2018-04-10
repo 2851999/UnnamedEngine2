@@ -43,11 +43,14 @@ public:
 	virtual void onUpdate() override;
 	virtual void onRender() override;
 	virtual void onDestroy() override;
+
+	virtual void onKeyPressed(int key) override;
 };
 
 void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
+	//getSettings().videoSamples = 0;
 }
 
 void Test::onCreated() {
@@ -73,82 +76,6 @@ void Test::onCreated() {
 	renderScene->addLight(light1);
 	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 	renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.0f, 3.0f, 0.0f), false))->setDirection(0.0f, -1.0f, 0.0f)->setInnerCutoff(25.0f)->setOuterCutoff(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f))); //Sphere appears off-centre
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 
 	//std::string path = "C:/UnnamedEngine/textures/PBR/";
@@ -179,11 +106,11 @@ void Test::onCreated() {
 	//resourceLoader.loadModel("", "SimpleSphere.model") //Normals not smooth????
 	//MeshLoader::loadModel("resources/objects/", "plain_sphere.model")
 
-	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
-//	GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj", true), pbrRenderShader);
-//	sphere->setScale(0.15f, 0.15f, 0.15f);
+	//GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
+	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj"), pbrRenderShader);
+	sphere->setScale(0.15f, 0.15f, 0.15f);
 	sphere->update();
-	//renderScene->add(sphere);
+	renderScene->add(sphere);
 
 	GameObject3D* testObject = new GameObject3D(resourceLoader.loadPBRModel("pbr/", "Cerberus_LP.FBX"), pbrRenderShader);
 	testObject->setScale(0.05f, 0.05f, 0.05f);
@@ -225,6 +152,12 @@ void Test::onRender() {
 
 void Test::onDestroy() {
 
+}
+
+void Test::onKeyPressed(int key) {
+	BaseTest3D::onKeyPressed(key);
+	if (key == GLFW_KEY_Q)
+		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

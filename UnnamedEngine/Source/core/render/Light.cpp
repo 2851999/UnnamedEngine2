@@ -32,8 +32,8 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 			depthBuffer->attach(new FramebufferTexture(
 					GL_TEXTURE_2D,
 					GL_DEPTH_COMPONENT,
-					1024,
-					1024,
+					shadowMapSize,
+					shadowMapSize,
 					GL_DEPTH_COMPONENT,
 					GL_FLOAT,
 					GL_DEPTH_ATTACHMENT,

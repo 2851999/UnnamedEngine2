@@ -28,11 +28,11 @@ PostProcessor::PostProcessor(std::string path) {
 	fbo = new FBO(GL_FRAMEBUFFER);
 	fbo->attach(new FramebufferTexture(
 			GL_TEXTURE_2D,
-			GL_RGB,
+			GL_RGBA16F,
 			Window::getCurrentInstance()->getSettings().windowWidth,
 			Window::getCurrentInstance()->getSettings().windowHeight,
-			GL_RGB,
-			GL_UNSIGNED_BYTE,
+			GL_RGBA,
+			GL_FLOAT,
 			GL_COLOR_ATTACHMENT0
 	));
 
@@ -41,8 +41,8 @@ PostProcessor::PostProcessor(std::string path) {
 			GL_DEPTH_COMPONENT32,
 			Window::getCurrentInstance()->getSettings().windowWidth,
 			Window::getCurrentInstance()->getSettings().windowHeight,
-			0,
-			0,
+			GL_DEPTH_COMPONENT,
+			GL_FLOAT,
 			GL_DEPTH_ATTACHMENT
 	));
 
@@ -52,6 +52,17 @@ PostProcessor::PostProcessor(std::string path) {
 	shader->addAttribute("Position", "position");
 	shader->addAttribute("TextureCoordinate", "textureCoord");
 	shader->addUniform("Texture", "tex");
+}
+
+void PostProcessor::start() {
+	fbo->bind();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+}
+
+void PostProcessor::stop() {
+	fbo->unbind();
 }
 
 void PostProcessor::render() {

@@ -34,7 +34,6 @@ void main() {
 	}
 	
 	vec3 light = ueGetLighting(normal, fragPosition, ambientColour, diffuseColour, specularColour, shininess, fragPosLightSpace);
-	light = (ueExposureToneMapping(1.0, light));
 
 	ue_FragColour = vec4(light, albedo.a);
 }

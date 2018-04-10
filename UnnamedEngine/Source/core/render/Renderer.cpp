@@ -278,7 +278,7 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 		shader->addUniform("ShadowMap", "ue_shadowMap");
 		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
 
-		for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_BATCH; i++) {
+		for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_SET; i++) {
 			shader->addUniform("LightSpaceMatrix["     + str(i) + "]", "ue_lightSpaceMatrix[" + str(i) + "]");
 			shader->addUniform("Light_Type["           + str(i) + "]", "ue_lights[" + str(i) + "].type");
 			shader->addUniform("Light_Position["       + str(i) + "]", "ue_lights[" + str(i) + "].position");

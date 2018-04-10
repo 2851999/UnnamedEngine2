@@ -51,8 +51,6 @@ void main() {
 	vec3 specularColour = 0.5 * mat_diffuseColour;
 	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour, specularColour, ue_material.shininess, ue_frag_pos_lightspace);
 
-	light = ueGammaCorrect(ueExposureToneMapping(1.0, light));
-
 	ue_FragColour = vec4(light, 1.0);
 	
 //	ue_FragColour = vec4(ue_frag_height, ue_frag_height, ue_frag_height, 1.0);

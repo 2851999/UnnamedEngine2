@@ -53,6 +53,8 @@ public:
 	virtual void onUpdate() override;
 	virtual void onRender() override;
 	virtual void onDestroy() override;
+
+	virtual void onKeyPressed(int key) override;
 };
 
 void Test::onInitialise() {
@@ -202,6 +204,12 @@ void Test::onRender() {
 
 void Test::onDestroy() {
 	delete particleSystem;
+}
+
+void Test::onKeyPressed(int key) {
+	BaseTest3D::onKeyPressed(key);
+	if (key == GLFW_KEY_Q)
+		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */
