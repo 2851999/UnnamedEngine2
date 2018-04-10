@@ -42,10 +42,10 @@ public:
 	virtual ~PostProcessor() { delete fbo; }
 
 	/* This should be called before rendering to render to the FBO */
-	inline void start() { fbo->bind(); }
+	void start();
 
 	/* This should be called after rendering */
-	inline void stop() { fbo->unbind(); }
+	void stop();
 
 	/* This renders the result */
 	void render();

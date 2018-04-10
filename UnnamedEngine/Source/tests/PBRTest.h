@@ -43,11 +43,14 @@ public:
 	virtual void onUpdate() override;
 	virtual void onRender() override;
 	virtual void onDestroy() override;
+
+	virtual void onKeyPressed(int key) override;
 };
 
 void Test::onInitialise() {
-//	getSettings().videoVSync = false;
-//	getSettings().videoMaxFPS = 0;
+	getSettings().videoVSync = false;
+	getSettings().videoMaxFPS = 0;
+	//getSettings().videoSamples = 0;
 }
 
 void Test::onCreated() {
@@ -64,12 +67,23 @@ void Test::onCreated() {
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
 	renderScene->enablePBR();
 	renderScene->setPBREnvironment(environment);
+	//renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	light1->update();
 	renderScene->addLight(light0);
-	//renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
+	renderScene->addLight(light1);
+	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
+	renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.0f, 3.0f, 0.0f), false))->setDirection(0.0f, -1.0f, 0.0f)->setInnerCutoff(25.0f)->setOuterCutoff(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f))); //Sphere appears off-centre
+	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 
 	//std::string path = "C:/UnnamedEngine/textures/PBR/";
+
+//	GameObject3D* plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), pbrRenderShader);
+//	plane->setPosition(0.0f, -2.0f, 0.0f);
+//	plane->update();
+//	renderScene->add(plane);
 
 	for (int i = 0; i < 16; i++) {
 		GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
@@ -92,9 +106,9 @@ void Test::onCreated() {
 	//resourceLoader.loadModel("", "SimpleSphere.model") //Normals not smooth????
 	//MeshLoader::loadModel("resources/objects/", "plain_sphere.model")
 
-	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
-//	GameObject3D* sphere = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj", true), pbrRenderShader);
-//	sphere->setScale(0.15f, 0.15f, 0.15f);
+	//GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
+	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj"), pbrRenderShader);
+	sphere->setScale(0.15f, 0.15f, 0.15f);
 	sphere->update();
 	renderScene->add(sphere);
 
@@ -133,11 +147,17 @@ void Test::onUpdate() {
 }
 
 void Test::onRender() {
-
+	//std::cout << glGetError() << std::endl;
 }
 
 void Test::onDestroy() {
 
+}
+
+void Test::onKeyPressed(int key) {
+	BaseTest3D::onKeyPressed(key);
+	if (key == GLFW_KEY_Q)
+		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

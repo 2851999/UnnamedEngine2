@@ -38,9 +38,9 @@ private:
 	 * for post processing effects */
 	static MeshRenderData* screenTextureMesh;
 
-	/* The size of the boundTextures array, at the moment saveTextures() is
+	/* Stores the sizes of the boundTextures array, at the moment saveTextures() is
 	 * called */
-	static unsigned int boundTexturesOldSize;
+	static std::vector<unsigned int> boundTexturesOldSize;
 
 	/* Assigns texture uniforms for a material */
 	static void assignMatTexture(Shader* shader, std::string type, Texture* texture);
@@ -60,11 +60,12 @@ public:
 	static const std::string SHADER_PLAIN_TEXTURE;
 	static const std::string SHADER_DEFERRED_LIGHTING;
 
-	static const std::string SHADER_PBR_EQUI_TO_CUBE;
-	static const std::string SHADER_PBR_IRRADIANCE;
-	static const std::string SHADER_PBR_PREFILTER;
-	static const std::string SHADER_PBR_BRDF;
+	static const std::string SHADER_PBR_EQUI_TO_CUBE_GEN;
+	static const std::string SHADER_PBR_IRRADIANCE_MAP_GEN;
+	static const std::string SHADER_PBR_PREFILTER_MAP_GEN;
+	static const std::string SHADER_PBR_BRDF_INTEGRATION_MAP_GEN;
 	static const std::string SHADER_PBR_LIGHTING;
+	static const std::string SHADER_PBR_DEFERRED_LIGHTING;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -85,20 +86,14 @@ public:
 
 	/* Used to store the current number of boundTextures so new textures
 	 * can be released later */
-	static inline void saveTextures() {
-		boundTexturesOldSize = boundTextures.size();
-	}
-
-	static inline unsigned int getNumBoundTextures() {
-		return boundTextures.size();
-	}
+	static void saveTextures();
 
 	/* Releases extra textures so that the boundTextures size is the same
-	 * as it was when saveTextures() was called */
-	static inline void releaseNewTextures() {
-		while (boundTextures.size() > boundTexturesOldSize)
-			unbindTexture();
-		boundTexturesOldSize = boundTextures.size();
+	 * as it was when saveTextures() was last called */
+	static void releaseNewTextures();
+
+	static unsigned int getNumBoundTextures() {
+		return boundTextures.size();
 	}
 
 	/* Method used to initialise the rendering system */

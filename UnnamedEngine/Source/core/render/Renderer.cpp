@@ -34,7 +34,7 @@ Texture* Renderer::blank;
 
 MeshRenderData* Renderer::screenTextureMesh;
 
-unsigned int Renderer::boundTexturesOldSize;
+std::vector<unsigned int> Renderer::boundTexturesOldSize;
 
 const std::string Renderer::SHADER_MATERIAL          = "Material";
 const std::string Renderer::SHADER_SKY_BOX           = "SkyBox";
@@ -50,11 +50,12 @@ const std::string Renderer::SHADER_TERRAIN           = "Terrain";
 const std::string Renderer::SHADER_PLAIN_TEXTURE     = "PlainTexture";
 const std::string Renderer::SHADER_DEFERRED_LIGHTING = "DeferredLighting";
 
-const std::string Renderer::SHADER_PBR_EQUI_TO_CUBE = "PBREquiToCube";
-const std::string Renderer::SHADER_PBR_IRRADIANCE   = "PBRIrradiance";
-const std::string Renderer::SHADER_PBR_PREFILTER    = "PBRPrefilter";
-const std::string Renderer::SHADER_PBR_BRDF         = "PBRBRDF";
-const std::string Renderer::SHADER_PBR_LIGHTING     = "PBRLighting";
+const std::string Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN         = "PBREquiToCubeGen";
+const std::string Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN       = "PBRIrradianceMapGen";
+const std::string Renderer::SHADER_PBR_PREFILTER_MAP_GEN        = "PBRPrefilterMapGen";
+const std::string Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN = "PBRBRDFIntegrationMapGen";
+const std::string Renderer::SHADER_PBR_LIGHTING                 = "PBRLighting";
+const std::string Renderer::SHADER_PBR_DEFERRED_LIGHTING        = "PBRDeferredLighting";
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -95,30 +96,44 @@ void Renderer::unbindTexture() {
 	boundTextures.pop_back();
 }
 
+void Renderer::saveTextures() {
+	boundTexturesOldSize.push_back(boundTextures.size());
+}
+
+void Renderer::releaseNewTextures() {
+	//Get the previous size
+	unsigned int previousSize = boundTexturesOldSize[boundTexturesOldSize.size() - 1];
+	boundTexturesOldSize.pop_back();
+
+	while (boundTextures.size() > previousSize)
+		unbindTexture();
+}
+
 void Renderer::initialise() {
 	glewInit();
 
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the shaders
-	addRenderShader(SHADER_MATERIAL,          loadEngineShader("MaterialShader"),                  NULL);
-	addRenderShader(SHADER_SKY_BOX,           loadEngineShader("SkyBoxShader"),                    NULL);
-	addRenderShader(SHADER_FONT,              loadEngineShader("FontShader"),                      NULL);
-	addRenderShader(SHADER_BILLBOARD,         loadEngineShader("billboard/BillboardShader"),       NULL);
-	addRenderShader(SHADER_PARTICLE,          loadEngineShader("ParticleShader"),                  NULL);
-	addRenderShader(SHADER_LIGHTING,          loadEngineShader("lighting/LightingShader"),        loadEngineShader("lighting/LightingDeferredGeom"));
-	addRenderShader(SHADER_FRAMEBUFFER,       loadEngineShader("FramebufferShader"),               NULL);
-	addRenderShader(SHADER_ENVIRONMENT_MAP,   loadEngineShader("EnvironmentMapShader"),            NULL);
-	addRenderShader(SHADER_SHADOW_MAP,        loadEngineShader("lighting/ShadowMapShader"),        NULL);
-	addRenderShader(SHADER_BILLBOARDED_FONT,  loadEngineShader("billboard/BillboardedFontShader"), NULL);
-	addRenderShader(SHADER_TERRAIN,           loadEngineShader("terrain/Terrain"),                 loadEngineShader("terrain/TerrainDeferredGeom"));
-	addRenderShader(SHADER_PLAIN_TEXTURE,     loadEngineShader("PlainTexture"),                    NULL);
-	addRenderShader(SHADER_DEFERRED_LIGHTING, loadEngineShader("lighting/DeferredLighting"),       NULL);
-	addRenderShader(SHADER_PBR_EQUI_TO_CUBE,  loadEngineShader("pbr/EquiToCube"),                  NULL);
-	addRenderShader(SHADER_PBR_IRRADIANCE,    loadEngineShader("pbr/Irradiance"),                  NULL);
-	addRenderShader(SHADER_PBR_PREFILTER,     loadEngineShader("pbr/Prefilter"),                   NULL);
-	addRenderShader(SHADER_PBR_BRDF,          loadEngineShader("pbr/BRDF"),                        NULL);
-	addRenderShader(SHADER_PBR_LIGHTING,      loadEngineShader("pbr/PBRShader"),                   NULL);
+	addRenderShader(SHADER_MATERIAL,              loadEngineShader("MaterialShader"),                  NULL);
+	addRenderShader(SHADER_SKY_BOX,               loadEngineShader("SkyBoxShader"),                    NULL);
+	addRenderShader(SHADER_FONT,                  loadEngineShader("FontShader"),                      NULL);
+	addRenderShader(SHADER_BILLBOARD,             loadEngineShader("billboard/BillboardShader"),       NULL);
+	addRenderShader(SHADER_PARTICLE,              loadEngineShader("ParticleShader"),                  NULL);
+	addRenderShader(SHADER_LIGHTING,              loadEngineShader("lighting/LightingShader"),        loadEngineShader("lighting/LightingDeferredGeom"));
+	addRenderShader(SHADER_FRAMEBUFFER,           loadEngineShader("FramebufferShader"),               NULL);
+	addRenderShader(SHADER_ENVIRONMENT_MAP,       loadEngineShader("EnvironmentMapShader"),            NULL);
+	addRenderShader(SHADER_SHADOW_MAP,            loadEngineShader("lighting/ShadowMapShader"),        NULL);
+	addRenderShader(SHADER_BILLBOARDED_FONT,      loadEngineShader("billboard/BillboardedFontShader"), NULL);
+	addRenderShader(SHADER_TERRAIN,               loadEngineShader("terrain/Terrain"),                 loadEngineShader("terrain/TerrainDeferredGeom"));
+	addRenderShader(SHADER_PLAIN_TEXTURE,         loadEngineShader("PlainTexture"),                    NULL);
+	addRenderShader(SHADER_DEFERRED_LIGHTING,     loadEngineShader("lighting/DeferredLighting"),       NULL);
+	addRenderShader(SHADER_PBR_EQUI_TO_CUBE_GEN,         loadEngineShader("pbr/EquiToCubeGen"),         NULL);
+	addRenderShader(SHADER_PBR_IRRADIANCE_MAP_GEN,       loadEngineShader("pbr/IrradianceMapGen"),      NULL);
+	addRenderShader(SHADER_PBR_PREFILTER_MAP_GEN,        loadEngineShader("pbr/PrefilterMapGen"),       NULL);
+	addRenderShader(SHADER_PBR_BRDF_INTEGRATION_MAP_GEN, loadEngineShader("pbr/BRDFIntegrationMapGen"), NULL);
+	addRenderShader(SHADER_PBR_LIGHTING,          loadEngineShader("pbr/PBRShader"),                   loadEngineShader("pbr/PBRDeferredGeom"));
+	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING, loadEngineShader("pbr/PBRDeferredLighting"),         NULL);
 
 
 	//Setup the screen texture mesh
@@ -256,14 +271,14 @@ Shader* Renderer::loadEngineShader(std::string path) {
 
 void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 	shader->use();
-	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == SHADER_PBR_LIGHTING) {
+	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == SHADER_PBR_LIGHTING || id == SHADER_PBR_DEFERRED_LIGHTING) {
 		shader->addUniform("UseNormalMap", "ue_useNormalMap");
 
 		shader->addUniform("UseShadowMap", "ue_useShadowMap");
 		shader->addUniform("ShadowMap", "ue_shadowMap");
 		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
 
-		for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_BATCH; i++) {
+		for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_SET; i++) {
 			shader->addUniform("LightSpaceMatrix["     + str(i) + "]", "ue_lightSpaceMatrix[" + str(i) + "]");
 			shader->addUniform("Light_Type["           + str(i) + "]", "ue_lights[" + str(i) + "].type");
 			shader->addUniform("Light_Position["       + str(i) + "]", "ue_lights[" + str(i) + "].position");
@@ -273,7 +288,7 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 			shader->addUniform("Light_Constant["       + str(i) + "]", "ue_lights[" + str(i) + "].constant");
 			shader->addUniform("Light_Linear["         + str(i) + "]", "ue_lights[" + str(i) + "].linear");
 			shader->addUniform("Light_Quadratic["      + str(i) + "]", "ue_lights[" + str(i) + "].quadratic");
-			shader->addUniform("Light_Cutoff["         + str(i) + "]", "ue_lights[" + str(i) + "].cutoff");
+			shader->addUniform("Light_InnerCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].innerCutoff");
 			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].outerCutoff");
 			shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lights[" + str(i) + "].shadowMap");
 			shader->addUniform("Light_UseShadowMap["   + str(i) + "]", "ue_lights[" + str(i) + "].useShadowMap");
@@ -298,7 +313,7 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 
 void Renderer::prepareDeferredGeomShader(std::string id, Shader* shader) {
 	shader->use();
-	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN) {
+	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_PBR_LIGHTING) {
 		shader->addUniform("UseNormalMap", "ue_useNormalMap");
 
 		shader->addUniform("UseShadowMap", "ue_useShadowMap");

@@ -1,5 +1,88 @@
 --------------------------------------------------------------
-Release 1 | Beta 0 | Development 5 (V0.2.7)
+Release 1 | Beta 0 | Development 6 (V0.2.9)
+
+* Added directional and spot light support for PBR lighting
+* Added support for changing the attentuation parameters in
+  PBR lighting
+* Added parallax displacement mapping for PBR
+* Added support for deferred PBR rendering using
+  RenderScene3D
+  
+* Changed saveTextures and releaseNewTextures in Renderer
+  so that it can be called more than once to allow more than
+  one state to be saved (releaseNewTextures will unbind the
+  textures that were added since the last saveTextures call)
+
+* Rewritten render method in RenderScene
+
+* Renamed cutoff to innerCutoff in Light
+* Renamed some of the PBR shaders
+
+* Cleaned up some shaders
+
+* Fixed bug: Was incorrectly calculating spot lights
+* Fixed bug: Gamma correction not applied correctly for
+             more than one set of six lights
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 7
+
+* Renamed some of the PBR shaders
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 6
+
+* Rewritten render method in RenderScene
+
+* Fixed bug: Gamma correction not applied correctly for
+             more than one set of six lights
+             
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 5
+
+* Changed saveTextures and releaseNewTextures in Renderer
+  so that it can be called more than once to allow more than
+  one state to be saved (releaseNewTextures will unbind the
+  textures that were added since the last saveTextures call)
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 4
+
+* Improved deferred lighting performance slightly
+
+* Fixed bug: Last commit broke PBR lighting when forward
+             rendering
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 3
+
+* Added support for deferred PBR rendering using
+  RenderScene3D
+  
+* Cleaned up some shaders
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 2
+
+* Added support for changing the attentuation parameters in
+  PBR lighting
+* Added parallax displacement mapping for PBR
+* Added shadow support for directional lights in PBR
+
+* Made light shaders a bit neater
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 1
+
+* Added directional and spot light support for PBR lighting
+
+* Renamed cutoff to innerCutoff in Light
+
+* Fixed bug: Was incorrectly calculating spot lights
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 (V0.2.8)
 
 * Added PBRTest
 * Added PBREnvironment

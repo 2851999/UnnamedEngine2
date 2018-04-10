@@ -23,6 +23,7 @@
 #include "GeometryBuffer.h"
 #include "pbr/PBREnvironment.h"
 #include "../Object.h"
+#include "PostProcessing.h"
 
 /*****************************************************************************
  * The RenderScene3D class is used to help to manage the rendering of a set
@@ -50,7 +51,7 @@ private:
 	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
 
 	/* Boolean to determine whether lighting should be used or not */
-	bool lightingEnabled = true;
+	bool lighting = true;
 
 	/* States whether deferred rendering should be used */
 	bool deferredRendering = false;
@@ -70,30 +71,20 @@ private:
 	/* The environment used for PBR */
 	PBREnvironment* pbrEnvironment = NULL;
 
-	/* Method used to perform rendering for deferred and forward rendering with lighting */
-	void renderWithLights(unsigned int uniformNumLights, Colour uniformLightAmbient, unsigned int lightStartIndex);
+	/* Post processor used for applying gamma correction */
+	PostProcessor* postProcessor;
 
-	/* Method used to set the lighting uniforms common to both forward and deferred lighting */
-	void setLightingUniforms(Shader* shader, unsigned int uniformNumLights, Colour uniformLightAmbient);
+	/* Used to render the lighting pass given the shader to use (and index of the batch to render for forward rendering) */
+	void renderLighting(RenderShader* renderShader, int indexOfBatch = -1);
 
-	/* Method used to set all of the uniforms for the lights - numDepthMaps stores
-	 * the number of depth textures that were bound in the process */
-	void setLightUniforms(Shader* shader, unsigned int startIndex, unsigned int maxLightsInBatch, unsigned int &numDepthMaps);
-
-	/* Method used to render the shadow map of a light */
-	void renderShadowMap(Light* light);
-
-	/* Method used to render all of the shadow maps as required */
+	/* Used to render the scene to the shadow maps */
 	void renderShadowMaps();
 
-	/* Method used to render the scene without the lights */
-	void renderWithoutLights();
-
-	/* Method used to render the scene with the available lights */
-	void renderWithLights();
+	/* Used to render the scene to a light's shadow map */
+	void renderShadowMap(Light* light);
 public:
-	/* The number of lights in each batch */
-	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
+	/* The number of lights in each set */
+	static const unsigned int NUM_LIGHTS_IN_SET = 6;
 
 	/* The constructor */
 	RenderScene3D();
@@ -118,11 +109,11 @@ public:
 
 	/* Getters and setters */
 	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
-	inline void enableLighting() { lightingEnabled = true; }
-	inline void disableLighting() { lightingEnabled = false; }
+	inline void enableLighting() { lighting = true; }
+	inline void disableLighting() { lighting = false; }
 	inline void setPBREnvironment(PBREnvironment* environment) { this->pbrEnvironment = environment; }
 	inline Colour getAmbientLight() { return ambientLight; }
-	inline bool isLightingEnabled() { return lightingEnabled; }
+	inline bool isLightingEnabled() { return lighting; }
 	inline PBREnvironment* getPBREnvironment() { return pbrEnvironment; }
 };
 

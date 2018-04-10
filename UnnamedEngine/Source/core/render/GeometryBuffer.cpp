@@ -24,7 +24,7 @@
  * The GeometryBuffer class
  *****************************************************************************/
 
-GeometryBuffer::GeometryBuffer() : FBO(GL_FRAMEBUFFER) {
+GeometryBuffer::GeometryBuffer(bool pbr) : FBO(GL_FRAMEBUFFER) {
 	//Attach the buffers
 
 	//Position buffer
@@ -35,6 +35,10 @@ GeometryBuffer::GeometryBuffer() : FBO(GL_FRAMEBUFFER) {
 
 	//Albedo buffer
 	attach(createBuffer(GL_TEXTURE_2D, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT2));
+
+	//Extra buffer for metalness and ao components for PBR
+	if (pbr)
+		attach(createBuffer(GL_TEXTURE_2D, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT3));
 
 	//Depth buffer
 	attach(createBuffer(GL_TEXTURE_2D, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT));
