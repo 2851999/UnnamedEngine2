@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 2
+
+* Added methods in RenderScene3D to change the exposure
+  and enable/disable gamma correction
+
+* Fixed bug: Artifact was appearing when forward rendering
+             with PBR and antialiasing
+* Fixed bug: Couldn't have no MSAA for forward rendering in
+             RenderScene3D
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 6 | Experimental 1
 
 * Added option to use multisamples FBO's and PostProcessors

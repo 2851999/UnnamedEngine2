@@ -118,6 +118,11 @@ public:
 	inline Colour getAmbientLight() { return ambientLight; }
 	inline bool isLightingEnabled() { return lighting; }
 	inline PBREnvironment* getPBREnvironment() { return pbrEnvironment; }
+
+	/* Used to apply some post processing options */
+	void enableGammaCorrection();
+	void disableGammaCorrection();
+	void setExposure(float exposure);
 };
 
 #endif /* CORE_RENDER_RENDERSCENE_H_ */

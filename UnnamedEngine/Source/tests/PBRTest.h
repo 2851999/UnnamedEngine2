@@ -160,6 +160,18 @@ void Test::onKeyPressed(int key) {
 	BaseTest3D::onKeyPressed(key);
 	if (key == GLFW_KEY_Q)
 		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
+	else if (key == GLFW_KEY_1)
+		renderScene->setExposure(0.25f);
+	else if (key == GLFW_KEY_2)
+		renderScene->setExposure(0.5f);
+	else if (key == GLFW_KEY_3)
+		renderScene->setExposure(1.0f);
+	else if (key == GLFW_KEY_4)
+		renderScene->setExposure(2.0f);
+	else if (key == GLFW_KEY_5)
+		renderScene->setExposure(4.0f);
+	else if (key == GLFW_KEY_6)
+		renderScene->setExposure(8.0f);
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

@@ -157,6 +157,8 @@ void Test::onCreated() {
 //	box->update();
 
 	camera->setMovementSpeed(5.0f);
+
+	renderScene->disableGammaCorrection();
 }
 
 void Test::onUpdate() {

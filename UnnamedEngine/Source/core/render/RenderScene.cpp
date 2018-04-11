@@ -31,8 +31,13 @@ RenderScene3D::RenderScene3D() {
 	shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getShader();
 	//Setup the post processor
 	postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader", false);
-	//Setup the intermediate FBO
-	intermediateFBO = new PostProcessor(true);
+	//Set the default post processing options
+	enableGammaCorrection();
+	setExposure(-1);
+
+	//Setup the intermediate FBO if it is needed
+	if (Window::getCurrentInstance()->getSettings().videoSamples > 0)
+		intermediateFBO = new PostProcessor(true);
 }
 
 RenderScene3D::~RenderScene3D() {
@@ -143,8 +148,11 @@ void RenderScene3D::render() {
 		} else {
 			//Forward rendering
 
-			//Render to the intermediate FBO
-			intermediateFBO->start();
+			if (intermediateFBO)
+				//Render to the intermediate FBO
+				intermediateFBO->start();
+			else
+				postProcessor->start();
 
 			//Go through all of the objects in this scene
 			for (unsigned int i = 0; i < batches.size(); i++) {
@@ -152,16 +160,19 @@ void RenderScene3D::render() {
 				renderLighting(batches[i].shader, i);
 			}
 
-			//Stop rendering to the intermediate FBO
-			intermediateFBO->stop();
-
-			//Copy the colour data to the postprocessor
-			intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT);
-			//Copy the depth data to the framebuffer
-			intermediateFBO->copyToScreen(GL_DEPTH_BUFFER_BIT);
+			if (intermediateFBO) {
+				//Stop rendering to the intermediate FBO
+				intermediateFBO->stop();
+				//Copy the colour data to the postprocessor
+				intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			} else
+				postProcessor->stop();
 
 			//Render the output
 			postProcessor->render();
+
+			//Copy the depth data to the framebuffer
+			postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
 		}
 	}
 }
@@ -341,4 +352,25 @@ void RenderScene3D::renderShadowMap(Light* light) {
 
 	//Stop drawing to the depth buffer
 	depthBuffer->unbind();
+}
+
+void RenderScene3D::enableGammaCorrection() {
+	Shader* shader = postProcessor->getShader();
+	shader->use();
+	shader->setUniformi("GammaCorrect", 1);
+	shader->stopUsing();
+}
+
+void RenderScene3D::disableGammaCorrection() {
+	Shader* shader = postProcessor->getShader();
+	shader->use();
+	shader->setUniformi("GammaCorrect", 0);
+	shader->stopUsing();
+}
+
+void RenderScene3D::setExposure(float exposure) {
+	Shader* shader = postProcessor->getShader();
+	shader->use();
+	shader->setUniformf("Exposure", exposure);
+	shader->stopUsing();
 }

@@ -35,7 +35,7 @@ PostProcessor::PostProcessor(bool multisample) {
 			GL_RGBA,
 			GL_FLOAT,
 			GL_COLOR_ATTACHMENT0,
-			GL_LINEAR,
+			GL_NEAREST,
 			GL_CLAMP_TO_EDGE,
 			true
 	));
@@ -48,7 +48,7 @@ PostProcessor::PostProcessor(bool multisample) {
 			GL_DEPTH_COMPONENT,
 			GL_FLOAT,
 			GL_DEPTH_ATTACHMENT,
-			GL_LINEAR,
+			GL_NEAREST,
 			GL_CLAMP_TO_EDGE,
 			true
 	));
