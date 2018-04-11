@@ -72,7 +72,10 @@ private:
 	PBREnvironment* pbrEnvironment = NULL;
 
 	/* Post processor used for applying gamma correction */
-	PostProcessor* postProcessor;
+	PostProcessor* postProcessor = NULL;
+
+	/* Intermediate FBO used for antialiasing */
+	PostProcessor* intermediateFBO = NULL;
 
 	/* Used to render the lighting pass given the shader to use (and index of the batch to render for forward rendering) */
 	void renderLighting(RenderShader* renderShader, int indexOfBatch = -1);

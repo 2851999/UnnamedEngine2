@@ -24,31 +24,49 @@
  * The GeometryBuffer class
  *****************************************************************************/
 
-GeometryBuffer::GeometryBuffer(bool pbr) : FBO(GL_FRAMEBUFFER) {
-	//Attach the buffers
+GeometryBuffer::GeometryBuffer(bool pbr, bool multisample) : pbr(pbr) {
+	//If multisampling need to create the multisample FBO
+	if (multisample)
+		multisampleFBO = createFBO(pbr, true);
+	//Create the  default FBO
+	defaultFBO = createFBO(pbr, false);
+}
+
+FBO* GeometryBuffer::createFBO(bool pbr, bool multisample) {
+	//Create the FBO instance
+	FBO* fbo = new FBO(GL_FRAMEBUFFER, multisample);
+
+	//Attach the buffers to the FBO
+
+	//Use render buffers to store the data for multisampling, then textures for the final
+	//buffer for binding to use in shaders
+	GLenum target = multisample ? GL_RENDERBUFFER : GL_TEXTURE_2D;
 
 	//Position buffer
-	attach(createBuffer(GL_TEXTURE_2D, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT0));
+	fbo->attach(createBuffer(target, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT0));
 
 	//Normal buffer
-	attach(createBuffer(GL_TEXTURE_2D, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT1));
+	fbo->attach(createBuffer(target, GL_RGBA32F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT1));
 
 	//Albedo buffer
-	attach(createBuffer(GL_TEXTURE_2D, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT2));
+	fbo->attach(createBuffer(target, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT2));
 
 	//Extra buffer for metalness and ao components for PBR
 	if (pbr)
-		attach(createBuffer(GL_TEXTURE_2D, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT3));
+		fbo->attach(createBuffer(target, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT3));
 
 	//Depth buffer
-	attach(createBuffer(GL_TEXTURE_2D, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT));
+	fbo->attach(createBuffer(target, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT));
 
 	//Setup this buffer
-	setup();
+	fbo->setup();
+
+	//Return the FBO
+	return fbo;
 }
 
-FramebufferTexture* GeometryBuffer::createBuffer(GLenum target, GLint internalFormat, GLenum format, GLenum type, GLenum attachment) {
-	return new FramebufferTexture(
+FramebufferStore* GeometryBuffer::createBuffer(GLenum target, GLint internalFormat, GLenum format, GLenum type, GLenum attachment) {
+	return new FramebufferStore(
 			target,
 			internalFormat,
 			Window::getCurrentInstance()->getSettings().windowWidth,
@@ -56,8 +74,46 @@ FramebufferTexture* GeometryBuffer::createBuffer(GLenum target, GLint internalFo
 			format,
 			type,
 			attachment,
-			GL_NEAREST,
+			GL_LINEAR,
 			GL_CLAMP_TO_EDGE,
-			false
+			true
 	);
+}
+
+void GeometryBuffer::bind() {
+	//Check whether multisampling is needed (if it is then the multisample FBO will have been created)
+	if (multisampleFBO)
+		//Multisampling should be used
+		multisampleFBO->bind();
+	else
+		defaultFBO->bind();
+}
+
+void GeometryBuffer::unbind() {
+	//Check if multisampling is needed
+	if (multisampleFBO) {
+		//Stop using the multisample FBO and copy all of the data over to the default one (this applies the multisampling)
+		multisampleFBO->unbind();
+
+		multisampleFBO->copyTo(defaultFBO, 0, 0);
+		multisampleFBO->copyTo(defaultFBO, 1, 1);
+		multisampleFBO->copyTo(defaultFBO, 2, 2);
+
+		multisampleFBO->copyTo(defaultFBO, 3, 3); //Metalness and AO for PBR, depth otherwise
+
+		//Copy the depth for PBR
+		if (pbr)
+			multisampleFBO->copyTo(defaultFBO, 4, 4);
+	} else
+		defaultFBO->unbind();
+}
+
+void GeometryBuffer::outputDepthInfo() {
+	//Copy depth data to the default framebuffer
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, defaultFBO->getHandle());
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	unsigned int windowWidth = Window::getCurrentInstance()->getSettings().windowWidth;
+	unsigned int windowHeight = Window::getCurrentInstance()->getSettings().windowHeight;
+	glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

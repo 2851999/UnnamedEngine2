@@ -26,7 +26,7 @@
  * attachment for an FBO
  *****************************************************************************/
 
-class FramebufferTexture : public Texture {
+class FramebufferStore : public Texture {
 private:
 	/* Various pieces of data */
 	GLint   internalFormat;
@@ -37,7 +37,7 @@ private:
 	GLuint  rbo;
 public:
 	/* The constructors */
-	FramebufferTexture(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum attachment, GLuint filter, GLuint clamp, bool shouldClamp) :
+	FramebufferStore(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum attachment, GLuint filter, GLuint clamp, bool shouldClamp) :
 			Texture(0, TextureParameters(target, filter, clamp, shouldClamp)) {
 		this->internalFormat = internalFormat;
 		setWidth(width);
@@ -49,10 +49,10 @@ public:
 		this->rbo = 0;
 	}
 
-	FramebufferTexture(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum attachment) : FramebufferTexture(target, internalFormat, width, height, format, type, attachment, GL_LINEAR, GL_CLAMP_TO_EDGE, false) {}
+	FramebufferStore(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum attachment) : FramebufferStore(target, internalFormat, width, height, format, type, attachment, GL_LINEAR, GL_CLAMP_TO_EDGE, false) {}
 
 	/* The destructor */
-	virtual ~FramebufferTexture() {
+	virtual ~FramebufferStore() {
 		destroy();
 	}
 
@@ -64,7 +64,7 @@ public:
 	}
 
 	/* The method used to setup this texture */
-	void setup(GLuint fboTarget);
+	void setup(GLuint fboTarget, bool multisample);
 
 	/* Setters and getters */
 	inline GLint getInternalFormat() { return internalFormat; }
@@ -87,34 +87,44 @@ private:
 	GLuint target;
 
 	/* The attachments */
-	std::vector<FramebufferTexture*> textures;
+	std::vector<FramebufferStore*> stores;
+
+	/* States whether this FBO should use multisampling */
+	bool multisample;
 public:
 	/* The constructor */
-	FBO(GLuint target) {
+	FBO(GLuint target, bool multisample = false) {
 		this->framebuffer = 0;
 		this->target = target;
+		this->multisample = multisample;
 	}
 
 	/* The destructor */
 	virtual ~FBO() {
-		for (unsigned int i = 0; i < textures.size(); i++)
-			delete textures[i];
-		textures.clear();
+		for (unsigned int i = 0; i < stores.size(); i++)
+			delete stores[i];
+		stores.clear();
 	}
 
-	/* The method used to attach a texture */
-	inline void attach(FramebufferTexture* texture) { textures.push_back(texture); }
+	/* Method used to attach a texture */
+	inline void attach(FramebufferStore* texture) { stores.push_back(texture); }
 
 	/* The method used to setup this FBO */
 	void setup();
 
-	/* Returns the framebuffer texture at a given index */
-	inline FramebufferTexture* getFramebufferTexture(unsigned int index) { return textures[index]; }
+	/* Copies the contents of a part of this FBO to another FBO */
+	void copyTo(unsigned int fboHandle, GLenum sourceMode, GLenum destMode, unsigned int sourceWidth, unsigned int sourceHeight, unsigned int destWidth, unsigned int destHeight, GLbitfield mask);
 
-	/* The method used to bind this framebuffer */
+	/* Copies the contents of a particular frambuffer store in this framebuffer to another */
+	void copyTo(FBO* fbo, unsigned int sourceStoreIndex, unsigned int destStoreIndex);
+
+	/* Returns the framebuffer texture at a given index */
+	inline FramebufferStore* getFramebufferStore(unsigned int index) { return stores[index]; }
+
+	/* Binds this framebuffer */
 	inline void bind() { glBindFramebuffer(target, framebuffer); }
 
-	/* The method used to unbind this framebuffer */
+	/* Unbinds this framebuffer */
 	inline void unbind() { glBindFramebuffer(target, 0); }
 
 	/* Getters */

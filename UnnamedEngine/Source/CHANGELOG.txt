@@ -1,4 +1,39 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 1
+
+* Added option to use multisamples FBO's and PostProcessors
+* Added MSAA to deferred rendering (not accurate though,
+  just added as a test)
+
+* Renamed FramebufferTexture to FramebufferStore
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 (V0.2.9)
+
+* Added directional and spot light support for PBR lighting
+* Added support for changing the attentuation parameters in
+  PBR lighting
+* Added parallax displacement mapping for PBR
+* Added support for deferred PBR rendering using
+  RenderScene3D
+  
+* Changed saveTextures and releaseNewTextures in Renderer
+  so that it can be called more than once to allow more than
+  one state to be saved (releaseNewTextures will unbind the
+  textures that were added since the last saveTextures call)
+
+* Rewritten render method in RenderScene
+
+* Renamed cutoff to innerCutoff in Light
+* Renamed some of the PBR shaders
+
+* Cleaned up some shaders
+
+* Fixed bug: Was incorrectly calculating spot lights
+* Fixed bug: Gamma correction not applied correctly for
+             more than one set of six lights
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 5 | Experimental 7
 
 * Renamed some of the PBR shaders

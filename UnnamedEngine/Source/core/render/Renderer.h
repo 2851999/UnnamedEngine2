@@ -105,8 +105,8 @@ public:
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
 
-	/* Method used to render a FramebufferTexture */
-	static void render(FramebufferTexture* texture, Shader* shader = NULL);
+	/* Method used to render a FramebufferStore */
+	static void render(FramebufferStore* texture, Shader* shader = NULL);
 
 	/* Method use to destroy any objects that were created */
 	static void destroy();

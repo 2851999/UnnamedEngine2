@@ -29,7 +29,7 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 		if (castShadows) {
 			depthBuffer = new FBO(GL_FRAMEBUFFER);
 
-			depthBuffer->attach(new FramebufferTexture(
+			depthBuffer->attach(new FramebufferStore(
 					GL_TEXTURE_2D,
 					GL_DEPTH_COMPONENT,
 					shadowMapSize,

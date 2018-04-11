@@ -30,7 +30,9 @@ RenderScene3D::RenderScene3D() {
 	//Get the required shaders
 	shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getShader();
 	//Setup the post processor
-	postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader");
+	postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader", false);
+	//Setup the intermediate FBO
+	intermediateFBO = new PostProcessor(true);
 }
 
 RenderScene3D::~RenderScene3D() {
@@ -50,7 +52,7 @@ void RenderScene3D::enableDeferred() {
 
 	//Create the geometry buffer
 	if (! gBuffer)
-		gBuffer = new GeometryBuffer(pbr);
+		gBuffer = new GeometryBuffer(pbr, Window::getCurrentInstance()->getSettings().videoSamples > 0);
 }
 
 void RenderScene3D::add(GameObject3D* object) {
@@ -136,18 +138,13 @@ void RenderScene3D::render() {
 			//Render the final output
 			postProcessor->render();
 
-			//Copy depth data to the default framebuffer so forward rendessssssssssring is still possible after this scene was rendered
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->getHandle());
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			unsigned int windowWidth = Window::getCurrentInstance()->getSettings().windowWidth;
-			unsigned int windowHeight = Window::getCurrentInstance()->getSettings().windowHeight;
-			glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			//Copy depth data to the default framebuffer so forward rendering is still possible after this scene was rendered
+			gBuffer->outputDepthInfo();
 		} else {
 			//Forward rendering
 
-			//Render to the post processor's framebuffer
-			postProcessor->start();
+			//Render to the intermediate FBO
+			intermediateFBO->start();
 
 			//Go through all of the objects in this scene
 			for (unsigned int i = 0; i < batches.size(); i++) {
@@ -155,10 +152,15 @@ void RenderScene3D::render() {
 				renderLighting(batches[i].shader, i);
 			}
 
-			//Stop using the post processor's framebuffer
-			postProcessor->stop();
+			//Stop rendering to the intermediate FBO
+			intermediateFBO->stop();
 
-			//Render the final output
+			//Copy the colour data to the postprocessor
+			intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT);
+			//Copy the depth data to the framebuffer
+			intermediateFBO->copyToScreen(GL_DEPTH_BUFFER_BIT);
+
+			//Render the output
 			postProcessor->render();
 		}
 	}
@@ -196,13 +198,13 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 	//Also check for deferred rendering
 	if (deferredRendering) {
 		//Bind the geometry buffer textures
-		shader->setUniformi("PositionBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(0)));
-		shader->setUniformi("NormalBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(1)));
-		shader->setUniformi("AlbedoBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(2)));
+		shader->setUniformi("PositionBuffer", Renderer::bindTexture(gBuffer->getPositionBuffer()));
+		shader->setUniformi("NormalBuffer", Renderer::bindTexture(gBuffer->getNormalBuffer()));
+		shader->setUniformi("AlbedoBuffer", Renderer::bindTexture(gBuffer->getAlbedoBuffer()));
 
 		//Check if the metalness is also needed (for PBR)
 		if (pbr)
-			shader->setUniformi("MetalnessAOBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(3)));
+			shader->setUniformi("MetalnessAOBuffer", Renderer::bindTexture(gBuffer->getMetalnessAOBuffer()));
 	}
 
 	//States the number of lights in the current batch (assigned later)
@@ -250,7 +252,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			//Assign the data for shadow mapping
 			if (lights[l]->hasDepthBuffer()) {
 				shader->setUniformMatrix4("LightSpaceMatrix[" + utils_string::str(lightIndexInSet) + "]", lights[l]->getLightSpaceMatrix());
-				shader->setUniformi("Light_ShadowMap[" + utils_string::str(lightIndexInSet) + "]", Renderer::bindTexture(lights[l]->getDepthBuffer()->getFramebufferTexture(0)));
+				shader->setUniformi("Light_ShadowMap[" + utils_string::str(lightIndexInSet) + "]", Renderer::bindTexture(lights[l]->getDepthBuffer()->getFramebufferStore(0)));
 				shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightIndexInSet) + "]", 1);
 			} else
 				shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightIndexInSet) + "]", 0);
