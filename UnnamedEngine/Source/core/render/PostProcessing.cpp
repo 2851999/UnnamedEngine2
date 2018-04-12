@@ -58,9 +58,6 @@ PostProcessor::PostProcessor(bool multisample) {
 
 PostProcessor::PostProcessor(std::string path, bool multisampling) : PostProcessor(multisampling) {
 	shader = Shader::createShader(Shader::loadShaderSource(path + ".vs"), Shader::loadShaderSource(path + ".fs"));
-	shader->addAttribute("Position", "position");
-	shader->addAttribute("TextureCoordinate", "textureCoord");
-	shader->addUniform("Texture", "tex");
 }
 
 void PostProcessor::start() {

@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 3
+
+* Cleaned up post processing shaders a bit
+
+* Fixed bug: Parallax disaplcement mapping was wrong when
+             objects were rotated (seems like bitangents from
+             assimp may be in the wrong direction)
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 6 | Experimental 2
 
 * Added methods in RenderScene3D to change the exposure

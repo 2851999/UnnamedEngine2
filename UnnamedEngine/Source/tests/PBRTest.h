@@ -69,7 +69,7 @@ void Test::onCreated() {
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
 	renderScene->enablePBR();
 	renderScene->setPBREnvironment(environment);
-	//renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
+	renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
@@ -113,6 +113,11 @@ void Test::onCreated() {
 	sphere->setScale(0.15f, 0.15f, 0.15f);
 	sphere->update();
 	renderScene->add(sphere);
+
+	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "Cube.obj"), pbrRenderShader);
+	sphere2->setPosition(10.0f, 1.0f, 0.0f);
+	sphere2->update();
+	renderScene->add(sphere2);
 
 	GameObject3D* testObject = new GameObject3D(resourceLoader.loadPBRModel("pbr/", "Cerberus_LP.FBX"), pbrRenderShader);
 	testObject->setScale(0.05f, 0.05f, 0.05f);

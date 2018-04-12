@@ -43,11 +43,11 @@ void ueAssignLightingData() {
 		}
 		vec3 N = normalize(ue_frag_normal);
 	
-		ue_frag_tbnMatrix = mat3(T, B, N);
+		ue_frag_tbnMatrix = mat3(-T, B, N);
 		
 		if (ue_useParallaxMap) {
-			ue_tangentViewPos = ue_frag_tbnMatrix * ue_cameraPosition;
-			ue_tangentFragPos = ue_frag_tbnMatrix * ue_frag_position;
+			ue_tangentViewPos = transpose(ue_frag_tbnMatrix) * ue_cameraPosition;
+			ue_tangentFragPos = transpose(ue_frag_tbnMatrix) * ue_frag_position;
 		}
 	}
 	

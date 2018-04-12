@@ -89,8 +89,8 @@ vec3 ueGetMaterialNormal(vec2 textureCoord) {
 vec2 ueGetMaterialParallax(vec2 textureCoord, vec3 viewDir) {
 	const float minLayers = 10;
 	const float maxLayers = 20;
-	
-	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+
+	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));
 	
 	float layerSize = 1.0 / numLayers;
 	float currentLayerDepth = 0.0;
