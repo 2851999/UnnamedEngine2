@@ -1,4 +1,72 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 7 (V0.3.0)
+
+* Added option to use multisamples FBO's and PostProcessors
+* Added MSAA to deferred rendering (not accurate though,
+  just added as a test)
+* Added methods in RenderScene3D to change the exposure
+  and enable/disable gamma correction
+* Added showDeferredBuffers method in RenderScene3D
+  (only works with antialiasing turned off)
+  
+* Changed frustum culling for rendering shadow maps to be
+  with the light's view frustum in RenderScene3D
+* Changed vectors to work more like GLSL with Vector3f(0.0f)
+  for example assigning all components in the vector to 0.0f
+  instead of just the x one
+  
+* Cleaned up post processing shaders a bit
+
+* Renamed FramebufferTexture to FramebufferStore
+
+* Fixed bug: Parallax disaplcement mapping was wrong when
+             objects were rotated (seems like bitangents from
+             assimp may be in the wrong direction)
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 4
+
+* Added showDeferredBuffers method in RenderScene3D
+  (only works with antialiasing turned off)
+* Added ability to render without lighting in RenderScene3D
+  (objects should have some sort of non-lighting shader)
+
+* Changed frustum culling for rendering shadow maps to be
+  with the light's view frustum in RenderScene3D
+* Changed vectors to work more like GLSL with Vector3f(0.0f)
+  for example assigning all components in the vector to 0.0f
+  instead of just the x one
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 3
+
+* Cleaned up post processing shaders a bit
+
+* Fixed bug: Parallax disaplcement mapping was wrong when
+             objects were rotated (seems like bitangents from
+             assimp may be in the wrong direction)
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 2
+
+* Added methods in RenderScene3D to change the exposure
+  and enable/disable gamma correction
+
+* Fixed bug: Artifact was appearing when forward rendering
+             with PBR and antialiasing
+* Fixed bug: Couldn't have no MSAA for forward rendering in
+             RenderScene3D
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 1
+
+* Added option to use multisamples FBO's and PostProcessors
+* Added MSAA to deferred rendering (not accurate though,
+  just added as a test)
+
+* Renamed FramebufferTexture to FramebufferStore
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 6 (V0.2.9)
 
 * Added directional and spot light support for PBR lighting

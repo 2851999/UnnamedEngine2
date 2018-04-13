@@ -17,20 +17,23 @@
  *****************************************************************************/
 
 #include "FBO.h"
-
+#include "../Window.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The FramebufferTexture class
  *****************************************************************************/
 
-void FramebufferTexture::setup(GLuint fboTarget) {
+void FramebufferStore::setup(GLuint fboTarget, bool multisample) {
 	//Check for a render buffer object
 	if (getParameters().getTarget() == GL_RENDERBUFFER) {
 		//Setup the render buffer
 		glGenRenderbuffers(1, &rbo);
 		glBindRenderbuffer(getParameters().getTarget(), rbo);
-		glRenderbufferStorage(getParameters().getTarget(), internalFormat, getWidth(), getHeight());
+		if (multisample)
+			glRenderbufferStorageMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight());
+		else
+			glRenderbufferStorage(getParameters().getTarget(), internalFormat, getWidth(), getHeight());
 		glBindRenderbuffer(getParameters().getTarget(), 0);
 
 		//Attach to framebuffer
@@ -39,8 +42,12 @@ void FramebufferTexture::setup(GLuint fboTarget) {
 		//Setup the texture
 		create();
 		bind();
-		glTexImage2D(getParameters().getTarget(), 0, internalFormat, getWidth(), getHeight(), 0, format, type, NULL);
-		applyParameters(true);
+		if (multisample)
+			glTexImage2DMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
+		else
+			glTexImage2D(getParameters().getTarget(), 0, internalFormat, getWidth(), getHeight(), 0, format, type, NULL);
+
+		applyParameters(false);
 
 		//Attach to framebuffer
 		glFramebufferTexture2D(fboTarget, attachment, getParameters().getTarget(), getHandle(), 0);
@@ -60,13 +67,13 @@ void FBO::setup() {
 	std::vector<unsigned int> colourAttachments;
 
 	//Go though each attached FramebufferTexture
-	for (unsigned int i = 0; i < textures.size(); i++) {
+	for (unsigned int i = 0; i < stores.size(); i++) {
 		//Setup the current texture
-		textures[i]->setup(target);
+		stores[i]->setup(target, multisample);
 
 		//Assume that if it is not a depth attachment then it is a colour attachment
-		if (textures[i]->getAttachment() != GL_DEPTH_ATTACHMENT)
-			colourAttachments.push_back(textures[i]->getAttachment());
+		if (stores[i]->getAttachment() != GL_DEPTH_ATTACHMENT)
+			colourAttachments.push_back(stores[i]->getAttachment());
 	}
 
 	if (colourAttachments.size() == 0) {
@@ -86,4 +93,39 @@ void FBO::setup() {
 
 	//Bind the default FBO
 	glBindFramebuffer(target, 0);
+}
+
+void FBO::copyTo(unsigned int fboHandle, GLenum sourceMode, GLenum destMode, int sourceWidth, int sourceHeight, int destX, int destY, int destWidth, int destHeight, GLbitfield mask) {
+	//Copy the data from this FBO to the other one
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboHandle);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+	glReadBuffer(sourceMode);
+	glDrawBuffer(destMode);
+	glBlitFramebuffer(0, 0, sourceWidth, sourceHeight, destX, destY, destX + destWidth, destY + destHeight, mask, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FBO::copyTo(FBO* fbo, unsigned int sourceStoreIndex, unsigned int destStoreIndex) {
+	//Get the source store
+	FramebufferStore* source = getFramebufferStore(sourceStoreIndex);
+	//Get the destination store
+	FramebufferStore* dest = fbo->getFramebufferStore(destStoreIndex);
+
+	//Get the mask (assume if it isn't copying depth then it is copying colour)
+	GLenum mask;
+	if (source->getAttachment() == GL_DEPTH_ATTACHMENT)
+		mask = GL_DEPTH_BUFFER_BIT;
+	else
+		mask = GL_COLOR_BUFFER_BIT;
+
+	//Copy the data
+	copyTo(fbo->getHandle(), source->getAttachment(), dest->getAttachment(), source->getWidth(), source->getHeight(), 0, 0, dest->getWidth(), dest->getHeight(), mask);
+}
+
+void FBO::copyToScreen(unsigned int sourceStoreIndex, int x, int y, int width, int height) {
+	//Get the source store
+	FramebufferStore* source = getFramebufferStore(sourceStoreIndex);
+
+	//Copy the data
+	copyTo(0, source->getAttachment(), GL_BACK, source->getWidth(), source->getHeight(), x, y, width, height, GL_COLOR_BUFFER_BIT);
 }

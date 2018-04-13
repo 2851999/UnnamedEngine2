@@ -21,6 +21,7 @@
 
 #include "FBO.h"
 #include "../Object.h"
+#include "../Frustum.h"
 
 /*****************************************************************************
  * The Light class contains the information required to create a light
@@ -56,6 +57,9 @@ private:
 	/* The light projection and view matrices */
 	Matrix4f lightProjection;
 	Matrix4f lightView;
+
+	/* Frustum used for frustum culling when rendering shadow maps */
+	Frustum frustum;
 
 	/* Combination of the above matrices, assigned in the update method */
 	Matrix4f lightProjectionView;
@@ -106,6 +110,7 @@ public:
 	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
 	inline Matrix4f getLightViewMatrix() { return lightView; }
 	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }
+	inline Frustum& getFrustum() { return frustum; }
 };
 
 #endif /* CORE_RENDER_LIGHT_H_ */

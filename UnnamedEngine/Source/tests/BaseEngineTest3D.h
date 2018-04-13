@@ -67,13 +67,15 @@ void Test::onCreated() {
 	camera->setFlying(true);
 
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane.obj", false);
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
+	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane3.obj", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae", false);
 
 	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), Renderer::SHADER_LIGHTING);
+	//plane->setRotation(90.0f, 0.0f, 0.0f);
+	//plane->setPosition(0.0f, 0.0f, -6.0f);
 	//plane = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj"), Renderer::SHADER_LIGHTING);
 	//plane->setScale(0.15f, 0.15f, 0.15f);
 	plane->update();
@@ -88,6 +90,7 @@ void Test::onCreated() {
 	//model1->getMesh()->getSkeleton()->stopAnimation();
 
 	model2 = new GameObject3D(resourceLoader.loadModel("teapot.model"), Renderer::SHADER_LIGHTING);
+	//model2->setRotation(90.0f, 0.0f, 0.0f);
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
 
@@ -106,7 +109,7 @@ void Test::onCreated() {
 	renderScene->add(model2);
 	renderScene->add(model3);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, 0.0001f); //->setDiffuseColour(Colour(200.0f, 200.0f, 200.0f));
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0.0f, -1.0f, 0.0001f); //->setDiffuseColour(Colour(200.0f, 200.0f, 200.0f));
 	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(0.0f, 1.0f, 0.0f), false))->setDiffuseColour(Colour::RED);
 	Light* light2 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.5f, -1.0f, 0.0001f);
 	//plane->getMesh()->getMaterial(1)->diffuseTexture = light0->getDepthBuffer()->getFramebufferTexture(0);
@@ -157,6 +160,8 @@ void Test::onCreated() {
 //	box->update();
 
 	camera->setMovementSpeed(5.0f);
+
+	renderScene->disableGammaCorrection();
 }
 
 void Test::onUpdate() {
@@ -177,6 +182,9 @@ void Test::onUpdate() {
 
 	model2->getTransform()->rotate(model2->getTransform()->getRotation().getUp(), 0.1f * getDelta());
 	model2->update();
+
+//	plane->getTransform()->rotate(plane->getTransform()->getRotation().getLeft(), 0.01f * getDelta());
+//	plane->update();
 }
 
 void Test::onRender() {

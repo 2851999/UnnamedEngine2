@@ -72,7 +72,10 @@ private:
 	PBREnvironment* pbrEnvironment = NULL;
 
 	/* Post processor used for applying gamma correction */
-	PostProcessor* postProcessor;
+	PostProcessor* postProcessor = NULL;
+
+	/* Intermediate FBO used for antialiasing */
+	PostProcessor* intermediateFBO = NULL;
 
 	/* Used to render the lighting pass given the shader to use (and index of the batch to render for forward rendering) */
 	void renderLighting(RenderShader* renderShader, int indexOfBatch = -1);
@@ -107,6 +110,9 @@ public:
 	/* Used to add a light to this scene */
 	inline void addLight(Light* light) { lights.push_back(light); }
 
+	/* Displays the various buffers on the screen used for deferred rendering */
+	void showDeferredBuffers();
+
 	/* Getters and setters */
 	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
 	inline void enableLighting() { lighting = true; }
@@ -115,6 +121,11 @@ public:
 	inline Colour getAmbientLight() { return ambientLight; }
 	inline bool isLightingEnabled() { return lighting; }
 	inline PBREnvironment* getPBREnvironment() { return pbrEnvironment; }
+
+	/* Used to apply some post processing options */
+	void enableGammaCorrection();
+	void disableGammaCorrection();
+	void setExposure(float exposure);
 };
 
 #endif /* CORE_RENDER_RENDERSCENE_H_ */

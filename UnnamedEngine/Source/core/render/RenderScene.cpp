@@ -30,7 +30,14 @@ RenderScene3D::RenderScene3D() {
 	//Get the required shaders
 	shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getShader();
 	//Setup the post processor
-	postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader");
+	postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader", false);
+	//Set the default post processing options
+	enableGammaCorrection();
+	setExposure(-1);
+
+	//Setup the intermediate FBO if it is needed
+	if (Window::getCurrentInstance()->getSettings().videoSamples > 0)
+		intermediateFBO = new PostProcessor(true);
 }
 
 RenderScene3D::~RenderScene3D() {
@@ -50,7 +57,7 @@ void RenderScene3D::enableDeferred() {
 
 	//Create the geometry buffer
 	if (! gBuffer)
-		gBuffer = new GeometryBuffer(pbr);
+		gBuffer = new GeometryBuffer(pbr, Window::getCurrentInstance()->getSettings().videoSamples > 0);
 }
 
 void RenderScene3D::add(GameObject3D* object) {
@@ -136,18 +143,16 @@ void RenderScene3D::render() {
 			//Render the final output
 			postProcessor->render();
 
-			//Copy depth data to the default framebuffer so forward rendessssssssssring is still possible after this scene was rendered
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer->getHandle());
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			unsigned int windowWidth = Window::getCurrentInstance()->getSettings().windowWidth;
-			unsigned int windowHeight = Window::getCurrentInstance()->getSettings().windowHeight;
-			glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			//Copy depth data to the default framebuffer so forward rendering is still possible after this scene was rendered
+			gBuffer->outputDepthInfo();
 		} else {
 			//Forward rendering
 
-			//Render to the post processor's framebuffer
-			postProcessor->start();
+			if (intermediateFBO)
+				//Render to the intermediate FBO
+				intermediateFBO->start();
+			else
+				postProcessor->start();
 
 			//Go through all of the objects in this scene
 			for (unsigned int i = 0; i < batches.size(); i++) {
@@ -155,12 +160,48 @@ void RenderScene3D::render() {
 				renderLighting(batches[i].shader, i);
 			}
 
-			//Stop using the post processor's framebuffer
+			if (intermediateFBO) {
+				//Stop rendering to the intermediate FBO
+				intermediateFBO->stop();
+				//Copy the colour data to the postprocessor
+				intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			} else
+				postProcessor->stop();
+
+			//Render the output
+			postProcessor->render();
+
+			//Copy the depth data to the framebuffer
+			postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
+		}
+	} else {
+		//Don't bother with deferred rendering if lighting is disabled
+
+		if (intermediateFBO)
+			//Render to the intermediate FBO
+			intermediateFBO->start();
+		else
+			postProcessor->start();
+
+		//Go through and render all of the objects in this scene
+		for (unsigned int i = 0; i < batches.size(); i++) {
+			for (unsigned int j = 0; j < batches[i].objects.size(); j++)
+				batches[i].objects[j]->render();
+		}
+
+		if (intermediateFBO) {
+			//Stop rendering to the intermediate FBO
+			intermediateFBO->stop();
+			//Copy the colour data to the postprocessor
+			intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		} else
 			postProcessor->stop();
 
-			//Render the final output
-			postProcessor->render();
-		}
+		//Render the output
+		postProcessor->render();
+
+		//Copy the depth data to the framebuffer
+		postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
 	}
 }
 
@@ -196,13 +237,13 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 	//Also check for deferred rendering
 	if (deferredRendering) {
 		//Bind the geometry buffer textures
-		shader->setUniformi("PositionBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(0)));
-		shader->setUniformi("NormalBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(1)));
-		shader->setUniformi("AlbedoBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(2)));
+		shader->setUniformi("PositionBuffer", Renderer::bindTexture(gBuffer->getPositionBuffer()));
+		shader->setUniformi("NormalBuffer", Renderer::bindTexture(gBuffer->getNormalBuffer()));
+		shader->setUniformi("AlbedoBuffer", Renderer::bindTexture(gBuffer->getAlbedoBuffer()));
 
 		//Check if the metalness is also needed (for PBR)
 		if (pbr)
-			shader->setUniformi("MetalnessAOBuffer", Renderer::bindTexture(gBuffer->getFramebufferTexture(3)));
+			shader->setUniformi("MetalnessAOBuffer", Renderer::bindTexture(gBuffer->getMetalnessAOBuffer()));
 	}
 
 	//States the number of lights in the current batch (assigned later)
@@ -250,7 +291,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			//Assign the data for shadow mapping
 			if (lights[l]->hasDepthBuffer()) {
 				shader->setUniformMatrix4("LightSpaceMatrix[" + utils_string::str(lightIndexInSet) + "]", lights[l]->getLightSpaceMatrix());
-				shader->setUniformi("Light_ShadowMap[" + utils_string::str(lightIndexInSet) + "]", Renderer::bindTexture(lights[l]->getDepthBuffer()->getFramebufferTexture(0)));
+				shader->setUniformi("Light_ShadowMap[" + utils_string::str(lightIndexInSet) + "]", Renderer::bindTexture(lights[l]->getDepthBuffer()->getFramebufferStore(0)));
 				shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightIndexInSet) + "]", 1);
 			} else
 				shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightIndexInSet) + "]", 0);
@@ -323,15 +364,26 @@ void RenderScene3D::renderShadowMap(Light* light) {
 		for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
 			//Pointer to the current object
 			GameObject3D* object = batches[i].objects[j];
-			//Assign the required uniforms that could not have been done outside of the loop
-			shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * object->getModelMatrix());
-			//Ensure the object uses the shadow map shader to render
-			object->getRenderShader()->addForwardShader(shadowMapShader);
+			//Stores the previous value of whether culling was enabled on the objects mesh
+			bool culling = object->getMesh()->isCullingEnabled();
+			//If culling is enabled ensure the object is visible to the light
+			if (! culling || ! object->shouldCull(light->getFrustum())) {
+				//Assign the required uniforms that could not have been done outside of the loop
+				shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * object->getModelMatrix());
+				//Ensure the object uses the shadow map shader to render
+				object->getRenderShader()->addForwardShader(shadowMapShader);
 
-			//Render the object with the shadow map shader
-			object->render();
+				//Ensure the object isn't culled just because it can't be seen by the camera
+				object->getMesh()->setCullingEnabled(false);
 
-			object->getRenderShader()->removeForwardShader(shadowMapShader);
+				//Render the object with the shadow map shader
+				object->render();
+
+				object->getRenderShader()->removeForwardShader(shadowMapShader);
+
+				//Restore the original value
+				object->getMesh()->setCullingEnabled(culling);
+			}
 		}
 	}
 
@@ -339,4 +391,48 @@ void RenderScene3D::renderShadowMap(Light* light) {
 
 	//Stop drawing to the depth buffer
 	depthBuffer->unbind();
+}
+
+void RenderScene3D::showDeferredBuffers() {
+	if (deferredRendering) {
+		//Copy the various buffers onto the default framebuffer
+		int x;
+		int y;
+		int windowWidth  = Window::getCurrentInstance()->getSettings().windowWidth;
+		int windowHeight = Window::getCurrentInstance()->getSettings().windowHeight;
+		int width = windowWidth / 4.0f;
+		int height = windowHeight / 4.0f;
+
+		unsigned int numBuffers = pbr ? 4 : 3;
+
+		x = windowWidth - width;
+		y = windowHeight - height;
+
+		for (unsigned int i = 0; i < numBuffers; i++) {
+			gBuffer->getFBO()->copyToScreen(i, x, y, width, height);
+
+			y -= height;
+		}
+	}
+}
+
+void RenderScene3D::enableGammaCorrection() {
+	Shader* shader = postProcessor->getShader();
+	shader->use();
+	shader->setUniformi("GammaCorrect", 1);
+	shader->stopUsing();
+}
+
+void RenderScene3D::disableGammaCorrection() {
+	Shader* shader = postProcessor->getShader();
+	shader->use();
+	shader->setUniformi("GammaCorrect", 0);
+	shader->stopUsing();
+}
+
+void RenderScene3D::setExposure(float exposure) {
+	Shader* shader = postProcessor->getShader();
+	shader->use();
+	shader->setUniformf("Exposure", exposure);
+	shader->stopUsing();
 }

@@ -1,8 +1,10 @@
-#version 140
+#include "PostProcess.fs"
 
-uniform sampler2D tex;
+#map uniform GammaCorrect gammaCorrect
+#map uniform Exposure exposureIn
 
-in vec2 frag_textureCoord;
+uniform bool gammaCorrect;
+uniform float exposureIn;
 
 out vec4 FragColour;
 
@@ -25,7 +27,16 @@ vec3 ueExposureToneMapping(float exposure, vec3 colour) {
 
 void main() {
 	//Get the colour
-	vec4 colour = texture(tex, frag_textureCoord);
+	vec4 colour = texture(ue_texture, ue_frag_textureCoord);
+	vec3 colourOutput;
 
-	FragColour = vec4(ueGammaCorrect(ueReinhardToneMapping(colour.rgb)), colour.a);
+	if (exposureIn >= 0)
+		colourOutput = ueExposureToneMapping(exposureIn, colour.rgb);
+	else
+		colourOutput = ueReinhardToneMapping(colour.rgb); //Default to reinhard
+
+	if (gammaCorrect)
+		colourOutput = ueGammaCorrect(colourOutput);
+
+	FragColour = vec4(colourOutput, colour.a);
 }

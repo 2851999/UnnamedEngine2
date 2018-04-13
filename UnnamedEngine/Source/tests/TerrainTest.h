@@ -84,6 +84,9 @@ void Test::onCreated() {
 
 	//stbi_write_bmp("D:/Storage/Users/Joel/Desktop/heightmapgen.bmp", 512, 512, 1, generator.generate(512, 512));
 	//std::cout << glfwGetJoystickName(0) << std::endl;
+
+	//scene->enableDeferred();
+	scene->enableGammaCorrection();
 }
 
 void Test::onUpdate() {

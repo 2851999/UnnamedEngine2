@@ -244,7 +244,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 	}
 }
 
-void Renderer::render(FramebufferTexture* texture, Shader* shader) {
+void Renderer::render(FramebufferStore* texture, Shader* shader) {
 	if (shader == NULL)
 		shader = getRenderShader(SHADER_PLAIN_TEXTURE)->getShader();
 

@@ -50,7 +50,9 @@ public:
 void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
-	//getSettings().videoSamples = 0;
+	getSettings().videoSamples = 0;
+//	getSettings().videoResolution = VideoResolution::RES_1080P;
+//	getSettings().windowFullscreen = true;
 }
 
 void Test::onCreated() {
@@ -67,16 +69,16 @@ void Test::onCreated() {
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
 	renderScene->enablePBR();
 	renderScene->setPBREnvironment(environment);
-	//renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
+	renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
-	Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
-	light1->update();
+	//Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	//light1->update();
 	renderScene->addLight(light0);
-	renderScene->addLight(light1);
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-	renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.0f, 3.0f, 0.0f), false))->setDirection(0.0f, -1.0f, 0.0f)->setInnerCutoff(25.0f)->setOuterCutoff(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f))); //Sphere appears off-centre
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
+//	renderScene->addLight(light1);
+//	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
+//	renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.0f, 3.0f, 0.0f), false))->setDirection(0.0f, -1.0f, 0.0f)->setInnerCutoff(25.0f)->setOuterCutoff(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f))); //Sphere appears off-centre
+//	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 
 	//std::string path = "C:/UnnamedEngine/textures/PBR/";
 
@@ -111,6 +113,11 @@ void Test::onCreated() {
 	sphere->setScale(0.15f, 0.15f, 0.15f);
 	sphere->update();
 	renderScene->add(sphere);
+
+	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "Cube.obj"), pbrRenderShader);
+	sphere2->setPosition(10.0f, 1.0f, 0.0f);
+	sphere2->update();
+	renderScene->add(sphere2);
 
 	GameObject3D* testObject = new GameObject3D(resourceLoader.loadPBRModel("pbr/", "Cerberus_LP.FBX"), pbrRenderShader);
 	testObject->setScale(0.05f, 0.05f, 0.05f);
@@ -148,6 +155,8 @@ void Test::onUpdate() {
 
 void Test::onRender() {
 	//std::cout << glGetError() << std::endl;
+
+	renderScene->showDeferredBuffers();
 }
 
 void Test::onDestroy() {
@@ -158,6 +167,18 @@ void Test::onKeyPressed(int key) {
 	BaseTest3D::onKeyPressed(key);
 	if (key == GLFW_KEY_Q)
 		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
+	else if (key == GLFW_KEY_1)
+		renderScene->setExposure(0.25f);
+	else if (key == GLFW_KEY_2)
+		renderScene->setExposure(0.5f);
+	else if (key == GLFW_KEY_3)
+		renderScene->setExposure(1.0f);
+	else if (key == GLFW_KEY_4)
+		renderScene->setExposure(2.0f);
+	else if (key == GLFW_KEY_5)
+		renderScene->setExposure(4.0f);
+	else if (key == GLFW_KEY_6)
+		renderScene->setExposure(8.0f);
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

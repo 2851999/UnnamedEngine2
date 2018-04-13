@@ -23,6 +23,7 @@
 #include "Transform.h"
 #include "Vector.h"
 #include "render/Mesh.h"
+#include "Frustum.h"
 
 /*****************************************************************************
  * The GameObject class is the basis of any objects used in a Game, but does
@@ -194,7 +195,8 @@ public:
 	inline float getDepth() { return size.getZ() * getScale().getZ(); }
 	inline float getLocalDepth() { return size.getZ(); }
 
-	virtual bool shouldCull() override;
+	bool shouldCull(Frustum& frustum);
+	bool shouldCull();
 };
 
 #endif /* CORE_OBJECT_H_ */

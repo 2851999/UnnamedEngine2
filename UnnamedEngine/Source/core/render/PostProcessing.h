@@ -30,13 +30,14 @@
 class PostProcessor {
 private:
 	/* The frame buffer object used for rendering */
-	FBO* fbo;
+	FBO* fbo = NULL;
 
 	/* The shader used when rendering the output */
-	Shader* shader;
+	Shader* shader = NULL;
 public:
-	/* The constructor */
-	PostProcessor(std::string path);
+	/* The constructors */
+	PostProcessor(bool multisample);
+	PostProcessor(std::string path, bool multisample);
 
 	/* The destructor */
 	virtual ~PostProcessor() { delete fbo; }
@@ -49,7 +50,16 @@ public:
 
 	/* This renders the result */
 	void render();
-};
 
+	/* Copies the result to the default framebuffer using glBlitFramebuffer */
+	void copyToScreen(GLbitfield mask);
+
+	/* Copies the result to a specified framebuffer using glBlitFramebuffer */
+	void copyToFramebuffer(FBO* drawFBO, GLbitfield mask);
+
+	/* Getters */
+	inline FBO* getFBO() { return fbo; }
+	inline Shader* getShader() { return shader; }
+};
 
 #endif /* CORE_RENDER_POSTPROCESSING_H_ */
