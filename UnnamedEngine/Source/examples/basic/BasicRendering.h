@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2018 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_BASIC_BASICSETUP_H_
-#define EXAMPLES_BASIC_BASICSETUP_H_
+#ifndef EXAMPLES_BASIC_BASICRENDERING_H_
+#define EXAMPLES_BASIC_BASICRENDERING_H_
 
 /*****************************************************************************
  * The Basic Rendering Example Program
  *
  * Tutorial Number: 3
  * Tutorial Name: Basic Rendering
- * Engine Version: V0.2.3 (1::0::0::1)
+ * Engine Version: V0.2.9 (1::0::6::4)
  * Date Created: 17/10/2016
- * Date Updated: 24/01/2017
+ * Date Updated: 13/04/2018
  *
  * Description: Demonstrates how to start rendering in 2D
  *****************************************************************************/
@@ -57,7 +57,7 @@ void Tutorial::initialise() {
 	//Assign some Settings
 	getSettings().windowTitle = "Tutorial 3 - Basic Rendering";
 	getSettings().videoResolution = VideoResolution::RES_1280x720;
-	getSettings().debuggingShowInformation = true;
+	getSettings().debugShowInformation = true;
 }
 
 void Tutorial::created() {
@@ -120,8 +120,6 @@ void Tutorial::update() {
 	//getDeltaSeconds() returns the time between the current frame, and the
 	//last frame in seconds
 	object->setRotation(object->getLocalRotationEuler() + 5.0f * getDeltaSeconds());
-	//The engine uses quaternions to handle rotations, but above we are using
-	//Euler angles in degrees
 
 	//Now to update the object's model matrix so the changes to it's rotation
 	//become visible the next time it is rendered
@@ -150,4 +148,4 @@ void Tutorial::onKeyPressed(int key) {
 		object->getMaterial()->diffuseColour = Colour(1.0, 0.5f, 0.5f);
 }
 
-#endif /* EXAMPLES_BASIC_BASICSETUP_H_ */
+#endif /* EXAMPLES_BASIC_BASICRENDERING_H_ */

@@ -110,6 +110,9 @@ public:
 	/* Used to add a light to this scene */
 	inline void addLight(Light* light) { lights.push_back(light); }
 
+	/* Displays the various buffers on the screen used for deferred rendering */
+	void showDeferredBuffers();
+
 	/* Getters and setters */
 	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
 	inline void enableLighting() { lighting = true; }

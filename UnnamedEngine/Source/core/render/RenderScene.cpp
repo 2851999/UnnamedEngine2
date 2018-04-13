@@ -174,6 +174,34 @@ void RenderScene3D::render() {
 			//Copy the depth data to the framebuffer
 			postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
 		}
+	} else {
+		//Don't bother with deferred rendering if lighting is disabled
+
+		if (intermediateFBO)
+			//Render to the intermediate FBO
+			intermediateFBO->start();
+		else
+			postProcessor->start();
+
+		//Go through and render all of the objects in this scene
+		for (unsigned int i = 0; i < batches.size(); i++) {
+			for (unsigned int j = 0; j < batches[i].objects.size(); j++)
+				batches[i].objects[j]->render();
+		}
+
+		if (intermediateFBO) {
+			//Stop rendering to the intermediate FBO
+			intermediateFBO->stop();
+			//Copy the colour data to the postprocessor
+			intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		} else
+			postProcessor->stop();
+
+		//Render the output
+		postProcessor->render();
+
+		//Copy the depth data to the framebuffer
+		postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
 	}
 }
 
@@ -336,15 +364,26 @@ void RenderScene3D::renderShadowMap(Light* light) {
 		for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
 			//Pointer to the current object
 			GameObject3D* object = batches[i].objects[j];
-			//Assign the required uniforms that could not have been done outside of the loop
-			shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * object->getModelMatrix());
-			//Ensure the object uses the shadow map shader to render
-			object->getRenderShader()->addForwardShader(shadowMapShader);
+			//Stores the previous value of whether culling was enabled on the objects mesh
+			bool culling = object->getMesh()->isCullingEnabled();
+			//If culling is enabled ensure the object is visible to the light
+			if (! culling || ! object->shouldCull(light->getFrustum())) {
+				//Assign the required uniforms that could not have been done outside of the loop
+				shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * object->getModelMatrix());
+				//Ensure the object uses the shadow map shader to render
+				object->getRenderShader()->addForwardShader(shadowMapShader);
 
-			//Render the object with the shadow map shader
-			object->render();
+				//Ensure the object isn't culled just because it can't be seen by the camera
+				object->getMesh()->setCullingEnabled(false);
 
-			object->getRenderShader()->removeForwardShader(shadowMapShader);
+				//Render the object with the shadow map shader
+				object->render();
+
+				object->getRenderShader()->removeForwardShader(shadowMapShader);
+
+				//Restore the original value
+				object->getMesh()->setCullingEnabled(culling);
+			}
 		}
 	}
 
@@ -352,6 +391,29 @@ void RenderScene3D::renderShadowMap(Light* light) {
 
 	//Stop drawing to the depth buffer
 	depthBuffer->unbind();
+}
+
+void RenderScene3D::showDeferredBuffers() {
+	if (deferredRendering) {
+		//Copy the various buffers onto the default framebuffer
+		int x;
+		int y;
+		int windowWidth  = Window::getCurrentInstance()->getSettings().windowWidth;
+		int windowHeight = Window::getCurrentInstance()->getSettings().windowHeight;
+		int width = windowWidth / 4.0f;
+		int height = windowHeight / 4.0f;
+
+		unsigned int numBuffers = pbr ? 4 : 3;
+
+		x = windowWidth - width;
+		y = windowHeight - height;
+
+		for (unsigned int i = 0; i < numBuffers; i++) {
+			gBuffer->getFBO()->copyToScreen(i, x, y, width, height);
+
+			y -= height;
+		}
+	}
 }
 
 void RenderScene3D::enableGammaCorrection() {

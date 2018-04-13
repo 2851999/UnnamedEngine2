@@ -75,7 +75,7 @@ void Test::onCreated() {
 
 	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), Renderer::SHADER_LIGHTING);
 	//plane->setRotation(90.0f, 0.0f, 0.0f);
-	plane->setPosition(0.0f, 0.0f, -6.0f);
+	//plane->setPosition(0.0f, 0.0f, -6.0f);
 	//plane = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj"), Renderer::SHADER_LIGHTING);
 	//plane->setScale(0.15f, 0.15f, 0.15f);
 	plane->update();
@@ -90,7 +90,7 @@ void Test::onCreated() {
 	//model1->getMesh()->getSkeleton()->stopAnimation();
 
 	model2 = new GameObject3D(resourceLoader.loadModel("teapot.model"), Renderer::SHADER_LIGHTING);
-	model2->setRotation(90.0f, 0.0f, 0.0f);
+	//model2->setRotation(90.0f, 0.0f, 0.0f);
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
 
@@ -183,8 +183,8 @@ void Test::onUpdate() {
 	model2->getTransform()->rotate(model2->getTransform()->getRotation().getUp(), 0.1f * getDelta());
 	model2->update();
 
-	plane->getTransform()->rotate(plane->getTransform()->getRotation().getLeft(), 0.01f * getDelta());
-	plane->update();
+//	plane->getTransform()->rotate(plane->getTransform()->getRotation().getLeft(), 0.01f * getDelta());
+//	plane->update();
 }
 
 void Test::onRender() {

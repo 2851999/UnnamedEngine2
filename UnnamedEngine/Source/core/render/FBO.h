@@ -113,10 +113,13 @@ public:
 	void setup();
 
 	/* Copies the contents of a part of this FBO to another FBO */
-	void copyTo(unsigned int fboHandle, GLenum sourceMode, GLenum destMode, unsigned int sourceWidth, unsigned int sourceHeight, unsigned int destWidth, unsigned int destHeight, GLbitfield mask);
+	void copyTo(unsigned int fboHandle, GLenum sourceMode, GLenum destMode, int sourceWidth, int sourceHeight, int destX, int destY, int destWidth, int destHeight, GLbitfield mask);
 
 	/* Copies the contents of a particular frambuffer store in this framebuffer to another */
 	void copyTo(FBO* fbo, unsigned int sourceStoreIndex, unsigned int destStoreIndex);
+
+	/* Copies the contents of a particular framebuffer store in this framebuffer to the screen */
+	void copyToScreen(unsigned int sourceStoreIndex, int x, int y, int width, int height);
 
 	/* Returns the framebuffer texture at a given index */
 	inline FramebufferStore* getFramebufferStore(unsigned int index) { return stores[index]; }

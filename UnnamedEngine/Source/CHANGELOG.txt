@@ -1,4 +1,18 @@
 --------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 4
+
+* Added showDeferredBuffers method in RenderScene3D
+  (only works with antialiasing turned off)
+* Added ability to render without lighting in RenderScene3D
+  (objects should have some sort of non-lighting shader)
+
+* Changed frustum culling for rendering shadow maps to be
+  with the light's view frustum in RenderScene3D
+* Changed vectors to work more like GLSL with Vector3f(0.0f)
+  for example assigning all components in the vector to 0.0f
+  instead of just the x one
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 6 | Experimental 3
 
 * Cleaned up post processing shaders a bit

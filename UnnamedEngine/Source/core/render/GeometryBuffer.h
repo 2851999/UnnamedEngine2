@@ -67,6 +67,9 @@ public:
 		else
 			return defaultFBO->getFramebufferStore(3);
 	}
+
+	/* Returns the default FBO */
+	inline FBO* getFBO() { return defaultFBO; }
 };
 
 

@@ -58,6 +58,9 @@ void Light::update() {
 		lightView.initLookAt(direction * -5, (direction * 5) + direction, up);
 
 		lightProjectionView = lightProjection * lightView;
+
+		//Update the frustum
+		frustum.update(lightProjectionView);
 	}
 }
 

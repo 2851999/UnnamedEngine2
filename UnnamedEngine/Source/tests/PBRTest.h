@@ -50,7 +50,7 @@ public:
 void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
-	getSettings().videoSamples = 16;
+	getSettings().videoSamples = 0;
 //	getSettings().videoResolution = VideoResolution::RES_1080P;
 //	getSettings().windowFullscreen = true;
 }
@@ -72,8 +72,8 @@ void Test::onCreated() {
 	renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
-	Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
-	light1->update();
+	//Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	//light1->update();
 	renderScene->addLight(light0);
 //	renderScene->addLight(light1);
 //	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
@@ -155,6 +155,8 @@ void Test::onUpdate() {
 
 void Test::onRender() {
 	//std::cout << glGetError() << std::endl;
+
+	renderScene->showDeferredBuffers();
 }
 
 void Test::onDestroy() {

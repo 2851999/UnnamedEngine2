@@ -95,13 +95,13 @@ void FBO::setup() {
 	glBindFramebuffer(target, 0);
 }
 
-void FBO::copyTo(unsigned int fboHandle, GLenum sourceMode, GLenum destMode, unsigned int sourceWidth, unsigned int sourceHeight, unsigned int destWidth, unsigned int destHeight, GLbitfield mask) {
+void FBO::copyTo(unsigned int fboHandle, GLenum sourceMode, GLenum destMode, int sourceWidth, int sourceHeight, int destX, int destY, int destWidth, int destHeight, GLbitfield mask) {
 	//Copy the data from this FBO to the other one
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboHandle);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
 	glReadBuffer(sourceMode);
 	glDrawBuffer(destMode);
-	glBlitFramebuffer(0, 0, sourceWidth, sourceHeight, 0, 0, destWidth, destHeight, mask, GL_NEAREST);
+	glBlitFramebuffer(0, 0, sourceWidth, sourceHeight, destX, destY, destX + destWidth, destY + destHeight, mask, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -119,5 +119,13 @@ void FBO::copyTo(FBO* fbo, unsigned int sourceStoreIndex, unsigned int destStore
 		mask = GL_COLOR_BUFFER_BIT;
 
 	//Copy the data
-	copyTo(fbo->getHandle(), source->getAttachment(), dest->getAttachment(), source->getWidth(), source->getHeight(), dest->getWidth(), dest->getHeight(), mask);
+	copyTo(fbo->getHandle(), source->getAttachment(), dest->getAttachment(), source->getWidth(), source->getHeight(), 0, 0, dest->getWidth(), dest->getHeight(), mask);
+}
+
+void FBO::copyToScreen(unsigned int sourceStoreIndex, int x, int y, int width, int height) {
+	//Get the source store
+	FramebufferStore* source = getFramebufferStore(sourceStoreIndex);
+
+	//Copy the data
+	copyTo(0, source->getAttachment(), GL_BACK, source->getWidth(), source->getHeight(), x, y, width, height, GL_COLOR_BUFFER_BIT);
 }
