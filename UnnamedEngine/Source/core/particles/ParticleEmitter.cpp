@@ -63,7 +63,7 @@ void ParticleEmitter::update(float delta) {
 			Particle& particle = system->getParticle(index);
 			particle.position = getPosition();
 			particle.colour = particleColour;
-			//particle.colour = Colour(RandomUtils::randomFloat(), RandomUtils::randomFloat(), RandomUtils::randomFloat(), RandomUtils::randomFloat());
+			//particle.colour = Colour(utils_random::randomFloat(), utils_random::randomFloat(), utils_random::randomFloat(), utils_random::randomFloat());
 			particle.size = particleSize;
 			particle.life = particleLifeSpan;
 			particle.velocity = particleInitialVelocity;
@@ -82,7 +82,7 @@ void ParticleEmitter::emitParticles(unsigned int count) {
 }
 
 void SphericalParticleEmitter::emitParticle(Particle& particle) {
-	float theta = RandomUtils::randomFloat(0, 2 * MathsUtils::PI);
-	float phi = RandomUtils::randomFloat(-MathsUtils::PI / 2, MathsUtils::PI / 2);
+	float theta = utils_random::randomFloat(0, 2 * utils_maths::PI);
+	float phi = utils_random::randomFloat(-utils_maths::PI / 2, utils_maths::PI / 2);
 	particle.velocity = Vector3f(particleMaxSpeed * cos(theta) * cos(phi), particleMaxSpeed * sin(phi), particleMaxSpeed * sin(theta) * cos(phi));
 }

@@ -52,8 +52,8 @@ DebugCamera::DebugCamera(Matrix4f projectionMatrix, InputBindings* bindings) : C
 	movementSpeed = 5.0f;
 
 	//Assign the default mouse sensitivity values
-	mouseSensitivityX = 10.0f;
-	mouseSensitivityY = 10.0f;
+	mouseSensitivityX = 0.25f;
+	mouseSensitivityY = 0.25f;
 
 	//Assign the default look sensitivity values
 	lookSensitivityX = 100.0f;
@@ -77,7 +77,7 @@ void DebugCamera::update(float delta) {
 	getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -axis3->getValue() * lookSensitivityX * currentDelta);
 	getTransform()->rotate(getTransform()->getRotation().getRight(), axis2->getValue() * lookSensitivityY * currentDelta);
 	Vector3f currentRot = getTransform()->getLocalRotation().toEuler();
-	currentRot.setX(MathsUtils::clamp(currentRot.getX(), -89.0f, 89.0f));
+	currentRot.setX(utils_maths::clamp(currentRot.getX(), -89.0f, 89.0f));
 	getTransform()->setRotation(currentRot);
 
 	//Update the camera
@@ -87,7 +87,7 @@ void DebugCamera::update(float delta) {
 void DebugCamera::onMouseMoved(double x, double y, double dx, double dy) {
 	//Orientate the camera
 	if (dx != 0)
-		getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -dx * mouseSensitivityX * currentDelta);
+		getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -dx * mouseSensitivityX);
 	if (dy != 0)
-		getTransform()->rotate(getTransform()->getRotation().getRight(), -dy * mouseSensitivityY * currentDelta);
+		getTransform()->rotate(getTransform()->getRotation().getRight(), -dy * mouseSensitivityY);
 }

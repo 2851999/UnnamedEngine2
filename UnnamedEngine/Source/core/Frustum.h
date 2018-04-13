@@ -58,6 +58,10 @@ public:
 
 	/* Method called to check whether a point is within this frustum */
 	bool pointInFrustum(Vector3f point);
+
+	/* Method called to check whether an AABB defined by its maximum and minimum
+	 * points are within this frustum */
+	bool AABBInFrustum(Vector3f min, Vector3f max);
 };
 
 #endif /* CORE_RENDER_FRUSTUM_H_ */

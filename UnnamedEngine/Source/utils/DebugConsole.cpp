@@ -38,7 +38,7 @@ DebugConsole::DebugConsole(BaseEngine* baseEngine) : baseEngine(baseEngine) {
 
 void DebugConsole::process(std::string command) {
 	//Split up the command using a space
-	std::vector<std::string> split = StrUtils::strSplit(command, ' ');
+	std::vector<std::string> split = utils_string::strSplit(command, ' ');
 
 	//Ensure a command was entered
 	if (split.size() > 0) {
@@ -46,12 +46,16 @@ void DebugConsole::process(std::string command) {
 		if (split[0] == "exit")
 			//Request the engine to stop
 			baseEngine->requestClose();
-		else if (split[0] == "wireframe") {
-			if (split[1] == "enable")
-				GLUtils::enableWireframe();
-			else if (split[1] == "disable")
-				GLUtils::disableWireframe();
-		}
+		else if (command == "enable wireframe") {
+			utils_gl::enableWireframe();
+			wireframeMode = true;
+		} else if (command == "disable wireframe") {
+			utils_gl::disableWireframe();
+			wireframeMode = false;
+		} else if (command == "show info")
+			baseEngine->getSettings().debugShowInformation = true;
+		else if (command == "hide info")
+			baseEngine->getSettings().debugShowInformation = false;
 
 		//Go through the functions and attempt to process the data
 		for (unsigned int i = 0; i < functions.size(); i++)

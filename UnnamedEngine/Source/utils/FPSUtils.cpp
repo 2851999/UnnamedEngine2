@@ -19,7 +19,7 @@
 #include "FPSUtils.h"
 #include "Utils.h"
 
-using namespace TimeUtils;
+using namespace utils_time;
 
 /*****************************************************************************
  * The FPSCalculator class
@@ -28,7 +28,7 @@ using namespace TimeUtils;
 void FPSCalculator::start() {
 	//Ensure it hasn't already been started
 	if (! started) {
-		//Assign the last frame's time
+		//Assign the last frame's times
 		lastFrame = getMilliseconds();
 		lastFPSCountUpdate = lastFrame;
 		currentDelta = 0;
@@ -41,7 +41,7 @@ void FPSCalculator::update() {
 	//Only calculate everything if necessary
 	if (mode != OFF) {
 		//Obtain the current time in milliseconds
-		long current = getMilliseconds();
+		float current = getMilliseconds();
 
 		//With a high FPS the delta will become 0, but to stop this causing issues
 		//the current delta will only be assigned when this is not the case and
@@ -97,19 +97,19 @@ void FPSLimiter::setMaxFPS(unsigned int maxFPS) {
 	//Prevent a divide by 0
 	if (maxFPS != 0)
 		//Calculate the target delta to achieve the desired frame rate
-		targetDelta = (long) (1000.0f / (float) maxFPS);
+		targetDelta = (1000.0f / (float) maxFPS);
 }
 
 void FPSLimiter::startFrame() {
 	//Assign the time of the start of the current frame
-	startOfFrame = TimeUtils::getMilliseconds();
+	startOfFrame = getMilliseconds();
 }
 
 void FPSLimiter::endFrame() {
 	//Ensure there is a frame cap
 	if (maxFPS > 0) {
 		//Calculate the difference in the target delta, and the current one
-		long difference = targetDelta - (TimeUtils::getMilliseconds() - startOfFrame);
+		float difference = targetDelta - (getMilliseconds() - startOfFrame);
 
 		//Pause the thread for the time necessary
 		if (difference > 0)

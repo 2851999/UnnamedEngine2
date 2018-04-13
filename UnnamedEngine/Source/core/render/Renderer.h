@@ -19,6 +19,7 @@
 #ifndef CORE_RENDER_RENDERER_H_
 #define CORE_RENDER_RENDERER_H_
 
+#include <unordered_map>
 #include "Camera.h"
 #include "FBO.h"
 
@@ -30,16 +31,19 @@ class Renderer {
 private:
 	static std::vector<Camera*> cameras;
 	static std::vector<Texture*> boundTextures;
-	static std::map<std::string, RenderShader*> renderShaders;
+	static std::unordered_map<std::string, RenderShader*> renderShaders;
 	static Texture* blank;
 
 	/* This mesh is used to render a FramebufferTexture to the screen - useful
 	 * for post processing effects */
 	static MeshRenderData* screenTextureMesh;
 
-	/* The size of the boundTextures array, at the moment saveTextures() is
+	/* Stores the sizes of the boundTextures array, at the moment saveTextures() is
 	 * called */
-	static unsigned int boundTexturesOldSize;
+	static std::vector<unsigned int> boundTexturesOldSize;
+
+	/* Assigns texture uniforms for a material */
+	static void assignMatTexture(Shader* shader, std::string type, Texture* texture);
 public:
 	/* The names of default shaders loaded into the engine */
 	static const std::string SHADER_MATERIAL;
@@ -52,6 +56,16 @@ public:
 	static const std::string SHADER_ENVIRONMENT_MAP;
 	static const std::string SHADER_SHADOW_MAP;
 	static const std::string SHADER_BILLBOARDED_FONT;
+	static const std::string SHADER_TERRAIN;
+	static const std::string SHADER_PLAIN_TEXTURE;
+	static const std::string SHADER_DEFERRED_LIGHTING;
+
+	static const std::string SHADER_PBR_EQUI_TO_CUBE_GEN;
+	static const std::string SHADER_PBR_IRRADIANCE_MAP_GEN;
+	static const std::string SHADER_PBR_PREFILTER_MAP_GEN;
+	static const std::string SHADER_PBR_BRDF_INTEGRATION_MAP_GEN;
+	static const std::string SHADER_PBR_LIGHTING;
+	static const std::string SHADER_PBR_DEFERRED_LIGHTING;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -72,20 +86,14 @@ public:
 
 	/* Used to store the current number of boundTextures so new textures
 	 * can be released later */
-	static inline void saveTextures() {
-		boundTexturesOldSize = boundTextures.size();
-	}
-
-	static inline unsigned int getNumBoundTextures() {
-		return boundTextures.size();
-	}
+	static void saveTextures();
 
 	/* Releases extra textures so that the boundTextures size is the same
-	 * as it was when saveTextures() was called */
-	static inline void releaseNewTextures() {
-		while (boundTextures.size() > boundTexturesOldSize)
-			unbindTexture();
-		boundTexturesOldSize = boundTextures.size();
+	 * as it was when saveTextures() was last called */
+	static void releaseNewTextures();
+
+	static unsigned int getNumBoundTextures() {
+		return boundTextures.size();
 	}
 
 	/* Method used to initialise the rendering system */
@@ -97,15 +105,24 @@ public:
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
 
-	/* Method used to render a FramebufferTexture */
-	static void render(FramebufferTexture* texture, Shader* shader = NULL);
+	/* Method used to render a FramebufferStore */
+	static void render(FramebufferStore* texture, Shader* shader = NULL);
 
 	/* Method use to destroy any objects that were created */
 	static void destroy();
 
+	/* Loads and returns an engine shader from the resources */
+	static Shader* loadEngineShader(std::string path);
+
+	/* Method used to prepare a shader by adding its required uniforms provided the id is recognised */
+	static void prepareForwardShader(std::string id, Shader* shader);
+
+	/* Method used to prepare a shader by adding its required uniforms provided the id is recognised */
+	static void prepareDeferredGeomShader(std::string id, Shader* shader);
+
 	/* Method used to add a RenderShader given a Shader - this method will also setup the shader
 	 * providing the id is recognised */
-	static void addRenderShader(std::string id, Shader* shader);
+	static void addRenderShader(std::string id, Shader* forwardShader, Shader* deferredGeomShader = NULL);
 
 	/* Method used to add a RenderShader */
 	static void addRenderShader(RenderShader* renderShader);
@@ -115,6 +132,9 @@ public:
 
 	/* Returns the blank texture */
 	static inline Texture* getBlankTexture() { return blank; }
+
+	/* Returns the screen texture mesh */
+	static inline MeshRenderData* getScreenTextureMesh() { return screenTextureMesh; }
 };
 
 #endif /* CORE_RENDER_RENDERER_H_ */

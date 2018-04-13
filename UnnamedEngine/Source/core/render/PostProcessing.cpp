@@ -19,41 +19,79 @@
 #include "PostProcessing.h"
 #include "Renderer.h"
 #include "../Window.h"
+#include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The PostProcessor class
  *****************************************************************************/
 
-PostProcessor::PostProcessor(std::string path) {
-	fbo = new FBO(GL_FRAMEBUFFER);
-	fbo->attach(new FramebufferTexture(
-			GL_TEXTURE_2D,
-			GL_RGB,
+PostProcessor::PostProcessor(bool multisample) {
+	fbo = new FBO(GL_FRAMEBUFFER, multisample);
+	fbo->attach(new FramebufferStore(
+			multisample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D,
+			GL_RGBA16F,
 			Window::getCurrentInstance()->getSettings().windowWidth,
 			Window::getCurrentInstance()->getSettings().windowHeight,
-			GL_RGB,
-			GL_UNSIGNED_BYTE,
-			GL_COLOR_ATTACHMENT0
+			GL_RGBA,
+			GL_FLOAT,
+			GL_COLOR_ATTACHMENT0,
+			GL_NEAREST,
+			GL_CLAMP_TO_EDGE,
+			true
 	));
 
-	fbo->attach(new FramebufferTexture(
+	fbo->attach(new FramebufferStore(
 			GL_RENDERBUFFER,
 			GL_DEPTH_COMPONENT32,
 			Window::getCurrentInstance()->getSettings().windowWidth,
 			Window::getCurrentInstance()->getSettings().windowHeight,
-			0,
-			0,
-			GL_DEPTH_ATTACHMENT
+			GL_DEPTH_COMPONENT,
+			GL_FLOAT,
+			GL_DEPTH_ATTACHMENT,
+			GL_NEAREST,
+			GL_CLAMP_TO_EDGE,
+			true
 	));
 
 	fbo->setup();
+}
 
+PostProcessor::PostProcessor(std::string path, bool multisampling) : PostProcessor(multisampling) {
 	shader = Shader::createShader(Shader::loadShaderSource(path + ".vs"), Shader::loadShaderSource(path + ".fs"));
-	shader->addAttribute("Position", "position");
-	shader->addAttribute("TextureCoordinate", "textureCoord");
-	shader->addUniform("Texture", "tex");
+}
+
+void PostProcessor::start() {
+	fbo->bind();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+}
+
+void PostProcessor::stop() {
+	fbo->unbind();
 }
 
 void PostProcessor::render() {
-	Renderer::render(fbo->getFramebufferTexture(0), shader);
+	Renderer::render(fbo->getFramebufferStore(0), shader);
+}
+
+void PostProcessor::copyToScreen(GLbitfield mask) {
+	unsigned int width = Window::getCurrentInstance()->getSettings().windowWidth;
+	unsigned int height = Window::getCurrentInstance()->getSettings().windowHeight;
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo->getHandle());
+	glDrawBuffer(GL_BACK);
+	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, mask, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void PostProcessor::copyToFramebuffer(FBO* drawFBO, GLbitfield mask) {
+	unsigned int width = Window::getCurrentInstance()->getSettings().windowWidth;
+	unsigned int height = Window::getCurrentInstance()->getSettings().windowHeight;
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFBO->getHandle());
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo->getHandle());
+	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, mask, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

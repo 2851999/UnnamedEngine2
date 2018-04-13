@@ -40,10 +40,10 @@ public:
 
 	/* Various methods to convert the data into another data type before
 	 * returning it */
-	inline unsigned int getDataAsUInt()  { return StrUtils::strToUInt(data);  }
-	inline int  		getDataAsInt()   { return StrUtils::strToInt(data);   }
-	inline bool 		getDataAsBool()  { return StrUtils::strToBool(data);  }
-	inline float 		getDataAsFloat() { return StrUtils::strToFloat(data); }
+	inline unsigned int getDataAsUInt()  { return utils_string::strToUInt(data);  }
+	inline int  		getDataAsInt()   { return utils_string::strToInt(data);   }
+	inline bool 		getDataAsBool()  { return utils_string::strToBool(data);  }
+	inline float 		getDataAsFloat() { return utils_string::strToFloat(data); }
 
 	/* Various setters and getters */
 	inline void setName(std::string name) { this->name = name; }

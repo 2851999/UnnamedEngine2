@@ -1,11 +1,14 @@
-#include "Core.vs"
-#include "Skinning.vs"
+#include "../Core.vs"
+#include "../Skinning.vs"
 
-uniform mat4 ue_lightSpaceMatrix;
+#define MAX_LIGHTS 6
+
+uniform mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
 uniform bool ue_useNormalMap;
 uniform bool ue_useParallaxMap;
+uniform int ue_numLights;
 
-out vec4 ue_frag_pos_lightspace;
+out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 out mat3 ue_frag_tbnMatrix;
 
 out vec3 ue_tangentViewPos;
@@ -24,7 +27,8 @@ void ueAssignLightingData() {
 		ue_frag_normal = ue_normalMatrix * ue_normal;
 	}
 	
-	ue_frag_pos_lightspace = ue_lightSpaceMatrix * vec4(ue_frag_position, 1.0);
+	for (int i = 0; i < ue_numLights; i++)
+		ue_frag_pos_lightspace[i] = ue_lightSpaceMatrix[i] * vec4(ue_frag_position, 1.0);
 	
 	if (ue_useNormalMap) {
 		vec3 T;
@@ -39,11 +43,11 @@ void ueAssignLightingData() {
 		}
 		vec3 N = normalize(ue_frag_normal);
 	
-		ue_frag_tbnMatrix = mat3(T, B, N);
+		ue_frag_tbnMatrix = mat3(-T, B, N);
 		
 		if (ue_useParallaxMap) {
-			ue_tangentViewPos = ue_frag_tbnMatrix * ue_camera_position;
-			ue_tangentFragPos = ue_frag_tbnMatrix * ue_frag_position;
+			ue_tangentViewPos = transpose(ue_frag_tbnMatrix) * ue_cameraPosition;
+			ue_tangentFragPos = transpose(ue_frag_tbnMatrix) * ue_frag_position;
 		}
 	}
 	

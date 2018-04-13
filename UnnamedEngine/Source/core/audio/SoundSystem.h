@@ -31,7 +31,7 @@ private:
 	AudioListener* listener = NULL;
 
 	/* The list of audio sources */
-	std::map<std::string, AudioSource*> sources;
+	std::unordered_map<std::string, AudioSource*> sources;
 
 	/* The list of audio sources currently playing */
 	std::vector<AudioSource*> playing;

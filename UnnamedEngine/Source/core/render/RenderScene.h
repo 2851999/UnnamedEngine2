@@ -20,7 +20,10 @@
 #define CORE_RENDER_RENDERSCENE_H_
 
 #include "Light.h"
+#include "GeometryBuffer.h"
+#include "pbr/PBREnvironment.h"
 #include "../Object.h"
+#include "PostProcessing.h"
 
 /*****************************************************************************
  * The RenderScene3D class is used to help to manage the rendering of a set
@@ -29,30 +32,100 @@
 
 class RenderScene3D {
 private:
-	/* The GameObjects in this scene */
-	std::vector<GameObject3D*> objects;
+	/* Structure used to group together objects with the same shader */
+	struct RenderBatch {
+		RenderShader* shader;
+		std::vector<GameObject3D*> objects;
+	};
+
+	/* The RenderBatches in this scene */
+	std::vector<RenderBatch> batches;
 
 	/* The lights in this scene */
 	std::vector<Light*> lights;
 
 	/* Various shaders that might be needed */
 	Shader* shadowMapShader;
-	Shader* lightingShader;
+
+	/* The ambient light used in lighting */
+	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
+
+	/* Boolean to determine whether lighting should be used or not */
+	bool lighting = true;
+
+	/* States whether deferred rendering should be used */
+	bool deferredRendering = false;
+
+	/* The geometry buffer used in deferred rendering */
+	GeometryBuffer* gBuffer = NULL;
+
+	/* States whether the geometry pass is being rendered */
+	bool geometryPass = false;
+
+	/* States whether the skybox should be used as an environment map */
+	bool useEnvironmentMap = false;
+
+	/* States whether PBR should be used */
+	bool pbr = false;
+
+	/* The environment used for PBR */
+	PBREnvironment* pbrEnvironment = NULL;
+
+	/* Post processor used for applying gamma correction */
+	PostProcessor* postProcessor = NULL;
+
+	/* Intermediate FBO used for antialiasing */
+	PostProcessor* intermediateFBO = NULL;
+
+	/* Used to render the lighting pass given the shader to use (and index of the batch to render for forward rendering) */
+	void renderLighting(RenderShader* renderShader, int indexOfBatch = -1);
+
+	/* Used to render the scene to the shadow maps */
+	void renderShadowMaps();
+
+	/* Used to render the scene to a light's shadow map */
+	void renderShadowMap(Light* light);
 public:
+	/* The number of lights in each set */
+	static const unsigned int NUM_LIGHTS_IN_SET = 6;
+
 	/* The constructor */
 	RenderScene3D();
 
 	/* The destructor */
 	virtual ~RenderScene3D();
 
+	/* Method used to enable deferred rendering */
+	void enableDeferred();
+
+	/* Method used to enable pbr rendering */
+	inline void enablePBR() { pbr = true; }
+
 	/* The method used to render all of the objects */
 	void render();
 
 	/* Used to add an object to this scene */
-	inline void add(GameObject3D* object) { objects.push_back(object); }
+	void add(GameObject3D* object);
 
 	/* Used to add a light to this scene */
 	inline void addLight(Light* light) { lights.push_back(light); }
+
+	/* Displays the various buffers on the screen used for deferred rendering */
+	void showDeferredBuffers();
+
+	/* Getters and setters */
+	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
+	inline void enableLighting() { lighting = true; }
+	inline void disableLighting() { lighting = false; }
+	inline void setPBREnvironment(PBREnvironment* environment) { this->pbrEnvironment = environment; }
+	inline Colour getAmbientLight() { return ambientLight; }
+	inline bool isLightingEnabled() { return lighting; }
+	inline PBREnvironment* getPBREnvironment() { return pbrEnvironment; }
+
+	/* Used to apply some post processing options */
+	void enableGammaCorrection();
+	void disableGammaCorrection();
+	void setExposure(float exposure);
 };
 
 #endif /* CORE_RENDER_RENDERSCENE_H_ */

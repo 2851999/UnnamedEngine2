@@ -22,6 +22,33 @@
  * The Light class
  *****************************************************************************/
 
+Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type) {
+	setPosition(position);
+
+	if (type == TYPE_DIRECTIONAL) {
+		if (castShadows) {
+			depthBuffer = new FBO(GL_FRAMEBUFFER);
+
+			depthBuffer->attach(new FramebufferStore(
+					GL_TEXTURE_2D,
+					GL_DEPTH_COMPONENT,
+					shadowMapSize,
+					shadowMapSize,
+					GL_DEPTH_COMPONENT,
+					GL_FLOAT,
+					GL_DEPTH_ATTACHMENT,
+					GL_LINEAR,
+					GL_CLAMP_TO_BORDER, //Want to clamp to avoid repeating shadows when out of the bounds of the shadow map
+					true
+			));
+
+			depthBuffer->setup();
+
+			lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
+		}
+	}
+}
+
 void Light::update() {
 	//Check the type of light this is
 	if (type == TYPE_DIRECTIONAL) {
@@ -31,6 +58,9 @@ void Light::update() {
 		lightView.initLookAt(direction * -5, (direction * 5) + direction, up);
 
 		lightProjectionView = lightProjection * lightView;
+
+		//Update the frustum
+		frustum.update(lightProjectionView);
 	}
 }
 
@@ -43,7 +73,7 @@ void Light::setUniforms(Shader* shader, std::string suffix) {
 	shader->setUniformf("Light_Constant" + suffix, constant);
 	shader->setUniformf("Light_Linear" + suffix, linear);
 	shader->setUniformf("Light_Quadratic" + suffix, quadratic);
-	shader->setUniformf("Light_Cutoff" + suffix, cutoff);
-	shader->setUniformf("Light_OuterCutoff" + suffix, outerCutoff);
+	shader->setUniformf("Light_InnerCutoff" + suffix, cos(utils_maths::toRadians(innerCutoff)));
+	shader->setUniformf("Light_OuterCutoff" + suffix, cos(utils_maths::toRadians(outerCutoff)));
 }
 

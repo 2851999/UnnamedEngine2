@@ -80,7 +80,7 @@ void GUITextBoxCursor::render() {
 		//Get the text box's current position
 		Vector3f p = textBox->getPosition();
 		//Calculate the x and y position the cursor should be on the screen
-		float x = 1 + p.getX() + (textBox->getFont()->getWidth(StrUtils::substring(textBox->renderText, 0, textBox->cursorIndex - textBox->viewIndexStart)));
+		float x = 1 + p.getX() + (textBox->getFont()->getWidth(utils_string::substring(textBox->renderText, 0, textBox->cursorIndex - textBox->viewIndexStart)));
 		float y = (p.getY() + (textBox->getHeight() / 2)) - (getHeight() / 2);
 		//Assign the cursor position
 		setPosition(x, y);
@@ -128,9 +128,9 @@ void GUITextBoxSelection::render() {
 			//Check whether the start of the selection is before or after
 			//the end of the selection
 			if (textBox->selectionIndexStart < textBox->selectionIndexEnd)
-				selectionX = p.getX() + textBox->getFont()->getWidth(StrUtils::substring(textBox->renderText, 0, textBox->selectionIndexStart - textBox->viewIndexStart));
+				selectionX = p.getX() + textBox->getFont()->getWidth(utils_string::substring(textBox->renderText, 0, textBox->selectionIndexStart - textBox->viewIndexStart));
 			else
-				selectionX = p.getX() + textBox->getFont()->getWidth(StrUtils::substring(textBox->renderText, 0, textBox->selectionIndexEnd - textBox->viewIndexStart));
+				selectionX = p.getX() + textBox->getFont()->getWidth(utils_string::substring(textBox->renderText, 0, textBox->selectionIndexEnd - textBox->viewIndexStart));
 		} catch (int e) {
 
 		}
@@ -263,7 +263,7 @@ void GUITextBox::updateRenderText() {
 		viewIndexEnd = text.length();
 
 	//Get the render text from the text using the view indices
-	renderText = StrUtils::substring(text, viewIndexStart, viewIndexEnd);
+	renderText = utils_string::substring(text, viewIndexStart, viewIndexEnd);
 
 	//Determine whether the render text should be masked
 	if (masked)
@@ -364,9 +364,9 @@ std::string GUITextBox::getSelection() {
 		//Return the selection, although first check which way round the
 		//start and end indices are
 		if (selectionIndexStart < selectionIndexEnd)
-			return StrUtils::substring(text, selectionIndexStart, selectionIndexEnd);
+			return utils_string::substring(text, selectionIndexStart, selectionIndexEnd);
 		else
-			return StrUtils::substring(text, selectionIndexEnd, selectionIndexStart);
+			return utils_string::substring(text, selectionIndexEnd, selectionIndexStart);
 	} else
 		//There is no selection so just return an empty string
 		return "";
@@ -396,9 +396,9 @@ std::string GUITextBox::getRenderTextSelection() {
 		//Return the selected text that is within view, being careful
 		//to ensure the start/end indices are the correct way round
 		if (selectionIndexStart <= selectionIndexEnd)
-			return StrUtils::substring(renderText, sis - viewIndexStart, sie - viewIndexStart);
+			return utils_string::substring(renderText, sis - viewIndexStart, sie - viewIndexStart);
 		else
-			return StrUtils::substring(renderText, sie - viewIndexStart, sis - viewIndexStart);
+			return utils_string::substring(renderText, sie - viewIndexStart, sis - viewIndexStart);
 	} else
 		//There is no selection, so return an empty string
 		return "";
@@ -411,10 +411,10 @@ void GUITextBox::deleteSelection() {
 
 	//Ensure the front and back are assigned correctly
 	if (selectionIndexStart < selectionIndexEnd) {
-		front = StrUtils::substring(text, 0, selectionIndexStart);
+		front = utils_string::substring(text, 0, selectionIndexStart);
 		back = text.substr(selectionIndexEnd);
 	} else {
-		front = StrUtils::substring(text, 0, selectionIndexEnd);
+		front = utils_string::substring(text, 0, selectionIndexEnd);
 		back = text.substr(selectionIndexStart);
 	}
 
@@ -423,7 +423,7 @@ void GUITextBox::deleteSelection() {
 
 	//Now reduce the view index start by the amount removed,
 	//ensuring it doesn't go below 0
-	viewIndexStart = (unsigned int) MathsUtils::max(0, (int) (viewIndexStart - amountRemoved));
+	viewIndexStart = (unsigned int) utils_maths::max(0, (int) (viewIndexStart - amountRemoved));
 
 	//Assign the text, ignoring the deleted text
 	text = front + back;
@@ -463,7 +463,7 @@ void GUITextBox::onKeyPressed(int key) {
 				//if there is a character to delete before the cursor
 				if (text.length() > 0 && cursorIndex > 0) {
 					//Get the start/end of the string
-					std::string front = StrUtils::substring(text, 0, cursorIndex - 1);
+					std::string front = utils_string::substring(text, 0, cursorIndex - 1);
 					std::string back = text.substr(cursorIndex);
 
 					//Assign the text, but ignore the character being deleted
@@ -499,7 +499,7 @@ void GUITextBox::onKeyPressed(int key) {
 			else {
 				//Otherwise delete the next character if possible
 				if (text.length() > 0 && cursorIndex < viewIndexEnd) {
-					std::string front = StrUtils::substring(text, 0, cursorIndex);
+					std::string front = utils_string::substring(text, 0, cursorIndex);
 					std::string back = text.substr(cursorIndex + 1);
 
 					text = front + back;
@@ -568,7 +568,7 @@ void GUITextBox::onChar(int key, char character) {
 			if (isDefined(character) || character == ' ') {
 				if (isSelection)
 					deleteSelection();
-				std::string front = StrUtils::substring(text, 0, cursorIndex);
+				std::string front = utils_string::substring(text, 0, cursorIndex);
 				std::string back = text.substr(cursorIndex);
 
 				text = front + character + back;
@@ -695,17 +695,17 @@ void GUITextBox::onShortcut(KeyboardShortcut* e) {
 				selectionIndexEnd++;
 		} else if (e->getName() == "Cut") {
 			if (isSelection) {
-				ClipboardUtils::setText(getSelection());
+				utils_clipboard::setText(getSelection());
 				deleteSelection();
 			}
 		} else if (e->getName() == "Paste") {
 			if (isSelection)
 				deleteSelection();
 
-			std::string front = StrUtils::substring(text, 0, cursorIndex);
+			std::string front = utils_string::substring(text, 0, cursorIndex);
 			std::string back = text.substr(cursorIndex);
 
-			std::string str = ClipboardUtils::getText();
+			std::string str = utils_clipboard::getText();
 			str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
 			str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
 
@@ -715,7 +715,7 @@ void GUITextBox::onShortcut(KeyboardShortcut* e) {
 			viewIndexEnd = text.length();
 		} else if (e->getName() == "Copy") {
 			if (isSelection)
-				ClipboardUtils::setText(getSelection());
+				utils_clipboard::setText(getSelection());
 		}
 	}
 }

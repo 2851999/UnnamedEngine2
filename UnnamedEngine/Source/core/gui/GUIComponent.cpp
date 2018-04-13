@@ -63,7 +63,7 @@ void GUIComponentRenderer::renderTextAtCentre(std::string text) {
 }
 
 unsigned int GUIComponentRenderer::getMaxRenderIndex() {
-	return MathsUtils::max(colours.size(), textures.size());
+	return utils_maths::max(colours.size(), textures.size());
 }
 
 void GUIComponentRenderer::setColour(Colour colour) {

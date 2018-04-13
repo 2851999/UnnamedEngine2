@@ -46,12 +46,9 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
-	std::vector<Mesh*> meshes1 = resourceLoader.loadModel("sphere.obj");
-	std::vector<Mesh*> meshes2 = resourceLoader.loadModel("sphere.obj");
-
-	sphereA = new PhysicsObject3D(meshes1, "Material");
+	sphereA = new PhysicsObject3D(resourceLoader.loadModel("sphere.obj"), "Material");
 	sphereA->setCollider(new SphereCollider(sphereA, 1.0f));
-	sphereB = new PhysicsObject3D(meshes2, "Material");
+	sphereB = new PhysicsObject3D(resourceLoader.loadModel("sphere.obj"), "Material");
 	sphereB->setCollider(new SphereCollider(sphereB, 1.0f));
 	sphereB->setPosition(3.0f, 0.0f, 0.0f);
 	sphereB->setVelocity(-0.2f, 0.0f, 0.0f);
@@ -63,7 +60,7 @@ void Test::onCreated() {
 
 	physicsScene->setCollisionCallback(std::bind(onCollision, this, 0, 0));
 
-	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
+	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
 }
 
@@ -79,12 +76,12 @@ void Test::onUpdate() {
 }
 
 void Test::onRender() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
-
-	glEnable(GL_MULTISAMPLE_ARB);
-	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	glEnable(GL_TEXTURE_2D);
+//	glEnable(GL_DEPTH_TEST);
+//
+//	glEnable(GL_MULTISAMPLE_ARB);
+//	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
 }
 
 void Test::onDestroy() {

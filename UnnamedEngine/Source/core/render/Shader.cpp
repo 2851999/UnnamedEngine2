@@ -55,7 +55,7 @@ void Shader::attach(GLuint shader) {
 	if (! status) {
 		GLchar error[1024];
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
-		Logger::log("Error linking shader" + StrUtils::str(error), "Shader", LogType::Error);
+		Logger::log("Error linking shader" + utils_string::str(error), "Shader", LogType::Error);
 	}
 
 	status = 0;
@@ -64,7 +64,7 @@ void Shader::attach(GLuint shader) {
 	if (! status) {
 		GLchar error[1024];
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
-		Logger::log("Error validating shader program " + StrUtils::str(error), "Shader", LogType::Error);
+		Logger::log("Error validating shader program " + utils_string::str(error), "Shader", LogType::Error);
 	}
 }
 
@@ -180,7 +180,7 @@ GLint Shader::createShader(std::string source, GLenum type) {
 	if (! status) {
 		GLchar error[1024];
 		glGetShaderInfoLog(shader, sizeof(error), NULL, error);
-		Logger::log("Error compiling shader: " + StrUtils::str(error) + " Source:\n" + source, "Shader", LogType::Error);
+		Logger::log("Error compiling shader: " + utils_string::str(error) + " Source:\n" + source, "Shader", LogType::Error);
 
 		glDeleteShader(shader);
 
@@ -233,35 +233,68 @@ Shader* Shader::createShader(ShaderSource vertexSource, ShaderSource geometrySou
 	return shader;
 }
 
-Shader::ShaderSource Shader::loadShaderSource(std::string path) {
-	//The ShaderSource
-	Shader::ShaderSource source;
+std::vector<std::string> Shader::loadInclude(std::string path, std::string line) {
+	//The directory the shader is in
+	std::string dir = "";
+	size_t pos = path.rfind("/") + 1;
+	if (pos != std::string::npos)
+		dir = path.substr(0, pos);
 
-	//Get the file text
-	std::vector<std::string> fileText = FileUtils::readFile(path);
+	//The relative file path (removes the "")
+	std::string filePath = line.substr(line.find("\"") + 1, line.rfind("\"") - line.find("\"") - 1);
+
+	while (utils_string::strStartsWith(filePath, "../")) {
+		filePath = utils_string::remove(filePath, "../");
+
+		//Remove last /
+		dir = dir.substr(0, dir.length() - 1);
+		//Remove last directory
+		dir = dir.substr(0, dir.rfind("/") + 1);
+	}
+
+	//Get the new text
+	std::vector<std::string> newText = utils_file::readFile(dir + filePath);
+
+	return newText;
+}
+
+void Shader::loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source) {
 
 	//Go through each line of file text
 	for (unsigned int i = 0; i < fileText.size(); i++) {
 		//Check for directives
-		if (StrUtils::strStartsWith(fileText[i], "#include ")) {
-			//The directory the shader is in
+		if (utils_string::strStartsWith(fileText[i], "#include ")) {
+
 			std::string dir = "";
 			size_t pos = path.rfind("/") + 1;
 			if (pos != std::string::npos)
 				dir = path.substr(0, pos);
-			//The file name (removes the "")
-			std::string fileName = fileText[i].substr(fileText[i].find("\"") + 1, fileText[i].rfind("\"") - fileText[i].find("\"") - 1);
-			//Get the new text
-			std::vector<std::string> newText = FileUtils::readFile(dir + fileName);
+
+			//The relative file path (removes the "")
+			std::string filePath = fileText[i].substr(fileText[i].find("\"") + 1, fileText[i].rfind("\"") - fileText[i].find("\"") - 1);
+
+			while (utils_string::strStartsWith(filePath, "../")) {
+				filePath = utils_string::remove(filePath, "../");
+
+				//Remove last /
+				dir = dir.substr(0, dir.length() - 1);
+				//Remove last directory
+				dir = dir.substr(0, dir.rfind("/") + 1);
+			}
+
+			//Load the new text
+			std::vector<std::string> newText = utils_file::readFile(dir + filePath);
+			loadShaderSource(dir + filePath, newText, source);
+
 			//Insert the new text into the file text
 			fileText.insert(fileText.begin() + i + 1, newText.begin(), newText.end());
 			//Remove the current line
 			fileText.erase(fileText.begin() + i);
 
 			i -= 1;
-		} else if (StrUtils::strStartsWith(fileText[i], "#map ")) {
+		} else if (utils_string::strStartsWith(fileText[i], "#map ")) {
 			//Split up the line by a space
-			std::vector<std::string> line = StrUtils::strSplit(fileText[i], ' ');
+			std::vector<std::string> line = utils_string::strSplit(fileText[i], ' ');
 			//Check the type and add the values
 			if (line[1] == "uniform")
 				source.uniforms.insert(std::pair<std::string, std::string>(line[2], line[3]));
@@ -274,6 +307,15 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path) {
 			i -= 1;
 		}
 	}
+}
+
+Shader::ShaderSource Shader::loadShaderSource(std::string path) {
+	//The ShaderSource
+	Shader::ShaderSource source;
+
+	std::vector<std::string> fileText = utils_file::readFile(path);
+
+	loadShaderSource(path, fileText, source);
 
 	//Assign the source
 	source.source = "";
@@ -311,6 +353,26 @@ void RenderShader::removeLastForwardShader() {
 	forwardShaders.pop_back();
 }
 
+void RenderShader::addDeferredGeomShader(Shader* deferredGeomShader) {
+	deferredGeomShaders.push_back(deferredGeomShader);
+}
+
+void RenderShader::removeDeferredGeomShader(Shader* deferredGeomShader) {
+	deferredGeomShaders.erase(std::remove(deferredGeomShaders.begin(), deferredGeomShaders.end(), deferredGeomShader), deferredGeomShaders.end());
+}
+
+void RenderShader::removeLastDeferredGeomShader() {
+	deferredGeomShaders.pop_back();
+}
+
 Shader* RenderShader::getShader() {
-	return forwardShaders.back();
+	if (useDeferredGeom) {
+		if (deferredGeomShaders.size() > 0)
+			return getDeferredGeomShader();
+		else {
+			Logger::log("Deferred geometry shader requested but not assigned", "Shader getShader()", LogType::Error);
+			return NULL;
+		}
+	} else
+		return getForwardShader();
 }

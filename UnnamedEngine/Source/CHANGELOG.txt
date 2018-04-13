@@ -1,817 +1,558 @@
 --------------------------------------------------------------
-Release 0 | Beta 5 (V0.2.3)
+Release 1 | Beta 1 (V0.3.0)
 
-* Added BinaryFile
-* Added enable and disable methods in KeyboardShortcuts
-  (disabled by default)
+* Added Sphere
+* Added CDLODHeightMap
+* Added CDLODQuadTreeNode
+* Added CDLODTerrain
+* Added HeightMapGenerator
+* Added SimplexNoise
+* Added GeometryBuffer
+* Added PBREnvironment
+* Added method 'setMesh' in GameObject
+* Added 'renderMode' to MeshData
+* Added 'setupShader' to MeshRenderData
+* Added 'AABBInFrustum' method in Frustum
+* Added 'updateAnimation' in Mesh
+* Added 'createTexture' method in Texture
+* Added some getters and setters to DebugCamera
+* Added convenience methods for setting the x, y and z
+  positions of a transform/object separately
+* Added an alternative constructor for FramebufferTexture
+* Added deferred rendering in RenderScene3D
+* Added geometry shader support in RenderShader for use with
+  deferred rendering (used for the geometry pass)
+* Added srgb setting in TextureParameters
+* Added support for "../" in include paths for shaders
+* Added loadTexturef in Texture to load textures with float
+  data
+* Added separate minFilter and magFilter properties in
+  TextureParameters (when filter supplied both assigned)
+* Added support for deferred PBR rendering using
+  RenderScene3D
+* Added option to use multisampled FBO's and PostProcessors
+* Added methods in RenderScene3D to change the exposure
+  and enable/disable gamma correction
+* Added showDeferredBuffers method in RenderScene3D
+  (only works with antialiasing turned off)
+
+* Changed default value of 'culling' in Mesh to false, and
+  changed all models to assign this value to true
+* Changed 'updateBones' to be prinvate in Skeleton
+* Changed resources so that they remove themselves from their
+  ResourceManager when deleted
+* Changed getDelta() methods to be of type float to be
+  more accurate
+* Changed debugging settings to debug
+* Changed ModelLoader to load diffuse textures as SRGB by
+  default with the variable 'loadDiffuseTexturesAsSRGB' to
+  change this when loading a model
+* Changed Material structure to a class
+* Changed saveTextures and releaseNewTextures in Renderer
+  so that it can be called more than once to allow more than
+  one state to be saved (releaseNewTextures will unbind the
+  textures that were added since the last saveTextures call)
+* Changed frustum culling for rendering shadow maps to be
+  with the light's view frustum in RenderScene3D
+* Changed vectors to work more like GLSL with Vector3f(0.0f)
+  for example assigning all components in the vector to 0.0f
+  instead of just the x one
   
-* Changed GUITextBox to only have the KeyboardShortcuts
-  instance enabled when it is selected
-* Changed Timer to use an enum for its current state
-* Changed MeshLoader to use BinaryFile to read/write
+* Cleaned up some shaders
+
+* Improved accuracy of FPSLimiter
+
+* Replaced all instances of std::map with std::unordered_map
+  as the order was not necessary
+
+* Renamed all utility namespaces from things like StrUtils
+  to utils_string, and FileUtils to utils_file
+* Renamed cutoff to innerCutoff in Light
+* Renamed FramebufferTexture to FramebufferStore
   
-* Fixed bug: Couldn't change a text box's cursor's colour
-* Fixed bug: Debugging info showed the music volume instead
-             of the sound effect volume
+* Rewritten render method in RenderScene
+  
+* Moved some of the shaders around
+
+* Removed BoundingSphere structure (Replaced with sphere)
+* Removed size parameter for SkyBox
+
+* Fixed bug: Not all resources were deleted when the engine
+             stopped
+* Fixed bug: Frustum culling did not take into account the
+             scale of the object
+* Fixed bug: Shadow's would repeat themselves if far enough
+             away
+* Fixed bug: DebugCamera was incorrectly calculating mouse
+             movement
+* Fixed bug: GUIDropDownMenu and hence GUIDropDownList did
+             not assign added button's transform
+* Fixed bug: Horizontal GUISlider did not work correctly
+* Fixed bug: Matrix4f used half the value it should have for
+             the fov
+* Fixed bug: Shininess value was not loaded from materials
+* Fixed bug: Was incorrectly calculating spot lights
+* Fixed bug: Parallax disaplcement mapping was wrong when
+             objects were rotated (seems like bitangents from
+             assimp may be in the wrong direction)
+
+* NOTE: MSAA in deferred rendering is not strictly correct
+        and can produce lighting artifacts
 
 --------------------------------------------------------------
-Release 0 | Beta 4 | Development 1 (V0.2.3)
+Release 1 | Beta 0 | Development 7 (V0.3.0)
 
-* Added BinaryFile
-* Added enable and disable methods in KeyboardShortcuts
-  (disabled by default)
+* Added option to use multisamples FBO's and PostProcessors
+* Added MSAA to deferred rendering (not accurate though,
+  just added as a test)
+* Added methods in RenderScene3D to change the exposure
+  and enable/disable gamma correction
+* Added showDeferredBuffers method in RenderScene3D
+  (only works with antialiasing turned off)
   
-* Changed GUITextBox to only have the KeyboardShortcuts
-  instance enabled when it is selected
-* Changed Timer to use an enum for its current state
-* Changed MeshLoader to use BinaryFile to read/write
+* Changed frustum culling for rendering shadow maps to be
+  with the light's view frustum in RenderScene3D
+* Changed vectors to work more like GLSL with Vector3f(0.0f)
+  for example assigning all components in the vector to 0.0f
+  instead of just the x one
   
-* Fixed bug: Couldn't change a text box's cursor's colour
-* Fixed bug: Debugging info showed the music volume instead
-             of the sound effect volume
+* Cleaned up post processing shaders a bit
+
+* Renamed FramebufferTexture to FramebufferStore
+
+* Fixed bug: Parallax disaplcement mapping was wrong when
+             objects were rotated (seems like bitangents from
+             assimp may be in the wrong direction)
 
 --------------------------------------------------------------
-Release 0 | Beta 4 | Development 0 | Experimental 3
+Release 1 | Beta 0 | Development 6 | Experimental 4
 
-* Fixed bug: Debugging info showed the music volume instead
-             of the sound effect volume
+* Added showDeferredBuffers method in RenderScene3D
+  (only works with antialiasing turned off)
+* Added ability to render without lighting in RenderScene3D
+  (objects should have some sort of non-lighting shader)
 
---------------------------------------------------------------
-Release 0 | Beta 4 | Development 0 | Experimental 2
-
-* Added BinaryFile
-
-* Changed Timer to use an enum for its current state
-* Changed MeshLoader to use BinaryFile to read/write
-
---------------------------------------------------------------
-Release 0 | Beta 4 | Development 0 | Experimental 1
-
-* Added enable and disable methods in KeyboardShortcuts
-  (disabled by default)
-  
-* Changed GUITextBox to only have the KeyboardShortcuts
-  instance enabled when it is selected
-  
-* Fixed bug: Couldn't change a text box's cursor's colour
+* Changed frustum culling for rendering shadow maps to be
+  with the light's view frustum in RenderScene3D
+* Changed vectors to work more like GLSL with Vector3f(0.0f)
+  for example assigning all components in the vector to 0.0f
+  instead of just the x one
 
 --------------------------------------------------------------
-Release 0 | Beta 4 (V0.2.2)
+Release 1 | Beta 0 | Development 6 | Experimental 3
 
-* Added BoneAnimationData
-* Added Bone
-* Added Animation
-* Added Skeleton
-* Added MeshLoader
-* Added 'wireframe' command to DebugConsole
-* Added renderWithoutBinding method in RenderData
-* Added SubData struct in RenderData
-* Added the ability to have multiple meshes in a single VBO
-* Added skeletal animation
-* Added parallax occlusion mapping
-* Added proper frustum culling of models added to a
-  RenderScene3D instance
-* Added method to pre-multiply a vector by a matrix
-* Added constructor conversions between vectors of similar
-  sizes
-* Added SHADER_ constants in Renderer to represent various
-  shader ID's
-* Added translate and scale methods to Transform
-* Added method to calculate and return the bounding sphere for
-  a Mesh in MeshData
-* Added 'path' to Texture to determine where textures have
-  come from (if loaded from a specific location)
-* Added custom model format
-* Added method in MeshLoader to convert a model into the
-  custom model format (currently uses .model file extension)
-* Added culling setting in GameObject
+* Cleaned up post processing shaders a bit
 
-* Changed Mesh to load a default colour of white if a
-  material colour is not defined
-* Changed Mesh to load the normal map as a height map from
-  an OBJ file
-* Changed shaders to use #map duplicates to replace the
-  previous assignment
-* Changed shadows to work with skeletal animation
-* Changed FrustumPlane to a structure
-* Changed Shader to store attached shaders in a vector
-* Changed light to calculate the projection view matrix when
-  update is called
-* Changed font to work in 3D without bill-boarding being
-  applied
-* Changed splash screen to be white background with black text
-  (Also now deletes the resources used to produce it)
+* Fixed bug: Parallax disaplcement mapping was wrong when
+             objects were rotated (seems like bitangents from
+             assimp may be in the wrong direction)
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 2
+
+* Added methods in RenderScene3D to change the exposure
+  and enable/disable gamma correction
+
+* Fixed bug: Artifact was appearing when forward rendering
+             with PBR and antialiasing
+* Fixed bug: Couldn't have no MSAA for forward rendering in
+             RenderScene3D
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 | Experimental 1
+
+* Added option to use multisamples FBO's and PostProcessors
+* Added MSAA to deferred rendering (not accurate though,
+  just added as a test)
+
+* Renamed FramebufferTexture to FramebufferStore
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 6 (V0.2.9)
+
+* Added directional and spot light support for PBR lighting
+* Added support for changing the attentuation parameters in
+  PBR lighting
+* Added parallax displacement mapping for PBR
+* Added support for deferred PBR rendering using
+  RenderScene3D
   
-* Moved Frustum.h to core
-* Moved the SubData structure to MeshData
+* Changed saveTextures and releaseNewTextures in Renderer
+  so that it can be called more than once to allow more than
+  one state to be saved (releaseNewTextures will unbind the
+  textures that were added since the last saveTextures call)
 
-* Renamed loadModel to loadAssimpModel
+* Rewritten render method in RenderScene
 
-* Rewritten Frustum class
+* Renamed cutoff to innerCutoff in Light
+* Renamed some of the PBR shaders
 
-* Removed errors from shaders when a uniform/attribute is
-  not found as many of these occur when the compiler
-  removed unnecessary variables
-  
-* Fixed bug: Trying to get the inverse of a Matrix3f with a
-             determinant of 0 would cause a crash
-* Fixed bug: Pasting text into a text box with new line
-             characters caused the text to render incorrectly
-* Fixed bug: Models didn't always have the correct orientation
-* Fixed bug: Shadows would render properly in certain
-             circumstances
-* Fixed bug: Transform didn't update its position, rotation
-             and scale when a new parent transform was
-             assigned
-* Fixed bug: getForward in Quaternion returned a vector
-             pointing the wrong way (As OpenGL has -Z into
-             the screen)
+* Cleaned up some shaders
+
+* Fixed bug: Was incorrectly calculating spot lights
+* Fixed bug: Gamma correction not applied correctly for
+             more than one set of six lights
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 7
+
+* Renamed some of the PBR shaders
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 6
+
+* Rewritten render method in RenderScene
+
+* Fixed bug: Gamma correction not applied correctly for
+             more than one set of six lights
              
-* Note: At the moment any loaded models assume the file being
-        loaded only has one model within it
- 
-* More shader cleanup
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 5 (V0.2.2)
+Release 1 | Beta 0 | Development 5 | Experimental 5
 
-* Added genNormals option in loadAssimpModel and
-  convertToEngineModel
-
-* Changed font to work in 3D without bill-boarding being
-  applied
-* Changed splash screen to be white background with black text
-  (Also now deletes the resources used to produce it)
+* Changed saveTextures and releaseNewTextures in Renderer
+  so that it can be called more than once to allow more than
+  one state to be saved (releaseNewTextures will unbind the
+  textures that were added since the last saveTextures call)
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 4 | Experimental 2
+Release 1 | Beta 0 | Development 5 | Experimental 4
 
-* Changed splash screen to be white background with black text
-  (Also now deletes the resources used to produce it)
+* Improved deferred lighting performance slightly
 
---------------------------------------------------------------
-Release 0 | Beta 3 | Development 4 | Experimental 1
-
-* Added genNormals option in loadAssimpModel and
-  convertToEngineModel
-
-* Changed font to work in 3D without bill-boarding being
-  applied
+* Fixed bug: Last commit broke PBR lighting when forward
+             rendering
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 4 (V0.2.1)
+Release 1 | Beta 0 | Development 5 | Experimental 3
 
-* Added MeshLoader
-* Added 'path' to Texture to determine where textures have
-  come from (if loaded from a specific location)
-* Added custom model format
-* Added method in MeshLoader to convert a model into the
-  custom model format (currently uses .model file extension)
-* Added culling setting in GameObject
+* Added support for deferred PBR rendering using
+  RenderScene3D
   
-* Changed light to calculate the projection view matrix when
-  update is called
-
-* Renamed loadModel to loadAssimpModel
+* Cleaned up some shaders
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 3 | Experimental 3
+Release 1 | Beta 0 | Development 5 | Experimental 2
 
-* Added method in MeshLoader to convert a model into the
-  custom engine format
-* Added support for other numbers of dimensions in the model
-  format
-* Added culling setting in GameObject
+* Added support for changing the attentuation parameters in
+  PBR lighting
+* Added parallax displacement mapping for PBR
+* Added shadow support for directional lights in PBR
+
+* Made light shaders a bit neater
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 | Experimental 1
+
+* Added directional and spot light support for PBR lighting
+
+* Renamed cutoff to innerCutoff in Light
+
+* Fixed bug: Was incorrectly calculating spot lights
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 5 (V0.2.8)
+
+* Added PBRTest
+* Added PBREnvironment
+* Added support for "../" in include paths for shaders
+* Added loadTexturef in Texture to load textures with float
+  data
+* Added separate minFilter and magFilter properties in
+  TextureParameters (when filter supplied both assigned)
   
-* Changed light to calculate the projection view matrix when
-  update is called
+* Changed Material structure to a class
+
+* Moved some of the shaders around
+
+* Replaced all instances of std::map with std::unordered_map
+  as the order was not necessary
+
+* Removed size parameter for SkyBox
+
+* Fixed bug: Matrix4f used half the value it should have for
+             the fov
+* Fixed bug: Shininess value was not loaded from materials
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 3 | Experimental 2
+Release 1 | Beta 0 | Development 4 | Experimental 9
 
-* Added saving/loading of a custom model format (currently
-  uses .model file extension)
-
-* Renamed loadModel to loadAssimpModel
+* Replaced EnvironmentDataGenerator with PBREnvironment
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 3 | Experimental 1
+Release 1 | Beta 0 | Development 4 | Experimental 8
 
-* Added MeshLoader
-* Added 'path' to Texture to determine where textures have
-  come from (if loaded from a specific location)
+* Cleaned up PBR shaders a bit
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 | Experimental 7
+
+* Fixed bug: BRDFLUT texture wasn't created properly
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 | Experimental 6
+
+* Changed Material structure to a class
+
+* Replaced all instances of std::map with std::unordered_map
+  as the order was not necessary
   
-* Started adding a custom model format
+* Fixed bug: Shininess value was not loaded from materials
+* Fixed bug: internalFormat and format were the wrong way
+             round in Texture's createTexture method
+* Fixed bug: Cubemap didn't assign the internalFormat
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 3 (V0.2.0)
+Release 1 | Beta 0 | Development 4 | Experimental 5
 
-* Added proper frustum culling of models added to a
-  RenderScene3D instance
-* Added method to pre-multiply a vector by a matrix
-* Added constructor conversions between vectors of similar
-  sizes
-* Added SHADER_ constants in Renderer to represent various
-  shader ID's
-* Added translate and scale methods to Transform
-* Added method to calculate and return the bounding sphere for
-  a Mesh in MeshData
-
-* Changed FrustumPlane to a structure
-* Changed Shader to store attached shaders in a vector
-
-* Moved Frustum.h to core
-
-* Rewritten Frustum class
-
-* Fixed bug: Transform didn't update its position, rotation
-             and scale when a new parent transform was
-             assigned
-* Fixed bug: getForward in Quaternion returned a vector
-             pointing the wrong way (As OpenGL has -Z into
-             the screen)
+* Added EnvironmentDataGenerator
+* Added loadTexturef in Texture to load textures with float
+  data
+* Added separate minFilter and magFilter properties in
+  TextureParameters (when filter supplied both assigned)
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 2 | Experimental 4
+Release 1 | Beta 0 | Development 4 | Experimental 4
 
-* Added method to calculate and return the bounding sphere for
-  a Mesh in MeshData
+* Added support for "../" in include paths for shaders
 
-* Changed Shader to store attached shaders in a vector
+* Moved some of the shaders around
 
---------------------------------------------------------------
-Release 0 | Beta 3 | Development 2 | Experimental 3
-
-* Moved Frustum.h and Frustum.cpp to core
-
-* Fixed bug: getForward in Quaternion returned a vector
-             pointing the wrong way (As OpenGL has -Z into
-             the screen)
+* Removed size parameter for SkyBox
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 2 | Experimental 2
+Release 1 | Beta 0 | Development 4 | Experimental 3
 
-* Added SHADER_ constants in Renderer to represent various
-  shader ID's
-* Added translate and scale methods to Transform
+* More PBR
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 | Experimental 2
+
+* More PBR in PBRTest
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 | Experimental 1
+
+* Added PBRTest
+
+* Fixed bug: Matrix4f used half the value it should have for
+             the fov
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 4 (V0.2.7)
+
+* Added GeometryBuffer
+* Added deferred rendering in RenderScene3D
+* Added geometry shader support in RenderShader for use with
+  deferred rendering
+* Added srgb setting in TextureParameters
+* Added gamma correction in lighting shaders
+
+* Changed ModelLoader to load diffuse textures as SRGB by
+  default with the variable 'loadDiffuseTexturesAsSRGB' to
+  change this when loading a model
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 3 | Experimental 4
+
+* Added geometry shader support in RenderShader for use with
+  deferred rendering
+* Added srgb setting in TextureParameters
+* Added gamma correction in lighting shaders
+* Added enableDeferred method in RenderScene3D
+
+* Changed ModelLoader to load diffuse textures as SRGB by
+  default with the variable 'loadDiffuseTexturesAsSRGB' to
+  change this when loading a model
   
-* Moved centre and radius from MeshData to Mesh
-
-* Fixed bug: Transform didn't update its position, rotation
-             and scale when a new parent transform was
-             assigned
+* Cleaned up RenderScene3D
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 2 | Experimental 1
+Release 1 | Beta 0 | Development 3 | Experimental 3
 
-* Added proper frustum culling of models added to a
-  RenderScene3D instance
-* Added method to pre-multiply a vector by a matrix
-* Added constructor conversions between vectors of similar
-  sizes
-
-* Changed FrustumPlane to a structure
-
-* Rewritten Frustum class
+* Added shadow mapping to deferred lighting
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 2 (V0.1.9)
+Release 1 | Beta 0 | Development 3 | Experimental 2
 
-* Added parallax occlusion mapping
+* Added deferred rendering in RenderScene3D
 
-* Changed shaders to use #map duplicates to replace the
-  previous assignment
-* Changed shadows to work with skeletal animation
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 3 | Experimental 1
 
-* Removed errors from shaders when a uniform/attribute is
-  not found as many of these occur when the compiler
-  removed unnecessary variables
+* Added GeometryBuffer
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 3 (V0.2.6)
+
+* Improved CDLODTerrain
+* Improved accuracy of FPSLimiter
+
+* Added convenience methods for setting the x, y and z
+  positions of a transform/object separately
+* Added support for more than one shadow map in a render
+  scene batch
+* Added an alternative constructor for FramebufferTexture
+* Added batch system to RenderScene to avoid repeatedly
+  assigning the same uniforms
   
-* Fixed bug: Shadows would render properly in certain
-             circumstances
+* Changed getDelta() methods to be of type float to be
+  more accurate
+* Changed debugging settings to debug
+    
+* Fixed bug: Frustum culling did not take into account the
+             scale of the object
+* Fixed bug: Shadow's would repeat themselves if far enough
+             away
+* Fixed bug: Terrain normals were incorrectly calculated
+* Fixed bug: DebugCamera was incorrectly calculating mouse
+             movement
+* Fixed bug: GUIDropDownMenu and hence GUIDropDownList did
+             not assign added button's transform
+* Fixed bug: Horizontal GUISlider did not work correctly
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 2 | Experimental 4
+
+* Added batch system to RenderScene to avoid repeatedly
+  assigning the same uniforms
+
+* Improved accuracy of FPSLimiter
+
+* Changed debugging settings to debug
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 2 | Experimental 3
+
+* Changed getDelta() methods to be of type float to be
+  more accurate
+
+* Fixed bug: Terrain normals were incorrectly calculated
+* Fixed bug: DebugCamera was incorrectly calculating mouse
+             movement
+* Fixed bug: GUIDropDownMenu and hence GUIDropDownList did
+             not assign added button's transform
+* Fixed bug: Horizontal GUISlider did not work correctly
+
+--------------------------------------------------------------
+Release 1 | Beta 0 | Development 2 | Experimental 2
+
+* Added support for more than one shadow map in a render
+  scene batch
+* Added an alternative constructor for FramebufferTexture
+  
+* Fixed bug: Frustum culling did not take into account the
+             scale of the object
              
-* More shader cleanup
+* Fixed bug: Shadow's would repeat themselves if far enough
+             away
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 1 | Experimental 4
+Release 1 | Beta 0 | Development 2 | Experimental 1
 
-* Added parallax occlusion mapping
+* Improved CDLODTerrain
 
---------------------------------------------------------------
-Release 0 | Beta 3 | Development 1 | Experimental 3
-
-* More shader cleanup
+* Added convenience methods for setting the x, y and z
+  positions of a transform/object separately
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 1 | Experimental 2
+Release 1 | Beta 0 | Development 2 (V0.2.5)
 
-* Removed errors from shaders when a uniform/attribute is
-  not found as many of these occur when the compiler
-  removed unnecessary variables
+* Added CDLODHeightMap
+* Added CDLODQuadTreeNode
+* Added CDLODTerrain
+* Added HeightMapGenerator
+* Added SimplexNoise
+* Added 'createTexture' method in Texture
 
-* More shader cleanup
+* Changed resources so that they remove themselves from their
+  ResourceManager when deleted
+
+* Fixed bug: Not all resources were deleted when the engine
+             stopped
+
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 1 | Experimental 1
+Release 1 | Beta 0 | Development 1 | Experimental 3
 
-* Changed shaders to use #map duplicates to replace the
-  previous assignment
-* Changed shadows to work with skeletal animation
+* Added HeightMapGenerator
+* Added SimplexNoise
+* Added 'meshSize' to CDLODTerrain
+
+* Changed resources so that they remove themselves from their
+  ResourceManager when deleted
   
-* Fixed bug: Shadows would render properly in certain
-             circumstances
-             
-* More shader cleanup
+* Fixed bug: Not all resources were deleted when the engine
+             stopped
+* Fixed bug: CDLODTerrain didn't unbind the height map
+             texture
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 1 (V0.1.8)
+Release 1 | Beta 0 | Development 1 | Experimental 2
 
-* Added BoneAnimationData
-* Added Bone
-* Added Animation
-* Added Skeleton
-* Added 'wireframe' command to DebugConsole
-* Added renderWithoutBinding method in RenderData
-* Added SubData struct in RenderData
-* Added the ability to have multiple meshes in a single VBO
-* Added skeletal animation
+* Added 'heightScale' in CDLODHeightMap
 
-* Changed Mesh to load a default colour of white if a
-  material colour is not defined
-* Changed Mesh to load the normal map as a height map from
-  an OBJ file
-  
-* Moved the SubData structure to MeshData
-  
-* Fixed bug: Trying to get the inverse of a Matrix3f with a
-             determinant of 0 would cause a crash
-* Fixed bug: Pasting text into a text box with new line
-             characters caused the text to render incorrectly
-* Fixed bug: Models didn't always have the correct orientation
-             
-* Note: At the moment any loaded models assume the file being
-        loaded only has one model within it
+* Fixed bug: Maximum and minimum heights for the smallest
+             CDLODQuadTreeNode's were not assigned correctly
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 10
+Release 1 | Beta 0 | Development 1 | Experimental 1
 
-* Changed lights to have a default quadratic attenuation of 1
-
---------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 9
-
-* Fixed bug: Models didn't always have the correct orientation
-
-* More skeletal animation
-
-* Note: At the moment any loaded models assume the file being
-        loaded only has one model within it
-        
---------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 8
-
-* More skeletal animation
+* Added CDLODHeightMap
+* Added CDLODQuadTreeNode
+* Added CDLODTerrain
+* Added 'createTexture' method in Texture
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 7
+Release 1 | Beta 0 | Development 1 (V0.2.4)
 
-* Fixed bug: Vector's lerp and nlerp methods were incorrect
+* Added Sphere
+* Added method 'setMesh' in GameObject
+* Added 'renderMode' to MeshData
+* Added 'setupShader' to MeshRenderData
+* Added 'AABBInFrustum' method in Frustum
+* Added 'updateAnimation' in Mesh
+* Added some getters and setters to DebugCamera
 
-* More skeletal animation
+* Changed default value of 'culling' in Mesh to false, and
+  changed all models to assign this value to true
+* Changed 'updateBones' to be prinvate in Skeleton
 
---------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 6
+* Renamed all utility namespaces from things like StrUtils
+  to utils_string, and FileUtils to utils_file
 
-* More development of skeletal animation
-
---------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 5
-
-* Added BoneAnimationData
-* Added Bone
-* Added Animation
-* Added Skeleton
-
-* Better animated model loading (Work in progress)
+* Removed BoundingSphere structure (Replaced with sphere)
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 4
+Release 1 | Beta 0 | Development 0 | Experimental 3
 
-* Changed Mesh to load the normal map as a height map from
-  an OBJ file
-  
-* Fixed bug: Animations didn't work quite right (scale
-             was being searched for instead of position)
+* Added 'AABBInFrustum' method in Frustum
+* Added 'updateAnimation' in Mesh
+* Added some getters and setters to DebugCamera
 
---------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 3
-
-* Added skeletal animation (Work in progress)
-
-* Changed Mesh to load a default colour of white if a
-  material colour is not defined
-  
-* Fixed bug: Trying to get the inverse of a Matrix3f with a
-             determinant of 0 would cause a crash
-* Fixed bug: Pasting text into a text box with new line
-             characters caused the text to render incorrectly
+* Changed default value of 'culling' in Mesh to false, and
+  changed all models to assign this value to true
+* Changed 'updateBones' to be prinvate in Skeleton
 
 --------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 2
+Release 1 | Beta 0 | Development 0 | Experimental 2
 
-* Moved the SubData structure to MeshData
-
---------------------------------------------------------------
-Release 0 | Beta 3 | Development 0 | Experimental 1
-
-* Added 'wireframe' command to DebugConsole
-* Added renderWithoutBinding method in RenderData
-* Added SubData struct in RenderData
-* Added the ability to have multiple meshes in a single VBO
+* Added method 'setMesh' in GameObject
+* Added 'renderMode' to MeshData
+* Added 'setupShader' to MeshRenderData
 
 --------------------------------------------------------------
-Release 0 | Beta 3 (V0.1.7)
+Release 1 | Beta 0 | Development 0 | Experimental 1
 
-* Added Animation2D
-* Added TextureAnimation2D
-* Added Sprite2D
-* Added Quaternion
-* Added Transform
-* Added DebugConsole
-* Added multi-line comments in ML
-* Added time stamps to logs
-* Added method in InputManager to add all available
-  controllers
-* Added the ability to make the Logger output to a file
-* Added a way to invert the controller axis in
-  InputBindingAxis
-* Added abs method in MathsUtils
-* Added support for dead zones in InputBindingAxis
-* Added method in InputManager to check whether a controller
-  with a specific index has been added
-* Added maximum and minimum values for a GUISlider (default
-  is 0 and 1)
-* Added the method clampToClosestInterval in MathsUtils
-* Added replaceAll method in StrUtils
-* Added lerp, slerp and nlerp methods in Vector
-* Added normalised method in Vector
-* Added doesExist, isFile and isDirectory to FileUtils
-* Added find method in MLElement
-* Added writeToDocument and readFromDocument methods in
-  SettingsUtils
-* Added save and load methods in InputBindings with an
-  MLDocument as a parameter
+* Added Sphere
 
-* Changed Logger to be a class instead of a namespace
-* Changed RenderData so non-instanced rendering only occurs
-  when primcount = -1, which it is set to by default
-* Changed public variables in TextureAtlas to be private
-* Changed Material from a class to a structure
-* Changed the position, rotation and velocity variables to
-  private in AudioObject
-* Changed the default TextureParameters for a font
-* Changed objects to use the new 'Transform' class
-* Changed audio system to use the new 'Transform' class and
-  quaternions
-  
-* Renamed FPSLimiter's methods start/update to startFrame/
-  endFrame
-* Renamed getRel methods to getLocal
+* Renamed all utility namespaces from things like StrUtils
+  to utils_string, and FileUtils to utils_file
 
-* Removed the MeshData* parameter in some of the update
-  methods in MeshRenderData
-* Removed top, bottom, left and right variables from Texture
-
-* Fixed bug: FPSLimiter didn't work properly when VSync was
-             enabled
-* Fixed bug: InputBindings would sometimes create a new
-			 controller instance when it wasn't supposed to
-* Fixed bug: Random controller noise could assign an
-             InputBindingAxis - this also improves assignment
-             making it harder to accidentally assign the
-             wrong axis
-* Fixed bug: ParticleEmitter could emit too many particles
-             when using the emitParticles method
-* Fixed bug: RenderData still rendered a mesh, even when
-             the number of instances was supposed to be 0
-* Fixed bug: GUISlider didn't assign the value correctly
-             when using an interval
-* Fixed bug: TextureAtlas wouldn't work if numRows didn't
-			 equal numColumns
-* Fixed bug: InputBindings caused a crash if a controller
-  			 was not found
-* Fixed bug: InputBindings would still load the controller
-             data from a file, even if the controller wasn't
-             found
-* Fixed bug: Setting the flying value to false in Camera3D
-             didn't do anything
-
-* More Asteroids development
+* Removed BoundingSphere structure (Replaced with sphere)
 
 --------------------------------------------------------------
-Release 0 | Beta 2 | Development 4 (V0.1.7)
+Release 1 (V0.2.3)
 
-* Added DebugConsole
-* Added lerp, slerp and nlerp methods in Vector
-* Added normalised method in Vector
-* Added some init methods in Quaternion
-* Added doesExist, isFile and isDirectory to FileUtils
-* Added find method in MLElement
-* Added writeToDocument and readFromDocument methods in
-  SettingsUtils
-* Added save and load methods in InputBindings with an
-  MLDocument as a parameter
-* Added Quaternion * Vector3f method
-
-* Removed addChild in Transform and replaced all occurrences
-  with setParent instead
-  
-* Fixed bug: Setting the flying value to false in Camera3D
-             didn't do anything
-* Fixed bug: Assigning the parent of a transform wouldn't
-             update the position, rotation and scale
-* Fixed bug: GUIBorder didn't render in the correct place
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 3 | Experimental 3
-
-* Renamed getRel methods in PhysicsObject2D/3D to getLocal
-
-* Some shader cleanup
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 3 | Experimental 2
-
-* Added DebugConsole
-* Added find method in MLElement
-* Added writeToDocument and readFromDocument methods in
-  SettingsUtils
-* Added save and load methods in InputBindings with an
-  MLDocument as a parameter
-* Added Quaternion * Vector3f method
-
-* Fixed bug: Assigning the parent of a transform wouldn't
-             update the position, rotation and scale
-* Fixed bug: GUIBorder didn't render in the correct place
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 3 | Experimental 1
-
-* Added lerp, slerp and nlerp methods in Vector
-* Added normalised method in Vector
-* Added some init methods in Quaternion
-* Added doesExist, isFile and isDirectory to FileUtils
-
-* Removed addChild in Transform and replaced all occurrences
-  with setParent instead
-  
-* Fixed bug: Setting the flying value to false in Camera3D
-             didn't do anything
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 3 (V0.1.6)
-
-* Added Quaternion
-* Added Transform
-* Added maximum and minimum values for a GUISlider (default
-  is 0 and 1)
-* Added the method clampToClosestInterval in MathsUtils
-* Added replaceAll method in StrUtils
-
-* Changed Material from a class to a structure
-* Changed the position, rotation and velocity variables to
-  private in AudioObject
-* Changed the default TextureParameters for a font
-* Changed objects to use the new 'Transform' class
-* Changed audio system to use the new 'Transform' class and
-  quaternions
-
-* Renamed FPSLimiter's methods start/update to startFrame/
-  endFrame
-* Renamed getRel methods to getLocal
-
-* Removed top, bottom, left and right variables from Texture
-
-* Fixed bug: GUISlider didn't assign the value correctly
-             when using an interval
-* Fixed bug: TextureAtlas wouldn't work if numRows didn't
-			 equal numColumns
-* Fixed bug: InputBindings caused a crash if a controller
-  			 was not found
-* Fixed bug: InputBindings would still load the controller
-             data from a file, even if the controller wasn't
-             found
-
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 11
-
-* Changed audio system to use the new transform class and
-  quaternions
-
-* Fixed bug: Incorrect audio positions
-
-* More quaternions
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 10
-
-* More quaternions
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 9
-
-* More quaternions
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 8
-
-* Now using new 'Transformation' class for transformations
-  of 2D objects
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 7
-
-* Added Transform
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 6
-
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 5
-
-* Added replaceAll method in StrUtils
-
-* Changed InputBindings so it would still load the controller
-  data from a file, even if the controller wasn't found
-* Changed the default TextureParameters for a font
-
-* Renamed FPSLimiter's methods start/update to startFrame/
-  endFrame
-
-* Fixed bug: InputBindings caused a crash if a controller
-  was not found
-  
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 4
-
-* Changed the position, rotation and velocity variables to
-  private in AudioObject
-
-* Fixed bug: TextureAtlas wouldn't work if numRows didn't
-			 equal numColumns
-			 
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 3
-
-* Changed Material from a class to a structure
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 2
-
-* Added Quaternion
-
-* Removed top, bottom, left and right variables from Texture
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 | Experimental 1
-
-* Added maximum and minimum values for a GUISlider (default
-  is 0 and 1)
-* Added the method clampToClosestInterval in MathsUtils
-
-* Fixed bug: GUISlider didn't assign the value correctly
-             when using an interval
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 2 (V0.1.5)
-
-* Added Animation2D
-* Added TextureAnimation2D
-* Added Sprite2D
-* Added a way to invert the controller axis in
-  InputBindingAxis
-* Added abs method in MathsUtils
-* Added support for dead zones in InputBindingAxis
-* Added method in InputManager to check whether a controller
-  with a specific index has been added
-  
-* Changed RenderData so non-instanced rendering only occurs
-  when primcount = -1, which it is set to by default
-* Changed public variables in TextureAtlas to be private
-  
-* Removed the MeshData* parameter in some of the update
-  methods in MeshRenderData
-
-* Fixed bug: Random controller noise could assign an
-             InputBindingAxis - this also improves assignment
-             making it harder to accidentally assign the
-             wrong axis
-* Fixed bug: ParticleEmitter could emit too many particles
-             when using the emitParticles method
-* Fixed bug: RenderData still rendered a mesh, even when
-             the number of instances was supposed to be 0
-  
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 1 | Experimental 3
-
-* Added Animation2D
-* Added TextureAnimation2D
-* Added Sprite2D
-
-* Changed public variables in TextureAtlas to be private
-
-* Removed the MeshData* parameter in some of the update
-  methods in MeshRenderData
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 1 | Experimental 2
-
-* Added method in InputManager to check whether a controller
-  with a specific index has been added
-  
-* Changed RenderData so non-instanced rendering only occurs
-  when primcount = -1, which it is set to by default
-  
-* Fixed bug: ParticleEmitter could emit too many particles
-             when using the emitParticles method
-* Fixed bug: RenderData still rendered a mesh, even when
-             the number of instances was supposed to be 0
-             
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 1 | Experimental 1
-
-* Added a way to invert the controller axis in
-  InputBindingAxis
-* Added abs method in MathsUtils
-* Added support for dead zones in InputBindingAxis
-
-* Fixed bug: Random controller noise could assign an
-             InputBindingAxis - this also improves assignment
-             making it harder to accidentally assign the
-             wrong axis
-  
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 1 (V0.1.4)
-
-* Added multi-line comments in ML
-* Added time stamps to logs
-* Added method in InputManager to add all available
-  controllers
-* Added the ability to make the Logger output to a file
-
-* Changed Logger to be a class instead of a namespace
-
-* Fixed bug: FPSLimiter didn't work properly when VSync was
-             enabled
-* Fixed bug: InputBindings would sometimes create a new
-			 controller instance when it wasn't supposed to
-
-* Note: Started shader cleanup
-
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 0 | Experimental 4
-
-* Added the ability to make the Logger output to a file
-
-* Changed Logger to be a class instead of a namespace
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 0 | Experimental 3
-
-* Added method in InputManager to add all available
-  controllers
-
-* Fixed bug: InputBindings would sometimes create a new
-			 controller instance when it wasn't supposed to
-
-* More Asteroids development
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 0 | Experimental 2
-
-* Added multi-line comments in ML
-* Added time stamps to logs
-
---------------------------------------------------------------
-Release 0 | Beta 2 | Development 0 | Experimental 1
-
-* Fixed bug: FPSLimiter didn't work properly when VSync was
-             enabled
-
-* Note: Started shader cleanup
+* First release build of Unnamed Engine 2 (Still doesn't have
+  a name)

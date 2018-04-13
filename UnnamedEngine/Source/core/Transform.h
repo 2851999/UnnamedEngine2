@@ -132,6 +132,9 @@ public:
 	}
 	inline void setPosition(Vector2f position)                { setPosition(Vector3f(position)); }
 	inline void setPosition(float x, float y, float z = 0.0f) { setPosition(Vector3f(x, y, z)); }
+	inline void setX(float x) { setPosition(x, localPosition.getY(), localPosition.getZ()); }
+	inline void setY(float y) { setPosition(localPosition.getX(), y, localPosition.getZ()); }
+	inline void setZ(float z) { setPosition(localPosition.getX(), localPosition.getY(), z); }
 
 	inline void setRotation(Quaternion rotation) {
 		this->localRotation = rotation;

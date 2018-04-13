@@ -20,7 +20,7 @@
 #define CORE_RENDER_SHADER_H_
 
 #include <GL/glew.h>
-#include <map>
+#include <unordered_map>
 
 #include "Colour.h"
 #include "../Matrix.h"
@@ -41,14 +41,17 @@ private:
 	std::vector<GLuint> attachedShaders;
 
 	/* Maps with locations of the variables in the shaders */
-	std::map<std::string, GLint> uniforms;
-	std::map<std::string, GLint> attributes;
+	std::unordered_map<std::string, GLint> uniforms;
+	std::unordered_map<std::string, GLint> attributes;
+
+	/* Loads and returns an included file */
+	static std::vector<std::string> loadInclude(std::string path, std::string line);
 public:
 	/* The ShaderSource struct stores information about Shader source code */
 	struct ShaderSource {
 		std::string source;
-		std::map<std::string, std::string> uniforms;
-		std::map<std::string, std::string> attributes;
+		std::unordered_map<std::string, std::string> uniforms;
+		std::unordered_map<std::string, std::string> attributes;
 	};
 
 	/* Constructors and destructors */
@@ -82,7 +85,7 @@ public:
 
 	/* Method to get a reference to the map of uniforms for assigning in
 	 * the Renderer */
-	std::map<std::string, GLint>& getUniforms() { return uniforms; }
+	std::unordered_map<std::string, GLint>& getUniforms() { return uniforms; }
 
 	/* Methods to create a shader */
 	static GLint createShader(std::string source, GLenum type);
@@ -90,6 +93,7 @@ public:
 	static Shader* createShader(ShaderSource vertexSource, ShaderSource geometrySource, ShaderSource fragmentSource);
 
 	/* Methods used to load a shader */
+	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source);
 	static ShaderSource loadShaderSource(std::string path);
 	static Shader* loadShader(std::string path);
 };
@@ -105,17 +109,37 @@ private:
 	/* The shaders used for forward rendering - will always use the last
 	 * shader that was added for rendering to allow them to be overridden */
 	std::vector<Shader*> forwardShaders;
+	/* The shaders used for the geometry pass of deferred rendering */
+	std::vector<Shader*> deferredGeomShaders;
+	/* Boolean that states whether the deferred geometry shader should be used */
+	bool useDeferredGeom = false;
 public:
 	/* Various constructors */
-	RenderShader(std::string name, Shader* forwardShader) : name(name) { addForwardShader(forwardShader); }
+	RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader) : name(name) {
+		if (forwardShader)
+			addForwardShader(forwardShader);
+		if (deferredGeomShader)
+			addDeferredGeomShader(deferredGeomShader);
+	}
 
 	/* Methods used to add/remove a forward shader */
 	void addForwardShader(Shader* forwardShader);
 	void removeForwardShader(Shader* forwardShader);
 	void removeLastForwardShader();
 
+	/* Methods used to add/remove a deferred geometry shader */
+	void addDeferredGeomShader(Shader* deferredGeomShader);
+	void removeDeferredGeomShader(Shader* deferredGeomShader);
+	void removeLastDeferredGeomShader();
+
 	/* The method used to get the shader that should be used */
 	Shader* getShader();
+
+	/* The method used to get the forward and deferred geometry shaders */
+	inline Shader* getForwardShader() { return forwardShaders.back(); }
+	inline Shader* getDeferredGeomShader() { return deferredGeomShaders.back(); }
+
+	inline void useGeometryShader(bool use) { useDeferredGeom = use; }
 
 	/* Returns the name of the RenderShader */
 	std::string getName() { return name; }

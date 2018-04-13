@@ -33,24 +33,36 @@ class TextureParameters {
 private:
 	/* The texture parameters with their default values */
 	GLuint target = DEFAULT_TARGET;
-	GLuint filter = DEFAULT_FILTER;
+	GLuint minFilter = DEFAULT_FILTER;
+	GLuint magFilter = DEFAULT_FILTER;
 	GLuint clamp  = DEFAULT_CLAMP;
 	bool shouldClamp = DEFAULT_SHOULD_CLAMP;
+
+	bool srgb = DEFAULT_SRGB;
+	bool generateMipMapsIfAvailable = true;
+
+	/* Returns whether a mipmap needs to be generated */
+	inline bool mipMapRequested() {
+		return generateMipMapsIfAvailable &&
+			   ((minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_LINEAR_MIPMAP_LINEAR) ||
+			    (magFilter == GL_NEAREST_MIPMAP_NEAREST || magFilter == GL_NEAREST_MIPMAP_LINEAR || magFilter == GL_LINEAR_MIPMAP_NEAREST || magFilter == GL_LINEAR_MIPMAP_LINEAR));
+	}
 public:
 	/* The default values which are assigned unless otherwise specified */
 	static GLuint DEFAULT_TARGET;
 	static GLuint DEFAULT_FILTER;
 	static GLuint DEFAULT_CLAMP;
 	static bool   DEFAULT_SHOULD_CLAMP;
+	static bool   DEFAULT_SRGB;
 
 	/* Various constructors */
 	TextureParameters() {}
 	TextureParameters(bool shouldClamp) : shouldClamp(shouldClamp) {}
 	TextureParameters(GLuint target) : target(target) {}
 	TextureParameters(GLuint target, bool shouldClamp) : target(target), shouldClamp(shouldClamp) {}
-	TextureParameters(GLuint target, GLuint filter) : target(target), filter(filter) {}
-	TextureParameters(GLuint target, GLuint filter, GLuint clamp) : target(target), filter(filter), clamp(clamp) { shouldClamp = true; }
-	TextureParameters(GLuint target, GLuint filter, GLuint clamp, bool shouldClamp) : target(target), filter(filter), clamp(clamp), shouldClamp(shouldClamp) {}
+	TextureParameters(GLuint target, GLuint filter) : target(target), minFilter(filter), magFilter(filter) {}
+	TextureParameters(GLuint target, GLuint filter, GLuint clamp) : target(target), minFilter(filter), magFilter(filter), clamp(clamp) { shouldClamp = true; }
+	TextureParameters(GLuint target, GLuint filter, GLuint clamp, bool shouldClamp, bool srgb = DEFAULT_SRGB) : target(target), minFilter(filter), magFilter(filter), clamp(clamp), shouldClamp(shouldClamp), srgb(srgb) {}
 
 	/* Methods used to apply the texture parameters to a texture */
 	void apply(GLuint texture, bool bind, bool unbind);
@@ -59,14 +71,21 @@ public:
 
 	/* Setters and getters */
 	inline TextureParameters setTarget(GLuint target) { this->target = target; return (*this); }
-	inline TextureParameters setFilter(GLuint filter) { this->filter = filter; return (*this); }
+	inline TextureParameters setFilter(GLuint filter) { this->minFilter = filter; this->magFilter = filter; return (*this); }
+	inline TextureParameters setMinFilter(GLuint minFilter) { this->minFilter = minFilter; return (*this); }
+	inline TextureParameters setMagFilter(GLuint magFilter) { this->magFilter = magFilter; return (*this); }
 	inline TextureParameters setClamp(GLuint clamp)   { this->clamp  = clamp;  return (*this); }
 	inline TextureParameters setShouldClamp(bool shouldClamp) { this->shouldClamp = shouldClamp; return (*this); }
+	inline TextureParameters setSRGB(bool srgb) { this->srgb = srgb; return (*this); }
+
+	inline void preventGenerateMipMaps() { generateMipMapsIfAvailable = false; }
 
 	inline GLuint getTarget() { return target; }
-	inline GLuint getFilter() { return filter; }
+	inline GLuint getMinFilter() { return minFilter; }
+	inline GLuint getMagFilter() { return magFilter; }
 	inline GLuint getClamp()  { return clamp;  }
 	inline bool getShouldClamp() { return shouldClamp; }
+	inline bool getSRGB() { return srgb; }
 };
 
 /*****************************************************************************
@@ -150,13 +169,27 @@ public:
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */
-	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& format);
+	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& internalFormat, GLint& format, bool srgb);
+	/* Returns the data necessary to load a texture taking the data as a float, again the
+	 * texture should be freed afterwards*/
+	static float* loadTexturef(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& internalFormat, GLint& format, bool srgb);
+
+	/* Returns the OpenGL texture format an image should have from its number of colour
+	 * components and whether it should be SRGB */
+	static GLint getTextureFormat(int numComponents, bool srgb);
+
+	/* Returns a texture instance created using the data given */
+	static Texture* createTexture(std::string path, void* data, int numComponents, GLsizei width, GLsizei height, GLint internalFormat, GLint format, GLenum type, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
 
 	/* Calls stbi_image_free */
-	static void freeTexture(unsigned char* texture);
+	static void freeTexture(void* texture);
 
 	/* Returns a Texture instance after reading its data from a file */
 	static Texture* loadTexture(std::string path, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
+	static Texture* loadTexturef(std::string path, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
+
+	/* Allows loaded textures to be flipped when being loaded */
+	static void setFlipVerticallyOnLoad(bool flip);
 };
 
 /*****************************************************************************
@@ -165,8 +198,14 @@ public:
 
 class Cubemap : public Texture {
 public:
-	/* The constructor */
+	/* The constructors */
+	Cubemap(TextureParameters parameters = TextureParameters()) : Texture(parameters) {}
 	Cubemap(std::string path, std::vector<std::string> faces);
+	Cubemap(GLuint handle, TextureParameters parameters = TextureParameters().setTarget(GL_TEXTURE_CUBE_MAP)) : Texture(handle, parameters) {} //Will not apply texture parameters
+
+	/* Method used to create a cube map given various values TextureParameters will be assigned
+	 * and the cubemap will remain bound */
+	static Cubemap* createCubemap(GLsizei size, GLint internalFormat, GLint format, GLenum type, TextureParameters parameters = TextureParameters());
 };
 
 #endif /* CORE_RENDER_TEXTURE_H_ */

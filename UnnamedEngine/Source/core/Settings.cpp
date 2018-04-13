@@ -21,13 +21,13 @@
 namespace VideoResolution {
 	/* Used to convert a Vector2i into a string representing a resolution */
 	std::string toString(Vector2i resolution) {
-		return StrUtils::str(StrUtils::str(resolution.getX()) + " x " + StrUtils::str(resolution.getY()));
+		return utils_string::str(utils_string::str(resolution.getX()) + " x " + utils_string::str(resolution.getY()));
 	}
 
 	/* Used to convert a string into a Vector2i representing a resolution */
 	Vector2i toVector(std::string resolution) {
-		std::vector<std::string> split = StrUtils::strSplit(resolution, " x ");
-		return Vector2i(StrUtils::strToInt(split[0]), StrUtils::strToInt(split[1]));
+		std::vector<std::string> split = utils_string::strSplit(resolution, " x ");
+		return Vector2i(utils_string::strToInt(split[0]), utils_string::strToInt(split[1]));
 	}
 }
 

@@ -1,0 +1,7 @@
+#version 140
+
+#map uniform Texture ue_texture
+
+uniform sampler2D ue_texture;
+
+in vec2 ue_frag_textureCoord; 

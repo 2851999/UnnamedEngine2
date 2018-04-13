@@ -23,6 +23,7 @@
 #include "Transform.h"
 #include "Vector.h"
 #include "render/Mesh.h"
+#include "Frustum.h"
 
 /*****************************************************************************
  * The GameObject class is the basis of any objects used in a Game, but does
@@ -37,7 +38,7 @@ private:
 	/* The RenderShader used when rendering */
 	RenderShader* renderShader;
 protected:
-	/* Tranform for this object */
+	/* Transform for this object */
 	Transform* transform = new Transform();
 public:
 	/* The constructors */
@@ -60,6 +61,11 @@ public:
 	inline Matrix4f& getModelMatrix() { return transform->getMatrix(); }
 
 	inline void setRenderShader(RenderShader* renderShader) { this->renderShader = renderShader; }
+
+	/* Used to set the internal mesh, previous will be deleted if there was one,
+	 * if a shader is supplied, then setup will be called on it otherwise it is assumed
+	 * it has already been setup */
+	void setMesh(Mesh* mesh, RenderShader* shader = NULL);
 
 	inline bool hasMesh() { return mesh; }
 	inline Mesh* getMesh() { return mesh; }
@@ -96,6 +102,8 @@ public:
 
 	/* Setters and getters */
 	inline void setPosition(Vector2f position) { transform->setPosition(position); }
+	inline void setX(float x) { transform->setX(x); }
+	inline void setY(float y) { transform->setY(y); }
 	inline void setPosition(float x, float y)  { transform->setPosition(x, y); }
 	inline void setRotation(Quaternion rotation) { transform->setRotation(rotation); }
 	inline void setRotation(float rotation)    { transform->setRotation(rotation); }
@@ -153,6 +161,9 @@ public:
 	/* Setters and getters */
 	inline void setPosition(Vector3f position) { transform->setPosition(position); }
 	inline void setPosition(float x, float y, float z)  { transform->setPosition(x, y, z); }
+	inline void setX(float x) { transform->setX(x); }
+	inline void setY(float y) { transform->setY(y); }
+	inline void setZ(float z) { transform->setZ(z); }
 	inline void setRotation(Quaternion rotation) { transform->setRotation(rotation); }
 	inline void setRotation(Vector3f rotation) { transform->setRotation(rotation); }
 	inline void setRotation(float x, float y, float z) { transform->setRotation(x, y, z); }
@@ -184,7 +195,8 @@ public:
 	inline float getDepth() { return size.getZ() * getScale().getZ(); }
 	inline float getLocalDepth() { return size.getZ(); }
 
-	virtual bool shouldCull() override;
+	bool shouldCull(Frustum& frustum);
+	bool shouldCull();
 };
 
 #endif /* CORE_OBJECT_H_ */

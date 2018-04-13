@@ -28,6 +28,7 @@
 #include "../utils/GLUtils.h"
 
 #include "../experimental/Billboard.h"
+//#include "../experimental/terrain/HeightMapTerrain.h"
 
 class Test : public BaseTest3D {
 private:
@@ -38,48 +39,65 @@ private:
 	GameObject3D* model1;
 	GameObject3D* model2;
 	GameObject3D* model3;
+//	GameObject3D* box;
 
 	Font* font;
+
+//	HeightMapTerrain* terrain;
+
+//	bool test = false;
+//	HeightMapTerrain* terrain2;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
 	virtual void onUpdate() override;
 	virtual void onRender() override;
 	virtual void onDestroy() override;
+
+	virtual void onKeyPressed(int key) override;
 };
 
 void Test::onInitialise() {
-//	getSettings().videoVSync = false;
-//	getSettings().videoMaxFPS = 0;
+	//getSettings().videoVSync = false;
+	//getSettings().videoMaxFPS = 0;
 }
 
 void Test::onCreated() {
-	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
+	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
 
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj");
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh");
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj");
-//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae");
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane.obj", false);
+	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane3.obj", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae", false);
 
 	plane = new GameObject3D(resourceLoader.loadModel("plane/", "plane2.model"), Renderer::SHADER_LIGHTING);
+	//plane->setRotation(90.0f, 0.0f, 0.0f);
+	//plane->setPosition(0.0f, 0.0f, -6.0f);
+	//plane = new GameObject3D(resourceLoader.loadModel("crytek-sponza/", "sponza.obj"), Renderer::SHADER_LIGHTING);
+	//plane->setScale(0.15f, 0.15f, 0.15f);
 	plane->update();
 
+	MeshLoader::loadDiffuseTexturesAsSRGB = false;
 	model1 = new GameObject3D(resourceLoader.loadModel("bob/", "bob_lamp_update.model"), Renderer::SHADER_LIGHTING);
 	model1->setPosition(-2.0f, 0.8f, 0.0f);
 	model1->update();
+	MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 	model1->getMesh()->getSkeleton()->startAnimation("");
 	//model1->getMesh()->getSkeleton()->stopAnimation();
 
 	model2 = new GameObject3D(resourceLoader.loadModel("teapot.model"), Renderer::SHADER_LIGHTING);
+	//model2->setRotation(90.0f, 0.0f, 0.0f);
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
 
 //	model2->getMesh()->getSkeleton()->startAnimation("");
 	//model2->getMesh()->getSkeleton()->stopAnimation();
 
-	model3 = new GameObject3D(resourceLoader.loadModel("gingerbreadman.model"), Renderer::SHADER_LIGHTING);
+	model3 = new GameObject3D(resourceLoader.loadModel("deformablesphere.dae"), Renderer::SHADER_LIGHTING);
 	model3->setPosition(2.0f, 0.8f, 0.0f);
 	model3->update();
 
@@ -91,10 +109,19 @@ void Test::onCreated() {
 	renderScene->add(model2);
 	renderScene->add(model3);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0, -1.0f, 0.0001f);
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0.0f, -1.0f, 0.0001f); //->setDiffuseColour(Colour(200.0f, 200.0f, 200.0f));
+	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(0.0f, 1.0f, 0.0f), false))->setDiffuseColour(Colour::RED);
+	Light* light2 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.5f, -1.0f, 0.0001f);
 	//plane->getMesh()->getMaterial(1)->diffuseTexture = light0->getDepthBuffer()->getFramebufferTexture(0);
 	light0->update();
+	light1->update();
+	light2->update();
 	renderScene->addLight(light0);
+	renderScene->addLight(light1);
+	renderScene->addLight(light2);
+	//renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.0f, 2.0f, 0.0f), false))->setDirection(0, -1.0f, 0.0001f)->setInnerCutoff(12.5f)->setOuterCutoff(17.5f));
+
+	//renderScene->enableDeferred();
 
 	particleEmitter = new SphericalParticleEmitter(1.0f);
 	particleEmitter->particleSpawnRate = 120;
@@ -113,6 +140,28 @@ void Test::onCreated() {
 
 	font = new Font("resources/fonts/CONSOLA.TTF", 64, Colour::WHITE, true, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
 	font->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
+
+//	terrain = new HeightMapTerrain();
+//	terrain->setup("D:/Storage/Users/Joel/Desktop/heightmap.jpg", 8);
+//	terrain->setScale(Vector3f(0.1f, 0.1f, 0.1f));
+//	terrain->update();
+
+//	terrain2 = new HeightMapTerrain();
+//	terrain2->setup("H:/Storage/Users/Joel/Desktop/heightmap.png", 8);
+//	terrain2->setScale(Vector3f(0.1f, 0.1f, 0.1f));
+//	terrain2->getMaterial()->diffuseColour = Colour::RED;
+//	terrain2->update();
+
+//	renderScene->add(terrain);
+
+//	box = new GameObject3D(new Mesh(MeshBuilder::createCube(1.0f, 1.0f, 1.0f)), Renderer::SHADER_MATERIAL);
+//	box->getMaterial()->diffuseColour = Colour::BLUE;
+//	//box->getMesh()->setBoundingSphere(box->getMesh()->getData()->calculateBoundingSphere());
+//	box->update();
+
+	camera->setMovementSpeed(5.0f);
+
+	renderScene->disableGammaCorrection();
 }
 
 void Test::onUpdate() {
@@ -127,20 +176,48 @@ void Test::onUpdate() {
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		particleEmitter->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 
-	model1->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	model1->getMesh()->updateAnimation(getDeltaSeconds());
 	//model2->getMesh()->getSkeleton()->update(getDeltaSeconds());
-	model3->getMesh()->getSkeleton()->update(getDeltaSeconds());
+	model3->getMesh()->updateAnimation(getDeltaSeconds());
+
+	model2->getTransform()->rotate(model2->getTransform()->getRotation().getUp(), 0.1f * getDelta());
+	model2->update();
+
+//	plane->getTransform()->rotate(plane->getTransform()->getRotation().getLeft(), 0.01f * getDelta());
+//	plane->update();
 }
 
 void Test::onRender() {
-	GLUtils::setupSimple3DView(true);
-
 	particleSystem->render();
 	font->render();
+//	terrain->render();
+
+//	box->render();
+
+//	if (camera->getFrustum().AABBInFrustum(Vector3f(-0.5f, -0.5f, -0.5f), Vector3f(0.5f, 0.5f, 0.5f))) {
+//		box->render();
+//		if (test) {
+//			std::cout << "In view" << std::endl;
+//			test = false;
+//		}
+//	} else {
+//		if (! test) {
+//			std::cout << "Out of view" << std::endl;
+//			test = true;
+//		}
+//	}
+
+//	terrain2->render();
 }
 
 void Test::onDestroy() {
 	delete particleSystem;
+}
+
+void Test::onKeyPressed(int key) {
+	BaseTest3D::onKeyPressed(key);
+	if (key == GLFW_KEY_Q)
+		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

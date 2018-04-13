@@ -21,6 +21,7 @@
 
 #include "FBO.h"
 #include "../Object.h"
+#include "../Frustum.h"
 
 /*****************************************************************************
  * The Light class contains the information required to create a light
@@ -43,16 +44,22 @@ private:
 	float linear    = 0.0f;
 	float quadratic = 1.0f;
 
-	/* The cutoff and outer cutoff values for spot lights */
-	float cutoff      = 0;
+	/* The inner and outer cutoff values for spot lights (taken in degrees) */
+	float innerCutoff = 0;
 	float outerCutoff = 0;
 
 	/* The FBO if assigned for shadow mapping */
 	FBO* depthBuffer = NULL;
 
+	/* The size of the shadow map (width and height) */
+	unsigned int shadowMapSize = 1024;
+
 	/* The light projection and view matrices */
 	Matrix4f lightProjection;
 	Matrix4f lightView;
+
+	/* Frustum used for frustum culling when rendering shadow maps */
+	Frustum frustum;
 
 	/* Combination of the above matrices, assigned in the update method */
 	Matrix4f lightProjectionView;
@@ -63,29 +70,7 @@ public:
 	static const unsigned int TYPE_SPOT        = 3;
 
 	/* The constructor */
-	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false) : type(type) {
-		setPosition(position);
-
-		if (type == TYPE_DIRECTIONAL) {
-			if (castShadows) {
-				depthBuffer = new FBO(GL_FRAMEBUFFER);
-
-				depthBuffer->attach(new FramebufferTexture(
-						GL_TEXTURE_2D,
-						GL_DEPTH_COMPONENT,
-						1024,
-						1024,
-						GL_DEPTH_COMPONENT,
-						GL_FLOAT,
-						GL_DEPTH_ATTACHMENT
-				));
-
-				depthBuffer->setup();
-
-				lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
-			}
-		}
-	}
+	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false);
 
 	/* The destructor */
 	virtual ~Light() { delete depthBuffer; }
@@ -106,7 +91,7 @@ public:
 	inline Light* setConstantAttenuation(float value) { constant = value; return this; }
 	inline Light* setLinearAttenuation(float value) { linear = value; return this; }
 	inline Light* setQuadraticAttenuation(float value) { quadratic = value; return this; }
-	inline Light* setCutoff(float cutoff) { this->cutoff = cutoff; return this; }
+	inline Light* setInnerCutoff(float innerCutoff) { this->innerCutoff = innerCutoff; return this; }
 	inline Light* setOuterCutoff(float outerCutoff) { this->outerCutoff = outerCutoff; return this; }
 
 	inline int getType() { return type; }
@@ -116,14 +101,16 @@ public:
 	inline float getConstantAttenuation() { return constant; }
 	inline float getLinearAttenuation() { return linear; }
 	inline float getQuadraticAttenuation() { return quadratic; }
-	inline float getCutoff() { return cutoff; }
+	inline float getInnerCutoff() { return innerCutoff; }
 	inline float getOuterCutoff() { return outerCutoff; }
 
 	inline FBO* getDepthBuffer() { return depthBuffer; }
 	inline bool hasDepthBuffer() { return depthBuffer; }
+	inline unsigned int getShadowMapSize() { return shadowMapSize; }
 	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
 	inline Matrix4f getLightViewMatrix() { return lightView; }
 	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }
+	inline Frustum& getFrustum() { return frustum; }
 };
 
 #endif /* CORE_RENDER_LIGHT_H_ */

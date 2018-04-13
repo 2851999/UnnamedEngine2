@@ -123,7 +123,7 @@ void MLDocument::load(std::string path) {
 }
 
 void MLDocument::save(std::string path) {
-	FileUtils::writeFile(path, toString());
+	utils_file::writeFile(path, toString());
 }
 
 std::string MLDocument::toString() {
@@ -144,7 +144,7 @@ void MLParser::parse(std::string line) {
 	//Ensure the sequence has been found
 	if (startLoc != std::string::npos && ! inComment) {
 		//Check for a comment
-		if (StrUtils::strStartsWith(line.substr(startLoc + 1), "!--"))
+		if (utils_string::strStartsWith(line.substr(startLoc + 1), "!--"))
 			inComment = true;
 
 		//Ensure the current line isn't part of a comment
@@ -162,7 +162,7 @@ void MLParser::parse(std::string line) {
 				//std::cout << tag << std::endl;
 
 				//Ensure the current tag is not closing a previous  one
-				if (! StrUtils::strStartsWith(tag, "/")) {
+				if (! utils_string::strStartsWith(tag, "/")) {
 					//A new element has been declared so parse it
 					MLElement element = parseElement(tag);
 
@@ -194,7 +194,7 @@ void MLParser::parse(std::string line) {
 		}
 	}
 	//Check whether a comment ends on the current line
-	if (inComment && StrUtils::strEndsWith(line, "-->"))
+	if (inComment && utils_string::strEndsWith(line, "-->"))
 		inComment = false;
 }
 

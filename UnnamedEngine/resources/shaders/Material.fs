@@ -1,9 +1,15 @@
 #map uniform Material_AmbientColour ue_material.ambientColour
 #map uniform Material_AmbientTexture ue_material.ambientTexture
+#map uniform Material_HasAmbientTexture ue_material.hasAmbientTexture
 #map uniform Material_DiffuseColour ue_material.diffuseColour
 #map uniform Material_DiffuseTexture ue_material.diffuseTexture
+#map uniform Material_HasDiffuseTexture ue_material.hasDiffuseTexture
+#map uniform Material_DiffuseTextureSRGB ue_material.diffuseTextureSRGB
 #map uniform Material_SpecularColour ue_material.specularColour
 #map uniform Material_SpecularTexture ue_material.specularTexture
+#map uniform Material_HasSpecularTexture ue_material.hasSpecularTexture
+#map uniform Material_ShininessTexture ue_material.shininessTexture
+#map uniform Material_HasShininessTexture ue_material.hasShininessTexture
 #map uniform Material_NormalMap ue_material.normalMap
 #map uniform Material_ParallaxMap ue_material.parallaxMap
 #map uniform Material_ParallaxScale ue_material.parallaxScale
@@ -16,8 +22,17 @@ struct UEMaterial {
 	vec3 specularColour;
 	
 	sampler2D ambientTexture;
+	bool hasAmbientTexture;
+
 	sampler2D diffuseTexture;
+	bool hasDiffuseTexture;
+	bool diffuseTextureSRGB;
+
 	sampler2D specularTexture;
+	bool hasSpecularTexture;
+
+	sampler2D shininessTexture;
+	bool hasShininessTexture;
 	
 	sampler2D normalMap;
 	sampler2D parallaxMap;
@@ -32,15 +47,36 @@ uniform UEMaterial ue_material;
 
 /* Various methods to get colours */
 vec3 ueGetMaterialAmbient(vec2 textureCoord) {
-	return ue_material.ambientColour * texture(ue_material.ambientTexture, textureCoord).xyz;
+	vec3 ambientColour = ue_material.ambientColour;
+	if (ue_material.hasAmbientTexture)
+		ambientColour *= texture(ue_material.ambientTexture, textureCoord).rgb;
+	return ambientColour;
 }
 
 vec4 ueGetMaterialDiffuse(vec2 textureCoord) {
-	return ue_material.diffuseColour * texture(ue_material.diffuseTexture, textureCoord);
+	vec4 diffuseColour = ue_material.diffuseColour;
+	if (ue_material.hasDiffuseTexture) {
+		// vec4 tex = texture(ue_material.diffuseTexture, textureCoord);
+		// if (ue_material.diffuseTextureSRGB)
+		// 	tex = pow(tex, vec4(2.2));
+		// diffuseColour *= tex;
+		diffuseColour *= texture(ue_material.diffuseTexture, textureCoord);
+	}
+	return diffuseColour;
 }
 
 vec3 ueGetMaterialSpecular(vec2 textureCoord) {
-	return ue_material.specularColour * texture(ue_material.specularTexture, textureCoord).xyz;
+	vec3 specularColour = ue_material.specularColour;
+	if (ue_material.hasSpecularTexture)
+		specularColour *= texture(ue_material.specularTexture, textureCoord).rgb;
+	return specularColour;
+}
+
+float ueGetMaterialShininess(vec2 textureCoord) {
+	if (ue_material.hasShininessTexture)
+		return texture(ue_material.shininessTexture, textureCoord).r;
+	else
+		return ue_material.shininess;
 }
 
 vec3 ueGetMaterialNormal(vec2 textureCoord) {
@@ -53,8 +89,8 @@ vec3 ueGetMaterialNormal(vec2 textureCoord) {
 vec2 ueGetMaterialParallax(vec2 textureCoord, vec3 viewDir) {
 	const float minLayers = 10;
 	const float maxLayers = 20;
-	
-	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));  
+
+	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));
 	
 	float layerSize = 1.0 / numLayers;
 	float currentLayerDepth = 0.0;
@@ -81,8 +117,4 @@ vec2 ueGetMaterialParallax(vec2 textureCoord, vec3 viewDir) {
 	float weight = nextDepth / (nextDepth - lastDepth);
 	
 	return prevTexCoords * weight + currentTexCoords * (1.0 - weight);
-}
-
-float ueGetMaterialShininess() {
-	return ue_material.shininess;
 }

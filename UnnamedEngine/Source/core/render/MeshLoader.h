@@ -19,7 +19,7 @@
 #ifndef CORE_RENDER_MESHLOADER_H_
 #define CORE_RENDER_MESHLOADER_H_
 
-#include <map>
+#include <unordered_map>
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -40,15 +40,15 @@ struct aiScene;
 
 class MeshLoader {
 private:
-	static void addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes);
+	static void addChildren(const aiNode* node, std::unordered_map<const aiNode*, const aiBone*>& nodes);
 	static const aiNode* findMeshNode(const aiNode* parent);
 	static const aiMatrix4x4 calculateMatrix(const aiNode* current, aiMatrix4x4 currentMatrix);
 
 	/* Static method called to load a material */
-	static Material* loadAssimpMaterial(std::string path, std::string fileName, const aiMaterial* material);
+	static Material* loadAssimpMaterial(std::string path, std::string fileName, const aiMaterial* material, bool pbr);
 
 	/* Static method called to load a texture */
-	static Texture* loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type);
+	static Texture* loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type, bool srgb = false);
 
 	/* Static method called to load a colour (If not assigned, returns WHITE instead) */
 	static Colour loadAssimpColour(const aiMaterial* material, const char* key, unsigned int type, unsigned int idx);
@@ -63,13 +63,17 @@ private:
 	static void writeTexture(BinaryFile& file, Texture* texture, std::string path);
 
 	static void readMaterial(BinaryFile& file, std::vector<Material*>& materials, std::string path);
-	static Texture* readTexture(BinaryFile& file, std::string path);
+	static Texture* readTexture(BinaryFile& file, std::string path, bool srgb = false);
 public:
-	/* Static method called to read a file and load a model's meshes */
-	static Mesh* loadModel(std::string path, std::string fileName);
+	static bool loadDiffuseTexturesAsSRGB;
+
+	/* Static method called to read a file and load a model's meshes
+	 * NOTE: PBR only needs to be assigned if loading a model using assimp (i.e. not
+	 * using the engine's model format) */
+	static Mesh* loadModel(std::string path, std::string fileName, bool pbr = false);
 
 	/* Static method called to read a file and load a model's meshes using Assimp */
-	static Mesh* loadAssimpModel(std::string path, std::string fileName, bool genNormals = true);
+	static Mesh* loadAssimpModel(std::string path, std::string fileName, bool pbr, bool genNormals = true);
 
 	/* Static method called to write a model to a file in a custom engine format */
 	static void saveEngineModel(std::string path, std::string fileName, Mesh* mesh);
@@ -78,7 +82,7 @@ public:
 	static Mesh* loadEngineModel(std::string path, std::string fileName);
 
 	/* Static method called to convert a model to the engine format and save it in the same location */
-	static void convertToEngineModel(std::string path, std::string fileName, bool genNormals = true);
+	static void convertToEngineModel(std::string path, std::string fileName, bool pbr, bool genNormals = true);
 };
 
 #endif /* CORE_RENDER_MESHLOADER_H_ */
