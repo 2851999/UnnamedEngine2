@@ -49,6 +49,9 @@ RenderScene3D::~RenderScene3D() {
 	batches.clear();
 	if (deferredRendering)
 		delete gBuffer;
+	if (intermediateFBO != NULL)
+		delete intermediateFBO;
+	delete postProcessor;
 }
 
 /* Method used to enable deferred rendering */
