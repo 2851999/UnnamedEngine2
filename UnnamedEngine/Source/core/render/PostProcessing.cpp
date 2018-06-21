@@ -42,11 +42,11 @@ PostProcessor::PostProcessor(bool multisample) {
 
 	fbo->attach(new FramebufferStore(
 			GL_RENDERBUFFER,
-			GL_DEPTH_COMPONENT32F,
+			GL_DEPTH_COMPONENT32,
 			Window::getCurrentInstance()->getSettings().windowWidth,
 			Window::getCurrentInstance()->getSettings().windowHeight,
 			GL_DEPTH_COMPONENT,
-			GL_FLOAT,
+			GL_UNSIGNED_INT,
 			GL_DEPTH_ATTACHMENT,
 			GL_NEAREST,
 			GL_CLAMP_TO_EDGE,

@@ -21,6 +21,7 @@
 #include "Renderer.h"
 #include "../Window.h"
 #include "../../utils/Utils.h"
+#include "../../utils/GLUtils.h"
 
 /*****************************************************************************
  * The RenderScene3D class
@@ -60,7 +61,7 @@ void RenderScene3D::enableDeferred() {
 
 	//Create the geometry buffer
 	if (! gBuffer)
-		gBuffer = new GeometryBuffer(pbr, Window::getCurrentInstance()->getSettings().videoSamples > 0);
+		gBuffer = new GeometryBuffer(pbr);
 }
 
 void RenderScene3D::add(GameObject3D* object) {
@@ -95,6 +96,10 @@ void RenderScene3D::render() {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
 
+			//Render a wireframe instead if requested
+			if (renderWireframe)
+				utils_gl::enableWireframe();
+
 			//Go through all of the objects in this scene
 			for (unsigned int i = 0; i < batches.size(); i++) {
 				//Ensure the geometry shader is used to render all of the objects in this batch
@@ -128,6 +133,9 @@ void RenderScene3D::render() {
 				batches[i].shader->useGeometryShader(false);
 			}
 
+			if (renderWireframe)
+				utils_gl::disableWireframe();
+
 			//Stop rendering to the geometry buffer
 			gBuffer->unbind();
 
@@ -157,11 +165,18 @@ void RenderScene3D::render() {
 			else
 				postProcessor->start();
 
+			//Render a wireframe instead if requested
+			if (renderWireframe)
+				utils_gl::enableWireframe();
+
 			//Go through all of the objects in this scene
 			for (unsigned int i = 0; i < batches.size(); i++) {
 				//Render the current batch
 				renderLighting(batches[i].shader, i);
 			}
+
+			if (renderWireframe)
+				utils_gl::disableWireframe();
 
 			if (intermediateFBO) {
 				//Stop rendering to the intermediate FBO
@@ -186,11 +201,21 @@ void RenderScene3D::render() {
 		else
 			postProcessor->start();
 
+		//Render a wireframe instead if requested
+		if (renderWireframe)
+			utils_gl::enableWireframe();
+
 		//Go through and render all of the objects in this scene
 		for (unsigned int i = 0; i < batches.size(); i++) {
 			for (unsigned int j = 0; j < batches[i].objects.size(); j++)
 				batches[i].objects[j]->render();
 		}
+
+		if (renderWireframe)
+			utils_gl::disableWireframe();
+
+		if (renderWireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		if (intermediateFBO) {
 			//Stop rendering to the intermediate FBO

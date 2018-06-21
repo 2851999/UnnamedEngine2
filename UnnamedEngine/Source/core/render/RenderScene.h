@@ -77,6 +77,9 @@ private:
 	/* Intermediate FBO used for antialiasing */
 	PostProcessor* intermediateFBO = NULL;
 
+	/* States whether the scene should be rendered in wireframe mode */
+	bool renderWireframe = false;
+
 	/* Used to render the lighting pass given the shader to use (and index of the batch to render for forward rendering) */
 	void renderLighting(RenderShader* renderShader, int indexOfBatch = -1);
 
@@ -117,6 +120,8 @@ public:
 	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
 	inline void enableLighting() { lighting = true; }
 	inline void disableLighting() { lighting = false; }
+	inline void enableWireframe() { renderWireframe = true; }
+	inline void disableWireframe() { renderWireframe = false; }
 	inline void setPBREnvironment(PBREnvironment* environment) { this->pbrEnvironment = environment; }
 	inline Colour getAmbientLight() { return ambientLight; }
 	inline bool isLightingEnabled() { return lighting; }
