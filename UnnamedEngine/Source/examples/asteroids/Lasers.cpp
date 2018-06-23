@@ -43,7 +43,7 @@ Lasers::Lasers(AsteroidsGame* game, Ship* ship) : soundSystem(game->getSoundSyst
 	ResourceLoader& loader = game->getResourceLoader();
 
 	//Setup the lasers renderer
-	renderer = new GameRenderer(MeshLoader::loadAssimpModel(loader.getAbsPathModels(), "lasernew.obj", false), loader.loadShader("LaserShader"), maxLasers, false, false, false);
+	renderer = new GameRenderer(MeshLoader::loadAssimpModel(loader.getAbsPathModels(), "lasernew.obj", false, false), loader.loadShader("LaserShader"), maxLasers, false, false, false);
 
 	for (unsigned int i = 0; i < maxLasers; i++) {
 		GameObject3D* object = new GameObject3D();

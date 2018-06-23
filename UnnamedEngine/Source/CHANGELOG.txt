@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 0 | Experimental 3
+
+* Changed MLParser to allow for closing an element on the
+  same line
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 0 | Experimental 2
 
 * Added methods to enable and disable wireframe rendering in

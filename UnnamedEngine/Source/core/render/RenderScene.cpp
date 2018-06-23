@@ -88,6 +88,7 @@ void RenderScene3D::render() {
 		renderShadowMaps();
 		//Check if deferred rendering or not
 		if (deferredRendering) {
+
 			//Deferred rendering
 
 			//Bind the geometry buffer to render to it
