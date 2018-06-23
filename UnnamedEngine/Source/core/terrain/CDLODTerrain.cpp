@@ -26,20 +26,28 @@
  * The CDLODTerrain class
  *****************************************************************************/
 
-CDLODTerrain::CDLODTerrain(std::string heightMapPath) : CDLODTerrain(new CDLODHeightMap(heightMapPath)) {}
+CDLODTerrain::CDLODTerrain(std::string heightMapPath, int lodDepth, float meshSize) : CDLODTerrain(new CDLODHeightMap(heightMapPath), lodDepth, meshSize) {}
 
-CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap) {
+CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap, int lodDepth, float meshSize) {
 	//Create the height map
 	this->heightMap = heightMap;
+	this->lodDepth = lodDepth;
+	this->meshSize = meshSize;
+
+
+	//Calculate what the leafNodeSize should be for the given lodDepth and size the map should be
+	float rootNodeSize = heightMap->getSize();
+	leafNodeSize = rootNodeSize / pow(2, lodDepth - 1);
 
 	//Setup the ranges
 	ranges.push_back(leafNodeSize * RANGE_MULTIPLIER);
 	for (int i = 1; i < lodDepth; i++) {
-		ranges.push_back((ranges[i - 1] + pow(2, i)*leafNodeSize) * RANGE_MULTIPLIER); //Multiplier resolves clamping issue
+		ranges.push_back((ranges[i - 1] + pow(2, i) * leafNodeSize) * RANGE_MULTIPLIER); //Multiplier resolves clamping issue
 	}
 
-	//Calculate the root node size
-	float rootNodeSize = leafNodeSize * pow(2, lodDepth - 1);
+	//Calculate the root node size (OLD)
+	//float rootNodeSize = leafNodeSize * pow(2, lodDepth - 1);
+
 	//float rootNodeSize = heightMap->getSize();
 
 //	std::cout << rootNodeSize << std::endl;

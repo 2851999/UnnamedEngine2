@@ -1,4 +1,155 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 (V0.3.1)
+
+* Added PlaneCollider3D
+* Added methods to enable and disable wireframe rendering in
+  RenderScene
+* Added 'getSteepness' mehtod in CDLODHeightMap
+
+* Changed MLParser to allow for closing an element on the
+  same line
+
+* Removed temporary (incorrect) antialiasing for deferred
+  rendering
+
+* Fixed bug: Radius for the bounding sphere of a mesh was
+             calculated incorrectly
+* Fixed bug: CDLODHeightMap could cause a crash when using
+		     getMinHeight and getMaxHeight
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 0 | Experimental 3
+
+* Changed MLParser to allow for closing an element on the
+  same line
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 0 | Experimental 2
+
+* Added methods to enable and disable wireframe rendering in
+  RenderScene
+* Added 'getSteepness' mehtod in CDLODHeightMap
+
+* Removed temporary (incorrect) antialiasing for deferred
+  rendering
+  
+* Fixed bug: CDLODHeightMap could cause a crash when using
+		     getMinHeight and getMaxHeight
+* Fixed bug: Previous experimental wouldn't output depth
+             information to the default framebuffer correctly
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 0 | Experimental 1
+
+* Added PlaneCollider3D
+
+* Fixed bug: Radius for the bounding sphere of a mesh was
+             calculated incorrectly
+* Fixed bug: PostProcessing and GeometryBuffer potentially
+			 caused some rendering artifacts
+
+--------------------------------------------------------------
+Release 1 | Beta 1 (V0.3.0)
+
+* Added Sphere
+* Added CDLODHeightMap
+* Added CDLODQuadTreeNode
+* Added CDLODTerrain
+* Added HeightMapGenerator
+* Added SimplexNoise
+* Added GeometryBuffer
+* Added PBREnvironment
+* Added method 'setMesh' in GameObject
+* Added 'renderMode' to MeshData
+* Added 'setupShader' to MeshRenderData
+* Added 'AABBInFrustum' method in Frustum
+* Added 'updateAnimation' in Mesh
+* Added 'createTexture' method in Texture
+* Added some getters and setters to DebugCamera
+* Added convenience methods for setting the x, y and z
+  positions of a transform/object separately
+* Added an alternative constructor for FramebufferTexture
+* Added deferred rendering in RenderScene3D
+* Added geometry shader support in RenderShader for use with
+  deferred rendering (used for the geometry pass)
+* Added srgb setting in TextureParameters
+* Added support for "../" in include paths for shaders
+* Added loadTexturef in Texture to load textures with float
+  data
+* Added separate minFilter and magFilter properties in
+  TextureParameters (when filter supplied both assigned)
+* Added support for deferred PBR rendering using
+  RenderScene3D
+* Added option to use multisampled FBO's and PostProcessors
+* Added methods in RenderScene3D to change the exposure
+  and enable/disable gamma correction
+* Added showDeferredBuffers method in RenderScene3D
+  (only works with antialiasing turned off)
+
+* Changed default value of 'culling' in Mesh to false, and
+  changed all models to assign this value to true
+* Changed 'updateBones' to be prinvate in Skeleton
+* Changed resources so that they remove themselves from their
+  ResourceManager when deleted
+* Changed getDelta() methods to be of type float to be
+  more accurate
+* Changed debugging settings to debug
+* Changed ModelLoader to load diffuse textures as SRGB by
+  default with the variable 'loadDiffuseTexturesAsSRGB' to
+  change this when loading a model
+* Changed Material structure to a class
+* Changed saveTextures and releaseNewTextures in Renderer
+  so that it can be called more than once to allow more than
+  one state to be saved (releaseNewTextures will unbind the
+  textures that were added since the last saveTextures call)
+* Changed frustum culling for rendering shadow maps to be
+  with the light's view frustum in RenderScene3D
+* Changed vectors to work more like GLSL with Vector3f(0.0f)
+  for example assigning all components in the vector to 0.0f
+  instead of just the x one
+  
+* Cleaned up some shaders
+
+* Improved accuracy of FPSLimiter
+
+* Replaced all instances of std::map with std::unordered_map
+  as the order was not necessary
+
+* Renamed all utility namespaces from things like StrUtils
+  to utils_string, and FileUtils to utils_file
+* Renamed cutoff to innerCutoff in Light
+* Renamed FramebufferTexture to FramebufferStore
+  
+* Rewritten render method in RenderScene
+  
+* Moved some of the shaders around
+
+* Removed BoundingSphere structure (Replaced with sphere)
+* Removed size parameter for SkyBox
+
+* Fixed bug: Not all resources were deleted when the engine
+             stopped
+* Fixed bug: Frustum culling did not take into account the
+             scale of the object
+* Fixed bug: Shadow's would repeat themselves if far enough
+             away
+* Fixed bug: DebugCamera was incorrectly calculating mouse
+             movement
+* Fixed bug: GUIDropDownMenu and hence GUIDropDownList did
+             not assign added button's transform
+* Fixed bug: Horizontal GUISlider did not work correctly
+* Fixed bug: Matrix4f used half the value it should have for
+             the fov
+* Fixed bug: Shininess value was not loaded from materials
+* Fixed bug: Was incorrectly calculating spot lights
+* Fixed bug: Parallax disaplcement mapping was wrong when
+             objects were rotated (seems like bitangents from
+             assimp may be in the wrong direction)
+
+* NOTE: MSAA in deferred rendering is not strictly correct
+        and can produce lighting artifacts
+
+--------------------------------------------------------------
 Release 1 | Beta 0 | Development 7 (V0.3.0)
 
 * Added option to use multisamples FBO's and PostProcessors
@@ -369,7 +520,6 @@ Release 1 | Beta 0 | Development 2 (V0.2.5)
 
 * Fixed bug: Not all resources were deleted when the engine
              stopped
-
 
 --------------------------------------------------------------
 Release 1 | Beta 0 | Development 1 | Experimental 3

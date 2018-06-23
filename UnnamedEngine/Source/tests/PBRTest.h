@@ -37,6 +37,8 @@ private:
 	PBREnvironment* environment;
 
 	Light* light0;
+
+	bool deferred = false;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -50,7 +52,7 @@ public:
 void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
-	getSettings().videoSamples = 0;
+	getSettings().videoSamples = deferred ? 0 : 16;
 //	getSettings().videoResolution = VideoResolution::RES_1080P;
 //	getSettings().windowFullscreen = true;
 }
@@ -60,7 +62,7 @@ void Test::onCreated() {
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");
 
-	environment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Milkyway_small.hdr");
+	environment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr");
 	//EquiToCube::generateCubemapAndIrradiance(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr", envMap, irMap, prefilMap, brdfLUTMap);
 
 	camera->setSkyBox(new SkyBox(environment->getEnvironmentCubemap()));
@@ -69,7 +71,8 @@ void Test::onCreated() {
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
 	renderScene->enablePBR();
 	renderScene->setPBREnvironment(environment);
-	renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
+	if (deferred)
+		renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	//Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
@@ -108,35 +111,40 @@ void Test::onCreated() {
 	//resourceLoader.loadModel("", "SimpleSphere.model") //Normals not smooth????
 	//MeshLoader::loadModel("resources/objects/", "plain_sphere.model")
 
-	//GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
-	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj"), pbrRenderShader);
+	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
+	//GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj"), pbrRenderShader);
 	sphere->setScale(0.15f, 0.15f, 0.15f);
 	sphere->update();
 	renderScene->add(sphere);
 
-	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "Cube.obj"), pbrRenderShader);
-	sphere2->setPosition(10.0f, 1.0f, 0.0f);
+	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "plane.obj"), pbrRenderShader);
+	sphere2->setPosition(10.0f, 0.8f, 0.0f);
 	sphere2->update();
 	renderScene->add(sphere2);
 
-	GameObject3D* testObject = new GameObject3D(resourceLoader.loadPBRModel("pbr/", "Cerberus_LP.FBX"), pbrRenderShader);
-	testObject->setScale(0.05f, 0.05f, 0.05f);
-	testObject->setPosition(0.0f, -6.0f, 0.0f);
-	testObject->update();
-	Material* mat = testObject->getMesh()->getMaterial(0);
+	GameObject3D* mit1 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "mitsuba-sphere.obj"), pbrRenderShader);
+	mit1->setPosition(10.0f, 1.0f, 0.0f);
+	mit1->update();
+	renderScene->add(mit1);
 
-	mat->setAlbedo(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_A.tga", TextureParameters().setSRGB(true)));
-	mat->setMetalness(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_M.tga"));
-	mat->setRoughness(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_R.tga"));
-	mat->setNormalMap(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_N.tga"));
-	mat->setAlbedo(Colour(1.0f, 1.0f, 1.0f));
-	mat->setRoughness(1.0f);
-	mat->setMetalness(1.0f);
-	mat->setAO(1.0f);
+//	GameObject3D* testObject = new GameObject3D(resourceLoader.loadPBRModel("pbr/", "Cerberus_LP.FBX"), pbrRenderShader);
+//	testObject->setScale(0.05f, 0.05f, 0.05f);
+//	testObject->setPosition(0.0f, -2.0f, 0.0f);
+//	testObject->update();
+//	Material* mat = testObject->getMesh()->getMaterial(0);
+//
+//	mat->setAlbedo(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_A.tga", TextureParameters().setSRGB(true)));
+//	mat->setMetalness(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_M.tga"));
+//	mat->setRoughness(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_R.tga"));
+//	mat->setNormalMap(Texture::loadTexture(resourceLoader.getAbsPathModels() + "pbr/Textures/Cerberus_N.tga"));
+//	mat->setAlbedo(Colour(1.0f, 1.0f, 1.0f));
+//	mat->setRoughness(1.0f);
+//	mat->setMetalness(1.0f);
+//	mat->setAO(1.0f);
 
 	//testObject->getMesh()->getMaterials()[1] = mat;
 
-	renderScene->add(testObject);
+//	renderScene->add(testObject);
 
 	camera->setMovementSpeed(5.0f);
 }
@@ -154,9 +162,7 @@ void Test::onUpdate() {
 }
 
 void Test::onRender() {
-	//std::cout << glGetError() << std::endl;
-
-	renderScene->showDeferredBuffers();
+	renderScene->showDeferredBuffers(); //For deferred rendering need to disable MSAA for this to work
 }
 
 void Test::onDestroy() {

@@ -46,7 +46,7 @@ public:
 
 class CollisionData3D {
 private:
-	/* States whether a collision occurred, and to colliders
+	/* States whether a collision occurred, and two colliders
 	 * are intersecting each other */
 	bool doesIntersect;
 
@@ -95,6 +95,7 @@ private:
 public:
 	/* Various collider types */
 	static const unsigned int TYPE_SPHERE = 1;
+	static const unsigned int TYPE_PLANE  = 2;
 
 	/* The constructor */
 	Collider3D(unsigned int type) : type(type) {}
@@ -124,11 +125,34 @@ public:
 	/* The destructor */
 	virtual ~SphereCollider() {}
 
-	/* The method check whether this collider intersects another collider */
+	/* The method used to check whether this collider intersects another collider */
 	virtual CollisionData3D intersects(Collider3D* collider);
 
 	/* Getters */
 	float getRadius() { return radius; }
+};
+
+/*****************************************************************************
+ * The PlaneCollider3D class is an implementation of a collider for a plane
+ * in 3D
+ *****************************************************************************/
+
+class PlaneCollider3D : public Collider3D, GameObject3D {
+private:
+	/* The normal of this plane (should be normalised when given) */
+	Vector3f normal;
+public:
+	/* The constructor */
+	PlaneCollider3D(GameObject3D* object, Vector3f normal) : Collider3D(TYPE_PLANE), normal(normal) { setParent(object); }
+
+	/* The destructor */
+	virtual ~PlaneCollider3D() {}
+
+	/* The method used to check whether this collider intersects another collider */
+	virtual CollisionData3D intersects(Collider3D* collider);
+
+	/* Getters */
+	Vector3f getNormal() { return normal; }
 };
 
 #endif /* CORE_PHYSICS_COLLIDER_H_ */

@@ -31,18 +31,17 @@ private:
 	/* States whether PBR is being used */
 	bool pbr;
 
-	/* The framebuffer objects */
-	FBO* multisampleFBO = NULL;
+	/* The framebuffer object */
 	FBO* defaultFBO = NULL;
 
 	/* Method used to create an FBO for the geometry buffer */
-	FBO* createFBO(bool pbr, bool multisample);
+	FBO* createFBO(bool pbr);
 
 	/* Method used to generate a framebuffer store */
 	FramebufferStore* createBuffer(GLenum target, GLint internalFormat, GLenum format, GLenum type, GLenum attachment);
 public:
 	/* The constructor */
-	GeometryBuffer(bool pbr, bool multisample);
+	GeometryBuffer(bool pbr);
 
 	/* The destructor */
 	virtual ~GeometryBuffer() {}
