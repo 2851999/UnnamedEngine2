@@ -163,20 +163,23 @@ void MLParser::parse(std::string line) {
 
 				//Ensure the current tag is not closing a previous  one
 				if (! utils_string::strStartsWith(tag, "/")) {
-					//A new element has been declared so parse it
-					MLElement element = parseElement(tag);
+					//Ensure this is not an XML declaration
+					if (! utils_string::strStartsWith(tag, "?xml")) {
+						//A new element has been declared so parse it
+						MLElement element = parseElement(tag);
 
-					//If '/' is at the end don't add the element to the opened ones
-					if (! utils_string::strEndsWith(tag, "/"))
-						//Add the element onto the currently opened elements
-						elements.push_back(element);
-					else {
-						//Check the size of the array
-						if (elements.size() > 1)
-							//Add this element to the last one
-							elements.at(elements.size() - 1).add(element);
-						else
+						//If '/' is at the end don't add the element to the opened ones
+						if (! utils_string::strEndsWith(tag, "/"))
+							//Add the element onto the currently opened elements
 							elements.push_back(element);
+						else {
+							//Check the size of the array
+							if (elements.size() > 1)
+								//Add this element to the last one
+								elements.at(elements.size() - 1).add(element);
+							else
+								elements.push_back(element);
+						}
 					}
 				} else {
 					//An old element has been closed

@@ -1,4 +1,30 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 1
+
+* Added Tilemap
+
+* Changed ML to allow it to read some XML files
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 (V0.3.1)
+
+* Added PlaneCollider3D
+* Added methods to enable and disable wireframe rendering in
+  RenderScene
+* Added 'getSteepness' mehtod in CDLODHeightMap
+
+* Changed MLParser to allow for closing an element on the
+  same line
+
+* Removed temporary (incorrect) antialiasing for deferred
+  rendering
+
+* Fixed bug: Radius for the bounding sphere of a mesh was
+             calculated incorrectly
+* Fixed bug: CDLODHeightMap could cause a crash when using
+		     getMinHeight and getMaxHeight
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 0 | Experimental 3
 
 * Changed MLParser to allow for closing an element on the

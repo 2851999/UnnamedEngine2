@@ -24,6 +24,7 @@
 #include "../core/render/Renderer.h"
 #include "../core/gui/Font.h"
 #include "../core/Sprite.h"
+#include "../core/render/Tilemap.h"
 #include "../utils/GLUtils.h"
 
 class Test : public BaseEngine {
@@ -32,6 +33,7 @@ private:
 	GameObject2D* object;
 	Font* font;
 	Sprite2D* sprite;
+	Tilemap* tilemap;
 public:
 	virtual ~Test() {}
 
@@ -83,6 +85,13 @@ void Test::created() {
 	camera->update();
 
 	Renderer::addCamera(camera);
+
+	std::vector<unsigned int> data;
+	data.push_back(1); 	data.push_back(1); 	data.push_back(1);
+	data.push_back(1); 	data.push_back(5); 	data.push_back(1);
+	data.push_back(1); 	data.push_back(1); 	data.push_back(1);
+
+	tilemap = new Tilemap(new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/Tileset.png"), 4, 4, 16), 3, 3, data);
 }
 
 void Test::update() {
@@ -98,6 +107,8 @@ void Test::render() {
 	object->render();
 
 	sprite->render();
+
+	tilemap->render();
 }
 
 void Test::destroy() {
