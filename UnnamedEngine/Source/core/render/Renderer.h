@@ -59,6 +59,7 @@ public:
 	static const std::string SHADER_TERRAIN;
 	static const std::string SHADER_PLAIN_TEXTURE;
 	static const std::string SHADER_DEFERRED_LIGHTING;
+	static const std::string SHADER_TILEMAP;
 
 	static const std::string SHADER_PBR_EQUI_TO_CUBE_GEN;
 	static const std::string SHADER_PBR_IRRADIANCE_MAP_GEN;

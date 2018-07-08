@@ -51,6 +51,7 @@ namespace utils_string {
 
 	std::vector<std::string> strSplit(const std::string &s, char delimeter);
 	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter);
+	std::vector<std::string> strSplitLast(const std::string& text, const std::string& delimeter);
 
 	inline std::string substring(const std::string &s, int begin, int end) {
 		return s.substr(begin, end - begin);

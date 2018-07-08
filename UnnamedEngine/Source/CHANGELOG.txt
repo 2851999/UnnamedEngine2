@@ -1,4 +1,17 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 2
+
+* Added methods findAttribute and getAttribute in MLElement
+* Added method loadTileset in Tilemap
+* Added method strSplitLast in utils_string
+* Added ability to read content in an element in MLDocument
+
+* Renamed find to findChild in MLElement
+
+* Fixed bug: MLDocument incorrectly delt with elements that
+             were closed on the same line
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 1 | Experimental 1
 
 * Added Tilemap

@@ -41,7 +41,8 @@ private:
 	/* The data passed to OpenGL about the tilemap */
 	std::vector<unsigned int> mapIndices;   //This stores the indices for the vertices of the tiles
 	std::vector<GLfloat> mapVertices; 		//This stores the position's of the vertices of the tiles
-	std::vector<GLfloat> mapTextureCoords;  //This stores the data for the texture coordinates for the tiles
+	std::vector<GLfloat> mapTextureCoords;  //This stores the data for the texture coordinates of the tiles
+	std::vector<GLfloat> mapVisibility;  //This stores the data for the visibility of the tiles
 
 	/* The render data used for rendering */
 	RenderData* renderData = NULL;
@@ -50,6 +51,7 @@ private:
 	VBO<unsigned int>* vboIndices = NULL;
 	VBO<GLfloat>* vboVertices = NULL;
 	VBO<GLfloat>* vboTextureCoords = NULL;
+	VBO<GLfloat>* vboVisibility = NULL;
 
 	/* The shader used for rendering */
 	Shader* shader = NULL;
@@ -62,6 +64,10 @@ public:
 
 	/* Renders this tilemap */
 	void render();
+
+	/* Method used to load a tileset from a file */
+	static TextureAtlas* loadTileset(std::string path, std::string name);
+	static Tilemap* loadTilemap(std::string path, std::string name);
 };
 
 

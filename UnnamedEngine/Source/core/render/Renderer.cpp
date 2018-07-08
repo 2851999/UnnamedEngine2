@@ -49,6 +49,7 @@ const std::string Renderer::SHADER_BILLBOARDED_FONT  = "BillboardedFont";
 const std::string Renderer::SHADER_TERRAIN           = "Terrain";
 const std::string Renderer::SHADER_PLAIN_TEXTURE     = "PlainTexture";
 const std::string Renderer::SHADER_DEFERRED_LIGHTING = "DeferredLighting";
+const std::string Renderer::SHADER_TILEMAP			 = "Tilemap";
 
 const std::string Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN         = "PBREquiToCubeGen";
 const std::string Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN       = "PBRIrradianceMapGen";
@@ -128,12 +129,13 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_TERRAIN,               loadEngineShader("terrain/Terrain"),                 loadEngineShader("terrain/TerrainDeferredGeom"));
 	addRenderShader(SHADER_PLAIN_TEXTURE,         loadEngineShader("PlainTexture"),                    NULL);
 	addRenderShader(SHADER_DEFERRED_LIGHTING,     loadEngineShader("lighting/DeferredLighting"),       NULL);
+	addRenderShader(SHADER_TILEMAP,				  loadEngineShader("TilemapShader"),				   NULL);
 	addRenderShader(SHADER_PBR_EQUI_TO_CUBE_GEN,         loadEngineShader("pbr/EquiToCubeGen"),         NULL);
 	addRenderShader(SHADER_PBR_IRRADIANCE_MAP_GEN,       loadEngineShader("pbr/IrradianceMapGen"),      NULL);
 	addRenderShader(SHADER_PBR_PREFILTER_MAP_GEN,        loadEngineShader("pbr/PrefilterMapGen"),       NULL);
 	addRenderShader(SHADER_PBR_BRDF_INTEGRATION_MAP_GEN, loadEngineShader("pbr/BRDFIntegrationMapGen"), NULL);
-	addRenderShader(SHADER_PBR_LIGHTING,          loadEngineShader("pbr/PBRShader"),                   loadEngineShader("pbr/PBRDeferredGeom"));
-	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING, loadEngineShader("pbr/PBRDeferredLighting"),         NULL);
+	addRenderShader(SHADER_PBR_LIGHTING,          loadEngineShader("pbr/PBRShader"),                    loadEngineShader("pbr/PBRDeferredGeom"));
+	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING, loadEngineShader("pbr/PBRDeferredLighting"),          NULL);
 
 
 	//Setup the screen texture mesh

@@ -52,11 +52,23 @@ MLElement::MLElement(std::string name) {
 	this->name = name;
 }
 
-int MLElement::find(std::string name) {
+int MLElement::findChild(std::string name) {
 	//Go through each element and compare their name
 	for (unsigned int i = 0; i < children.size(); i++) {
 		//Compare the name of the current child
 		if (children[i].getName() == name)
+			//Return the current index
+			return i;
+	}
+	//Return -1, as no child element was found with the specified name
+	return -1;
+}
+
+int MLElement::findAttribute(std::string name) {
+	//Go through each element and compare their name
+	for (unsigned int i = 0; i < attributes.size(); i++) {
+		//Compare the name of the current child
+		if (attributes[i].getName() == name)
 			//Return the current index
 			return i;
 	}
@@ -161,7 +173,7 @@ void MLParser::parse(std::string line) {
 
 				//std::cout << tag << std::endl;
 
-				//Ensure the current tag is not closing a previous  one
+				//Ensure the current tag is not closing a previous one
 				if (! utils_string::strStartsWith(tag, "/")) {
 					//Ensure this is not an XML declaration
 					if (! utils_string::strStartsWith(tag, "?xml")) {
@@ -174,7 +186,7 @@ void MLParser::parse(std::string line) {
 							elements.push_back(element);
 						else {
 							//Check the size of the array
-							if (elements.size() > 1)
+							if (elements.size() > 0)
 								//Add this element to the last one
 								elements.at(elements.size() - 1).add(element);
 							else
@@ -205,6 +217,13 @@ void MLParser::parse(std::string line) {
 					parse(remaining);
 			}
 		}
+	} else if (! inComment) {
+		//Check an element is open
+		if (elements.size() > 0) {
+			//The current line is part of the contents of the last element
+			elements.at(elements.size() - 1).addContent(line);
+		} else
+			Logger::log("Line '" + line + "' is not a comment or part of the contents of an element", "MLDocument", LogType::Warning);
 	}
 	//Check whether a comment ends on the current line
 	if (inComment && utils_string::strEndsWith(line, "-->"))

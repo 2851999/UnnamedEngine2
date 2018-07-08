@@ -26,6 +26,7 @@
 #include "../core/Sprite.h"
 #include "../core/render/Tilemap.h"
 #include "../utils/GLUtils.h"
+#include "../core/ml/ML.h"
 
 class Test : public BaseEngine {
 private:
@@ -91,7 +92,7 @@ void Test::created() {
 	data.push_back(1); 	data.push_back(5); 	data.push_back(1);
 	data.push_back(1); 	data.push_back(1); 	data.push_back(1);
 
-	tilemap = new Tilemap(new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/Tileset.png"), 4, 4, 16), 3, 3, data);
+	tilemap = Tilemap::loadTilemap("C:/UnnamedEngine/maps/", "Tilemap.tmx");
 }
 
 void Test::update() {
