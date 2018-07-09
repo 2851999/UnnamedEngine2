@@ -26,6 +26,8 @@
 void Camera2D::update() {
 	//Setup the view matrix
 	getViewMatrix().setIdentity();
+//	Vector3f pos = getPosition();
+//	pos = Vector2f((float) round(pos.getX()), (float) round(pos.getY()));
 	getViewMatrix().transformR(getPosition(), getRotation(), getScale());
 }
 

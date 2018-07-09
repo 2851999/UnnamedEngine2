@@ -23,10 +23,10 @@
 #include "TextureAtlas.h"
 
 /*****************************************************************************
- * The Tilemap class
+ * The TilemapLayer class
  *****************************************************************************/
 
-class Tilemap {
+class TilemapLayer {
 private:
 	/* The tileset used in rendering this map */
 	TextureAtlas* tileset;
@@ -55,20 +55,64 @@ private:
 
 	/* The shader used for rendering */
 	Shader* shader = NULL;
+
+	/* The width and height of this layer */
+	unsigned int width;
+	unsigned int height;
 public:
 	/* The constructor */
-	Tilemap(TextureAtlas* tileset, unsigned int rows, unsigned int columns, std::vector<unsigned int> &data);
+	TilemapLayer(TextureAtlas* tileset, unsigned int rows, unsigned int columns, std::vector<unsigned int> &data, GLenum usage);
 
 	/* The destructor */
-	virtual ~Tilemap() {}
+	virtual ~TilemapLayer();
 
 	/* Renders this tilemap */
 	void render();
 
-	/* Method used to load a tileset from a file */
-	static TextureAtlas* loadTileset(std::string path, std::string name);
-	static Tilemap* loadTilemap(std::string path, std::string name);
+	/* Method to set a tile's id given its location in world coordinates */
+	void setTileID(float x, float y, unsigned int id);
+
+	/* Returns the tile at a specific location in the map given in world coordinates - returns
+	 * 0 if out of bounds */
+	unsigned int getTileID(float x, float y);
+
+	/* Returns a boolean stating if a specific location given in world coordinates is within
+	 * the bounds of this layer */
+	bool isWithinBounds(float x, float y);
+
+	/* Returns the width and height of this layer in pixels */
+	inline unsigned int getWidth() { return width; }
+	inline unsigned int getHeight() { return height; }
 };
 
+/*****************************************************************************
+ * The Tilemap class
+ *****************************************************************************/
+
+class Tilemap {
+private:
+	/* The layers of this tilemap */
+	std::vector<TilemapLayer*> layers;
+public:
+	/* The constructor */
+	Tilemap() {}
+
+	/* The destructor */
+	virtual ~Tilemap();
+
+	/* Renders this tilemap */
+	void render();
+
+	/* Adds a tilemap layer to this tilemap */
+	inline void addLayer(TilemapLayer* layer) { layers.push_back(layer); }
+
+	/* Getters and setters */
+	inline std::vector<TilemapLayer*>& getLayers() { return layers; }
+
+	/* Method used to load a tileset from a file */
+	static TextureAtlas* loadTileset(std::string path, std::string name);
+	/* Method used to load a tile map from a file */
+	static Tilemap* loadTilemap(std::string path, std::string name, GLenum usage = GL_STATIC_DRAW);
+};
 
 #endif /* CORE_RENDER_TILEMAP_H_ */

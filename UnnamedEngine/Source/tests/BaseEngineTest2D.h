@@ -52,7 +52,7 @@ public:
 	virtual void onKeyReleased(int key) override {}
 	virtual void onChar(int key, char character) override {}
 
-	virtual void onMousePressed(int button) override {}
+	virtual void onMousePressed(int button) override;
 	virtual void onMouseReleased(int button) override {}
 	virtual void onMouseMoved(double x, double y, double dx, double dy) override {}
 	virtual void onMouseDragged(double x, double y, double dx, double dy) override {}
@@ -64,9 +64,17 @@ public:
 
 void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
+	getSettings().videoVSync = 1;
+//	getSettings().videoMaxFPS = 0;
+	getSettings().videoSamples = 16;
+	getSettings().videoMaxAnisotropicSamples = 16;
 }
 
 void Test::created() {
+	TextureParameters::DEFAULT_CLAMP = GL_CLAMP_TO_EDGE;
+	TextureParameters::DEFAULT_SHOULD_CLAMP = true;
+	TextureParameters::DEFAULT_FILTER = GL_LINEAR;
+
 	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));
 	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), Renderer::SHADER_MATERIAL);
 	object->setSize(200, 200);
@@ -92,14 +100,33 @@ void Test::created() {
 	data.push_back(1); 	data.push_back(5); 	data.push_back(1);
 	data.push_back(1); 	data.push_back(1); 	data.push_back(1);
 
-	tilemap = Tilemap::loadTilemap("C:/UnnamedEngine/maps/", "Tilemap.tmx");
+	tilemap = Tilemap::loadTilemap("C:/UnnamedEngine/maps/", "Map3.tmx");
 }
 
 void Test::update() {
+	if (Keyboard::isPressed(GLFW_KEY_W))
+		camera->getTransform()->translate(0.0f, 256.0f * getDeltaSeconds());
+	if (Keyboard::isPressed(GLFW_KEY_S))
+		camera->getTransform()->translate(0.0f, -256.0f * getDeltaSeconds());
+	if (Keyboard::isPressed(GLFW_KEY_A))
+		camera->getTransform()->translate(256.0f * getDeltaSeconds(), 0.0f);
+	if (Keyboard::isPressed(GLFW_KEY_D))
+		camera->getTransform()->translate(-256.0f * getDeltaSeconds(), 0.0f);
+	camera->update();
+
 	object->getTransform()->rotate(60.0f * getDeltaSeconds());
 	object->update();
 
 	sprite->update(getDeltaSeconds());
+}
+
+void Test::onMousePressed(int button) {
+	Vector3f cameraPos = camera->getPosition();
+	Vector2d mousePos = Mouse::getPosition();
+	float worldX = (float) mousePos.getX() - cameraPos.getX();
+	float worldY = (float) mousePos.getY() - cameraPos.getY();
+	std::cout << tilemap->getLayers()[0]->getTileID(worldX, worldY) << std::endl;
+	tilemap->getLayers()[0]->setTileID(worldX, worldY, 1);
 }
 
 void Test::render() {

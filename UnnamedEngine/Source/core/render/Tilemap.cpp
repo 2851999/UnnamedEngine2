@@ -23,10 +23,14 @@
 #include "../ml/ML.h"
 
 /*****************************************************************************
- * The Tilemap class
+ * The TilemapLayer class
  *****************************************************************************/
 
-Tilemap::Tilemap(TextureAtlas* tileset, unsigned int rows, unsigned int columns, std::vector<unsigned int> &data) : tileset(tileset), mapRows(rows), mapColumns(columns), data(data) {
+TilemapLayer::TilemapLayer(TextureAtlas* tileset, unsigned int rows, unsigned int columns, std::vector<unsigned int> &data, GLenum usage) : tileset(tileset), mapRows(rows), mapColumns(columns), data(data) {
+	//Assign the width and height of this layer
+	this->width = mapRows * tileset->getSubTextureWidth();
+	this->height = mapColumns * tileset->getSubTextureHeight();
+
 	//Calculate the number of vertices required
 	unsigned int numTiles = mapRows * mapColumns;
 	unsigned int numVertices = numTiles * 4;
@@ -78,6 +82,12 @@ Tilemap::Tilemap(TextureAtlas* tileset, unsigned int rows, unsigned int columns,
 				//Get the texture data
 				tileset->getSides(tileID - 1, top, left, bottom, right); //Take 1 to be the first tile
 
+			//Pad the texture, so a tiny part of the edge is not shown reducing bleeding artifacts
+			top += 0.32f / (float) tileset->getTexture()->getHeight();
+			bottom -= 0.32f / (float) tileset->getTexture()->getHeight();
+			left += 0.32f / (float) tileset->getTexture()->getWidth();
+			right -= 0.32f / (float) tileset->getTexture()->getWidth();
+
 			//Assign the vertices
 
 			//Top-left
@@ -128,25 +138,33 @@ Tilemap::Tilemap(TextureAtlas* tileset, unsigned int rows, unsigned int columns,
 	renderData = new RenderData(GL_TRIANGLES, numIndices);
 	shader = Renderer::getRenderShader(Renderer::SHADER_TILEMAP)->getShader();
 
-	vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, mapIndices.size() * sizeof(mapIndices[0]), mapIndices, GL_STATIC_DRAW);
+	vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, mapIndices.size() * sizeof(mapIndices[0]), mapIndices, usage);
 	renderData->setIndicesVBO(vboIndices);
 
-	vboVertices = new VBO<GLfloat>(GL_ARRAY_BUFFER, mapVertices.size() * sizeof(mapVertices[0]), mapVertices, GL_STATIC_DRAW, false);
+	vboVertices = new VBO<GLfloat>(GL_ARRAY_BUFFER, mapVertices.size() * sizeof(mapVertices[0]), mapVertices, usage, false);
 	vboVertices->addAttribute(shader->getAttributeLocation("Position"), 2);
 	renderData->addVBO(vboVertices);
 
-	vboTextureCoords = new VBO<GLfloat>(GL_ARRAY_BUFFER, mapTextureCoords.size() * sizeof(mapTextureCoords[0]), mapTextureCoords, GL_STATIC_DRAW, false);
+	vboTextureCoords = new VBO<GLfloat>(GL_ARRAY_BUFFER, mapTextureCoords.size() * sizeof(mapTextureCoords[0]), mapTextureCoords, usage, false);
 	vboTextureCoords->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2);
 	renderData->addVBO(vboTextureCoords);
 
-	vboVisibility = new VBO<GLfloat>(GL_ARRAY_BUFFER, mapVisibility.size() * sizeof(mapVisibility[0]), mapVisibility, GL_STATIC_DRAW, false);
+	vboVisibility = new VBO<GLfloat>(GL_ARRAY_BUFFER, mapVisibility.size() * sizeof(mapVisibility[0]), mapVisibility, usage, false);
 	vboVisibility->addAttribute(shader->getAttributeLocation("Visibility"), 1);
 	renderData->addVBO(vboVisibility);
 
 	renderData->setup();
 }
 
-void Tilemap::render() {
+TilemapLayer::~TilemapLayer() {
+	delete renderData;
+	delete vboIndices;
+	delete vboVertices;
+	delete vboTextureCoords;
+	delete vboVisibility;
+}
+
+void TilemapLayer::render() {
 	//Render the map
 	shader->use();
 
@@ -159,6 +177,117 @@ void Tilemap::render() {
 	Renderer::unbindTexture();
 
 	shader->stopUsing();
+}
+
+void TilemapLayer::setTileID(float x, float y, unsigned int id) {
+	//Ensure in bounds
+	if (isWithinBounds(x, y)) {
+		//Get the row and column
+		unsigned int row = floor(x / tileset->getSubTextureWidth());
+		unsigned int col = floor(y / tileset->getSubTextureHeight());
+		//Calculate the tile index
+		unsigned int dataIndex = (col * mapColumns) + row;
+
+		//States if the visibility has changed
+		bool visibilityChanged = false;
+
+		//Calculate the position in the vertices data to change
+		unsigned int index = dataIndex * 4;
+
+		//Check whether the tile will now be hidden
+		if (id == 0) {
+			//Need to change visibility
+			mapVisibility[index]     = 0.0f;
+			mapVisibility[index + 1] = 0.0f;
+			mapVisibility[index + 2] = 0.0f;
+			mapVisibility[index + 3] = 0.0f;
+
+			visibilityChanged = true;
+		} else {
+			//Ensure tile is visible
+			if (data[dataIndex] == 0) {
+				//This tile needs its visibility changing
+				mapVisibility[index]     = 1.0f;
+				mapVisibility[index + 1] = 1.0f;
+				mapVisibility[index + 2] = 1.0f;
+				mapVisibility[index + 3] = 1.0f;
+
+				visibilityChanged = true;
+			}
+			//Assign the texture coordinates#
+			unsigned int pos = index * 2;
+
+			//The texture coordinate values
+			float top, left, bottom, right;
+
+			//Get the texture data
+			tileset->getSides(id - 1, top, left, bottom, right); //Take 1 to be the first tile
+
+			//Top-left
+			mapTextureCoords[pos] = left;
+			mapTextureCoords[pos + 1] = top;
+
+			//Top-right
+			mapTextureCoords[pos + 2] = right;
+			mapTextureCoords[pos + 3] = top;
+
+			//Bottom-left
+			mapTextureCoords[pos + 4] = left;
+			mapTextureCoords[pos + 5] = bottom;
+
+			//Bottom-right
+			mapTextureCoords[pos + 6] = right;
+			mapTextureCoords[pos + 7] = bottom;
+
+			//Update the texture coordinates
+			vboTextureCoords->updateStream(mapTextureCoords.size() * sizeof(mapTextureCoords[0]));
+		}
+
+		//Update the visibility if necessary
+		if (visibilityChanged)
+			vboVisibility->updateStream(mapVisibility.size() * sizeof(mapVisibility[0]));
+
+		//Assign the id
+		data[dataIndex] = id;
+	}
+}
+
+unsigned int TilemapLayer::getTileID(float x, float y) {
+	//Ensure in bounds
+	if (isWithinBounds(x, y)) {
+		//Get the row and column
+		unsigned int row = floor(x / tileset->getSubTextureWidth());
+		unsigned int col = floor(y / tileset->getSubTextureHeight());
+		//Calculate the tile index
+		unsigned int index = (col * mapColumns) + row;
+
+		//Return the id of the tile at this index
+		return data[index];
+	} else {
+		//Return nothing
+		return 0;
+	}
+}
+
+bool TilemapLayer::isWithinBounds(float x, float y) {
+	return x > 0 && y > 0 && x < width && y < height;
+}
+
+/*****************************************************************************
+ * The Tilemap class
+ *****************************************************************************/
+
+Tilemap::~Tilemap() {
+	//Go through and delete all of the tilemap layers
+	for (unsigned int i = 0; i < layers.size(); i++)
+		delete layers[i];
+	layers.clear();
+}
+
+void Tilemap::render() {
+	//Go through each layer and render it
+	for (unsigned int i = 0; i < layers.size(); i++)
+		layers[i]->render();
 }
 
 TextureAtlas* Tilemap::loadTileset(std::string path, std::string name) {
@@ -205,7 +334,7 @@ TextureAtlas* Tilemap::loadTileset(std::string path, std::string name) {
 	return new TextureAtlas(texture, rows, columns, tileCount);
 }
 
-Tilemap* Tilemap::loadTilemap(std::string path, std::string name) {
+Tilemap* Tilemap::loadTilemap(std::string path, std::string name, GLenum usage) {
 	//Load the file
 	MLDocument document;
 	document.load(path + name);
@@ -230,13 +359,15 @@ Tilemap* Tilemap::loadTilemap(std::string path, std::string name) {
 			columns = current.getDataAsUInt();
 	}
 
-	//The tileset
-	TextureAtlas* tileset = NULL;
-	//The data for the map
-	std::vector<unsigned int> data;
+	//The tilesets
+	std::vector<TextureAtlas*> tilesets;
+	std::vector<unsigned int> firstgids;
 
 	//Get the children of the tilemap element and go through them
 	std::vector<MLElement> children = tilemapElement.getChildren();
+
+	//The tilemap
+	Tilemap* tilemap = new Tilemap();
 
 	for (unsigned int i = 0; i < children.size(); i++) {
 		//Check what the current child element is
@@ -244,22 +375,48 @@ Tilemap* Tilemap::loadTilemap(std::string path, std::string name) {
 
 		if (current.getName() == "tileset") {
 			std::vector<std::string> pathName = utils_string::strSplitLast(path + current.getAttribute(current.findAttribute("source")).getData(), "/");
-			//Load the tileset
-			tileset = loadTileset(pathName[0] + "/", pathName[1]);
+			//Load the tileset and add it
+			tilesets.push_back(loadTileset(pathName[0] + "/", pathName[1]));
+			//Get the first grid id and add it
+			firstgids.push_back(current.getAttribute(current.findAttribute("firstgid")).getDataAsUInt());
 		} else if (current.getName() == "layer") {
 			//Get the data element
 			MLElement dataElement = current.getChild(current.findChild("data"));
 			//Get the data
 			std::string dataString = dataElement.getContents();
+			//The data for the map
+			std::vector<unsigned int> data;
 			//Split up the data
 			std::vector<std::string> split = utils_string::strSplit(dataString, ",");
+			//Assign the tileset to the first available
+			TextureAtlas* tileset = NULL;
 			//Go through each tile and convert the value to an integer
 			data.resize(split.size());
-			for (unsigned int i = 0; i < split.size(); i++)
+
+			//The first grid id for the current tileset
+			unsigned int currentFirstGID = 0;
+
+			for (unsigned int i = 0; i < split.size(); i++) {
 				data[i] = utils_string::strToUInt(split[i]);
+				//Check which tileset this uses if not assigned
+				if (! tileset && data[i] != 0) {
+					//Go through and find which tileset should be used
+					unsigned int loc = 0;
+					while (loc < firstgids.size() - 1 && firstgids[loc + 1] < data[i])
+						loc++;
+					//Assign the tileset
+					tileset = tilesets[loc];
+					currentFirstGID = firstgids[loc];
+				}
+				if (data[i] != 0)
+					//Subtract the first grid id
+					data[i] -= (currentFirstGID - 1);
+			}
+			//Create and add this layer
+			tilemap->addLayer(new TilemapLayer(tileset, rows, columns, data, usage));
 		}
 	}
 
-	//Create the instance of the tilemap and return it
-	return new Tilemap(tileset, rows, columns, data);
+	//Return the tilemap
+	return tilemap;
 }

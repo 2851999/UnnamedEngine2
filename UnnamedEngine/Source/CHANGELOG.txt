@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 3
+
+* Added padding to texture coordinates for Font to reduce
+  texture bleeding artifacts
+
+* Renamed Tilemap to TilemapLayer and created Tilemap class
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 1 | Experimental 2
 
 * Added methods findAttribute and getAttribute in MLElement

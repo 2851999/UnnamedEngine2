@@ -166,10 +166,14 @@ void Font::update(std::string text) {
 			data->addPosition(Vector3f(xPos + width, yPos + height, 0.0f));
 			data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
 
-			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, 0.0f));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth), 0.0f));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth), info.glyphHeight / (float) textureAtlasHeight));
-			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, info.glyphHeight / (float) textureAtlasHeight));
+			//Pad the texture coordinates to reduce bleeding artifacts
+			float offsetX = 0.002f / (float) object3D->getMaterial()->diffuseTexture->getWidth();
+			float offsetY = 0.002f / (float) object3D->getMaterial()->diffuseTexture->getHeight();
+
+			data->addTextureCoord(Vector2f((info.xOffset / (float) textureAtlasWidth) + offsetX, 0.0f + offsetY));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth) - offsetX, 0.0f + offsetY));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth) - offsetX, (info.glyphHeight / (float) textureAtlasHeight) - offsetY));
+			data->addTextureCoord(Vector2f((info.xOffset / (float) textureAtlasWidth) + offsetX, (info.glyphHeight / (float) textureAtlasHeight) - offsetY));
 
 			unsigned int ip = (i - newLineCount) * 4;
 
