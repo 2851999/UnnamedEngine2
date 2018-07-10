@@ -24,9 +24,9 @@
  * The Animation2D class
  *****************************************************************************/
 
-Animation2D::Animation2D(GameObject2D* entity, float timeBetweenFrame, unsigned int totalFrames, bool repeat) :
-		entity(entity), timeBetweenFrame(timeBetweenFrame), totalFrames(totalFrames), repeat(repeat) {
-	currentFrame = 0;
+Animation2D::Animation2D(Sprite2D* sprite, float timeBetweenFrame, unsigned int totalFrames, bool repeat, unsigned int startFrame) :
+		sprite(sprite), timeBetweenFrame(timeBetweenFrame), totalFrames(totalFrames), repeat(repeat), startFrame(startFrame) {
+	currentFrame = startFrame;
 	running = false;
 	currentTime = 0.0f;
 }
@@ -49,7 +49,7 @@ void Animation2D::stop() {
 
 void Animation2D::reset() {
 	//Reset all of the values
-	currentFrame = 0;
+	currentFrame = startFrame;
 	running = false;
 	currentTime = 0.0f;
 	onReset();
@@ -63,11 +63,11 @@ void Animation2D::update(float deltaSeconds) {
 
 		//Check whether the animation should update
 		if (currentTime >= timeBetweenFrame) {
-			//Check whether the current frame is the last (NOTE: First frame is index 0)
-			if (currentFrame == totalFrames - 1) {
+			//Check whether the current frame is the last (NOTE: First frame can be index 0)
+			if (currentFrame == startFrame + totalFrames - 1) {
 				//Restart the animation if it should repeat
 				if (repeat) {
-					currentFrame = 0;
+					currentFrame = startFrame;
 					currentTime = 0;
 					//Update the animation to the current frame
 					updateFrame();
@@ -88,27 +88,23 @@ void Animation2D::update(float deltaSeconds) {
  * The TextureAnimation2D class
  *****************************************************************************/
 
-TextureAnimation2D::TextureAnimation2D(GameObject2D* entity, TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat) :
-		Animation2D(entity, timeBetweenFrame, textureAtlas->getNumTextures(), repeat), textureAtlas(textureAtlas) {
+TextureAnimation2D::TextureAnimation2D(Sprite2D* sprite, TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat, unsigned int startFrame, int numFrames) :
+		Animation2D(sprite, timeBetweenFrame, numFrames == -1 ? textureAtlas->getNumTextures() : numFrames, repeat, startFrame), textureAtlas(textureAtlas) {
 
 }
 
 void TextureAnimation2D::onStart() {
 	//Assign the texture in the entity
-	if (entity)
+	if (sprite)
 		//Assign the texture
-		entity->getMaterial()->diffuseTexture = textureAtlas->getTexture();
+		sprite->getMaterial()->diffuseTexture = textureAtlas->getTexture();
 }
 
 void TextureAnimation2D::updateFrame() {
-	//Ensure the entity has been assigned with a mesh
-	if (entity && entity->hasMesh()) {
-		//Update the mesh
-		float top, left, bottom, right;
-		textureAtlas->getSides(currentFrame, top, left, bottom, right);
-		entity->getMesh()->getData()->clearTextureCoords();
-		MeshBuilder::addQuadT(entity->getMesh()->getData(), top, left, bottom, right);
-		entity->getMesh()->getRenderData()->updateTextureCoords();
+	//Ensure the entity has been assigned
+	if (sprite) {
+		//Assign the texture coordinates
+		sprite->setTextureCoords(textureAtlas, currentFrame);
 	}
 }
 
@@ -146,6 +142,7 @@ void Sprite2D::startAnimation(std::string name) {
 	//Check whether the animation exists
 	if (animations.count(name) > 0) {
 		//Assign the current animation
+		currentAnimationName = name;
 		currentAnimation = animations.at(name);
 		//Start the current animation
 		currentAnimation->start();
@@ -159,7 +156,20 @@ void Sprite2D::stopAnimation() {
 	if (currentAnimation) {
 		//Stop the current animation
 		currentAnimation->stop();
+		currentAnimationName = "";
 		currentAnimation = NULL;
+	}
+}
+
+void Sprite2D::setTextureCoords(TextureAtlas* textureAtlas, unsigned int index) {
+	//Ensure the entity has been assigned with a mesh
+	if (hasMesh()) {
+		//Update the mesh
+		float top, left, bottom, right;
+		textureAtlas->getSides(index, top, left, bottom, right);
+		getMesh()->getData()->clearTextureCoords();
+		MeshBuilder::addQuadT(getMesh()->getData(), top, left, bottom, right);
+		getMesh()->getRenderData()->updateTextureCoords();
 	}
 }
 

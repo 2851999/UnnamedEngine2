@@ -62,8 +62,8 @@ GameObject2D::GameObject2D(float width, float height) : GameObject(NULL, NULL) {
 	size = Vector2f(width, height);
 }
 
-GameObject2D::GameObject2D(Mesh* mesh, std::string shaderId, float width , float height) :
-		GameObject2D(mesh, Renderer::getRenderShader(shaderId), width, height) {}
+GameObject2D::GameObject2D(Mesh* mesh, std::string shaderID, float width , float height) :
+		GameObject2D(mesh, Renderer::getRenderShader(shaderID), width, height) {}
 
 void GameObject2D::update() {
 	//Check to make sure this object has a mesh
@@ -85,8 +85,8 @@ GameObject3D::GameObject3D(float width, float height, float depth) : GameObject(
 	size = Vector3f(width, height, depth);
 }
 
-GameObject3D::GameObject3D(Mesh* mesh, std::string shaderId, float width , float height, float depth) :
-		GameObject3D(mesh, Renderer::getRenderShader(shaderId), width, height, depth) {}
+GameObject3D::GameObject3D(Mesh* mesh, std::string shaderID, float width , float height, float depth) :
+		GameObject3D(mesh, Renderer::getRenderShader(shaderID), width, height, depth) {}
 
 void GameObject3D::update() {
 	//Check to make sure this object has a mesh

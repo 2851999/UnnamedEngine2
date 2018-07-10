@@ -78,6 +78,11 @@ namespace utils_maths {
 		return radians * (180.0f / PI);
 	}
 
+	/* Works for powers of 10 - roundNearest(0.08f, 0.1f) = 0.1f */
+	inline float roundNearest(float value, float precision) {
+		return (float) floor(value / precision + 0.5) * precision;
+	}
+
 	template<typename T>
 	inline T clamp(T value, T min, T max) {
 		if (value < min)

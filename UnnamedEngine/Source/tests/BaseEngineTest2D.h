@@ -27,6 +27,7 @@
 #include "../core/render/Tilemap.h"
 #include "../utils/GLUtils.h"
 #include "../core/ml/ML.h"
+#include "../core/audio/SoundSystem.h"
 
 class Test : public BaseEngine {
 private:
@@ -35,6 +36,7 @@ private:
 	Font* font;
 	Sprite2D* sprite;
 	Tilemap* tilemap;
+	SoundSystem* soundSystem;
 public:
 	virtual ~Test() {}
 
@@ -95,23 +97,24 @@ void Test::created() {
 
 	Renderer::addCamera(camera);
 
-	std::vector<unsigned int> data;
-	data.push_back(1); 	data.push_back(1); 	data.push_back(1);
-	data.push_back(1); 	data.push_back(5); 	data.push_back(1);
-	data.push_back(1); 	data.push_back(1); 	data.push_back(1);
-
 	tilemap = Tilemap::loadTilemap("C:/UnnamedEngine/maps/", "Map3.tmx");
+
+	soundSystem = new SoundSystem();
+	soundSystem->createListener();
+	soundSystem->addMusic("Music", AudioLoader::loadFile("C:/UnnamedEngine/maps/music.ogg"));
+	soundSystem->getSource("Music")->setLoop(true);
+	soundSystem->play("Music");
 }
 
 void Test::update() {
 	if (Keyboard::isPressed(GLFW_KEY_W))
-		camera->getTransform()->translate(0.0f, 256.0f * getDeltaSeconds());
-	if (Keyboard::isPressed(GLFW_KEY_S))
 		camera->getTransform()->translate(0.0f, -256.0f * getDeltaSeconds());
+	if (Keyboard::isPressed(GLFW_KEY_S))
+		camera->getTransform()->translate(0.0f, 256.0f * getDeltaSeconds());
 	if (Keyboard::isPressed(GLFW_KEY_A))
-		camera->getTransform()->translate(256.0f * getDeltaSeconds(), 0.0f);
-	if (Keyboard::isPressed(GLFW_KEY_D))
 		camera->getTransform()->translate(-256.0f * getDeltaSeconds(), 0.0f);
+	if (Keyboard::isPressed(GLFW_KEY_D))
+		camera->getTransform()->translate(256.0f * getDeltaSeconds(), 0.0f);
 	camera->update();
 
 	object->getTransform()->rotate(60.0f * getDeltaSeconds());
@@ -125,7 +128,7 @@ void Test::onMousePressed(int button) {
 	Vector2d mousePos = Mouse::getPosition();
 	float worldX = (float) mousePos.getX() - cameraPos.getX();
 	float worldY = (float) mousePos.getY() - cameraPos.getY();
-	std::cout << tilemap->getLayers()[0]->getTileID(worldX, worldY) << std::endl;
+//	std::cout << tilemap->getLayers()[0]->getTileID(worldX, worldY) << std::endl;
 	tilemap->getLayers()[0]->setTileID(worldX, worldY, 1);
 }
 
@@ -140,6 +143,7 @@ void Test::render() {
 }
 
 void Test::destroy() {
+	delete soundSystem;
 	delete object;
 	delete camera;
 }

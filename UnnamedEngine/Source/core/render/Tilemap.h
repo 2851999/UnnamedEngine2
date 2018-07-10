@@ -28,6 +28,9 @@
 
 class TilemapLayer {
 private:
+	/* The name of this layer (If it has one) */
+	std::string name;
+
 	/* The tileset used in rendering this map */
 	TextureAtlas* tileset;
 
@@ -37,6 +40,9 @@ private:
 
 	/* The data in this tilemap */
 	std::vector<unsigned int> data;
+
+	/* States whether this layer is visible */
+	bool visible;
 
 	/* The data passed to OpenGL about the tilemap */
 	std::vector<unsigned int> mapIndices;   //This stores the indices for the vertices of the tiles
@@ -61,7 +67,7 @@ private:
 	unsigned int height;
 public:
 	/* The constructor */
-	TilemapLayer(TextureAtlas* tileset, unsigned int rows, unsigned int columns, std::vector<unsigned int> &data, GLenum usage);
+	TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int rows, unsigned int columns, std::vector<unsigned int> &data, bool visible, GLenum usage);
 
 	/* The destructor */
 	virtual ~TilemapLayer();
@@ -80,9 +86,16 @@ public:
 	 * the bounds of this layer */
 	bool isWithinBounds(float x, float y);
 
+	/* Getters and setters */
+
+	inline void setName(std::string name) { this->name = name; }
+	inline std::string getName() { return name; }
+
 	/* Returns the width and height of this layer in pixels */
 	inline unsigned int getWidth() { return width; }
 	inline unsigned int getHeight() { return height; }
+
+	inline bool isVisible() { return visible; }
 };
 
 /*****************************************************************************
@@ -101,7 +114,13 @@ public:
 	virtual ~Tilemap();
 
 	/* Renders this tilemap */
-	void render();
+	inline void render() { renderLayers(0, layers.size() - 1); }
+
+	/* Renders a specific range of layers (inclusive) */
+	void renderLayers(unsigned int startIndex, unsigned int endIndex);
+
+	/* Returns the index of the layer with a given name or -1 if it is not found */
+	int findLayer(std::string name);
 
 	/* Adds a tilemap layer to this tilemap */
 	inline void addLayer(TilemapLayer* layer) { layers.push_back(layer); }

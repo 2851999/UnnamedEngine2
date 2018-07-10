@@ -1,4 +1,24 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 4
+
+* Added 'visibility' to TilemapLayer
+* Added 'startFrame' to Animation2D
+* Added 'getCurrentAnimationName' and 'getCurrentAnimation'
+  to Sprite2D
+* Added 'setTextureCoords' in Sprite2D
+* Added 'name' to TilemapLayer
+* Added 'roundNearest' in utils_maths
+  
+* Changed 'entity' to 'sprite' in Animation2D
+* Changed Camera2D to invert its position to make its
+  movement more intuitive
+
+* Fixed bug: Tilemap might not have loaded multiple tilemaps
+  properly
+* Fixed bug: TextureAtlas would not work properly with
+             non-square textures
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 1 | Experimental 3
 
 * Added padding to texture coordinates for Font to reduce

@@ -27,8 +27,8 @@ void Camera2D::update() {
 	//Setup the view matrix
 	getViewMatrix().setIdentity();
 //	Vector3f pos = getPosition();
-//	pos = Vector2f((float) round(pos.getX()), (float) round(pos.getY()));
-	getViewMatrix().transformR(getPosition(), getRotation(), getScale());
+//	pos = Vector2f(utils_maths::roundNearest(pos.getX(), 0.1f), utils_maths::roundNearest(pos.getY(), 0.1f));
+	getViewMatrix().transformR(getPosition() * -1, getRotation(), getScale()); //Seems to go opposite direction as expected
 }
 
 /*****************************************************************************
