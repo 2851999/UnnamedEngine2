@@ -1,4 +1,19 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 5
+
+* Added AudioSequence
+* Added 'Offsets' to TextureAtlas
+* Added 'fadeIn' and 'fadeOut' methods to Audio and
+  SoundSystem
+
+* Improved Audio to include loop intervals and a way to
+  request a looping sound to stop
+
+* Fixed bug: Tilemap had its width and height values reversed
+             as well as its rows and columns
+* Fixed bug: AudioLoader incorrectly loaded stereo sounds
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 1 | Experimental 4
 
 * Added 'visibility' to TilemapLayer

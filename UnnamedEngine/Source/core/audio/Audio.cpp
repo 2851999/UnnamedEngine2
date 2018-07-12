@@ -132,6 +132,7 @@ AudioData* AudioLoader::loadOggFile(std::string path) {
 
 	//Read the file and assign the size of it in bytes
 	data->size = stb_vorbis_decode_filename(path.c_str(), &numChannels, &data->frequency, &data->data) * sizeof(short);
+	data->size *= numChannels;
 
 	//Assign the format
 	if (numChannels == 1)
@@ -165,40 +166,103 @@ AudioSource::AudioSource(AudioData* data, unsigned int type) {
 
 void AudioSource::updateVolume() {
 	if (type == TYPE_SOUND_EFFECT)
-		gain = ((float) Window::getCurrentInstance()->getSettings().audioSoundEffectVolume) / 100.0f;
+		gain = volumeFraction * ((float) Window::getCurrentInstance()->getSettings().audioSoundEffectVolume) / 100.0f;
 	else if (type == TYPE_MUSIC)
-		gain = ((float) Window::getCurrentInstance()->getSettings().audioMusicVolume) / 100.0f;
+		gain = volumeFraction * ((float) Window::getCurrentInstance()->getSettings().audioMusicVolume) / 100.0f;
 	else {
-		gain = 1.0f;
+		//Leave the volume as it is
 	}
 }
 
 void AudioSource::update() {
 	if (AudioManager::hasContext()) {
-		//Get all of the needed values
-		Vector3f sourcePosition = getPosition();
-		//Vector3f sourceRotation = this.getRotation();
-		Vector3f sourceVelocity = getVelocity();
-		//Update all of the source values
-		alSource3f(sourceHandle, AL_POSITION, sourcePosition.getX(), sourcePosition.getY(), sourcePosition.getZ());
-		alSource3f(sourceHandle, AL_VELOCITY, sourceVelocity.getX(), sourceVelocity.getY(), sourceVelocity.getZ());
-		alSourcef(sourceHandle, AL_PITCH, pitch);
-		alSourcef(sourceHandle, AL_GAIN, gain);
-		if (loop)
-			alSourcei(sourceHandle, AL_LOOPING, AL_TRUE);
-		else
-			alSourcei(sourceHandle, AL_LOOPING, AL_FALSE);
+		//Ensure the audio should not wait for something
+		if (timeStopped == -1.0f) {
+			//Update the the position if necessary
+			if (transform->hasChanged()) {
+				//Get the position and pass it to OpenAL
+				Vector3f sourcePosition = getPosition();
+				alSource3f(sourceHandle, AL_POSITION, sourcePosition.getX(), sourcePosition.getY(), sourcePosition.getZ());
+			}
+
+			//Get all of the needed values
+			//Vector3f sourceRotation = this.getRotation();
+			Vector3f sourceVelocity = getVelocity();
+			//Update the other of the source values
+			alSource3f(sourceHandle, AL_VELOCITY, sourceVelocity.getX(), sourceVelocity.getY(), sourceVelocity.getZ());
+			alSourcef(sourceHandle, AL_PITCH, pitch);
+			alSourcef(sourceHandle, AL_GAIN, volumeFraction2 * gain);
+			alSourcei(sourceHandle, AL_LOOPING, loop && loopInterval == 0.0f && ! requestedStop ? AL_TRUE : AL_FALSE);
+
+			//Check if the audio has stopped playing
+			if (! isPlaying() && isPlayingOrPaused()) {
+				//Audio has finished
+
+				//Check if the the audio should be restarted
+				if (loop && loopInterval > 0.0f && ! requestedStop) {
+					//The loop should be restarted after the loop interval
+
+					//Assign the time stopped
+					timeStopped = utils_time::getSeconds();
+				} else
+					//Sound should stop
+					stop();
+			}
+
+			//Assign the volume fraction 2 if fading
+			if (fadeState != -1) {
+				float timeElapsed = utils_time::getSeconds() - fadeStart;
+
+				if (fadeState == 1)
+					volumeFraction2 = timeElapsed / fadeTime;
+				else if (fadeState == 2)
+					volumeFraction2 = fadeInitialVolF2 * (1.0f - (timeElapsed / fadeTime));
+
+				//Ensure it is in the correct range
+				volumeFraction2 = utils_maths::clamp(volumeFraction2, 0.0f, 1.0f);
+				//Check if fading should stop
+				if (timeElapsed >= fadeTime) {
+					//Stop playing if it was fading out
+					if (fadeState == 2)
+						stop();
+					else
+						//Stop the fading
+						fadeState = -1.0f;
+				}
+			} else
+				volumeFraction2 = 1.0f;
+
+		} else {
+			//Ensure the sound shouldn't stop
+			if (! requestedStop) {
+				//The audio is waiting to restart, so check if the time is up
+				if (utils_time::getSeconds() - timeStopped >= loopInterval)
+					//Restart the audio
+					play();
+			} else
+				//Stop the sound
+				stop();
+		}
 	}
 }
 
 void AudioSource::play() {
-	if (AudioManager::hasContext())
+	if (AudioManager::hasContext()) {
 		alSourcePlay(sourceHandle);
+		playingPaused = true;
+		timeStopped = -1.0f;
+		requestedStop = false;
+	}
 }
 
 void AudioSource::stop() {
-	if (AudioManager::hasContext())
+	if (AudioManager::hasContext()) {
 		alSourceStop(sourceHandle);
+		playingPaused = false;
+		timeStopped = -1.0f;
+		requestedStop = false;
+		fadeState = -1;
+	}
 }
 
 void AudioSource::pause() {
@@ -221,6 +285,36 @@ void AudioSource::destroy() {
 	}
 }
 
+void AudioSource::fadeIn(float fadeTime) {
+	this->fadeTime = fadeTime;
+	fadeStart = utils_time::getSeconds();
+	fadeState = 1;
+	play();
+}
+
+void AudioSource::fadeOut(float fadeTime) {
+	//Ensure not already fading out
+	if (fadeState != 2) {
+		this->fadeTime = fadeTime;
+		fadeStart = utils_time::getSeconds();
+
+		//Check if this was previously fading out
+		if (fadeState == 1) {
+			fadeInitialVolF2 = volumeFraction2;
+
+			//Check if need to subtract some fade time
+			if (volumeFraction2 < 1.0f) {
+				//Subtract the amount of time it would have taken to go from 1.0 down
+				//to whatever it currently is
+				this->fadeTime -= (1.0f - volumeFraction2) * fadeTime;
+			}
+		} else
+			fadeInitialVolF2 = 1.0f;
+
+		fadeState = 2;
+	}
+}
+
 bool AudioSource::isPlaying() {
 	int value = 0;
 	alGetSourcei(sourceHandle, AL_SOURCE_STATE, &value);
@@ -231,6 +325,90 @@ bool AudioSource::isPaused() {
 	int value = 0;
 	alGetSourcei(sourceHandle, AL_SOURCE_STATE, &value);
 	return value == AL_PAUSED;
+}
+
+/***************************************************************************************************
+ * The AudioSequence class
+ ***************************************************************************************************/
+
+void AudioSequence::update() {
+	//Check if this sequence is playing
+	if (currentIndex != -1) {
+		//Ensure the audio should not wait for something
+		if (timeStopped == -1) {
+			//Check if the current source has finished
+			if (! sources[currentIndex]->isPlaying()) {
+				//Stop the source
+				sources[currentIndex]->stop();
+				//Check if stop is requested
+				if (requestedStop) {
+					//Stop this sequence
+					currentIndex = -1;
+					stop();
+				} else {
+					//Move on to the next (if there is one)
+					if ((unsigned int) currentIndex < sources.size() - 1) {
+						timeStopped = utils_time::getSeconds();
+					} else {
+						//Check if looping
+						if (loop) {
+							timeStopped = utils_time::getSeconds();
+						} else {
+							//Stop this sequence
+							currentIndex = -1;
+							stop();
+						}
+					}
+				}
+			} else {
+				//Update the source
+				sources[currentIndex]->update();
+			}
+		} else {
+			//Check if its time to start the next source
+			if (utils_time::getSeconds() - timeStopped >= playInterval) {
+				if ((unsigned int) currentIndex < sources.size() - 1)
+					currentIndex++;
+				else
+					currentIndex = 0;
+
+				sources[currentIndex]->play();
+				timeStopped = -1.0f;
+			}
+		}
+	}
+}
+
+void AudioSequence::play() {
+	currentIndex = 0;
+	sources[currentIndex]->play();
+	timeStopped = -1.0f;
+	playingPaused = true;
+	requestedStop = false;
+}
+
+void AudioSequence::pause() {
+	if (currentIndex != -1)
+		sources[currentIndex]->pause();
+}
+
+void AudioSequence::resume() {
+	if (currentIndex != -1)
+		sources[currentIndex]->resume();
+}
+
+void AudioSequence::stop() {
+	if (currentIndex != -1)
+		sources[currentIndex]->stop();
+	timeStopped = -1.0f;
+	playingPaused = false;
+	requestedStop = false;
+}
+
+void AudioSequence::requestStop() {
+	if (currentIndex != -1)
+		sources[currentIndex]->requestStop();
+	requestedStop = true;
 }
 
 /***************************************************************************************************

@@ -142,16 +142,49 @@ public:
 
 class AudioSource : public AudioObject {
 private:
+	/* OpenAL handles */
 	ALuint sourceHandle = 0;
 	ALuint bufferHandle = 0;
 
+	/* Type of source used in determining which volume to use */
 	unsigned int type = 0;
 
-	float pitch = 0;
-	float gain  = 0;
+	/* Determines the gain value based off of the value in the settings */
+	float volumeFraction = 1.0f;
 
+	/* Determines the gain and can vary over the time making fade in/out effect */
+	float volumeFraction2 = 1.0f;
+
+	/* Various properties of the sound */
+	float pitch = 0.0f;
+	float gain  = 0.0f;
+
+	/* States whether this audio source is playing/is paused (including between loops) */
+	bool playingPaused = false;
+
+	/* States whether the sound should loop */
 	bool loop = false;
+	/* States the interval between restarting the sound (if loop = true) */
+	float loopInterval = 0.0f;
+	/* States the time the loop last stopped (Used to loop with a time interval) */
+	float timeStopped = -1.0f;
+
+	/* States whether this audio should stop when it next finishes */
+	bool requestedStop = false;
+
+	/* States current state of fading (-1 = no fading, 1 = fade in, 2 = fade out) */
+	int fadeState = -1;
+
+	/* Time since fading started */
+	float fadeStart = 0.0f;
+
+	/* States time over which the audio should fade in/fade out */
+	float fadeTime = 0.0f;
+
+	/* The initial volume fraction (2) when fade out was started */
+	float fadeInitialVolF2;
 public:
+	/* The main types of audio */
 	static const unsigned int TYPE_SOUND_EFFECT = 1;
 	static const unsigned int TYPE_MUSIC        = 2;
 
@@ -167,12 +200,15 @@ public:
 		transform->setParent(parent->getTransform());
 	}
 
+	/* The destructor */
 	virtual ~AudioSource() {
 		destroy();
 	}
 
+	/* Updates the volume in line with the settings (if a valid audio type has been assigned) */
 	void updateVolume();
 
+	/* Updates this source using OpenAL */
 	void update();
 
 	/* Various audio related methods */
@@ -182,15 +218,78 @@ public:
 	void resume();
 	void destroy();
 
+	/* Starts fading in/out */
+	void fadeIn(float fadeTime); //Also starts the audio playing
+	void fadeOut(float fadeTime);
+
 	/* The setters and getters */
 	inline void setPitch(float pitch) { this->pitch = pitch; }
 	inline void setGain(float gain) { this->gain = gain; }
-	inline void setLoop(bool loop) { this->loop = loop; }
+	inline void setLoop(bool loop, float loopInterval = 0.0f) { this->loop = loop; this->loopInterval = loopInterval; }
+	inline void setVolumeFraction(float volumeFraction) { this->volumeFraction = volumeFraction; }
+
+	/* Requests the audio source to stop when it has finished (applicable if looping) */
+	inline void requestStop() { requestedStop = true; }
+
 	inline float getPitch() { return pitch; }
 	inline float getGain() { return gain; }
 	inline bool doesLoop() { return loop; }
+	/* States whether the audio is playing/will continue to play if not stopped or has been (temporarily) paused */
+	bool isPlayingOrPaused() { return playingPaused; }
+	/* States whether the audio is actually playing or has been paused */
 	bool isPlaying();
 	bool isPaused();
+};
+
+/***************************************************************************************************
+ * The AudioSequence class
+ ***************************************************************************************************/
+
+class AudioSequence {
+private:
+	/* The sources in this sequence */
+	std::vector<AudioSource*> sources;
+
+	/* The index of the currently playing source (-1 if none) */
+	int currentIndex = -1;
+
+	/* States whether this sequence should loop */
+	bool loop = false;
+
+	/* Interval to wait between playing the next source/looping (in seconds) */
+	float playInterval = 0.0f;
+
+	/* States the time the last source stopped */
+	float timeStopped = -1.0f;
+
+	/* States whether a stop has been requested */
+	bool requestedStop = false;
+
+	/* States whether this audio source is playing/is paused (including between loops) */
+	bool playingPaused = false;
+public:
+	/* The constructor */
+	AudioSequence(std::vector<AudioSource*>& sources, bool loop, float playInterval) : sources(sources), loop(loop), playInterval(playInterval) {}
+
+	/* The destructor */
+	virtual ~AudioSequence() {}
+
+	/* Method used to update this sequence */
+	void update();
+
+	/* The methods used to play, pause, resume and stop playing audio */
+	void play();
+	void pause();
+	void resume();
+	void stop();
+	void requestStop();
+
+	/* States whether the audio is playing/will continue to play if not stopped or has been (temporarily) paused */
+	bool isPlayingOrPaused() { return playingPaused; }
+
+	/* Getters and setters */
+	inline void setLoop(bool loop) { this->loop = loop; }
+	inline void setPlayInterval(float playInterval) { this->playInterval = playInterval; }
 };
 
 /***************************************************************************************************

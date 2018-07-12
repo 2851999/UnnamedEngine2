@@ -26,15 +26,11 @@
  * The TilemapLayer class
  *****************************************************************************/
 
-TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int rows, unsigned int columns, std::vector<unsigned int> &data, bool visible, GLenum usage) : name(name), tileset(tileset), mapRows(rows), mapColumns(columns), data(data), visible(visible) {
-	//Assign the width and height of this layer
-	this->width = mapRows * tileset->getSubTextureWidth();
-	this->height = mapColumns * tileset->getSubTextureHeight();
-
+TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int> &data, bool visible, GLenum usage) : name(name), tileset(tileset), layerColumns(columns), layerRows(rows), tileWidth(tileWidth), tileHeight(tileHeight), data(data), visible(visible) {
 	if (visible) {
 
 		//Calculate the number of vertices required
-		unsigned int numTiles = mapRows * mapColumns;
+		unsigned int numTiles = layerColumns * layerRows;
 		unsigned int numVertices = numTiles * 4;
 		unsigned int numIndices = numTiles * 6;
 		//Assign the data
@@ -48,19 +44,19 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 		float mapX = 0;
 		float mapY = 0;
 
-		//The tile width and height
-		float tileWidth = tileset->getSubTextureWidth();
-		float tileHeight = tileset->getSubTextureHeight();
+//		//The tile width and height
+//		float tileWidth = tileset->getSubTextureWidth();
+//		float tileHeight = tileset->getSubTextureHeight();
 
-		//Go through each column in the map
-		for (unsigned int y = 0; y < mapColumns; y++) {
+		//Go through each row in the map
+		for (unsigned int y = 0; y < layerRows; y++) {
 			//Start on the left hand side
 			mapX = 0;
 
-			//Go through each row in the map
-			for (unsigned int x = 0; x < mapRows; x++) {
+			//Go through each column in the map
+			for (unsigned int x = 0; x < layerColumns; x++) {
 				//Calculate the index for the tile
-				unsigned int tileIndex = ((y * mapColumns) + x);
+				unsigned int tileIndex = ((y * layerColumns) + x);
 
 				//The texture coordinate values
 				float top, left, bottom, right;
@@ -190,10 +186,10 @@ void TilemapLayer::setTileID(float x, float y, unsigned int id) {
 	//Ensure in bounds
 	if (isWithinBounds(x, y)) {
 		//Get the row and column
-		unsigned int row = floor(x / tileset->getSubTextureWidth());
-		unsigned int col = floor(y / tileset->getSubTextureHeight());
+		unsigned int col = floor(x / tileset->getSubTextureWidth());
+		unsigned int row = floor(y / tileset->getSubTextureHeight());
 		//Calculate the tile index
-		unsigned int dataIndex = (col * mapColumns) + row;
+		unsigned int dataIndex = (row * layerColumns) + col;
 
 		//States if the visibility has changed
 		bool visibilityChanged = false;
@@ -263,10 +259,10 @@ unsigned int TilemapLayer::getTileID(float x, float y) {
 	//Ensure in bounds
 	if (isWithinBounds(x, y)) {
 		//Get the row and column
-		unsigned int row = floor(x / tileset->getSubTextureWidth());
-		unsigned int col = floor(y / tileset->getSubTextureHeight());
+		unsigned int col = floor(x / tileWidth);
+		unsigned int row = floor(y / tileHeight);
 		//Calculate the tile index
-		unsigned int index = (col * mapColumns) + row;
+		unsigned int index = (row * layerColumns) + col;
 
 		//Return the id of the tile at this index
 		return data[index];
@@ -277,7 +273,7 @@ unsigned int TilemapLayer::getTileID(float x, float y) {
 }
 
 bool TilemapLayer::isWithinBounds(float x, float y) {
-	return x > 0 && y > 0 && x < width && y < height;
+	return x > 0 && y > 0 && x < getWidth() && y < getHeight();
 }
 
 /*****************************************************************************
@@ -346,11 +342,11 @@ TextureAtlas* Tilemap::loadTileset(std::string path, std::string name) {
 	Texture* texture = Texture::loadTexture(texturePath);
 
 	//Calculate the number of rows/columns in the tileset
-	unsigned int rows = texture->getWidth() / tileWidth;
-	unsigned int columns = texture->getHeight() / tileHeight;
+	unsigned int columns = texture->getWidth() / tileWidth;
+	unsigned int rows = texture->getHeight() / tileHeight;
 
 	//Return the result
-	return new TextureAtlas(texture, rows, columns, tileCount);
+	return new TextureAtlas(texture, columns, rows, tileCount);
 }
 
 Tilemap* Tilemap::loadTilemap(std::string path, std::string name, GLenum usage) {
@@ -365,7 +361,7 @@ Tilemap* Tilemap::loadTilemap(std::string path, std::string name, GLenum usage) 
 	std::vector<MLAttribute> tilesetAttributes = tilemapElement.getAttributes();
 
 	//Info needed
-	unsigned int rows, columns = 0;
+	unsigned int rows, columns, tileWidth, tileHeight = 0;
 
 	//Go through all of the attributes
 	for (unsigned int i = 0; i < tilesetAttributes.size(); i++) {
@@ -373,9 +369,13 @@ Tilemap* Tilemap::loadTilemap(std::string path, std::string name, GLenum usage) 
 		MLAttribute current = tilesetAttributes[i];
 		//Assign the required info
 		if (current.getName() == "width")
-			rows = current.getDataAsUInt();
-		else if (current.getName() == "height")
 			columns = current.getDataAsUInt();
+		else if (current.getName() == "height")
+			rows = current.getDataAsUInt();
+		else if (current.getName() == "tilewidth")
+			tileWidth = current.getDataAsUInt();
+		else if (current.getName() == "tileheight")
+			tileHeight = current.getDataAsUInt();
 	}
 
 	//The tilesets
@@ -386,7 +386,7 @@ Tilemap* Tilemap::loadTilemap(std::string path, std::string name, GLenum usage) 
 	std::vector<MLElement> children = tilemapElement.getChildren();
 
 	//The tilemap
-	Tilemap* tilemap = new Tilemap();
+	Tilemap* tilemap = new Tilemap(columns, rows, tileWidth, tileHeight);
 
 	for (unsigned int i = 0; i < children.size(); i++) {
 		//Check what the current child element is
@@ -442,7 +442,7 @@ Tilemap* Tilemap::loadTilemap(std::string path, std::string name, GLenum usage) 
 					data[i] -= (currentFirstGID - 1);
 			}
 			//Create and add this layer
-			tilemap->addLayer(new TilemapLayer(name, tileset, rows, columns, data, visible, usage));
+			tilemap->addLayer(new TilemapLayer(name, tileset, columns, rows, tileWidth, tileHeight, data, visible, usage));
 		}
 	}
 

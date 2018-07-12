@@ -35,8 +35,12 @@ private:
 	TextureAtlas* tileset;
 
 	/* The number of rows and columns of tiles */
-	unsigned int mapRows;
-	unsigned int mapColumns;
+	unsigned int layerColumns;
+	unsigned int layerRows;
+
+	/* The tile width and height */
+	unsigned int tileWidth;
+	unsigned int tileHeight;
 
 	/* The data in this tilemap */
 	std::vector<unsigned int> data;
@@ -61,13 +65,9 @@ private:
 
 	/* The shader used for rendering */
 	Shader* shader = NULL;
-
-	/* The width and height of this layer */
-	unsigned int width;
-	unsigned int height;
 public:
 	/* The constructor */
-	TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int rows, unsigned int columns, std::vector<unsigned int> &data, bool visible, GLenum usage);
+	TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int> &data, bool visible, GLenum usage);
 
 	/* The destructor */
 	virtual ~TilemapLayer();
@@ -92,8 +92,8 @@ public:
 	inline std::string getName() { return name; }
 
 	/* Returns the width and height of this layer in pixels */
-	inline unsigned int getWidth() { return width; }
-	inline unsigned int getHeight() { return height; }
+	inline unsigned int getWidth() { return layerColumns * tileWidth; }
+	inline unsigned int getHeight() { return layerRows * tileHeight; }
 
 	inline bool isVisible() { return visible; }
 };
@@ -106,9 +106,17 @@ class Tilemap {
 private:
 	/* The layers of this tilemap */
 	std::vector<TilemapLayer*> layers;
+
+	/* The grid width and height of this tilemap */
+	unsigned int gridWidth;
+	unsigned int gridHeight;
+
+	/* The width and height of the tiles */
+	unsigned int tileWidth;
+	unsigned int tileHeight;
 public:
 	/* The constructor */
-	Tilemap() {}
+	Tilemap(unsigned int gridWidth, unsigned int gridHeight, unsigned int tileWidth, unsigned int tileHeight) : gridWidth(gridWidth), gridHeight(gridHeight), tileWidth(tileWidth), tileHeight(tileHeight) {}
 
 	/* The destructor */
 	virtual ~Tilemap();
@@ -127,6 +135,8 @@ public:
 
 	/* Getters and setters */
 	inline std::vector<TilemapLayer*>& getLayers() { return layers; }
+	inline unsigned int getWidth() { return gridWidth * tileWidth; }
+	inline unsigned int getHeight() { return gridHeight * tileHeight; }
 
 	/* Method used to load a tileset from a file */
 	static TextureAtlas* loadTileset(std::string path, std::string name);
