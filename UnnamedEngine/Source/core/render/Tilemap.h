@@ -95,6 +95,10 @@ public:
 	inline unsigned int getWidth() { return layerColumns * tileWidth; }
 	inline unsigned int getHeight() { return layerRows * tileHeight; }
 
+	/* Returns the width and height of the tiles in this layer */
+	inline unsigned int getTileWidth() { return tileWidth; }
+	inline unsigned int getTileHeight() { return tileHeight; }
+
 	inline bool isVisible() { return visible; }
 };
 
@@ -137,6 +141,9 @@ public:
 	inline std::vector<TilemapLayer*>& getLayers() { return layers; }
 	inline unsigned int getWidth() { return gridWidth * tileWidth; }
 	inline unsigned int getHeight() { return gridHeight * tileHeight; }
+
+	inline unsigned int getTileWidth() { return tileWidth; }
+	inline unsigned int getTileHeight() { return tileHeight; }
 
 	/* Method used to load a tileset from a file */
 	static TextureAtlas* loadTileset(std::string path, std::string name);

@@ -95,20 +95,38 @@ void SoundSystem::fadeOut(std::string key, float fadeTime) {
 	source->fadeOut(fadeTime);
 }
 
+void SoundSystem::fadeInSequence(std::string key, float fadeTime) {
+	AudioSequence* sequence = getSequence(key);
+	sequence->fadeIn(fadeTime);
+	playingSequences.push_back(sequence);
+}
+
+void SoundSystem::fadeOutSequence(std::string key, float fadeTime) {
+	AudioSequence* sequence = getSequence(key);
+	sequence->fadeOut(fadeTime);
+}
+
 void SoundSystem::pauseAll() {
 	//Go through all playing audio
+	for (unsigned int i = 0; i < playingSequences.size(); i++)
+		playingSequences[i]->pause();
 	for (unsigned int i = 0; i < playing.size(); i++)
 		playing[i]->pause();
 }
 
 void SoundSystem::resumeAll() {
 	//Go through all playing audio
+	for (unsigned int i = 0; i < playingSequences.size(); i++)
+		playingSequences[i]->resume();
 	for (unsigned int i = 0; i < playing.size(); i++)
 		playing[i]->resume();
 }
 
 void SoundSystem::stopAll() {
 	//Go through all playing audio
+	for (unsigned int i = 0; i < playingSequences.size(); i++)
+		playingSequences[i]->stop();
+	playingSequences.clear();
 	for (unsigned int i = 0; i < playing.size(); i++)
 		playing[i]->stop();
 	playing.clear();
@@ -141,6 +159,11 @@ void SoundSystem::update() {
 void SoundSystem::destroy() {
 	sources.clear();
 	playing.clear();
+	playingSequences.clear();
+
+	for (auto it : sequences)
+		delete it.second;
+	sequences.clear();
 
 	if (listener)
 		delete listener;

@@ -58,67 +58,72 @@ AudioData* AudioLoader::loadWaveFile(std::string path) {
 	//Open the file
 	input.open(path.c_str(), std::ios::binary);
 
-	//Read the RIFF data
-	input.read((char*) &waveRiff, sizeof(Wave_RIFF));
+	//Ensure the file was opened
+	if (input.is_open()) {
+		//Read the RIFF data
+		input.read((char*) &waveRiff, sizeof(Wave_RIFF));
 
-	//Ensure the RIFF header data is correct for a wave file
-	if (waveRiff.ChunkID[0] != 'R' || waveRiff.ChunkID[1] != 'I' || waveRiff.ChunkID[2] != 'F' || waveRiff.ChunkID[3] != 'F') {
+		//Ensure the RIFF header data is correct for a wave file
+		if (waveRiff.ChunkID[0] != 'R' || waveRiff.ChunkID[1] != 'I' || waveRiff.ChunkID[2] != 'F' || waveRiff.ChunkID[3] != 'F') {
+			input.close();
+			Logger::log("Wave file '" + path + "' has an invalid 'RIFF' header", "AudioLoader", LogType::Error);
+			return NULL;
+		}
+
+		if (waveRiff.Format[0] != 'W' || waveRiff.Format[1] != 'A' || waveRiff.Format[2] != 'V' || waveRiff.Format[3] != 'E') {
+			input.close();
+			Logger::log("Wave file '" + path + "' has an invalid 'RIFF' header for a wave file", "AudioLoader", LogType::Error);
+			return NULL;
+		}
+
+		//Read the 'fmt' sub-chunk
+		input.read((char*) &waveFmt, sizeof(Wave_fmt));
+
+		//Ensure it is valid
+		if (waveFmt.SubChunkID[0] != 'f' || waveFmt.SubChunkID[1] != 'm' || waveFmt.SubChunkID[2] != 't' || waveFmt.SubChunkID[3] != ' ') {
+			input.close();
+			Logger::log("Wave file '" + path + "' has an invalid 'fmt' header", "AudioLoader", LogType::Error);
+			return NULL;
+		}
+
+		//Read the first section of audio data
+		input.read((char*) &waveData, sizeof(Wave_data));
+
+		//Ensure the data is valid
+		if (waveData.SubChunkID[0] != 'd' || waveData.SubChunkID[1] != 'a' || waveData.SubChunkID[2] != 't' || waveData.SubChunkID[3] != 'a') {
+			input.close();
+			Logger::log("Wave file '" + path + "' has an invalid 'data' header", "AudioLoader", LogType::Error);
+			return NULL;
+		}
+
+		//Create the AudioData instance and create the data array
+		data = new AudioData();
+		data->data = new short[waveData.SubChunkSize];
+
+		//Read all of the remaining audio data
+		input.read((char*) data->data, waveData.SubChunkSize);
+
+		//Setup the rest of the AudioData instance
+		data->size = waveData.SubChunkSize;
+		data->frequency = waveFmt.SampleRate;
+
+		if (waveFmt.NumChannels == 1) {
+			if (waveFmt.BitsPerSample == 8)
+				data->format = AL_FORMAT_MONO8;
+			else if (waveFmt.BitsPerSample == 16)
+				data->format = AL_FORMAT_MONO16;
+		} else if (waveFmt.NumChannels == 2) {
+			if (waveFmt.BitsPerSample == 8)
+				data->format = AL_FORMAT_STEREO8;
+			else if (waveFmt.BitsPerSample == 16)
+				data->format = AL_FORMAT_STEREO16;
+		}
+
+		//Close the input file
 		input.close();
-		Logger::log("Wave file '" + path + "' has an invalid 'RIFF' header", "AudioLoader", LogType::Error);
-		return NULL;
-	}
-
-	if (waveRiff.Format[0] != 'W' || waveRiff.Format[1] != 'A' || waveRiff.Format[2] != 'V' || waveRiff.Format[3] != 'E') {
-		input.close();
-		Logger::log("Wave file '" + path + "' has an invalid 'RIFF' header for a wave file", "AudioLoader", LogType::Error);
-		return NULL;
-	}
-
-	//Read the 'fmt' sub-chunk
-	input.read((char*) &waveFmt, sizeof(Wave_fmt));
-
-	//Ensure it is valid
-	if (waveFmt.SubChunkID[0] != 'f' || waveFmt.SubChunkID[1] != 'm' || waveFmt.SubChunkID[2] != 't' || waveFmt.SubChunkID[3] != ' ') {
-		input.close();
-		Logger::log("Wave file '" + path + "' has an invalid 'fmt' header", "AudioLoader", LogType::Error);
-		return NULL;
-	}
-
-	//Read the first section of audio data
-	input.read((char*) &waveData, sizeof(Wave_data));
-
-	//Ensure the data is valid
-	if (waveData.SubChunkID[0] != 'd' || waveData.SubChunkID[1] != 'a' || waveData.SubChunkID[2] != 't' || waveData.SubChunkID[3] != 'a') {
-		input.close();
-		Logger::log("Wave file '" + path + "' has an invalid 'data' header", "AudioLoader", LogType::Error);
-		return NULL;
-	}
-
-	//Create the AudioData instance and create the data array
-	data = new AudioData();
-	data->data = new short[waveData.SubChunkSize];
-
-	//Read all of the remaining audio data
-	input.read((char*) data->data, waveData.SubChunkSize);
-
-	//Setup the rest of the AudioData instance
-	data->size = waveData.SubChunkSize;
-	data->frequency = waveFmt.SampleRate;
-
-	if (waveFmt.NumChannels == 1) {
-		if (waveFmt.BitsPerSample == 8)
-			data->format = AL_FORMAT_MONO8;
-		else if (waveFmt.BitsPerSample == 16)
-			data->format = AL_FORMAT_MONO16;
-	} else if (waveFmt.NumChannels == 2) {
-		if (waveFmt.BitsPerSample == 8)
-			data->format = AL_FORMAT_STEREO8;
-		else if (waveFmt.BitsPerSample == 16)
-			data->format = AL_FORMAT_STEREO16;
-	}
-
-	//Close the input file
-	input.close();
+	} else
+		//An error occurred
+		Logger::log("Wave file '" + path + "' could not be opened successfully", "AudioLoader", LogType::Error);
 
 	return data;
 }
@@ -133,6 +138,13 @@ AudioData* AudioLoader::loadOggFile(std::string path) {
 	//Read the file and assign the size of it in bytes
 	data->size = stb_vorbis_decode_filename(path.c_str(), &numChannels, &data->frequency, &data->data) * sizeof(short);
 	data->size *= numChannels;
+
+	//Check if the data was not read properly
+	if (data->size < 0) {
+		Logger::log("Ogg Vorbis file '" + path + "' was not read successfully", "AudioLoader", LogType::Error);
+		delete data;
+		return NULL;
+	}
 
 	//Assign the format
 	if (numChannels == 1)
@@ -409,6 +421,19 @@ void AudioSequence::requestStop() {
 	if (currentIndex != -1)
 		sources[currentIndex]->requestStop();
 	requestedStop = true;
+}
+
+void AudioSequence::fadeIn(float fadeTime) {
+	currentIndex = 0;
+	sources[currentIndex]->fadeIn(fadeTime);
+	timeStopped = -1.0f;
+	playingPaused = true;
+	requestedStop = false;
+}
+
+void AudioSequence::fadeOut(float fadeTime) {
+	if (currentIndex != -1)
+		sources[currentIndex]->fadeOut(fadeTime);
 }
 
 /***************************************************************************************************

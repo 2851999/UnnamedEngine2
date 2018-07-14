@@ -284,6 +284,10 @@ public:
 	void stop();
 	void requestStop();
 
+	/* Starts fading in/out */
+	void fadeIn(float fadeTime); //Also starts the audio playing
+	void fadeOut(float fadeTime);
+
 	/* States whether the audio is playing/will continue to play if not stopped or has been (temporarily) paused */
 	bool isPlayingOrPaused() { return playingPaused; }
 

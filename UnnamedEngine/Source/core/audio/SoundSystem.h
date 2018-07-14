@@ -94,6 +94,10 @@ public:
 	void fadeIn(std::string key, float time);
 	void fadeOut(std::string key, float time);
 
+	/* Methods to fade in/out */
+	void fadeInSequence(std::string key, float time);
+	void fadeOutSequence(std::string key, float time);
+
 	/* Methods used to pause and resume all playing audio */
 	void pauseAll();
 	void resumeAll();

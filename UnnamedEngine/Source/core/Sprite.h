@@ -135,7 +135,7 @@ public:
 	virtual ~Sprite2D();
 
 	/* Method called to update this sprite */
-	void update(float deltaSeconds);
+	virtual void update(float deltaSeconds);
 
 	/* Method used to add an animation */
 	inline void addAnimation(std::string name, Animation2D* animation) {

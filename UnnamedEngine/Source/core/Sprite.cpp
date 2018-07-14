@@ -36,7 +36,8 @@ Animation2D::~Animation2D() {
 }
 
 void Animation2D::start() {
-	//Start
+	//Start the animation, after ensuring all the variables are reset ready to start
+	reset();
 	running = true;
 	onStart();
 }
@@ -95,9 +96,12 @@ TextureAnimation2D::TextureAnimation2D(Sprite2D* sprite, TextureAtlas* textureAt
 
 void TextureAnimation2D::onStart() {
 	//Assign the texture in the entity
-	if (sprite)
+	if (sprite) {
 		//Assign the texture
 		sprite->getMaterial()->diffuseTexture = textureAtlas->getTexture();
+		//Assign the texture for the first frame
+		sprite->setTextureCoords(textureAtlas, currentFrame);
+	}
 }
 
 void TextureAnimation2D::updateFrame() {
@@ -131,9 +135,13 @@ Sprite2D::~Sprite2D() {
 
 void Sprite2D::update(float deltaSeconds) {
 	//Check whether there is a current animation
-	if (currentAnimation)
+	if (currentAnimation) {
 		//Update the current animation
 		currentAnimation->update(deltaSeconds);
+		//Check if the animation has finished
+		if (! currentAnimation->isRunning())
+			stopAnimation();
+	}
 	//Update this object
 	GameObject2D::update();
 }
@@ -152,7 +160,7 @@ void Sprite2D::startAnimation(std::string name) {
 }
 
 void Sprite2D::stopAnimation() {
-	//Ensure there is a current animationn
+	//Ensure there is a current animation
 	if (currentAnimation) {
 		//Stop the current animation
 		currentAnimation->stop();
