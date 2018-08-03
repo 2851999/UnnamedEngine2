@@ -18,13 +18,14 @@
 
 #include "Sprite.h"
 
+#include "render/Renderer.h"
 #include "../utils/Logging.h"
 
 /*****************************************************************************
  * The Animation2D class
  *****************************************************************************/
 
-Animation2D::Animation2D(Sprite2D* sprite, float timeBetweenFrame, unsigned int totalFrames, bool repeat, unsigned int startFrame) :
+Animation2D::Animation2D(Sprite* sprite, float timeBetweenFrame, unsigned int totalFrames, bool repeat, unsigned int startFrame) :
 		sprite(sprite), timeBetweenFrame(timeBetweenFrame), totalFrames(totalFrames), repeat(repeat), startFrame(startFrame) {
 	currentFrame = startFrame;
 	running = false;
@@ -89,7 +90,7 @@ void Animation2D::update(float deltaSeconds) {
  * The TextureAnimation2D class
  *****************************************************************************/
 
-TextureAnimation2D::TextureAnimation2D(Sprite2D* sprite, TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat, unsigned int startFrame, int numFrames) :
+TextureAnimation2D::TextureAnimation2D(Sprite* sprite, TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat, unsigned int startFrame, int numFrames) :
 		Animation2D(sprite, timeBetweenFrame, numFrames == -1 ? textureAtlas->getNumTextures() : numFrames, repeat, startFrame), textureAtlas(textureAtlas) {
 
 }
@@ -113,27 +114,45 @@ void TextureAnimation2D::updateFrame() {
 }
 
 /*****************************************************************************
- * The Sprite2D class
+ * The Sprite class
  *****************************************************************************/
 
-Sprite2D::Sprite2D(Texture* texture) :
-		GameObject2D(new Mesh(MeshBuilder::createQuad(texture->getWidth(), texture->getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), "Material", texture->getWidth(), texture->getHeight()) {
-	getMaterial()->diffuseTexture = texture;
-}
-
-Sprite2D::Sprite2D(Texture* texture, float width, float height) :
-		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, texture, MeshData::SEPARATE_TEXTURE_COORDS)), "Material", width, height) {
-	getMaterial()->diffuseTexture = texture;
-}
-
-Sprite2D::~Sprite2D() {
+Sprite::~Sprite() {
 	//Go through and release all of the animations
 	for (auto const& elem : animations)
 		delete elem.second;
 	animations.clear();
 }
 
-void Sprite2D::update(float deltaSeconds) {
+void Sprite::setup(Texture* texture) {
+	setWidth(texture->getWidth());
+	setHeight(texture->getHeight());
+	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	getMaterial()->diffuseTexture = texture;
+}
+
+void Sprite::setup(Texture* texture, float width, float height) {
+	setWidth(width);
+	setHeight(height);
+	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	getMaterial()->diffuseTexture = texture;
+}
+
+void Sprite::setup(TextureAtlas* textureAtlas) {
+	setWidth(textureAtlas->getSubTextureWidth());
+	setHeight(textureAtlas->getSubTextureHeight());
+	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), textureAtlas->getTexture(), MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	getMaterial()->diffuseTexture = textureAtlas->getTexture();
+}
+
+void Sprite::setup(TextureAtlas* textureAtlas, float width, float height) {
+	setWidth(width);
+	setHeight(height);
+	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), textureAtlas->getTexture(), MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	getMaterial()->diffuseTexture = textureAtlas->getTexture();
+}
+
+void Sprite::update(float deltaSeconds) {
 	//Check whether there is a current animation
 	if (currentAnimation) {
 		//Update the current animation
@@ -146,7 +165,7 @@ void Sprite2D::update(float deltaSeconds) {
 	GameObject2D::update();
 }
 
-void Sprite2D::startAnimation(std::string name) {
+void Sprite::startAnimation(std::string name) {
 	//Check whether the animation exists
 	if (animations.count(name) > 0) {
 		//Assign the current animation
@@ -156,10 +175,10 @@ void Sprite2D::startAnimation(std::string name) {
 		currentAnimation->start();
 	} else
 		//Log an error
-		Logger::log("Could not locate the animation with the name '" + name + "'", "Sprite2D", LogType::Error);
+		Logger::log("Could not locate the animation with the name '" + name + "'", "Sprite", LogType::Error);
 }
 
-void Sprite2D::stopAnimation() {
+void Sprite::stopAnimation() {
 	//Ensure there is a current animation
 	if (currentAnimation) {
 		//Stop the current animation
@@ -169,7 +188,7 @@ void Sprite2D::stopAnimation() {
 	}
 }
 
-void Sprite2D::setTextureCoords(TextureAtlas* textureAtlas, unsigned int index) {
+void Sprite::setTextureCoords(TextureAtlas* textureAtlas, unsigned int index) {
 	//Ensure the entity has been assigned with a mesh
 	if (hasMesh()) {
 		//Update the mesh

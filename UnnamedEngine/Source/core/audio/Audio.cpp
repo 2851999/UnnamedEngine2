@@ -298,10 +298,17 @@ void AudioSource::destroy() {
 }
 
 void AudioSource::fadeIn(float fadeTime) {
-	this->fadeTime = fadeTime;
-	fadeStart = utils_time::getSeconds();
-	fadeState = 1;
-	play();
+	//Ensure not already fading in
+	if (fadeState != 1) {
+		this->fadeTime = fadeTime;
+		fadeStart = utils_time::getSeconds();
+		fadeState = 1;
+		//Start with no sound
+		volumeFraction2 = 0.0f;
+		alSourcef(sourceHandle, AL_GAIN, 0.0f);
+
+		play();
+	}
 }
 
 void AudioSource::fadeOut(float fadeTime) {
@@ -475,8 +482,10 @@ void AudioManager::remove(AudioSource* source) {
 
 void AudioManager::initialise() {
 	device = alcOpenDevice(NULL);
-	context = alcCreateContext(device, NULL);
-	alcMakeContextCurrent(context);
+	if (device) {
+		context = alcCreateContext(device, NULL);
+		alcMakeContextCurrent(context);
+	}
 }
 
 void AudioManager::destroy() {

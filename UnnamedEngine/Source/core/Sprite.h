@@ -24,8 +24,8 @@
 
 #include "../utils/Timer.h"
 
-/* Forward declaration of Sprite2D */
-class Sprite2D;
+/* Forward declaration of Sprite */
+class Sprite;
 
 /*****************************************************************************
  * The Animation2D class helps to create 2D animations
@@ -34,7 +34,7 @@ class Sprite2D;
 class Animation2D {
 protected:
 	/* The entity to apply this animation to */
-	Sprite2D* sprite = NULL;
+	Sprite* sprite = NULL;
 
 	/* The current frame of the animation */
 	unsigned int currentFrame = 0;
@@ -58,7 +58,7 @@ private:
 	float currentTime = 0.0f;
 public:
 	/* The constructors */
-	Animation2D(Sprite2D* sprite, float timeBetweenFrame, unsigned int totalFrames, bool repeat = false, unsigned int startFrame = 0);
+	Animation2D(Sprite* sprite, float timeBetweenFrame, unsigned int totalFrames, bool repeat = false, unsigned int startFrame = 0);
 	Animation2D(float timeBetweenFrame, unsigned int totalFrames, bool repeat = false, unsigned int startFrame = 0) : Animation2D(NULL, timeBetweenFrame, totalFrames, repeat, startFrame) {}
 
 	/* The destructor */
@@ -84,12 +84,12 @@ public:
 	/* Setters and getters */
 	inline void setTimeBetweenFrame(float time) { timeBetweenFrame = time; }
 	inline void setRepeat(bool repeat) { this->repeat = repeat; }
-	inline void setSprite(Sprite2D* sprite) { this->sprite = sprite; }
+	inline void setSprite(Sprite* sprite) { this->sprite = sprite; }
 
 	inline float getTimeBetweenFrame() { return timeBetweenFrame; }
 	inline bool  doesRepeat() { return repeat; }
 	inline bool  isRunning()  { return running; }
-	inline Sprite2D* getSprite() { return sprite; }
+	inline Sprite* getSprite() { return sprite; }
 };
 
 /*****************************************************************************
@@ -102,7 +102,7 @@ private:
 	TextureAtlas* textureAtlas;
 public:
 	/* The constructors */
-	TextureAnimation2D(Sprite2D* sprite, TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat = false, unsigned int startFrame = 0, int numFrames = -1);
+	TextureAnimation2D(Sprite* sprite, TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat = false, unsigned int startFrame = 0, int numFrames = -1);
 	TextureAnimation2D(TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat = false, unsigned int startFrame = 0, int numFrames = -1) : TextureAnimation2D(NULL, textureAtlas, timeBetweenFrame, repeat, startFrame, numFrames) {}
 
 	/* Method called when the frame needs to change */
@@ -113,11 +113,11 @@ public:
 };
 
 /*****************************************************************************
- * The Sprite2D class helps to create a 2D sprite that can have animations
+ * The Sprite class helps to create a 2D sprite that can have animations
  * attached to them
  *****************************************************************************/
 
-class Sprite2D : public GameObject2D {
+class Sprite : public GameObject2D {
 private:
 	/* The animations for this sprite */
 	std::unordered_map<std::string, Animation2D*> animations;
@@ -127,12 +127,20 @@ private:
 	Animation2D* currentAnimation = NULL;
 public:
 	/* The constructors */
-	Sprite2D() {}
-	Sprite2D(Texture* texture);
-	Sprite2D(Texture* texture, float width, float height);
+	Sprite() {}
+	Sprite(Texture* texture) { setup(texture); }
+	Sprite(Texture* texture, float width, float height) { setup(texture, width, height); }
+	Sprite(TextureAtlas* textureAtlas) { setup(textureAtlas); }
+	Sprite(TextureAtlas* textureAtlas, float width, float height) { setup(textureAtlas, width, height); }
+
+	/* Sets the mesh given various things */
+	void setup(Texture* texture);
+	void setup(Texture* texture, float width, float height);
+	void setup(TextureAtlas* textureAtlas);
+	void setup(TextureAtlas* texture, float width, float height);
 
 	/* The destructor */
-	virtual ~Sprite2D();
+	virtual ~Sprite();
 
 	/* Method called to update this sprite */
 	virtual void update(float deltaSeconds);

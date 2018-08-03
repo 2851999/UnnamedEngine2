@@ -34,7 +34,7 @@ private:
 	Camera2D* camera;
 	GameObject2D* object;
 	Font* font;
-	Sprite2D* sprite;
+	Sprite* sprite;
 	Tilemap* tilemap;
 	SoundSystem* soundSystem;
 public:
@@ -85,7 +85,7 @@ void Test::created() {
 	object->getMaterial()->diffuseColour = Colour::WHITE;
 	object->update();
 
-	sprite = new Sprite2D(texture, 100, 100);
+	sprite = new Sprite(texture, 100, 100);
 	sprite->setPosition(400, 100);
 	//Animation2D* animation = new TextureAnimation2D(sprite, new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/ParticleAtlas3.png"), 8, 8, 64), 0.05f);
 	sprite->addAnimation("Smoke", new TextureAnimation2D(new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/smoke.png"), 7, 7, 46), 0.05f, true));
@@ -126,8 +126,8 @@ void Test::update() {
 void Test::onMousePressed(int button) {
 	Vector3f cameraPos = camera->getPosition();
 	Vector2d mousePos = Mouse::getPosition();
-	float worldX = (float) mousePos.getX() - cameraPos.getX();
-	float worldY = (float) mousePos.getY() - cameraPos.getY();
+	float worldX = (float) mousePos.getX() + cameraPos.getX();
+	float worldY = (float) mousePos.getY() + cameraPos.getY();
 //	std::cout << tilemap->getLayers()[0]->getTileID(worldX, worldY) << std::endl;
 	tilemap->getLayers()[0]->setTileID(worldX, worldY, 1);
 }

@@ -1,4 +1,18 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 7
+
+* Added ResourcePack
+* Added 'setup' methods in Sprite
+* Added error messages to SoundSystem
+
+* Renamed Sprite2D to Sprite
+
+* Fixed bug: Potential OpenAL crash upon failure to find a
+             device
+* Fixed bug: 'fadeIn' in AudioSource did not start without
+			 sound
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 1 | Experimental 6
 
 * Added 'fade' methods to AudioSequence

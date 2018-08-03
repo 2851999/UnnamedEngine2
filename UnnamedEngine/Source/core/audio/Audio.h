@@ -337,7 +337,7 @@ public:
 	/* Method to update the volume of all audio sources */
 	static void updateVolume();
 
-	static inline bool hasContext() { return context != NULL; }
+	static inline bool hasContext() { return context; }
 };
 
 #endif /* CORE_AUDIO_AUDIO_H_ */

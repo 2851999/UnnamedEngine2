@@ -21,6 +21,8 @@
 
 #include "Audio.h"
 
+#include "../../utils/Logging.h"
+
 /***************************************************************************************************
  * The SoundSystem class
  ***************************************************************************************************/
@@ -150,12 +152,22 @@ public:
 
 	/* The method used to get an AudioSource given its key */
 	AudioSource* getSource(std::string key) {
-		return sources.at(key);
+		try {
+			return sources.at(key);
+		} catch(std::out_of_range& e) {
+			Logger::log("Source with the key '" + key + "' was not found", "SoundSystem", LogType::Error);
+			return NULL;
+		}
 	}
 
 	/* Method used to get an AudioSequence */
 	AudioSequence* getSequence(std::string key) {
-		return sequences.at(key);
+		try {
+			return sequences.at(key);
+		} catch(std::out_of_range& e) {
+			Logger::log("Sequence with the key '" + key + "' was not found", "SoundSystem", LogType::Error);
+			return NULL;
+		}
 	}
 
 	/* Called to destroy all created objects */
