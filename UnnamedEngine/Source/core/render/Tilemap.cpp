@@ -26,19 +26,27 @@
  * The TilemapLayer class
  *****************************************************************************/
 
-TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int> &data, bool visible, GLenum usage) : name(name), tileset(tileset), layerColumns(columns), layerRows(rows), tileWidth(tileWidth), tileHeight(tileHeight), data(data), visible(visible) {
+TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int> &data, bool visible, bool editable, GLenum usage) : name(name), tileset(tileset), layerColumns(columns), layerRows(rows), tileWidth(tileWidth), tileHeight(tileHeight), data(data), visible(visible), editable(editable) {
 	if (visible) {
-
-		//Calculate the number of vertices required
-		unsigned int numTiles = layerColumns * layerRows;
-		unsigned int numVertices = numTiles * 4;
-		unsigned int numIndices = numTiles * 6;
 		//Assign the data
 
-		mapIndices.resize(numIndices);
-		mapVertices.resize(numVertices * 2);
-		mapTextureCoords.resize(numVertices * 2);
-		mapVisibility.resize(numVertices);
+		bool reduceTriangles = ! editable;
+
+		//Number of indices
+		unsigned int numIndices = 0;
+
+		if (! reduceTriangles) {
+			//Calculate the number of vertices required
+			unsigned int numTiles = layerColumns * layerRows;
+			unsigned int numVertices = numTiles * 4;
+			numIndices = numTiles * 6;
+
+			//Resize the arrays
+			mapIndices.resize(numIndices);
+			mapVertices.resize(numVertices * 2);
+			mapTextureCoords.resize(numVertices * 2);
+			mapVisibility.resize(numVertices);
+		}
 
 		//The current x and y position of the tile in the map
 		float mapX = 0;
@@ -58,17 +66,11 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 				//Calculate the index for the tile
 				unsigned int tileIndex = ((y * layerColumns) + x);
 
-				//The texture coordinate values
-				float top, left, bottom, right;
-
 				//The id for the tile
 				unsigned int tileID = data[tileIndex];
 
-				//Calculate the position in the data to assign (4 vertices per tile, each with 2 values)
-				unsigned int index = tileIndex * 4;
-				unsigned int pos = index * 2;
-				//Calculate the position in the indices data to assign
-				unsigned int posIndices = tileIndex * 6;
+				//The texture coordinate values
+				float top, left, bottom, right;
 
 				//Visibility of the current tile
 				float tileVisibility = 1.0f;
@@ -86,51 +88,106 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 				left += 0.5f / (float) tileset->getTexture()->getWidth();
 				right -= 0.5f / (float) tileset->getTexture()->getWidth();
 
-				//Assign the vertices
+				if (! reduceTriangles) {
+					//Calculate the position in the data to assign (4 vertices per tile, each with 2 values)
+					unsigned int index = tileIndex * 4;
+					unsigned int pos = index * 2;
+					//Calculate the position in the indices data to assign
+					unsigned int posIndices = tileIndex * 6;
 
-				//Top-left
-				mapVertices[pos] = mapX;
-				mapVertices[pos + 1] = mapY;
-				mapTextureCoords[pos] = left;
-				mapTextureCoords[pos + 1] = top;
+					//Assign the vertices
 
-				//Top-right
-				mapVertices[pos + 2] = mapX + tileWidth;
-				mapVertices[pos + 3] = mapY;
-				mapTextureCoords[pos + 2] = right;
-				mapTextureCoords[pos + 3] = top;
+					//Top-left
+					mapVertices[pos] = mapX;
+					mapVertices[pos + 1] = mapY;
+					mapTextureCoords[pos] = left;
+					mapTextureCoords[pos + 1] = top;
 
-				//Bottom-left
-				mapVertices[pos + 4] = mapX;
-				mapVertices[pos + 5] = mapY + tileHeight;
-				mapTextureCoords[pos + 4] = left;
-				mapTextureCoords[pos + 5] = bottom;
+					//Top-right
+					mapVertices[pos + 2] = mapX + tileWidth;
+					mapVertices[pos + 3] = mapY;
+					mapTextureCoords[pos + 2] = right;
+					mapTextureCoords[pos + 3] = top;
 
-				//Bottom-right
-				mapVertices[pos + 6] = mapX + tileWidth;
-				mapVertices[pos + 7] = mapY + tileHeight;
-				mapTextureCoords[pos + 6] = right;
-				mapTextureCoords[pos + 7] = bottom;
+					//Bottom-left
+					mapVertices[pos + 4] = mapX;
+					mapVertices[pos + 5] = mapY + tileHeight;
+					mapTextureCoords[pos + 4] = left;
+					mapTextureCoords[pos + 5] = bottom;
 
-				//Assign the indices
-				mapIndices[posIndices]     = index;     //Top-left
-				mapIndices[posIndices + 1] = index + 1; //Top-right
-				mapIndices[posIndices + 2] = index + 2; //Bottom-left
+					//Bottom-right
+					mapVertices[pos + 6] = mapX + tileWidth;
+					mapVertices[pos + 7] = mapY + tileHeight;
+					mapTextureCoords[pos + 6] = right;
+					mapTextureCoords[pos + 7] = bottom;
 
-				mapIndices[posIndices + 3] = index + 1; //Top-right
-				mapIndices[posIndices + 4] = index + 3; //Bottom-right
-				mapIndices[posIndices + 5] = index + 2; //Bottom-left
+					//Assign the indices
+					mapIndices[posIndices]     = index;     //Top-left
+					mapIndices[posIndices + 1] = index + 1; //Top-right
+					mapIndices[posIndices + 2] = index + 2; //Bottom-left
 
-				//Assign the visibility
-				mapVisibility[index]     = tileVisibility;
-				mapVisibility[index + 1] = tileVisibility;
-				mapVisibility[index + 2] = tileVisibility;
-				mapVisibility[index + 3] = tileVisibility;
+					mapIndices[posIndices + 3] = index + 1; //Top-right
+					mapIndices[posIndices + 4] = index + 3; //Bottom-right
+					mapIndices[posIndices + 5] = index + 2; //Bottom-left
+
+					//Assign the visibility
+					mapVisibility[index]     = tileVisibility;
+					mapVisibility[index + 1] = tileVisibility;
+					mapVisibility[index + 2] = tileVisibility;
+					mapVisibility[index + 3] = tileVisibility;
+				} else {
+					//Ensure the tile is visible
+					if (tileID != 0) {
+						unsigned int index = (mapVertices.size() / 2);
+
+						//Top-left
+						mapVertices.push_back(mapX);
+						mapVertices.push_back(mapY);
+						mapTextureCoords.push_back(left);
+						mapTextureCoords.push_back(top);
+
+						//Top-right
+						mapVertices.push_back(mapX + tileWidth);
+						mapVertices.push_back(mapY);
+						mapTextureCoords.push_back(right);
+						mapTextureCoords.push_back(top);
+
+						//Bottom-left
+						mapVertices.push_back(mapX);
+						mapVertices.push_back(mapY + tileHeight);
+						mapTextureCoords.push_back(left);
+						mapTextureCoords.push_back(bottom);
+
+						//Bottom-right
+						mapVertices.push_back(mapX + tileWidth);
+						mapVertices.push_back(mapY + tileHeight);
+						mapTextureCoords.push_back(right);
+						mapTextureCoords.push_back(bottom);
+
+						//Assign the indices
+						mapIndices.push_back(index);     //Top-left
+						mapIndices.push_back(index + 1); //Top-right
+						mapIndices.push_back(index + 2); //Bottom-left
+
+						mapIndices.push_back(index + 1); //Top-right
+						mapIndices.push_back(index + 3); //Bottom-right
+						mapIndices.push_back(index + 2); //Bottom-left
+
+						//Assign the visibility
+						mapVisibility.push_back(tileVisibility);
+						mapVisibility.push_back(tileVisibility);
+						mapVisibility.push_back(tileVisibility);
+						mapVisibility.push_back(tileVisibility);
+					}
+				}
 
 				mapX += tileWidth;
 			}
 			mapY += tileHeight;
 		}
+
+		if (reduceTriangles)
+			numIndices = mapIndices.size();
 
 		//Setup for rendering
 		renderData = new RenderData(GL_TRIANGLES, numIndices);
@@ -183,75 +240,78 @@ void TilemapLayer::render() {
 }
 
 void TilemapLayer::setTileID(float x, float y, unsigned int id) {
-	//Ensure in bounds
-	if (isWithinBounds(x, y)) {
-		//Get the row and column
-		unsigned int col = floor(x / tileset->getSubTextureWidth());
-		unsigned int row = floor(y / tileset->getSubTextureHeight());
-		//Calculate the tile index
-		unsigned int dataIndex = (row * layerColumns) + col;
+	//Ensure this layer is editable
+	if (editable) {
+		//Ensure in bounds
+		if (isWithinBounds(x, y)) {
+			//Get the row and column
+			unsigned int col = floor(x / tileset->getSubTextureWidth());
+			unsigned int row = floor(y / tileset->getSubTextureHeight());
+			//Calculate the tile index
+			unsigned int dataIndex = (row * layerColumns) + col;
 
-		//States if the visibility has changed
-		bool visibilityChanged = false;
+			//States if the visibility has changed
+			bool visibilityChanged = false;
 
-		//Calculate the position in the vertices data to change
-		unsigned int index = dataIndex * 4;
+			//Calculate the position in the vertices data to change
+			unsigned int index = dataIndex * 4;
 
-		//Check whether the tile will now be hidden
-		if (id == 0) {
-			//Need to change visibility
-			mapVisibility[index]     = 0.0f;
-			mapVisibility[index + 1] = 0.0f;
-			mapVisibility[index + 2] = 0.0f;
-			mapVisibility[index + 3] = 0.0f;
-
-			visibilityChanged = true;
-		} else {
-			//Ensure tile is visible
-			if (data[dataIndex] == 0) {
-				//This tile needs its visibility changing
-				mapVisibility[index]     = 1.0f;
-				mapVisibility[index + 1] = 1.0f;
-				mapVisibility[index + 2] = 1.0f;
-				mapVisibility[index + 3] = 1.0f;
+			//Check whether the tile will now be hidden
+			if (id == 0) {
+				//Need to change visibility
+				mapVisibility[index]     = 0.0f;
+				mapVisibility[index + 1] = 0.0f;
+				mapVisibility[index + 2] = 0.0f;
+				mapVisibility[index + 3] = 0.0f;
 
 				visibilityChanged = true;
+			} else {
+				//Ensure tile is visible
+				if (data[dataIndex] == 0) {
+					//This tile needs its visibility changing
+					mapVisibility[index]     = 1.0f;
+					mapVisibility[index + 1] = 1.0f;
+					mapVisibility[index + 2] = 1.0f;
+					mapVisibility[index + 3] = 1.0f;
+
+					visibilityChanged = true;
+				}
+				//Assign the texture coordinates#
+				unsigned int pos = index * 2;
+
+				//The texture coordinate values
+				float top, left, bottom, right;
+
+				//Get the texture data
+				tileset->getSides(id - 1, top, left, bottom, right); //Take 1 to be the first tile
+
+				//Top-left
+				mapTextureCoords[pos] = left;
+				mapTextureCoords[pos + 1] = top;
+
+				//Top-right
+				mapTextureCoords[pos + 2] = right;
+				mapTextureCoords[pos + 3] = top;
+
+				//Bottom-left
+				mapTextureCoords[pos + 4] = left;
+				mapTextureCoords[pos + 5] = bottom;
+
+				//Bottom-right
+				mapTextureCoords[pos + 6] = right;
+				mapTextureCoords[pos + 7] = bottom;
+
+				//Update the texture coordinates
+				vboTextureCoords->updateStream(mapTextureCoords.size() * sizeof(mapTextureCoords[0]));
 			}
-			//Assign the texture coordinates#
-			unsigned int pos = index * 2;
 
-			//The texture coordinate values
-			float top, left, bottom, right;
+			//Update the visibility if necessary
+			if (visibilityChanged)
+				vboVisibility->updateStream(mapVisibility.size() * sizeof(mapVisibility[0]));
 
-			//Get the texture data
-			tileset->getSides(id - 1, top, left, bottom, right); //Take 1 to be the first tile
-
-			//Top-left
-			mapTextureCoords[pos] = left;
-			mapTextureCoords[pos + 1] = top;
-
-			//Top-right
-			mapTextureCoords[pos + 2] = right;
-			mapTextureCoords[pos + 3] = top;
-
-			//Bottom-left
-			mapTextureCoords[pos + 4] = left;
-			mapTextureCoords[pos + 5] = bottom;
-
-			//Bottom-right
-			mapTextureCoords[pos + 6] = right;
-			mapTextureCoords[pos + 7] = bottom;
-
-			//Update the texture coordinates
-			vboTextureCoords->updateStream(mapTextureCoords.size() * sizeof(mapTextureCoords[0]));
+			//Assign the id
+			data[dataIndex] = id;
 		}
-
-		//Update the visibility if necessary
-		if (visibilityChanged)
-			vboVisibility->updateStream(mapVisibility.size() * sizeof(mapVisibility[0]));
-
-		//Assign the id
-		data[dataIndex] = id;
 	}
 }
 
@@ -349,7 +409,7 @@ TextureAtlas* Tilemap::loadTileset(std::string path, std::string name) {
 	return new TextureAtlas(texture, columns, rows, tileCount);
 }
 
-Tilemap* Tilemap::loadTilemap(std::string path, std::string name, GLenum usage) {
+Tilemap* Tilemap::loadTilemap(std::string path, std::string name, bool editable, GLenum usage) {
 	//Load the file
 	MLDocument document;
 	document.load(path + name);
@@ -442,7 +502,7 @@ Tilemap* Tilemap::loadTilemap(std::string path, std::string name, GLenum usage) 
 					data[i] -= (currentFirstGID - 1);
 			}
 			//Create and add this layer
-			tilemap->addLayer(new TilemapLayer(name, tileset, columns, rows, tileWidth, tileHeight, data, visible, usage));
+			tilemap->addLayer(new TilemapLayer(name, tileset, columns, rows, tileWidth, tileHeight, data, visible, editable, usage));
 		}
 	}
 

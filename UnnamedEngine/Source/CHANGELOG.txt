@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 8
+
+* Added 'editable' parameter for tilemaps and improved
+  performance for rendering when this is false
+* Added 'getGridWidth' and 'getGridHeight' in TilemapLayer and
+  Tilemap
+
+* Fixed bug: Font 'getWidth' could cause a segmentation fault
+             with '\n' in the text
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 1 | Experimental 7
 
 * Added ResourcePack

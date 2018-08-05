@@ -52,7 +52,7 @@ private:
 	std::vector<unsigned int> mapIndices;   //This stores the indices for the vertices of the tiles
 	std::vector<GLfloat> mapVertices; 		//This stores the position's of the vertices of the tiles
 	std::vector<GLfloat> mapTextureCoords;  //This stores the data for the texture coordinates of the tiles
-	std::vector<GLfloat> mapVisibility;  //This stores the data for the visibility of the tiles
+	std::vector<GLfloat> mapVisibility;     //This stores the data for the visibility of the tiles
 
 	/* The render data used for rendering */
 	RenderData* renderData = NULL;
@@ -65,9 +65,12 @@ private:
 
 	/* The shader used for rendering */
 	Shader* shader = NULL;
+
+	/* States whether this layer is editable */
+	bool editable;
 public:
 	/* The constructor */
-	TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int> &data, bool visible, GLenum usage);
+	TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int> &data, bool visible, bool editable, GLenum usage);
 
 	/* The destructor */
 	virtual ~TilemapLayer();
@@ -87,9 +90,14 @@ public:
 	bool isWithinBounds(float x, float y);
 
 	/* Getters and setters */
-
 	inline void setName(std::string name) { this->name = name; }
 	inline std::string getName() { return name; }
+
+	inline std::vector<unsigned int>& getData() { return data; }
+
+	/* Returns the width and height of this layer's grid */
+	inline unsigned int getGridWidth() { return layerColumns; }
+	inline unsigned int getGridHeight() { return layerRows; }
 
 	/* Returns the width and height of this layer in pixels */
 	inline unsigned int getWidth() { return layerColumns * tileWidth; }
@@ -139,6 +147,10 @@ public:
 
 	/* Getters and setters */
 	inline std::vector<TilemapLayer*>& getLayers() { return layers; }
+
+	inline unsigned int getGridWidth() { return gridWidth; }
+	inline unsigned int getGridHeight() { return gridHeight; }
+
 	inline unsigned int getWidth() { return gridWidth * tileWidth; }
 	inline unsigned int getHeight() { return gridHeight * tileHeight; }
 
@@ -148,7 +160,7 @@ public:
 	/* Method used to load a tileset from a file */
 	static TextureAtlas* loadTileset(std::string path, std::string name);
 	/* Method used to load a tile map from a file */
-	static Tilemap* loadTilemap(std::string path, std::string name, GLenum usage = GL_STATIC_DRAW);
+	static Tilemap* loadTilemap(std::string path, std::string name, bool editable = false, GLenum usage = GL_STATIC_DRAW);
 };
 
 #endif /* CORE_RENDER_TILEMAP_H_ */

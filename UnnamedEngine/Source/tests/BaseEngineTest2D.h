@@ -97,7 +97,7 @@ void Test::created() {
 
 	Renderer::addCamera(camera);
 
-	tilemap = Tilemap::loadTilemap("C:/UnnamedEngine/maps/", "Map3.tmx");
+	tilemap = Tilemap::loadTilemap("C:/UnnamedEngine/maps/", "Map3.tmx", true);
 
 	soundSystem = new SoundSystem();
 	soundSystem->createListener();

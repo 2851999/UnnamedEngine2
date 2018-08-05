@@ -46,7 +46,7 @@ private:
 		float glyphLeft;
 		float glyphTop;
 		float xOffset;
-	} glyphs[(ASCII_END - ASCII_START) + 1] ;
+	} glyphs[(ASCII_END - ASCII_START) + 1];
 
 	/* The width/height of then texture atlas */
 	unsigned int textureAtlasWidth  = 0;
