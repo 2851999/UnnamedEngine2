@@ -97,6 +97,18 @@ namespace utils_string {
 		return split;
 	}
 
+	std::vector<std::string> strSplitLast(const std::string& text, const std::string& delimeter) {
+		std::vector<std::string> split;
+		//The location of the last instance of the delimeter
+		size_t loc = text.find_last_of(delimeter);
+		//Add the first and last parts of the string to the array when split
+		split.push_back(text.substr(0, loc));
+		split.push_back(text.substr(loc + 1, split.size() - loc - 2));
+
+		//Return the result
+		return split;
+	}
+
 	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement) {
 		size_t index = 0;
 		std::string str = s;
@@ -327,7 +339,7 @@ namespace utils_settings {
 		settingsElement.add(debugging);
 
 		//Add the settings element, or replace the current one if one already exists
-		int index = document.getRoot().find("settings");
+		int index = document.getRoot().findChild("settings");
 		if (index >= 0)
 			document.getRoot().setChild(index, settingsElement);
 		else
@@ -349,7 +361,7 @@ namespace utils_settings {
 		//The settings instance
 		Settings settings;
 		//Attempt to get the index of the settings element in the document
-		int index = document.getRoot().find("settings");
+		int index = document.getRoot().findChild("settings");
 		//Check whether the settings element was found
 		if (index >= 0) {
 			//Go through each child attribute in the document

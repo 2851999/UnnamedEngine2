@@ -152,7 +152,7 @@ void Font::update(std::string text) {
 				currentX = -getWidth(text) / 2;
 		} else {
 			//Get the character data for the current character
-			GlyphInfo info = glyphs[((int) text.at(i)) - ASCII_START];
+			GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
 
 			//The positions used for the vertices
 			float xPos = currentX + info.glyphLeft;
@@ -166,10 +166,14 @@ void Font::update(std::string text) {
 			data->addPosition(Vector3f(xPos + width, yPos + height, 0.0f));
 			data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
 
-			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, 0.0f));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth), 0.0f));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth), info.glyphHeight / (float) textureAtlasHeight));
-			data->addTextureCoord(Vector2f(info.xOffset / (float) textureAtlasWidth, info.glyphHeight / (float) textureAtlasHeight));
+			//Pad the texture coordinates to reduce bleeding artifacts
+			float offsetX = 0.002f / (float) object3D->getMaterial()->diffuseTexture->getWidth();
+			float offsetY = 0.002f / (float) object3D->getMaterial()->diffuseTexture->getHeight();
+
+			data->addTextureCoord(Vector2f((info.xOffset / (float) textureAtlasWidth) + offsetX, 0.0f + offsetY));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth) - offsetX, 0.0f + offsetY));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth) - offsetX, (info.glyphHeight / (float) textureAtlasHeight) - offsetY));
+			data->addTextureCoord(Vector2f((info.xOffset / (float) textureAtlasWidth) + offsetX, (info.glyphHeight / (float) textureAtlasHeight) - offsetY));
 
 			unsigned int ip = (i - newLineCount) * 4;
 
@@ -234,15 +238,16 @@ float Font::getWidth(std::string text) {
 	float lineWidth = 0;
 	//Go through each character in the text
 	for (unsigned int i = 0; i < text.length(); i++) {
-		//Get the character data for the current character
-		GlyphInfo info = glyphs[((int) text.at(i)) - ASCII_START];
-		//Add onto the width
-		lineWidth += (info.advanceX / 64);
-
 		//Check for a new line escape character
 		if (text.compare(i, 1, "\n") == 0)
 			//Reset the width of the current line
 			lineWidth = 0;
+		else {
+			//Get the character data for the current character
+			GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
+			//Add onto the width
+			lineWidth += (info.advanceX / 64);
+		}
 
 		//Find the maximum width
 		width = utils_maths::max(width, lineWidth);
@@ -263,7 +268,7 @@ float Font::getHeight(std::string text) {
 			height += lineHeight;
 		} else {
 			//Get the character data for the current character
-			GlyphInfo info = glyphs[((int) text.at(i)) - ASCII_START];
+			GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
 			//Assign the height
 			lineHeight = utils_maths::max(lineHeight, info.glyphHeight + (info.glyphTop - info.glyphHeight));
 		}

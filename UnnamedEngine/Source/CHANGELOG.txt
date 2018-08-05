@@ -1,4 +1,160 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 2 (V0.3.2)
+
+* Added Tilemap
+* Added TilemapLayer
+* Added AudioSequence
+* Added ResourcePack
+* Added methods findAttribute and getAttribute in MLElement
+* Added method strSplitLast in utils_string
+* Added ability to read content in an element in MLDocument
+* Added padding to texture coordinates for Font to reduce
+  texture bleeding artifacts
+* Added 'startFrame' to Animation2D
+* Added 'getCurrentAnimationName' and 'getCurrentAnimation'
+  to Sprite
+* Added 'setTextureCoords' in Sprite
+* Added 'roundNearest' in utils_maths
+* Added 'Offsets' to TextureAtlas
+* Added 'fadeIn' and 'fadeOut' methods to AudioSource and
+  SoundSystem
+* Added error messages in AudioLoader for files that don't
+  exist
+* Added 'setup' methods in Sprite
+* Added error messages to SoundSystem
+
+* Changed ML to allow it to read some XML files
+* Changed 'entity' to 'sprite' in Animation2D
+* Changed Camera2D to invert its position to make its
+  movement more intuitive
+* Changed Animation2D to reset the animation when starting
+* Changed Sprite to set currentAnimation to NULL when it
+  has finished running
+* Changed 'update' method in Sprite to be overridable
+* Changed TextureAnimation2D to assign the texture for the
+  first frame of animation when it is started
+  
+* Improved Audio to include loop intervals and a way to
+  request a looping sound to stop
+
+* Renamed find to findChild in MLElement
+* Renamed Sprite2D to Sprite
+
+* Fixed bug: MLDocument incorrectly delt with elements that
+             were closed on the same line
+* Fixed bug: TextureAtlas would not work properly with
+             non-square textures
+* Fixed bug: AudioLoader incorrectly loaded stereo sounds
+* Fixed bug: Potential OpenAL crash upon failure to find a
+             device
+* Fixed bug: Font 'getWidth' could cause a segmentation fault
+             with '\n' in the text
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 8
+
+* Added 'editable' parameter for tilemaps and improved
+  performance for rendering when this is false
+* Added 'getGridWidth' and 'getGridHeight' in TilemapLayer and
+  Tilemap
+
+* Fixed bug: Font 'getWidth' could cause a segmentation fault
+             with '\n' in the text
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 7
+
+* Added ResourcePack
+* Added 'setup' methods in Sprite
+* Added error messages to SoundSystem
+
+* Renamed Sprite2D to Sprite
+
+* Fixed bug: Potential OpenAL crash upon failure to find a
+             device
+* Fixed bug: 'fadeIn' in AudioSource did not start without
+			 sound
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 6
+
+* Added 'fade' methods to AudioSequence
+* Added 'getTileWidth' and 'getTileHeight' methods to Tilemap
+  and TilemapLayer
+* Added error messages in AudioLoader for files that don't
+  exist
+  
+* Changed Animation2D to reset the animation when starting
+* Changed Sprite2D to set currentAnimation to NULL when it
+  has finished running
+* Changed 'update' method in Sprite2D to be overridable
+* Changed TextureAnimation2D to assign the texture for the
+  first frame of animation when it is started
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 5
+
+* Added AudioSequence
+* Added 'Offsets' to TextureAtlas
+* Added 'fadeIn' and 'fadeOut' methods to AudioSource and
+  SoundSystem
+
+* Improved Audio to include loop intervals and a way to
+  request a looping sound to stop
+
+* Fixed bug: Tilemap had its width and height values reversed
+             as well as its rows and columns
+* Fixed bug: AudioLoader incorrectly loaded stereo sounds
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 4
+
+* Added 'visibility' to TilemapLayer
+* Added 'startFrame' to Animation2D
+* Added 'getCurrentAnimationName' and 'getCurrentAnimation'
+  to Sprite2D
+* Added 'setTextureCoords' in Sprite2D
+* Added 'name' to TilemapLayer
+* Added 'roundNearest' in utils_maths
+  
+* Changed 'entity' to 'sprite' in Animation2D
+* Changed Camera2D to invert its position to make its
+  movement more intuitive
+
+* Fixed bug: Tilemap might not have loaded multiple tilemaps
+  properly
+* Fixed bug: TextureAtlas would not work properly with
+             non-square textures
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 3
+
+* Added padding to texture coordinates for Font to reduce
+  texture bleeding artifacts
+
+* Renamed Tilemap to TilemapLayer and created Tilemap class
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 2
+
+* Added methods findAttribute and getAttribute in MLElement
+* Added method loadTileset in Tilemap
+* Added method strSplitLast in utils_string
+* Added ability to read content in an element in MLDocument
+
+* Renamed find to findChild in MLElement
+
+* Fixed bug: MLDocument incorrectly delt with elements that
+             were closed on the same line
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 1 | Experimental 1
+
+* Added Tilemap
+
+* Changed ML to allow it to read some XML files
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 1 (V0.3.1)
 
 * Added PlaneCollider3D
