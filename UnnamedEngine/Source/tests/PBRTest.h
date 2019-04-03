@@ -58,6 +58,9 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
+//	GLint num;
+//	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &num);
+//	std::cout << num << std::endl;
 	MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");

@@ -160,15 +160,8 @@ void RenderScene3D::render() {
 		} else {
 			//Forward rendering
 
-			if (intermediateFBO)
-				//Render to the intermediate FBO
-				intermediateFBO->start();
-			else
-				postProcessor->start();
-
-			//Render a wireframe instead if requested
-			if (renderWireframe)
-				utils_gl::enableWireframe();
+			//Prepare for forward rendering
+			forwardPreRender();
 
 			//Go through all of the objects in this scene
 			for (unsigned int i = 0; i < batches.size(); i++) {
@@ -176,35 +169,14 @@ void RenderScene3D::render() {
 				renderLighting(batches[i].shader, i);
 			}
 
-			if (renderWireframe)
-				utils_gl::disableWireframe();
-
-			if (intermediateFBO) {
-				//Stop rendering to the intermediate FBO
-				intermediateFBO->stop();
-				//Copy the colour data to the postprocessor
-				intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			} else
-				postProcessor->stop();
-
-			//Render the output
-			postProcessor->render();
-
-			//Copy the depth data to the framebuffer
-			postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
+			//Finish forward rendering
+			forwardPostRender();
 		}
 	} else {
 		//Don't bother with deferred rendering if lighting is disabled
 
-		if (intermediateFBO)
-			//Render to the intermediate FBO
-			intermediateFBO->start();
-		else
-			postProcessor->start();
-
-		//Render a wireframe instead if requested
-		if (renderWireframe)
-			utils_gl::enableWireframe();
+		//Prepare for forward rendering
+		forwardPreRender();
 
 		//Go through and render all of the objects in this scene
 		for (unsigned int i = 0; i < batches.size(); i++) {
@@ -212,26 +184,40 @@ void RenderScene3D::render() {
 				batches[i].objects[j]->render();
 		}
 
-		if (renderWireframe)
-			utils_gl::disableWireframe();
-
-		if (renderWireframe)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-		if (intermediateFBO) {
-			//Stop rendering to the intermediate FBO
-			intermediateFBO->stop();
-			//Copy the colour data to the postprocessor
-			intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		} else
-			postProcessor->stop();
-
-		//Render the output
-		postProcessor->render();
-
-		//Copy the depth data to the framebuffer
-		postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
+		//Finish forward rendering
+		forwardPostRender();
 	}
+}
+
+void RenderScene3D::forwardPreRender() {
+	if (intermediateFBO)
+		//Render to the intermediate FBO
+		intermediateFBO->start();
+	else
+		postProcessor->start();
+
+	//Render a wireframe instead if requested
+	if (renderWireframe)
+		utils_gl::enableWireframe();
+}
+
+void RenderScene3D::forwardPostRender() {
+	if (renderWireframe)
+		utils_gl::disableWireframe();
+
+	if (intermediateFBO) {
+		//Stop rendering to the intermediate FBO
+		intermediateFBO->stop();
+		//Copy the colour data to the postprocessor
+		intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	} else
+		postProcessor->stop();
+
+	//Render the output
+	postProcessor->render();
+
+	//Copy the depth data to the framebuffer
+	postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
 }
 
 void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch) {
