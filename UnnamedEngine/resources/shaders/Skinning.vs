@@ -2,11 +2,11 @@
 #map attribute BoneWeights ue_boneWeights
 #map uniform UseSkinning ue_useSkinning
 
-const int UE_MAX_BONES = 80;
+const int UE_MAX_BONES = 90;
 uniform mat4 ue_bones[UE_MAX_BONES];
 
 layout(location = UE_LOCATION_BONE_IDS) in ivec4 ue_boneIDs;
-layout(location = UE_LOCATION_BONE_WEIGHTS) in vec4  ue_boneWeights;
+layout(location = UE_LOCATION_BONE_WEIGHTS) in vec4 ue_boneWeights;
 
 uniform bool ue_useSkinning;
 

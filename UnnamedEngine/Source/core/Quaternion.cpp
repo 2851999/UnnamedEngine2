@@ -97,6 +97,39 @@ Quaternion& Quaternion::lookAt(const Vector3f& eye, const Vector3f& centre, cons
 	return initFromRotationMatrix(Matrix4f().initLookAt(eye, centre, up));
 }
 
+Quaternion Quaternion::slerp(const Quaternion& a, const Quaternion& b, float factor) {
+	//https://en.wikipedia.org/wiki/Slerp
+	Quaternion v0 = a;
+	Quaternion v1 = b;
+	Quaternion result;
+
+	float dot = v0.dot(v1);
+	if (dot < 0.0f) {
+		v0 = v0 * -1.0f;
+		dot = -dot;
+	}
+
+	float s0 = 1.0f - factor;
+	float s1 = factor;
+
+	const float THRESHOLD = 0.9995;
+	if (dot < THRESHOLD) {
+		float theta = acosf(dot);
+		float invSin = 1.0f / sinf(theta);
+
+		s0 = sinf(s0 * theta) * invSin;
+		s1 = sinf(s1 * theta) * invSin;
+	}
+
+	result[0] = (s0 * v0[0]) + (s1 * v1[0]);
+	result[1] = (s0 * v0[1]) + (s1 * v1[1]);
+	result[2] = (s0 * v0[2]) + (s1 * v1[2]);
+	result[3] = (s0 * v0[3]) + (s1 * v1[3]);
+
+	//Interpolate and return the result
+	return result.normalise();
+}
+
 Matrix4f Quaternion::toRotationMatrix() {
 	//https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
 	Matrix4f m;

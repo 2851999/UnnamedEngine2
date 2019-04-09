@@ -296,7 +296,7 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 			shader->addUniform("Light_UseShadowMap["   + str(i) + "]", "ue_lights[" + str(i) + "].useShadowMap");
 		}
 
-		for (unsigned int i = 0; i < 80; i++)
+		for (unsigned int i = 0; i < Skeleton::SKINNING_MAX_BONES; ++i)
 			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
 
 		shader->addUniform("NumLights", "ue_numLights");
@@ -306,7 +306,7 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");
 		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
 	} else if (id == SHADER_SHADOW_MAP) {
-		for (unsigned int i = 0; i < 80; i++)
+		for (unsigned int i = 0; i < Skeleton::SKINNING_MAX_BONES; ++i)
 			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
 	}
 
@@ -322,7 +322,7 @@ void Renderer::prepareDeferredGeomShader(std::string id, Shader* shader) {
 		shader->addUniform("ShadowMap", "ue_shadowMap");
 		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
 
-		for (unsigned int i = 0; i < 80; i++)
+		for (unsigned int i = 0; i < Skeleton::SKINNING_MAX_BONES; ++i)
 			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
 
 		shader->addUniform("NumLights", "ue_numLights");

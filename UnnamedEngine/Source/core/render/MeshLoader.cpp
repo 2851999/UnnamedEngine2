@@ -224,6 +224,10 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 				currentIndex++;
 			}
 
+			//Check if number of bones in model exceeds the maximum supported
+			if (bones.size() > Skeleton::SKINNING_MAX_BONES)
+				Logger::log("Model exceeds maximum number of bones for rendering", "MeshLoader", LogType::Warning);
+
 			//Assign the bones in the skeleton
 			skeleton->setBones(bones);
 			skeleton->setRootBone(rootBoneIndex);
@@ -316,6 +320,7 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 	material->ambientTexture  = loadAssimpTexture(path, mat, aiTextureType_AMBIENT);
 	material->diffuseTexture  = loadAssimpTexture(path, mat, aiTextureType_DIFFUSE, loadDiffuseTexturesAsSRGB);
 	material->specularTexture = loadAssimpTexture(path, mat, aiTextureType_SPECULAR);
+
 	if (pbr)
 		material->shininessTexture = loadAssimpTexture(path, mat, aiTextureType_SHININESS); //No standard way of using this for phong shading
 

@@ -38,7 +38,9 @@ private:
 
 	Light* light0;
 
-	bool deferred = false;
+	GameObject3D* mit1;
+
+	bool deferred = true;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -65,7 +67,7 @@ void Test::onCreated() {
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");
 
-	environment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr");
+	environment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr"); //Milkyway_small
 	//EquiToCube::generateCubemapAndIrradiance(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr", envMap, irMap, prefilMap, brdfLUTMap);
 
 	camera->setSkyBox(new SkyBox(environment->getEnvironmentCubemap()));
@@ -125,7 +127,16 @@ void Test::onCreated() {
 	sphere2->update();
 	renderScene->add(sphere2);
 
-	GameObject3D* mit1 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "mitsuba-sphere.obj"), pbrRenderShader);
+	//mitsuba-sphere.obj
+	mit1 = new GameObject3D(resourceLoader.loadPBRModel("Sphere-Bot Basic/", "bot.dae"), pbrRenderShader);
+	mit1->getMesh()->getSkeleton()->startAnimation("");
+
+	std::cout << mit1->getMesh()->getMaterial(2)->diffuseTexture->getPath() << std::endl;
+
+	mit1->getMesh()->getMaterial(2)->shininessTexture = Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_rough.jpg");
+	mit1->getMesh()->getMaterial(2)->normalMap = Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_nmap_1.jpg");
+
+	//mit1->setScale(0.5f, 0.5f, 0.5f);
 	mit1->setPosition(10.0f, 1.0f, 0.0f);
 	mit1->update();
 	renderScene->add(mit1);
@@ -162,6 +173,8 @@ void Test::onUpdate() {
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		light0->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 	light0->update();
+
+	mit1->getMesh()->updateAnimation(getDeltaSeconds());
 }
 
 void Test::onRender() {

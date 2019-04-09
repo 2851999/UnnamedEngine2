@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 2 | Experimental 2
+
+* Increased maximum number of bones in a model from 80 to 90
+
+* Fixed bug: Rotations for skeletal animation weren't
+             interpolated correctly
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 2 | Experimental 1
 
 * Cleaned up RenderScene3D slightly
