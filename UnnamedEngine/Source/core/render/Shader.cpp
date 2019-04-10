@@ -334,7 +334,11 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path) {
 }
 
 Shader* Shader::loadShader(std::string path) {
-	return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".fs"));
+	//Check for geometry shader
+	if (utils_file::isFile(path + ".gs"))
+		return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".gs"), loadShaderSource(path + ".fs"));
+	else
+		return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".fs"));
 }
 
 /*****************************************************************************

@@ -39,4 +39,5 @@ void main() {
     vec3 colour = ueGetLightingPBR(normal, fragPosition, albedo, metalness, roughness, ao, fragPosLightSpace);
 
 	ue_FragColour = vec4(colour, 1.0);
+	//ue_FragColour = vec4(vec3(ueCalculatePointShadow(ue_lights[0], fragPosition, ue_cameraPosition)), 1.0);
 }

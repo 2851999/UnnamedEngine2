@@ -55,6 +55,7 @@ public:
 	static const std::string SHADER_FRAMEBUFFER;
 	static const std::string SHADER_ENVIRONMENT_MAP;
 	static const std::string SHADER_SHADOW_MAP;
+	static const std::string SHADER_SHADOW_CUBEMAP;
 	static const std::string SHADER_BILLBOARDED_FONT;
 	static const std::string SHADER_TERRAIN;
 	static const std::string SHADER_PLAIN_TEXTURE;

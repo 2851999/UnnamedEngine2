@@ -45,6 +45,7 @@ const std::string Renderer::SHADER_LIGHTING          = "Lighting";
 const std::string Renderer::SHADER_FRAMEBUFFER       = "Framebuffer";
 const std::string Renderer::SHADER_ENVIRONMENT_MAP   = "EnvironmentMap";
 const std::string Renderer::SHADER_SHADOW_MAP        = "ShadowMap";
+const std::string Renderer::SHADER_SHADOW_CUBEMAP    = "ShadowCubemap";
 const std::string Renderer::SHADER_BILLBOARDED_FONT  = "BillboardedFont";
 const std::string Renderer::SHADER_TERRAIN           = "Terrain";
 const std::string Renderer::SHADER_PLAIN_TEXTURE     = "PlainTexture";
@@ -116,20 +117,21 @@ void Renderer::initialise() {
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the shaders
-	addRenderShader(SHADER_MATERIAL,              loadEngineShader("MaterialShader"),                  NULL);
-	addRenderShader(SHADER_SKY_BOX,               loadEngineShader("SkyBoxShader"),                    NULL);
-	addRenderShader(SHADER_FONT,                  loadEngineShader("FontShader"),                      NULL);
-	addRenderShader(SHADER_BILLBOARD,             loadEngineShader("billboard/BillboardShader"),       NULL);
-	addRenderShader(SHADER_PARTICLE,              loadEngineShader("ParticleShader"),                  NULL);
-	addRenderShader(SHADER_LIGHTING,              loadEngineShader("lighting/LightingShader"),        loadEngineShader("lighting/LightingDeferredGeom"));
-	addRenderShader(SHADER_FRAMEBUFFER,           loadEngineShader("FramebufferShader"),               NULL);
-	addRenderShader(SHADER_ENVIRONMENT_MAP,       loadEngineShader("EnvironmentMapShader"),            NULL);
-	addRenderShader(SHADER_SHADOW_MAP,            loadEngineShader("lighting/ShadowMapShader"),        NULL);
-	addRenderShader(SHADER_BILLBOARDED_FONT,      loadEngineShader("billboard/BillboardedFontShader"), NULL);
-	addRenderShader(SHADER_TERRAIN,               loadEngineShader("terrain/Terrain"),                 loadEngineShader("terrain/TerrainDeferredGeom"));
-	addRenderShader(SHADER_PLAIN_TEXTURE,         loadEngineShader("PlainTexture"),                    NULL);
-	addRenderShader(SHADER_DEFERRED_LIGHTING,     loadEngineShader("lighting/DeferredLighting"),       NULL);
-	addRenderShader(SHADER_TILEMAP,				  loadEngineShader("TilemapShader"),				   NULL);
+	addRenderShader(SHADER_MATERIAL,              loadEngineShader("MaterialShader"),                   NULL);
+	addRenderShader(SHADER_SKY_BOX,               loadEngineShader("SkyBoxShader"),                     NULL);
+	addRenderShader(SHADER_FONT,                  loadEngineShader("FontShader"),                       NULL);
+	addRenderShader(SHADER_BILLBOARD,             loadEngineShader("billboard/BillboardShader"),        NULL);
+	addRenderShader(SHADER_PARTICLE,              loadEngineShader("ParticleShader"),                   NULL);
+	addRenderShader(SHADER_LIGHTING,              loadEngineShader("lighting/LightingShader"),          loadEngineShader("lighting/LightingDeferredGeom"));
+	addRenderShader(SHADER_FRAMEBUFFER,           loadEngineShader("FramebufferShader"),                NULL);
+	addRenderShader(SHADER_ENVIRONMENT_MAP,       loadEngineShader("EnvironmentMapShader"),             NULL);
+	addRenderShader(SHADER_SHADOW_MAP,            loadEngineShader("lighting/ShadowMapShader"),         NULL);
+	addRenderShader(SHADER_SHADOW_CUBEMAP,        loadEngineShader("lighting/ShadowCubemapShader"),     NULL);
+	addRenderShader(SHADER_BILLBOARDED_FONT,      loadEngineShader("billboard/BillboardedFontShader"),  NULL);
+	addRenderShader(SHADER_TERRAIN,               loadEngineShader("terrain/Terrain"),                  loadEngineShader("terrain/TerrainDeferredGeom"));
+	addRenderShader(SHADER_PLAIN_TEXTURE,         loadEngineShader("PlainTexture"),                     NULL);
+	addRenderShader(SHADER_DEFERRED_LIGHTING,     loadEngineShader("lighting/DeferredLighting"),        NULL);
+	addRenderShader(SHADER_TILEMAP,				  loadEngineShader("TilemapShader"),				    NULL);
 	addRenderShader(SHADER_PBR_EQUI_TO_CUBE_GEN,         loadEngineShader("pbr/EquiToCubeGen"),         NULL);
 	addRenderShader(SHADER_PBR_IRRADIANCE_MAP_GEN,       loadEngineShader("pbr/IrradianceMapGen"),      NULL);
 	addRenderShader(SHADER_PBR_PREFILTER_MAP_GEN,        loadEngineShader("pbr/PrefilterMapGen"),       NULL);
@@ -228,7 +230,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 					saveTextures();
 
 					if (mesh->hasMaterial())
-						setMaterialUniforms(renderShader->getShader(), renderShader->getName(), mesh->getMaterial(data->getSubData(i).materialIndex));
+						setMaterialUniforms(shader, renderShader->getName(), mesh->getMaterial(data->getSubData(i).materialIndex));
 					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex * sizeof(unsigned int), data->getSubData(i).baseVertex);
 
 					releaseNewTextures();
@@ -293,6 +295,7 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 			shader->addUniform("Light_InnerCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].innerCutoff");
 			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].outerCutoff");
 			shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lights[" + str(i) + "].shadowMap");
+			shader->addUniform("Light_ShadowCubemap["  + str(i) + "]", "ue_lights[" + str(i) + "].shadowCubemap");
 			shader->addUniform("Light_UseShadowMap["   + str(i) + "]", "ue_lights[" + str(i) + "].useShadowMap");
 		}
 
@@ -305,7 +308,7 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");
 		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
-	} else if (id == SHADER_SHADOW_MAP) {
+	} else if (id == SHADER_SHADOW_MAP || id == SHADER_SHADOW_CUBEMAP) {
 		for (unsigned int i = 0; i < Skeleton::SKINNING_MAX_BONES; ++i)
 			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
 	}

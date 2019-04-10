@@ -46,6 +46,7 @@ private:
 
 	/* Various shaders that might be needed */
 	Shader* shadowMapShader;
+	Shader* shadowCubemapShader;
 
 	/* The ambient light used in lighting */
 	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);

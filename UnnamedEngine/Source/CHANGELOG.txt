@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 2 | Experimental 3
+
+* Added point light shadows
+
+* Changed loadShader method in Shader to load a geometry
+  shader if it is also available
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 2 | Experimental 2
 
 * Increased maximum number of bones in a model from 80 to 90

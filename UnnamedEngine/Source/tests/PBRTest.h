@@ -57,9 +57,12 @@ void Test::onInitialise() {
 	getSettings().videoSamples = deferred ? 0 : 16;
 //	getSettings().videoResolution = VideoResolution::RES_1080P;
 //	getSettings().windowFullscreen = true;
+
+	//Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
 }
 
 void Test::onCreated() {
+	//Logger::stopFileOutput();
 //	GLint num;
 //	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &num);
 //	std::cout << num << std::endl;
@@ -67,7 +70,7 @@ void Test::onCreated() {
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");
 
-	environment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr"); //Milkyway_small
+	environment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Milkyway_small.hdr"); //Milkyway_small
 	//EquiToCube::generateCubemapAndIrradiance(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr", envMap, irMap, prefilMap, brdfLUTMap);
 
 	camera->setSkyBox(new SkyBox(environment->getEnvironmentCubemap()));
@@ -79,7 +82,10 @@ void Test::onCreated() {
 	if (deferred)
 		renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
-	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+
+	//camera->setProjectionMatrix(light0->getLightProjectionMatrix());
+
 	//Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	//light1->update();
 	renderScene->addLight(light0);
@@ -116,8 +122,8 @@ void Test::onCreated() {
 	//resourceLoader.loadModel("", "SimpleSphere.model") //Normals not smooth????
 	//MeshLoader::loadModel("resources/objects/", "plain_sphere.model")
 
-	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
-	//GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj"), pbrRenderShader);
+	//GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
+	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj"), pbrRenderShader);
 	sphere->setScale(0.15f, 0.15f, 0.15f);
 	sphere->update();
 	renderScene->add(sphere);
@@ -175,6 +181,8 @@ void Test::onUpdate() {
 	light0->update();
 
 	mit1->getMesh()->updateAnimation(getDeltaSeconds());
+
+	//camera->setViewMatrix(light0->getLightShadowTransform(1));
 }
 
 void Test::onRender() {

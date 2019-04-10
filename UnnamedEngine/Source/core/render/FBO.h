@@ -22,12 +22,12 @@
 #include "Texture.h"
 
 /*****************************************************************************
- * The FramebufferTexture class stores the data required create a texture
+ * The FramebufferStore class stores the data required create a texture
  * attachment for an FBO
  *****************************************************************************/
 
 class FramebufferStore : public Texture {
-private:
+protected:
 	/* Various pieces of data */
 	GLint   internalFormat;
 	GLenum  format;
@@ -64,13 +64,29 @@ public:
 	}
 
 	/* The method used to setup this texture */
-	void setup(GLuint fboTarget, bool multisample);
+	virtual void setup(GLuint fboTarget, bool multisample);
 
 	/* Setters and getters */
 	inline GLint getInternalFormat() { return internalFormat; }
 	inline GLenum getFormat() { return format; }
 	inline GLenum getType() { return type; }
 	inline GLenum getAttachment() { return attachment; }
+};
+
+/*****************************************************************************
+ * The FramebufferStoreCubemap class stores the data required create a cubemap
+ * attachment for an FBO
+ *****************************************************************************/
+
+class FramebufferStoreCubemap : public FramebufferStore {
+public:
+	/* The constructors */
+	FramebufferStoreCubemap(GLint internalFormat, GLsizei size, GLenum format, GLenum type, GLenum attachment, GLuint filter, GLuint clamp, bool shouldClamp) : FramebufferStore(GL_TEXTURE_CUBE_MAP, internalFormat, size, size, format, type, attachment, filter, clamp, shouldClamp) {}
+
+	virtual ~FramebufferStoreCubemap() {}
+
+	/* The method used to setup this texture */
+	void setup(GLuint fboTarget, bool multisample) override;
 };
 
 /*****************************************************************************
