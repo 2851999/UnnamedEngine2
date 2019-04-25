@@ -171,7 +171,7 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 		}
 	}
 	//Sort the particles
-	std::sort(&particles.front(), &particles.back());
+	std::sort(particles.begin(), particles.end());
 }
 
 void ParticleSystem::render() {

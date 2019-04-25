@@ -58,11 +58,11 @@ void Test::onInitialise() {
 //	getSettings().videoResolution = VideoResolution::RES_1080P;
 //	getSettings().windowFullscreen = true;
 
-	//Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
+	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
 }
 
 void Test::onCreated() {
-	//Logger::stopFileOutput();
+	Logger::stopFileOutput();
 //	GLint num;
 //	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &num);
 //	std::cout << num << std::endl;
@@ -137,7 +137,7 @@ void Test::onCreated() {
 	mit1 = new GameObject3D(resourceLoader.loadPBRModel("Sphere-Bot Basic/", "bot.dae"), pbrRenderShader);
 	mit1->getMesh()->getSkeleton()->startAnimation("");
 
-	std::cout << mit1->getMesh()->getMaterial(2)->diffuseTexture->getPath() << std::endl;
+	//std::cout << mit1->getMesh()->getMaterial(2)->diffuseTexture->getPath() << std::endl;
 
 	mit1->getMesh()->getMaterial(2)->shininessTexture = Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_rough.jpg");
 	mit1->getMesh()->getMaterial(2)->normalMap = Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_nmap_1.jpg");

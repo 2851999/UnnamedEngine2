@@ -65,7 +65,7 @@ public:
 	inline Mesh* loadPBRModel(std::string fileName) const { return sLoadPBRModel(getAbsPathModels(), fileName); }
 	inline Mesh* loadPBRModel(std::string folder, std::string fileName) const { return sLoadPBRModel(getAbsPathModels() + folder, fileName); }
 
-	inline Font* loadFont(std::string fileName, int size = 18, Colour colour = Colour::WHITE) const { return sLoadFont(getAbsPathFonts() + fileName, size, colour); }
+	inline Font* loadFont(std::string fileName, int size = 18) const { return sLoadFont(getAbsPathFonts() + fileName, size); }
 
 	/* Setters and getters */
 	inline void setPath(std::string path) { this->path = path; }
@@ -99,7 +99,7 @@ public:
 	inline static Mesh* sLoadModel(std::string path, std::string fileName) { return MeshLoader::loadModel(path, fileName, false); }
 	inline static Mesh* sLoadPBRModel(std::string path, std::string fileName) { return MeshLoader::loadModel(path, fileName, true); }
 
-	inline static Font* sLoadFont(std::string path, int size = 18, Colour colour = Colour::WHITE) { return new Font(path, size, colour); }
+	inline static Font* sLoadFont(std::string path, int size = 18) { return new Font(path, size); }
 };
 
 

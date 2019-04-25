@@ -26,7 +26,7 @@
  *****************************************************************************/
 
 Animation2D::Animation2D(Sprite* sprite, float timeBetweenFrame, unsigned int totalFrames, bool repeat, unsigned int startFrame) :
-		sprite(sprite), timeBetweenFrame(timeBetweenFrame), totalFrames(totalFrames), repeat(repeat), startFrame(startFrame) {
+		sprite(sprite), timeBetweenFrames(timeBetweenFrame), totalFrames(totalFrames), repeat(repeat), startFrame(startFrame) {
 	currentFrame = startFrame;
 	running = false;
 	currentTime = 0.0f;
@@ -64,7 +64,7 @@ void Animation2D::update(float deltaSeconds) {
 		currentTime += deltaSeconds;
 
 		//Check whether the animation should update
-		if (currentTime >= timeBetweenFrame) {
+		if (currentTime >= timeBetweenFrames) {
 			//Check whether the current frame is the last (NOTE: First frame can be index 0)
 			if (currentFrame == startFrame + totalFrames - 1) {
 				//Restart the animation if it should repeat

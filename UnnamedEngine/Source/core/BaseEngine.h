@@ -55,6 +55,9 @@ private:
 	/* The default font */
 	Font* defaultFont = NULL;
 
+	/* Default text instance */
+	Text* textInstance = NULL;
+
 	/* Debug camera used when rendering debug information */
 	Camera2D* debugCamera = NULL;
 	/* Debug console */

@@ -1,6 +1,24 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 2 | Experimental 4
+
+* Added Text
+
+* Added methods to Font that only update either the position
+  that text will be rendered or the actual text to be rendered
+* Added 'getCurrentFrameInAnimation' method in Animation2D
+  
+* Renamed 'timeBetweenFrame' to 'timeBetweenFrames' in
+  Animation2D
+  
+* Fixed bug: Depth sorting for particles ignored the last
+  			 particle
+  			 
+* Note: Text handles rendering of a Font instead of Font
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 2 | Experimental 3
 
+* Added FramebufferStoreCubemap
 * Added point light shadows
 
 * Changed loadShader method in Shader to load a geometry

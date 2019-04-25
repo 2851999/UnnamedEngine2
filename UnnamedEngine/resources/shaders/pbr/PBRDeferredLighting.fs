@@ -32,7 +32,7 @@ void main() {
 	vec4 fragPosLightSpace[MAX_LIGHTS];
 
 	for (int i = 0; i < ue_numLights; i++) {
-		if (ue_lights[i].useShadowMap)
+		if (ue_lights[i].useShadowMap && ue_lights[i].type != 2)
 			fragPosLightSpace[i] = ue_lightSpaceMatrix[i] * vec4(fragPosition, 1.0);
 	}
 	

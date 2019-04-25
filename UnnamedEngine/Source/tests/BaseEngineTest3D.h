@@ -42,6 +42,7 @@ private:
 //	GameObject3D* box;
 
 	Font* font;
+	Text* text;
 
 //	HeightMapTerrain* terrain;
 
@@ -138,8 +139,9 @@ void Test::onCreated() {
 	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
 	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
 
-	font = new Font("resources/fonts/CONSOLA.TTF", 64, Colour::WHITE, true, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
-	font->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
+	font = new Font("resources/fonts/CONSOLA.TTF", 64, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
+	text = new Text(font, Colour::WHITE, true);
+	text->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
 
 //	terrain = new HeightMapTerrain();
 //	terrain->setup("D:/Storage/Users/Joel/Desktop/heightmap.jpg", 8);
@@ -189,7 +191,7 @@ void Test::onUpdate() {
 
 void Test::onRender() {
 	particleSystem->render();
-	font->render();
+	text->render();
 //	terrain->render();
 
 //	box->render();

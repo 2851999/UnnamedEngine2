@@ -28,10 +28,10 @@ AsteroidsResources::~AsteroidsResources() {}
 
 void AsteroidsResources::setup(ResourceLoader& loader) {
 	//Create the resources
-	fontTitle = loader.loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
-	fontGUI = loader.loadFont("TT1240M_.TTF", 24.0f, Colour::WHITE);
-	fontHeading = loader.loadFont("TT1240M_.ttf", 24.0f, Colour::WHITE);
-	fontHeadingMono = loader.loadFont("CONSOLA.ttf", 24.0f, Colour::WHITE);
+	fontTitle = loader.loadFont("TT1240M_.ttf", 64.0f);
+	fontGUI = loader.loadFont("TT1240M_.TTF", 24.0f);
+	fontHeading = loader.loadFont("TT1240M_.ttf", 24.0f);
+	fontHeadingMono = loader.loadFont("CONSOLA.ttf", 24.0f);
 
 	texturesButtons = { loader.loadTexture("Button.png"), loader.loadTexture("Button_Hover.png"), loader.loadTexture("Button_Clicked.png") };
 	textureShieldBar = loader.loadTexture("ShieldBar.png");
