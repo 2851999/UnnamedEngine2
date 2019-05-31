@@ -46,6 +46,7 @@ private:
 
 	/* Various shaders that might be needed */
 	Shader* shadowMapShader;
+	Shader* shadowCubemapShader;
 
 	/* The ambient light used in lighting */
 	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
@@ -79,6 +80,11 @@ private:
 
 	/* States whether the scene should be rendered in wireframe mode */
 	bool renderWireframe = false;
+
+	/* Methods used before and after actual rendering of the scene when using forward rendering to handle the
+	 * framebuffers/gamma correction */
+	void forwardPreRender();
+	void forwardPostRender();
 
 	/* Used to render the lighting pass given the shader to use (and index of the batch to render for forward rendering) */
 	void renderLighting(RenderShader* renderShader, int indexOfBatch = -1);

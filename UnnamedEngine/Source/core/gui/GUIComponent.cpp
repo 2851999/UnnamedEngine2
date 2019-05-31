@@ -30,6 +30,8 @@
 Font* GUIComponentRenderer::DEFAULT_FONT = NULL;
 
 void GUIComponentRenderer::setup() {
+	//Assign the text instance
+	textInstance = new Text(DEFAULT_FONT);
 	//Set the default colour and texture
 	getMaterial()->diffuseColour = Colour::WHITE;
 	getMaterial()->diffuseTexture = Renderer::getBlankTexture();
@@ -49,10 +51,10 @@ void GUIComponentRenderer::update() {
 }
 
 void GUIComponentRenderer::renderText(std::string text, Vector2f relPos) {
-	//Make sure there is a font instance
-	if (font)
+	//Make sure there is a text instance
+	if (textInstance)
 		//Render the text
-		font->render(text, Vector2f(getPosition().getX(), getPosition().getY()) + relPos);
+		textInstance->render(text, Vector2f(getPosition().getX(), getPosition().getY()) + relPos);
 }
 
 void GUIComponentRenderer::renderTextAtCentre(std::string text) {

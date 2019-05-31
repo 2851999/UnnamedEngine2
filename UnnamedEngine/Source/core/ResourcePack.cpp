@@ -31,6 +31,9 @@ void ResourcePack::destroy() {
 	for (auto const& it : textureAtlasResources)
 		delete it.second;
 	textureAtlasResources.clear();
+	for (auto const& it : fontResources)
+		delete it.second;
+	fontResources.clear();
 }
 
 Texture* ResourcePack::getTexture(std::string id) {
@@ -51,4 +54,14 @@ TextureAtlas* ResourcePack::getTextureAtlas(std::string id) {
 		Logger::log("TextureAtlas with the name '" + id + "' was not found", "ResourcePack", LogType::Error);
 	}
 	return textureAtlas;
+}
+
+Font* ResourcePack::getFont(std::string id) {
+	Font* font = NULL;
+	try {
+		font = fontResources.at(id);
+	} catch(std::out_of_range& e) {
+		Logger::log("Font with the name '" + id + "' was not found", "ResourcePack", LogType::Error);
+	}
+	return font;
 }

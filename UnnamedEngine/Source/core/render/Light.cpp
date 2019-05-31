@@ -25,13 +25,13 @@
 Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type) {
 	setPosition(position);
 
-	if (type == TYPE_DIRECTIONAL) {
-		if (castShadows) {
+	if (castShadows) {
+		if (type == TYPE_DIRECTIONAL) {
 			depthBuffer = new FBO(GL_FRAMEBUFFER);
 
 			depthBuffer->attach(new FramebufferStore(
 					GL_TEXTURE_2D,
-					GL_DEPTH_COMPONENT,
+					GL_DEPTH_COMPONENT24,
 					shadowMapSize,
 					shadowMapSize,
 					GL_DEPTH_COMPONENT,
@@ -45,6 +45,29 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 			depthBuffer->setup();
 
 			lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
+		} else if (type == TYPE_POINT) {
+			depthBuffer = new FBO(GL_FRAMEBUFFER);
+
+			//Setup the depth buffer cubemap
+			depthBuffer->attach(new FramebufferStoreCubemap(
+					GL_DEPTH_COMPONENT24,
+					shadowMapSize,
+					GL_DEPTH_COMPONENT,
+					GL_FLOAT,
+					GL_DEPTH_ATTACHMENT,
+					GL_NEAREST,
+					GL_CLAMP_TO_EDGE, //Want to clamp to avoid repeating shadows when out of the bounds of the shadow map
+					true
+			));
+
+			depthBuffer->setup();
+
+			//Setup the shadow transforms for each face of the cubemap
+			for (unsigned int i = 0; i < 6; ++i)
+				lightShadowTransforms.push_back(Matrix4f());
+
+			//Setup the projection matrix for the shadow map rendering
+			lightProjection.initPerspective(90.0f, (float) shadowMapSize / (float) shadowMapSize, 1.0f, 25.0f);
 		}
 	}
 }
@@ -61,6 +84,16 @@ void Light::update() {
 
 		//Update the frustum
 		frustum.update(lightProjectionView);
+	} else if (type == TYPE_POINT && hasDepthBuffer()) {
+		//The position of the point light
+		Vector3f pos = getPosition();
+		//Assign each of the transform matrices
+		lightShadowTransforms[0] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f( 1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f));
+		lightShadowTransforms[1] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f(-1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f));
+		lightShadowTransforms[2] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f( 0.0f,  1.0f,  0.0f), Vector3f(0.0f,  0.0f,  1.0f));
+		lightShadowTransforms[3] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f( 0.0f, -1.0f,  0.0f), Vector3f(0.0f,  0.0f, -1.0f));
+		lightShadowTransforms[4] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f( 0.0f,  0.0f,  1.0f), Vector3f(0.0f, -1.0f,  0.0f));
+		lightShadowTransforms[5] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f( 0.0f,  0.0f, -1.0f), Vector3f(0.0f, -1.0f,  0.0f));
 	}
 }
 

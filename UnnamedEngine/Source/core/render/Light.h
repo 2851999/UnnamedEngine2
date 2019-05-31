@@ -58,6 +58,9 @@ private:
 	Matrix4f lightProjection;
 	Matrix4f lightView;
 
+	/* Shadow transforms for point lights */
+	std::vector<Matrix4f> lightShadowTransforms;
+
 	/* Frustum used for frustum culling when rendering shadow maps */
 	Frustum frustum;
 
@@ -108,6 +111,7 @@ public:
 	inline bool hasDepthBuffer() { return depthBuffer; }
 	inline unsigned int getShadowMapSize() { return shadowMapSize; }
 	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
+	inline Matrix4f& getLightShadowTransform(unsigned int index) { return lightShadowTransforms[index]; }
 	inline Matrix4f getLightViewMatrix() { return lightView; }
 	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }
 	inline Frustum& getFrustum() { return frustum; }

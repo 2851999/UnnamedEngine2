@@ -156,7 +156,7 @@ public:
 		float theta = acosf(dot) * factor;
 		Vector<T, N> relative = b - a * dot;
 		relative.normalise();
-		return ((a * cosf(theta)) + (relative * sin(theta)));
+		return ((a * cosf(theta)) + (relative * sinf(theta)));
 	}
 	inline static Vector<T, N> nlerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) { return lerp(a, b, factor).normalise(); }
 

@@ -20,6 +20,7 @@ struct UELight {
 	float outerCutoff;
 
 	sampler2D shadowMap;
+	samplerCube shadowCubemap;
 	bool useShadowMap;
 };
 
@@ -124,6 +125,36 @@ float ueCalculateShadow(UELight light, vec4 fragPosLightSpace, vec3 normal) {
 	return shadow;
 }
 
+//Same as above, but for a point light
+float ueCalculatePointShadow(UELight light, vec3 fragPos, vec3 viewPos) {
+	vec3 fragToLight = fragPos - light.position;
+	float farPlane = 25.0;
+	float currentDepth = length(fragToLight);
+	
+	vec3 sampleOffsetDirections[20] = vec3[](
+		vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+		vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+		vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+		vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+		vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1) );
+	
+	float shadow = 0.0;
+	float bias = 0.15;
+	int samples = 20;
+	float viewDistance = length(viewPos - fragPos);
+	float diskRadius = (1.0 + (viewDistance / farPlane)) / 25.0;
+	
+	for (int i = 0; i < samples; ++i) {
+		float closestDepth = texture(light.shadowCubemap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+		closestDepth *= farPlane;
+		if (currentDepth - bias > closestDepth)
+			shadow += 1.0;
+	}
+	
+	return shadow /= float(samples);
+	//return texture(light.shadowCubemap, fragToLight).r;
+}
+
 //Returns the result of applying all lighting calculations
 vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseColour, vec3 specularColour, float matShininess, vec4 fragPosLightSpace[MAX_LIGHTS]) {
 	//The ambient light
@@ -149,9 +180,12 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(ue_lights[i], fragPosLightSpace[i], normal));
 			else
 				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
-		} else if (ue_lights[i].type == 2)
-			otherLight += ueCalculatePointLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
-		else if (ue_lights[i].type == 3)
+		} else if (ue_lights[i].type == 2) {
+			if (ue_lights[i].useShadowMap)
+				otherLight += ueCalculatePointLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess)* (1.0 - ueCalculatePointShadow(ue_lights[i], fragPos, ue_cameraPosition));
+			else
+				otherLight += ueCalculatePointLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
+		} else if (ue_lights[i].type == 3)
 			otherLight += ueCalculateSpotLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
 	}
 

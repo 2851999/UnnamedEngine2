@@ -22,6 +22,7 @@
 #include <map>
 
 #include "render/TextureAtlas.h"
+#include "gui/Font.h"
 
 /*****************************************************************************
  * The ResourcePack class used for loading a group of resources for use
@@ -33,6 +34,7 @@ private:
 	/* The resources */
 	std::map<std::string, Texture*>      textureResources;
 	std::map<std::string, TextureAtlas*> textureAtlasResources;
+	std::map<std::string, Font*>         fontResources;
 public:
 	/* The constructor */
 	ResourcePack() {}
@@ -43,6 +45,7 @@ public:
 	/* Adds a resource to this resource pack */
 	inline void add(std::string id, Texture* resource) { textureResources.insert(std::pair<std::string, Texture*>(id, resource)); }
 	inline void add(std::string id, TextureAtlas* resource) { textureAtlasResources.insert(std::pair<std::string, TextureAtlas*>(id, resource)); }
+	inline void add(std::string id, Font* resource) { fontResources.insert(std::pair<std::string, Font*>(id, resource)); }
 
 	/* Deletes all added resources */
 	void destroy();
@@ -50,6 +53,7 @@ public:
 	/* Returns the resource with the given id */
 	Texture* getTexture(std::string id);
 	TextureAtlas* getTextureAtlas(std::string id);
+	Font* getFont(std::string id);
 };
 
 

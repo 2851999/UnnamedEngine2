@@ -42,7 +42,7 @@ FBO* GeometryBuffer::createFBO(bool pbr) {
 	fbo->attach(createBuffer(target, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT0));
 
 	//Normal buffer
-	fbo->attach(createBuffer(target, GL_RGBA32F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT1));
+	fbo->attach(createBuffer(target, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT1));
 
 	//Albedo buffer
 	fbo->attach(createBuffer(target, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT2));
@@ -52,7 +52,7 @@ FBO* GeometryBuffer::createFBO(bool pbr) {
 		fbo->attach(createBuffer(target, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT3));
 
 	//Depth buffer
-	fbo->attach(createBuffer(target, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, GL_DEPTH_ATTACHMENT));
+	fbo->attach(createBuffer(target, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, GL_DEPTH_ATTACHMENT));
 
 	//Setup this buffer
 	fbo->setup();

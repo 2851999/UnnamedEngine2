@@ -40,7 +40,7 @@ protected:
 	unsigned int currentFrame = 0;
 private:
 	/* The time between each frame of the animation (in seconds) */
-	float timeBetweenFrame = 0.0f;
+	float timeBetweenFrames = 0.0f;
 
 	/* The total number of frames within this animation */
 	unsigned int totalFrames = 0;
@@ -58,8 +58,8 @@ private:
 	float currentTime = 0.0f;
 public:
 	/* The constructors */
-	Animation2D(Sprite* sprite, float timeBetweenFrame, unsigned int totalFrames, bool repeat = false, unsigned int startFrame = 0);
-	Animation2D(float timeBetweenFrame, unsigned int totalFrames, bool repeat = false, unsigned int startFrame = 0) : Animation2D(NULL, timeBetweenFrame, totalFrames, repeat, startFrame) {}
+	Animation2D(Sprite* sprite, float timeBetweenFrames, unsigned int totalFrames, bool repeat = false, unsigned int startFrame = 0);
+	Animation2D(float timeBetweenFrames, unsigned int totalFrames, bool repeat = false, unsigned int startFrame = 0) : Animation2D(NULL, timeBetweenFrames, totalFrames, repeat, startFrame) {}
 
 	/* The destructor */
 	virtual ~Animation2D();
@@ -82,11 +82,13 @@ public:
 	virtual void updateFrame() {}
 
 	/* Setters and getters */
-	inline void setTimeBetweenFrame(float time) { timeBetweenFrame = time; }
+	inline void setTimeBetweenFrames(float time) { timeBetweenFrames = time; }
 	inline void setRepeat(bool repeat) { this->repeat = repeat; }
 	inline void setSprite(Sprite* sprite) { this->sprite = sprite; }
 
-	inline float getTimeBetweenFrame() { return timeBetweenFrame; }
+	/* Returns index of current frame within this animation (relative to the start frame) */
+	inline unsigned int getCurrentFrameInAnimation() { return currentFrame - startFrame; }
+	inline float getTimeBetweenFrames() { return timeBetweenFrames; }
 	inline bool  doesRepeat() { return repeat; }
 	inline bool  isRunning()  { return running; }
 	inline Sprite* getSprite() { return sprite; }

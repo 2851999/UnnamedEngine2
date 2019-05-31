@@ -1,4 +1,88 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 3 (V0.3.3)
+
+* Added FramebufferStoreCubemap
+* Added Text
+* Added point light shadows
+* Added methods to Font that only update either the position
+  that text will be rendered or the actual text to be rendered
+* Added 'getCurrentFrameInAnimation' method in Animation2D
+* Added ability to add fonts to ResourcePack
+* Added 1440p to VideoResolution
+
+* Changed loadShader method in Shader to load a geometry
+  shader if it is also availabl
+  
+* Renamed 'timeBetweenFrame' to 'timeBetweenFrames' in
+  Animation2D
+
+* Cleaned up RenderScene3D slightly
+
+* Increased maximum number of bones in a model from 80 to 90
+
+* Fixed bug: RenderScene3D didn't use wireframes correctly
+             when not using lighting
+* Fixed bug: Rotations for skeletal animation weren't
+             interpolated correctly
+* Fixed bug: Depth sorting for particles ignored the last
+  			 particle
+* Fixed bug: Font getHeight only measured the height of one
+             line if \n was included
+
+* Note: Text handles rendering of a Font instead of Font
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 2 | Experimental 5
+
+* Added ability to add fonts to ResourcePack
+* Added 1440p to VideoResolution
+
+* Fixed bug: Font getHeight only measured the height of one
+             line if \n was included
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 2 | Experimental 4
+
+* Added Text
+
+* Added methods to Font that only update either the position
+  that text will be rendered or the actual text to be rendered
+* Added 'getCurrentFrameInAnimation' method in Animation2D
+  
+* Renamed 'timeBetweenFrame' to 'timeBetweenFrames' in
+  Animation2D
+  
+* Fixed bug: Depth sorting for particles ignored the last
+  			 particle
+  			 
+* Note: Text handles rendering of a Font instead of Font
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 2 | Experimental 3
+
+* Added FramebufferStoreCubemap
+* Added point light shadows
+
+* Changed loadShader method in Shader to load a geometry
+  shader if it is also available
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 2 | Experimental 2
+
+* Increased maximum number of bones in a model from 80 to 90
+
+* Fixed bug: Rotations for skeletal animation weren't
+             interpolated correctly
+
+--------------------------------------------------------------
+Release 1 | Beta 1 | Development 2 | Experimental 1
+
+* Cleaned up RenderScene3D slightly
+
+* Fixed bug: RenderScene3D didn't use wireframes correctly
+             when not using lighting
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 2 (V0.3.2)
 
 * Added Tilemap

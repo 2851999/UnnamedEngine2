@@ -46,7 +46,7 @@ AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
 	buttonExit->addListener(this);
 
 	//Setup the title font
-	Font* titleFont = game->getResourceLoader().loadFont("TT1240M_.ttf", 64.0f, Colour::WHITE);
+	Font* titleFont = game->getResourceLoader().loadFont("TT1240M_.ttf", 64.0f);
 
 	//Create the title label
 	GUILabel* titleLabel = new GUILabel("Paused", titleFont);

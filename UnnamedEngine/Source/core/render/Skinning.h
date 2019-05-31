@@ -218,6 +218,9 @@ private:
 	/* Recursive method used to set the bind pose of a bone */
 	void setBoneBindPose(Bone* parentBone, const Matrix4f& parentMatrix);
 public:
+	/* Maximum number of bones for an animated model */
+	static const unsigned int SKINNING_MAX_BONES = 90;
+
 	/* The constructor */
 	Skeleton() {}
 

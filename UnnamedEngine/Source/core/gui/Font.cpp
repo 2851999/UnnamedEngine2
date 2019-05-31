@@ -25,11 +25,11 @@
  * The Font class
  *****************************************************************************/
 
-#define FONT_SCALE 2
-
 FT_Library Font::ftLibrary;
 
-void Font::setup(std::string path, unsigned int size, Colour colour, TextureParameters parameters) {
+const float Font::RENDER_SCALE = 2.0f;
+
+void Font::setup(std::string path, unsigned int size, TextureParameters parameters) {
 	FT_Face face;
 	//Attempt to get the font face
 	if (FT_New_Face(ftLibrary, path.c_str(), 0, &face)) {
@@ -38,7 +38,7 @@ void Font::setup(std::string path, unsigned int size, Colour colour, TexturePara
 		return;
 	}
 	//Assign the size
-	FT_Set_Pixel_Sizes(face, 0, size * FONT_SCALE);
+	FT_Set_Pixel_Sizes(face, 0, size * RENDER_SCALE);
 
 	//Get the GlyphSlot which stores information about a certain character that has been loaded
 	FT_GlyphSlot glyphSlot = face->glyph;
@@ -60,13 +60,9 @@ void Font::setup(std::string path, unsigned int size, Colour colour, TexturePara
 		//Update the height to make it the same as the tallest letter
 		height = utils_maths::max(height, glyphSlot->bitmap.rows);
 	}
-	//Assign the texture atlas width/height variables
-	textureAtlasWidth  = width;
-	textureAtlasHeight = height;
-
 	//Create and bind the texture atlas
-	Texture* textureAtlas = new Texture(width, height, parameters);
-	textureAtlas->bind();
+	texture = new Texture(width, height, parameters);
+	texture->bind();
 	//Allows textures that are not a multiple of 4 in size
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -95,40 +91,15 @@ void Font::setup(std::string path, unsigned int size, Colour colour, TexturePara
 		xOffset += glyphSlot->bitmap.width;
 	}
 
-	textureAtlas->applyParameters(false, true);
+	texture->applyParameters(false, true);
 
 	//Return the GL_UNPACK_ALIGNMENT to its default state
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 	FT_Done_Face(face);
-
-	//The shader type to use
-	std::string shaderType;
-	if (! billboarded)
-		shaderType = Renderer::SHADER_FONT;
-	else
-		shaderType = Renderer::SHADER_BILLBOARDED_FONT;
-
-	//Create the GameObject3D instance and assign the texture
-	object3D = new GameObject3D(new Mesh(MeshBuilder::createQuad3D(textureAtlasWidth, textureAtlasHeight, textureAtlas, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)), shaderType);
-	object3D->getMaterial()->diffuseColour = colour;
-	object3D->getMaterial()->diffuseTexture = textureAtlas;
-	object3D->setScale(1.0f / (float) FONT_SCALE, 1.0f / (float) FONT_SCALE, 1.0f);
-	object3D->getMesh()->setCullingEnabled(false);
-	object3D->update();
 }
 
-void Font::update(std::string text) {
-	//The pointer to the MeshData instance in the object
-	MeshData* data;
-
-	data = object3D->getMesh()->getData();
-
-	//Clear the previous data
-	data->clearPositions();
-	data->clearTextureCoords();
-	data->clearIndices();
-
+void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
 	//The current x and y positions
 	float currentX = 0.0f;
 	float currentY = 0.0f;
@@ -140,13 +111,13 @@ void Font::update(std::string text) {
 
 	unsigned int newLineCount = 0;
 	//Go through each character in the text
-	for (unsigned int i = 0; i < text.length(); i++) {
+	for (unsigned int i = 0; i < text.length(); ++i) {
 		//Check for a new line escape character
 		if (text.compare(i, 1, "\n") == 0) {
-			newLineCount ++;
+			++newLineCount;
 			//Go to a new line
 			currentX = 0.0f;
-			currentY += textureAtlasHeight;
+			currentY += texture->getHeight();
 
 			if (billboarded)
 				currentX = -getWidth(text) / 2;
@@ -167,13 +138,13 @@ void Font::update(std::string text) {
 			data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
 
 			//Pad the texture coordinates to reduce bleeding artifacts
-			float offsetX = 0.002f / (float) object3D->getMaterial()->diffuseTexture->getWidth();
-			float offsetY = 0.002f / (float) object3D->getMaterial()->diffuseTexture->getHeight();
+			float offsetX = 0.002f / (float) texture->getWidth();
+			float offsetY = 0.002f / (float) texture->getHeight();
 
-			data->addTextureCoord(Vector2f((info.xOffset / (float) textureAtlasWidth) + offsetX, 0.0f + offsetY));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth) - offsetX, 0.0f + offsetY));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) textureAtlasWidth) - offsetX, (info.glyphHeight / (float) textureAtlasHeight) - offsetY));
-			data->addTextureCoord(Vector2f((info.xOffset / (float) textureAtlasWidth) + offsetX, (info.glyphHeight / (float) textureAtlasHeight) - offsetY));
+			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()) + offsetX, 0.0f + offsetY));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()) - offsetX, 0.0f + offsetY));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()) - offsetX, (info.glyphHeight / (float) texture->getHeight()) - offsetY));
+			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()) + offsetX, (info.glyphHeight / (float) texture->getHeight()) - offsetY));
 
 			unsigned int ip = (i - newLineCount) * 4;
 
@@ -187,48 +158,10 @@ void Font::update(std::string text) {
 			currentX += (info.advanceX / 64.0f);
 		}
 	}
-	object3D->getMesh()->getRenderData()->updatePositions(data);
-	object3D->getMesh()->getRenderData()->updateTextureCoords();
-	object3D->getMesh()->getRenderData()->updateIndices(data);
-}
-
-void Font::update(std::string text, Vector2f position) {
-	update(text);
-
-	object3D->setPosition(Vector3f(position));
-	object3D->update();
-}
-
-void Font::update(std::string text, Vector3f position) {
-	update(text);
-
-	object3D->setPosition(position);
-	object3D->update();
-}
-
-void Font::render() {
-	if (billboarded) {
-		Shader* shader = object3D->getShader();
-		shader->use();
-
-		Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
-
-		shader->setUniformVector3("Camera_Right", Vector3f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2)));
-		shader->setUniformVector3("Camera_Up", Vector3f(-matrix.get(1, 0), -matrix.get(1, 1), -matrix.get(1, 2)));
-		shader->setUniformVector2("Billboard_Size", Vector2f(0.005f, 0.005f));
-		shader->setUniformVector3("Billboard_Centre", object3D->getPosition());
-
-		shader->setUniformMatrix4("ProjectionViewMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
-
-		object3D->render();
-
-		shader->stopUsing();
-	} else
-		object3D->render();
 }
 
 void Font::destroy() {
-	delete object3D;
+
 }
 
 float Font::getWidth(std::string text) {
@@ -253,7 +186,7 @@ float Font::getWidth(std::string text) {
 		width = utils_maths::max(width, lineWidth);
 	}
 	//Return the width
-	return width * (1.0f / (float) FONT_SCALE);
+	return width * (1.0f / (float) RENDER_SCALE);
 }
 
 float Font::getHeight(std::string text) {
@@ -264,8 +197,8 @@ float Font::getHeight(std::string text) {
 	for (unsigned int i = 0; i < text.length(); i++) {
 		//Check for a new line escape character
 		if (text.compare(i, 1, "\n") == 0) {
-			lineHeight = 0;
 			height += lineHeight;
+			lineHeight = 0;
 		} else {
 			//Get the character data for the current character
 			GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
@@ -276,7 +209,7 @@ float Font::getHeight(std::string text) {
 	if (height == 0)
 		height = lineHeight;
 	//Return the height
-	return height * (1.0f / (float) FONT_SCALE);
+	return height * (1.0f / (float) RENDER_SCALE);
 }
 
 

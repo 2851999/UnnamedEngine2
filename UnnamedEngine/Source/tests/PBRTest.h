@@ -38,7 +38,9 @@ private:
 
 	Light* light0;
 
-	bool deferred = false;
+	GameObject3D* mit1;
+
+	bool deferred = true;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -50,19 +52,31 @@ public:
 };
 
 void Test::onInitialise() {
-	getSettings().videoVSync = false;
+	getSettings().videoVSync = true;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
-//	getSettings().videoResolution = VideoResolution::RES_1080P;
+//	getSettings().videoResolution = VideoResolution::RES_1440p;
+//	getSettings().videoRefreshRate = 144;
 //	getSettings().windowFullscreen = true;
+
+	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
 }
 
 void Test::onCreated() {
+	Logger::stopFileOutput();
+
+//	GLint num;
+//	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &num);
+//	std::cout << num << std::endl;
+
+//	GLint num;
+//	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &num);
+//	std::cout << num << std::endl;
 	MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 	//MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "SimpleSphere.obj");
 
-	environment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr");
+	environment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Milkyway_small.hdr"); //Milkyway_small
 	//EquiToCube::generateCubemapAndIrradiance(resourceLoader.getAbsPathTextures() + "PBR/Theatre-Center_2k.hdr", envMap, irMap, prefilMap, brdfLUTMap);
 
 	camera->setSkyBox(new SkyBox(environment->getEnvironmentCubemap()));
@@ -74,7 +88,10 @@ void Test::onCreated() {
 	if (deferred)
 		renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
-	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+
+	//camera->setProjectionMatrix(light0->getLightProjectionMatrix());
+
 	//Light* light1 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	//light1->update();
 	renderScene->addLight(light0);
@@ -111,8 +128,8 @@ void Test::onCreated() {
 	//resourceLoader.loadModel("", "SimpleSphere.model") //Normals not smooth????
 	//MeshLoader::loadModel("resources/objects/", "plain_sphere.model")
 
-	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
-	//GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj"), pbrRenderShader);
+	//GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
+	GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj"), pbrRenderShader);
 	sphere->setScale(0.15f, 0.15f, 0.15f);
 	sphere->update();
 	renderScene->add(sphere);
@@ -122,7 +139,16 @@ void Test::onCreated() {
 	sphere2->update();
 	renderScene->add(sphere2);
 
-	GameObject3D* mit1 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "mitsuba-sphere.obj"), pbrRenderShader);
+	//mitsuba-sphere.obj
+	mit1 = new GameObject3D(resourceLoader.loadPBRModel("Sphere-Bot Basic/", "bot.dae"), pbrRenderShader);
+	mit1->getMesh()->getSkeleton()->startAnimation("");
+
+	//std::cout << mit1->getMesh()->getMaterial(2)->diffuseTexture->getPath() << std::endl;
+
+	mit1->getMesh()->getMaterial(2)->shininessTexture = Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_rough.jpg");
+	mit1->getMesh()->getMaterial(2)->normalMap = Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_nmap_1.jpg");
+
+	//mit1->setScale(0.5f, 0.5f, 0.5f);
 	mit1->setPosition(10.0f, 1.0f, 0.0f);
 	mit1->update();
 	renderScene->add(mit1);
@@ -159,6 +185,10 @@ void Test::onUpdate() {
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		light0->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 	light0->update();
+
+	mit1->getMesh()->updateAnimation(getDeltaSeconds());
+
+	//camera->setViewMatrix(light0->getLightShadowTransform(1));
 }
 
 void Test::onRender() {
