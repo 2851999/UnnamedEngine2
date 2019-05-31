@@ -1,11 +1,10 @@
 #include "../Core.vs"
+#include "../Material.glsl"
 #include "../Skinning.vs"
 
 #define MAX_LIGHTS 6
 
 uniform mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
-uniform bool ue_useNormalMap;
-uniform bool ue_useParallaxMap;
 uniform int ue_numLights;
 
 out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
@@ -30,7 +29,7 @@ void ueAssignLightingData() {
 	for (int i = 0; i < ue_numLights; i++)
 		ue_frag_pos_lightspace[i] = ue_lightSpaceMatrix[i] * vec4(ue_frag_position, 1.0);
 	
-	if (ue_useNormalMap) {
+	if (ue_material.hasNormalMap) {
 		vec3 T;
 		vec3 B;
 		
@@ -45,7 +44,7 @@ void ueAssignLightingData() {
 	
 		ue_frag_tbnMatrix = mat3(-T, B, N);
 		
-		if (ue_useParallaxMap) {
+		if (ue_material.hasParallaxMap) {
 			ue_tangentViewPos = transpose(ue_frag_tbnMatrix) * ue_cameraPosition;
 			ue_tangentFragPos = transpose(ue_frag_tbnMatrix) * ue_frag_position;
 		}

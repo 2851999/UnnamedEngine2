@@ -32,8 +32,6 @@ uniform vec3 ue_lightAmbient;
 
 uniform samplerCube ue_environmentMap;
 uniform bool ue_useEnvironmentMap;
-uniform bool ue_useNormalMap;
-uniform bool ue_useParallaxMap;
 
 in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 in mat3 ue_frag_tbnMatrix;
@@ -195,7 +193,7 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 //Returns the texture coordinate taking into account parralax mapping
 vec2 ueCalculateTextureCoord() {
 	vec2 textureCoord = ue_frag_textureCoord;
-	if (ue_useParallaxMap) {
+	if (ue_material.hasParallaxMap) {
 		textureCoord = ueGetMaterialParallax(ue_frag_textureCoord, normalize(ue_tangentViewPos - ue_tangentFragPos));
 		
 		if(textureCoord.x > 1.0 || textureCoord.y > 1.0 || textureCoord.x < 0.0 || textureCoord.y < 0.0)
@@ -208,7 +206,7 @@ vec2 ueCalculateTextureCoord() {
 vec3 ueCalculateNormal(vec2 textureCoord) {
 	vec3 normal;
 	
-	if (ue_useNormalMap)
+	if (ue_material.hasNormalMap)
 		normal = normalize(ue_frag_tbnMatrix * ueGetMaterialNormal(textureCoord));
 	else
 		normal = normalize(ue_frag_normal);

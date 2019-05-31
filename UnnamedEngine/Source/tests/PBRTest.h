@@ -52,7 +52,7 @@ public:
 };
 
 void Test::onInitialise() {
-	getSettings().videoVSync = true;
+	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
 //	getSettings().videoResolution = VideoResolution::RES_1440p;

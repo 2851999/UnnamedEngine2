@@ -27,6 +27,15 @@
  * The Renderer class
  *****************************************************************************/
 
+Renderer::ShaderMaterialData Renderer::shaderMaterialData;
+Renderer::ShaderSkinningData Renderer::shaderSkinningData;
+
+UBO* Renderer::uboMaterial;
+UBO* Renderer::uboSkinning;
+
+const unsigned int Renderer::SHADER_UBO_BINDING_LOCATION_MATERIAL = 2;
+const unsigned int Renderer::SHADER_UBO_BINDING_LOCATION_SKINNING = 3;
+
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
 std::unordered_map<std::string, RenderShader*> Renderer::renderShaders;
@@ -116,6 +125,10 @@ void Renderer::initialise() {
 
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
+	//Setup the UBOs
+	uboMaterial = new UBO(NULL, sizeof(ShaderMaterialData), GL_DYNAMIC_DRAW, SHADER_UBO_BINDING_LOCATION_MATERIAL);
+	uboSkinning = new UBO(NULL, sizeof(ShaderSkinningData), GL_DYNAMIC_DRAW, SHADER_UBO_BINDING_LOCATION_SKINNING);
+
 	//Setup the shaders
 	addRenderShader(SHADER_MATERIAL,              loadEngineShader("MaterialShader"),                   NULL);
 	addRenderShader(SHADER_SKY_BOX,               loadEngineShader("SkyBoxShader"),                     NULL);
@@ -139,7 +152,6 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_PBR_LIGHTING,          loadEngineShader("pbr/PBRShader"),                    loadEngineShader("pbr/PBRDeferredGeom"));
 	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING, loadEngineShader("pbr/PBRDeferredLighting"),          NULL);
 
-
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
 	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
@@ -156,23 +168,30 @@ void Renderer::assignMatTexture(Shader* shader, std::string type, Texture* textu
 	if (texture)
 		//Bind the texture
 		shader->setUniformi("Material_" + type, bindTexture(texture));
-	shader->setUniformi("Material_Has" + type, texture != NULL);
+	if (type == "AmbientTexture")
+		shaderMaterialData.hasAmbientTexture = texture != NULL;
+	else if (type == "DiffuseTexture")
+		shaderMaterialData.hasDiffuseTexture = texture != NULL;
+	else if (type == "SpecularTexture")
+		shaderMaterialData.hasSpecularTexture = texture != NULL;
+	else if (type == "ShininessTexture")
+		shaderMaterialData.hasShininessTexture = texture != NULL;
 }
 
 void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Material* material) {
-	shader->setUniformColourRGBA("Material_DiffuseColour", material->diffuseColour);
+	shaderMaterialData.diffuseColour = Vector4f(material->diffuseColour);
 
 	assignMatTexture(shader, "Diffuse", material->diffuseTexture);
 	if (material->diffuseTexture)
-		shader->setUniformi("Material_DiffuseTextureSRGB", material->diffuseTexture->getParameters().getSRGB());
+		shaderMaterialData.diffuseTextureSRGB = material->diffuseTexture->getParameters().getSRGB();
 	else
-		shader->setUniformi("Material_DiffuseTextureSRGB", 0);
+		shaderMaterialData.diffuseTextureSRGB = 0;
 
 	//Check to see whether the shader is for lighting
 	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == SHADER_PBR_LIGHTING) {
 		//Assign other lighting specific properties
-		shader->setUniformColourRGB("Material_AmbientColour", material->ambientColour);
-		shader->setUniformColourRGB("Material_SpecularColour", material->specularColour);
+		shaderMaterialData.ambientColour = Vector4f(material->ambientColour);
+		shaderMaterialData.specularColour = Vector4f(material->specularColour);
 
 		assignMatTexture(shader, "Ambient", material->ambientTexture);
 		assignMatTexture(shader, "Specular", material->specularTexture);
@@ -180,19 +199,22 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 
 		if (material->normalMap) {
 			shader->setUniformi("Material_NormalMap", bindTexture(material->normalMap));
-			shader->setUniformi("UseNormalMap", 1);
+			shaderMaterialData.hasNormalMap = 1;
 		} else
-			shader->setUniformi("UseNormalMap", 0);
+			shaderMaterialData.hasNormalMap = 0;
 
 		if (material->parallaxMap) {
 			shader->setUniformi("Material_ParallaxMap", bindTexture(material->parallaxMap));
-			shader->setUniformf("Material_ParallaxScale", material->parallaxScale);
-			shader->setUniformi("UseParallaxMap", 1);
+			shaderMaterialData.parallaxScale = material->parallaxScale;
+			shaderMaterialData.hasParallaxMap = 1;
 		} else
-			shader->setUniformi("UseParallaxMap", 0);
+			shaderMaterialData.hasParallaxMap = 0;
 
-		shader->setUniformf("Material_Shininess", material->shininess);
+		shaderMaterialData.shininess = material->shininess;
 	}
+
+	//Update the material UBO
+	uboMaterial->update(&shaderMaterialData, 0, sizeof(ShaderMaterialData));
 }
 
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
@@ -217,7 +239,8 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 			if (mesh->hasSkeleton()) {
 				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); i++)
-					shader->setUniformMatrix4("Bones[" + utils_string::str(i) + "]", mesh->getSkeleton()->getBone(i)->getFinalTransform());
+					shaderSkinningData.bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
+				uboSkinning->update(&shaderSkinningData, 0, sizeof(ShaderSkinningData));
 				shader->setUniformi("UseSkinning", 1);
 			} else
 				shader->setUniformi("UseSkinning", 0);
@@ -264,6 +287,7 @@ void Renderer::render(FramebufferStore* texture, Shader* shader) {
 }
 
 void Renderer::destroy() {
+	delete uboMaterial;
 	delete screenTextureMesh;
 }
 
@@ -276,11 +300,8 @@ Shader* Renderer::loadEngineShader(std::string path) {
 void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 	shader->use();
 	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == SHADER_PBR_LIGHTING || id == SHADER_PBR_DEFERRED_LIGHTING) {
-		shader->addUniform("UseNormalMap", "ue_useNormalMap");
-
 		shader->addUniform("UseShadowMap", "ue_useShadowMap");
 		shader->addUniform("ShadowMap", "ue_shadowMap");
-		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
 
 		for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_SET; i++) {
 			shader->addUniform("LightSpaceMatrix["     + str(i) + "]", "ue_lightSpaceMatrix[" + str(i) + "]");
@@ -319,11 +340,8 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 void Renderer::prepareDeferredGeomShader(std::string id, Shader* shader) {
 	shader->use();
 	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_PBR_LIGHTING) {
-		shader->addUniform("UseNormalMap", "ue_useNormalMap");
-
 		shader->addUniform("UseShadowMap", "ue_useShadowMap");
 		shader->addUniform("ShadowMap", "ue_shadowMap");
-		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
 
 		for (unsigned int i = 0; i < Skeleton::SKINNING_MAX_BONES; ++i)
 			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");

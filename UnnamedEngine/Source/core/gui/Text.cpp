@@ -92,7 +92,6 @@ void Text::update(Vector3f position) {
 
 void Text::render() {
 	if (billboarded) {
-		std::cout << "RENDER" << std::endl;
 		Shader* shader = getShader();
 		shader->use();
 

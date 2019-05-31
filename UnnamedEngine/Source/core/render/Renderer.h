@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include "Camera.h"
 #include "FBO.h"
+#include "UBO.h"
 
 /*****************************************************************************
  * The Renderer class contains everything need to render a Mesh
@@ -29,6 +30,39 @@
 
 class Renderer {
 private:
+	struct ShaderMaterialData {
+		Vector4f ambientColour;
+		Vector4f diffuseColour;
+		Vector4f specularColour;
+
+		int hasAmbientTexture;
+		int hasDiffuseTexture;
+		int diffuseTextureSRGB;
+		int hasSpecularTexture;
+		int hasShininessTexture;
+		int hasNormalMap;
+		int hasParallaxMap;
+
+		float parallaxScale;
+		float shininess;
+	};
+
+	static ShaderMaterialData shaderMaterialData;
+
+	static UBO* uboMaterial;
+
+	struct ShaderSkinningData {
+		Matrix4f bones[Skeleton::SKINNING_MAX_BONES];
+	};
+
+	static ShaderSkinningData shaderSkinningData;
+
+	static UBO* uboSkinning;
+
+	/* Block binding locations for UBO's */
+	static const unsigned int SHADER_UBO_BINDING_LOCATION_MATERIAL;
+	static const unsigned int SHADER_UBO_BINDING_LOCATION_SKINNING;
+
 	static std::vector<Camera*> cameras;
 	static std::vector<Texture*> boundTextures;
 	static std::unordered_map<std::string, RenderShader*> renderShaders;
