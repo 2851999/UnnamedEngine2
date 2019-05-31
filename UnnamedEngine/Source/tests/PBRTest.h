@@ -52,10 +52,11 @@ public:
 };
 
 void Test::onInitialise() {
-	getSettings().videoVSync = false;
+	getSettings().videoVSync = true;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
-//	getSettings().videoResolution = VideoResolution::RES_1080P;
+//	getSettings().videoResolution = VideoResolution::RES_1440p;
+//	getSettings().videoRefreshRate = 144;
 //	getSettings().windowFullscreen = true;
 
 	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
@@ -63,6 +64,11 @@ void Test::onInitialise() {
 
 void Test::onCreated() {
 	Logger::stopFileOutput();
+
+//	GLint num;
+//	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &num);
+//	std::cout << num << std::endl;
+
 //	GLint num;
 //	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &num);
 //	std::cout << num << std::endl;

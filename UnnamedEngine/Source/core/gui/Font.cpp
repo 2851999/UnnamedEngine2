@@ -197,8 +197,8 @@ float Font::getHeight(std::string text) {
 	for (unsigned int i = 0; i < text.length(); i++) {
 		//Check for a new line escape character
 		if (text.compare(i, 1, "\n") == 0) {
-			lineHeight = 0;
 			height += lineHeight;
+			lineHeight = 0;
 		} else {
 			//Get the character data for the current character
 			GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
