@@ -97,7 +97,7 @@ void Light::update() {
 	}
 }
 
-void Light::setUniforms(Renderer::ShaderLightData& lightData) {
+void Light::setUniforms(ShaderStruct_Light& lightData) {
 	lightData.type = type;
 	lightData.position = Vector4f(getPosition(), 0.0f);
 	lightData.direction = Vector4f(direction, 0.0f);

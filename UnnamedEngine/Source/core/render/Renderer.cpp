@@ -27,18 +27,12 @@
  * The Renderer class
  *****************************************************************************/
 
-Renderer::ShaderMaterialData Renderer::shaderMaterialData;
-Renderer::ShaderSkinningData Renderer::shaderSkinningData;
+ShaderInterface* Renderer::shaderInterface;
+ShaderBlock_Material Renderer::shaderMaterialData;
+UBO* Renderer::shaderMaterialUBO;
 
-UBO* Renderer::uboMaterial;
-UBO* Renderer::uboSkinning;
-UBO* Renderer::uboLights;
-
-Renderer::ShaderLightsData Renderer::lightsData;
-
-const unsigned int Renderer::SHADER_UBO_BINDING_LOCATION_MATERIAL = 2;
-const unsigned int Renderer::SHADER_UBO_BINDING_LOCATION_SKINNING = 3;
-const unsigned int Renderer::SHADER_UBO_BINDING_LOCATION_LIGHTS = 4;
+ShaderBlock_Skinning Renderer::shaderSkinningData;
+UBO* Renderer::shaderSkinningUBO;
 
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
@@ -130,9 +124,9 @@ void Renderer::initialise() {
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the UBOs
-	uboMaterial = new UBO(NULL, sizeof(ShaderMaterialData), GL_DYNAMIC_DRAW, SHADER_UBO_BINDING_LOCATION_MATERIAL);
-	uboSkinning = new UBO(NULL, sizeof(ShaderSkinningData), GL_DYNAMIC_DRAW, SHADER_UBO_BINDING_LOCATION_SKINNING);
-	uboLights = new UBO(NULL, sizeof(ShaderLightsData), GL_DYNAMIC_DRAW, SHADER_UBO_BINDING_LOCATION_LIGHTS);
+	shaderInterface = new ShaderInterface();
+	shaderMaterialUBO = shaderInterface->getUBO(ShaderInterface::BLOCK_MATERIAL);
+	shaderSkinningUBO = shaderInterface->getUBO(ShaderInterface::BLOCK_SKINNING);
 
 	//Setup the shaders
 	addRenderShader(SHADER_MATERIAL,              loadEngineShader("MaterialShader"),                   NULL);
@@ -219,7 +213,7 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 	}
 
 	//Update the material UBO
-	uboMaterial->update(&shaderMaterialData, 0, sizeof(ShaderMaterialData));
+	shaderMaterialUBO->update(&shaderMaterialData, 0, sizeof(ShaderBlock_Material));
 }
 
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
@@ -245,7 +239,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			if (mesh->hasSkeleton()) {
 				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); i++)
 					shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
-				uboSkinning->update(&shaderSkinningData, 0, sizeof(ShaderSkinningData));
+				shaderSkinningUBO->update(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
 				shader->setUniformi("UseSkinning", 1);
 			} else
 				shader->setUniformi("UseSkinning", 0);
@@ -292,9 +286,7 @@ void Renderer::render(FramebufferStore* texture, Shader* shader) {
 }
 
 void Renderer::destroy() {
-	delete uboMaterial;
-	delete uboSkinning;
-	delete uboLights;
+	delete shaderInterface;
 	delete screenTextureMesh;
 }
 

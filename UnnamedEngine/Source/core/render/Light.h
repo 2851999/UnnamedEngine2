@@ -84,7 +84,7 @@ public:
 	void update();
 
 	/* The method called to assign the uniforms in a shader for this light */
-	virtual void setUniforms(Renderer::ShaderLightData& lightData);
+	virtual void setUniforms(ShaderStruct_Light& lightData);
 
 	/* Setters and getters */
 	inline Light* setType(unsigned int type) { this->type = type; return this; }

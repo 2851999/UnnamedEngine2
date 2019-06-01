@@ -81,6 +81,12 @@ private:
 	/* States whether the scene should be rendered in wireframe mode */
 	bool renderWireframe = false;
 
+	/* The lighting data UBO for the shaders */
+	UBO* shaderLightingUBO;
+
+	/* The structure used to update the lighting data UBO */
+	ShaderBlock_Lighting shaderLightingData;
+
 	/* Methods used before and after actual rendering of the scene when using forward rendering to handle the
 	 * framebuffers/gamma correction */
 	void forwardPreRender();
