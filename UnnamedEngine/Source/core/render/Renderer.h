@@ -52,7 +52,7 @@ private:
 	static UBO* uboMaterial;
 
 	struct ShaderSkinningData {
-		Matrix4f bones[Skeleton::SKINNING_MAX_BONES];
+		Matrix4f ue_bones[Skeleton::SKINNING_MAX_BONES];
 	};
 
 	static ShaderSkinningData shaderSkinningData;
@@ -62,6 +62,7 @@ private:
 	/* Block binding locations for UBO's */
 	static const unsigned int SHADER_UBO_BINDING_LOCATION_MATERIAL;
 	static const unsigned int SHADER_UBO_BINDING_LOCATION_SKINNING;
+	static const unsigned int SHADER_UBO_BINDING_LOCATION_LIGHTS;
 
 	static std::vector<Camera*> cameras;
 	static std::vector<Texture*> boundTextures;
@@ -102,6 +103,40 @@ public:
 	static const std::string SHADER_PBR_BRDF_INTEGRATION_MAP_GEN;
 	static const std::string SHADER_PBR_LIGHTING;
 	static const std::string SHADER_PBR_DEFERRED_LIGHTING;
+
+	//https://stackoverflow.com/questions/7451476/opengl-uniform-buffer-std140-layout-a-driver-bug-or-did-i-misunderstand-the-spe
+	struct ShaderLightData {
+		int type;
+		float padding1[3];
+
+		Vector4f position;
+		Vector4f direction;
+		Vector4f diffuseColour;
+		Vector4f specularColour;
+
+		float constant;
+
+		float linear;
+		float quadratic;
+
+		float innerCutoff;
+		float outerCutoff;
+
+		int useShadowMap;
+		float padding2[2];
+	};
+
+	struct ShaderLightsData {
+		ShaderLightData ue_lights[6];
+		Matrix4f ue_lightSpaceMatrix[6];
+
+		Vector4f ue_lightAmbient;
+		int ue_numLights;
+	};
+
+	static ShaderLightsData lightsData;
+
+	static UBO* uboLights;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

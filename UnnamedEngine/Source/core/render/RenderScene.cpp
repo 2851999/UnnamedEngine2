@@ -112,7 +112,7 @@ void RenderScene3D::render() {
 				//Use the shader
 				shader->use();
 
-				shader->setUniformi("NumLights", 0);
+				Renderer::lightsData.ue_numLights = 0;
 				shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
 
 				//Go through all of the objects in the current batch
@@ -247,7 +247,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 	} else {
 		//Assign the shader uniforms only needed for 'normal' phong shading that don't need information from the
 		//model or current light
-		shader->setUniformColourRGB("LightAmbient", ambientLight);
+		Renderer::lightsData.ue_lightAmbient = Vector4f(ambientLight, 0.0f);
 	}
 
 	//Also check for deferred rendering
@@ -282,7 +282,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			if (pbr)
 				shader->setUniformi("UseAmbient", 0);
 			else
-				shader->setUniformColourRGB("LightAmbient", Colour(0.0f, 0.0f, 0.0f));
+				Renderer::lightsData.ue_lightAmbient = Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
 
 			//Setup blending
 			glEnable(GL_BLEND);
@@ -292,7 +292,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 		}
 
 		//Assign the number of lights that will be rendered in this set
-		shader->setUniformi("NumLights", uniformNumLights);
+		Renderer::lightsData.ue_numLights = uniformNumLights;
 
 		//The light number in the current set
 		unsigned int lightIndexInSet;
@@ -302,19 +302,21 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			//Calculate the index of the current light as it will appear in the shader
 			lightIndexInSet = l - s;
 			//Assign the uniforms for the current light
-			lights[l]->setUniforms(shader, "[" + utils_string::str(lightIndexInSet) + "]");
+			lights[l]->setUniforms(Renderer::lightsData.ue_lights[lightIndexInSet]);
 
 			//Assign the data for shadow mapping
 			if (lights[l]->hasDepthBuffer()) {
-				shader->setUniformMatrix4("LightSpaceMatrix[" + utils_string::str(lightIndexInSet) + "]", lights[l]->getLightSpaceMatrix());
+				Renderer::lightsData.ue_lightSpaceMatrix[lightIndexInSet] = lights[l]->getLightSpaceMatrix();
 				if (lights[l]->getType() == Light::TYPE_POINT)
 					shader->setUniformi("Light_ShadowCubemap[" + utils_string::str(lightIndexInSet) + "]", Renderer::bindTexture(lights[l]->getDepthBuffer()->getFramebufferStore(0))); //((Camera3D*)Renderer::getCamera())->getSkyBox()->getCubemap())
 				else
 					shader->setUniformi("Light_ShadowMap[" + utils_string::str(lightIndexInSet) + "]", Renderer::bindTexture(lights[l]->getDepthBuffer()->getFramebufferStore(0)));
-				shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightIndexInSet) + "]", 1);
+				Renderer::lightsData.ue_lights[lightIndexInSet].useShadowMap = 1;
 			} else
-				shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightIndexInSet) + "]", 0);
+				Renderer::lightsData.ue_lights[lightIndexInSet].useShadowMap = 0;
 		}
+
+		Renderer::uboLights->update(&Renderer::lightsData, 0, sizeof(Renderer::ShaderLightsData));
 
 		//Now check whether forward or deferred rendering
 		if (deferredRendering)

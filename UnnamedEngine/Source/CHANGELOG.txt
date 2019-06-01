@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 3 | Experimental 2
+
+* Changed rendering of lighting to use UBOs
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 3 | Experimental 1
 
 * Added UBO

@@ -55,9 +55,9 @@ void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
-//	getSettings().videoResolution = VideoResolution::RES_1440p;
-//	getSettings().videoRefreshRate = 144;
-//	getSettings().windowFullscreen = true;
+	getSettings().videoResolution = VideoResolution::RES_1440p;
+	getSettings().videoRefreshRate = 144;
+	getSettings().windowFullscreen = true;
 
 	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
 }

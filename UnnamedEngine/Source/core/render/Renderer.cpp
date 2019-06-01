@@ -32,9 +32,13 @@ Renderer::ShaderSkinningData Renderer::shaderSkinningData;
 
 UBO* Renderer::uboMaterial;
 UBO* Renderer::uboSkinning;
+UBO* Renderer::uboLights;
+
+Renderer::ShaderLightsData Renderer::lightsData;
 
 const unsigned int Renderer::SHADER_UBO_BINDING_LOCATION_MATERIAL = 2;
 const unsigned int Renderer::SHADER_UBO_BINDING_LOCATION_SKINNING = 3;
+const unsigned int Renderer::SHADER_UBO_BINDING_LOCATION_LIGHTS = 4;
 
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
@@ -128,6 +132,7 @@ void Renderer::initialise() {
 	//Setup the UBOs
 	uboMaterial = new UBO(NULL, sizeof(ShaderMaterialData), GL_DYNAMIC_DRAW, SHADER_UBO_BINDING_LOCATION_MATERIAL);
 	uboSkinning = new UBO(NULL, sizeof(ShaderSkinningData), GL_DYNAMIC_DRAW, SHADER_UBO_BINDING_LOCATION_SKINNING);
+	uboLights = new UBO(NULL, sizeof(ShaderLightsData), GL_DYNAMIC_DRAW, SHADER_UBO_BINDING_LOCATION_LIGHTS);
 
 	//Setup the shaders
 	addRenderShader(SHADER_MATERIAL,              loadEngineShader("MaterialShader"),                   NULL);
@@ -239,7 +244,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 			if (mesh->hasSkeleton()) {
 				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); i++)
-					shaderSkinningData.bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
+					shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
 				uboSkinning->update(&shaderSkinningData, 0, sizeof(ShaderSkinningData));
 				shader->setUniformi("UseSkinning", 1);
 			} else
@@ -288,6 +293,8 @@ void Renderer::render(FramebufferStore* texture, Shader* shader) {
 
 void Renderer::destroy() {
 	delete uboMaterial;
+	delete uboSkinning;
+	delete uboLights;
 	delete screenTextureMesh;
 }
 
@@ -300,38 +307,17 @@ Shader* Renderer::loadEngineShader(std::string path) {
 void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 	shader->use();
 	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == SHADER_PBR_LIGHTING || id == SHADER_PBR_DEFERRED_LIGHTING) {
-		shader->addUniform("UseShadowMap", "ue_useShadowMap");
 		shader->addUniform("ShadowMap", "ue_shadowMap");
 
 		for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_SET; i++) {
-			shader->addUniform("LightSpaceMatrix["     + str(i) + "]", "ue_lightSpaceMatrix[" + str(i) + "]");
-			shader->addUniform("Light_Type["           + str(i) + "]", "ue_lights[" + str(i) + "].type");
-			shader->addUniform("Light_Position["       + str(i) + "]", "ue_lights[" + str(i) + "].position");
-			shader->addUniform("Light_Direction["      + str(i) + "]", "ue_lights[" + str(i) + "].direction");
-			shader->addUniform("Light_DiffuseColour["  + str(i) + "]", "ue_lights[" + str(i) + "].diffuseColour");
-			shader->addUniform("Light_SpecularColour[" + str(i) + "]", "ue_lights[" + str(i) + "].specularColour");
-			shader->addUniform("Light_Constant["       + str(i) + "]", "ue_lights[" + str(i) + "].constant");
-			shader->addUniform("Light_Linear["         + str(i) + "]", "ue_lights[" + str(i) + "].linear");
-			shader->addUniform("Light_Quadratic["      + str(i) + "]", "ue_lights[" + str(i) + "].quadratic");
-			shader->addUniform("Light_InnerCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].innerCutoff");
-			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].outerCutoff");
-			shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lights[" + str(i) + "].shadowMap");
-			shader->addUniform("Light_ShadowCubemap["  + str(i) + "]", "ue_lights[" + str(i) + "].shadowCubemap");
-			shader->addUniform("Light_UseShadowMap["   + str(i) + "]", "ue_lights[" + str(i) + "].useShadowMap");
+			shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lightsTextures[" + str(i) + "].shadowMap");
+			shader->addUniform("Light_ShadowCubemap["  + str(i) + "]", "ue_lightsTextures[" + str(i) + "].shadowCubemap");
 		}
 
-		for (unsigned int i = 0; i < Skeleton::SKINNING_MAX_BONES; ++i)
-			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
-
-		shader->addUniform("NumLights", "ue_numLights");
-		shader->addUniform("LightAmbient", "ue_lightAmbient");
 		shader->addUniform("CameraPosition", "ue_cameraPosition");
 
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");
 		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
-	} else if (id == SHADER_SHADOW_MAP || id == SHADER_SHADOW_CUBEMAP) {
-		for (unsigned int i = 0; i < Skeleton::SKINNING_MAX_BONES; ++i)
-			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
 	}
 
 	shader->stopUsing();
@@ -340,14 +326,8 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 void Renderer::prepareDeferredGeomShader(std::string id, Shader* shader) {
 	shader->use();
 	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_PBR_LIGHTING) {
-		shader->addUniform("UseShadowMap", "ue_useShadowMap");
 		shader->addUniform("ShadowMap", "ue_shadowMap");
 
-		for (unsigned int i = 0; i < Skeleton::SKINNING_MAX_BONES; ++i)
-			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
-
-		shader->addUniform("NumLights", "ue_numLights");
-		shader->addUniform("LightAmbient", "ue_lightAmbient");
 		shader->addUniform("CameraPosition", "ue_cameraPosition");
 
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");

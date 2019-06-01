@@ -1,11 +1,7 @@
 #include "../Core.vs"
 #include "../Material.glsl"
 #include "../Skinning.vs"
-
-#define MAX_LIGHTS 6
-
-uniform mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
-uniform int ue_numLights;
+#include "Lighting.glsl"
 
 out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 out mat3 ue_frag_tbnMatrix;
