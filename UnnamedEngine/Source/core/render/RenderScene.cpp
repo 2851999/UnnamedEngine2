@@ -116,7 +116,7 @@ void RenderScene3D::render() {
 				shader->use();
 
 				shaderLightingData.ue_numLights = 0;
-				shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+				Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
 
 				//Go through all of the objects in the current batch
 				for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
@@ -127,8 +127,8 @@ void RenderScene3D::render() {
 					Matrix4f modelMatrix = object->getModelMatrix();
 
 					//Assign the required matrix uniforms for the object
-					shader->setUniformMatrix4("ModelMatrix", modelMatrix);
-					shader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
+					Renderer::getShaderBlock_Core().ue_modelMatrix = modelMatrix;
+					Renderer::getShaderBlock_Core().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
 
 					//Render the object with the geometry shader
 					object->render();
@@ -234,7 +234,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 	shader->use();
 
 	//Assign any uniforms that are needed for all kinds of lighting
-	shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+	Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
 
 	//Check whether using PBR or phong lighting
 	if (pbr) {
@@ -332,8 +332,8 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 				Matrix4f modelMatrix = batches[indexOfBatch].objects[j]->getModelMatrix();
 
 				//Assign the required matrix uniforms for the object
-				shader->setUniformMatrix4("ModelMatrix", modelMatrix);
-				shader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
+				Renderer::getShaderBlock_Core().ue_modelMatrix = modelMatrix;
+				Renderer::getShaderBlock_Core().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
 
 				//Render the object with the shadow map shader
 				batches[indexOfBatch].objects[j]->render();
@@ -405,7 +405,7 @@ void RenderScene3D::renderShadowMap(Light* light) {
 			if (! culling || ! object->shouldCull(light->getFrustum()) || light->getType() == Light::TYPE_POINT) {
 				//Assign the required uniforms that could not have been done outside of the loop
 				if (light->getType() == Light::TYPE_POINT) {
-					shadowCubemapShader->setUniformMatrix4("ModelMatrix", object->getModelMatrix());
+					Renderer::getShaderBlock_Core().ue_modelMatrix = object->getModelMatrix();
 					//Ensure the object uses the shadow map shader to render
 					object->getRenderShader()->addForwardShader(shadowCubemapShader);
 				} else {

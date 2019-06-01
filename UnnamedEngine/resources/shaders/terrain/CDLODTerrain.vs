@@ -55,7 +55,7 @@ vec3 ueTerrainCalculateWorldPosition(vec3 position, vec3 translation, float scal
 
 	float height = ueTerrainGetHeight(worldPosition.xz);
 	worldPosition.y = height;
-	float dist = distance(ue_cameraPosition, worldPosition);
+	float dist = distance(ue_cameraPosition.xyz, worldPosition);
 	float nextLevelThreshold = ((ue_range - dist) / scale);
 	float morphK = 1.0 - smoothstep(morphStart, morphEnd, nextLevelThreshold);
 	worldPosition.xz = ueTerrainMorphVertex(position.xz, worldPosition.xz, morphK);

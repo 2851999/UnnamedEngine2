@@ -23,7 +23,7 @@ vec3 ueCalculateLight(UELight light, vec3 lightDirection, vec3 diffuseColour, ve
 	float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
 	vec3 diffuseLight = diffuseStrength * (light.diffuseColour.xyz * diffuseColour);
 	
-	vec3 viewDirection = normalize(ue_cameraPosition - fragPos);
+	vec3 viewDirection = normalize(ue_cameraPosition.xyz - fragPos);
 	vec3 halfwayDirection = normalize(lightDirection + viewDirection);
 	
 	float specularStrength = pow(max(dot(normal, halfwayDirection), 0.0), matShininess);
@@ -141,7 +141,7 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 	vec3 otherLight = vec3(0.0);
 	
 	if (ue_useEnvironmentMap) {
-		vec3 I = normalize(fragPos - ue_cameraPosition);
+		vec3 I = normalize(fragPos - ue_cameraPosition.xyz);
 		vec3 R = reflect(I, normalize(normal));
 		
 		ambientColour *= texture(ue_environmentMap, R).rgb;
@@ -159,7 +159,7 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
 		} else if (ue_lights[i].type == 2) {
 			if (ue_lights[i].useShadowMap)
-				otherLight += ueCalculatePointLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess)* (1.0 - ueCalculatePointShadow(ue_lights[i], ue_lightsTextures[i], fragPos, ue_cameraPosition));
+				otherLight += ueCalculatePointLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess)* (1.0 - ueCalculatePointShadow(ue_lights[i], ue_lightsTextures[i], fragPos, ue_cameraPosition.xyz));
 			else
 				otherLight += ueCalculatePointLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
 		} else if (ue_lights[i].type == 3)

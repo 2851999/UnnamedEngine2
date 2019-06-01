@@ -93,7 +93,7 @@ void CDLODTerrain::render() {
 
 //	shader->setUniformi("NumLights", 1);
 //	shader->setUniformColourRGB("Light_Ambient", Colour(0.1f, 0.1f, 0.1f));
-//	shader->setUniformVector3("Camera_Position", ((Camera3D*) Renderer::getCamera())->getPosition());
+	Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f); //Required unless added to RenderScene3D?
 //	shader->setUniformi("UseEnvironmentMap", 0);
 //	shader->setUniformi("UseShadowMap", 0);
 //

@@ -28,6 +28,10 @@
  *****************************************************************************/
 
 ShaderInterface* Renderer::shaderInterface;
+
+ShaderBlock_Core Renderer::shaderCoreData;
+UBO* Renderer::shaderCoreUBO;
+
 ShaderBlock_Material Renderer::shaderMaterialData;
 UBO* Renderer::shaderMaterialUBO;
 
@@ -125,6 +129,7 @@ void Renderer::initialise() {
 
 	//Setup the UBOs
 	shaderInterface = new ShaderInterface();
+	shaderCoreUBO = shaderInterface->getUBO(ShaderInterface::BLOCK_CORE);
 	shaderMaterialUBO = shaderInterface->getUBO(ShaderInterface::BLOCK_MATERIAL);
 	shaderSkinningUBO = shaderInterface->getUBO(ShaderInterface::BLOCK_SKINNING);
 
@@ -202,7 +207,8 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 //			if (iterator.first == "MVPMatrix")
 //				shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
 //		}
-		shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
+		shaderCoreData.ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
+		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
 		if (mesh->hasData() && mesh->hasRenderData()) {
 			MeshData* data = mesh->getData();
 			MeshRenderData* renderData = mesh->getRenderData();
@@ -277,8 +283,6 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 			shader->addUniform("Light_ShadowCubemap["  + str(i) + "]", "ue_lightsTextures[" + str(i) + "].shadowCubemap");
 		}
 
-		shader->addUniform("CameraPosition", "ue_cameraPosition");
-
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");
 		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
 	}
@@ -290,8 +294,6 @@ void Renderer::prepareDeferredGeomShader(std::string id, Shader* shader) {
 	shader->use();
 	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_PBR_LIGHTING) {
 		shader->addUniform("ShadowMap", "ue_shadowMap");
-
-		shader->addUniform("CameraPosition", "ue_cameraPosition");
 
 		shader->addUniform("EnvironmentMap", "ue_environmentMap");
 		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");

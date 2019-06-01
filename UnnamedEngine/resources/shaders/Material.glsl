@@ -33,7 +33,7 @@ struct UEMaterialTextures {
 	sampler2D parallaxMap;
 };
 
-/* The material instance */
+/* The material data */
 layout (std140, binding = 2) uniform UEMaterialData {
 	UEMaterial ue_material;
 };

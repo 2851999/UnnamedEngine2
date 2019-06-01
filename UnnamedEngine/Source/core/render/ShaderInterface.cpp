@@ -25,17 +25,20 @@
  *****************************************************************************/
 
 /* The ids for particular shader blocks */
+const std::string ShaderInterface::BLOCK_CORE     = "Core";
 const std::string ShaderInterface::BLOCK_MATERIAL = "Material";
 const std::string ShaderInterface::BLOCK_SKINNING = "Skinning";
 const std::string ShaderInterface::BLOCK_LIGHTING = "Lighting";
 
 /* Binding locations for shader blocks */
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_CORE     = 1;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_MATERIAL = 2;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SKINNING = 3;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_LIGHTING = 4;
 
 ShaderInterface::ShaderInterface() {
 	//Add all required UBOs for the default shaders
+	add(BLOCK_CORE,     new UBO(NULL, sizeof(ShaderBlock_Core),     GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_CORE));
 	add(BLOCK_MATERIAL, new UBO(NULL, sizeof(ShaderBlock_Material), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_MATERIAL));
 	add(BLOCK_SKINNING, new UBO(NULL, sizeof(ShaderBlock_Skinning), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_SKINNING));
 	add(BLOCK_LIGHTING, new UBO(NULL, sizeof(ShaderBlock_Lighting), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_LIGHTING));

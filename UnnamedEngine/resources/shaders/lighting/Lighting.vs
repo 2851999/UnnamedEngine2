@@ -11,15 +11,16 @@ out vec3 ue_tangentFragPos;
 
 void ueAssignLightingData() {
 	mat4 boneTransform;
+	mat3 normalMatrix = mat3(ue_normalMatrix);
 	if (ue_useSkinning) {
 		boneTransform = ueGetBoneTransform();
 		
 		ue_frag_position = vec3(ue_modelMatrix * boneTransform * vec4(ue_position, 1.0));
 		
-		ue_frag_normal = ue_normalMatrix * vec3(boneTransform * vec4(ue_normal, 0.0));
+		ue_frag_normal = normalMatrix * vec3(boneTransform * vec4(ue_normal, 0.0));
 	} else {
 		ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
-		ue_frag_normal = ue_normalMatrix * ue_normal;
+		ue_frag_normal = normalMatrix * ue_normal;
 	}
 	
 	for (int i = 0; i < ue_numLights; i++)
@@ -30,18 +31,18 @@ void ueAssignLightingData() {
 		vec3 B;
 		
 		if (ue_useSkinning) {
-			T = normalize(ue_normalMatrix * vec3(boneTransform * vec4(ue_tangent, 0.0)));
-			B = normalize(ue_normalMatrix * vec3(boneTransform * vec4(ue_bitangent, 0.0)));
+			T = normalize(normalMatrix * vec3(boneTransform * vec4(ue_tangent, 0.0)));
+			B = normalize(normalMatrix * vec3(boneTransform * vec4(ue_bitangent, 0.0)));
 		} else {
-			T = normalize(ue_normalMatrix * ue_tangent);
-			B = normalize(ue_normalMatrix * ue_bitangent);
+			T = normalize(normalMatrix * ue_tangent);
+			B = normalize(normalMatrix * ue_bitangent);
 		}
 		vec3 N = normalize(ue_frag_normal);
 	
 		ue_frag_tbnMatrix = mat3(-T, B, N);
 		
 		if (ue_material.hasParallaxMap) {
-			ue_tangentViewPos = transpose(ue_frag_tbnMatrix) * ue_cameraPosition;
+			ue_tangentViewPos = transpose(ue_frag_tbnMatrix) * ue_cameraPosition.xyz;
 			ue_tangentFragPos = transpose(ue_frag_tbnMatrix) * ue_frag_position;
 		}
 	}

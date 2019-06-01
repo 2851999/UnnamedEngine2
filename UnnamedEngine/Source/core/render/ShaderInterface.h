@@ -28,6 +28,16 @@
 
 //https://stackoverflow.com/questions/7451476/opengl-uniform-buffer-std140-layout-a-driver-bug-or-did-i-misunderstand-the-spe
 
+struct ShaderBlock_Core {
+	Matrix4f ue_mvpMatrix;
+	Matrix4f ue_modelMatrix;
+	Matrix4f ue_viewMatrix;
+	Matrix4f ue_projectionMatrix;
+	Matrix4f ue_normalMatrix;
+
+	Vector4f ue_cameraPosition;
+};
+
 struct ShaderBlock_Material {
 	Vector4f ambientColour;
 	Vector4f diffuseColour;
@@ -88,11 +98,13 @@ private:
 	std::unordered_map<std::string, UBO*> ubos;
 public:
 	/* The ids for particular shader blocks */
+	static const std::string BLOCK_CORE;
 	static const std::string BLOCK_MATERIAL;
 	static const std::string BLOCK_SKINNING;
 	static const std::string BLOCK_LIGHTING;
 
 	/* Binding locations for shader blocks */
+	static const unsigned int UBO_BINDING_LOCATION_CORE;
 	static const unsigned int UBO_BINDING_LOCATION_MATERIAL;
 	static const unsigned int UBO_BINDING_LOCATION_SKINNING;
 	static const unsigned int UBO_BINDING_LOCATION_LIGHTING;

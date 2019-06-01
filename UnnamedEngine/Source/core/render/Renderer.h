@@ -32,11 +32,14 @@
 class Renderer {
 private:
 	static ShaderInterface* shaderInterface;
+
+	static ShaderBlock_Core shaderCoreData;
+	static UBO* shaderCoreUBO;
+
 	static ShaderBlock_Material shaderMaterialData;
 	static UBO* shaderMaterialUBO;
 
 	static ShaderBlock_Skinning shaderSkinningData;
-
 	static UBO* shaderSkinningUBO;
 
 	static std::vector<Camera*> cameras;
@@ -150,6 +153,9 @@ public:
 
 	/* Returns the screen texture mesh */
 	static inline MeshRenderData* getScreenTextureMesh() { return screenTextureMesh; }
+
+	/* Returns a reference to the data for the core UBO */
+	static inline ShaderBlock_Core& getShaderBlock_Core() { return shaderCoreData; }
 };
 
 #endif /* CORE_RENDER_RENDERER_H_ */
