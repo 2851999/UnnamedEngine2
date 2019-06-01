@@ -113,9 +113,9 @@ void Text::render() {
 
 void Text::setFont(Font* font) {
 	this->font = font;
-	getMaterial()->diffuseTexture = font->getTexture();
+	getMaterial()->setDiffuse(font->getTexture());
 }
 
 void Text::setColour(Colour colour) {
-	getMaterial()->diffuseColour = colour;
+	getMaterial()->setDiffuse(colour);
 }

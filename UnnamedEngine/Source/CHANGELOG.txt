@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 3 | Experimental 4
+
+* Changed Material so variables are no longer public (use
+  methods to access instead) allowing faster transfer of data
+  using UBO's
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 3 | Experimental 3
 
 * Added ShaderInterface

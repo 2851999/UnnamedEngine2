@@ -82,7 +82,7 @@ public:
 	void setColour(Colour colour);
 
 	inline Font* getFont() { return font; }
-	inline Colour getColour() { return getMaterial()->diffuseColour; }
+	inline Colour getColour() { return getMaterial()->getDiffuseColour(); }
 };
 
 #endif /* CORE_GUI_TEXT_H_ */

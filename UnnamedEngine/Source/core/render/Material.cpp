@@ -23,17 +23,23 @@
  ******************************************************************************/
 
 void Material::setDefault(bool pbr) {
+	setAmbient(NULL);
+	setDiffuse(NULL);
+	setSpecular(NULL);
+	setNormalMap(NULL);
+	setParallaxMap(NULL);
+
 	if (! pbr) {
-		ambientColour  = Colour(0.1f, 0.1f, 0.1f);
-		diffuseColour  = Colour::WHITE;
-		specularColour = Colour::WHITE;
-		shininess = 32.0f;
+		shaderData.ambientColour  = Colour(0.1f, 0.1f, 0.1f);
+		shaderData.diffuseColour  = Colour::WHITE;
+		shaderData.specularColour = Colour::WHITE;
+		shaderData.shininess = 32.0f;
 	} else {
-		ambientColour  = Colour(0.0f);
-		diffuseColour  = Colour::WHITE;
-		specularColour = Colour(1.0f);
-		shininess = 0.0f;
+		shaderData.ambientColour  = Colour(0.0f);
+		shaderData.diffuseColour  = Colour::WHITE;
+		shaderData.specularColour = Colour(1.0f);
+		shaderData.shininess = 0.0f;
 	}
 
-	parallaxScale = 0.05f;
+	shaderData.parallaxScale = 0.05f;
 }

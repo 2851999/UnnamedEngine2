@@ -32,8 +32,8 @@ GameOverMenu::GameOverMenu(AsteroidsGame* game, Player* player) : game(game), pl
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
 	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
-	background->getMaterial()->diffuseTexture = backgroundTexture;
-	background->getMaterial()->diffuseColour = Colour(1.0f, 1.0f, 1.0f, 0.8f);
+	background->getMaterial()->setDiffuse(backgroundTexture);
+	background->getMaterial()->setDiffuse(Colour(1.0f, 1.0f, 1.0f, 0.8f));
 	background->update();
 
 	buttonExit = new GUIButton("Exit", 400, 30, game->getResources().getTexturesButtons());

@@ -99,7 +99,7 @@ void TextureAnimation2D::onStart() {
 	//Assign the texture in the entity
 	if (sprite) {
 		//Assign the texture
-		sprite->getMaterial()->diffuseTexture = textureAtlas->getTexture();
+		sprite->getMaterial()->setDiffuse(textureAtlas->getTexture());
 		//Assign the texture for the first frame
 		sprite->setTextureCoords(textureAtlas, currentFrame);
 	}
@@ -128,28 +128,28 @@ void Sprite::setup(Texture* texture) {
 	setWidth(texture->getWidth());
 	setHeight(texture->getHeight());
 	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
-	getMaterial()->diffuseTexture = texture;
+	getMaterial()->setDiffuse(texture);
 }
 
 void Sprite::setup(Texture* texture, float width, float height) {
 	setWidth(width);
 	setHeight(height);
 	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
-	getMaterial()->diffuseTexture = texture;
+	getMaterial()->setDiffuse(texture);
 }
 
 void Sprite::setup(TextureAtlas* textureAtlas) {
 	setWidth(textureAtlas->getSubTextureWidth());
 	setHeight(textureAtlas->getSubTextureHeight());
 	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), textureAtlas->getTexture(), MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
-	getMaterial()->diffuseTexture = textureAtlas->getTexture();
+	getMaterial()->setDiffuse(textureAtlas->getTexture());
 }
 
 void Sprite::setup(TextureAtlas* textureAtlas, float width, float height) {
 	setWidth(width);
 	setHeight(height);
 	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), textureAtlas->getTexture(), MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
-	getMaterial()->diffuseTexture = textureAtlas->getTexture();
+	getMaterial()->setDiffuse(textureAtlas->getTexture());
 }
 
 void Sprite::update(float deltaSeconds) {

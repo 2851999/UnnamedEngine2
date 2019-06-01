@@ -167,53 +167,24 @@ void Renderer::assignMatTexture(Shader* shader, std::string type, Texture* textu
 	if (texture)
 		//Bind the texture
 		shader->setUniformi("Material_" + type, bindTexture(texture));
-	if (type == "AmbientTexture")
-		shaderMaterialData.hasAmbientTexture = texture != NULL;
-	else if (type == "DiffuseTexture")
-		shaderMaterialData.hasDiffuseTexture = texture != NULL;
-	else if (type == "SpecularTexture")
-		shaderMaterialData.hasSpecularTexture = texture != NULL;
-	else if (type == "ShininessTexture")
-		shaderMaterialData.hasShininessTexture = texture != NULL;
 }
 
 void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Material* material) {
-	shaderMaterialData.diffuseColour = Vector4f(material->diffuseColour);
-
-	assignMatTexture(shader, "Diffuse", material->diffuseTexture);
-	if (material->diffuseTexture)
-		shaderMaterialData.diffuseTextureSRGB = material->diffuseTexture->getParameters().getSRGB();
-	else
-		shaderMaterialData.diffuseTextureSRGB = 0;
+	assignMatTexture(shader, "Diffuse", material->getDiffuseTexture());
 
 	//Check to see whether the shader is for lighting
 	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == SHADER_PBR_LIGHTING) {
 		//Assign other lighting specific properties
-		shaderMaterialData.ambientColour = Vector4f(material->ambientColour);
-		shaderMaterialData.specularColour = Vector4f(material->specularColour);
+		assignMatTexture(shader, "Ambient", material->getAmbientTexture());
+		assignMatTexture(shader, "Specular", material->getSpecularTexture());
+		assignMatTexture(shader, "Shininess", material->getShininessTexture());
 
-		assignMatTexture(shader, "Ambient", material->ambientTexture);
-		assignMatTexture(shader, "Specular", material->specularTexture);
-		assignMatTexture(shader, "Shininess", material->shininessTexture);
-
-		if (material->normalMap) {
-			shader->setUniformi("Material_NormalMap", bindTexture(material->normalMap));
-			shaderMaterialData.hasNormalMap = 1;
-		} else
-			shaderMaterialData.hasNormalMap = 0;
-
-		if (material->parallaxMap) {
-			shader->setUniformi("Material_ParallaxMap", bindTexture(material->parallaxMap));
-			shaderMaterialData.parallaxScale = material->parallaxScale;
-			shaderMaterialData.hasParallaxMap = 1;
-		} else
-			shaderMaterialData.hasParallaxMap = 0;
-
-		shaderMaterialData.shininess = material->shininess;
+		if (material->getNormalMap())
+			shader->setUniformi("Material_NormalMap", bindTexture(material->getNormalMap()));
 	}
 
 	//Update the material UBO
-	shaderMaterialUBO->update(&shaderMaterialData, 0, sizeof(ShaderBlock_Material));
+	shaderMaterialUBO->update(&material->getShaderData(), 0, sizeof(ShaderBlock_Material));
 }
 
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
