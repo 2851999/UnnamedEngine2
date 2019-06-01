@@ -5,10 +5,9 @@
 const int UE_MAX_BONES = 90;
 
 layout (std140, binding = 3) uniform UESkinningData {
-	uniform mat4 ue_bones[UE_MAX_BONES];
+	mat4 ue_bones[UE_MAX_BONES];
+	bool ue_useSkinning;
 };
-
-uniform bool ue_useSkinning;
 
 layout(location = UE_LOCATION_BONE_IDS) in ivec4 ue_boneIDs;
 layout(location = UE_LOCATION_BONE_WEIGHTS) in vec4 ue_boneWeights;

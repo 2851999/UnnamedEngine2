@@ -72,6 +72,9 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	particles.resize(maxParticles);
 
 	renderData->setup();
+
+	//Get the UBO for the billboarding
+	shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);
 }
 
 ParticleSystem::~ParticleSystem() {
@@ -187,10 +190,12 @@ void ParticleSystem::render() {
 		Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
 
 		//Assign the uniforms for the particle shader
-		shader->setUniformVector3("Camera_Right", Vector3f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2)));
-		shader->setUniformVector3("Camera_Up", Vector3f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2)));
+		shaderBillboardData.ue_cameraRight = Vector4f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2), 0.0f);
+		shaderBillboardData.ue_cameraUp = Vector4f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2), 0.0f);
 
-		shader->setUniformMatrix4("ProjectionViewMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
+		shaderBillboardData.ue_projectionViewMatrix = (Renderer::getCamera()->getProjectionViewMatrix());
+
+		shaderBillboardUBO->update(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
 
 		if (textureAtlas)
 			shader->setUniformi("Texture", Renderer::bindTexture(textureAtlas->getTexture()));

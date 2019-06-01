@@ -35,6 +35,10 @@ private:
 
 	/* States whether this text is billboarded or not */
 	bool billboarded = false;
+
+	/* UBO and data structure for billboarding */
+	UBO* shaderBillboardUBO;
+	ShaderBlock_Billboard shaderBillboardData;
 public:
 	/* The constructors */
 	Text(Font* font, Colour colour = Colour::WHITE, bool billboarded = false);

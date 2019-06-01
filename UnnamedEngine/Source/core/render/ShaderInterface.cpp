@@ -29,12 +29,26 @@ const std::string ShaderInterface::BLOCK_CORE     = "Core";
 const std::string ShaderInterface::BLOCK_MATERIAL = "Material";
 const std::string ShaderInterface::BLOCK_SKINNING = "Skinning";
 const std::string ShaderInterface::BLOCK_LIGHTING = "Lighting";
+const std::string ShaderInterface::BLOCK_TERRAIN  = "Terrain";
+const std::string ShaderInterface::BLOCK_GAMMA_CORRECTION  = "GammaCorrection";
+const std::string ShaderInterface::BLOCK_PBR_ENV_MAP_GEN  = "PBREnvMapGen";
+const std::string ShaderInterface::BLOCK_PBR_PREFILTER_MAP_GEN  = "PBRPrefilterMapGen";
+const std::string ShaderInterface::BLOCK_PBR_LIGHTING_CORE  = "PBRLightingCore";
+const std::string ShaderInterface::BLOCK_BILLBOARD = "Billboard";
+const std::string ShaderInterface::BLOCK_SHADOW_CUBEMAP = "ShadowCubemap";
 
 /* Binding locations for shader blocks */
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_CORE     = 1;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_MATERIAL = 2;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SKINNING = 3;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_LIGHTING = 4;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_TERRAIN  = 5;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_GAMMA_CORRECTION = 6;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN = 7;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN = 8;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_LIGHTING_CORE = 9;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_BILLBOARD = 10;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SHADOW_CUBEMAP = 11;
 
 ShaderInterface::ShaderInterface() {
 	//Add all required UBOs for the default shaders
@@ -42,6 +56,13 @@ ShaderInterface::ShaderInterface() {
 	add(BLOCK_MATERIAL, new UBO(NULL, sizeof(ShaderBlock_Material), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_MATERIAL));
 	add(BLOCK_SKINNING, new UBO(NULL, sizeof(ShaderBlock_Skinning), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_SKINNING));
 	add(BLOCK_LIGHTING, new UBO(NULL, sizeof(ShaderBlock_Lighting), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_LIGHTING));
+	add(BLOCK_TERRAIN,  new UBO(NULL, sizeof(ShaderBlock_Terrain),  GL_DYNAMIC_DRAW,  UBO_BINDING_LOCATION_TERRAIN));
+	add(BLOCK_GAMMA_CORRECTION, new UBO(NULL, sizeof(ShaderBlock_GammaCorrection), GL_STATIC_DRAW, UBO_BINDING_LOCATION_GAMMA_CORRECTION));
+	add(BLOCK_PBR_ENV_MAP_GEN, new UBO(NULL, sizeof(ShaderBlock_PBREnvMapGen), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN));
+	add(BLOCK_PBR_PREFILTER_MAP_GEN, new UBO(NULL, sizeof(ShaderBlock_PBRPrefilterMapGen), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN));
+	add(BLOCK_PBR_LIGHTING_CORE, new UBO(NULL, sizeof(ShaderBlock_PBRLightingCore), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_LIGHTING_CORE));
+	add(BLOCK_BILLBOARD, new UBO(NULL, sizeof(ShaderBlock_Billboard), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_BILLBOARD));
+	add(BLOCK_SHADOW_CUBEMAP, new UBO(NULL, sizeof(ShaderBlock_ShadowCubemap), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_SHADOW_CUBEMAP));
 }
 
 ShaderInterface::~ShaderInterface() {

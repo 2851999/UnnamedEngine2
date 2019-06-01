@@ -87,6 +87,24 @@ private:
 	/* The structure used to update the lighting data UBO */
 	ShaderBlock_Lighting shaderLightingData;
 
+	/* The gamma correction UBO for the shaders */
+	UBO* shaderGammaCorrectionUBO;
+
+	/* The structure used to update the gamma correction data UBO */
+	ShaderBlock_GammaCorrection shaderGammaCorrectionData;
+
+	/* The PBR lighting core UBO for the shaders */
+	UBO* shaderPBRLightingCoreUBO;
+
+	/* The structure used to update the PBR lighting core data UBO */
+	ShaderBlock_PBRLightingCore shaderPBRLightingCoreData;
+
+	/* The shadow cubemap UBO for the shaders */
+	UBO* shaderShadowCubemapUBO;
+
+	/* The structure used to update the shadow cubemap data UBO */
+	ShaderBlock_ShadowCubemap shaderShadowCubemapData;
+
 	/* Methods used before and after actual rendering of the scene when using forward rendering to handle the
 	 * framebuffers/gamma correction */
 	void forwardPreRender();

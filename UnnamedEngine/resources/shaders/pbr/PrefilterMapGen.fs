@@ -1,4 +1,4 @@
-#version 330
+#version 420
 
 #include "PBRCore.fs"
 
@@ -7,12 +7,13 @@ out vec4 FragColor;
 in vec3 localPos;
 
 #map uniform EnvMap environmentMap
-#map uniform EnvMapSize envMapSize
-#map uniform Roughness roughness
 
 uniform samplerCube environmentMap;
-uniform float envMapSize;
-uniform float roughness;
+
+layout (std140, binding = 8) uniform UEEquiToCubeGenData {
+	float envMapSize;
+	float roughness;
+};
 
 void main() {
     const uint SAMPLE_COUNT = 1024u;

@@ -31,8 +31,11 @@ Text::Text(Font* font, Colour colour, bool billboarded) {
 	std::string shaderType;
 	if (! billboarded)
 		shaderType = Renderer::SHADER_FONT;
-	else
+	else {
 		shaderType = Renderer::SHADER_BILLBOARDED_FONT;
+		//Get the UBO for the billboard
+		shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);
+	}
 
 	//Create the Mesh instance and assign the texture
 	Texture* fontTexture = font->getTexture();
@@ -97,12 +100,14 @@ void Text::render() {
 
 		Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
 
-		shader->setUniformVector3("Camera_Right", Vector3f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2)));
-		shader->setUniformVector3("Camera_Up", Vector3f(-matrix.get(1, 0), -matrix.get(1, 1), -matrix.get(1, 2)));
-		shader->setUniformVector2("Billboard_Size", Vector2f(0.005f, 0.005f));
-		shader->setUniformVector3("Billboard_Centre", getPosition());
+		shaderBillboardData.ue_cameraRight = Vector4f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2), 0.0f);
+		shaderBillboardData.ue_cameraUp = Vector4f(-matrix.get(1, 0), -matrix.get(1, 1), -matrix.get(1, 2), 0.0f);
+		shaderBillboardData.ue_billboardSize = Vector2f(0.005f, 0.005f);
+		shaderBillboardData.ue_billboardCentre = Vector4f(getPosition(), 0.0f);
 
-		shader->setUniformMatrix4("ProjectionViewMatrix", (Renderer::getCamera()->getProjectionViewMatrix()));
+		shaderBillboardData.ue_projectionViewMatrix = (Renderer::getCamera()->getProjectionViewMatrix());
+
+		shaderBillboardUBO->update(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
 
 		GameObject3D::render();
 

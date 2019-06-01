@@ -57,6 +57,9 @@ struct ShaderBlock_Material {
 
 struct ShaderBlock_Skinning {
 	Matrix4f ue_bones[Skeleton::SKINNING_MAX_BONES];
+	int ue_useSkinning;
+
+	void updateUseSkinning(UBO* ubo) { ubo->update(&ue_useSkinning, sizeof(ue_bones), sizeof(ue_useSkinning)); };
 };
 
 struct ShaderStruct_Light {
@@ -88,6 +91,47 @@ struct ShaderBlock_Lighting {
 	int ue_numLights;
 };
 
+struct ShaderBlock_Terrain {
+	Vector4f ue_translation;
+	Vector2f ue_gridSize;
+	float ue_scale;
+	float ue_range;
+	float ue_heightScale;
+	float ue_size;
+};
+
+struct ShaderBlock_GammaCorrection {
+	int gammaCorrect;
+	float exposureIn;
+};
+
+struct ShaderBlock_PBREnvMapGen {
+	Matrix4f projection;
+	Matrix4f view;
+};
+
+struct ShaderBlock_PBRPrefilterMapGen {
+	float envMapSize;
+	float roughness;
+};
+
+struct ShaderBlock_PBRLightingCore {
+	int ue_useAmbient;
+};
+
+struct ShaderBlock_Billboard {
+	Matrix4f ue_projectionViewMatrix;
+	Vector4f ue_cameraRight;
+	Vector4f ue_cameraUp;
+	Vector4f ue_billboardCentre;
+	Vector2f ue_billboardSize;
+};
+
+struct ShaderBlock_ShadowCubemap {
+	Matrix4f shadowMatrices[6];
+	Vector4f lightPos;
+};
+
 /*****************************************************************************
  * The ShaderInterface class handles data transfer to shaders via UBO's
  *****************************************************************************/
@@ -102,12 +146,26 @@ public:
 	static const std::string BLOCK_MATERIAL;
 	static const std::string BLOCK_SKINNING;
 	static const std::string BLOCK_LIGHTING;
+	static const std::string BLOCK_TERRAIN;
+	static const std::string BLOCK_GAMMA_CORRECTION;
+	static const std::string BLOCK_PBR_ENV_MAP_GEN;
+	static const std::string BLOCK_PBR_PREFILTER_MAP_GEN;
+	static const std::string BLOCK_PBR_LIGHTING_CORE;
+	static const std::string BLOCK_BILLBOARD;
+	static const std::string BLOCK_SHADOW_CUBEMAP;
 
 	/* Binding locations for shader blocks */
 	static const unsigned int UBO_BINDING_LOCATION_CORE;
 	static const unsigned int UBO_BINDING_LOCATION_MATERIAL;
 	static const unsigned int UBO_BINDING_LOCATION_SKINNING;
 	static const unsigned int UBO_BINDING_LOCATION_LIGHTING;
+	static const unsigned int UBO_BINDING_LOCATION_TERRAIN;
+	static const unsigned int UBO_BINDING_LOCATION_GAMMA_CORRECTION;
+	static const unsigned int UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN;
+	static const unsigned int UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN;
+	static const unsigned int UBO_BINDING_LOCATION_PBR_LIGHTING_CORE;
+	static const unsigned int UBO_BINDING_LOCATION_BILLBOARD;
+	static const unsigned int UBO_BINDING_LOCATION_SHADOW_CUBEMAP;
 
 	/* Constructor */
 	ShaderInterface();

@@ -216,10 +216,12 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			if (mesh->hasSkeleton()) {
 				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); i++)
 					shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
+				shaderSkinningData.ue_useSkinning = true;
 				shaderSkinningUBO->update(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
-				shader->setUniformi("UseSkinning", 1);
-			} else
-				shader->setUniformi("UseSkinning", 0);
+			} else {
+				shaderSkinningData.ue_useSkinning = false;
+				shaderSkinningData.updateUseSkinning(shaderSkinningUBO);
+			}
 
 			if (data->hasSubData()) {
 				renderData->getRenderData()->bindVAO();

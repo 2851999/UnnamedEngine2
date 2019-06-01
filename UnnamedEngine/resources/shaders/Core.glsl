@@ -1,4 +1,4 @@
-#version 440
+#version 420
 //Used for assigning UBO block locations - can remove
 
 layout (std140, binding = 1) uniform UECoreData {

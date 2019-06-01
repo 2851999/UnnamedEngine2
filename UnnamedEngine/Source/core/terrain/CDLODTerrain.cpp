@@ -62,6 +62,11 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap, int lodDepth, float meshSi
 //	texture1 = Texture::loadTexture("C:/UnnamedEngine/textures/grass.png");
 //	texture2 = Texture::loadTexture("C:/UnnamedEngine/textures/snow.jpg");
 //	texture3 = Texture::loadTexture("C:/UnnamedEngine/textures/stone.jpg");
+
+	//Assign the UBO data
+	shaderTerrainUBO =  Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_TERRAIN);
+	shaderTerrainData.ue_heightScale = heightMap->getHeightScale();
+	shaderTerrainData.ue_size = heightMap->getSize();
 }
 
 CDLODTerrain::~CDLODTerrain() {
@@ -85,9 +90,6 @@ void CDLODTerrain::render() {
 	//Use the terrain shader
 	Shader* shader = getShader();
 	shader->use();
-
-	shader->setUniformf("HeightScale", heightMap->getHeightScale());
-	shader->setUniformf("Size", heightMap->getSize());
 
 	shader->setUniformi("HeightMap", Renderer::bindTexture(heightMap->getTexture()));
 
@@ -114,10 +116,12 @@ void CDLODTerrain::render() {
 		CDLODQuadTreeNode* currentNode = selectionList[selectionList.size() - 1];
 		selectionList.pop_back();
 
-		shader->setUniformVector3("Translation", Vector3f(currentNode->getX(), 0.0f, currentNode->getZ()));
-		shader->setUniformf("Scale", currentNode->getSize());
-		shader->setUniformf("Range", currentNode->getRange());
-		shader->setUniformVector2("GridSize", Vector2f(meshSize, meshSize));
+		shaderTerrainData.ue_translation = Vector4f(currentNode->getX(), 0.0f, currentNode->getZ(), 0.0f);
+		shaderTerrainData.ue_scale = currentNode->getSize();
+		shaderTerrainData.ue_range = currentNode->getRange();
+		shaderTerrainData.ue_gridSize = Vector2f(meshSize, meshSize);
+
+		shaderTerrainUBO->update(&shaderTerrainData, 0, sizeof(ShaderBlock_Terrain));
 
 //		std::cout << currentNode->getSize() << std::endl;
 //		std::cout << currentNode->getRange() << std::endl;

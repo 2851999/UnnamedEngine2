@@ -45,8 +45,8 @@ void SkyBox::render() {
 	Shader* shader = box->getShader();
 	shader->use();
 
-	shader->setUniformMatrix4("ViewMatrix", Renderer::getCamera()->getViewMatrix());
-	shader->setUniformMatrix4("ProjectionMatrix", Renderer::getCamera()->getProjectionMatrix());
+	Renderer::getShaderBlock_Core().ue_viewMatrix = Renderer::getCamera()->getViewMatrix();
+	Renderer::getShaderBlock_Core().ue_projectionMatrix =  Renderer::getCamera()->getProjectionMatrix();
 
 	box->render();
 

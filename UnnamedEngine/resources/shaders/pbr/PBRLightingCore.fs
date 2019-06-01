@@ -5,12 +5,14 @@
 #map uniform IrradianceMap ue_irradianceMap
 #map uniform PrefilterMap ue_prefilterMap
 #map uniform BRDFLUT ue_brdfLUT
-#map uniform UseAmbient ue_useAmbient
 
 uniform samplerCube ue_irradianceMap;
 uniform samplerCube ue_prefilterMap;
-uniform sampler2D   ue_brdfLUT; 
-uniform bool ue_useAmbient;
+uniform sampler2D   ue_brdfLUT;
+
+layout (std140, binding = 9) uniform UEPBRLightingCoreData {
+	bool ue_useAmbient;
+};
 
 vec3 ueCalculateLightPBR(UELight light, vec3 lightDirection, vec3 normal, vec3 viewDirection, vec3 fragPos, vec3 albedo, float metalness, float roughness, vec3 F0) {
     vec3 lightColor = light.diffuseColour.xyz;

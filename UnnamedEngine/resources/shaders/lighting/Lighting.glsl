@@ -19,9 +19,9 @@ struct UELight {
 };
 
 layout (std140, binding = 4) uniform UELightingData {
-	uniform UELight ue_lights[MAX_LIGHTS];
-	uniform mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
+	UELight ue_lights[MAX_LIGHTS];
+	mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
 	
-	uniform vec4 ue_lightAmbient;
-	uniform int ue_numLights;
+	vec4 ue_lightAmbient;
+	int ue_numLights;
 };
