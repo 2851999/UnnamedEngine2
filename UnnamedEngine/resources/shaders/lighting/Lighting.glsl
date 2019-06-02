@@ -24,4 +24,6 @@ layout (std140, binding = 4) uniform UELightingData {
 	
 	vec4 ue_lightAmbient;
 	int ue_numLights;
+	
+	bool ue_useEnvironmentMap;
 };

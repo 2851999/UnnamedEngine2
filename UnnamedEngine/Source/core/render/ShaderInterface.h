@@ -89,6 +89,8 @@ struct ShaderBlock_Lighting {
 
 	Vector4f ue_lightAmbient;
 	int ue_numLights;
+
+	int ue_useEnvironmentMap;
 };
 
 struct ShaderBlock_Terrain {

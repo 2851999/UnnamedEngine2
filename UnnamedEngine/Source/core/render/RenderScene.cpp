@@ -38,7 +38,9 @@ RenderScene3D::RenderScene3D() {
 	shaderLightingUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_LIGHTING);
 	shaderGammaCorrectionUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_GAMMA_CORRECTION);
 
-	//Set the default post processing options
+	//Assign some default values
+	shaderLightingData.ue_useEnvironmentMap = false;
+
 	shaderGammaCorrectionData.gammaCorrect = true;
 	shaderGammaCorrectionData.exposureIn = -1;
 
@@ -114,6 +116,9 @@ void RenderScene3D::render() {
 			if (renderWireframe)
 				utils_gl::enableWireframe();
 
+			//Assign the camera position
+			Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
+
 			//Go through all of the objects in this scene
 			for (unsigned int i = 0; i < batches.size(); i++) {
 				//Ensure the geometry shader is used to render all of the objects in this batch
@@ -125,7 +130,6 @@ void RenderScene3D::render() {
 				shader->use();
 
 				shaderLightingData.ue_numLights = 0;
-				Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
 
 				//Go through all of the objects in the current batch
 				for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
@@ -212,6 +216,9 @@ void RenderScene3D::forwardPreRender() {
 	//Render a wireframe instead if requested
 	if (renderWireframe)
 		utils_gl::enableWireframe();
+
+	//Assign the camera position
+	Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
 }
 
 void RenderScene3D::forwardPostRender() {
@@ -312,7 +319,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 		unsigned int lightIndexInSet;
 
 		//Go through each light in the set
-		for (unsigned int l = s; (l < s + NUM_LIGHTS_IN_SET) && (l < lights.size()); l++) {
+		for (unsigned int l = s; (l < s + NUM_LIGHTS_IN_SET) && (l < lights.size()); ++l) {
 			//Calculate the index of the current light as it will appear in the shader
 			lightIndexInSet = l - s;
 			//Assign the uniforms for the current light
@@ -338,7 +345,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			Renderer::getScreenTextureMesh()->render();
 		else {
 			//Go through each object in the current batch and render it with the shader
-			for (unsigned int j = 0; j < batches[indexOfBatch].objects.size(); j++) {
+			for (unsigned int j = 0; j < batches[indexOfBatch].objects.size(); ++j) {
 				//Get the model matrix for the current object
 				Matrix4f modelMatrix = batches[indexOfBatch].objects[j]->getModelMatrix();
 
@@ -408,9 +415,9 @@ void RenderScene3D::renderShadowMap(Light* light) {
 	Matrix4f lightSpaceMatrix = light->getLightSpaceMatrix();
 
 	//Go through all of the objects in this scene
-	for (unsigned int i = 0; i < batches.size(); i++) {
+	for (unsigned int i = 0; i < batches.size(); ++i) {
 		//Go through all of the objects in the current batch
-		for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
+		for (unsigned int j = 0; j < batches[i].objects.size(); ++j) {
 			//Pointer to the current object
 			GameObject3D* object = batches[i].objects[j];
 			//Stores the previous value of whether culling was enabled on the objects mesh

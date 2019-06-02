@@ -186,6 +186,8 @@ void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Mater
 
 		if (material->getNormalMap())
 			shader->setUniformi("Material_NormalMap", bindTexture(material->getNormalMap()));
+		if (material->getParallaxMap())
+			shader->setUniformi("Material_ParallaxMap", bindTexture(material->getParallaxMap()));
 	}
 
 	//Update the material UBO

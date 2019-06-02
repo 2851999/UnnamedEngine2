@@ -10,7 +10,6 @@ struct UELightTextures {
 uniform UELightTextures ue_lightsTextures[MAX_LIGHTS];
 
 uniform samplerCube ue_environmentMap;
-uniform bool ue_useEnvironmentMap;
 
 in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 in mat3 ue_frag_tbnMatrix;

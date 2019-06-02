@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 3 | Experimental 7
+
+* Changed shaders to use UBO's more
+
+* Fixed bug: Previous commit stopped assigning parallax maps
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 3 | Experimental 6
 
 * Changed shaders to use UBO's more
