@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 1 | Beta 1 | Development 3 | Experimental 8
+
+* Fixed bug: Tilemap didn't assign the mvp matix since
+             changing to use UBO's
+
+--------------------------------------------------------------
 Release 1 | Beta 1 | Development 3 | Experimental 7
 
 * Changed shaders to use UBO's more

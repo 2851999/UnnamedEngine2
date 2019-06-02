@@ -209,6 +209,9 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 		renderData->addVBO(vboVisibility);
 
 		renderData->setup();
+
+		//Obtain the required UBO
+		shaderCoreUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_CORE);
 	}
 }
 
@@ -227,7 +230,8 @@ void TilemapLayer::render() {
 		//Render the map
 		shader->use();
 
-		Renderer::getShaderBlock_Core().ue_mvpMatrix = Renderer::getCamera()->getProjectionViewMatrix() * Matrix4f().initIdentity();
+		shaderCoreData.ue_mvpMatrix = Renderer::getCamera()->getProjectionViewMatrix() * Matrix4f().initIdentity();
+		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
 
 		shader->setUniformi("Texture", Renderer::bindTexture(tileset->getTexture()));
 
