@@ -51,6 +51,7 @@ namespace utils_string {
 
 	std::vector<std::string> strSplit(const std::string &s, char delimeter);
 	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter);
+	std::vector<std::string> strSplitLast(const std::string& text, const std::string& delimeter);
 
 	inline std::string substring(const std::string &s, int begin, int end) {
 		return s.substr(begin, end - begin);
@@ -75,6 +76,11 @@ namespace utils_maths {
 
 	inline float toDegrees(float radians) {
 		return radians * (180.0f / PI);
+	}
+
+	/* Works for powers of 10 - roundNearest(0.08f, 0.1f) = 0.1f */
+	inline float roundNearest(float value, float precision) {
+		return (float) floor(value / precision + 0.5) * precision;
 	}
 
 	template<typename T>

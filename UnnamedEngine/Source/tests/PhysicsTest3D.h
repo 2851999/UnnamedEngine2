@@ -27,8 +27,8 @@
 
 class Test : public BaseTest3D {
 private:
-	PhysicsObject3D* sphereA;
-	PhysicsObject3D* sphereB;
+	PhysicsObject3D* objectA;
+	PhysicsObject3D* objectB;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -46,17 +46,25 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
-	sphereA = new PhysicsObject3D(resourceLoader.loadModel("sphere.obj"), "Material");
-	sphereA->setCollider(new SphereCollider(sphereA, 1.0f));
-	sphereB = new PhysicsObject3D(resourceLoader.loadModel("sphere.obj"), "Material");
-	sphereB->setCollider(new SphereCollider(sphereB, 1.0f));
-	sphereB->setPosition(3.0f, 0.0f, 0.0f);
-	sphereB->setVelocity(-0.2f, 0.0f, 0.0f);
+//	Mesh* modelA = resourceLoader.loadModel("sphere.obj");
+	Mesh* modelA = resourceLoader.loadModel("plane.obj");
+	Mesh* modelB = resourceLoader.loadModel("sphere.obj");
 
-	renderScene->add(sphereA);
-	physicsScene->add(sphereA);
-	renderScene->add(sphereB);
-	physicsScene->add(sphereB);
+	objectA = new PhysicsObject3D(modelA, "Material");
+//	objectA->setCollider(new SphereCollider(objectA, modelA->getBoundingSphereRadius()));
+	objectA->setCollider(new PlaneCollider3D(objectA, Vector3f(1.0f, 0.0f, 0.0f)));
+	objectA->setRotation(0.0f, 0.0f, 45.0f);
+	objectB = new PhysicsObject3D(modelB, "Material");
+	objectB->setCollider(new SphereCollider(objectB, modelB->getBoundingSphereRadius()));
+	objectB->setPosition(3.0f, 0.0f, 0.0f);
+	objectB->setVelocity(-0.2f, 0.0f, 0.0f);
+
+	renderScene->add(objectA);
+	physicsScene->add(objectA);
+	renderScene->add(objectB);
+	physicsScene->add(objectB);
+
+	renderScene->disableLighting();
 
 	physicsScene->setCollisionCallback(std::bind(onCollision, this, 0, 0));
 
@@ -66,13 +74,13 @@ void Test::onCreated() {
 
 void Test::onUpdate() {
 	if (Keyboard::isPressed(GLFW_KEY_UP))
-		sphereA->setAcceleration(0.0f, 0.0f, -1.0f);
+		objectA->setAcceleration(0.0f, 0.0f, -1.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_DOWN))
-		sphereA->setAcceleration(0.0f, 0.0f, 1.0f);
+		objectA->setAcceleration(0.0f, 0.0f, 1.0f);
 	if (Keyboard::isPressed(GLFW_KEY_LEFT))
-		sphereA->setAcceleration(-1.0f, 0.0f, 0.0f);
+		objectA->setAcceleration(-1.0f, 0.0f, 0.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
-		sphereA->setAcceleration(1.0f, 0.0f, 0.0f);
+		objectA->setAcceleration(1.0f, 0.0f, 0.0f);
 }
 
 void Test::onRender() {

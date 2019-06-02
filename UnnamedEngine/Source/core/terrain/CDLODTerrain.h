@@ -44,18 +44,22 @@ private:
 
 	/* The parameters for the quad-tree */
 	float leafNodeSize = 4.0f;
-	int   lodDepth = 8;
+	int   lodDepth = 8; //0 is most detail, 8 is least
 
 	/* Range multiplier to help resolve seams between nodes */
 	const float RANGE_MULTIPLIER = 1.25f;
+
+	/* The UBO for the terrain data in the shader and an instance of its data structure */
+	ShaderBlock_Terrain shaderTerrainData;
+	UBO* shaderTerrainUBO;
 
 //	Texture* texture1;
 //	Texture* texture2;
 //	Texture* texture3;
 public:
 	/* The constructor */
-	CDLODTerrain(CDLODHeightMap* heightMap);
-	CDLODTerrain(std::string heightMapPath);
+	CDLODTerrain(CDLODHeightMap* heightMap, int lodDepth, float meshSize);
+	CDLODTerrain(std::string heightMapPath, int lodDepth, float meshSize);
 
 	/* The destructor */
 	virtual ~CDLODTerrain();

@@ -54,8 +54,9 @@ void BaseEngine::create() {
 	//Initialise the font system
 	Font::initialiseFreeType();
 
-	//Assign the default font
-	defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16, Colour::WHITE);
+	//Assign the default font and text instance
+	defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
+	textInstance = new Text(defaultFont, Colour::WHITE);
 	//Create the debug camera
 	debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
 	debugCamera->update();
@@ -83,10 +84,13 @@ void BaseEngine::create() {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, Colour::BLACK, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
-		Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, Colour::BLACK, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
-		font->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);
-		font2->render(Engine::Build + " " + Engine::Version, getSettings().windowWidth / 2 - font2->getWidth(Engine::Build + " " + Engine::Version) / 2, (getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2) + 38.0f);
+		Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
+		Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
+		textInstance->setFont(font);
+		textInstance->setColour(Colour::BLACK);
+		textInstance->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);
+		textInstance->setFont(font2);
+		textInstance->render(Engine::Build + " " + Engine::Version, getSettings().windowWidth / 2 - font2->getWidth(Engine::Build + " " + Engine::Version) / 2, (getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2) + 38.0f);
 
 		glDisable(GL_BLEND);
 		Renderer::removeCamera();
@@ -97,6 +101,10 @@ void BaseEngine::create() {
 		glfwSwapBuffers(window->getInstance());
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+		//Go back to default values for rendering text
+		textInstance->setFont(defaultFont);
+		textInstance->setColour(Colour::WHITE);
 	}
 
 	//Notify the game that everything is ready to start creating game objects
@@ -153,22 +161,22 @@ void BaseEngine::renderDebugInfo() {
 	if (debugConsole->isWireframeEnabled())
 		utils_gl::disableWireframe();
 
-	defaultFont->render(str("----------- DEBUG -----------\n") +
-							"Engine Version : " + str(Engine::Version) + "\n" +
-							"Engine Date    : " + str(Engine::DateCreated) + "\n" +
-							"Engine Build   : " + str(Engine::Build) + "\n" +
-							"Current Delta  : " + str((int) getDelta()) + "\n" +
-							"Current FPS    : " + str(getFPS()) + "\n" +
-							"----------- VIDEO -----------\n" +
-							"Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
-							"VSync          : " + str(getSettings().videoVSync) + "\n" +
-							"MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
-							"Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
-							"----------- AUDIO -----------\n" +
-							"Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
-							"SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
-							"-----------------------------"
-							, 2, 16);
+	textInstance->render(str("----------- DEBUG -----------\n") +
+							 "Engine Version : " + str(Engine::Version) + "\n" +
+							 "Engine Date    : " + str(Engine::DateCreated) + "\n" +
+							 "Engine Build   : " + str(Engine::Build) + "\n" +
+							 "Current Delta  : " + str((int) getDelta()) + "\n" +
+							 "Current FPS    : " + str(getFPS()) + "\n" +
+							 "----------- VIDEO -----------\n" +
+							 "Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
+							 "VSync          : " + str(getSettings().videoVSync) + "\n" +
+							 "MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
+							 "Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
+							 "----------- AUDIO -----------\n" +
+							 "Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
+							 "SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
+							 "-----------------------------"
+							 , 2, 16);
 
 	Renderer::removeCamera();
 

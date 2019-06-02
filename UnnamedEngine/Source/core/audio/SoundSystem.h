@@ -21,6 +21,8 @@
 
 #include "Audio.h"
 
+#include "../../utils/Logging.h"
+
 /***************************************************************************************************
  * The SoundSystem class
  ***************************************************************************************************/
@@ -30,11 +32,17 @@ private:
 	/* The main listener */
 	AudioListener* listener = NULL;
 
-	/* The list of audio sources */
+	/* List of audio sources */
 	std::unordered_map<std::string, AudioSource*> sources;
 
-	/* The list of audio sources currently playing */
+	/* List of sequences */
+	std::unordered_map<std::string, AudioSequence*> sequences;
+
+	/* List of audio sources currently playing */
 	std::vector<AudioSource*> playing;
+
+	/* List of sequences currently playing */
+	std::vector<AudioSequence*> playingSequences;
 public:
 	/* The default constructor */
 	SoundSystem() {}
@@ -67,11 +75,30 @@ public:
 	inline void addMusic(std::string key, AudioData* data, Vector3f position) { addSource(key, new AudioSource(data, AudioSource::TYPE_MUSIC, position)); }
 	inline void addMusic(std::string key, AudioData* data, GameObject3D* parent) { addSource(key, new AudioSource(data, AudioSource::TYPE_MUSIC, parent)); }
 
+	/* Methods used to add audio sequences */
+	void addSequence(std::string key, std::vector<std::string>& sourceKeys, bool loop, float playInterval = 0.0f);
+
 	/* The methods used to play, pause, resume and stop playing audio */
 	void play(std::string key);
 	void pause(std::string key);
 	void resume(std::string key);
 	void stop(std::string key);
+	void requestStop(std::string key);
+
+	/* The methods used to play, pause, resume and stop playing sequences */
+	void playSequence(std::string key);
+	void pauseSequence(std::string key);
+	void resumeSequence(std::string key);
+	void stopSequence(std::string key);
+	void requestStopSequence(std::string key);
+
+	/* Methods to fade in/out */
+	void fadeIn(std::string key, float time);
+	void fadeOut(std::string key, float time);
+
+	/* Methods to fade in/out */
+	void fadeInSequence(std::string key, float time);
+	void fadeOutSequence(std::string key, float time);
 
 	/* Methods used to pause and resume all playing audio */
 	void pauseAll();
@@ -125,7 +152,22 @@ public:
 
 	/* The method used to get an AudioSource given its key */
 	AudioSource* getSource(std::string key) {
-		return sources.at(key);
+		try {
+			return sources.at(key);
+		} catch(std::out_of_range& e) {
+			Logger::log("Source with the key '" + key + "' was not found", "SoundSystem", LogType::Error);
+			return NULL;
+		}
+	}
+
+	/* Method used to get an AudioSequence */
+	AudioSequence* getSequence(std::string key) {
+		try {
+			return sequences.at(key);
+		} catch(std::out_of_range& e) {
+			Logger::log("Sequence with the key '" + key + "' was not found", "SoundSystem", LogType::Error);
+			return NULL;
+		}
 	}
 
 	/* Called to destroy all created objects */

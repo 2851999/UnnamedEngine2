@@ -28,7 +28,7 @@ SkyBox::SkyBox(Cubemap* cubemap) {
 	box = new GameObject3D({ new Mesh(MeshBuilder::createCube(1.0f, 1.0f, 1.0f)) }, Renderer::getRenderShader(Renderer::SHADER_SKY_BOX));
 	//Assign the cubemap
 	this->cubemap = cubemap;
-	box->getMaterial()->diffuseTexture = cubemap;
+	box->getMaterial()->setDiffuse(cubemap);
 }
 
 void SkyBox::update(Vector3f cameraPosition) {
@@ -45,8 +45,8 @@ void SkyBox::render() {
 	Shader* shader = box->getShader();
 	shader->use();
 
-	shader->setUniformMatrix4("ViewMatrix", Renderer::getCamera()->getViewMatrix());
-	shader->setUniformMatrix4("ProjectionMatrix", Renderer::getCamera()->getProjectionMatrix());
+	Renderer::getShaderBlock_Core().ue_viewMatrix = Renderer::getCamera()->getViewMatrix();
+	Renderer::getShaderBlock_Core().ue_projectionMatrix =  Renderer::getCamera()->getProjectionMatrix();
 
 	box->render();
 

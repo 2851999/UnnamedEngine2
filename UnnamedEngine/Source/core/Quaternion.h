@@ -33,7 +33,7 @@ public:
 	Quaternion(float x = 0.0f, float y = 0.0f, float z = 0.0f, float w = 1.0f) {
 		setX(x); setY(y); setZ(z); setW(w);
 	}
-	Quaternion(const Vector<float, 4> base) { setX(base[0]); setY(base[1]); setZ(base[2]); setW(base[3]); }
+	Quaternion(const Vector<float, 4>& base) { setX(base[0]); setY(base[1]); setZ(base[2]); setW(base[3]); }
 	Quaternion(const Vector4f& base) { setX(base.getX()); setY(base.getY()); setZ(base.getZ()); setW(base.getW()); }
 	Quaternion(const Vector4<float>& base) { setX(base.getX()); setY(base.getY()); setZ(base.getZ()); setW(base.getW()); }
 
@@ -76,6 +76,17 @@ public:
 	inline Vector3f operator*(const Vector3f& other) const {
 		return rotate(other, (*this));
 	}
+
+	inline Quaternion operator*(float value) const {
+		Quaternion result;
+		result[0] = getX() * value;
+		result[1] = getY() * value;
+		result[2] = getZ() * value;
+		result[3] = getW() * value;
+		return result;
+	}
+
+	static Quaternion slerp(const Quaternion& a, const Quaternion& b, float factor);
 
 	inline Quaternion conjugate() const { return Quaternion(-getX(), -getY(), -getZ(), getW()); }
 

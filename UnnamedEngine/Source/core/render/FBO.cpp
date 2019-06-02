@@ -21,7 +21,7 @@
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
- * The FramebufferTexture class
+ * The FramebufferStore class
  *****************************************************************************/
 
 void FramebufferStore::setup(GLuint fboTarget, bool multisample) {
@@ -52,6 +52,30 @@ void FramebufferStore::setup(GLuint fboTarget, bool multisample) {
 		//Attach to framebuffer
 		glFramebufferTexture2D(fboTarget, attachment, getParameters().getTarget(), getHandle(), 0);
 	}
+}
+
+/*****************************************************************************
+ * The FramebufferStoreCubemap class
+ *****************************************************************************/
+
+void FramebufferStoreCubemap::setup(GLuint fboTarget, bool multisample) {
+	//Assume want to use framebuffer - target should be GL_TEXTURE_CUBE_MAP for applyParameters to work
+
+	//Setup the texture
+	create();
+	bind();
+
+	for (unsigned int i = 0; i < 6; ++i) {
+		if (multisample)
+			glTexImage2DMultisample(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
+		else
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, getWidth(), getHeight(), 0, format, type, NULL);
+	}
+
+	applyParameters(false, false);
+
+	//Attach to framebuffer
+	glFramebufferTexture(fboTarget, attachment, getHandle(), 0);
 }
 
 /*****************************************************************************
@@ -88,8 +112,9 @@ void FBO::setup() {
 	}
 
 	//Check to see whether the setup was successful
-	if (glCheckFramebufferStatus(target) != GL_FRAMEBUFFER_COMPLETE)
-		Logger::log("Framebuffer is not complete", "FramebufferObject", LogType::Error);
+	int status = glCheckFramebufferStatus(target);
+	if (status != GL_FRAMEBUFFER_COMPLETE)
+		Logger::log("Framebuffer is not complete, current status: " + utils_string::str(status), "FramebufferObject", LogType::Error);
 
 	//Bind the default FBO
 	glBindFramebuffer(target, 0);

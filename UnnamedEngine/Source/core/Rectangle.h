@@ -58,6 +58,16 @@ public:
 				other.intersects(x + width, y + height)                   ||
 				other.intersects(x, y + height);
 	}
+
+	/* Returns vectors representing corners of the rectangle */
+	//Top-left
+	Vector2f getVertex1() { return Vector2f(x, y); }
+	//Top-right
+	Vector2f getVertex2() { return Vector2f(x + width, y); }
+	//Bottom-left
+	Vector2f getVertex3() { return Vector2f(x, y + height); }
+	//Bottom-right
+	Vector2f getVertex4() { return Vector2f(x + width, y + height); }
 };
 
 #endif /* CORE_RECTANGLE_H_ */

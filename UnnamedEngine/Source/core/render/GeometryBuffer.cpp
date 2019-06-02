@@ -24,29 +24,25 @@
  * The GeometryBuffer class
  *****************************************************************************/
 
-GeometryBuffer::GeometryBuffer(bool pbr, bool multisample) : pbr(pbr) {
-	//If multisampling need to create the multisample FBO
-	if (multisample)
-		multisampleFBO = createFBO(pbr, true);
+GeometryBuffer::GeometryBuffer(bool pbr) : pbr(pbr) {
 	//Create the  default FBO
-	defaultFBO = createFBO(pbr, false);
+	defaultFBO = createFBO(pbr);
 }
 
-FBO* GeometryBuffer::createFBO(bool pbr, bool multisample) {
+FBO* GeometryBuffer::createFBO(bool pbr) {
 	//Create the FBO instance
-	FBO* fbo = new FBO(GL_FRAMEBUFFER, multisample);
+	FBO* fbo = new FBO(GL_FRAMEBUFFER, false);
 
 	//Attach the buffers to the FBO
 
-	//Use render buffers to store the data for multisampling, then textures for the final
-	//buffer for binding to use in shaders
-	GLenum target = multisample ? GL_RENDERBUFFER : GL_TEXTURE_2D;
+	//Use textures for binding to use in the shaders
+	GLenum target = GL_TEXTURE_2D;
 
 	//Position buffer
 	fbo->attach(createBuffer(target, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT0));
 
 	//Normal buffer
-	fbo->attach(createBuffer(target, GL_RGBA32F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT1));
+	fbo->attach(createBuffer(target, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT1));
 
 	//Albedo buffer
 	fbo->attach(createBuffer(target, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_COLOR_ATTACHMENT2));
@@ -56,7 +52,7 @@ FBO* GeometryBuffer::createFBO(bool pbr, bool multisample) {
 		fbo->attach(createBuffer(target, GL_RGB16F, GL_RGB, GL_FLOAT, GL_COLOR_ATTACHMENT3));
 
 	//Depth buffer
-	fbo->attach(createBuffer(target, GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT));
+	fbo->attach(createBuffer(target, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, GL_DEPTH_ATTACHMENT));
 
 	//Setup this buffer
 	fbo->setup();
@@ -81,31 +77,11 @@ FramebufferStore* GeometryBuffer::createBuffer(GLenum target, GLint internalForm
 }
 
 void GeometryBuffer::bind() {
-	//Check whether multisampling is needed (if it is then the multisample FBO will have been created)
-	if (multisampleFBO)
-		//Multisampling should be used
-		multisampleFBO->bind();
-	else
 		defaultFBO->bind();
 }
 
 void GeometryBuffer::unbind() {
-	//Check if multisampling is needed
-	if (multisampleFBO) {
-		//Stop using the multisample FBO and copy all of the data over to the default one (this applies the multisampling)
-		multisampleFBO->unbind();
-
-		multisampleFBO->copyTo(defaultFBO, 0, 0);
-		multisampleFBO->copyTo(defaultFBO, 1, 1);
-		multisampleFBO->copyTo(defaultFBO, 2, 2);
-
-		multisampleFBO->copyTo(defaultFBO, 3, 3); //Metalness and AO for PBR, depth otherwise
-
-		//Copy the depth for PBR
-		if (pbr)
-			multisampleFBO->copyTo(defaultFBO, 4, 4);
-	} else
-		defaultFBO->unbind();
+	defaultFBO->unbind();
 }
 
 void GeometryBuffer::outputDepthInfo() {

@@ -60,9 +60,10 @@ void Test::onCreated() {
 
 	//terrain = new CDLODTerrain(resourceLoader.getAbsPathTextures() + "heightmap.jpg");
 	HeightMapGenerator generator;
-	heightMap = new CDLODHeightMap(generator.generate(512, 512), 1, 512, 512, GL_RED, GL_RED);
-	terrain = new CDLODTerrain(heightMap);
-	terrain->getMaterial()->shininess = 1.0f;
+	heightMap = new CDLODHeightMap(generator.generate(256, 256), 1, 256, 256, GL_RED, GL_RED);
+	//heightMap = new CDLODHeightMap("F:/Storage/Users/Joel/Desktop/test.jpg");
+	terrain = new CDLODTerrain(heightMap, 4, 16.0f);
+	terrain->getMaterial()->setShininess(1.0f);
 	terrain->update();
 
 	scene = new RenderScene3D();
@@ -86,7 +87,9 @@ void Test::onCreated() {
 	//std::cout << glfwGetJoystickName(0) << std::endl;
 
 	//scene->enableDeferred();
-	scene->enableGammaCorrection();
+	//scene->enableGammaCorrection();
+
+	//scene->enableWireframe();
 }
 
 void Test::onUpdate() {
@@ -95,8 +98,10 @@ void Test::onUpdate() {
 	} else {
 		camera->setMovementSpeed(5.0f);
 	}
-	//Vector3f pos = camera->getPosition();
-	//camera->setY(heightMap->getHeight(pos.getX(), pos.getZ()) + 1.5f);
+	Vector3f pos = camera->getPosition();
+	camera->setY(heightMap->getHeight(pos.getX(), pos.getZ()) + 1.5f);
+
+	//std::cout << heightMap->getSteepness(pos.getX(), pos.getZ(), camera->getTransform()->getRotation().getForward()) << std::endl;
 
 	//terrain->getTransform()->rotate(terrain->getTransform()->getRotation().getUp(), 0.1f * getDelta());
 	//terrain->setScale(10.0f, 10.0f, 10.0f);

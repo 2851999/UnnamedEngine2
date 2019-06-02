@@ -26,6 +26,14 @@
  *****************************************************************************/
 
 class TextureAtlas {
+public:
+	/* Stores offsets of the sub-texture from the grid being looked up */
+	struct Offsets {
+		float left = 0.0f;
+		float right = 0.0f;
+		float top = 0.0f;
+		float bottom = 0.0f;
+	};
 private:
 	/* The texture */
 	Texture* texture;
@@ -40,6 +48,8 @@ private:
 	/* The width/height of a texture within this atlas */
 	float textureWidth;
 	float textureHeight;
+
+	Offsets offsets;
 public:
 	/* The constructor */
 	TextureAtlas(Texture* texture, unsigned int numColumns, unsigned int numRows, unsigned int numTextures);
@@ -50,8 +60,14 @@ public:
 	/* Getters */
 	inline Texture* getTexture() { return texture; }
 	inline unsigned int getNumTextures() { return numTextures; }
-	inline float getSubTextureWidth() { return textureWidth; }
-	inline float getSubTextureHeight() { return textureHeight; }
+	/* Returns the width/height of a sub texture (including offsets) */
+	inline float getSubTextureWidth() { return textureWidth - offsets.left - offsets.right; }
+	inline float getSubTextureHeight() { return textureHeight - offsets.top - offsets.bottom; }
+	/* Returns the width/height of a sub texture (without offsets) */
+	inline float getGridWidth() { return textureWidth; }
+	inline float getGridHeight() { return textureHeight; }
+	/* Returns a reference to the offsets */
+	inline Offsets& getOffsets() { return offsets; }
 };
 
 #endif /* CORE_RENDER_TEXTUREATLAS_H_ */

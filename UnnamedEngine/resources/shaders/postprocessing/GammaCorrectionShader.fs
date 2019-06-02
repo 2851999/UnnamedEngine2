@@ -1,10 +1,9 @@
 #include "PostProcess.fs"
 
-#map uniform GammaCorrect gammaCorrect
-#map uniform Exposure exposureIn
-
-uniform bool gammaCorrect;
-uniform float exposureIn;
+layout (std140, binding = 6) uniform UEGammaCorrectionData {
+	bool gammaCorrect;
+	float exposureIn;
+};
 
 out vec4 FragColour;
 

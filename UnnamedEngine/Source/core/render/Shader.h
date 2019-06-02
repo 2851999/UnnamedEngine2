@@ -69,6 +69,7 @@ public:
 	void addUniform(std::string id, std::string name);
 	void addAttribute(std::string id, std::string name);
 
+	inline GLint getProgram() { return program; }
 	GLint getUniformLocation(std::string id);
 	GLint getAttributeLocation(std::string id);
 

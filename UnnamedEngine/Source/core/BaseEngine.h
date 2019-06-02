@@ -32,8 +32,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.3.0";
-	const std::string DateCreated = "13/04/2018";
+	const std::string Version     = "V0.3.4";
+	const std::string DateCreated = "02/06/2019";
 	const std::string Build       = "Beta";
 }
 
@@ -54,6 +54,9 @@ private:
 
 	/* The default font */
 	Font* defaultFont = NULL;
+
+	/* Default text instance */
+	Text* textInstance = NULL;
 
 	/* Debug camera used when rendering debug information */
 	Camera2D* debugCamera = NULL;

@@ -64,6 +64,7 @@ Vector3f BoneAnimationData::getInterpolatedPosition(float animationTime) {
 	float deltaTime = keyframePositionsTimes[nextIndex] - keyframePositionsTimes[lastIndex];
 	//Calculate the interpolation factor
 	float factor = (animationTime - keyframePositionsTimes[lastIndex]) / deltaTime;
+
 	//Interpolate and return the result
 	return Vector3f::lerp(keyframePositions[lastIndex], keyframePositions[nextIndex], factor);
 }
@@ -81,6 +82,7 @@ Quaternion BoneAnimationData::getInterpolatedRotation(float animationTime) {
 	float deltaTime = keyframeRotationsTimes[nextIndex] - keyframeRotationsTimes[lastIndex];
 	//Calculate the interpolation factor
 	float factor = (animationTime - keyframeRotationsTimes[lastIndex]) / deltaTime;
+
 	//Interpolate and return the result
 	return Quaternion::slerp(keyframeRotations[lastIndex], keyframeRotations[nextIndex], factor).normalise();
 }

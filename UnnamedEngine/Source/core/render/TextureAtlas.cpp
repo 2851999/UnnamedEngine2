@@ -35,11 +35,15 @@ TextureAtlas::TextureAtlas(Texture* texture, unsigned int numColumns, unsigned i
 void TextureAtlas::getSides(unsigned int textureIndex, float& top, float& left, float& bottom, float& right) {
 	//Coordinates of the tile in pixels
 	float x = (textureIndex % numColumns) * textureWidth;
-	float y = (textureIndex / numRows) * textureHeight;
+	float y = (textureIndex / numColumns) * textureHeight;
+
+	//Apply the x and y offsets
+	x += offsets.left;
+	y += offsets.top;
 
 	//Assign the texture coordinates
-	top = y / (float) texture->getWidth();
-	left = x / (float) texture->getHeight();
-	bottom =  top + (textureHeight / (float) texture->getHeight());
-	right = left + (textureWidth / (float) texture->getWidth());
+	top = y / (float) texture->getHeight();
+	left = x / (float) texture->getWidth();
+	bottom =  top + (getSubTextureHeight() / (float) texture->getHeight());
+	right = left + (getSubTextureWidth() / (float) texture->getWidth());
 }

@@ -46,56 +46,24 @@ private:
 		float glyphLeft;
 		float glyphTop;
 		float xOffset;
-	} glyphs[(ASCII_END - ASCII_START) + 1] ;
+	} glyphs[(ASCII_END - ASCII_START) + 1];
 
-	/* The width/height of then texture atlas */
-	unsigned int textureAtlasWidth  = 0;
-	unsigned int textureAtlasHeight = 0;
-
-	/* States whether this font is billboarded or not */
-	bool billboarded = false;
-
-	/* The GameObject3D instance for this font */
-	GameObject3D* object3D = NULL;
+	/* The texture this font */
+	Texture* texture;
 
 	/* The method used to setup this Font instance given the font name and size */
-	void setup(std::string path, unsigned int size, Colour colour, TextureParameters parameters);
-
-	/* Methods used to update this font ready to render some text */
-	void update(std::string text);
+	void setup(std::string path, unsigned int size, TextureParameters parameters);
 public:
-	/* The constructor */
-	Font(std::string path, unsigned int size = 18, Colour colour = Colour::WHITE, TextureParameters parameters = TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST)) { setup(path, size, colour, parameters); }
-	Font(std::string path, unsigned int size, Colour colour, bool billboarded, TextureParameters parameters = TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST)) : billboarded(billboarded) { setup(path, size, colour, parameters); }
-	virtual ~Font() { destroy(); }
+	/* Render scale used to render font at a higher size and then down scale later */
+	static const float RENDER_SCALE;
 
-	/* Methods used to update this font ready to render some text */
-	void update(std::string text, Vector2f position);
-	inline void update(std::string text, float x, float y) { update(text, Vector2f(x, y)); }
-	void update(std::string text, Vector3f position);
-	inline void update(std::string text, float x, float y, float z) { update(text, Vector3f(x, y, z)); }
+	/* The constructors */
+	Font(std::string path, unsigned int size = 18, TextureParameters parameters = TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST)) { setup(path, size, parameters); }
+	/* The destructors */
+	virtual ~Font() {} //Destroy should be called when resource is released
 
-	/* Method used to render the current text */
-	void render();
-
-	/* Methods used to update and render some text */
-	inline void render(std::string text, Vector2f position) {
-		update(text, position);
-		render();
-	}
-
-	inline void render(std::string text, float x, float y) {
-		render(text, Vector2f(x, y));
-	}
-
-	inline void render(std::string text, Vector3f position) {
-		update(text, position);
-		render();
-	}
-
-	inline void render(std::string text, float x, float y, float z) {
-		render(text, Vector3f(x, y, z));
-	}
+	/* Method to assign a MeshData instance to render some text */
+	void assignMeshData(MeshData* data, std::string text, bool billboarded);
 
 	/* Method used to release all of the resources this font holds */
 	void destroy() override;
@@ -108,6 +76,9 @@ public:
 	static void initialiseFreeType();
 	/* The static method used to release resources used by FreeType */
 	static void destroyFreeType();
+
+	/* Setters and getters */
+	inline Texture* getTexture() { return texture; }
 };
 
 #endif /* CORE_GUI_FONT_H_ */

@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include "Camera.h"
 #include "FBO.h"
+#include "UBO.h"
+#include "ShaderInterface.h"
 
 /*****************************************************************************
  * The Renderer class contains everything need to render a Mesh
@@ -29,6 +31,17 @@
 
 class Renderer {
 private:
+	static ShaderInterface* shaderInterface;
+
+	static ShaderBlock_Core shaderCoreData;
+	static UBO* shaderCoreUBO;
+
+	static ShaderBlock_Material shaderMaterialData;
+	static UBO* shaderMaterialUBO;
+
+	static ShaderBlock_Skinning shaderSkinningData;
+	static UBO* shaderSkinningUBO;
+
 	static std::vector<Camera*> cameras;
 	static std::vector<Texture*> boundTextures;
 	static std::unordered_map<std::string, RenderShader*> renderShaders;
@@ -55,10 +68,12 @@ public:
 	static const std::string SHADER_FRAMEBUFFER;
 	static const std::string SHADER_ENVIRONMENT_MAP;
 	static const std::string SHADER_SHADOW_MAP;
+	static const std::string SHADER_SHADOW_CUBEMAP;
 	static const std::string SHADER_BILLBOARDED_FONT;
 	static const std::string SHADER_TERRAIN;
 	static const std::string SHADER_PLAIN_TEXTURE;
 	static const std::string SHADER_DEFERRED_LIGHTING;
+	static const std::string SHADER_TILEMAP;
 
 	static const std::string SHADER_PBR_EQUI_TO_CUBE_GEN;
 	static const std::string SHADER_PBR_IRRADIANCE_MAP_GEN;
@@ -127,6 +142,9 @@ public:
 	/* Method used to add a RenderShader */
 	static void addRenderShader(RenderShader* renderShader);
 
+	/* Returns the ShaderInterface instance */
+	static inline ShaderInterface* getShaderInterface() { return shaderInterface; }
+
 	/* Returns the RenderShader with a specific id */
 	static RenderShader* getRenderShader(std::string id);
 
@@ -135,6 +153,9 @@ public:
 
 	/* Returns the screen texture mesh */
 	static inline MeshRenderData* getScreenTextureMesh() { return screenTextureMesh; }
+
+	/* Returns a reference to the data for the core UBO */
+	static inline ShaderBlock_Core& getShaderBlock_Core() { return shaderCoreData; }
 };
 
 #endif /* CORE_RENDER_RENDERER_H_ */

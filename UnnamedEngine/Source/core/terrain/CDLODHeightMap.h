@@ -19,6 +19,7 @@
 #ifndef CORE_TERRAIN_CDLODHEIGHTMAP_H_
 #define CORE_TERRAIN_CDLODHEIGHTMAP_H_
 
+#include "../Vector.h"
 #include "../render/Texture.h"
 
 /*****************************************************************************
@@ -44,6 +45,9 @@ private:
 
 	/* Method used to setup this height map */
 	void setup(unsigned char* data, int numComponents, int width, int height, int internalFormat, int format);
+
+	/* Method used to get the 'normal' for a particular point */
+	Vector3f calculateNormal(float x, float y);
 public:
 	/* The constructors */
 	CDLODHeightMap(std::string path);
@@ -55,8 +59,12 @@ public:
 	/* Method used to get the height at a particular location (in world coordinates) */
 	float getHeight(float x, float y);
 
-	/* Method used to get the value at a particular location (where (0, 0) is the top left of the height map */
+	/* Method used to get the value at a particular location (where (0, 0) is the top left of the height map and (size - 1, size - 1) is the lower right) */
 	float getValue(int mapX, int mapY);
+
+	/* Returns a value between -1 and 1 indicating the 'steepness' of the height map at a particular
+	 * location with 1 indicating the steepest increasing gradient and -1 the steepest decreasing gradient */
+	float getSteepness(float x, float y, Vector3f direction);
 
 	/* Methods used to get the minimum and maximum heights over a certain area of the height map */
 	float getMinHeight(float x, float y, float areaSize);

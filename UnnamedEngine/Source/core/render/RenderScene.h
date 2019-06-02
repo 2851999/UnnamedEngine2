@@ -46,6 +46,7 @@ private:
 
 	/* Various shaders that might be needed */
 	Shader* shadowMapShader;
+	Shader* shadowCubemapShader;
 
 	/* The ambient light used in lighting */
 	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
@@ -76,6 +77,38 @@ private:
 
 	/* Intermediate FBO used for antialiasing */
 	PostProcessor* intermediateFBO = NULL;
+
+	/* States whether the scene should be rendered in wireframe mode */
+	bool renderWireframe = false;
+
+	/* The lighting data UBO for the shaders */
+	UBO* shaderLightingUBO;
+
+	/* The structure used to update the lighting data UBO */
+	ShaderBlock_Lighting shaderLightingData;
+
+	/* The gamma correction UBO for the shaders */
+	UBO* shaderGammaCorrectionUBO;
+
+	/* The structure used to update the gamma correction data UBO */
+	ShaderBlock_GammaCorrection shaderGammaCorrectionData;
+
+	/* The PBR lighting core UBO for the shaders */
+	UBO* shaderPBRLightingCoreUBO;
+
+	/* The structure used to update the PBR lighting core data UBO */
+	ShaderBlock_PBRLightingCore shaderPBRLightingCoreData;
+
+	/* The shadow cubemap UBO for the shaders */
+	UBO* shaderShadowCubemapUBO;
+
+	/* The structure used to update the shadow cubemap data UBO */
+	ShaderBlock_ShadowCubemap shaderShadowCubemapData;
+
+	/* Methods used before and after actual rendering of the scene when using forward rendering to handle the
+	 * framebuffers/gamma correction */
+	void forwardPreRender();
+	void forwardPostRender();
 
 	/* Used to render the lighting pass given the shader to use (and index of the batch to render for forward rendering) */
 	void renderLighting(RenderShader* renderShader, int indexOfBatch = -1);
@@ -117,6 +150,8 @@ public:
 	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
 	inline void enableLighting() { lighting = true; }
 	inline void disableLighting() { lighting = false; }
+	inline void enableWireframe() { renderWireframe = true; }
+	inline void disableWireframe() { renderWireframe = false; }
 	inline void setPBREnvironment(PBREnvironment* environment) { this->pbrEnvironment = environment; }
 	inline Colour getAmbientLight() { return ambientLight; }
 	inline bool isLightingEnabled() { return lighting; }

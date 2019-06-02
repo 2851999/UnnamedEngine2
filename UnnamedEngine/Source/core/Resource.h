@@ -66,6 +66,7 @@ public:
  * The Resource class is inherited from to allow data to be managed
  *****************************************************************************/
 #include <iostream>
+
 class Resource {
 private:
 	/* Pointer to the resource manager this is loaded in */

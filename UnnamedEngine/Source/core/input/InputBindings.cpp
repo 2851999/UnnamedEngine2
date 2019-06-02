@@ -317,7 +317,7 @@ void InputBindings::save(MLDocument& document) {
 	}
 
 	//Add the input bindings element, or replace the current one if one already exists
-	int index = document.getRoot().find("input_bindings");
+	int index = document.getRoot().findChild("input_bindings");
 	if (index >= 0)
 		document.getRoot().setChild(index, inputBindingsElement);
 	else
@@ -335,7 +335,7 @@ void InputBindings::save(std::string path) {
 
 void InputBindings::load(MLDocument& document, InputManager* inputManager) {
 	//Attempt to get the index of the settings element in the document
-	int index = document.getRoot().find("input_bindings");
+	int index = document.getRoot().findChild("input_bindings");
 	//Check whether the settings element was found
 	if (index >= 0) {
 		//The currently loaded controllers

@@ -191,6 +191,7 @@ void GUITextBox::setup() {
 	masked = false;
 	mask = "*";
 	defaultText = "";
+	defaultTextColour = getTextColour();
 	cursorIndex = 0;
 	cursor = new GUITextBoxCursor(this, 1.0f);
 	viewIndexStart = 0;
@@ -222,15 +223,20 @@ void GUITextBox::setup() {
 void GUITextBox::onComponentUpdate() {}
 
 void GUITextBox::onComponentRender() {
-	//Get the current text box font
-	Font* f = getFont();
+	//Get the current text instance
+	Text* f = getTextInstance();
+	Font* font = f->getFont();
+	Colour textColour = getTextColour();
+	bool useDefaultText = shouldUseDefaultText();
 	//Determine whether default text has been assigned
-	if (shouldUseDefaultText()) {
-		//If so, assing the render text to it
+	if (useDefaultText) {
+		//If so, assign the render text to it
 		renderText = defaultText;
 		//Also assign the font to the one for the default text (if assigned)
 		if (defaultTextFont != NULL)
-			f = defaultTextFont;
+			f->setFont(defaultTextFont);
+		//Assign the text colour
+		f->setColour(defaultTextColour);
 	} else {
 		//Otherwise the render text should updated and clipped within the boundaries
 		//of the text box
@@ -243,10 +249,18 @@ void GUITextBox::onComponentRender() {
 
 	//Calculate the text position
 	float textX = p.getX() + 1;
-	float textY = (p.getY() + (getHeight() / 2) + (f->getHeight("|") / 2));
+	float textY = (p.getY() + (getHeight() / 2) + (f->getFont()->getHeight("|") / 2));
 
 	//Render the text within the text box
 	f->render(renderText, textX, textY);
+
+	//Assign the font back if it was changed
+	if (useDefaultText) {
+		if (f->getFont() != font)
+			f->setFont(font);
+		//Ensure the text colour is restored
+		f->setColour(textColour);
+	}
 
 	//Render the cursor if the text box is selected
 	if (selected)

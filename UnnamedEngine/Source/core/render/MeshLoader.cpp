@@ -224,6 +224,10 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 				currentIndex++;
 			}
 
+			//Check if number of bones in model exceeds the maximum supported
+			if (bones.size() > Skeleton::SKINNING_MAX_BONES)
+				Logger::log("Model exceeds maximum number of bones for rendering", "MeshLoader", LogType::Warning);
+
 			//Assign the bones in the skeleton
 			skeleton->setBones(bones);
 			skeleton->setRootBone(rootBoneIndex);
@@ -313,31 +317,32 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 	Material* material = new Material(pbr);
 
 	//Load and assign the textures
-	material->ambientTexture  = loadAssimpTexture(path, mat, aiTextureType_AMBIENT);
-	material->diffuseTexture  = loadAssimpTexture(path, mat, aiTextureType_DIFFUSE, loadDiffuseTexturesAsSRGB);
-	material->specularTexture = loadAssimpTexture(path, mat, aiTextureType_SPECULAR);
+	material->setAmbient(loadAssimpTexture(path, mat, aiTextureType_AMBIENT));
+	material->setDiffuse(loadAssimpTexture(path, mat, aiTextureType_DIFFUSE, loadDiffuseTexturesAsSRGB));
+	material->setSpecular(loadAssimpTexture(path, mat, aiTextureType_SPECULAR));
+
 	if (pbr)
-		material->shininessTexture = loadAssimpTexture(path, mat, aiTextureType_SHININESS); //No standard way of using this for phong shading
+		material->setShininess(loadAssimpTexture(path, mat, aiTextureType_SHININESS)); //No standard way of using this for phong shading
 
 	//Check to see whether the material has a normal map
 	if (mat->GetTextureCount(aiTextureType_NORMALS) != 0)
-		material->normalMap = loadAssimpTexture(path, mat, aiTextureType_NORMALS);
+		material->setNormalMap(loadAssimpTexture(path, mat, aiTextureType_NORMALS));
 	else if (utils_string::strEndsWith(fileName, ".obj") && (mat->GetTextureCount(aiTextureType_HEIGHT) != 0))
-		material->normalMap = loadAssimpTexture(path, mat, aiTextureType_HEIGHT);
+		material->setNormalMap(loadAssimpTexture(path, mat, aiTextureType_HEIGHT));
 
 	if (mat->GetTextureCount(aiTextureType_DISPLACEMENT) != 0)
-		material->parallaxMap = loadAssimpTexture(path, mat, aiTextureType_DISPLACEMENT);
+		material->setParallaxMap(loadAssimpTexture(path, mat, aiTextureType_DISPLACEMENT));
 
 	//Load and assign the colours
-	material->ambientColour  = loadAssimpColour(mat, AI_MATKEY_COLOR_AMBIENT);
-	material->diffuseColour  = loadAssimpColour(mat, AI_MATKEY_COLOR_DIFFUSE);
-	material->specularColour = loadAssimpColour(mat, AI_MATKEY_COLOR_SPECULAR);
+	material->setAmbient(loadAssimpColour(mat, AI_MATKEY_COLOR_AMBIENT));
+	material->setDiffuse(loadAssimpColour(mat, AI_MATKEY_COLOR_DIFFUSE));
+	material->setSpecular(loadAssimpColour(mat, AI_MATKEY_COLOR_SPECULAR));
 
 	float value;
 	if ((mat->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS) && value != 0.0f) {
 		if (pbr)
 			value /= 4.0f; //Assimp multiplies this by 4
-		material->shininess = value;
+		material->setShininess(value);
 	}
 
 	return material;
@@ -758,17 +763,17 @@ void MeshLoader::convertToEngineModel(std::string path, std::string fileName, bo
 }
 
 void MeshLoader::writeMaterial(BinaryFile& file, Material* material, std::string path) {
-	file.writeVector4f(material->ambientColour);
-	file.writeVector4f(material->diffuseColour);
-	file.writeVector4f(material->specularColour);
-	writeTexture(file, material->ambientTexture, path);
-	writeTexture(file, material->diffuseTexture, path);
-	writeTexture(file, material->specularTexture, path);
-	writeTexture(file, material->shininessTexture, path);
-	writeTexture(file, material->normalMap, path);
-	writeTexture(file, material->parallaxMap, path);
-	file.writeFloat(material->parallaxScale);
-	file.writeFloat(material->shininess);
+	file.writeVector4f(material->getAmbientColour());
+	file.writeVector4f(material->getDiffuseColour());
+	file.writeVector4f(material->getSpecularColour());
+	writeTexture(file, material->getAmbientTexture(), path);
+	writeTexture(file, material->getDiffuseTexture(), path);
+	writeTexture(file, material->getSpecularTexture(), path);
+	writeTexture(file, material->getShininessTexture(), path);
+	writeTexture(file, material->getNormalMap(), path);
+	writeTexture(file, material->getParallaxMap(), path);
+	file.writeFloat(material->getParallaxScale());
+	file.writeFloat(material->getShininess());
 }
 
 void MeshLoader::writeTexture(BinaryFile& file, Texture* texture, std::string path) {
@@ -780,17 +785,24 @@ void MeshLoader::writeTexture(BinaryFile& file, Texture* texture, std::string pa
 
 void MeshLoader::readMaterial(BinaryFile& file, std::vector<Material*>& materials, std::string path) {
 	Material* material = new Material();
-	file.readVector4f(material->ambientColour);
-	file.readVector4f(material->diffuseColour);
-	file.readVector4f(material->specularColour);
-	material->ambientTexture = readTexture(file, path);
-	material->diffuseTexture = readTexture(file, path, loadDiffuseTexturesAsSRGB);
-	material->specularTexture = readTexture(file, path);
-	material->shininessTexture = readTexture(file, path);
-	material->normalMap = readTexture(file, path);
-	material->parallaxMap = readTexture(file, path);
-	file.readFloat(material->parallaxScale);
-	file.readFloat(material->shininess);
+	Vector4f readVectorValue;
+	file.readVector4f(readVectorValue);
+	material->setAmbient(readVectorValue);
+	file.readVector4f(readVectorValue);
+	material->setDiffuse(readVectorValue);
+	file.readVector4f(readVectorValue);
+	material->setSpecular(readVectorValue);
+	material->setAmbient(readTexture(file, path));
+	material->setDiffuse(readTexture(file, path, loadDiffuseTexturesAsSRGB));
+	material->setSpecular(readTexture(file, path));
+	material->setShininess(readTexture(file, path));
+	material->setNormalMap(readTexture(file, path));
+	material->setParallaxMap(readTexture(file, path));
+	float readFloatValue;
+	file.readFloat(readFloatValue);
+	material->setParallaxScale(readFloatValue);
+	file.readFloat(readFloatValue);
+	material->setShininess(readFloatValue);
 	materials.push_back(material);
 }
 

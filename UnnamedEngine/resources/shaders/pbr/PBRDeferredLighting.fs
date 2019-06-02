@@ -10,8 +10,6 @@ uniform sampler2D ue_gNormal;
 uniform sampler2D ue_gAlbedo;
 uniform sampler2D ue_gMetalnessAO;
 
-uniform mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
-
 in vec2 frag_textureCoord;
 
 out vec4 ue_FragColour;
@@ -32,11 +30,13 @@ void main() {
 	vec4 fragPosLightSpace[MAX_LIGHTS];
 
 	for (int i = 0; i < ue_numLights; i++) {
-		if (ue_lights[i].useShadowMap)
+		if (ue_lights[i].useShadowMap && ue_lights[i].type != 2)
 			fragPosLightSpace[i] = ue_lightSpaceMatrix[i] * vec4(fragPosition, 1.0);
 	}
 	
     vec3 colour = ueGetLightingPBR(normal, fragPosition, albedo, metalness, roughness, ao, fragPosLightSpace);
 
 	ue_FragColour = vec4(colour, 1.0);
+	//ue_FragColour = vec4(vec3(ue_lights[0].quadratic), 1.0);
+	//ue_FragColour = vec4(vec3(ueCalculatePointShadow(ue_lights[0], fragPosition, ue_cameraPosition)), 1.0);
 }

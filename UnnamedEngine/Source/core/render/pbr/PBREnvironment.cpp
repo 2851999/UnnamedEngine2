@@ -87,18 +87,23 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	envMapParameters.preventGenerateMipMaps();
 	Cubemap* environmentCubemap = Cubemap::createCubemap(ENVIRONMENT_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, envMapParameters);
 
+	ShaderBlock_PBREnvMapGen envMapGenData;
+	UBO* envMapGenUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_PBR_ENV_MAP_GEN);
+
 	shader1->use();
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture->getHandle());
 
 	shader1->setUniformi("EquiMap", 0);
-	shader1->setUniformMatrix4("ProjectionMatrix", captureProjection);
+	envMapGenData.projection = captureProjection;
 
 	glViewport(0, 0, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	for (unsigned int i = 0; i < 6; i++) {
-		shader1->setUniformMatrix4("ViewMatrix", captureViews[i]);
+		envMapGenData.view = captureViews[i];
+		envMapGenUBO->update(&envMapGenData, 0, sizeof(ShaderBlock_PBREnvMapGen));
+
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, environmentCubemap->getHandle(), 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -125,12 +130,13 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubemap->getHandle());
 	shader2->setUniformi("EnvMap", 0);
-	shader2->setUniformMatrix4("ProjectionMatrix", captureProjection);
+	envMapGenData.projection = captureProjection;
 
 	glViewport(0, 0, IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	for (unsigned int i = 0; i < 6; i++) {
-		shader2->setUniformMatrix4("ViewMatrix", captureViews[i]);
+		envMapGenData.view = captureViews[i];
+		envMapGenUBO->update(&envMapGenData, 0, sizeof(ShaderBlock_PBREnvMapGen));
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceCubemap->getHandle(), 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -148,6 +154,9 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	prefilMapParameters.preventGenerateMipMaps();
 	Cubemap* prefilterCubemap = Cubemap::createCubemap(PREFILTER_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, prefilMapParameters);
 
+	ShaderBlock_PBRPrefilterMapGen prefilterMapGenData;
+	UBO* prefilterMapGenUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_PBR_ENV_MAP_GEN);
+
 	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, Window::getCurrentInstance()->getSettings().videoMaxAnisotropicSamples);
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP); //Allocate required memory
 
@@ -155,8 +164,8 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubemap->getHandle());
 	shader3->setUniformi("EnvMap", 0);
-	shader3->setUniformMatrix4("ProjectionMatrix", captureProjection);
-	shader3->setUniformf("EnvMapSize", ENVIRONMENT_MAP_SIZE);
+	envMapGenData.projection = captureProjection;
+	prefilterMapGenData.envMapSize = ENVIRONMENT_MAP_SIZE;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	const unsigned int maxMipLevels = 5;
@@ -171,9 +180,11 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 		glViewport(0, 0, mipWidth, mipHeight);
 
 		float roughness = (float) mip / (float) (maxMipLevels - 1);
-		shader3->setUniformf("Roughness", roughness);
+		prefilterMapGenData.roughness = roughness;
+		prefilterMapGenUBO->update(&prefilterMapGenData, 0, sizeof(ShaderBlock_PBRPrefilterMapGen));
 		for (unsigned int i = 0; i < 6; i++) {
-			shader3->setUniformMatrix4("ViewMatrix", captureViews[i]);
+			envMapGenData.view = captureViews[i];
+			envMapGenUBO->update(&envMapGenData, 0, sizeof(ShaderBlock_PBREnvMapGen));
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterCubemap->getHandle(), mip);
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

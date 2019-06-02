@@ -20,6 +20,7 @@
 #define CORE_RENDER_LIGHT_H_
 
 #include "FBO.h"
+#include "Renderer.h"
 #include "../Object.h"
 #include "../Frustum.h"
 
@@ -58,6 +59,9 @@ private:
 	Matrix4f lightProjection;
 	Matrix4f lightView;
 
+	/* Shadow transforms for point lights */
+	std::vector<Matrix4f> lightShadowTransforms;
+
 	/* Frustum used for frustum culling when rendering shadow maps */
 	Frustum frustum;
 
@@ -80,7 +84,7 @@ public:
 	void update();
 
 	/* The method called to assign the uniforms in a shader for this light */
-	virtual void setUniforms(Shader* shader, std::string suffix);
+	virtual void setUniforms(ShaderStruct_Light& lightData);
 
 	/* Setters and getters */
 	inline Light* setType(unsigned int type) { this->type = type; return this; }
@@ -108,6 +112,7 @@ public:
 	inline bool hasDepthBuffer() { return depthBuffer; }
 	inline unsigned int getShadowMapSize() { return shadowMapSize; }
 	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
+	inline Matrix4f& getLightShadowTransform(unsigned int index) { return lightShadowTransforms[index]; }
 	inline Matrix4f getLightViewMatrix() { return lightView; }
 	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }
 	inline Frustum& getFrustum() { return frustum; }

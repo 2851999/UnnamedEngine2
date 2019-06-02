@@ -86,20 +86,20 @@ float CDLODHeightMap::getHeight(float x, float y) {
 	if (mapMaxX == mapMinX)
 		fxy1 = v3;
 	else
-		fxy1 = ((mapMaxX - mapX)/(mapMaxX - mapMinX)) * v3 + ((mapX - mapMinX)/(mapMaxX - mapMinX)) * v4;
+		fxy1 = ((mapMaxX - mapX) / (mapMaxX - mapMinX)) * v3 + ((mapX - mapMinX) / (mapMaxX - mapMinX)) * v4;
 
 	float fxy2;
 	if (mapMaxX == mapMinX)
 		fxy2 = v1;
 	else
-		fxy2 = ((mapMaxX - mapX)/(mapMaxX - mapMinX)) * v1 + ((mapX - mapMinX)/(mapMaxX - mapMinX)) * v2;
+		fxy2 = ((mapMaxX - mapX) / (mapMaxX - mapMinX)) * v1 + ((mapX - mapMinX) / (mapMaxX - mapMinX)) * v2;
 
 	//Interpolate in y direction
 	float height;
 	if (mapMaxY == mapMinY)
 		height = fxy1;
 	else
-		height = ((mapMaxY - mapY)/(mapMaxY - mapMinY)) * fxy1 + ((mapY - mapMinY)/(mapMaxY - mapMinY)) * fxy2;
+		height = ((mapMaxY - mapY) / (mapMaxY - mapMinY)) * fxy1 + ((mapY - mapMinY) / (mapMaxY - mapMinY)) * fxy2;
 
 	//Return the height
 	return height;
@@ -121,6 +121,29 @@ float CDLODHeightMap::getValue(int mapX, int mapY) {
 	}
 }
 
+Vector3f CDLODHeightMap::calculateNormal(float x, float y) {
+	//From the shader
+	Vector3f normal;
+
+	float normalOffset = 1.0f;
+	Vector3f off = Vector3f(normalOffset, normalOffset, 0.0);
+	float hL = getHeight(x - off.getX(), y - off.getZ());
+	float hR = getHeight(x + off.getX(), y + off.getZ());
+	float hD = getHeight(x - off.getZ(), y - off.getY());
+	float hU = getHeight(x + off.getZ(), y + off.getY());
+
+	normal.setX(hL - hR);
+	normal.setY(2.0 * normalOffset);
+	normal.setZ(hD - hU);
+	normal.normalise();
+
+	return normal;
+}
+
+float CDLODHeightMap::getSteepness(float x, float y, Vector3f direction) {
+	return -calculateNormal(x, y).dot(direction);
+}
+
 float CDLODHeightMap::getMinHeight(float x, float y, float areaSize) {
 	//The minimum value
 	float min = 9999999.0f;
@@ -131,8 +154,8 @@ float CDLODHeightMap::getMinHeight(float x, float y, float areaSize) {
 	float endY   = y + areaSize / 2.0f;
 
 	//Go through each coordinate in the area (taking into account the nodeSize)
-	for (float currentY = startY; currentY <= endY; currentY++) {
-		for (float currentX = startX; currentX <= endX; currentX++) {
+	for (float currentY = startY; currentY < endY; currentY++) {
+		for (float currentX = startX; currentX < endX; currentX++) {
 			//Assign the value
 			min = utils_maths::min(min, getHeight(currentX, currentY));
 		}
@@ -150,8 +173,8 @@ float CDLODHeightMap::getMaxHeight(float x, float y, float areaSize) {
 	float startY = y - areaSize / 2.0f;
 	float endY   = y + areaSize / 2.0f;
 	//Go through each coordinate in the area (taking into account the nodeSize)
-	for (float currentY = startY; currentY <= endY; currentY++) {
-		for (float currentX = startX; currentX <= endX; currentX++) {
+	for (float currentY = startY; currentY < endY; currentY++) {
+		for (float currentX = startX; currentX < endX; currentX++) {
 			//Assign the value
 			max = utils_maths::max(max, getHeight(currentX, currentY));
 		}

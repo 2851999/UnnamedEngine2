@@ -32,7 +32,7 @@ Sphere MeshData::calculateBoundingSphere() {
 	float lengthX = maxX - minX;
 	float lengthY = maxY - minY;
 	float lengthZ = maxZ - minZ;
-	float largestLength = Vector3f(lengthX, lengthY, lengthZ).length();
+	float largestLength = utils_maths::max(utils_maths::max(lengthX, lengthY), lengthZ);
 
 	//Calculate the centre and radius of the bound sphere
 	sphere.centre = Vector3f((maxX + minX) / 2.0f, (maxY + minY) / 2.0f, (maxZ + minZ) / 2.0f);

@@ -27,12 +27,14 @@ namespace VideoResolution {
 	const Vector2i RES_1280x720   = Vector2i(1280, 720);
 	const Vector2i RES_1366x768   = Vector2i(1366, 768);
 	const Vector2i RES_1920x1080  = Vector2i(1920, 1080);
+	const Vector2i RES_2560x1440  = Vector2i(2560, 1440);
 	const Vector2i RES_3840x2160  = Vector2i(3840, 2160);
 
 	/* The named video resolutions */
 	const Vector2i RES_DEFAULT    = RES_1280x720;
-	const Vector2i RES_720P       = RES_1280x720;
-	const Vector2i RES_1080P      = RES_1920x1080;
+	const Vector2i RES_720p       = RES_1280x720;
+	const Vector2i RES_1080p      = RES_1920x1080;
+	const Vector2i RES_1440p      = RES_2560x1440;
 	const Vector2i RES_4K         = RES_3840x2160;
 
 	/* Used to convert a Vector2i into a string representing a resolution */

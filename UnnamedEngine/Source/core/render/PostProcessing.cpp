@@ -46,7 +46,7 @@ PostProcessor::PostProcessor(bool multisample) {
 			Window::getCurrentInstance()->getSettings().windowWidth,
 			Window::getCurrentInstance()->getSettings().windowHeight,
 			GL_DEPTH_COMPONENT,
-			GL_FLOAT,
+			GL_UNSIGNED_INT,
 			GL_DEPTH_ATTACHMENT,
 			GL_NEAREST,
 			GL_CLAMP_TO_EDGE,

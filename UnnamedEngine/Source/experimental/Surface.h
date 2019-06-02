@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2018 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,12 +16,26 @@
  *
  *****************************************************************************/
 
-#include "GLUtils.h"
+#ifndef EXPERIMENTAL_SURFACE_H_
+#define EXPERIMENTAL_SURFACE_H_
 
-/*****************************************************************************
- * Various OpenGL utilities
- *****************************************************************************/
+#include "../core/Object.h"
+#include "../core/render/Renderer.h"
 
-namespace GLUtils {
+class Surface : public GameObject3D {
+private:
+	unsigned int width;
+	unsigned int height;
+public:
+	Surface(unsigned int meshSize);
 
-}
+	virtual ~Surface() {}
+
+	float f(float x, float y, float t);
+	void updateHeights(float time);
+
+	MeshData* createMeshData(unsigned int width, unsigned int height);
+};
+
+
+#endif /* EXPERIMENTAL_SURFACE_H_ */
