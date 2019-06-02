@@ -6,20 +6,18 @@
 #define UE_TERRAIN_VERTEX_MORPH_END 0.40
 
 #map uniform HeightMap ue_heightMap
-#map uniform Translation ue_translation
-#map uniform Scale ue_scale
-#map uniform Range ue_range
-#map uniform GridSize ue_gridSize
-#map uniform HeightScale ue_heightScale
-#map uniform Size ue_size
 
 uniform sampler2D ue_heightMap;
-uniform vec3 ue_translation;
-uniform float ue_scale;
-uniform float ue_range;
-uniform vec2 ue_gridSize;
-uniform float ue_heightScale;
-uniform float ue_size;
+
+/* The terrain data */
+layout (std140, binding = 5) uniform UETerrainData {
+	uniform vec4 ue_translation;
+	uniform vec2 ue_gridSize;
+	uniform float ue_scale;
+	uniform float ue_range;
+	uniform float ue_heightScale;
+	uniform float ue_size;
+};
 
 out float ue_frag_height;
 
@@ -55,7 +53,7 @@ vec3 ueTerrainCalculateWorldPosition(vec3 position, vec3 translation, float scal
 
 	float height = ueTerrainGetHeight(worldPosition.xz);
 	worldPosition.y = height;
-	float dist = distance(ue_cameraPosition, worldPosition);
+	float dist = distance(ue_cameraPosition.xyz, worldPosition);
 	float nextLevelThreshold = ((ue_range - dist) / scale);
 	float morphK = 1.0 - smoothstep(morphStart, morphEnd, nextLevelThreshold);
 	worldPosition.xz = ueTerrainMorphVertex(position.xz, worldPosition.xz, morphK);
@@ -66,7 +64,7 @@ vec3 ueTerrainCalculateWorldPosition(vec3 position, vec3 translation, float scal
 }
 
 void ueTerrainAssignTerrainData() {
-	vec3 worldPosition = ueTerrainCalculateWorldPosition(ue_position, ue_translation, ue_scale, UE_TERRAIN_VERTEX_MORPH_START, UE_TERRAIN_VERTEX_MORPH_END);
+	vec3 worldPosition = ueTerrainCalculateWorldPosition(ue_position, ue_translation.xyz, ue_scale, UE_TERRAIN_VERTEX_MORPH_START, UE_TERRAIN_VERTEX_MORPH_END);
 	
 	ue_frag_height = (worldPosition.y / ue_heightScale) + 0.5;
 	

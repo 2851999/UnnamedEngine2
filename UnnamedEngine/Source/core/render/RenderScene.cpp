@@ -33,9 +33,23 @@ RenderScene3D::RenderScene3D() {
 	shadowCubemapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_CUBEMAP)->getForwardShader();
 	//Setup the post processor
 	postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader", false);
-	//Set the default post processing options
-	enableGammaCorrection();
-	setExposure(-1);
+
+	//Get the lighting and gamma correction UBOs
+	shaderLightingUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_LIGHTING);
+	shaderGammaCorrectionUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_GAMMA_CORRECTION);
+
+	//Assign some default values
+	shaderLightingData.ue_useEnvironmentMap = false;
+
+	shaderGammaCorrectionData.gammaCorrect = true;
+	shaderGammaCorrectionData.exposureIn = -1;
+
+	//Assign the default data
+	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
+
+	//Get the PBR lighting core and shadow cubemap UBO's
+	shaderPBRLightingCoreUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_PBR_LIGHTING_CORE);
+	shaderShadowCubemapUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_SHADOW_CUBEMAP);
 
 	//Setup the intermediate FBO if it is needed
 	if (Window::getCurrentInstance()->getSettings().videoSamples > 0)
@@ -102,6 +116,9 @@ void RenderScene3D::render() {
 			if (renderWireframe)
 				utils_gl::enableWireframe();
 
+			//Assign the camera position
+			Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
+
 			//Go through all of the objects in this scene
 			for (unsigned int i = 0; i < batches.size(); i++) {
 				//Ensure the geometry shader is used to render all of the objects in this batch
@@ -112,8 +129,7 @@ void RenderScene3D::render() {
 				//Use the shader
 				shader->use();
 
-				shader->setUniformi("NumLights", 0);
-				shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+				shaderLightingData.ue_numLights = 0;
 
 				//Go through all of the objects in the current batch
 				for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
@@ -124,8 +140,8 @@ void RenderScene3D::render() {
 					Matrix4f modelMatrix = object->getModelMatrix();
 
 					//Assign the required matrix uniforms for the object
-					shader->setUniformMatrix4("ModelMatrix", modelMatrix);
-					shader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
+					Renderer::getShaderBlock_Core().ue_modelMatrix = modelMatrix;
+					Renderer::getShaderBlock_Core().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
 
 					//Render the object with the geometry shader
 					object->render();
@@ -200,6 +216,9 @@ void RenderScene3D::forwardPreRender() {
 	//Render a wireframe instead if requested
 	if (renderWireframe)
 		utils_gl::enableWireframe();
+
+	//Assign the camera position
+	Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
 }
 
 void RenderScene3D::forwardPostRender() {
@@ -231,12 +250,13 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 	shader->use();
 
 	//Assign any uniforms that are needed for all kinds of lighting
-	shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
+	Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
 
 	//Check whether using PBR or phong lighting
 	if (pbr) {
 		//Ensure ambient lighting is added
-		shader->setUniformi("UseAmbient", 1);
+		shaderPBRLightingCoreData.ue_useAmbient = 1;
+		shaderPBRLightingCoreUBO->update(&shaderPBRLightingCoreData, 0, sizeof(ShaderBlock_PBRLightingCore));
 		//Check if the environment textures should be bound
 		if (pbrEnvironment) {
 			//Bind the textures
@@ -247,7 +267,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 	} else {
 		//Assign the shader uniforms only needed for 'normal' phong shading that don't need information from the
 		//model or current light
-		shader->setUniformColourRGB("LightAmbient", ambientLight);
+		shaderLightingData.ue_lightAmbient = Vector4f(ambientLight, 0.0f);
 	}
 
 	//Also check for deferred rendering
@@ -279,10 +299,11 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			blendNeeded = true;
 
 			//Assign the ambient light parameter if using phong shading (don't want to include it twice)
-			if (pbr)
-				shader->setUniformi("UseAmbient", 0);
-			else
-				shader->setUniformColourRGB("LightAmbient", Colour(0.0f, 0.0f, 0.0f));
+			if (pbr) {
+				shaderPBRLightingCoreData.ue_useAmbient = 0;
+				shaderPBRLightingCoreUBO->update(&shaderPBRLightingCoreData, 0, sizeof(ShaderBlock_PBRLightingCore));
+			} else
+				shaderLightingData.ue_lightAmbient = Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
 
 			//Setup blending
 			glEnable(GL_BLEND);
@@ -292,29 +313,31 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 		}
 
 		//Assign the number of lights that will be rendered in this set
-		shader->setUniformi("NumLights", uniformNumLights);
+		shaderLightingData.ue_numLights = uniformNumLights;
 
 		//The light number in the current set
 		unsigned int lightIndexInSet;
 
 		//Go through each light in the set
-		for (unsigned int l = s; (l < s + NUM_LIGHTS_IN_SET) && (l < lights.size()); l++) {
+		for (unsigned int l = s; (l < s + NUM_LIGHTS_IN_SET) && (l < lights.size()); ++l) {
 			//Calculate the index of the current light as it will appear in the shader
 			lightIndexInSet = l - s;
 			//Assign the uniforms for the current light
-			lights[l]->setUniforms(shader, "[" + utils_string::str(lightIndexInSet) + "]");
+			lights[l]->setUniforms(shaderLightingData.ue_lights[lightIndexInSet]);
 
 			//Assign the data for shadow mapping
 			if (lights[l]->hasDepthBuffer()) {
-				shader->setUniformMatrix4("LightSpaceMatrix[" + utils_string::str(lightIndexInSet) + "]", lights[l]->getLightSpaceMatrix());
+				shaderLightingData.ue_lightSpaceMatrix[lightIndexInSet] = lights[l]->getLightSpaceMatrix();
 				if (lights[l]->getType() == Light::TYPE_POINT)
 					shader->setUniformi("Light_ShadowCubemap[" + utils_string::str(lightIndexInSet) + "]", Renderer::bindTexture(lights[l]->getDepthBuffer()->getFramebufferStore(0))); //((Camera3D*)Renderer::getCamera())->getSkyBox()->getCubemap())
 				else
 					shader->setUniformi("Light_ShadowMap[" + utils_string::str(lightIndexInSet) + "]", Renderer::bindTexture(lights[l]->getDepthBuffer()->getFramebufferStore(0)));
-				shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightIndexInSet) + "]", 1);
+				shaderLightingData.ue_lights[lightIndexInSet].useShadowMap = 1;
 			} else
-				shader->setUniformi("Light_UseShadowMap[" + utils_string::str(lightIndexInSet) + "]", 0);
+				shaderLightingData.ue_lights[lightIndexInSet].useShadowMap = 0;
 		}
+
+		shaderLightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
 
 		//Now check whether forward or deferred rendering
 		if (deferredRendering)
@@ -322,13 +345,13 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			Renderer::getScreenTextureMesh()->render();
 		else {
 			//Go through each object in the current batch and render it with the shader
-			for (unsigned int j = 0; j < batches[indexOfBatch].objects.size(); j++) {
+			for (unsigned int j = 0; j < batches[indexOfBatch].objects.size(); ++j) {
 				//Get the model matrix for the current object
 				Matrix4f modelMatrix = batches[indexOfBatch].objects[j]->getModelMatrix();
 
 				//Assign the required matrix uniforms for the object
-				shader->setUniformMatrix4("ModelMatrix", modelMatrix);
-				shader->setUniformMatrix3("NormalMatrix", modelMatrix.to3x3().inverse().transpose());
+				Renderer::getShaderBlock_Core().ue_modelMatrix = modelMatrix;
+				Renderer::getShaderBlock_Core().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
 
 				//Render the object with the shadow map shader
 				batches[indexOfBatch].objects[j]->render();
@@ -375,13 +398,16 @@ void RenderScene3D::renderShadowMap(Light* light) {
 	if (light->getType() == Light::TYPE_POINT) {
 		shadowCubemapShader->use();
 
-		shadowCubemapShader->setUniformVector3("LightPosition", light->getPosition());
-		shadowCubemapShader->setUniformMatrix4("ShadowMatrices[0]", light->getLightShadowTransform(0));
-		shadowCubemapShader->setUniformMatrix4("ShadowMatrices[1]", light->getLightShadowTransform(1));
-		shadowCubemapShader->setUniformMatrix4("ShadowMatrices[2]", light->getLightShadowTransform(2));
-		shadowCubemapShader->setUniformMatrix4("ShadowMatrices[3]", light->getLightShadowTransform(3));
-		shadowCubemapShader->setUniformMatrix4("ShadowMatrices[4]", light->getLightShadowTransform(4));
-		shadowCubemapShader->setUniformMatrix4("ShadowMatrices[5]", light->getLightShadowTransform(5));
+		shaderShadowCubemapData.lightPos = Vector4f(light->getPosition(), 0.0f);
+
+		shaderShadowCubemapData.shadowMatrices[0] = light->getLightShadowTransform(0);
+		shaderShadowCubemapData.shadowMatrices[1] = light->getLightShadowTransform(1);
+		shaderShadowCubemapData.shadowMatrices[2] = light->getLightShadowTransform(2);
+		shaderShadowCubemapData.shadowMatrices[3] = light->getLightShadowTransform(3);
+		shaderShadowCubemapData.shadowMatrices[4] = light->getLightShadowTransform(4);
+		shaderShadowCubemapData.shadowMatrices[5] = light->getLightShadowTransform(5);
+
+		shaderShadowCubemapUBO->update(&shaderShadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
 	} else
 		shadowMapShader->use();
 
@@ -389,9 +415,9 @@ void RenderScene3D::renderShadowMap(Light* light) {
 	Matrix4f lightSpaceMatrix = light->getLightSpaceMatrix();
 
 	//Go through all of the objects in this scene
-	for (unsigned int i = 0; i < batches.size(); i++) {
+	for (unsigned int i = 0; i < batches.size(); ++i) {
 		//Go through all of the objects in the current batch
-		for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
+		for (unsigned int j = 0; j < batches[i].objects.size(); ++j) {
 			//Pointer to the current object
 			GameObject3D* object = batches[i].objects[j];
 			//Stores the previous value of whether culling was enabled on the objects mesh
@@ -400,11 +426,11 @@ void RenderScene3D::renderShadowMap(Light* light) {
 			if (! culling || ! object->shouldCull(light->getFrustum()) || light->getType() == Light::TYPE_POINT) {
 				//Assign the required uniforms that could not have been done outside of the loop
 				if (light->getType() == Light::TYPE_POINT) {
-					shadowCubemapShader->setUniformMatrix4("ModelMatrix", object->getModelMatrix());
+					Renderer::getShaderBlock_Core().ue_modelMatrix = object->getModelMatrix();
 					//Ensure the object uses the shadow map shader to render
 					object->getRenderShader()->addForwardShader(shadowCubemapShader);
 				} else {
-					shadowMapShader->setUniformMatrix4("LightSpaceMatrix", lightSpaceMatrix * object->getModelMatrix());
+					Renderer::getShaderBlock_Core().ue_modelMatrix = lightSpaceMatrix * object->getModelMatrix();
 					//Ensure the object uses the shadow map shader to render
 					object->getRenderShader()->addForwardShader(shadowMapShader);
 				}
@@ -459,22 +485,22 @@ void RenderScene3D::showDeferredBuffers() {
 }
 
 void RenderScene3D::enableGammaCorrection() {
-	Shader* shader = postProcessor->getShader();
-	shader->use();
-	shader->setUniformi("GammaCorrect", 1);
-	shader->stopUsing();
+	shaderGammaCorrectionData.gammaCorrect = true;
+
+	//Update the data
+	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
 }
 
 void RenderScene3D::disableGammaCorrection() {
-	Shader* shader = postProcessor->getShader();
-	shader->use();
-	shader->setUniformi("GammaCorrect", 0);
-	shader->stopUsing();
+	shaderGammaCorrectionData.gammaCorrect = false;
+
+	//Update the data
+	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
 }
 
 void RenderScene3D::setExposure(float exposure) {
-	Shader* shader = postProcessor->getShader();
-	shader->use();
-	shader->setUniformf("Exposure", exposure);
-	shader->stopUsing();
+	shaderGammaCorrectionData.exposureIn = exposure;
+
+	//Update the data
+	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
 }

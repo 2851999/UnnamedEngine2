@@ -35,6 +35,10 @@ private:
 
 	/* States whether this text is billboarded or not */
 	bool billboarded = false;
+
+	/* UBO and data structure for billboarding */
+	UBO* shaderBillboardUBO;
+	ShaderBlock_Billboard shaderBillboardData;
 public:
 	/* The constructors */
 	Text(Font* font, Colour colour = Colour::WHITE, bool billboarded = false);
@@ -82,7 +86,7 @@ public:
 	void setColour(Colour colour);
 
 	inline Font* getFont() { return font; }
-	inline Colour getColour() { return getMaterial()->diffuseColour; }
+	inline Colour getColour() { return getMaterial()->getDiffuseColour(); }
 };
 
 #endif /* CORE_GUI_TEXT_H_ */

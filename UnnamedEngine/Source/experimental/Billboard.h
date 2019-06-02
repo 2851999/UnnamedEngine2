@@ -29,7 +29,7 @@
 class Billboard : public GameObject3D {
 public:
 	Billboard(float width, float height) : GameObject3D(new Mesh(MeshBuilder::createQuad3D(width, height)), "Billboard", width, height) {
-		getMaterial()->diffuseColour = Colour::RED;
+		getMaterial()->setDiffuse(Colour::RED);
 	}
 
 	virtual void update() override {}

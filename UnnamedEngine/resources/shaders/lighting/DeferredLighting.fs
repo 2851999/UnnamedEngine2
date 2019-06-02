@@ -8,8 +8,6 @@ uniform sampler2D ue_gPosition;
 uniform sampler2D ue_gNormal;
 uniform sampler2D ue_gAlbedo;
 
-uniform mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
-
 in vec2 frag_textureCoord;
 
 out vec4 ue_FragColour;

@@ -97,16 +97,16 @@ void Light::update() {
 	}
 }
 
-void Light::setUniforms(Shader* shader, std::string suffix) {
-	shader->setUniformi("Light_Type" + suffix, type);
-	shader->setUniformVector3("Light_Position" + suffix, getPosition());
-	shader->setUniformVector3("Light_Direction" + suffix, direction);
-	shader->setUniformColourRGB("Light_DiffuseColour"  + suffix, diffuseColour);
-	shader->setUniformColourRGB("Light_SpecularColour" + suffix, specularColour);
-	shader->setUniformf("Light_Constant" + suffix, constant);
-	shader->setUniformf("Light_Linear" + suffix, linear);
-	shader->setUniformf("Light_Quadratic" + suffix, quadratic);
-	shader->setUniformf("Light_InnerCutoff" + suffix, cos(utils_maths::toRadians(innerCutoff)));
-	shader->setUniformf("Light_OuterCutoff" + suffix, cos(utils_maths::toRadians(outerCutoff)));
+void Light::setUniforms(ShaderStruct_Light& lightData) {
+	lightData.type = type;
+	lightData.position = Vector4f(getPosition(), 0.0f);
+	lightData.direction = Vector4f(direction, 0.0f);
+	lightData.diffuseColour = Vector4f(diffuseColour, 0.0f);
+	lightData.specularColour = Vector4f(specularColour, 0.0f);
+	lightData.constant = constant;
+	lightData.linear = linear;
+	lightData.quadratic = quadratic;
+	lightData.innerCutoff = innerCutoff;
+	lightData.outerCutoff = outerCutoff;
 }
 

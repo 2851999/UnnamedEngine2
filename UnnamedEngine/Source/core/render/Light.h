@@ -20,6 +20,7 @@
 #define CORE_RENDER_LIGHT_H_
 
 #include "FBO.h"
+#include "Renderer.h"
 #include "../Object.h"
 #include "../Frustum.h"
 
@@ -83,7 +84,7 @@ public:
 	void update();
 
 	/* The method called to assign the uniforms in a shader for this light */
-	virtual void setUniforms(Shader* shader, std::string suffix);
+	virtual void setUniforms(ShaderStruct_Light& lightData);
 
 	/* Setters and getters */
 	inline Light* setType(unsigned int type) { this->type = type; return this; }

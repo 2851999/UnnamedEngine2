@@ -20,6 +20,7 @@
 #define CORE_RENDER_TILEMAP_H_
 
 #include "RenderData.h"
+#include "ShaderInterface.h"
 #include "TextureAtlas.h"
 
 /*****************************************************************************
@@ -65,6 +66,10 @@ private:
 
 	/* The shader used for rendering */
 	Shader* shader = NULL;
+
+	/* UBO and data structure for updating core shader values */
+	ShaderBlock_Core shaderCoreData;
+	UBO* shaderCoreUBO;
 
 	/* States whether this layer is editable */
 	bool editable;

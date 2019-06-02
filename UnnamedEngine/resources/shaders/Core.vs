@@ -1,11 +1,5 @@
 #include "Core.glsl"
 
-#map uniform MVPMatrix ue_mvpMatrix
-#map uniform ModelMatrix ue_modelMatrix
-#map uniform ViewMatrix ue_viewMatrix
-#map uniform ProjectionMatrix ue_projectionMatrix
-#map uniform NormalMatrix ue_normalMatrix
-#map uniform CameraPosition ue_cameraPosition
 #map attribute Position ue_position
 #map attribute TextureCoordinate ue_textureCoord
 #map attribute Normal ue_normal
@@ -19,14 +13,6 @@
 #define UE_LOCATION_BITANGENT 4
 #define UE_LOCATION_BONE_IDS 5
 #define UE_LOCATION_BONE_WEIGHTS 6
-
-uniform mat4 ue_mvpMatrix;
-uniform mat4 ue_modelMatrix;
-uniform mat4 ue_viewMatrix;
-uniform mat4 ue_projectionMatrix;
-uniform mat3 ue_normalMatrix;
-
-uniform vec3 ue_cameraPosition;
 
 layout(location = UE_LOCATION_POSITION) in vec3 ue_position;
 layout(location = UE_LOCATION_TEXTURE_COORD) in vec2 ue_textureCoord;

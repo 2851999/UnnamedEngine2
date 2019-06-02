@@ -1,15 +1,13 @@
-#version 330
+#version 420
 
-#map uniform LightPosition lightPos
-
-uniform vec3 lightPos;
+#include "ShadowCubemapShader.glsl"
 
 in vec4 FragPos;
 
 out vec3 color;
 
 void main() {
-    float lightDistance = length(FragPos.xyz - lightPos);
+    float lightDistance = length(FragPos.xyz - lightPos.xyz);
 	
 	float farPlane = 25.0f;
 	

@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2018 Joel Davies
+ *   Copyright 2019 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,30 +16,31 @@
  *
  *****************************************************************************/
 
-#include "Material.h"
+#ifndef CORE_RENDER_UBO_H_
+#define CORE_RENDER_UBO_H_
+
+#include <GL/glew.h>
+
+#include "Shader.h"
 
 /*****************************************************************************
- * The Material class
- ******************************************************************************/
+ * The UBO class is used to manage a uniform buffer object
+ *****************************************************************************/
 
-void Material::setDefault(bool pbr) {
-	setAmbient(NULL);
-	setDiffuse(NULL);
-	setSpecular(NULL);
-	setNormalMap(NULL);
-	setParallaxMap(NULL);
+class UBO {
+private:
+	/* The buffer instance */
+	GLuint buffer;
+public:
+	/* Constructor */
+	UBO(void* data, unsigned int size, GLenum usage, GLuint blockBinding);
 
-	if (! pbr) {
-		shaderData.ambientColour  = Colour(0.1f, 0.1f, 0.1f);
-		shaderData.diffuseColour  = Colour::WHITE;
-		shaderData.specularColour = Colour::WHITE;
-		shaderData.shininess = 32.0f;
-	} else {
-		shaderData.ambientColour  = Colour(0.0f);
-		shaderData.diffuseColour  = Colour::WHITE;
-		shaderData.specularColour = Colour(1.0f);
-		shaderData.shininess = 0.0f;
-	}
+	/* Destructor */
+	virtual ~UBO();
 
-	shaderData.parallaxScale = 0.05f;
-}
+	/* Method to update the contents of this buffer */
+	void update(void* data, GLintptr offset, GLsizeiptr size);
+};
+
+
+#endif /* CORE_RENDER_UBO_H_ */

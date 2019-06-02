@@ -52,7 +52,7 @@ public:
 };
 
 void Test::onInitialise() {
-	getSettings().videoVSync = true;
+	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
 //	getSettings().videoResolution = VideoResolution::RES_1440p;
@@ -145,8 +145,8 @@ void Test::onCreated() {
 
 	//std::cout << mit1->getMesh()->getMaterial(2)->diffuseTexture->getPath() << std::endl;
 
-	mit1->getMesh()->getMaterial(2)->shininessTexture = Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_rough.jpg");
-	mit1->getMesh()->getMaterial(2)->normalMap = Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_nmap_1.jpg");
+	mit1->getMesh()->getMaterial(2)->setShininess(Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_rough.jpg"));
+	mit1->getMesh()->getMaterial(2)->setNormalMap(Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_nmap_1.jpg"));
 
 	//mit1->setScale(0.5f, 0.5f, 0.5f);
 	mit1->setPosition(10.0f, 1.0f, 0.0f);

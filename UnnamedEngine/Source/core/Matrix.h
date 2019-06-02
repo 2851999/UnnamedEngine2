@@ -361,6 +361,12 @@ public:
 class Matrix4f : public Matrix4<float> {
 public:
 	Matrix4f() : Matrix4<float>() {}
+	Matrix4f(const Matrix<float, 3> &base) : Matrix4<float>() {
+		set(0, 0, base.get(0, 0)); 		set(0, 1, base.get(0, 1));		set(0, 2, base.get(0, 2));		set(0, 3, 0);
+		set(1, 0, base.get(1, 0)); 		set(1, 1, base.get(1, 1));		set(1, 2, base.get(1, 2));		set(1, 3, 0);
+		set(2, 0, base.get(2, 0)); 		set(2, 1, base.get(2, 1));		set(2, 2, base.get(2, 2));		set(2, 3, 0);
+		set(3, 0, 0);                   set(3, 1, 0);                   set(3, 2, 0);                   set(3, 3, 0);
+	}
 	Matrix4f(const Matrix<float, 4> &base) : Matrix4<float>(base) {}
 	Matrix4f(const Matrix4<float> &base) : Matrix4<float>(base) {}
 

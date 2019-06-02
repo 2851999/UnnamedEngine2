@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2018 Joel Davies
+ *   Copyright 2019 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,30 +16,29 @@
  *
  *****************************************************************************/
 
-#include "Material.h"
+#include "UBO.h"
 
 /*****************************************************************************
- * The Material class
- ******************************************************************************/
+ * The UBO class
+ *****************************************************************************/
 
-void Material::setDefault(bool pbr) {
-	setAmbient(NULL);
-	setDiffuse(NULL);
-	setSpecular(NULL);
-	setNormalMap(NULL);
-	setParallaxMap(NULL);
+UBO::UBO(void* data, unsigned int size, GLenum usage, GLuint blockBinding) {
+	//Setup the UBO
+	glGenBuffers(1, &buffer);
+	glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+	glBufferData(GL_UNIFORM_BUFFER, size, data, usage);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	if (! pbr) {
-		shaderData.ambientColour  = Colour(0.1f, 0.1f, 0.1f);
-		shaderData.diffuseColour  = Colour::WHITE;
-		shaderData.specularColour = Colour::WHITE;
-		shaderData.shininess = 32.0f;
-	} else {
-		shaderData.ambientColour  = Colour(0.0f);
-		shaderData.diffuseColour  = Colour::WHITE;
-		shaderData.specularColour = Colour(1.0f);
-		shaderData.shininess = 0.0f;
-	}
+	glBindBufferBase(GL_UNIFORM_BUFFER, blockBinding, buffer);
+}
 
-	shaderData.parallaxScale = 0.05f;
+UBO::~UBO() {
+	if (buffer > 0)
+		glDeleteBuffers(1, &buffer);
+}
+
+void UBO::update(void* data, GLintptr offset, GLsizeiptr size) {
+	glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+	glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }

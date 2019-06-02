@@ -49,6 +49,10 @@ private:
 	/* Range multiplier to help resolve seams between nodes */
 	const float RANGE_MULTIPLIER = 1.25f;
 
+	/* The UBO for the terrain data in the shader and an instance of its data structure */
+	ShaderBlock_Terrain shaderTerrainData;
+	UBO* shaderTerrainUBO;
+
 //	Texture* texture1;
 //	Texture* texture2;
 //	Texture* texture3;

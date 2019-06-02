@@ -1,4 +1,4 @@
-#version 140
+#version 420
 
 #map attribute Position ue_position
 #map attribute TextureCoordinate ue_textureCoord
