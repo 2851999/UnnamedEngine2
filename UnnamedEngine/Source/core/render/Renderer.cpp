@@ -123,8 +123,6 @@ void Renderer::releaseNewTextures() {
 }
 
 void Renderer::initialise() {
-	glewInit();
-
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the UBOs

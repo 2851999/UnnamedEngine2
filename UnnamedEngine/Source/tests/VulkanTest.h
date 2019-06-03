@@ -16,18 +16,39 @@
  *
  *****************************************************************************/
 
-#include "tests/VulkanTest.h"
-//#include "examples/basic/BasicRendering3D.h"
-//#include "examples/asteroids/AsteroidsGame.h"
+#ifndef TESTS_BASEENGINETEST3D_H_
+#define TESTS_BASEENGINETEST3D_H_
 
-int main() {
-	Test test;
-	test.create();
-//	AsteroidsGame asteroids;
-//	asteroids.create();
+#include "../core/BaseEngine.h"
 
-//	Tutorial tutorial;
-//	tutorial.create();
+class Test : public BaseEngine {
+public:
+	void initialise() override;
+	void created() override;
+	void update() override;
+	void render() override;
+	void destroy() override;
+};
 
-	return 0;
+void Test::initialise() {
+	getSettings().videoVulkan = true;
 }
+
+void Test::created() {
+
+}
+
+void Test::update() {
+
+}
+
+void Test::render() {
+
+}
+
+void Test::destroy() {
+
+}
+
+
+#endif /* TESTS_BASEENGINETEST3D_H_ */

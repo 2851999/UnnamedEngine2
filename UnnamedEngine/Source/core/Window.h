@@ -21,6 +21,7 @@
 
 #include <windows.h>
 #include <GL/glew.h>
+#include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
 #include "Settings.h"
@@ -53,7 +54,6 @@ private:
 	/* The current instance being used */
 	static Window* currentInstance;
 public:
-
 	/* Constructor and destructor */
 	Window();
 	virtual ~Window() { destroy(); }
