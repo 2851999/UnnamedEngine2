@@ -84,6 +84,8 @@ public:
 	VkPhysicalDevice& getPhysical() { return physicalDevice; }
 	VkDevice&         getLogical()  { return logicalDevice;  }
 	VulkanDeviceQueueFamilies& getQueueFamilies() { return queueFamilies; }
+	VkQueue& getGraphicsQueue()     { return graphicsQueue; }
+	VkQueue& getPresentQueue()      { return presentQueue;  }
 
 	/* Finds a suitable physical device and creates and returns a VulkanDevice instance using it */
 	static VulkanDevice* create();

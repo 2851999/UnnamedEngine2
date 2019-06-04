@@ -22,6 +22,8 @@
 #include "../Window.h"
 #include "VulkanDevice.h"
 #include "VulkanSwapChain.h"
+#include "VulkanRenderPass.h"
+#include "VulkanGraphicsPipeline.h"
 
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
@@ -29,6 +31,8 @@
 
 class Vulkan {
 private:
+	static const unsigned int MAX_FRAMES_IN_FLIGHT = 2;
+
 	/* The actual instance handled by this class */
 	static VkInstance instance;
 
@@ -43,6 +47,32 @@ private:
 
 	/* The swap chain */
 	static VulkanSwapChain* swapChain;
+
+	/* The render pass */
+	static VulkanRenderPass* renderPass;
+
+	/* Vertex and indices data */
+	static float vertices[];
+	static uint16_t indices[];
+
+	/* The vertex and index buffers to render */
+	static VulkanBuffer<float>*    vertexBuffer;
+	static VulkanBuffer<uint16_t>* indexBuffer;
+
+	/* The graphics pipeline */
+	static VulkanGraphicsPipeline* graphicsPipeline;
+
+	/* Command pool */
+	static VkCommandPool commandPool;
+
+	/* Command buffers (one for each swap chain image) */
+	static std::vector<VkCommandBuffer> commandBuffers;
+
+	/* Synchronisation objects */
+	static std::vector<VkSemaphore> imageAvailableSemaphores; //Signals image acquired ready for rendering
+	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
+	static std::vector<VkFence> inFlightFences;
+	static unsigned int currentFrame;
 
 	/* Method to create a debug messenger */
 	static VkResult createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
@@ -83,11 +113,32 @@ public:
 	/* Method to destroy the window surface */
 	static void destroyWindowSurface();
 
+	/* Method to create the command pool */
+	static void createCommandPool();
+
+	/* Method to destroy the command pool */
+	static void destroyCommandPool();
+
+	/* Method to create the command buffers */
+	static void createCommandBuffers(); //(Destroyed with command pool)
+
+	/* Method to create the synchronisation objects */
+	static void createSyncObjects();
+
+	/* Method to destroy the synchronisation objects */
+	static void destroySyncObjects();
+
+	/* Method to draw a frame */
+	static void drawFrame();
+
 	/* Method to obtain the Vulkan instance */
 	static inline VkInstance& getInstance() { return instance; }
 
 	/* Method to obtain the window surface */
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
+
+	/* Method to obtain the command pool */
+	static inline VkCommandPool& getCommandPool() { return commandPool; }
 };
 
 

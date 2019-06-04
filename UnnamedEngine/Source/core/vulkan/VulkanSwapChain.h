@@ -53,6 +53,14 @@ public:
 
 	/* Destructor */
 	virtual ~VulkanSwapChain();
+
+	/* Getters */
+	VkSwapchainKHR& getInstance() { return instance; }
+	VkImageView& getImageView(unsigned int index) { return imageViews[index]; }
+	VkFormat getFormat() { return format; }
+	VkExtent2D& getExtent() { return extent; }
+	VulkanDevice* getDevice() { return device; }
+	unsigned int getImageCount() { return images.size(); }
 };
 
 #endif /* CORE_VULKAN_VULKANSWAPCHAIN_H_ */

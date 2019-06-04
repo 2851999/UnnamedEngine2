@@ -136,7 +136,8 @@ void BaseEngine::create() {
 					renderDebugInfo();
 				if (getSettings().debugConsoleEnabled)
 					renderDebugConsole();
-			}
+			} else
+				Vulkan::drawFrame();
 
 			window->update();
 

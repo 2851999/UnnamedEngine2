@@ -23,15 +23,38 @@
 
 #include "../../utils/Logging.h"
 
+#include <limits>
+
 /*****************************************************************************
  * The Vulkan class
  *****************************************************************************/
 
-VkInstance               Vulkan::instance;
-VkDebugUtilsMessengerEXT Vulkan::debugMessenger;
-VkSurfaceKHR             Vulkan::windowSurface;
-VulkanDevice*            Vulkan::device;
-VulkanSwapChain*         Vulkan::swapChain;
+VkInstance                   Vulkan::instance;
+VkDebugUtilsMessengerEXT     Vulkan::debugMessenger;
+VkSurfaceKHR                 Vulkan::windowSurface;
+VulkanDevice*                Vulkan::device;
+VulkanSwapChain*             Vulkan::swapChain;
+VulkanRenderPass*            Vulkan::renderPass;
+VulkanBuffer<float>*         Vulkan::vertexBuffer;
+VulkanBuffer<uint16_t>*      Vulkan::indexBuffer;
+VulkanGraphicsPipeline*      Vulkan::graphicsPipeline;
+VkCommandPool                Vulkan::commandPool;
+std::vector<VkCommandBuffer> Vulkan::commandBuffers;
+std::vector<VkSemaphore>     Vulkan::imageAvailableSemaphores;
+std::vector<VkSemaphore>     Vulkan::renderFinishedSemaphores;
+std::vector<VkFence>         Vulkan::inFlightFences;
+unsigned int                 Vulkan::currentFrame = 0;
+
+float Vulkan::vertices[25] = {
+	-0.5f, -0.5f,     1.0f, 0.0f, 0.0f,
+	 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,
+	 0.5f,  0.5f,     0.0f, 0.0f, 1.0f,
+	-0.5f,  0.5f,     1.0f, 1.0f, 1.0f
+};
+
+uint16_t Vulkan::indices[6] = {
+		0, 1, 2, 2, 3, 0
+};
 
 bool Vulkan::ENABLE_VALIDATION_LAYERS = true;
 
@@ -68,11 +91,43 @@ bool Vulkan::initialise(Window* window) {
 	//Create the swap chain
 	swapChain = new VulkanSwapChain(device, window->getSettings());
 
+	//Create the render pass
+	renderPass = new VulkanRenderPass(swapChain);
+
+	//Create the command pool
+	createCommandPool();
+
+	//Create the vertex and index buffers
+	vertexBuffer = new VulkanBuffer<float>(vertices, 25, 5, device, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+	indexBuffer  = new VulkanBuffer<uint16_t>(indices, 6, 1, device, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+
+	//Create the graphics pipeline
+	graphicsPipeline = new VulkanGraphicsPipeline(swapChain, vertexBuffer, renderPass);
+
+	//Create the command buffers
+	createCommandBuffers();
+
+	//Create the synchronisation objects
+	createSyncObjects();
+
 	//If have reached this point, initialisation successful
 	return true;
 }
 
 void Vulkan::destroy() {
+	//Wait for a suitable time
+	vkDeviceWaitIdle(device->getLogical());
+
+	destroySyncObjects();
+
+	delete graphicsPipeline;
+
+	delete vertexBuffer;
+	delete indexBuffer;
+
+	destroyCommandPool();
+
+	delete renderPass;
 	delete swapChain;
 	delete device;
 
@@ -148,6 +203,158 @@ bool Vulkan::createWindowSurface(Window* window) {
 
 void Vulkan::destroyWindowSurface() {
 	vkDestroySurfaceKHR(instance, windowSurface, nullptr);
+}
+
+void Vulkan::createCommandPool() {
+	//Obtain the queue family indices from the device
+	VulkanDeviceQueueFamilies& queueFamilies = device->getQueueFamilies();
+
+	//Setup the command pool creation data
+	VkCommandPoolCreateInfo poolCreateInfo = {};
+	poolCreateInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolCreateInfo.queueFamilyIndex = queueFamilies.graphicsFamilyIndex;
+	poolCreateInfo.flags            = 0; //Optional VK_COMMAND_POOL_CREATE_TRANSIENT_BIT - if buffers will be updated many times
+
+	//Attempt to create the command pool
+	if (vkCreateCommandPool(device->getLogical(), &poolCreateInfo, nullptr, &commandPool) != VK_SUCCESS)
+		Logger::log("Failed to create command pool", "Vulkan", LogType::Error);
+}
+
+void Vulkan::destroyCommandPool() {
+	vkDestroyCommandPool(device->getLogical(), commandPool, nullptr);
+}
+
+void Vulkan::createCommandBuffers() {
+	//Obtain the list of framebuffers in the swap chain
+	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
+
+	//Need to allocate the same number of command buffers as framebuffers
+	commandBuffers.resize(swapChainFramebuffers.size());
+
+	VkCommandBufferAllocateInfo allocInfo = {};
+	allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool        = commandPool;
+	allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
+
+	//Attempt to allocate the command buffers
+	if (vkAllocateCommandBuffers(device->getLogical(), &allocInfo, commandBuffers.data()) != VK_SUCCESS)
+		Logger::log("Failed to allocate command buffers", "Vulkan", LogType::Error);
+
+	//Go through the command buffers
+	for (size_t i = 0; i < commandBuffers.size(); i++) {
+		VkCommandBufferBeginInfo beginInfo = {};
+		beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags            = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+		beginInfo.pInheritanceInfo = nullptr; // Optional
+
+		if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS)
+			throw std::runtime_error("Failed to begin recording command buffer");
+
+		VkRenderPassBeginInfo renderPassInfo = {};
+		renderPassInfo.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass  = renderPass->getInstance();
+		renderPassInfo.framebuffer = swapChainFramebuffers[i];
+
+		renderPassInfo.renderArea.offset = {0, 0};
+		renderPassInfo.renderArea.extent = swapChain->getExtent();
+
+		VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+		renderPassInfo.clearValueCount = 1;
+		renderPassInfo.pClearValues    = &clearColor;
+
+		vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getInstance());
+
+		VkBuffer vertexBuffers[] = { vertexBuffer->getInstance() };
+		VkDeviceSize offsets = { 0 };
+		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, &offsets);
+		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer->getInstance(), 0, VK_INDEX_TYPE_UINT16);
+
+		//vkCmdDraw(commandBuffers[i], vertexBuffer->getNumVertices(), 1, 0, 0);
+		vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(6), 1, 0, 0, 0);
+
+		vkCmdEndRenderPass(commandBuffers[i]);
+
+		if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
+			Logger::log("Failed to record command buffer", "Vulkan", LogType::Error);
+	}
+}
+
+void Vulkan::createSyncObjects() {
+	//Create the semaphores and fences
+	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
+	VkSemaphoreCreateInfo semaphoreInfo = {};
+	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkFenceCreateInfo fenceInfo = {};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; //Start signalled as default is not and would cause 'vkWaitForFences called for fence 0x11 which has not been submitted on a Queue or during acquire next image'
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+		if (vkCreateSemaphore(device->getLogical(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+			vkCreateSemaphore(device->getLogical(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+			vkCreateFence(device->getLogical(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+
+			Logger::log("Failed to create synchronisation objects for a frame", "Vulkan", LogType::Error);
+		}
+	}
+}
+
+void Vulkan::destroySyncObjects() {
+	//Destroy the semaphores and fences
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+		vkDestroySemaphore(device->getLogical(), renderFinishedSemaphores[i], nullptr);
+		vkDestroySemaphore(device->getLogical(), imageAvailableSemaphores[i], nullptr);
+		vkDestroyFence(device->getLogical(), inFlightFences[i], nullptr);
+	}
+}
+
+void Vulkan::drawFrame() {
+	//Wait for all fences (VK_TRUE)
+	vkWaitForFences(device->getLogical(), 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+	vkResetFences(device->getLogical(), 1, &inFlightFences[currentFrame]); //Unlike semaphores have to reset after use
+
+	uint32_t imageIndex;
+	vkAcquireNextImageKHR(device->getLogical(), swapChain->getInstance(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+	VkSubmitInfo submitInfo = {};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
+	VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores    = waitSemaphores;
+	submitInfo.pWaitDstStageMask  = waitStages;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers    = &commandBuffers[imageIndex];
+
+	VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores    = signalSemaphores;
+
+	//Fence added here to be signalled when command buffer finishes executing
+	if (vkQueueSubmit(device->getGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) //vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS
+		Logger::log("Failed to submit draw command buffer", "Vulkan", LogType::Error);
+
+	VkPresentInfoKHR presentInfo = {};
+	presentInfo.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores    = signalSemaphores;
+
+	VkSwapchainKHR swapChains[] = { swapChain->getInstance() };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains    = swapChains;
+	presentInfo.pImageIndices  = &imageIndex;
+	presentInfo.pResults       = nullptr;
+
+	vkQueuePresentKHR(device->getPresentQueue(), &presentInfo);
+
+	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 VkResult Vulkan::createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
