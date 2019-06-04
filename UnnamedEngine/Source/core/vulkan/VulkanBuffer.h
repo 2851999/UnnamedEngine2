@@ -28,9 +28,6 @@
 template <typename T>
 class VulkanBuffer {
 private:
-	/* Number of pieces of data stored for each vertex */
-	unsigned int dataPerVertex;
-
 	/* Device this buffer is for */
 	VulkanDevice* device;
 
@@ -50,20 +47,18 @@ private:
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, VkCommandPool& commandPool, VkQueue& graphicsQueue);
 public:
 	/* Constructor */
-	VulkanBuffer(T* vertexData, unsigned int dataCount, unsigned int dataPerVertex, VulkanDevice* device, VkBufferUsageFlags usage);
+	VulkanBuffer(T* vertexData, unsigned int dataCount, VulkanDevice* device, VkBufferUsageFlags usage);
 
 	/* Destructor */
 	virtual ~VulkanBuffer();
 
 	/* Setters and getters */
 	VkBuffer& getInstance() { return instance; }
-	VkVertexInputBindingDescription getBindingDescription();
-	std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions();
 	uint32_t getNumVertices() { return static_cast<uint32_t>(3); }
 };
 
 template class VulkanBuffer<float>;
-template class VulkanBuffer<uint16_t>;
+template class VulkanBuffer<unsigned int>;
 
 
 #endif /* CORE_VULKAN_VULKANBUFFER_H_ */

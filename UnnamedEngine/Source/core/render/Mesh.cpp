@@ -187,7 +187,7 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
 		vboPositions = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getPositions().size() * sizeof(data->getPositions()[0]), data->getPositions(), usagePositions);
-		vboPositions->addAttribute(shader->getAttributeLocation("Position"), data->getNumDimensions());
+		vboPositions->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, data->getNumDimensions());
 		renderData->addVBO(vboPositions);
 	}
 
@@ -201,39 +201,39 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 	//Setup texture coordinates
 	if (data->hasTextureCoords() && data->separateTextureCoords()) {
 		vboTextureCoords = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getTextureCoords().size() * sizeof(data->getTextureCoords()[0]), data->getTextureCoords(), usageTextureCoords);
-		vboTextureCoords->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2);
+		vboTextureCoords->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, 2);
 		renderData->addVBO(vboTextureCoords);
 	}
 
 	//Setup normals
 	if (data->hasNormals() && data->separateNormals()) {
 		vboNormals = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getNormals().size() * sizeof(data->getNormals()[0]), data->getNormals(), usageNormals);
-		vboNormals->addAttribute(shader->getAttributeLocation("Normal"), 3);
+		vboNormals->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, 3);
 		renderData->addVBO(vboNormals);
 	}
 
 	//Setup tangents
 	if (data->hasTangents() && data->separateTangents()) {
 		vboTangents = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getTangents().size() * sizeof(data->getTangents()[0]), data->getTangents(), usageTangents);
-		vboTangents->addAttribute(shader->getAttributeLocation("Tangent"), 3);
+		vboTangents->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, 3);
 		renderData->addVBO(vboTangents);
 	}
 
 	//Setup bitangents
 	if (data->hasBitangents() && data->separateBitangents()) {
 		vboBitangents = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBitangents().size() * sizeof(data->getBitangents()[0]), data->getBitangents(), usageBitangents);
-		vboBitangents->addAttribute(shader->getAttributeLocation("Bitangent"), 3);
+		vboBitangents->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, 3);
 		renderData->addVBO(vboBitangents);
 	}
 
 	//Setup bones
 	if (data->hasBones()) {
 		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), GL_STATIC_DRAW);
-		vboBoneIDs->addAttribute(shader->getAttributeLocation("BoneIDs"), 4);
+		vboBoneIDs->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
 		renderData->addVBO(vboBoneIDs);
 
 		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), GL_STATIC_DRAW);
-		vboBoneWeights->addAttribute(shader->getAttributeLocation("BoneWeights"), 4);
+		vboBoneWeights->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, 4);
 		renderData->addVBO(vboBoneWeights);
 	}
 
@@ -243,22 +243,22 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 		vboOthers = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getOthers().size() * sizeof(data->getOthers()[0]), data->getOthers(), usageOthers);
 
 		if (data->hasPositions() && ! data->separatePositions())
-			vboOthers->addAttribute(shader->getAttributeLocation("Position"), data->getNumDimensions());
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, data->getNumDimensions());
 
 		if (data->hasColours() && ! data->separateColours())
 			vboOthers->addAttribute(shader->getAttributeLocation("Colour"), 4);
 
 		if (data->hasTextureCoords() && ! data->separateTextureCoords())
-			vboOthers->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2);
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, 2);
 
 		if (data->hasNormals() && ! data->separateNormals())
-			vboOthers->addAttribute(shader->getAttributeLocation("Normal"), 3);
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, 3);
 
 		if (data->hasTangents() && ! data->separateTangents())
-			vboOthers->addAttribute(shader->getAttributeLocation("Tangent"), 3);
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, 3);
 
 		if (data->hasBitangents() && ! data->separateBitangents())
-			vboOthers->addAttribute(shader->getAttributeLocation("Bitangent"), 3);
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, 3);
 
 		renderData->addVBO(vboOthers);
 	}

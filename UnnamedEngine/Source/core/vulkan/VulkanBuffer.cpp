@@ -28,9 +28,8 @@
  *****************************************************************************/
 
 template <typename T>
-VulkanBuffer<T>::VulkanBuffer(T* vertexData, unsigned int dataCount, unsigned int dataPerVertex, VulkanDevice* device, VkBufferUsageFlags usage) {
+VulkanBuffer<T>::VulkanBuffer(T* vertexData, unsigned int dataCount, VulkanDevice* device, VkBufferUsageFlags usage) {
 	this->device = device;
-	this->dataPerVertex = dataPerVertex;
 	//Create the vertex buffer
 
 	VkDeviceSize bufferSize = sizeof(T) * dataCount;
@@ -59,34 +58,6 @@ template <typename T>
 VulkanBuffer<T>::~VulkanBuffer() {
 	vkDestroyBuffer(device->getLogical(), instance, nullptr);
 	vkFreeMemory(device->getLogical(), bufferMemory, nullptr);
-}
-
-template <typename T>
-VkVertexInputBindingDescription VulkanBuffer<T>::getBindingDescription() {
-	VkVertexInputBindingDescription bindingDescription = {};
-
-	bindingDescription.binding = 0; //like glVertexAttrib binding
-	bindingDescription.stride = sizeof(T) * dataPerVertex; //5 floats per vertex here
-	bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; //Move to the next data entry after each vertex
-
-	return bindingDescription;
-}
-
-template <typename T>
-std::array<VkVertexInputAttributeDescription, 2> VulkanBuffer<T>::getAttributeDescriptions() {
-	std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
-
-	attributeDescriptions[0].binding  = 0;
-	attributeDescriptions[0].location = 0; //Location for shader
-	attributeDescriptions[0].format   = VK_FORMAT_R32G32_SFLOAT;
-	attributeDescriptions[0].offset   = 0;
-
-	attributeDescriptions[1].binding  = 0;
-	attributeDescriptions[1].location = 1;
-	attributeDescriptions[1].format   = VK_FORMAT_R32G32B32_SFLOAT;
-	attributeDescriptions[1].offset   = sizeof(T) * 2; //Offset of colour data
-
-	return attributeDescriptions;
 }
 
 template <typename T>

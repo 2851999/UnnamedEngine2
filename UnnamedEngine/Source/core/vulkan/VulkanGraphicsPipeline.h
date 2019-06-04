@@ -25,6 +25,8 @@
 #include "VulkanSwapChain.h"
 #include "VulkanRenderPass.h"
 
+#include "../render/VBO.h"
+
 /*****************************************************************************
  * The VulkanGraphicsPipeline class handles a graphics pipeline in Vulkan
  *****************************************************************************/
@@ -45,7 +47,7 @@ private:
 	static VkShaderModule createShaderModule(VulkanDevice* device, const std::vector<char>& code);
 public:
 	/* Constructor */
-	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VulkanBuffer<float>* vertexBuffer, VulkanRenderPass* renderPass);
+	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass);
 
 	/* Destructor */
 	virtual ~VulkanGraphicsPipeline();

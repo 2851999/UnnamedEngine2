@@ -35,8 +35,8 @@ VkSurfaceKHR                 Vulkan::windowSurface;
 VulkanDevice*                Vulkan::device;
 VulkanSwapChain*             Vulkan::swapChain;
 VulkanRenderPass*            Vulkan::renderPass;
-VulkanBuffer<float>*         Vulkan::vertexBuffer;
-VulkanBuffer<uint16_t>*      Vulkan::indexBuffer;
+VBO<float>*                  Vulkan::vertexBuffer;
+VBO<unsigned int>*           Vulkan::indexBuffer;
 VulkanGraphicsPipeline*      Vulkan::graphicsPipeline;
 VkCommandPool                Vulkan::commandPool;
 std::vector<VkCommandBuffer> Vulkan::commandBuffers;
@@ -45,14 +45,14 @@ std::vector<VkSemaphore>     Vulkan::renderFinishedSemaphores;
 std::vector<VkFence>         Vulkan::inFlightFences;
 unsigned int                 Vulkan::currentFrame = 0;
 
-float Vulkan::vertices[25] = {
+std::vector<float> Vulkan::vertices = {
 	-0.5f, -0.5f,     1.0f, 0.0f, 0.0f,
 	 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,
 	 0.5f,  0.5f,     0.0f, 0.0f, 1.0f,
 	-0.5f,  0.5f,     1.0f, 1.0f, 1.0f
 };
 
-uint16_t Vulkan::indices[6] = {
+std::vector<unsigned int> Vulkan::indices = {
 		0, 1, 2, 2, 3, 0
 };
 
@@ -98,8 +98,12 @@ bool Vulkan::initialise(Window* window) {
 	createCommandPool();
 
 	//Create the vertex and index buffers
-	vertexBuffer = new VulkanBuffer<float>(vertices, 25, 5, device, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-	indexBuffer  = new VulkanBuffer<uint16_t>(indices, 6, 1, device, VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+	vertexBuffer = new VBO<float>(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices, GL_STATIC_DRAW);
+	vertexBuffer->addAttribute(0, 2);
+	vertexBuffer->addAttribute(1, 3);
+	vertexBuffer->setup();
+	indexBuffer  = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices, GL_STATIC_DRAW);
+	indexBuffer->setup();
 
 	//Create the graphics pipeline
 	graphicsPipeline = new VulkanGraphicsPipeline(swapChain, vertexBuffer, renderPass);
@@ -267,10 +271,10 @@ void Vulkan::createCommandBuffers() {
 
 		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getInstance());
 
-		VkBuffer vertexBuffers[] = { vertexBuffer->getInstance() };
+		VkBuffer vertexBuffers[] = { vertexBuffer->getVkBuffer()->getInstance() };
 		VkDeviceSize offsets = { 0 };
 		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, &offsets);
-		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer->getInstance(), 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer->getVkBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
 
 		//vkCmdDraw(commandBuffers[i], vertexBuffer->getNumVertices(), 1, 0, 0);
 		vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(6), 1, 0, 0, 0);

@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 3
+
+* Added basic Vulkan support to VBO
+
+* Modified MeshRenderData and ShaderInterface to assign
+  specific attribute locations matching the ones defined in
+  the shaders
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 2
 
 * Added VulkanRenderPass

@@ -26,7 +26,7 @@
  * The VulkanGraphicsPipeline class
  *****************************************************************************/
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VulkanBuffer<float>* vertexBuffer, VulkanRenderPass* renderPass) {
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass) {
 	this->swapChain = swapChain;
 
 	//Create the graohics pipeline
@@ -57,8 +57,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, Vulka
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-	auto bindingDescription    = vertexBuffer->getBindingDescription();
-	auto attributeDescriptions = vertexBuffer->getAttributeDescriptions();
+	auto bindingDescription    = vertexBuffer->getVkBindingDescription();
+	auto attributeDescriptions = vertexBuffer->getVkAttributeDescriptions();
 
 	vertexInputInfo.vertexBindingDescriptionCount   = 1;
 	vertexInputInfo.pVertexBindingDescriptions      = &bindingDescription;

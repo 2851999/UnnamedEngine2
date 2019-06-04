@@ -25,6 +25,8 @@
 #include "VulkanRenderPass.h"
 #include "VulkanGraphicsPipeline.h"
 
+#include "../render/VBO.h"
+
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
  *****************************************************************************/
@@ -52,12 +54,12 @@ private:
 	static VulkanRenderPass* renderPass;
 
 	/* Vertex and indices data */
-	static float vertices[];
-	static uint16_t indices[];
+	static std::vector<float> vertices;
+	static std::vector<unsigned int> indices;
 
 	/* The vertex and index buffers to render */
-	static VulkanBuffer<float>*    vertexBuffer;
-	static VulkanBuffer<uint16_t>* indexBuffer;
+	static VBO<float>*    vertexBuffer;
+	static VBO<unsigned int>* indexBuffer;
 
 	/* The graphics pipeline */
 	static VulkanGraphicsPipeline* graphicsPipeline;
@@ -131,13 +133,10 @@ public:
 	/* Method to draw a frame */
 	static void drawFrame();
 
-	/* Method to obtain the Vulkan instance */
+	/* Getters */
 	static inline VkInstance& getInstance() { return instance; }
-
-	/* Method to obtain the window surface */
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
-
-	/* Method to obtain the command pool */
+	static inline VulkanDevice* getDevice() { return device; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 };
 
