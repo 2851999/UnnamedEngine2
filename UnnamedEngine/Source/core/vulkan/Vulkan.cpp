@@ -44,6 +44,11 @@ std::vector<VkSemaphore>     Vulkan::imageAvailableSemaphores;
 std::vector<VkSemaphore>     Vulkan::renderFinishedSemaphores;
 std::vector<VkFence>         Vulkan::inFlightFences;
 unsigned int                 Vulkan::currentFrame = 0;
+VkDescriptorPool             Vulkan::descriptorPool;
+VkDescriptorSetLayout        Vulkan::descriptorSetLayout;
+std::vector<VkDescriptorSet> Vulkan::descriptorSets;
+std::vector<VulkanBuffer*>   Vulkan::uniformBuffers;
+Vulkan::UBOData Vulkan::uboData;
 
 std::vector<float> Vulkan::vertices = {
 	-0.5f, -0.5f,     1.0f, 0.0f, 0.0f,
@@ -105,8 +110,16 @@ bool Vulkan::initialise(Window* window) {
 	indexBuffer  = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices, GL_STATIC_DRAW);
 	indexBuffer->setup();
 
+	//Create the descriptor pool
+	createDescriptorPool();
+
+	createUniformBuffers();
+
+	createDescriptorSetLayout();
+	createDescriptorSets();
+
 	//Create the graphics pipeline
-	graphicsPipeline = new VulkanGraphicsPipeline(swapChain, vertexBuffer, renderPass);
+	graphicsPipeline = new VulkanGraphicsPipeline(swapChain, vertexBuffer, renderPass, descriptorSetLayout);
 
 	//Create the command buffers
 	createCommandBuffers();
@@ -125,6 +138,11 @@ void Vulkan::destroy() {
 	destroySyncObjects();
 
 	delete graphicsPipeline;
+
+	destroyDescriptorSetLayout();
+	destroyUniformBuffers();
+
+	destroyDescriptorPool();
 
 	delete vertexBuffer;
 	delete indexBuffer;
@@ -274,6 +292,7 @@ void Vulkan::createCommandBuffers() {
 		VkBuffer vertexBuffers[] = { vertexBuffer->getVkBuffer()->getInstance() };
 		VkDeviceSize offsets = { 0 };
 		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, &offsets);
+		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getLayout(), 0, 1, &descriptorSets[i], 0, nullptr);
 		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer->getVkBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
 
 		//vkCmdDraw(commandBuffers[i], vertexBuffer->getNumVertices(), 1, 0, 0);
@@ -320,6 +339,81 @@ void Vulkan::destroySyncObjects() {
 	}
 }
 
+void Vulkan::createDescriptorPool() {
+	//Assign the creation info
+	VkDescriptorPoolSize poolSize = {};
+	poolSize.type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	poolSize.descriptorCount = static_cast<uint32_t>(swapChain->getImageCount()); //Have one for each swap chain image
+
+	VkDescriptorPoolCreateInfo poolInfo = {};
+	poolInfo.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	poolInfo.poolSizeCount = 1;
+	poolInfo.pPoolSizes    = &poolSize;
+	poolInfo.maxSets       = static_cast<uint32_t>(swapChain->getImageCount());
+	poolInfo.flags         = 0;
+
+	//Attempt to create the pool
+	if (vkCreateDescriptorPool(device->getLogical(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+		Logger::log("Failed to create descriptor pool", "Vulkan", LogType::Error);
+}
+
+void Vulkan::destroyDescriptorPool() {
+	vkDestroyDescriptorPool(device->getLogical(), descriptorPool, nullptr);
+}
+
+void Vulkan::createDescriptorSets() {
+	std::vector<VkDescriptorSetLayout> layouts(swapChain->getImageCount(), descriptorSetLayout);
+	VkDescriptorSetAllocateInfo allocInfo = {};
+	allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool     = descriptorPool;
+	allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChain->getImageCount());
+	allocInfo.pSetLayouts        = layouts.data();
+
+	descriptorSets.resize(swapChain->getImageCount());
+	if (vkAllocateDescriptorSets(device->getLogical(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+		Logger::log("Failed to allocate descriptor sets", "Vulkan", LogType::Error);
+
+	for (unsigned int i = 0; i < swapChain->getImageCount(); i++) {
+		VkDescriptorBufferInfo bufferInfo = {};
+		bufferInfo.buffer = uniformBuffers[i]->getInstance();
+		bufferInfo.offset = 0;
+		bufferInfo.range  = sizeof(UBOData); //Can use VK_WHOLE_SIZE
+
+		VkWriteDescriptorSet descriptorWrite = {};
+		descriptorWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.dstSet           = descriptorSets[i];
+		descriptorWrite.dstBinding       = 0;
+		descriptorWrite.dstArrayElement  = 0;
+		descriptorWrite.descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrite.descriptorCount  = 1;
+		descriptorWrite.pBufferInfo      = &bufferInfo;
+		descriptorWrite.pImageInfo       = nullptr; // Optional
+		descriptorWrite.pTexelBufferView = nullptr; // Optional
+
+		vkUpdateDescriptorSets(device->getLogical(), 1, &descriptorWrite, 0, nullptr);
+	}
+}
+
+void Vulkan::createUniformBuffers() {
+	VkDeviceSize bufferSize = sizeof(UBOData);
+	uniformBuffers.resize(swapChain->getImageCount());
+
+	for (unsigned int i = 0; i < swapChain->getImageCount(); ++i)
+		uniformBuffers[i] = new VulkanBuffer(bufferSize, device, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, false);
+}
+
+void Vulkan::destroyUniformBuffers() {
+	for (unsigned int i = 0; i < uniformBuffers.size(); ++i)
+		delete uniformBuffers[i];
+	uniformBuffers.clear();
+}
+
+void Vulkan::updateUniformBuffer() {
+	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
+
+	uniformBuffers[currentFrame]->copyData(&uboData, sizeof(UBOData));
+}
+
 void Vulkan::startDraw() {
 	//Aquire the next swap chain image
 	vkAcquireNextImageKHR(device->getLogical(), swapChain->getInstance(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &currentFrame); //Image index is next in chain
@@ -330,6 +424,8 @@ void Vulkan::startDraw() {
 
 	//------------------------------------------------------------------------------------------------------
 	vkResetCommandBuffer(commandBuffers[currentFrame], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+
+	updateUniformBuffer();
 
 	//Obtain the list of framebuffers in the swap chain
 	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
@@ -357,6 +453,28 @@ void Vulkan::startDraw() {
 	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getInstance());
+	vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getLayout(), 0, 1, &descriptorSets[currentFrame], 0, nullptr);
+}
+
+void Vulkan::createDescriptorSetLayout() {
+	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
+	uboLayoutBinding.binding            = 0;
+	uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	uboLayoutBinding.descriptorCount    = 1;
+	uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT; //VK_SHADER_STAGE_ALL_GRAPHICS
+	uboLayoutBinding.pImmutableSamplers = nullptr; //Optional
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+	layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = 1;
+	layoutInfo.pBindings    = &uboLayoutBinding;
+
+	if (vkCreateDescriptorSetLayout(device->getLogical(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+		Logger::log("Failed to create descriptor set layout", "Vulkan", LogType::Error);
+}
+
+void Vulkan::destroyDescriptorSetLayout() {
+	vkDestroyDescriptorSetLayout(device->getLogical(), descriptorSetLayout, nullptr);
 }
 
 void Vulkan::stopDraw() {
@@ -414,6 +532,85 @@ void Vulkan::drawFrame() {
 	vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(6), 1, 0, 0, 0);
 
 	stopDraw();
+}
+
+void Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+	VkBufferCreateInfo bufferInfo = {};
+	bufferInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferInfo.size        = size;
+	bufferInfo.usage       = usage;
+	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; //Only used by graphics queue
+
+	if (vkCreateBuffer(device->getLogical(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+		Logger::log("Failed to create vertex buffer", "VulkanBuffer", LogType::Error);
+
+	VkMemoryRequirements memoryRequirements;
+	vkGetBufferMemoryRequirements(device->getLogical(), buffer, &memoryRequirements);
+
+	//Allocate memory to this buffer
+	VkMemoryAllocateInfo allocInfo = {};
+	allocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocInfo.allocationSize  = memoryRequirements.size;
+	allocInfo.memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits, properties);
+
+	if (vkAllocateMemory(device->getLogical(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+		Logger::log("Failed to allocate vertex buffer memory", "VulkanBuffer", LogType::Error);
+
+	//Associate the memory with the buffer
+	vkBindBufferMemory(device->getLogical(), buffer, bufferMemory, 0);
+}
+
+void Vulkan::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, VkCommandPool& commandPool, VkQueue& graphicsQueue) {
+	VkCommandBufferAllocateInfo allocInfo = {};
+	allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandPool        = commandPool;
+	allocInfo.commandBufferCount = 1;
+
+	VkCommandBuffer commandBuffer;
+	vkAllocateCommandBuffers(device->getLogical(), &allocInfo, &commandBuffer);
+
+	//Start recording to the command buffer
+	VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; //VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT not necessary here since only using once and want to wait for copy to finish
+
+	vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+	VkBufferCopy copyRegion = {};
+	copyRegion.srcOffset = 0;
+	copyRegion.dstOffset = 0;
+	copyRegion.size      = size;
+	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+	//Stop recording to the buffer
+	vkEndCommandBuffer(commandBuffer);
+
+	VkSubmitInfo submitInfo = {};
+	submitInfo.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers    = &commandBuffer;
+
+	vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+	vkQueueWaitIdle(graphicsQueue);
+
+	vkFreeCommandBuffers(device->getLogical(), commandPool, 1, &commandBuffer);
+}
+
+uint32_t Vulkan::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+	VkPhysicalDeviceMemoryProperties memoryProperties;
+	vkGetPhysicalDeviceMemoryProperties(device->getPhysical(), &memoryProperties);
+
+	//Should also check what heap memory comes from since this can also affect performance - not done here
+
+	for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; ++i) {
+		if ((typeFilter & (1 << i)) //Check if corresponding bit for current memory type is 1
+				&& (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties)
+			return i;
+	}
+
+	Logger::log("Failed to find suitable memory type", "VulkanBuffer", LogType::Error);
+	return 0;
 }
 
 VkResult Vulkan::createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {

@@ -47,13 +47,14 @@ private:
 	static VkShaderModule createShaderModule(VulkanDevice* device, const std::vector<char>& code);
 public:
 	/* Constructor */
-	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass);
+	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, VkDescriptorSetLayout& descriptorSetLayout);
 
 	/* Destructor */
 	virtual ~VulkanGraphicsPipeline();
 
 	/* Getters */
 	VkPipeline& getInstance() { return pipeline; }
+	VkPipelineLayout& getLayout() { return pipelineLayout; }
 };
 
 

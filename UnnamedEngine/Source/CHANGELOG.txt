@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 5
+
+* Changed Renderer to only load shaders being used (can also
+  use 'loadRenderShader' to load shaders manually
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 4
 
 * Added basic Vulkan support to RenderData

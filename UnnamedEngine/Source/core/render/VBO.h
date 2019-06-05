@@ -58,7 +58,7 @@ private:
 	bool                  instanced;
 
 	/* The bulkan buffer for use with Vulkan */
-	VulkanBuffer<T>* vulkanBuffer = NULL;
+	VulkanBuffer* vulkanBuffer = NULL;
 
 	/* The attributes this VBO supplies */
 	std::vector<Attribute> attributes;
@@ -104,7 +104,7 @@ public:
 
 	/* Setters and getters */
 	inline std::vector<T>& getData() { return data; }
-	inline VulkanBuffer<T>* getVkBuffer() { return vulkanBuffer; }
+	inline VulkanBuffer* getVkBuffer() { return vulkanBuffer; }
 	inline VkVertexInputBindingDescription getVkBindingDescription() { return vulkanVertexInputBindingDescription; }
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };

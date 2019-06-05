@@ -25,9 +25,11 @@
  * The VulkanBuffer class manages a Vulkan buffer (For vertex data)
  *****************************************************************************/
 
-template <typename T>
 class VulkanBuffer {
 private:
+	/* States whether this buffer needs to use a staging buffer (i.e. memory used is inaccessable to CPU */
+	bool useStaging;
+
 	/* Device this buffer is for */
 	VulkanDevice* device;
 
@@ -37,28 +39,22 @@ private:
 	/* The memory used by this buffer */
 	VkDeviceMemory bufferMemory;
 
-	/* Locates a particular kind of graphics memory for a buffer */
-	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-
-	/* Creates a buffer */
-	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-
-	/* Copies a buffer from one place to another */
-	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, VkCommandPool& commandPool, VkQueue& graphicsQueue);
+	/* Method to copy memory to a buffer (that is accessible to CPU) */
+	void copyData(void* data, VkDeviceSize& size, VkDeviceMemory& dest);
 public:
 	/* Constructor */
-	VulkanBuffer(T* vertexData, unsigned int dataCount, VulkanDevice* device, VkBufferUsageFlags usage);
+	VulkanBuffer(VkDeviceSize bufferSize, VulkanDevice* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, bool useStaging = true);
+	VulkanBuffer(void* data, VkDeviceSize size, VulkanDevice* device, VkBufferUsageFlags usage, bool useStaging = true);
 
 	/* Destructor */
 	virtual ~VulkanBuffer();
 
+	/* Method used to copy data to this buffer */
+	void copyData(void* data, VkDeviceSize size);
+
 	/* Setters and getters */
 	VkBuffer& getInstance() { return instance; }
-	uint32_t getNumVertices() { return static_cast<uint32_t>(3); }
 };
-
-template class VulkanBuffer<float>;
-template class VulkanBuffer<unsigned int>;
 
 
 #endif /* CORE_VULKAN_VULKANBUFFER_H_ */

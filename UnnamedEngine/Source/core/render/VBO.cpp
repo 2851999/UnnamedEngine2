@@ -97,7 +97,7 @@ void VBO<T>::setup() {
 			usageVulkan = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
 		//Create the Vulkan buffer
-		vulkanBuffer = new VulkanBuffer<T>(data.data(), data.size(), Vulkan::getDevice(), usageVulkan);
+		vulkanBuffer = new VulkanBuffer(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan);
 
 		//Assign the vertex input binding description
 		vulkanVertexInputBindingDescription.binding   = 0; //like glVertexAttrib binding

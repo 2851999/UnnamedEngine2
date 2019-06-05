@@ -26,7 +26,7 @@
  * The VulkanGraphicsPipeline class
  *****************************************************************************/
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass) {
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, VkDescriptorSetLayout& descriptorSetLayout) {
 	this->swapChain = swapChain;
 
 	//Create the graohics pipeline
@@ -148,8 +148,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount         = 0; //Optional
-	pipelineLayoutInfo.pSetLayouts            = nullptr; //Optional
+	pipelineLayoutInfo.setLayoutCount         = 1; //Optional
+	pipelineLayoutInfo.pSetLayouts            = &descriptorSetLayout; //Optional
 	pipelineLayoutInfo.pushConstantRangeCount = 0; //Optional
 	pipelineLayoutInfo.pPushConstantRanges    = nullptr; //Optional
 

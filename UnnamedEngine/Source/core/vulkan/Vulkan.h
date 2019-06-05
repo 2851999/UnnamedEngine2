@@ -74,6 +74,22 @@ private:
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
 
+	/* The descriptor pool (For UBO's) */
+	static VkDescriptorPool descriptorPool;
+
+	/* The descriptor set layout (For UBO) */
+	static VkDescriptorSetLayout descriptorSetLayout;
+
+	static std::vector<VkDescriptorSet> descriptorSets;
+
+	static std::vector<VulkanBuffer*> uniformBuffers;
+
+	struct UBOData {
+		Matrix4f mvpMatrix;
+	};
+
+	static UBOData uboData;
+
 	/* Method to create a debug messenger */
 	static VkResult createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
 
@@ -128,6 +144,30 @@ public:
 	/* Method to destroy the synchronisation objects */
 	static void destroySyncObjects();
 
+	/* Method to create the descriptor pool */
+	static void createDescriptorPool();
+
+	/* Method to destroy the descriptor pool */
+	static void destroyDescriptorPool();
+
+	/* Method to create the descriptor sets */
+	static void createDescriptorSets();
+
+	/* Method to create the descriptor set layout */
+	static void createDescriptorSetLayout();
+
+	/* Method to destroy the descriptor set layout */
+	static void destroyDescriptorSetLayout();
+
+	/* Method to create the uniform buffers */
+	static void createUniformBuffers();
+
+	/* Method to destroy the uniform buffers */
+	static void destroyUniformBuffers();
+
+	/* Method to update the uniform buffer */
+	static void updateUniformBuffer();
+
 	/* Method to start drawing a frame (and recording to the command buffer) */
 	static void startDraw();
 
@@ -136,6 +176,15 @@ public:
 
 	/* Method to draw a frame */
 	static void drawFrame();
+
+	/* Locates a particular kind of graphics memory for a buffer */
+	static uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+	/* Creates a buffer */
+	static void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+
+	/* Copies a buffer from one place to another */
+	static void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, VkCommandPool& commandPool, VkQueue& graphicsQueue);
 
 	/* Waits for device to be finished working */
 	static inline void waitDeviceIdle() { vkDeviceWaitIdle(device->getLogical()); }
