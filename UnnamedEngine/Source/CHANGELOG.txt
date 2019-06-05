@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 4
+
+* Added basic Vulkan support to RenderData
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 3
 
 * Added basic Vulkan support to VBO

@@ -120,7 +120,7 @@ bool Vulkan::initialise(Window* window) {
 
 void Vulkan::destroy() {
 	//Wait for a suitable time
-	vkDeviceWaitIdle(device->getLogical());
+	waitDeviceIdle();
 
 	destroySyncObjects();
 
@@ -217,7 +217,7 @@ void Vulkan::createCommandPool() {
 	VkCommandPoolCreateInfo poolCreateInfo = {};
 	poolCreateInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolCreateInfo.queueFamilyIndex = queueFamilies.graphicsFamilyIndex;
-	poolCreateInfo.flags            = 0; //Optional VK_COMMAND_POOL_CREATE_TRANSIENT_BIT - if buffers will be updated many times
+	poolCreateInfo.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; //Optional VK_COMMAND_POOL_CREATE_TRANSIENT_BIT - if buffers will be updated many times
 
 	//Attempt to create the command pool
 	if (vkCreateCommandPool(device->getLogical(), &poolCreateInfo, nullptr, &commandPool) != VK_SUCCESS)
@@ -253,7 +253,7 @@ void Vulkan::createCommandBuffers() {
 		beginInfo.pInheritanceInfo = nullptr; // Optional
 
 		if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS)
-			throw std::runtime_error("Failed to begin recording command buffer");
+			Logger::log("Failed to begin recording command buffer", "Vulkan", LogType::Error);
 
 		VkRenderPassBeginInfo renderPassInfo = {};
 		renderPassInfo.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -287,10 +287,12 @@ void Vulkan::createCommandBuffers() {
 }
 
 void Vulkan::createSyncObjects() {
+	//Number of images in swap chain
+	unsigned int swapChainImageCount = swapChain->getImageCount();
 	//Create the semaphores and fences
-	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+	imageAvailableSemaphores.resize(swapChainImageCount);
+	renderFinishedSemaphores.resize(swapChainImageCount);
+	inFlightFences.resize(swapChainImageCount);
 
 	VkSemaphoreCreateInfo semaphoreInfo = {};
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -299,7 +301,7 @@ void Vulkan::createSyncObjects() {
 	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; //Start signalled as default is not and would cause 'vkWaitForFences called for fence 0x11 which has not been submitted on a Queue or during acquire next image'
 
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+	for (unsigned int i = 0; i < swapChainImageCount; ++i) {
 		if (vkCreateSemaphore(device->getLogical(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
 			vkCreateSemaphore(device->getLogical(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
 			vkCreateFence(device->getLogical(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
@@ -311,20 +313,58 @@ void Vulkan::createSyncObjects() {
 
 void Vulkan::destroySyncObjects() {
 	//Destroy the semaphores and fences
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+	for (size_t i = 0; i < inFlightFences.size(); ++i) {
 		vkDestroySemaphore(device->getLogical(), renderFinishedSemaphores[i], nullptr);
 		vkDestroySemaphore(device->getLogical(), imageAvailableSemaphores[i], nullptr);
 		vkDestroyFence(device->getLogical(), inFlightFences[i], nullptr);
 	}
 }
 
-void Vulkan::drawFrame() {
+void Vulkan::startDraw() {
+	//Aquire the next swap chain image
+	vkAcquireNextImageKHR(device->getLogical(), swapChain->getInstance(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &currentFrame); //Image index is next in chain
+
 	//Wait for all fences (VK_TRUE)
 	vkWaitForFences(device->getLogical(), 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
 	vkResetFences(device->getLogical(), 1, &inFlightFences[currentFrame]); //Unlike semaphores have to reset after use
 
-	uint32_t imageIndex;
-	vkAcquireNextImageKHR(device->getLogical(), swapChain->getInstance(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+	//------------------------------------------------------------------------------------------------------
+	vkResetCommandBuffer(commandBuffers[currentFrame], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+
+	//Obtain the list of framebuffers in the swap chain
+	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
+
+	VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags            = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+	beginInfo.pInheritanceInfo = nullptr; // Optional
+
+	if (vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS)
+		Logger::log("Failed to begin recording command buffer", "Vulkan", LogType::Error);
+
+	VkRenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass  = renderPass->getInstance();
+	renderPassInfo.framebuffer = swapChainFramebuffers[currentFrame];
+
+	renderPassInfo.renderArea.offset = {0, 0};
+	renderPassInfo.renderArea.extent = swapChain->getExtent();
+
+	VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues    = &clearColor;
+
+	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getInstance());
+}
+
+void Vulkan::stopDraw() {
+	vkCmdEndRenderPass(commandBuffers[currentFrame]);
+
+	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
+		Logger::log("Failed to record command buffer", "Vulkan", LogType::Error);
+	//-------------------------------------------------------------------------------------------
 
 	VkSubmitInfo submitInfo = {};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -335,7 +375,7 @@ void Vulkan::drawFrame() {
 	submitInfo.pWaitSemaphores    = waitSemaphores;
 	submitInfo.pWaitDstStageMask  = waitStages;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers    = &commandBuffers[imageIndex];
+	submitInfo.pCommandBuffers    = &commandBuffers[currentFrame];
 
 	VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
 	submitInfo.signalSemaphoreCount = 1;
@@ -353,12 +393,27 @@ void Vulkan::drawFrame() {
 	VkSwapchainKHR swapChains[] = { swapChain->getInstance() };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains    = swapChains;
-	presentInfo.pImageIndices  = &imageIndex;
+	presentInfo.pImageIndices  = &currentFrame;
 	presentInfo.pResults       = nullptr;
 
 	vkQueuePresentKHR(device->getPresentQueue(), &presentInfo);
 
-	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+	//vkAcquireNextImageKHR semaphore signalled will be the one with this index (so must increase before it is called again)
+	currentFrame = (currentFrame + 1) % swapChain->getImageCount();
+}
+
+void Vulkan::drawFrame() {
+	startDraw();
+
+	VkBuffer vertexBuffers[] = { vertexBuffer->getVkBuffer()->getInstance() };
+	VkDeviceSize offsets = { 0 };
+	vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, &offsets);
+	vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer->getVkBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
+
+	//vkCmdDraw(commandBuffers[i], vertexBuffer->getNumVertices(), 1, 0, 0);
+	vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(6), 1, 0, 0, 0);
+
+	stopDraw();
 }
 
 VkResult Vulkan::createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {

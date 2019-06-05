@@ -129,6 +129,9 @@ void BaseEngine::create() {
 			//Ensure the debug console isn't open
 			if (! debugConsole || ! debugConsole->isVisible())
 				update();
+
+			if (getSettings().videoVulkan)
+				Vulkan::startDraw();
 			render();
 
 			if (! getSettings().videoVulkan) {
@@ -137,12 +140,15 @@ void BaseEngine::create() {
 				if (getSettings().debugConsoleEnabled)
 					renderDebugConsole();
 			} else
-				Vulkan::drawFrame();
+				Vulkan::stopDraw();
 
 			window->update();
 
 			fpsLimiter.endFrame();
 		}
+		//Wait for a suitable time
+		if (getSettings().videoVulkan)
+			Vulkan::waitDeviceIdle();
 
 		//Tell the game to destroy everything it created
 		destroy();

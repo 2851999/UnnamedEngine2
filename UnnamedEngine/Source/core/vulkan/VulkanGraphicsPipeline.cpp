@@ -77,9 +77,9 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 
 	VkViewport viewport = {};
 	viewport.x        = 0.0f;
-	viewport.y        = 0.0f;
+	viewport.y        = (float) swapChain->getExtent().height;
 	viewport.width    = (float) swapChain->getExtent().width;
-	viewport.height   = (float) swapChain->getExtent().height;
+	viewport.height   = -((float) swapChain->getExtent().height);
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 

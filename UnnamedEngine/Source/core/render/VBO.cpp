@@ -140,34 +140,42 @@ void VBO<T>::setupAttribute(unsigned int index) {
 
 template <typename T>
 void VBO<T>::startRendering() {
-	bind();
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		bind();
 
-	//Enable the vertex attribute arrays
-	for (unsigned int i = 0; i < attributes.size(); i++) {
-		glEnableVertexAttribArray(attributes[i].location);
-		//Check for instancing
-		if (instanced)
-			glVertexAttribDivisor(attributes[i].location, attributes[i].divisor);
+		//Enable the vertex attribute arrays
+		for (unsigned int i = 0; i < attributes.size(); i++) {
+			glEnableVertexAttribArray(attributes[i].location);
+			//Check for instancing
+			if (instanced)
+				glVertexAttribDivisor(attributes[i].location, attributes[i].divisor);
+		}
 	}
 }
 
 template <typename T>
 void VBO<T>::stopRendering() {
-	//Disable the vertex attribute arrays
-	for (unsigned int i = 0; i < attributes.size(); i++)
-		glDisableVertexAttribArray(attributes[i].location);
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		//Disable the vertex attribute arrays
+		for (unsigned int i = 0; i < attributes.size(); i++)
+			glDisableVertexAttribArray(attributes[i].location);
+	}
 }
 
 template <typename T>
 void VBO<T>::update() {
-	bind();
-	glBufferData(target, data.size() * sizeof(data[0]), &data.front(), usage);
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		bind();
+		glBufferData(target, data.size() * sizeof(data[0]), &data.front(), usage);
+	}
 }
 
 template <typename T>
 void VBO<T>::updateStream(GLsizeiptr size) {
-	bind();
-	//Buffer orphaning
-	glBufferData(target, this->size, NULL, usage);
-	glBufferSubData(target, 0, size, &data.front());
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		bind();
+		//Buffer orphaning
+		glBufferData(target, this->size, NULL, usage);
+		glBufferSubData(target, 0, size, &data.front());
+	}
 }

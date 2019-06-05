@@ -33,8 +33,6 @@
 
 class Vulkan {
 private:
-	static const unsigned int MAX_FRAMES_IN_FLIGHT = 2;
-
 	/* The actual instance handled by this class */
 	static VkInstance instance;
 
@@ -58,7 +56,7 @@ private:
 	static std::vector<unsigned int> indices;
 
 	/* The vertex and index buffers to render */
-	static VBO<float>*    vertexBuffer;
+	static VBO<float>* vertexBuffer;
 	static VBO<unsigned int>* indexBuffer;
 
 	/* The graphics pipeline */
@@ -130,14 +128,24 @@ public:
 	/* Method to destroy the synchronisation objects */
 	static void destroySyncObjects();
 
+	/* Method to start drawing a frame (and recording to the command buffer) */
+	static void startDraw();
+
+	/* Method to stop drawing a frame (and recording to the command buffer) */
+	static void stopDraw();
+
 	/* Method to draw a frame */
 	static void drawFrame();
+
+	/* Waits for device to be finished working */
+	static inline void waitDeviceIdle() { vkDeviceWaitIdle(device->getLogical()); }
 
 	/* Getters */
 	static inline VkInstance& getInstance() { return instance; }
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
 	static inline VulkanDevice* getDevice() { return device; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
+	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 };
 
 

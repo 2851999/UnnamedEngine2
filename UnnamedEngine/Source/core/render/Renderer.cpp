@@ -224,7 +224,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			}
 
 			if (data->hasSubData()) {
-				renderData->getRenderData()->bindVAO();
+				renderData->getRenderData()->bindBuffers();
 
 				//Go through each sub data instance
 				for (unsigned int i = 0; i < data->getSubDataCount(); i++) {
@@ -237,7 +237,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 					releaseNewTextures();
 				}
 
-				renderData->getRenderData()->unbindVAO();
+				renderData->getRenderData()->unbindBuffers();
 			} else {
 				saveTextures();
 				if (mesh->hasMaterial())
