@@ -193,8 +193,10 @@ public:
 	static inline VkInstance& getInstance() { return instance; }
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
 	static inline VulkanDevice* getDevice() { return device; }
+	static inline VulkanSwapChain* getSwapChain() { return swapChain; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
+	static inline unsigned int getCurrentFrame() { return currentFrame; }
 };
 
 

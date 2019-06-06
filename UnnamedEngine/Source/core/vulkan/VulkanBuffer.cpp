@@ -39,10 +39,10 @@ VulkanBuffer::VulkanBuffer(void* data, VkDeviceSize size, VulkanDevice* device, 
 		VulkanBuffer(size, device, useStaging ? VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage : usage, useStaging ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT), useStaging) {
 
 	//Copy the data to this buffer
-	copyData(data, size);
+	copyData(data, 0, size);
 }
 
-void VulkanBuffer::copyData(void* dataToCopy, VkDeviceSize size) {
+void VulkanBuffer::copyData(void* dataToCopy, unsigned int offset, VkDeviceSize size) {
 	//Check if supposed to use staging
 	if (useStaging) {
 		//Create the staging buffer
@@ -51,7 +51,7 @@ void VulkanBuffer::copyData(void* dataToCopy, VkDeviceSize size) {
 		Vulkan::createBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
 		//Pass the data to the staging buffer
-		copyData(dataToCopy, size, stagingBufferMemory);
+		copyData(dataToCopy, offset, size, stagingBufferMemory);
 
 		//Copy data to the actual buffer being used
 		Vulkan::copyBuffer(stagingBuffer, instance, size, Vulkan::getCommandPool(), device->getGraphicsQueue());
@@ -60,13 +60,13 @@ void VulkanBuffer::copyData(void* dataToCopy, VkDeviceSize size) {
 		vkFreeMemory(device->getLogical(), stagingBufferMemory, nullptr);
 	} else
 		//Pass the data to the buffer
-		copyData(dataToCopy, size, bufferMemory);
+		copyData(dataToCopy, offset, size, bufferMemory);
 }
 
-void VulkanBuffer::copyData(void* dataToCopy, VkDeviceSize& size, VkDeviceMemory& dest) {
+void VulkanBuffer::copyData(void* dataToCopy, unsigned int offset, VkDeviceSize& size, VkDeviceMemory& dest) {
 	//Map buffer memory into CPU accessible memory
 	void* data;
-	vkMapMemory(device->getLogical(), dest, 0, size, 0, &data); //Data is now mapped
+	vkMapMemory(device->getLogical(), dest, offset, size, 0, &data); //Data is now mapped
 	memcpy(data, dataToCopy, (size_t) size);
 	vkUnmapMemory(device->getLogical(), dest); //Driver not necessarily copied yet, can either use heap that is host coherent,
 	//or use vkFlushMappedMemoryRanges/vkInvalidateMappedMemoryRanges

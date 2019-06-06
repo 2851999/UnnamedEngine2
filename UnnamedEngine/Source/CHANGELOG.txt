@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 6
+
+* Started adding Vulkan support to UBO
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 5
 
 * Changed Renderer to only load shaders being used (can also

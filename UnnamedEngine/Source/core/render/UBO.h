@@ -23,14 +23,19 @@
 
 #include "Shader.h"
 
+#include "../vulkan/Vulkan.h"
+
 /*****************************************************************************
  * The UBO class is used to manage a uniform buffer object
  *****************************************************************************/
 
 class UBO {
 private:
-	/* The buffer instance */
+	/* The buffer instance for OpenGL */
 	GLuint buffer;
+
+	/* The buffers for Vulkan (one required per swap chain image) */
+	std::vector<VulkanBuffer*> vulkanBuffers;
 public:
 	/* Constructor */
 	UBO(void* data, unsigned int size, GLenum usage, GLuint blockBinding);

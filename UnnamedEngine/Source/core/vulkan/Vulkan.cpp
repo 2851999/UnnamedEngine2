@@ -373,7 +373,9 @@ void Vulkan::createDescriptorSets() {
 	if (vkAllocateDescriptorSets(device->getLogical(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
 		Logger::log("Failed to allocate descriptor sets", "Vulkan", LogType::Error);
 
-	for (unsigned int i = 0; i < swapChain->getImageCount(); i++) {
+	//Allows writing of each UBO
+	for (unsigned int i = 0; i < swapChain->getImageCount(); ++i) {
+		//////////////////////////////////THIS WILL CHANGE TO ADD SAMPLER AS WELL
 		VkDescriptorBufferInfo bufferInfo = {};
 		bufferInfo.buffer = uniformBuffers[i]->getInstance();
 		bufferInfo.offset = 0;
@@ -394,6 +396,28 @@ void Vulkan::createDescriptorSets() {
 	}
 }
 
+void Vulkan::createDescriptorSetLayout() {
+	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
+	uboLayoutBinding.binding            = 0;
+	uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	uboLayoutBinding.descriptorCount    = 1;
+	uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT; //VK_SHADER_STAGE_ALL_GRAPHICS
+	uboLayoutBinding.pImmutableSamplers = nullptr; //Optional
+
+	//////////////////////////////////THIS WILL CHANGE TO ADD SAMPLER AS WELL
+	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+	layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = 1;
+	layoutInfo.pBindings    = &uboLayoutBinding;
+
+	if (vkCreateDescriptorSetLayout(device->getLogical(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+		Logger::log("Failed to create descriptor set layout", "Vulkan", LogType::Error);
+}
+
+void Vulkan::destroyDescriptorSetLayout() {
+	vkDestroyDescriptorSetLayout(device->getLogical(), descriptorSetLayout, nullptr);
+}
+
 void Vulkan::createUniformBuffers() {
 	VkDeviceSize bufferSize = sizeof(UBOData);
 	uniformBuffers.resize(swapChain->getImageCount());
@@ -411,7 +435,7 @@ void Vulkan::destroyUniformBuffers() {
 void Vulkan::updateUniformBuffer() {
 	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
 
-	uniformBuffers[currentFrame]->copyData(&uboData, sizeof(UBOData));
+	uniformBuffers[currentFrame]->copyData(&uboData, 0, sizeof(UBOData));
 }
 
 void Vulkan::startDraw() {
@@ -454,27 +478,6 @@ void Vulkan::startDraw() {
 
 	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getInstance());
 	vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getLayout(), 0, 1, &descriptorSets[currentFrame], 0, nullptr);
-}
-
-void Vulkan::createDescriptorSetLayout() {
-	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
-	uboLayoutBinding.binding            = 0;
-	uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	uboLayoutBinding.descriptorCount    = 1;
-	uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT; //VK_SHADER_STAGE_ALL_GRAPHICS
-	uboLayoutBinding.pImmutableSamplers = nullptr; //Optional
-
-	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-	layoutInfo.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = 1;
-	layoutInfo.pBindings    = &uboLayoutBinding;
-
-	if (vkCreateDescriptorSetLayout(device->getLogical(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-		Logger::log("Failed to create descriptor set layout", "Vulkan", LogType::Error);
-}
-
-void Vulkan::destroyDescriptorSetLayout() {
-	vkDestroyDescriptorSetLayout(device->getLogical(), descriptorSetLayout, nullptr);
 }
 
 void Vulkan::stopDraw() {
