@@ -21,6 +21,7 @@
 #include "Texture.h"
 
 #include "../Window.h"
+#include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -63,113 +64,184 @@ void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
  * The Texture class
  *****************************************************************************/
 
-unsigned char* Texture::loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei& height, GLint& internalFormat, GLint& format, bool srgb) {
+Texture::Texture(void* imageData, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters, bool shouldApplyParameters) : width(width), height(height), numComponents(numComponents), parameters(parameters) {
+	//Check whether using OpenGL or Vulkan
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		create();
+		//Bind the texture and then pass the texture data to OpenGL
+		bind();
+
+		//Obtain the correct format to use
+		GLint internalFormat, format;
+		getTextureFormatGL(numComponents, parameters.getSRGB(), internalFormat, format);
+
+		glTexImage2D(parameters.getTarget(), 0, internalFormat, width, height, 0, format, type, imageData);
+
+		//Apply the parameters if requested, but don't need to bind the texture again,
+		//and it doesn't need to unbind either
+		if (shouldApplyParameters)
+			applyParameters(false, false);
+
+		unbind();
+	} else {
+		//Setup the Vulkan texture
+		//---------------------------------------------------LOAD AND CREATE THE TEXTURE---------------------------------------------------
+		VkDeviceSize imageSize = width * height * STBI_rgb_alpha; //Don't seem to have support for any other colour formats when tiling (at least on chosen device)
+		VkFormat format;
+		Texture::getTextureFormatVk(STBI_rgb_alpha, false, format);
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		Vulkan::createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+		void* data;
+		vkMapMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, 0, imageSize, 0, &data);
+		memcpy(data, imageData, static_cast<size_t>(imageSize));
+		vkUnmapMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory);
+
+		Vulkan::createImage(width, height, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
+
+		//First need to transition texture image to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL then copy from staging buffer to the texture image
+		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)
+		Vulkan::copyBufferToImage(stagingBuffer, textureVkImage, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+
+		//Prepare image for shader access
+		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
+	    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);
+
+		//------------------------------------------------------CREATE THE IMAGE VIEW------------------------------------------------------
+		VkImageViewCreateInfo viewInfo = {};
+		viewInfo.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image      = textureVkImage;
+		viewInfo.viewType   = VK_IMAGE_VIEW_TYPE_2D; //TODO: Use target in parameters
+		viewInfo.format     = format;
+		viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewInfo.subresourceRange.baseMipLevel   = 0;
+		viewInfo.subresourceRange.levelCount     = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount     = 1;
+
+		if (vkCreateImageView(Vulkan::getDevice()->getLogical(), &viewInfo, nullptr, &textureVkImageView) != VK_SUCCESS)
+		    Logger::log("Failed to create texture image view", "Texture", LogType::Error);
+	}
+}
+
+void Texture::destroy() {
+	if (texture > 0)
+		glDeleteTextures(1, &texture);
+	else if (textureVkImage != VK_NULL_HANDLE) {
+		vkDestroyImageView(Vulkan::getDevice()->getLogical(), textureVkImageView, nullptr);
+
+	    vkDestroyImage(Vulkan::getDevice()->getLogical(), textureVkImage, nullptr);
+	    vkFreeMemory(Vulkan::getDevice()->getLogical(), textureVkImageMemory, nullptr);
+	}
+}
+
+unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& width, int& height, bool srgb) {
 	//Load the data using stb_image
-	unsigned char* image = stbi_load(path.c_str(), &width, &height, &numComponents, 0);
+	unsigned char* image = stbi_load(path.c_str(), &width, &height, &numComponents, Window::getCurrentInstance()->getSettings().videoVulkan ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
 
 	//Check that the data was loaded
 	if (image == nullptr) {
 		//Log an error if not
 		Logger::log("Failed to load the image from the path '" + path + "'", "Texture", LogType::Error);
 		return NULL;
-	} else {
-		//Assign the right format
-		internalFormat = getTextureFormat(numComponents, srgb);
-		//SRGB corrects incoming textures to a linear colour space
-		if (internalFormat == GL_SRGB)
-			format = GL_RGB;
-		else if (internalFormat == GL_SRGB_ALPHA)
-			format = GL_RGBA;
-		else
-			format = internalFormat;
 	}
 
 	return image;
 }
 
-float* Texture::loadTexturef(std::string path, int& numComponents, GLsizei& width, GLsizei& height, GLint& internalFormat, GLint& format, bool srgb) {
+float* Texture::loadTexturef(std::string path, int& numComponents, int& width, int& height, bool srgb) {
 	//Load the data using stb_image
-	float* image = stbi_loadf(path.c_str(), &width, &height, &numComponents, 0);
+	float* image = stbi_loadf(path.c_str(), &width, &height, &numComponents, Window::getCurrentInstance()->getSettings().videoVulkan ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
 
 	//Check that the data was loaded
 	if (image == nullptr) {
 		//Log an error if not
 		Logger::log("Failed to load the image from the path '" + path + "'", "Texture", LogType::Error);
 		return NULL;
-	} else {
-		//Assign the right format
-		internalFormat = getTextureFormat(numComponents, srgb);
-		//SRGB corrects incoming textures to a linear colour space
-		if (internalFormat == GL_SRGB)
-			format = GL_RGB;
-		else if (internalFormat == GL_SRGB_ALPHA)
-			format = GL_RGBA;
-		else
-			format = internalFormat;
 	}
 
 	return image;
 }
 
-GLint Texture::getTextureFormat(int numComponents, bool srgb) {
+void Texture::getTextureFormatGL(int numComponents, bool srgb, GLint& internalFormat, GLint& format) {
 	//Check the number of components and assign the right OpenGL format
 	if (numComponents == 1)
-		return GL_RED;
+		internalFormat = GL_RED;
 	else if (numComponents == 2)
-		return GL_RG;
+		internalFormat = GL_RG;
 	else if (numComponents == 3) {
 		if (srgb)
-			return GL_SRGB;
+			internalFormat = GL_SRGB;
 		else
-			return GL_RGB;
+			internalFormat = GL_RGB;
 	} else if (numComponents == 4) {
 		if (srgb)
-			return GL_SRGB_ALPHA;
+			internalFormat = GL_SRGB_ALPHA;
 		else
-			return GL_RGBA;
+			internalFormat = GL_RGBA;
 	}
 
-	return -1;
+	//SRGB corrects incoming textures to a linear colour space
+	if (internalFormat == GL_SRGB)
+		format = GL_RGB;
+	else if (internalFormat == GL_SRGB_ALPHA)
+		format = GL_RGBA;
+	else
+		format = internalFormat;
+}
+
+void Texture::getTextureFormatVk(int numComponents, bool srgb, VkFormat& format) {
+	if (srgb) {
+		if (numComponents == 1)
+			format = VK_FORMAT_R8_SRGB;
+		else if (numComponents == 2)
+			format = VK_FORMAT_R8G8_SRGB;
+		else if (numComponents == 3)
+			format = VK_FORMAT_R8G8B8_SRGB;
+		else if (numComponents == 4)
+			format = VK_FORMAT_R8G8B8A8_SRGB;
+	} else {
+		if (numComponents == 1)
+			format = VK_FORMAT_R8_UNORM;
+		else if (numComponents == 2)
+			format = VK_FORMAT_R8G8_UNORM;
+		else if (numComponents == 3)
+			format = VK_FORMAT_R8G8B8_UNORM;
+		else if (numComponents == 4)
+			format = VK_FORMAT_R8G8B8A8_UNORM;
+	}
 }
 
 void Texture::freeTexture(void* texture) {
 	stbi_image_free(texture);
 }
 
-Texture* Texture::createTexture(std::string path, void* data, int numComponents, GLsizei width, GLsizei height, GLint internalFormat, GLint format, GLenum type, TextureParameters parameters, bool applyParameters) {
+Texture* Texture::createTexture(std::string path, void* data, int numComponents, int width, int height, GLenum type, TextureParameters parameters, bool applyParameters) {
 	if (data == NULL)
 		return NULL;
 
 	//Create the Texture instance and set it up
-	Texture* texture = new Texture(parameters);
-	texture->setWidth(width);
-	texture->setHeight(height);
-	texture->setNumComponents(numComponents);
+	Texture* texture = new Texture(data, numComponents, width, height, type, parameters, applyParameters);
 	texture->setPath(path);
-
-	//Bind the texture and then pass the texture data to OpenGL
-	texture->bind();
-
-	glTexImage2D(parameters.getTarget(), 0, internalFormat, width, height, 0, format, type, data);
-
-	//Apply the parameters if requested, but don't need to bind the texture again,
-	//and it doesn't need to unbind either
-	if (applyParameters)
-		texture->applyParameters(false, false);
-
-	texture->unbind();
 
 	return texture;
 }
 
 Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bool applyParameters) {
 	//The data needed for the texture
-	int numComponents, w, h, internalFormat, format;
+	int numComponents, w, h;
 	//Obtain the texture data
-	unsigned char* image = loadTexture(path, numComponents, w, h, internalFormat, format, parameters.getSRGB());
+	unsigned char* image = loadTexture(path, numComponents, w, h, parameters.getSRGB());
 
 	//Create the texture - case where image is NULL is handled by this as well
-	Texture* texture = createTexture(path, image, numComponents, w, h, internalFormat, format, GL_UNSIGNED_BYTE, parameters, applyParameters);
+	Texture* texture = createTexture(path, image, numComponents, w, h, GL_UNSIGNED_BYTE, parameters, applyParameters);
 
 	//Free the image data as it is no longer needed
 	stbi_image_free(image);
@@ -179,12 +251,12 @@ Texture* Texture::loadTexture(std::string path, TextureParameters parameters, bo
 
 Texture* Texture::loadTexturef(std::string path, TextureParameters parameters, bool applyParameters) {
 	//The data needed for the texture
-	int numComponents, w, h, internalFormat, format;
+	int numComponents, w, h;
 	//Obtain the texture data
-	float* image = loadTexturef(path, numComponents, w, h, internalFormat, format, parameters.getSRGB());
+	float* image = loadTexturef(path, numComponents, w, h, parameters.getSRGB());
 
 	//Create the texture - case where image is NULL is handled by this as well
-	Texture* texture = createTexture(path, image, numComponents, w, h, internalFormat, format, GL_FLOAT, parameters, applyParameters);
+	Texture* texture = createTexture(path, image, numComponents, w, h, GL_FLOAT, parameters, applyParameters);
 
 	//Free the image data as it is no longer needed
 	stbi_image_free(image);
@@ -220,7 +292,8 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 		//Go through each face
 		for (unsigned int i = 0; i < faces.size(); i++) {
 			//Load the image for the current face
-			image = Texture::loadTexture(path + faces[i], numComponents, width, height, internalFormat, format, parameters.getSRGB());
+			image = Texture::loadTexture(path + faces[i], numComponents, width, height, parameters.getSRGB());
+			Texture::getTextureFormatGL(numComponents, parameters.getSRGB(), internalFormat, format);
 			//Setup the texture
 			glTexImage2D(
 				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,

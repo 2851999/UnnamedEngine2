@@ -23,7 +23,6 @@
 
 #include "../../utils/Logging.h"
 
-#include <stb/stb_image.h>
 #include <limits>
 
 /*****************************************************************************
@@ -50,9 +49,7 @@ VkDescriptorSetLayout        Vulkan::descriptorSetLayout;
 std::vector<VkDescriptorSet> Vulkan::descriptorSets;
 std::vector<VulkanBuffer*>   Vulkan::uniformBuffers;
 Vulkan::UBOData              Vulkan::uboData;
-VkImage                      Vulkan::textureImage;
-VkDeviceMemory               Vulkan::textureImageMemory;
-VkImageView                  Vulkan::textureImageView;
+Texture*                     Vulkan::texture;
 VkSampler                    Vulkan::textureSampler;
 
 std::vector<float> Vulkan::vertices = {
@@ -116,8 +113,7 @@ bool Vulkan::initialise(Window* window) {
 	indexBuffer  = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices, GL_STATIC_DRAW);
 	indexBuffer->setup();
 
-	createTextureImage();
-	createTextureImageView();
+	texture = Texture::loadTexture("resources/textures/texture.jpg");
 	createTextureSampler();
 
 	//Create the descriptor pool
@@ -148,10 +144,7 @@ void Vulkan::destroy() {
 	destroySyncObjects();
 
 	vkDestroySampler(device->getLogical(), textureSampler, nullptr);
-	vkDestroyImageView(device->getLogical(), textureImageView, nullptr);
-
-    vkDestroyImage(device->getLogical(), textureImage, nullptr);
-    vkFreeMemory(device->getLogical(), textureImageMemory, nullptr);
+	delete texture;
 
 	delete graphicsPipeline;
 
@@ -319,57 +312,6 @@ void Vulkan::createCommandBuffers() {
 		if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
 			Logger::log("Failed to record command buffer", "Vulkan", LogType::Error);
 	}
-}
-
-void Vulkan::createTextureImage() {
-	int textureWidth, textureHeight, numChannels;
-	stbi_uc* pixels = stbi_load("resources/textures/texture.jpg", &textureWidth, &textureHeight, &numChannels, STBI_rgb_alpha);
-	VkDeviceSize imageSize = textureWidth * textureHeight * 4; //numChannels doesn't work???
-
-	if (! pixels)
-		Logger::log("Failed to load texture image", "Vulkan", LogType::Error);
-
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-	createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-	void* data;
-	vkMapMemory(device->getLogical(), stagingBufferMemory, 0, imageSize, 0, &data);
-	memcpy(data, pixels, static_cast<size_t>(imageSize));
-	vkUnmapMemory(device->getLogical(), stagingBufferMemory);
-
-	stbi_image_free(pixels);
-
-	createImage(textureWidth, textureHeight, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
-
-	//First need to transition texture image to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL then copy from staging buffer to the texture image
-	transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)
-	copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(textureWidth), static_cast<uint32_t>(textureHeight));
-
-	//Prepare image for shader access
-	transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-    vkDestroyBuffer(device->getLogical(), stagingBuffer, nullptr);
-    vkFreeMemory(device->getLogical(), stagingBufferMemory, nullptr);
-}
-
-void Vulkan::createTextureImageView() {
-	VkImageViewCreateInfo viewInfo = {};
-	viewInfo.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image      = textureImage;
-	viewInfo.viewType   = VK_IMAGE_VIEW_TYPE_2D;
-	viewInfo.format     = VK_FORMAT_R8G8B8A8_UNORM;
-	viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-	viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-	viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-	viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-	viewInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-	viewInfo.subresourceRange.baseMipLevel   = 0;
-	viewInfo.subresourceRange.levelCount     = 1;
-	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount     = 1;
-
-	if (vkCreateImageView(device->getLogical(), &viewInfo, nullptr, &textureImageView) != VK_SUCCESS)
-	    Logger::log("Failed to create texture image view", "Vulkan", LogType::Error);
 }
 
 void Vulkan::createTextureSampler() {
@@ -627,7 +569,7 @@ void Vulkan::createDescriptorSets() {
 
 	    VkDescriptorImageInfo imageInfo = {};
 	    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	    imageInfo.imageView   = textureImageView;
+	    imageInfo.imageView   = texture->getVkImageView();
 	    imageInfo.sampler     = textureSampler;
 
 	    std::array<VkWriteDescriptorSet, 2> descriptorWrites = {};

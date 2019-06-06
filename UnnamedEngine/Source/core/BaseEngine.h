@@ -34,7 +34,7 @@ namespace Engine {
 	 */
 	const std::string Version     = "V0.3.4";
 	const std::string DateCreated = "02/06/2019";
-	const std::string Build       = "Development";
+	const std::string Build       = "Experimental";
 }
 
 /*****************************************************************************

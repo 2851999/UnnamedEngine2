@@ -1,5 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 8
+
+* Added basic Vulkan support to Texture
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 7
+
+* More Vulkan
 
 --------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 6

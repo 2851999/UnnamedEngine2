@@ -26,6 +26,7 @@
 #include "VulkanGraphicsPipeline.h"
 
 #include "../render/VBO.h"
+#include "../render/Texture.h"
 
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
@@ -84,9 +85,7 @@ private:
 
 	static std::vector<VulkanBuffer*> uniformBuffers;
 
-	static VkImage textureImage;
-	static VkDeviceMemory textureImageMemory;
-	static VkImageView textureImageView;
+	static Texture* texture;
 	static VkSampler textureSampler;
 
 	struct UBOData {
@@ -143,8 +142,6 @@ public:
 	/* Method to create the command buffers */
 	static void createCommandBuffers(); //(Destroyed with command pool)
 
-	static void createTextureImage();
-	static void createTextureImageView();
 	static void createTextureSampler();
 	static void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
