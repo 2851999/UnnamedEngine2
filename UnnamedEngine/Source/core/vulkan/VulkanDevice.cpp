@@ -52,6 +52,8 @@ VulkanDevice::VulkanDevice(VkPhysicalDevice& physicalDevice) {
 	}
 
 	VkPhysicalDeviceFeatures deviceFeatures = {};
+	//Request anisotropic filtering (support must be checked in 'isDeviceSuitable')
+	deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 	//Obtain the required validation layers and device extensions
 	std::vector<const char*>& validationLayers = VulkanValidationLayers::getLayers();
@@ -145,8 +147,11 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) {
 		swapChainSupportAdequate = (! swapChainSupportDetails.formats.empty()) && (! swapChainSupportDetails.presentModes.empty());
 	}
 
+	VkPhysicalDeviceFeatures supportedFeatures;
+	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
 	//Return the result
-	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && queueFamilies.isComplete() && extensionsSupported && swapChainSupportAdequate;
+	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && queueFamilies.isComplete() && extensionsSupported && swapChainSupportAdequate && supportedFeatures.samplerAnisotropy;
 }
 
 VulkanDeviceQueueFamilies VulkanDevice::findQueueFamilies(VkPhysicalDevice device) {

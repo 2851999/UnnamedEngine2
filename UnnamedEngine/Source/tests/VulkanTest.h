@@ -28,10 +28,10 @@ private:
 	float lastTime = 0;
 
 	std::vector<float> vertices = {
-		-0.5f, -0.5f,     1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f,    0.0f, 0.0f, 1.0f,
-		-0.5f,  0.5f,    1.0f, 1.0f, 1.0f
+		-0.5f, -0.5f,     1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
+		 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,    0.0f, 0.0f,
+		 0.5f,  0.5f,     0.0f, 0.0f, 1.0f,    0.0f, 1.0f,
+		-0.5f,  0.5f,     1.0f, 1.0f, 1.0f,    1.0f, 1.0f
 	};
 
 	std::vector<unsigned int> indices = {
@@ -62,6 +62,7 @@ void Test::created() {
 	vertexBuffer = new VBO<float>(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices, GL_STATIC_DRAW);
 	vertexBuffer->addAttribute(0, 2);
 	vertexBuffer->addAttribute(1, 3);
+	vertexBuffer->addAttribute(2, 2);
 	indexBuffer  = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices, GL_STATIC_DRAW);
 	quad->addVBO(vertexBuffer);
 	quad->setIndicesVBO(indexBuffer);

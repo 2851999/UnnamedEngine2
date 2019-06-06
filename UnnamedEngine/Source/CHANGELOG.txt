@@ -1,4 +1,7 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 7
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 6
 
 * Started adding Vulkan support to UBO

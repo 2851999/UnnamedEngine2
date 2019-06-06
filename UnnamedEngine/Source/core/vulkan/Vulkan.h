@@ -84,6 +84,11 @@ private:
 
 	static std::vector<VulkanBuffer*> uniformBuffers;
 
+	static VkImage textureImage;
+	static VkDeviceMemory textureImageMemory;
+	static VkImageView textureImageView;
+	static VkSampler textureSampler;
+
 	struct UBOData {
 		Matrix4f mvpMatrix;
 	};
@@ -137,6 +142,15 @@ public:
 
 	/* Method to create the command buffers */
 	static void createCommandBuffers(); //(Destroyed with command pool)
+
+	static void createTextureImage();
+	static void createTextureImageView();
+	static void createTextureSampler();
+	static void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+	static VkCommandBuffer beginSingleTimeCommands();
+	static void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 	/* Method to create the synchronisation objects */
 	static void createSyncObjects();
