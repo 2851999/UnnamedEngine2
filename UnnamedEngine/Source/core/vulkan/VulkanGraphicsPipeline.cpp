@@ -34,7 +34,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 	vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = renderShader->getShader()->getVertexShaderModule();
+	vertShaderStageInfo.module = renderShader->getShader()->getVkVertexShaderModule();
 	vertShaderStageInfo.pName  = "main"; //Entry point
 
 	//pSpecializationInfo can be used to specify values for shader constants - faster than using if statements
@@ -43,7 +43,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
 	fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = renderShader->getShader()->getFragmentShaderModule();
+	fragShaderStageInfo.module = renderShader->getShader()->getVkFragmentShaderModule();
 	fragShaderStageInfo.pName  = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };

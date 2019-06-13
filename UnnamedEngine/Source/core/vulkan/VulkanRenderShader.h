@@ -21,7 +21,7 @@
 
 #include "../render/UBO.h"
 #include "../render/Texture.h"
-#include "VulkanShader.h"
+#include "../render/Shader.h"
 
 /*****************************************************************************
  * The VulkanRenderShader class
@@ -29,7 +29,7 @@
 
 class VulkanRenderShader {
 private:
-	/* UBO's used with this shader */
+	/* UBO's used with this shader (Does not delete these UBOs) */
 	std::vector<UBO*> ubos;
 
 	/* Holds information about a texture being used in the shader */
@@ -42,13 +42,13 @@ private:
 	std::vector<ShaderTextureInfo> textures;
 
 	/* Shader used */
-	VulkanShader* shader;
+	Shader* shader;
 
 	/* The descriptor pool for allocation of descriptors */
-	VkDescriptorPool descriptorPool;
+	VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
 
 	/* The descriptor set layout */
-	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
 
 	/* The descriptor sets */
 	std::vector<VkDescriptorSet> descriptorSets;
@@ -58,18 +58,26 @@ public:
 	};
 
 	/* Constructor */
-	VulkanRenderShader(Texture* texture);
+	VulkanRenderShader(Shader* shader);
 
 	/* Destructor */
 	virtual ~VulkanRenderShader();
+
+	/* Methods to add a UBO or Texture to this instance */
+	inline void add(UBO* ubo) { ubos.push_back(ubo); }
+	inline void add(Texture* texture, unsigned int binding) {
+		ShaderTextureInfo info;
+		info.texture = texture;
+		info.binding = binding;
+		textures.push_back(info);
+	}
 
 	/* Method to setup this render shader (Creates descriptor sets and the layout)  */
 	void setup();
 
 	/* Getters */
-	inline UBO* getUBO() { return ubos[0]; }
-	inline Texture* getTexture() { return textures[0].texture; }
-	inline VulkanShader* getShader() { return shader; }
+	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
+	inline Shader* getShader() { return shader; }
 	inline VkDescriptorSetLayout& getDescriptorSetLayout() { return descriptorSetLayout; }
 	inline VkDescriptorSet& getDescriptorSet(unsigned int index) { return descriptorSets[index]; }
 };

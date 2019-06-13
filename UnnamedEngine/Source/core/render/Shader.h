@@ -19,7 +19,7 @@
 #ifndef CORE_RENDER_SHADER_H_
 #define CORE_RENDER_SHADER_H_
 
-#include <GL/glew.h>
+#include "../Window.h"
 #include <unordered_map>
 
 #include "Colour.h"
@@ -44,8 +44,15 @@ private:
 	std::unordered_map<std::string, GLint> uniforms;
 	std::unordered_map<std::string, GLint> attributes;
 
+	/* The shader modules for Vulkan */
+	VkShaderModule vertexShaderModule   = VK_NULL_HANDLE;
+	VkShaderModule fragmentShaderModule = VK_NULL_HANDLE;
+
 	/* Loads and returns an included file */
 	static std::vector<std::string> loadInclude(std::string path, std::string line);
+
+	/* Method to read a file (used for Vulkan shaders) */
+	static std::vector<char> readFile(const std::string& path);
 public:
 	/* The ShaderSource struct stores information about Shader source code */
 	struct ShaderSource {
@@ -58,6 +65,7 @@ public:
 	Shader() {}
 	Shader(GLint vertexShader, GLint fragmentShader) : Shader(vertexShader, -1, fragmentShader) {}
 	Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader);
+	Shader(VkShaderModule vertexShaderModule, VkShaderModule fragmentShaderModule);
 	virtual ~Shader();
 
 	/* Various shader functions */
@@ -72,6 +80,9 @@ public:
 	inline GLint getProgram() { return program; }
 	GLint getUniformLocation(std::string id);
 	GLint getAttributeLocation(std::string id);
+
+	VkShaderModule& getVkVertexShaderModule() { return vertexShaderModule; }
+	VkShaderModule& getVkFragmentShaderModule() { return fragmentShaderModule; }
 
 	/* Various methods to assign values */
 	void setUniformi(std::string id, GLuint value);
@@ -92,6 +103,7 @@ public:
 	static GLint createShader(std::string source, GLenum type);
 	static Shader* createShader(ShaderSource vertexSource, ShaderSource fragmentSource);
 	static Shader* createShader(ShaderSource vertexSource, ShaderSource geometrySource, ShaderSource fragmentSource);
+	static VkShaderModule createVkShaderModule(const std::vector<char>& code);
 
 	/* Methods used to load a shader */
 	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source);

@@ -26,25 +26,13 @@
  * The VulkanRenderShader class
  *****************************************************************************/
 
-VulkanRenderShader::VulkanRenderShader(Texture* texture) {
-	ubos.push_back(new UBO(NULL, sizeof(UBOData), GL_DYNAMIC_DRAW, 0));
-	ShaderTextureInfo info;
-	info.texture = texture;
-	info.binding = 1;
-	textures.push_back(info);
-
-	shader = new VulkanShader("resources/shaders/vulkan/shader");
-
-	setup();
+VulkanRenderShader::VulkanRenderShader(Shader* shader) {
+	this->shader = shader;
 }
 
 VulkanRenderShader::~VulkanRenderShader() {
 	vkDestroyDescriptorSetLayout(Vulkan::getDevice()->getLogical(), descriptorSetLayout, nullptr);
 	vkDestroyDescriptorPool(Vulkan::getDevice()->getLogical(), descriptorPool, nullptr);
-
-	for (UBO* ubo : ubos)
-		delete ubo;
-	delete shader;
 }
 
 void VulkanRenderShader::setup() {
@@ -52,11 +40,19 @@ void VulkanRenderShader::setup() {
 
 	//---------------------------CREATE DESCRIPTOR POOL---------------------------
 	//Assign the creation info
-	std::array<VkDescriptorPoolSize, 2> poolSizes = {};
-	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainImageCount);
-	poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	poolSizes[1].descriptorCount = static_cast<uint32_t>(swapChainImageCount); //Have one for each swap chain image
+	std::vector<VkDescriptorPoolSize> poolSizes = {};
+	for (unsigned int i = 0; i < ubos.size(); ++i) {
+		VkDescriptorPoolSize poolSize;
+		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = static_cast<uint32_t>(swapChainImageCount);
+		poolSizes.push_back(poolSize);
+	}
+	for (unsigned int i = 0; i < textures.size(); ++i) {
+		VkDescriptorPoolSize poolSize;
+		poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSize.descriptorCount = static_cast<uint32_t>(swapChainImageCount); //Have one for each swap chain image
+		poolSizes.push_back(poolSize);
+	}
 
 	VkDescriptorPoolCreateInfo poolInfo = {};
 	poolInfo.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -67,7 +63,7 @@ void VulkanRenderShader::setup() {
 
 	//Attempt to create the pool
 	if (vkCreateDescriptorPool(Vulkan::getDevice()->getLogical(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-		Logger::log("Failed to create descriptor pool", "Vulkan", LogType::Error);
+		Logger::log("Failed to create descriptor pool", "VulkanRenderShader", LogType::Error);
 
 	//---------------------------CREATE DESCRIPTOR SET LAYOUT---------------------------
 	std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -104,7 +100,7 @@ void VulkanRenderShader::setup() {
 
 	//Create the descriptor set layout
 	if (vkCreateDescriptorSetLayout(Vulkan::getDevice()->getLogical(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-		Logger::log("Failed to create descriptor set layout", "Vulkan", LogType::Error);
+		Logger::log("Failed to create descriptor set layout", "VulkanRenderShader", LogType::Error);
 
 	//---------------------------CREATE DESCRIPTOR SETS---------------------------
 	std::vector<VkDescriptorSetLayout> layouts(swapChainImageCount, descriptorSetLayout);
@@ -116,7 +112,7 @@ void VulkanRenderShader::setup() {
 
 	descriptorSets.resize(swapChainImageCount);
 	if (vkAllocateDescriptorSets(Vulkan::getDevice()->getLogical(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
-		Logger::log("Failed to allocate descriptor sets", "Vulkan", LogType::Error);
+		Logger::log("Failed to allocate descriptor sets", "VulkanRenderShader", LogType::Error);
 
 	//Allows writing of each UBO and texture
 	for (unsigned int i = 0; i < swapChainImageCount; ++i) {

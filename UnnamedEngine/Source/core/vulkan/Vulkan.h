@@ -62,6 +62,7 @@ private:
 	static VBO<float>* vertexBuffer;
 	static VBO<unsigned int>* indexBuffer;
 
+	static UBO* ubo;
 	static VulkanRenderShader* renderShader;
 
 	static VulkanRenderShader::UBOData uboData;

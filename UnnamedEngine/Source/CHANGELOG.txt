@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 10
+
+* Added basic Vulkan support to Shader
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 9
 
 * Added VulkanShader

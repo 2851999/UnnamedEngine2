@@ -38,6 +38,7 @@ VulkanSwapChain*             Vulkan::swapChain;
 VulkanRenderPass*            Vulkan::renderPass;
 VBO<float>*                  Vulkan::vertexBuffer;
 VBO<unsigned int>*           Vulkan::indexBuffer;
+UBO*                         Vulkan::ubo;
 VulkanRenderShader*          Vulkan::renderShader;
 VulkanRenderShader::UBOData  Vulkan::uboData;
 VulkanGraphicsPipeline*      Vulkan::graphicsPipeline;
@@ -50,10 +51,10 @@ unsigned int                 Vulkan::currentFrame = 0;
 Texture*                     Vulkan::texture;
 
 std::vector<float> Vulkan::vertices = {
-	-0.5f, -0.5f,     1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
-	 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,    0.0f, 0.0f,
-	 0.5f,  0.5f,     0.0f, 0.0f, 1.0f,    0.0f, 1.0f,
-	-0.5f,  0.5f,     1.0f, 1.0f, 1.0f,    1.0f, 1.0f
+	-0.5f, -0.5f,     1.0f, 0.0f, 0.0f,    0.0f, 0.0f,
+	 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,    1.0f, 0.0f,
+	 0.5f,  0.5f,     0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
+	-0.5f,  0.5f,     1.0f, 1.0f, 1.0f,    0.0f, 1.0f
 };
 
 std::vector<unsigned int> Vulkan::indices = {
@@ -112,7 +113,12 @@ bool Vulkan::initialise(Window* window) {
 
 	texture = Texture::loadTexture("resources/textures/texture.jpg");
 
-	renderShader = new VulkanRenderShader(texture);
+	ubo = new UBO(NULL, sizeof(VulkanRenderShader::UBOData), GL_DYNAMIC_DRAW, 0);
+
+	renderShader = new VulkanRenderShader(Shader::loadShader("resources/shaders/vulkan/shader"));
+	renderShader->add(ubo);
+	renderShader->add(texture, 1);
+	renderShader->setup();
 
 	//Create the graphics pipeline
 	graphicsPipeline = new VulkanGraphicsPipeline(swapChain, vertexBuffer, renderPass, renderShader);
@@ -133,11 +139,10 @@ void Vulkan::destroy() {
 
 	destroySyncObjects();
 
-	delete texture;
-
 	delete graphicsPipeline;
 
 	delete renderShader;
+	delete ubo;
 
 	delete vertexBuffer;
 	delete indexBuffer;
@@ -257,47 +262,6 @@ void Vulkan::createCommandBuffers() {
 	//Attempt to allocate the command buffers
 	if (vkAllocateCommandBuffers(device->getLogical(), &allocInfo, commandBuffers.data()) != VK_SUCCESS)
 		Logger::log("Failed to allocate command buffers", "Vulkan", LogType::Error);
-
-	//Go through the command buffers
-	for (size_t i = 0; i < commandBuffers.size(); i++) {
-		VkCommandBufferBeginInfo beginInfo = {};
-		beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags            = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-		beginInfo.pInheritanceInfo = nullptr; // Optional
-
-		if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS)
-			Logger::log("Failed to begin recording command buffer", "Vulkan", LogType::Error);
-
-		VkRenderPassBeginInfo renderPassInfo = {};
-		renderPassInfo.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass  = renderPass->getInstance();
-		renderPassInfo.framebuffer = swapChainFramebuffers[i];
-
-		renderPassInfo.renderArea.offset = {0, 0};
-		renderPassInfo.renderArea.extent = swapChain->getExtent();
-
-		VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-		renderPassInfo.clearValueCount = 1;
-		renderPassInfo.pClearValues    = &clearColor;
-
-		vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getInstance());
-
-		VkBuffer vertexBuffers[] = { vertexBuffer->getVkBuffer()->getInstance() };
-		VkDeviceSize offsets = { 0 };
-		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, &offsets);
-		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getLayout(), 0, 1, &renderShader->getDescriptorSet(i), 0, nullptr);
-		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer->getVkBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
-
-		//vkCmdDraw(commandBuffers[i], vertexBuffer->getNumVertices(), 1, 0, 0);
-		vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(6), 1, 0, 0, 0);
-
-		vkCmdEndRenderPass(commandBuffers[i]);
-
-		if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
-			Logger::log("Failed to record command buffer", "Vulkan", LogType::Error);
-	}
 }
 
 void Vulkan::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
@@ -482,7 +446,7 @@ void Vulkan::destroySyncObjects() {
 void Vulkan::updateUniformBuffer() {
 	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
 
-	renderShader->getUBO()->update(&uboData, 0, sizeof(VulkanRenderShader::UBOData));
+	renderShader->getUBO(0)->update(&uboData, 0, sizeof(VulkanRenderShader::UBOData));
 }
 
 void Vulkan::startDraw() {

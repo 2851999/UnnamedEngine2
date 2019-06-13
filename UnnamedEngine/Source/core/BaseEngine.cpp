@@ -157,13 +157,13 @@ void BaseEngine::create() {
 			//Destroy all other engine resources
 			Font::destroyFreeType();
 			AudioManager::destroy();
-			ResourceManager::destroyAllManagers();
 
 			//Delete all of the objects required by the BaseEngine class
 			delete debugCamera;
 			if (debugConsole)
 				delete debugConsole;
 		}
+		ResourceManager::destroyAllManagers();
 	} else
 		//Failed to initialise the graphics API
 		Logger::log("Failed to initialise graphics API", "BaseEngine", LogType::Error);
