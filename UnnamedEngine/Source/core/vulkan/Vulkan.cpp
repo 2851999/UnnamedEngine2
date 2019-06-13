@@ -20,8 +20,8 @@
 
 #include "VulkanExtensions.h"
 #include "VulkanValidationLayers.h"
-#include "VulkanShader.h"
 
+#include "../render/Mesh.h"
 #include "../../utils/Logging.h"
 
 #include <limits>
@@ -36,30 +36,12 @@ VkSurfaceKHR                 Vulkan::windowSurface;
 VulkanDevice*                Vulkan::device;
 VulkanSwapChain*             Vulkan::swapChain;
 VulkanRenderPass*            Vulkan::renderPass;
-VBO<float>*                  Vulkan::vertexBuffer;
-VBO<unsigned int>*           Vulkan::indexBuffer;
-UBO*                         Vulkan::ubo;
-VulkanRenderShader*          Vulkan::renderShader;
-VulkanRenderShader::UBOData  Vulkan::uboData;
-VulkanGraphicsPipeline*      Vulkan::graphicsPipeline;
 VkCommandPool                Vulkan::commandPool;
 std::vector<VkCommandBuffer> Vulkan::commandBuffers;
 std::vector<VkSemaphore>     Vulkan::imageAvailableSemaphores;
 std::vector<VkSemaphore>     Vulkan::renderFinishedSemaphores;
 std::vector<VkFence>         Vulkan::inFlightFences;
 unsigned int                 Vulkan::currentFrame = 0;
-Texture*                     Vulkan::texture;
-
-std::vector<float> Vulkan::vertices = {
-	-0.5f, -0.5f,     1.0f, 0.0f, 0.0f,    0.0f, 0.0f,
-	 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,    1.0f, 0.0f,
-	 0.5f,  0.5f,     0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
-	-0.5f,  0.5f,     1.0f, 1.0f, 1.0f,    0.0f, 1.0f
-};
-
-std::vector<unsigned int> Vulkan::indices = {
-		0, 1, 2, 2, 3, 0
-};
 
 bool Vulkan::ENABLE_VALIDATION_LAYERS = true;
 
@@ -102,27 +84,6 @@ bool Vulkan::initialise(Window* window) {
 	//Create the command pool
 	createCommandPool();
 
-	//Create the vertex and index buffers
-	vertexBuffer = new VBO<float>(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices, GL_STATIC_DRAW);
-	vertexBuffer->addAttribute(0, 2);
-	vertexBuffer->addAttribute(1, 3);
-	vertexBuffer->addAttribute(2, 2);
-	vertexBuffer->setup();
-	indexBuffer  = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices, GL_STATIC_DRAW);
-	indexBuffer->setup();
-
-	texture = Texture::loadTexture("resources/textures/texture.jpg");
-
-	ubo = new UBO(NULL, sizeof(VulkanRenderShader::UBOData), GL_DYNAMIC_DRAW, 0);
-
-	renderShader = new VulkanRenderShader(Shader::loadShader("resources/shaders/vulkan/shader"));
-	renderShader->add(ubo);
-	renderShader->add(texture, 1);
-	renderShader->setup();
-
-	//Create the graphics pipeline
-	graphicsPipeline = new VulkanGraphicsPipeline(swapChain, vertexBuffer, renderPass, renderShader);
-
 	//Create the command buffers
 	createCommandBuffers();
 
@@ -138,14 +99,6 @@ void Vulkan::destroy() {
 	waitDeviceIdle();
 
 	destroySyncObjects();
-
-	delete graphicsPipeline;
-
-	delete renderShader;
-	delete ubo;
-
-	delete vertexBuffer;
-	delete indexBuffer;
 
 	destroyCommandPool();
 
@@ -443,12 +396,6 @@ void Vulkan::destroySyncObjects() {
 	}
 }
 
-void Vulkan::updateUniformBuffer() {
-	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-
-	renderShader->getUBO(0)->update(&uboData, 0, sizeof(VulkanRenderShader::UBOData));
-}
-
 void Vulkan::startDraw() {
 	//Aquire the next swap chain image
 	vkAcquireNextImageKHR(device->getLogical(), swapChain->getInstance(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &currentFrame); //Image index is next in chain
@@ -459,8 +406,6 @@ void Vulkan::startDraw() {
 
 	//------------------------------------------------------------------------------------------------------
 	vkResetCommandBuffer(commandBuffers[currentFrame], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
-
-	updateUniformBuffer();
 
 	//Obtain the list of framebuffers in the swap chain
 	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
@@ -486,9 +431,6 @@ void Vulkan::startDraw() {
 	renderPassInfo.pClearValues    = &clearColor;
 
 	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getInstance());
-	vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline->getLayout(), 0, 1, &renderShader->getDescriptorSet(currentFrame), 0, nullptr);
 }
 
 void Vulkan::stopDraw() {
@@ -532,20 +474,6 @@ void Vulkan::stopDraw() {
 
 	//vkAcquireNextImageKHR semaphore signalled will be the one with this index (so must increase before it is called again)
 	currentFrame = (currentFrame + 1) % swapChain->getImageCount();
-}
-
-void Vulkan::drawFrame() {
-	startDraw();
-
-	VkBuffer vertexBuffers[] = { vertexBuffer->getVkBuffer()->getInstance() };
-	VkDeviceSize offsets = { 0 };
-	vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, &offsets);
-	vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer->getVkBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
-
-	//vkCmdDraw(commandBuffers[i], vertexBuffer->getNumVertices(), 1, 0, 0);
-	vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(6), 1, 0, 0, 0);
-
-	stopDraw();
 }
 
 void Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {

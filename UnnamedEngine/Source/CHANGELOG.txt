@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 11
+
+* Removed VulkanShader
+
+* Fixed bug: Didn't delete 'vboOthers' in MeshRenderData
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 10
 
 * Added basic Vulkan support to Shader

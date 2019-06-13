@@ -19,6 +19,7 @@
 #include "Mesh.h"
 
 #include "Renderer.h"
+#include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -194,7 +195,7 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 	//Setup colours
 	if (data->hasColours() && data->separateColours()) {
 		vboColours = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getColours().size() * sizeof(data->getColours()[0]), data->getColours(), usageColours);
-		vboColours->addAttribute(shader->getAttributeLocation("Colour"), 4);
+		vboColours->addAttribute(shader->getAttributeLocation("Colour"), 4); //Won't work for Vulkan
 		renderData->addVBO(vboColours);
 	}
 
@@ -246,7 +247,7 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, data->getNumDimensions());
 
 		if (data->hasColours() && ! data->separateColours())
-			vboOthers->addAttribute(shader->getAttributeLocation("Colour"), 4);
+			vboOthers->addAttribute(shader->getAttributeLocation("Colour"), 4); //Won't work for Vulkan
 
 		if (data->hasTextureCoords() && ! data->separateTextureCoords())
 			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, 2);
@@ -271,9 +272,18 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 
 	//Setup the render data
 	renderData->setup();
+
+	//Setup the graphics pipeline (if using Vulkan)
+	if (Window::getCurrentInstance()->getSettings().videoVulkan)
+		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), vboOthers, Vulkan::getRenderPass(), renderShader->getVkRenderShader());
 }
 
 void MeshRenderData::render() {
+	//Bind the pipeline and descriptor set (for Vulkan)
+	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
+		vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsVkPipeline->getInstance());
+		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsVkPipeline->getLayout(), 0, 1, &setupShader->getVkRenderShader()->getDescriptorSet(Vulkan::getCurrentFrame()), 0, nullptr);
+	}
 	renderData->render();
 }
 
@@ -351,6 +361,8 @@ void MeshRenderData::updateIndices(MeshData* data) {
 }
 
 void MeshRenderData::destroy() {
+	if (graphicsVkPipeline)
+		delete graphicsVkPipeline;
 	delete renderData;
 	delete vboPositions;
 	delete vboColours;
@@ -358,6 +370,7 @@ void MeshRenderData::destroy() {
 	delete vboNormals;
 	delete vboTangents;
 	delete vboBitangents;
+	delete vboOthers;
 	delete vboIndices;
 }
 

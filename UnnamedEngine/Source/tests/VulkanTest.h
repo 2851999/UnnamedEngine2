@@ -20,6 +20,7 @@
 #define TESTS_BASEENGINETEST3D_H_
 
 #include "../core/BaseEngine.h"
+#include "../core/vulkan/VulkanRenderShader.h"
 
 #include "../utils/Utils.h"
 
@@ -27,22 +28,11 @@ class Test : public BaseEngine {
 private:
 	float lastTime = 0;
 
-	std::vector<float> vertices = {
-			-0.5f, -0.5f,     1.0f, 0.0f, 0.0f,    0.0f, 0.0f,
-			 0.5f, -0.5f,     0.0f, 1.0f, 0.0f,    1.0f, 0.0f,
-			 0.5f,  0.5f,     0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
-			-0.5f,  0.5f,     1.0f, 1.0f, 1.0f,    0.0f, 1.0f
-	};
-
-	std::vector<unsigned int> indices = {
-			0, 1, 2, 2, 3, 0
-	};
-
-	VBO<float>* vertexBuffer;
-	VBO<unsigned int>* indexBuffer;
-	RenderData* quad;
-
-	Shader* shader;
+	UBO* ubo;
+	VulkanRenderShader* renderShader;
+	MeshRenderData* quad;
+	VulkanRenderShader::UBOData uboData;
+	Texture* texture;
 public:
 	void initialise() override;
 	void created() override;
@@ -58,20 +48,17 @@ void Test::initialise() {
 }
 
 void Test::created() {
-	quad = new RenderData(GL_TRIANGLES, 6);
-	vertexBuffer = new VBO<float>(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices, GL_STATIC_DRAW);
-	vertexBuffer->addAttribute(0, 2);
-	vertexBuffer->addAttribute(1, 3);
-	vertexBuffer->addAttribute(2, 2);
-	indexBuffer  = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices, GL_STATIC_DRAW);
-	quad->addVBO(vertexBuffer);
-	quad->setIndicesVBO(indexBuffer);
-	quad->setup();
+	texture = Texture::loadTexture("resources/textures/texture.jpg");
 
-	if (! getSettings().videoVulkan) {
-		std::string path = "resources/shaders/vulkan/shader";
-		shader = Shader::createShader(Shader::loadShaderSource(path + ".vert"), Shader::loadShaderSource(path + ".frag"));
-	}
+	ubo = new UBO(NULL, sizeof(VulkanRenderShader::UBOData), GL_DYNAMIC_DRAW, 0);
+
+	renderShader = new VulkanRenderShader(Shader::loadShader("resources/shaders/vulkan/shader"));
+	renderShader->add(ubo);
+	renderShader->add(texture, 1);
+	renderShader->setup();
+
+	MeshData* data = MeshBuilder::createQuad(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture);
+	quad = new MeshRenderData(data, new RenderShader("Shader", renderShader));
 }
 
 void Test::update() {
@@ -79,22 +66,30 @@ void Test::update() {
 		lastTime = utils_time::getSeconds();
 		std::cout << getFPS() << std::endl;
 	}
+	//Update the UBO
+	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
+
+	renderShader->getUBO(0)->update(&uboData, 0, sizeof(VulkanRenderShader::UBOData));
 }
 
 void Test::render() {
-	if (! getSettings().videoVulkan) {
-		glClear(GL_COLOR_BUFFER_BIT);
-		shader->use();
-	}
+//	if (! getSettings().videoVulkan) {
+//		glClear(GL_COLOR_BUFFER_BIT);
+//		shader->use();
+//	}
+//	quad->render();
+//	if (! getSettings().videoVulkan)
+//		shader->stopUsing();
+
 	quad->render();
-	if (! getSettings().videoVulkan)
-		shader->stopUsing();
 }
 
 void Test::destroy() {
 	delete quad;
-	delete indexBuffer;
-	delete vertexBuffer;
+
+	//delete texture; Handled by Resource
+	delete renderShader;
+	delete ubo;
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

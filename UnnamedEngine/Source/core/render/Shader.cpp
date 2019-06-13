@@ -419,13 +419,16 @@ void RenderShader::removeLastDeferredGeomShader() {
 }
 
 Shader* RenderShader::getShader() {
-	if (useDeferredGeom) {
-		if (deferredGeomShaders.size() > 0)
-			return getDeferredGeomShader();
-		else {
-			Logger::log("Deferred geometry shader requested but not assigned", "Shader getShader()", LogType::Error);
-			return NULL;
-		}
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		if (useDeferredGeom) {
+			if (deferredGeomShaders.size() > 0)
+				return getDeferredGeomShader();
+			else {
+				Logger::log("Deferred geometry shader requested but not assigned", "Shader getShader()", LogType::Error);
+				return NULL;
+			}
+		} else
+			return getForwardShader();
 	} else
-		return getForwardShader();
+		return renderShaderVk->getShader();
 }

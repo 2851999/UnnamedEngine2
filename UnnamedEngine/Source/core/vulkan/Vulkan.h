@@ -29,6 +29,7 @@
 #include "../render/VBO.h"
 #include "../render/UBO.h"
 #include "../render/Texture.h"
+#include "../render/Mesh.h"
 
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
@@ -54,22 +55,6 @@ private:
 	/* The render pass */
 	static VulkanRenderPass* renderPass;
 
-	/* Vertex and indices data */
-	static std::vector<float> vertices;
-	static std::vector<unsigned int> indices;
-
-	/* The vertex and index buffers to render */
-	static VBO<float>* vertexBuffer;
-	static VBO<unsigned int>* indexBuffer;
-
-	static UBO* ubo;
-	static VulkanRenderShader* renderShader;
-
-	static VulkanRenderShader::UBOData uboData;
-
-	/* The graphics pipeline */
-	static VulkanGraphicsPipeline* graphicsPipeline;
-
 	/* Command pool */
 	static VkCommandPool commandPool;
 
@@ -81,8 +66,6 @@ private:
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
-
-	static Texture* texture;
 
 	/* Method to create a debug messenger */
 	static VkResult createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
@@ -156,9 +139,6 @@ public:
 	/* Method to stop drawing a frame (and recording to the command buffer) */
 	static void stopDraw();
 
-	/* Method to draw a frame */
-	static void drawFrame();
-
 	/* Locates a particular kind of graphics memory for a buffer */
 	static uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
@@ -176,6 +156,7 @@ public:
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
 	static inline VulkanDevice* getDevice() { return device; }
 	static inline VulkanSwapChain* getSwapChain() { return swapChain; }
+	static inline VulkanRenderPass* getRenderPass() { return renderPass; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }

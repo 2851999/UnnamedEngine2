@@ -26,6 +26,7 @@
 #include "Skinning.h"
 #include "VBO.h"
 #include "../Sphere.h"
+#include "../vulkan/VulkanGraphicsPipeline.h"
 
 /*****************************************************************************
  * The MeshData class stores information about a mesh
@@ -238,6 +239,9 @@ private:
 
 	/* The shader used when assigning attribute locations */
 	RenderShader* setupShader = NULL;
+
+	/* The pipeline used to render the mesh data (for Vulkan) */
+	VulkanGraphicsPipeline* graphicsVkPipeline = NULL;
 
 	/* The various Vertex Buffer Objects for this mesh */
 	VBO<GLfloat>* vboPositions     = NULL;

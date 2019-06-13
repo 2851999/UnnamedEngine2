@@ -30,6 +30,8 @@
  * The Shader class handles a shader program
  *****************************************************************************/
 
+class VulkanRenderShader;
+
 class Shader : public Resource {
 private:
 	static Shader* currentShader;
@@ -126,6 +128,9 @@ private:
 	std::vector<Shader*> deferredGeomShaders;
 	/* Boolean that states whether the deferred geometry shader should be used */
 	bool useDeferredGeom = false;
+
+	/* The render shader for Vulkan */
+	VulkanRenderShader* renderShaderVk = NULL;
 public:
 	/* Various constructors */
 	RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader) : name(name) {
@@ -133,6 +138,10 @@ public:
 			addForwardShader(forwardShader);
 		if (deferredGeomShader)
 			addDeferredGeomShader(deferredGeomShader);
+	}
+
+	RenderShader(std::string name, VulkanRenderShader* renderShader) {
+		this->renderShaderVk = renderShader;
 	}
 
 	/* Methods used to add/remove a forward shader */
@@ -154,8 +163,9 @@ public:
 
 	inline void useGeometryShader(bool use) { useDeferredGeom = use; }
 
-	/* Returns the name of the RenderShader */
+	/* Getters */
 	std::string getName() { return name; }
+	VulkanRenderShader* getVkRenderShader() { return renderShaderVk; }
 };
 
 #endif /* CORE_RENDER_SHADER_H_ */
