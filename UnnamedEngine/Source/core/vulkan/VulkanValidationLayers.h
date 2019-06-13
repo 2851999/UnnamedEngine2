@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2019 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,12 +16,25 @@
  *
  *****************************************************************************/
 
-#include "GLUtils.h"
+#ifndef CORE_VULKAN_VULKANVALIDATIONLAYERS_H_
+#define CORE_VULKAN_VULKANVALIDATIONLAYERS_H_
+
+#include <vector>
 
 /*****************************************************************************
- * Various OpenGL utilities
+ * The VulkanValidationLayers class
  *****************************************************************************/
 
-namespace GLUtils {
+class VulkanValidationLayers {
+private:
+	/* Stores all the requested validation layers to use */
+	static std::vector<const char*> validationLayers;
+public:
+	/* Returns whether the validation layers required are supported */
+	static bool checkSupport();
 
-}
+	/* Returns a list of the required validation layers */
+	static std::vector<const char*>& getLayers() { return validationLayers; }
+};
+
+#endif /* CORE_VULKAN_VULKANVALIDATIONLAYERS_H_ */

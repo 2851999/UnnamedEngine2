@@ -41,6 +41,9 @@ bool Window::create() {
 	//Setup the window
 	glfwDefaultWindowHints();
 
+	if (settings.videoVulkan)
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
 	setResizable(settings.windowResizable);
 	setDecorated(settings.windowDecorated);
 	setSamples(settings.videoSamples);
@@ -63,7 +66,7 @@ bool Window::create() {
 		}
 	}
 
-	instance = glfwCreateWindow(targetRes.getX(), targetRes.getY(), settings.windowTitle.c_str(), monitor, NULL);
+	instance = glfwCreateWindow(targetRes.getX(), targetRes.getY(), settings.windowTitle.c_str(), monitor, nullptr);
 
 	if (! instance) {
 		Logger::log("Failed to create the window", "Window", LogType::Error);

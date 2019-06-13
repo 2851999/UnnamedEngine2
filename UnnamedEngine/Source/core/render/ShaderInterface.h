@@ -143,6 +143,15 @@ private:
 	/* Map used to store UBO's with keys for accessing them */
 	std::unordered_map<std::string, UBO*> ubos;
 public:
+	/* The locations for attributes in the shaders */
+	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
+	static const unsigned int ATTRIBUTE_LOCATION_TEXTURE_COORD;
+	static const unsigned int ATTRIBUTE_LOCATION_NORMAL;
+	static const unsigned int ATTRIBUTE_LOCATION_TANGENT;
+	static const unsigned int ATTRIBUTE_LOCATION_BITANGENT;
+	static const unsigned int ATTRIBUTE_LOCATION_BONE_IDS;
+	static const unsigned int ATTRIBUTE_LOCATION_BONE_WEIGHTS;
+
 	/* The ids for particular shader blocks */
 	static const std::string BLOCK_CORE;
 	static const std::string BLOCK_MATERIAL;

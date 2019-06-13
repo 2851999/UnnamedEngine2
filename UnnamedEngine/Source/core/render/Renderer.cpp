@@ -40,7 +40,8 @@ UBO* Renderer::shaderSkinningUBO;
 
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
-std::unordered_map<std::string, RenderShader*> Renderer::renderShaders;
+std::unordered_map<std::string, std::vector<std::string>> Renderer::renderShaderPaths;
+std::unordered_map<std::string, RenderShader*> Renderer::loadedRenderShaders;
 Texture* Renderer::blank;
 
 MeshRenderData* Renderer::screenTextureMesh;
@@ -123,8 +124,6 @@ void Renderer::releaseNewTextures() {
 }
 
 void Renderer::initialise() {
-	glewInit();
-
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the UBOs
@@ -134,27 +133,27 @@ void Renderer::initialise() {
 	shaderSkinningUBO = shaderInterface->getUBO(ShaderInterface::BLOCK_SKINNING);
 
 	//Setup the shaders
-	addRenderShader(SHADER_MATERIAL,              loadEngineShader("MaterialShader"),                   NULL);
-	addRenderShader(SHADER_SKY_BOX,               loadEngineShader("SkyBoxShader"),                     NULL);
-	addRenderShader(SHADER_FONT,                  loadEngineShader("FontShader"),                       NULL);
-	addRenderShader(SHADER_BILLBOARD,             loadEngineShader("billboard/BillboardShader"),        NULL);
-	addRenderShader(SHADER_PARTICLE,              loadEngineShader("ParticleShader"),                   NULL);
-	addRenderShader(SHADER_LIGHTING,              loadEngineShader("lighting/LightingShader"),          loadEngineShader("lighting/LightingDeferredGeom"));
-	addRenderShader(SHADER_FRAMEBUFFER,           loadEngineShader("FramebufferShader"),                NULL);
-	addRenderShader(SHADER_ENVIRONMENT_MAP,       loadEngineShader("EnvironmentMapShader"),             NULL);
-	addRenderShader(SHADER_SHADOW_MAP,            loadEngineShader("lighting/ShadowMapShader"),         NULL);
-	addRenderShader(SHADER_SHADOW_CUBEMAP,        loadEngineShader("lighting/ShadowCubemapShader"),     NULL);
-	addRenderShader(SHADER_BILLBOARDED_FONT,      loadEngineShader("billboard/BillboardedFontShader"),  NULL);
-	addRenderShader(SHADER_TERRAIN,               loadEngineShader("terrain/Terrain"),                  loadEngineShader("terrain/TerrainDeferredGeom"));
-	addRenderShader(SHADER_PLAIN_TEXTURE,         loadEngineShader("PlainTexture"),                     NULL);
-	addRenderShader(SHADER_DEFERRED_LIGHTING,     loadEngineShader("lighting/DeferredLighting"),        NULL);
-	addRenderShader(SHADER_TILEMAP,				  loadEngineShader("TilemapShader"),				    NULL);
-	addRenderShader(SHADER_PBR_EQUI_TO_CUBE_GEN,         loadEngineShader("pbr/EquiToCubeGen"),         NULL);
-	addRenderShader(SHADER_PBR_IRRADIANCE_MAP_GEN,       loadEngineShader("pbr/IrradianceMapGen"),      NULL);
-	addRenderShader(SHADER_PBR_PREFILTER_MAP_GEN,        loadEngineShader("pbr/PrefilterMapGen"),       NULL);
-	addRenderShader(SHADER_PBR_BRDF_INTEGRATION_MAP_GEN, loadEngineShader("pbr/BRDFIntegrationMapGen"), NULL);
-	addRenderShader(SHADER_PBR_LIGHTING,          loadEngineShader("pbr/PBRShader"),                    loadEngineShader("pbr/PBRDeferredGeom"));
-	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING, loadEngineShader("pbr/PBRDeferredLighting"),          NULL);
+	addRenderShader(SHADER_MATERIAL,                     "MaterialShader",                   "");
+	addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
+	addRenderShader(SHADER_FONT,                         "FontShader",                       "");
+	addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
+	addRenderShader(SHADER_PARTICLE,                     "ParticleShader",                   "");
+	addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
+	addRenderShader(SHADER_FRAMEBUFFER,                  "FramebufferShader",                "");
+	addRenderShader(SHADER_ENVIRONMENT_MAP,              "EnvironmentMapShader",             "");
+	addRenderShader(SHADER_SHADOW_MAP,                   "lighting/ShadowMapShader",         "");
+	addRenderShader(SHADER_SHADOW_CUBEMAP,               "lighting/ShadowCubemapShader",     "");
+	addRenderShader(SHADER_BILLBOARDED_FONT,             "billboard/BillboardedFontShader",  "");
+	addRenderShader(SHADER_TERRAIN,                      "terrain/Terrain",                  "terrain/TerrainDeferredGeom");
+	addRenderShader(SHADER_PLAIN_TEXTURE,                "PlainTexture",                     "");
+	addRenderShader(SHADER_DEFERRED_LIGHTING,            "lighting/DeferredLighting",        "");
+	addRenderShader(SHADER_TILEMAP,				         "TilemapShader",				     "");
+	addRenderShader(SHADER_PBR_EQUI_TO_CUBE_GEN,         "pbr/EquiToCubeGen",                "");
+	addRenderShader(SHADER_PBR_IRRADIANCE_MAP_GEN,       "pbr/IrradianceMapGen",             "");
+	addRenderShader(SHADER_PBR_PREFILTER_MAP_GEN,        "pbr/PrefilterMapGen",              "");
+	addRenderShader(SHADER_PBR_BRDF_INTEGRATION_MAP_GEN, "pbr/BRDFIntegrationMapGen",        "");
+	addRenderShader(SHADER_PBR_LIGHTING,                 "pbr/PBRShader",                    "pbr/PBRDeferredGeom");
+	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING,        "pbr/PBRDeferredLighting",          "");
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
@@ -226,7 +225,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			}
 
 			if (data->hasSubData()) {
-				renderData->getRenderData()->bindVAO();
+				renderData->getRenderData()->bindBuffers();
 
 				//Go through each sub data instance
 				for (unsigned int i = 0; i < data->getSubDataCount(); i++) {
@@ -239,7 +238,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 					releaseNewTextures();
 				}
 
-				renderData->getRenderData()->unbindVAO();
+				renderData->getRenderData()->unbindBuffers();
 			} else {
 				saveTextures();
 				if (mesh->hasMaterial())
@@ -306,24 +305,43 @@ void Renderer::prepareDeferredGeomShader(std::string id, Shader* shader) {
 	shader->stopUsing();
 }
 
-void Renderer::addRenderShader(std::string id, Shader* forwardShader, Shader* deferredGeomShader) {
+void Renderer::addRenderShader(std::string id, std::string forwardShaderPath, std::string deferredGeomShaderPath) {
+	renderShaderPaths.insert(std::pair<std::string, std::vector<std::string>>(id, { forwardShaderPath, deferredGeomShaderPath }));
+}
+
+void Renderer::loadRenderShader(std::string id) {
+	//Get the paths
+	std::vector<std::string> shaderPaths = renderShaderPaths.at(id);
+	Shader* forwardShader = NULL;
+	Shader* deferredGeomShader = NULL;
+
+	//Load the shaders if the paths have been assigned
 	//Setup the shader
-	if (forwardShader)
+	if (shaderPaths[0] != "") {
+		forwardShader = loadEngineShader(shaderPaths[0]);
 		prepareForwardShader(id, forwardShader);
-	if (deferredGeomShader)
+	}
+	if (shaderPaths[1] != "") {
+		deferredGeomShader = loadEngineShader(shaderPaths[1]);
 		prepareDeferredGeomShader(id, deferredGeomShader);
+	}
 
 	//Add the shader
 	addRenderShader(new RenderShader(id, forwardShader, deferredGeomShader));
 }
 
 void Renderer::addRenderShader(RenderShader* renderShader) {
-	renderShaders.insert(std::pair<std::string, RenderShader*>(renderShader->getName(), renderShader));
+	loadedRenderShaders.insert(std::pair<std::string, RenderShader*>(renderShader->getName(), renderShader));
 }
 
 RenderShader* Renderer::getRenderShader(std::string id) {
-	if (renderShaders.count(id) > 0)
-		return renderShaders.at(id);
+	if (loadedRenderShaders.count(id) > 0)
+		return loadedRenderShaders.at(id);
+	else if (renderShaderPaths.count(id) > 0) {
+		//Load the render shader then return it
+		loadRenderShader(id);
+		return loadedRenderShaders.at(id);
+	}
 	else {
 		Logger::log("The RenderShader with the id '" + id + "' could not be found", "Renderer", LogType::Error);
 		return NULL;

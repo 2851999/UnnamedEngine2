@@ -19,7 +19,7 @@
 #ifndef CORE_RENDER_TEXTURE_H_
 #define CORE_RENDER_TEXTURE_H_
 
-#include <GL/glew.h>
+#include "../Window.h"
 #include <string>
 
 #include "../Resource.h"
@@ -32,10 +32,10 @@
 class TextureParameters {
 private:
 	/* The texture parameters with their default values */
-	GLuint target = DEFAULT_TARGET;
+	GLuint target    = DEFAULT_TARGET;
 	GLuint minFilter = DEFAULT_FILTER;
 	GLuint magFilter = DEFAULT_FILTER;
-	GLuint clamp  = DEFAULT_CLAMP;
+	GLuint clamp     = DEFAULT_CLAMP;
 	bool shouldClamp = DEFAULT_SHOULD_CLAMP;
 
 	bool srgb = DEFAULT_SRGB;
@@ -97,6 +97,15 @@ private:
 	/* OpenGL handle to the texture */
 	GLuint texture = 0;
 
+	/* Required objects for Vulkan to access and use a texture */
+	VkImage        textureVkImage       = VK_NULL_HANDLE;
+	VkDeviceMemory textureVkImageMemory = VK_NULL_HANDLE;
+	VkImageView    textureVkImageView   = VK_NULL_HANDLE;
+
+	/* Sampler for this texture (Should change to use one for many rather than
+	 * create one for each texture) */
+	VkSampler textureVkSampler = VK_NULL_HANDLE;
+
 	/* The width and height */
 	unsigned int width = 0;
 	unsigned int height = 0;
@@ -116,6 +125,7 @@ public:
 	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : texture(texture), parameters(parameters) {}
 	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : width(width), height(height), parameters(parameters) { create(); }
 	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : texture(texture), width(width), height(height), parameters(parameters) {}
+	Texture(void* data, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool shouldApplyParameters = true);
 
 	/* The destructor */
 	virtual ~Texture() { destroy(); }
@@ -145,10 +155,7 @@ public:
 	inline void unbind() { glBindTexture(parameters.getTarget(), 0);       }
 
 	/* Called to delete this texture */
-	virtual void destroy() override {
-		if (texture > 0)
-			glDeleteTextures(1, &texture);
-	}
+	virtual void destroy() override;
 
 	/* The setters and getters */
 	inline void setParameters(TextureParameters& parameters) { this->parameters = parameters; }
@@ -166,20 +173,26 @@ public:
 	inline bool hasTexture() { return texture > 0; }
 	inline std::string getPath() { return path; }
 	inline bool hasPath() { return path.length() > 0; }
+	VkImageView& getVkImageView() { return textureVkImageView; }
+	VkDescriptorImageInfo getVkImageInfo();
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */
-	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& internalFormat, GLint& format, bool srgb);
+	static unsigned char* loadTexture(std::string path, int& numComponents, int& width, int& height, bool srgb);
 	/* Returns the data necessary to load a texture taking the data as a float, again the
 	 * texture should be freed afterwards*/
-	static float* loadTexturef(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& internalFormat, GLint& format, bool srgb);
+	static float* loadTexturef(std::string path, int& numComponents, int& width, int& height, bool srgb);
 
-	/* Returns the OpenGL texture format an image should have from its number of colour
+	/* Obtains the OpenGL texture format and internal format that an image should have from its number of colour
 	 * components and whether it should be SRGB */
-	static GLint getTextureFormat(int numComponents, bool srgb);
+	static void getTextureFormatGL(int numComponents, bool srgb, GLint& internalFormat, GLint& format);
+
+	/* Obtains the Vulkan format that an image should have from its number of colour
+	 * components and whether it should be SRGB */
+	static void getTextureFormatVk(int numComponents, bool srgb, VkFormat& format);
 
 	/* Returns a texture instance created using the data given */
-	static Texture* createTexture(std::string path, void* data, int numComponents, GLsizei width, GLsizei height, GLint internalFormat, GLint format, GLenum type, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
+	static Texture* createTexture(std::string path, void* data, int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
 
 	/* Calls stbi_image_free */
 	static void freeTexture(void* texture);

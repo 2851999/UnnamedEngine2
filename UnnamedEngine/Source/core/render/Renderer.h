@@ -44,7 +44,8 @@ private:
 
 	static std::vector<Camera*> cameras;
 	static std::vector<Texture*> boundTextures;
-	static std::unordered_map<std::string, RenderShader*> renderShaders;
+	static std::unordered_map<std::string, std::vector<std::string>> renderShaderPaths;
+	static std::unordered_map<std::string, RenderShader*> loadedRenderShaders;
 	static Texture* blank;
 
 	/* This mesh is used to render a FramebufferTexture to the screen - useful
@@ -135,9 +136,11 @@ public:
 	/* Method used to prepare a shader by adding its required uniforms provided the id is recognised */
 	static void prepareDeferredGeomShader(std::string id, Shader* shader);
 
-	/* Method used to add a RenderShader given a Shader - this method will also setup the shader
-	 * providing the id is recognised */
-	static void addRenderShader(std::string id, Shader* forwardShader, Shader* deferredGeomShader = NULL);
+	/* Method used to add a RenderShader given a the paths to the shaders */
+	static void addRenderShader(std::string id, std::string forwardShaderPath, std::string deferredGeomShaderPath = "");
+
+	/* Method used to load a render shader from the list of render shaders and store it ready for use */
+	static void loadRenderShader(std::string id);
 
 	/* Method used to add a RenderShader */
 	static void addRenderShader(RenderShader* renderShader);

@@ -20,7 +20,11 @@
 #include "render/Renderer.h"
 #include "audio/Audio.h"
 #include "gui/GUIComponent.h"
+#include "vulkan/Vulkan.h"
+#include "vulkan/VulkanValidationLayers.h"
+#include "vulkan/VulkanExtensions.h"
 #include "../utils/GLUtils.h"
+#include "../utils/Logging.h"
 
 /*****************************************************************************
  * The BaseEngine class
@@ -45,105 +49,128 @@ void BaseEngine::create() {
 	fpsCalculator.start();
 	fpsLimiter.setMaxFPS(getSettings().videoMaxFPS);
 
-	//Initialise the Renderer therefore loading engine shaders and textures
-	Renderer::initialise();
+	//Initialise the graphics API and don't continue if it fails
+	if (initGraphicsAPI()) {
+		if (! getSettings().videoVulkan) {
 
-	//Initialise the Audio system
-	AudioManager::initialise();
+			//Initialise the Renderer therefore loading engine shaders and textures
+			Renderer::initialise();
 
-	//Initialise the font system
-	Font::initialiseFreeType();
+			//Initialise the Audio system
+			AudioManager::initialise();
 
-	//Assign the default font and text instance
-	defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
-	textInstance = new Text(defaultFont, Colour::WHITE);
-	//Create the debug camera
-	debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
-	debugCamera->update();
+			//Initialise the font system
+			Font::initialiseFreeType();
 
-	GUIComponentRenderer::DEFAULT_FONT = defaultFont;
+			//Assign the default font and text instance
+			defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
+			textInstance = new Text(defaultFont, Colour::WHITE);
+			//Create the debug camera
+			debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
+			debugCamera->update();
 
-	//Create the debug console
-	if (getSettings().debugConsoleEnabled) {
-		debugConsole = new DebugConsole(this);
-		debugConsole->enable();
-		debugConsole->hide();
-	}
+			GUIComponentRenderer::DEFAULT_FONT = defaultFont;
 
-//	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
-//	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
+			//Create the debug console
+			if (getSettings().debugConsoleEnabled) {
+				debugConsole = new DebugConsole(this);
+				debugConsole->enable();
+				debugConsole->hide();
+			}
 
-	if (getSettings().engineSplashScreen) {
-		Renderer::addCamera(debugCamera);
+		//	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
+		//	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 
-		ResourceManager* manager = new ResourceManager();
-		ResourceManager::addResourceManager(manager);
+			if (getSettings().engineSplashScreen) {
+				Renderer::addCamera(debugCamera);
 
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				ResourceManager* manager = new ResourceManager();
+				ResourceManager::addResourceManager(manager);
 
-		Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
-		Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
-		textInstance->setFont(font);
-		textInstance->setColour(Colour::BLACK);
-		textInstance->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);
-		textInstance->setFont(font2);
-		textInstance->render(Engine::Build + " " + Engine::Version, getSettings().windowWidth / 2 - font2->getWidth(Engine::Build + " " + Engine::Version) / 2, (getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2) + 38.0f);
+				glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+				glClear(GL_COLOR_BUFFER_BIT);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glDisable(GL_BLEND);
-		Renderer::removeCamera();
+				Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
+				Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST));
+				textInstance->setFont(font);
+				textInstance->setColour(Colour::BLACK);
+				textInstance->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);
+				textInstance->setFont(font2);
+				textInstance->render(Engine::Build + " " + Engine::Version, getSettings().windowWidth / 2 - font2->getWidth(Engine::Build + " " + Engine::Version) / 2, (getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2) + 38.0f);
 
-		delete manager;
-		ResourceManager::removeResourceManager();
+				glDisable(GL_BLEND);
+				Renderer::removeCamera();
 
-		glfwSwapBuffers(window->getInstance());
+				delete manager;
+				ResourceManager::removeResourceManager();
 
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+				glfwSwapBuffers(window->getInstance());
 
-		//Go back to default values for rendering text
-		textInstance->setFont(defaultFont);
-		textInstance->setColour(Colour::WHITE);
-	}
+				glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	//Notify the game that everything is ready to start creating game objects
-	//for rendering
-	created();
+				//Go back to default values for rendering text
+				textInstance->setFont(defaultFont);
+				textInstance->setColour(Colour::WHITE);
+			}
+		}
 
-	//The main game loop - continues until either the window is told to close,
-	//or the game requests it to stop
-	while ((! window->shouldClose()) && (! closeRequested)) {
-		fpsLimiter.startFrame();
-		fpsCalculator.update();
+		//Notify the game that everything is ready to start creating game objects
+		//for rendering
+		created();
 
-		//Ensure the debug console isn't open
-		if (! debugConsole || ! debugConsole->isVisible())
-			update();
-		render();
+		//The main game loop - continues until either the window is told to close,
+		//or the game requests it to stop
+		while ((! window->shouldClose()) && (! closeRequested)) {
+			fpsLimiter.startFrame();
+			fpsCalculator.update();
 
-		if (getSettings().debugShowInformation)
-			renderDebugInfo();
-		if (getSettings().debugConsoleEnabled)
-			renderDebugConsole();
+			//Ensure the debug console isn't open
+			if (! debugConsole || ! debugConsole->isVisible())
+				update();
 
-		window->update();
+			if (getSettings().videoVulkan)
+				Vulkan::startDraw();
+			render();
 
-		fpsLimiter.endFrame();
-	}
+			if (! getSettings().videoVulkan) {
+				if (getSettings().debugShowInformation)
+					renderDebugInfo();
+				if (getSettings().debugConsoleEnabled)
+					renderDebugConsole();
+			} else
+				Vulkan::stopDraw();
 
-	//Tell the game to destroy everything it created
-	destroy();
+			window->update();
 
-	//Destroy all other engine resources
-	Font::destroyFreeType();
-	AudioManager::destroy();
-	ResourceManager::destroyAllManagers();
+			fpsLimiter.endFrame();
+		}
+		//Wait for a suitable time
+		if (getSettings().videoVulkan)
+			Vulkan::waitDeviceIdle();
 
-	//Delete all of the objects required by the BaseEngine class
-	delete debugCamera;
-	if (debugConsole)
-		delete debugConsole;
+		//Tell the game to destroy everything it created
+		destroy();
+
+		if (! getSettings().videoVulkan) {
+			//Destroy all other engine resources
+			Font::destroyFreeType();
+			AudioManager::destroy();
+
+			//Delete all of the objects required by the BaseEngine class
+			delete debugCamera;
+			if (debugConsole)
+				delete debugConsole;
+		}
+		ResourceManager::destroyAllManagers();
+	} else
+		//Failed to initialise the graphics API
+		Logger::log("Failed to initialise graphics API", "BaseEngine", LogType::Error);
+
+	if (getSettings().videoVulkan)
+		//Destroy everything used by Vulkan
+		Vulkan::destroy();
 
 	delete window;
 }
@@ -211,4 +238,15 @@ void BaseEngine::renderDebugConsole() {
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
 	}
+}
+
+bool BaseEngine::initGraphicsAPI() {
+	if (getSettings().videoVulkan) {
+		//Initialise Vulkan
+		return Vulkan::initialise(window);
+	} else
+		//Initialise OpenGL
+		glewInit();
+
+	return true;
 }

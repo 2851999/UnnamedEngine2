@@ -53,7 +53,7 @@ struct Settings {
 	std::string  windowTitle      = "Unnamed Engine";
 	unsigned int windowWidth      = 0;
 	unsigned int windowHeight     = 0;
-	float        windowAspectRatio = 0.0;
+	float        windowAspectRatio = 0.0f;
 	bool         windowResizable  = false;
 	bool         windowDecorated  = true;
 	bool         windowBorderless = false;
@@ -67,6 +67,7 @@ struct Settings {
 	unsigned int videoRefreshRate = 60;
 	Vector2i     videoResolution  = VideoResolution::RES_DEFAULT;
 	unsigned int videoMaxFPS      = 60;
+	bool         videoVulkan      = false;
 
 	/* Various audio settings */
 	unsigned int audioSoundEffectVolume = 100;

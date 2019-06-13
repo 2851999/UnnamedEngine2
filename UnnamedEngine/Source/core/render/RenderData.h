@@ -44,6 +44,10 @@ private:
 	/* States the number of instances to render, instancing is only used if
 	 * this value is greater than zero */
 	GLsizei primcount = -1;
+
+	/* The vertex buffer instances and offsets for Vulkan */
+	std::vector<VkBuffer> vboVkInstances;
+	std::vector<VkDeviceSize> vboVkOffsets;
 public:
 
 	/* The constructor */
@@ -55,15 +59,15 @@ public:
 	/* The method used to setup this data for rendering */
 	void setup();
 
-	/* Method used to bind/unbind the VAO */
-	inline void bindVAO() { glBindVertexArray(vao); }
-	inline void unbindVAO() { glBindVertexArray(0); }
+	/* Method used to bind/unbind the VAO/other buffers before/after rendering */
+	void bindBuffers();
+	void unbindBuffers();
 
 	/* The method used to render this data */
 	inline void render() {
-		bindVAO();
+		bindBuffers();
 		renderWithoutBinding();
-		unbindVAO();
+		unbindBuffers();
 	}
 
 	/* The method to render this data without binding/unbinding the VAO */

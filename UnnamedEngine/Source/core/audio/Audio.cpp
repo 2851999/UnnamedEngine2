@@ -21,11 +21,11 @@
 #include <algorithm>
 #include <fstream>
 
-#define _MSC_VER
-#include <stb/stb_vorbis.h>
-
 #include "../Window.h"
 #include "../../utils/Logging.h"
+
+#define _MSC_VER //Seems to conflict with Vulkan header (so define after including window)
+#include <stb/stb_vorbis.h>
 
 /*****************************************************************************
  * The AudioLoader class

@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <fstream>
 
+#include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -36,6 +37,11 @@ Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 	if (geometryShader)
 		attach(geometryShader);
 	attach(fragmentShader);
+}
+
+Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule fragmentShaderModule) {
+	this->vertexShaderModule = vertexShaderModule;
+	this->fragmentShaderModule = fragmentShaderModule;
 }
 
 Shader::~Shader() {
@@ -88,11 +94,17 @@ void Shader::stopUsing() {
 }
 
 void Shader::destroy() {
-	glDeleteProgram(program);
-	//Go through each attached shader and delete them
-	for (unsigned int i = 0; i < attachedShaders.size(); i++)
-		glDeleteShader(attachedShaders[i]);
-	attachedShaders.clear();
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		glDeleteProgram(program);
+		//Go through each attached shader and delete them
+		for (unsigned int i = 0; i < attachedShaders.size(); i++)
+			glDeleteShader(attachedShaders[i]);
+		attachedShaders.clear();
+	} else {
+		//Destroy the shader modules
+		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
+		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
+	}
 }
 
 void Shader::addUniform(std::string id, std::string name) {
@@ -233,6 +245,38 @@ Shader* Shader::createShader(ShaderSource vertexSource, ShaderSource geometrySou
 	return shader;
 }
 
+VkShaderModule Shader::createVkShaderModule(const std::vector<char>& code) {
+	//Assign the creation info
+	VkShaderModuleCreateInfo createInfo = {};
+	createInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	createInfo.codeSize = code.size();
+	createInfo.pCode    = reinterpret_cast<const uint32_t*>(code.data());
+
+	//Load the shader module
+	VkShaderModule shaderModule;
+	if (vkCreateShaderModule(Vulkan::getDevice()->getLogical(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+		Logger::log("Failed to create shader module", "VulkanGraphicsPipeline", LogType::Error);
+
+	return shaderModule;
+}
+
+std::vector<char> Shader::readFile(const std::string& path) {
+	std::ifstream file(path, std::ios::ate | std::ios::binary); //Read at end as can tell size of file from position
+
+	if (! file.is_open())
+		Logger::log("Failed to open file " + path, "Shader", LogType::Error);
+
+	size_t fileSize = (size_t) file.tellg();
+	std::vector<char> buffer(fileSize);
+
+	file.seekg(0);
+	file.read(buffer.data(), fileSize);
+
+	file.close();
+
+	return buffer;
+}
+
 std::vector<std::string> Shader::loadInclude(std::string path, std::string line) {
 	//The directory the shader is in
 	std::string dir = "";
@@ -334,11 +378,16 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path) {
 }
 
 Shader* Shader::loadShader(std::string path) {
-	//Check for geometry shader
-	if (utils_file::isFile(path + ".gs"))
-		return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".gs"), loadShaderSource(path + ".fs"));
-	else
-		return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".fs"));
+	//Check whether using Vulkan
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		//Check for geometry shader
+		if (utils_file::isFile(path + ".gs"))
+			return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".gs"), loadShaderSource(path + ".fs"));
+		else
+			return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".fs"));
+	} else
+		//Load the shader
+		return new Shader(createVkShaderModule(readFile(path + "_vert.spv")), createVkShaderModule(readFile(path + "_frag.spv")));
 }
 
 /*****************************************************************************
@@ -370,13 +419,16 @@ void RenderShader::removeLastDeferredGeomShader() {
 }
 
 Shader* RenderShader::getShader() {
-	if (useDeferredGeom) {
-		if (deferredGeomShaders.size() > 0)
-			return getDeferredGeomShader();
-		else {
-			Logger::log("Deferred geometry shader requested but not assigned", "Shader getShader()", LogType::Error);
-			return NULL;
-		}
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		if (useDeferredGeom) {
+			if (deferredGeomShaders.size() > 0)
+				return getDeferredGeomShader();
+			else {
+				Logger::log("Deferred geometry shader requested but not assigned", "Shader getShader()", LogType::Error);
+				return NULL;
+			}
+		} else
+			return getForwardShader();
 	} else
-		return getForwardShader();
+		return renderShaderVk->getShader();
 }
