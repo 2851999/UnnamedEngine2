@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 12
+
+* More Vulkan
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 11
 
 * Removed VulkanShader

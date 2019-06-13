@@ -29,6 +29,7 @@ private:
 	float lastTime = 0;
 
 	UBO* ubo;
+	Shader* shader;
 	VulkanRenderShader* renderShader;
 	MeshRenderData* quad;
 	VulkanRenderShader::UBOData uboData;
@@ -52,13 +53,18 @@ void Test::created() {
 
 	ubo = new UBO(NULL, sizeof(VulkanRenderShader::UBOData), GL_DYNAMIC_DRAW, 0);
 
-	renderShader = new VulkanRenderShader(Shader::loadShader("resources/shaders/vulkan/shader"));
-	renderShader->add(ubo);
-	renderShader->add(texture, 1);
-	renderShader->setup();
-
 	MeshData* data = MeshBuilder::createQuad(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture);
-	quad = new MeshRenderData(data, new RenderShader("Shader", renderShader));
+
+	if (getSettings().videoVulkan) {
+		renderShader = new VulkanRenderShader(Shader::loadShader("resources/shaders/vulkan/shader"));
+		renderShader->add(ubo);
+		renderShader->add(texture, 1);
+		renderShader->setup();
+		quad = new MeshRenderData(data, new RenderShader("Shader", renderShader));
+	} else {
+		shader = Shader::loadShader("resources/shaders/vulkan/shader");
+		quad = new MeshRenderData(data, new RenderShader("Shader", shader, NULL));
+	}
 }
 
 void Test::update() {
@@ -69,26 +75,27 @@ void Test::update() {
 	//Update the UBO
 	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
 
-	renderShader->getUBO(0)->update(&uboData, 0, sizeof(VulkanRenderShader::UBOData));
+	ubo->update(&uboData, 0, sizeof(VulkanRenderShader::UBOData));
 }
 
 void Test::render() {
-//	if (! getSettings().videoVulkan) {
-//		glClear(GL_COLOR_BUFFER_BIT);
-//		shader->use();
-//	}
-//	quad->render();
-//	if (! getSettings().videoVulkan)
-//		shader->stopUsing();
-
+	if (! getSettings().videoVulkan) {
+		glClear(GL_COLOR_BUFFER_BIT);
+		shader->use();
+		glActiveTexture(GL_TEXTURE1);
+		texture->bind();
+	}
 	quad->render();
+	if (! getSettings().videoVulkan)
+		shader->stopUsing();
 }
 
 void Test::destroy() {
 	delete quad;
 
 	//delete texture; Handled by Resource
-	delete renderShader;
+	if (getSettings().videoVulkan)
+		delete renderShader;
 	delete ubo;
 }
 
