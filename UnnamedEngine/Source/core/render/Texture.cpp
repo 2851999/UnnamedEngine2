@@ -29,11 +29,11 @@
  *****************************************************************************/
 
 /* Define the default parameters */
-GLuint TextureParameters::DEFAULT_TARGET = GL_TEXTURE_2D;
-GLuint TextureParameters::DEFAULT_FILTER = GL_NEAREST;
-GLuint TextureParameters::DEFAULT_CLAMP  = GL_CLAMP_TO_EDGE;
+GLuint TextureParameters::DEFAULT_TARGET       = GL_TEXTURE_2D;
+GLuint TextureParameters::DEFAULT_FILTER       = GL_NEAREST;
+GLuint TextureParameters::DEFAULT_CLAMP        = GL_CLAMP_TO_EDGE;
 bool   TextureParameters::DEFAULT_SHOULD_CLAMP = false;
-bool   TextureParameters::DEFAULT_SRGB   = false;
+bool   TextureParameters::DEFAULT_SRGB         = false;
 
 void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
 	//Bind the texture if necessary
@@ -128,6 +128,36 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 
 		if (vkCreateImageView(Vulkan::getDevice()->getLogical(), &viewInfo, nullptr, &textureVkImageView) != VK_SUCCESS)
 		    Logger::log("Failed to create texture image view", "Texture", LogType::Error);
+
+		//------------------------------------------------------CREATE THE SAMPLER------------------------------------------------------
+		VkSamplerCreateInfo samplerInfo = {};
+		samplerInfo.sType     = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerInfo.magFilter = VK_FILTER_LINEAR;
+		samplerInfo.minFilter = VK_FILTER_LINEAR;
+
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+
+		samplerInfo.anisotropyEnable = VK_TRUE;
+		samplerInfo.maxAnisotropy = 16;
+
+		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+
+		samplerInfo.unnormalizedCoordinates = VK_FALSE;
+
+		samplerInfo.compareEnable = VK_FALSE; //Useful for PCF shadows
+		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.mipLodBias = 0.0f;
+		samplerInfo.minLod = 0.0f;
+		samplerInfo.maxLod = 0.0f;
+
+		//NOTE: Sampler not attached to image (can use again in TextureParameters?)
+
+		if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
+			Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
 	}
 }
 
@@ -139,7 +169,17 @@ void Texture::destroy() {
 
 	    vkDestroyImage(Vulkan::getDevice()->getLogical(), textureVkImage, nullptr);
 	    vkFreeMemory(Vulkan::getDevice()->getLogical(), textureVkImageMemory, nullptr);
+
+		vkDestroySampler(Vulkan::getDevice()->getLogical(), textureVkSampler, nullptr);
 	}
+}
+
+VkDescriptorImageInfo Texture::getVkImageInfo() {
+    VkDescriptorImageInfo imageInfo = {};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView   = textureVkImageView;
+    imageInfo.sampler     = textureVkSampler;
+    return imageInfo;
 }
 
 unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& width, int& height, bool srgb) {

@@ -18,11 +18,16 @@
 
 #include "UBO.h"
 
+#include "../vulkan/Vulkan.h"
+
 /*****************************************************************************
  * The UBO class
  *****************************************************************************/
 
-UBO::UBO(void* data, unsigned int size, GLenum usage, GLuint blockBinding) {
+UBO::UBO(void* data, unsigned int size, GLenum usage, unsigned int blockBinding) {
+	this->size = size;
+	this->blockBinding = blockBinding;
+
 	//Check whether using Vulkan or OpenGL
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
 		//Setup the UBO
@@ -51,7 +56,7 @@ UBO::~UBO() {
 	}
 }
 
-void UBO::update(void* data, GLintptr offset, GLsizeiptr size) {
+void UBO::update(void* data, unsigned int offset, unsigned int size) {
 	//Check whether using Vulkan or OpenGL
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
 		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
@@ -61,4 +66,20 @@ void UBO::update(void* data, GLintptr offset, GLsizeiptr size) {
 		//Update the current buffer
 		vulkanBuffers[Vulkan::getCurrentFrame()]->copyData(data, offset, size);
 	}
+}
+
+VkWriteDescriptorSet UBO::getVkWriteDescriptorSet(unsigned int frame, VkDescriptorSet& descriptorSet, const VkDescriptorBufferInfo* bufferInfo) {
+	VkWriteDescriptorSet writeDescriptor;
+	writeDescriptor.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	writeDescriptor.dstSet           = descriptorSet;
+	writeDescriptor.dstBinding       = blockBinding;
+	writeDescriptor.dstArrayElement  = 0;
+	writeDescriptor.descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	writeDescriptor.descriptorCount  = 1;
+	writeDescriptor.pBufferInfo      = bufferInfo;
+	writeDescriptor.pImageInfo       = nullptr; //Optional
+	writeDescriptor.pTexelBufferView = nullptr; //Optional
+	writeDescriptor.pNext            = nullptr;
+
+	return writeDescriptor;
 }

@@ -79,4 +79,13 @@ VulkanBuffer::~VulkanBuffer() {
 	vkFreeMemory(device->getLogical(), bufferMemory, nullptr);
 }
 
+VkDescriptorBufferInfo VulkanBuffer::getBufferInfo() {
+	VkDescriptorBufferInfo bufferInfo = {};
+	bufferInfo.buffer = instance;
+	bufferInfo.offset = 0;
+	bufferInfo.range  = sizeof(VulkanRenderShader::UBOData); //Can use VK_WHOLE_SIZE
+
+	return bufferInfo;
+}
+
 

@@ -16,42 +16,35 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANGRAPHICSPIPELINE_H_
-#define CORE_VULKAN_VULKANGRAPHICSPIPELINE_H_
+#ifndef CORE_VULKAN_VULKANSHADER_H_
+#define CORE_VULKAN_VULKANSHADER_H_
 
-#include "../Window.h"
-#include "VulkanBuffer.h"
-
-#include "VulkanSwapChain.h"
-#include "VulkanRenderPass.h"
-
-#include "../render/VBO.h"
-
-class VulkanRenderShader;
+#include "../render/UBO.h"
 
 /*****************************************************************************
- * The VulkanGraphicsPipeline class handles a graphics pipeline in Vulkan
+ * The VulkanShader class
  *****************************************************************************/
 
-class VulkanGraphicsPipeline {
+class VulkanShader {
 private:
-	/* The swap chain for this pipeline */
-	VulkanSwapChain* swapChain;
+	VkShaderModule vertexShaderModule;
+	VkShaderModule fragmentShaderModule;
 
-	/* The layout and pipeline instance */
-	VkPipelineLayout pipelineLayout;
-	VkPipeline       pipeline;
+	/* Method to create a shader module */
+	static VkShaderModule createShaderModule(VulkanDevice* device, const std::vector<char>& code);
+
+	/* Method to read a file */
+	static std::vector<char> readFile(const std::string& fileName);
 public:
 	/* Constructor */
-	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, VulkanRenderShader* renderShader);
+	VulkanShader(std::string path);
 
 	/* Destructor */
-	virtual ~VulkanGraphicsPipeline();
+	virtual ~VulkanShader();
 
 	/* Getters */
-	VkPipeline& getInstance() { return pipeline; }
-	VkPipelineLayout& getLayout() { return pipelineLayout; }
+	VkShaderModule& getVertexShaderModule() { return vertexShaderModule; }
+	VkShaderModule& getFragmentShaderModule() { return fragmentShaderModule; }
 };
 
-
-#endif /* CORE_VULKAN_VULKANGRAPHICSPIPELINE_H_ */
+#endif /* CORE_VULKAN_VULKANSHADER_H_ */

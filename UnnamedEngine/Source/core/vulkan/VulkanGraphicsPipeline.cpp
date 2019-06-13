@@ -18,6 +18,8 @@
 
 #include "VulkanGraphicsPipeline.h"
 
+#include "VulkanRenderShader.h"
+
 #include "../../utils/Logging.h"
 
 #include <fstream>
@@ -26,21 +28,13 @@
  * The VulkanGraphicsPipeline class
  *****************************************************************************/
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, VkDescriptorSetLayout& descriptorSetLayout) {
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, VulkanRenderShader* renderShader) {
 	this->swapChain = swapChain;
-
-	//Create the graohics pipeline
-	auto vertShaderCode = readFile("resources/shaders/vulkan/vert.spv");
-	auto fragShaderCode = readFile("resources/shaders/vulkan/frag.spv");
-
-	//Can destroy after pipeline creation
-	VkShaderModule vertShaderModule = createShaderModule(swapChain->getDevice(), vertShaderCode);
-	VkShaderModule fragShaderModule = createShaderModule(swapChain->getDevice(), fragShaderCode);
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 	vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = vertShaderModule;
+	vertShaderStageInfo.module = renderShader->getShader()->getVertexShaderModule();
 	vertShaderStageInfo.pName  = "main"; //Entry point
 
 	//pSpecializationInfo can be used to specify values for shader constants - faster than using if statements
@@ -49,7 +43,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
 	fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = fragShaderModule;
+	fragShaderStageInfo.module = renderShader->getShader()->getFragmentShaderModule();
 	fragShaderStageInfo.pName  = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -149,7 +143,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount         = 1; //Optional
-	pipelineLayoutInfo.pSetLayouts            = &descriptorSetLayout; //Optional
+	pipelineLayoutInfo.pSetLayouts            = &renderShader->getDescriptorSetLayout(); //Optional
 	pipelineLayoutInfo.pushConstantRangeCount = 0; //Optional
 	pipelineLayoutInfo.pPushConstantRanges    = nullptr; //Optional
 
@@ -177,45 +171,10 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 
 	if (vkCreateGraphicsPipelines(swapChain->getDevice()->getLogical(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
 		Logger::log("Failed to create graphics pipeline", "VulkanGraphicsPipeline", LogType::Error);
-
-	vkDestroyShaderModule(swapChain->getDevice()->getLogical(), fragShaderModule, nullptr);
-	vkDestroyShaderModule(swapChain->getDevice()->getLogical(), vertShaderModule, nullptr);
 }
 
 VulkanGraphicsPipeline::~VulkanGraphicsPipeline() {
 	//Destroy the pipeline and its layout
 	vkDestroyPipeline(swapChain->getDevice()->getLogical(), pipeline, nullptr);
 	vkDestroyPipelineLayout(swapChain->getDevice()->getLogical(), pipelineLayout, nullptr);
-}
-
-std::vector<char> VulkanGraphicsPipeline::readFile(const std::string& fileName) {
-	std::ifstream file(fileName, std::ios::ate | std::ios::binary); //Read at end as can tell size of file from position
-
-	if (! file.is_open())
-		Logger::log("Failed to open file " + fileName, "VulkanGraphicsPipeline", LogType::Error);
-
-	size_t fileSize = (size_t) file.tellg();
-	std::vector<char> buffer(fileSize);
-
-	file.seekg(0);
-	file.read(buffer.data(), fileSize);
-
-	file.close();
-
-	return buffer;
-}
-
-VkShaderModule VulkanGraphicsPipeline::createShaderModule(VulkanDevice* device, const std::vector<char>& code) {
-	//Assign the creation info
-	VkShaderModuleCreateInfo createInfo = {};
-	createInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	createInfo.codeSize = code.size();
-	createInfo.pCode    = reinterpret_cast<const uint32_t*>(code.data());
-
-	//Load the shader module
-	VkShaderModule shaderModule;
-	if (vkCreateShaderModule(device->getLogical(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
-		Logger::log("Failed to create shader module", "VulkanGraphicsPipeline", LogType::Error);
-
-	return shaderModule;
 }

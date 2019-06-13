@@ -24,8 +24,10 @@
 #include "VulkanSwapChain.h"
 #include "VulkanRenderPass.h"
 #include "VulkanGraphicsPipeline.h"
+#include "VulkanRenderShader.h"
 
 #include "../render/VBO.h"
+#include "../render/UBO.h"
 #include "../render/Texture.h"
 
 /*****************************************************************************
@@ -60,6 +62,10 @@ private:
 	static VBO<float>* vertexBuffer;
 	static VBO<unsigned int>* indexBuffer;
 
+	static VulkanRenderShader* renderShader;
+
+	static VulkanRenderShader::UBOData uboData;
+
 	/* The graphics pipeline */
 	static VulkanGraphicsPipeline* graphicsPipeline;
 
@@ -75,24 +81,7 @@ private:
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
 
-	/* The descriptor pool (For UBO's) */
-	static VkDescriptorPool descriptorPool;
-
-	/* The descriptor set layout (For UBO) */
-	static VkDescriptorSetLayout descriptorSetLayout;
-
-	static std::vector<VkDescriptorSet> descriptorSets;
-
-	static std::vector<VulkanBuffer*> uniformBuffers;
-
 	static Texture* texture;
-	static VkSampler textureSampler;
-
-	struct UBOData {
-		Matrix4f mvpMatrix;
-	};
-
-	static UBOData uboData;
 
 	/* Method to create a debug messenger */
 	static VkResult createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
@@ -142,7 +131,6 @@ public:
 	/* Method to create the command buffers */
 	static void createCommandBuffers(); //(Destroyed with command pool)
 
-	static void createTextureSampler();
 	static void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 	static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
@@ -154,24 +142,6 @@ public:
 
 	/* Method to destroy the synchronisation objects */
 	static void destroySyncObjects();
-
-	/* Method to create the descriptor pool */
-	static void createDescriptorPool();
-
-	/* Method to destroy the descriptor pool */
-	static void destroyDescriptorPool();
-
-	/* Method to create the descriptor sets */
-	static void createDescriptorSets();
-
-	/* Method to create the descriptor set layout */
-	static void createDescriptorSetLayout();
-
-	/* Method to destroy the descriptor set layout */
-	static void destroyDescriptorSetLayout();
-
-	/* Method to create the uniform buffers */
-	static void createUniformBuffers();
 
 	/* Method to destroy the uniform buffers */
 	static void destroyUniformBuffers();

@@ -54,6 +54,7 @@ public:
 
 	/* Setters and getters */
 	VkBuffer& getInstance() { return instance; }
+	VkDescriptorBufferInfo getBufferInfo();
 };
 
 

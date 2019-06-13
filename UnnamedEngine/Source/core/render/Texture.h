@@ -32,10 +32,10 @@
 class TextureParameters {
 private:
 	/* The texture parameters with their default values */
-	GLuint target = DEFAULT_TARGET;
+	GLuint target    = DEFAULT_TARGET;
 	GLuint minFilter = DEFAULT_FILTER;
 	GLuint magFilter = DEFAULT_FILTER;
-	GLuint clamp  = DEFAULT_CLAMP;
+	GLuint clamp     = DEFAULT_CLAMP;
 	bool shouldClamp = DEFAULT_SHOULD_CLAMP;
 
 	bool srgb = DEFAULT_SRGB;
@@ -101,6 +101,10 @@ private:
 	VkImage        textureVkImage       = VK_NULL_HANDLE;
 	VkDeviceMemory textureVkImageMemory = VK_NULL_HANDLE;
 	VkImageView    textureVkImageView   = VK_NULL_HANDLE;
+
+	/* Sampler for this texture (Should change to use one for many rather than
+	 * create one for each texture) */
+	VkSampler textureVkSampler = VK_NULL_HANDLE;
 
 	/* The width and height */
 	unsigned int width = 0;
@@ -170,6 +174,7 @@ public:
 	inline std::string getPath() { return path; }
 	inline bool hasPath() { return path.length() > 0; }
 	VkImageView& getVkImageView() { return textureVkImageView; }
+	VkDescriptorImageInfo getVkImageInfo();
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */

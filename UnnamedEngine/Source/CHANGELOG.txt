@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 0 | Experimental 9
+
+* Added VulkanShader
+* Added VulkanRenderShader
+
+* Fixed bug: Crash when deleting a UBO instance when using
+             Vulkan
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 8
 
 * Added basic Vulkan support to Texture
