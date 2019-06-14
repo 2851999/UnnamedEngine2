@@ -10,20 +10,18 @@ uniform sampler2D ue_gNormal;
 uniform sampler2D ue_gAlbedo;
 uniform sampler2D ue_gMetalnessAO;
 
-in vec2 frag_textureCoord;
-
-out vec4 ue_FragColour;
+layout(location = 0) out vec4 ue_FragColour;
 
 void main() {
-	vec3 fragPosition = texture(ue_gPosition, frag_textureCoord).rgb;
+	vec3 fragPosition = texture(ue_gPosition, ue_frag_textureCoord).rgb;
 
-	vec3 albedo = texture(ue_gAlbedo, frag_textureCoord).rgb;
+	vec3 albedo = texture(ue_gAlbedo, ue_frag_textureCoord).rgb;
 	
-	vec4 normalRough = texture(ue_gNormal, frag_textureCoord);
+	vec4 normalRough = texture(ue_gNormal, ue_frag_textureCoord);
 	vec3 normal = normalRough.rgb;
 	float roughness = normalRough.a;
 
-	vec3 metalnessAO = texture(ue_gMetalnessAO, frag_textureCoord).rgb;
+	vec3 metalnessAO = texture(ue_gMetalnessAO, ue_frag_textureCoord).rgb;
 	float metalness = metalnessAO.r;
 	float ao = metalnessAO.g;
 

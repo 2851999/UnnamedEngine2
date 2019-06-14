@@ -30,7 +30,7 @@ private:
 
 	UBO* ubo;
 	Shader* shader;
-	VulkanRenderShader* renderShader;
+	RenderShader* renderShader;
 	MeshRenderData* quad;
 	VulkanRenderShader::UBOData uboData;
 	Texture* texture;
@@ -43,7 +43,7 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().videoVulkan = true; //Validation layer have quite large effect on performance
+	getSettings().videoVulkan = true; //Validation layers have quite large effect on performance
 	getSettings().videoMaxFPS = 0;
 	getSettings().debugShowInformation = false;
 }
@@ -55,17 +55,17 @@ void Test::created() {
 
 	MeshData* data = MeshBuilder::createQuad(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture);
 
+	shader = Shader::loadShader("resources/shaders/vulkan/shader");
+	renderShader = new RenderShader("Shader", shader, NULL);
 	if (getSettings().videoVulkan) {
-		renderShader = new VulkanRenderShader(Shader::loadShader("resources/shaders/vulkan/shader"));
-		renderShader->add(ubo);
-		renderShader->add(texture, 1);
-		renderShader->setup();
-		quad = new MeshRenderData(data, new RenderShader("Shader", renderShader));
-	} else {
-		shader = Shader::loadShader("resources/shaders/vulkan/shader");
-		quad = new MeshRenderData(data, new RenderShader("Shader", shader, NULL));
+		renderShader->getVkRenderShader()->add(ubo);
+		renderShader->getVkRenderShader()->add(texture, 1);
+		renderShader->getVkRenderShader()->setup();
 	}
+
+	quad = new MeshRenderData(data, renderShader);
 }
+
 
 void Test::update() {
 	if (utils_time::getSeconds() - lastTime > 0.5f) {
@@ -93,9 +93,7 @@ void Test::render() {
 void Test::destroy() {
 	delete quad;
 
-	//delete texture; Handled by Resource
-	if (getSettings().videoVulkan)
-		delete renderShader;
+	delete renderShader;
 	delete ubo;
 }
 

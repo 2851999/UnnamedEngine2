@@ -6,9 +6,9 @@
 uniform sampler2D ue_tex;
 
 //Data from the vertex shader
-in vec4 ue_frag_colour;
+layout(location = 3) in vec4 ue_frag_colour;
 
-out vec4 ue_FragColour;
+layout(location = 0) out vec4 ue_FragColour;
 
 void main() {
 	//Assign the colour

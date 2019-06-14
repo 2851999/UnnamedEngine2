@@ -394,6 +394,22 @@ Shader* Shader::loadShader(std::string path) {
  * The RenderShader class
  *****************************************************************************/
 
+RenderShader::RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader) : name(name) {
+	//Check if using Vulkan
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		if (forwardShader)
+			addForwardShader(forwardShader);
+		if (deferredGeomShader)
+			addDeferredGeomShader(deferredGeomShader);
+	} else
+		this->renderShaderVk = new VulkanRenderShader(forwardShader);
+}
+
+RenderShader::~RenderShader()  {
+	if (renderShaderVk)
+		delete renderShaderVk;
+}
+
 void RenderShader::addForwardShader(Shader* forwardShader) {
 	forwardShaders.push_back(forwardShader);
 }

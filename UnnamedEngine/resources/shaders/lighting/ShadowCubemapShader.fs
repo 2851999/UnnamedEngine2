@@ -2,9 +2,9 @@
 
 #include "ShadowCubemapShader.glsl"
 
-in vec4 FragPos;
+layout(location = 0) in vec4 FragPos;
 
-out vec3 color;
+layout(location = 1) out vec3 color;
 
 void main() {
     float lightDistance = length(FragPos.xyz - lightPos.xyz);

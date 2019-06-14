@@ -2,9 +2,9 @@
 
 #map attribute Visibility visibility
 
-in float visibility;
+layout(location = 7) in float visibility;
 
-out float frag_visibility;
+layout(location = 3) out float frag_visibility;
 
 void main() {
 	frag_visibility = visibility;

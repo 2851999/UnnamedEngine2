@@ -1,7 +1,7 @@
 #include "../Core.fs"
 #include "../Material.glsl"
 
-out vec4 ue_FragColour;
+layout(location = 0) out vec4 ue_FragColour;
 
 void main() {
 	//Assign the final colour

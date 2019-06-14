@@ -19,7 +19,7 @@ layout (std140, binding = 5) uniform UETerrainData {
 	uniform float ue_size;
 };
 
-out float ue_frag_height;
+layout(location = 3) out float ue_frag_height;
 
 vec2 ueTerrainMorphVertex(vec2 gridPos, vec2 vertex, float morphK) {
 	vec2 fracPart = fract(gridPos.xy * ue_gridSize.xy * 0.5) * 2.0 / ue_gridSize.xy;

@@ -133,16 +133,14 @@ private:
 	VulkanRenderShader* renderShaderVk = NULL;
 public:
 	/* Various constructors */
-	RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader) : name(name) {
-		if (forwardShader)
-			addForwardShader(forwardShader);
-		if (deferredGeomShader)
-			addDeferredGeomShader(deferredGeomShader);
-	}
+	RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader);
 
 	RenderShader(std::string name, VulkanRenderShader* renderShader) {
 		this->renderShaderVk = renderShader;
 	}
+
+	/* Descructor */
+	virtual ~RenderShader();
 
 	/* Methods used to add/remove a forward shader */
 	void addForwardShader(Shader* forwardShader);

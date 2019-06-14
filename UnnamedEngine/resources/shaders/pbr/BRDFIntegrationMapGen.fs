@@ -1,10 +1,10 @@
-#version 330
+#version 420
 
 #include "PBRCore.fs"
 
-out vec2  FragColor;
+layout(location = 0) in vec2 texCoords;
 
-in vec2 texCoords;
+layout(location = 0) out vec2 FragColor;
 
 vec2 integrateBRDF(float NdotV, float roughness) {
     vec3 V;

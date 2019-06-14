@@ -2,9 +2,9 @@
 
 #map attribute Position aPos
 
-layout (location = 0) in vec3 aPos;
+layout(location = 0) in vec3 aPos;
 
-out vec3 localPos;
+layout(location = 0) out vec3 localPos;
 
 layout (std140, binding = 7) uniform UEEnvMapGenData {
 	uniform mat4 projection;

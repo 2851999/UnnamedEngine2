@@ -1,6 +1,6 @@
 #include "PBRLightingCore.fs"
 
-out vec4 ue_FragColour;
+layout(location = 0) out vec4 ue_FragColour;
 
 void main() {
     vec2 textureCoord = ueCalculateTextureCoord();

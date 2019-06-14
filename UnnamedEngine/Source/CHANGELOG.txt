@@ -1,4 +1,38 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 1 | Experimental 1
+
+* Changed Texture to use TextureParameters when using Vulkan
+  to generate the texture sampler
+* Changed shaders to use explicit locations (To make more
+  compatible for compilation to SPIR-V)
+
+* More Vulkan
+
+--------------------------------------------------------------
+Release 1 | Beta 2 | Development 1 (V0.3.5)
+
+* Added Vulkan
+* Added VulkanDevice
+* Added VulkanExtensions
+* Added VulkanSwapChain
+* Added VulkanValidationLayers
+* Added VulkanRenderPass
+* Added VulkanGraphicsPipeline
+* Added VulkanBuffer
+* Added VulkanRenderShader
+* Added 'videoVulkan' setting in Settings
+
+* Changed Renderer to only load shaders being used (can also
+  use 'loadRenderShader' to load shaders manually
+* Changed MeshRenderData and ShaderInterface to assign
+  specific attribute locations matching the ones defined in
+  the shaders
+  
+* Fixed bug: Didn't delete 'vboOthers' in MeshRenderData
+
+* Started adding Vulkan support
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 0 | Experimental 12
 
 * More Vulkan

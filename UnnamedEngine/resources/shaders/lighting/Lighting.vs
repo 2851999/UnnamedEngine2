@@ -3,11 +3,11 @@
 #include "../Skinning.vs"
 #include "Lighting.glsl"
 
-out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
-out mat3 ue_frag_tbnMatrix;
+layout(location = 7) out vec3 ue_tangentViewPos;
+layout(location = 8) out vec3 ue_tangentFragPos;
 
-out vec3 ue_tangentViewPos;
-out vec3 ue_tangentFragPos;
+layout(location = 9) out mat3 ue_frag_tbnMatrix;
+layout(location = 25) out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 
 void ueAssignLightingData() {
 	mat4 boneTransform;

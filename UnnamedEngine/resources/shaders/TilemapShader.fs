@@ -4,9 +4,9 @@
 
 uniform sampler2D tex;
 
-in float frag_visibility;
+layout(location = 3) in float frag_visibility;
 
-out vec4 ue_FragColour;
+layout(location = 0) out vec4 ue_FragColour;
 
 void main() {
 	vec4 texColour = texture(tex, ue_frag_textureCoord);
