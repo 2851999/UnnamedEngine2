@@ -20,7 +20,6 @@
 #define TESTS_BASEENGINETEST3D_H_
 
 #include "../core/BaseEngine.h"
-#include "../core/vulkan/VulkanRenderShader.h"
 
 #include "../utils/Utils.h"
 
@@ -28,11 +27,15 @@ class Test : public BaseEngine {
 private:
 	float lastTime = 0;
 
+	struct UBOData {
+		Matrix4f mvpMatrix;
+	};
+
 	UBO* ubo;
 	Shader* shader;
 	RenderShader* renderShader;
 	MeshRenderData* quad;
-	VulkanRenderShader::UBOData uboData;
+	UBOData uboData;
 	Texture* texture;
 public:
 	void initialise() override;
@@ -51,19 +54,17 @@ void Test::initialise() {
 void Test::created() {
 	texture = Texture::loadTexture("resources/textures/texture.jpg");
 
-	ubo = new UBO(NULL, sizeof(VulkanRenderShader::UBOData), GL_DYNAMIC_DRAW, 0);
+	ubo = new UBO(NULL, sizeof(UBOData), GL_DYNAMIC_DRAW, 0);
 
 	MeshData* data = MeshBuilder::createQuad(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture);
 
 	shader = Shader::loadShader("resources/shaders/vulkan/shader");
 	renderShader = new RenderShader("Shader", shader, NULL);
-	if (getSettings().videoVulkan) {
-		renderShader->getVkRenderShader()->add(ubo);
-		renderShader->getVkRenderShader()->add(texture, 1);
-		renderShader->getVkRenderShader()->setup();
-	}
 
 	quad = new MeshRenderData(data, renderShader);
+	quad->getRenderData()->add(ubo);
+	quad->getRenderData()->add(texture, 1);
+	quad->getRenderData()->setupVulkan(shader);
 }
 
 
@@ -75,7 +76,7 @@ void Test::update() {
 	//Update the UBO
 	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
 
-	ubo->update(&uboData, 0, sizeof(VulkanRenderShader::UBOData));
+	ubo->update(&uboData, 0, sizeof(UBOData));
 }
 
 void Test::render() {

@@ -20,6 +20,9 @@
 #define CORE_RENDER_RENDERDATA_H_
 
 #include "VBO.h"
+#include "UBO.h"
+#include "Texture.h"
+#include "../vulkan/VulkanGraphicsPipeline.h"
 
 /*****************************************************************************
  * The RenderData class is used for rendering
@@ -48,16 +51,52 @@ private:
 	/* The vertex buffer instances and offsets for Vulkan */
 	std::vector<VkBuffer> vboVkInstances;
 	std::vector<VkDeviceSize> vboVkOffsets;
+
+	/* The pipeline used to render the data */
+	VulkanGraphicsPipeline* graphicsVkPipeline = NULL;
+
+	/* UBO's used with to render (Does not delete these UBOs) */
+	std::vector<UBO*> ubos;
+
+	/* Holds information about a texture being used in the shader */
+	struct TextureInfo {
+		Texture*     texture;
+		unsigned int binding;
+	};
+
+	/* Textures used when rendering */
+	std::vector<TextureInfo> textures;
+
+	/* The descriptor pool for allocation of descriptors */
+	VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+
+	/* The descriptor set layout */
+	VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+
+	/* The descriptor sets */
+	std::vector<VkDescriptorSet> descriptorSets;
 public:
 
 	/* The constructor */
 	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}
 
 	/* The destructor */
-	virtual ~RenderData() {}
+	virtual ~RenderData();
 
 	/* The method used to setup this data for rendering */
 	void setup();
+
+	/* The method used to setup this data for rendering (With Vulkan) */
+	void setupVulkan(Shader* shader);
+
+	/* Methods to add a UBO or Texture to this instance */
+	inline void add(UBO* ubo) { ubos.push_back(ubo); }
+	inline void add(Texture* texture, unsigned int binding) {
+		TextureInfo info;
+		info.texture = texture;
+		info.binding = binding;
+		textures.push_back(info);
+	}
 
 	/* Method used to bind/unbind the VAO/other buffers before/after rendering */
 	void bindBuffers();
@@ -85,6 +124,9 @@ public:
 	inline void setNumInstances(GLsizei primcount) { this->primcount = primcount; }
 
 	inline GLuint getVAO() { return vao; }
+	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
+	inline VkDescriptorSetLayout& getVkDescriptorSetLayout() { return descriptorSetLayout; }
+	inline VkDescriptorSet& getVkDescriptorSet(unsigned int index) { return descriptorSets[index]; }
 };
 
 #endif /* CORE_RENDER_RENDERDATA_H_ */

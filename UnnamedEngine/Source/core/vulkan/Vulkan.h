@@ -24,7 +24,6 @@
 #include "VulkanSwapChain.h"
 #include "VulkanRenderPass.h"
 #include "VulkanGraphicsPipeline.h"
-#include "VulkanRenderShader.h"
 
 #include "../render/VBO.h"
 #include "../render/UBO.h"

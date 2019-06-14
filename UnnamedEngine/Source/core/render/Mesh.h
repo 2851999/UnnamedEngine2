@@ -240,9 +240,6 @@ private:
 	/* The shader used when assigning attribute locations */
 	RenderShader* setupShader = NULL;
 
-	/* The pipeline used to render the mesh data (for Vulkan) */
-	VulkanGraphicsPipeline* graphicsVkPipeline = NULL;
-
 	/* The various Vertex Buffer Objects for this mesh */
 	VBO<GLfloat>* vboPositions     = NULL;
 	VBO<GLfloat>* vboColours       = NULL;

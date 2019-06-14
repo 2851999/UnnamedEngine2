@@ -270,20 +270,13 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 		renderData->setIndicesVBO(vboIndices);
 	}
 
+	//TODO: ADD REQUIRED UBO's AND TEXTURES HERE?
+
 	//Setup the render data
 	renderData->setup();
-
-	//Setup the graphics pipeline (if using Vulkan)
-	if (Window::getCurrentInstance()->getSettings().videoVulkan)
-		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), vboOthers, Vulkan::getRenderPass(), renderShader->getVkRenderShader());
 }
 
 void MeshRenderData::render() {
-	//Bind the pipeline and descriptor set (for Vulkan)
-	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
-		vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsVkPipeline->getInstance());
-		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsVkPipeline->getLayout(), 0, 1, &setupShader->getVkRenderShader()->getDescriptorSet(Vulkan::getCurrentFrame()), 0, nullptr);
-	}
 	renderData->render();
 }
 
@@ -361,8 +354,6 @@ void MeshRenderData::updateIndices(MeshData* data) {
 }
 
 void MeshRenderData::destroy() {
-	if (graphicsVkPipeline)
-		delete graphicsVkPipeline;
 	delete renderData;
 	delete vboPositions;
 	delete vboColours;

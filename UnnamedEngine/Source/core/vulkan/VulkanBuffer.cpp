@@ -83,7 +83,7 @@ VkDescriptorBufferInfo VulkanBuffer::getBufferInfo() {
 	VkDescriptorBufferInfo bufferInfo = {};
 	bufferInfo.buffer = instance;
 	bufferInfo.offset = 0;
-	bufferInfo.range  = sizeof(VulkanRenderShader::UBOData); //Can use VK_WHOLE_SIZE
+	bufferInfo.range  = VK_WHOLE_SIZE;
 
 	return bufferInfo;
 }

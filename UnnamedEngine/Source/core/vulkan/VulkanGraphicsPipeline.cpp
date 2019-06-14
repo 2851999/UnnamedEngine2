@@ -18,9 +18,8 @@
 
 #include "VulkanGraphicsPipeline.h"
 
-#include "VulkanRenderShader.h"
-
 #include "../../utils/Logging.h"
+#include "../render/RenderData.h"
 
 #include <fstream>
 
@@ -28,13 +27,13 @@
  * The VulkanGraphicsPipeline class
  *****************************************************************************/
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, VulkanRenderShader* renderShader) {
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, RenderData* renderData, Shader* shader) {
 	this->swapChain = swapChain;
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 	vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = renderShader->getShader()->getVkVertexShaderModule();
+	vertShaderStageInfo.module = shader->getVkVertexShaderModule();
 	vertShaderStageInfo.pName  = "main"; //Entry point
 
 	//pSpecializationInfo can be used to specify values for shader constants - faster than using if statements
@@ -43,7 +42,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
 	fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = renderShader->getShader()->getVkFragmentShaderModule();
+	fragShaderStageInfo.module = shader->getVkFragmentShaderModule();
 	fragShaderStageInfo.pName  = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -143,7 +142,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount         = 1; //Optional
-	pipelineLayoutInfo.pSetLayouts            = &renderShader->getDescriptorSetLayout(); //Optional
+	pipelineLayoutInfo.pSetLayouts            = &renderData->getVkDescriptorSetLayout(); //Optional
 	pipelineLayoutInfo.pushConstantRangeCount = 0; //Optional
 	pipelineLayoutInfo.pPushConstantRanges    = nullptr; //Optional
 

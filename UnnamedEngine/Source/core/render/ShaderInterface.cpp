@@ -33,7 +33,6 @@ const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT     = 4;
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS      = 5;
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS  = 6;
 
-
 /* The ids for particular shader blocks */
 const std::string ShaderInterface::BLOCK_CORE                   = "Core";
 const std::string ShaderInterface::BLOCK_MATERIAL               = "Material";

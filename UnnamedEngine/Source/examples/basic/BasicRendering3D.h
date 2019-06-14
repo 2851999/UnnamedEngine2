@@ -24,9 +24,9 @@
  *
  * Tutorial Number: 4
  * Tutorial Name: Basic Rendering 3D
- * Engine Version: V0.2.9 (1::0::6::4)
+ * Engine Version: V0.3.5 (1::2::1::2)
  * Date Created: 13/04/2018
- * Date Updated: 13/04/2018
+ * Date Updated: 14/06/2019
  *
  * Description: Demonstrates how to start rendering in 3D
  *****************************************************************************/
@@ -68,7 +68,7 @@ void Tutorial::created() {
 	//correspond to the number of pixels on the screen
 	Mesh* mesh = new Mesh(MeshBuilder::createCube(1.0f, 1.0f, 1.0f));
 
-	mesh->getMaterial()->diffuseColour = Colour::ORANGE;
+	mesh->getMaterial()->setDiffuse(Colour::ORANGE);
 
 	//Frustum culling can be applied on a mesh per mesh basis, and by default it will be
 	//enabled, however it can be disabled using the following
@@ -132,11 +132,11 @@ void Tutorial::destroy() {
 void Tutorial::onKeyPressed(int key) {
 	//Check the key
 	if (key == GLFW_KEY_R)
-		object->getMaterial()->diffuseColour = Colour::RED;
+		object->getMaterial()->setDiffuse(Colour::RED);
 	else if (key == GLFW_KEY_O)
-		object->getMaterial()->diffuseColour = Colour::ORANGE;
+		object->getMaterial()->setDiffuse(Colour::ORANGE);
 	else if (key == GLFW_KEY_Q)
-		object->getMaterial()->diffuseColour = Colour(1.0, 0.5f, 0.5f);
+		object->getMaterial()->setDiffuse(Colour(1.0, 0.5f, 0.5f));
 }
 
 #endif /* EXAMPLES_BASIC_BASICRENDERING3D_H_ */
