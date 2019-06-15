@@ -59,8 +59,8 @@ public:
 };
 
 void Test::onInitialise() {
-	//getSettings().videoVSync = false;
-	//getSettings().videoMaxFPS = 0;
+	getSettings().videoVSync = false;
+	getSettings().videoMaxFPS = 0;
 }
 
 void Test::onCreated() {

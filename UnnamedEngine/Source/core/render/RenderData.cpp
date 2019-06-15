@@ -236,5 +236,12 @@ void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset
 			if (vboIndices)
 				glDrawElementsBaseVertex(mode, count, GL_UNSIGNED_INT, (void*) indicesOffset, baseVertex);
 		}
+	} else {
+		//Check for instancing
+		if (primcount == -1) {
+			//Check for indices
+			if (vboIndices)
+				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, 1, indicesOffset, baseVertex, 0); //Is this correct?
+		}
 	}
 }

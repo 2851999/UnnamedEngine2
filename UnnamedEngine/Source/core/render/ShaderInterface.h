@@ -139,7 +139,16 @@ struct ShaderBlock_ShadowCubemap {
  *****************************************************************************/
 
 class ShaderInterface {
+public:
+	/* Structure storing the necessary information to create a UBO */
+	struct UBOInfo {
+		unsigned int size;
+		unsigned int usage;
+		unsigned int binding;
+	};
 private:
+	/* Map storing UBO information */
+	std::unordered_map<std::string, UBOInfo> ubosInfo;
 	/* Map used to store UBO's with keys for accessing them */
 	std::unordered_map<std::string, UBO*> ubos;
 public:
@@ -185,9 +194,9 @@ public:
 	virtual ~ShaderInterface();
 
 	/* Method to add a UBO to this interface */
-	inline void add(std::string id, UBO* ubo) { ubos.insert(std::pair<std::string, UBO*>(id, ubo)); }
+	void add(std::string id, unsigned int size, unsigned int usage, unsigned int binding);
 
-	/* Method to obtain a UBO from this interface */
+	/* Method to obtain a UBO from this interface (Should only call once per object - for Vulkan this will return a new UBO each time) */
 	UBO* getUBO(std::string id);
 };
 

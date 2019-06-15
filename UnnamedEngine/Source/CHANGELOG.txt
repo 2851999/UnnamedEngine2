@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 1 | Experimental 3
+
+* Changed ShaderInterface to only create UBO's when they are
+  obtained using 'getUBO'
+  
+* Fixed bug: Font still had overlapping glyphs in the bitmap
+             resulting in lines appearing in text
+* Fixed bug: Font didn't destroy the texture it created when
+             it was destroyed
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 1 | Experimental 2
 
 * Removed VulkanRenderShader

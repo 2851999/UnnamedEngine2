@@ -56,10 +56,11 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 			return;
 		}
 		//Add onto the width
-		width += glyphSlot->bitmap.width;
+		width += glyphSlot->bitmap.width + GLYPH_SPACING;
 		//Update the height to make it the same as the tallest letter
 		height = utils_maths::max(height, glyphSlot->bitmap.rows);
 	}
+
 	//Create and bind the texture atlas
 	texture = new Texture(width, height, parameters);
 	texture->bind();
@@ -88,7 +89,7 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 		glyphs[i - ASCII_START].xOffset     = xOffset;
 
 		//Increment the x offset
-		xOffset += glyphSlot->bitmap.width;
+		xOffset += glyphSlot->bitmap.width + GLYPH_SPACING;
 	}
 
 	texture->applyParameters(false, true);
@@ -137,14 +138,10 @@ void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
 			data->addPosition(Vector3f(xPos + width, yPos + height, 0.0f));
 			data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
 
-			//Pad the texture coordinates to reduce bleeding artifacts
-			float offsetX = 0.002f / (float) texture->getWidth();
-			float offsetY = 0.002f / (float) texture->getHeight();
-
-			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()) + offsetX, 0.0f + offsetY));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()) - offsetX, 0.0f + offsetY));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()) - offsetX, (info.glyphHeight / (float) texture->getHeight()) - offsetY));
-			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()) + offsetX, (info.glyphHeight / (float) texture->getHeight()) - offsetY));
+			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()), 0.0f));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()), 0.0f));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()), (info.glyphHeight / (float) texture->getHeight())));
+			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()), (info.glyphHeight / (float) texture->getHeight())));
 
 			unsigned int ip = (i - newLineCount) * 4;
 
@@ -161,7 +158,7 @@ void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
 }
 
 void Font::destroy() {
-
+	delete texture;
 }
 
 float Font::getWidth(std::string text) {

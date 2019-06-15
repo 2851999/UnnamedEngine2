@@ -167,26 +167,22 @@ void Renderer::initialise() {
 }
 
 void Renderer::assignMatTexture(Shader* shader, std::string type, Texture* texture) {
-	type += "Texture";
 	if (texture)
 		//Bind the texture
 		shader->setUniformi("Material_" + type, bindTexture(texture));
 }
 
 void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Material* material) {
-	assignMatTexture(shader, "Diffuse", material->getDiffuseTexture());
+	assignMatTexture(shader, "DiffuseTexture", material->getDiffuseTexture());
 
 	//Check to see whether the shader is for lighting
 	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == SHADER_PBR_LIGHTING) {
 		//Assign other lighting specific properties
-		assignMatTexture(shader, "Ambient", material->getAmbientTexture());
-		assignMatTexture(shader, "Specular", material->getSpecularTexture());
-		assignMatTexture(shader, "Shininess", material->getShininessTexture());
-
-		if (material->getNormalMap())
-			shader->setUniformi("Material_NormalMap", bindTexture(material->getNormalMap()));
-		if (material->getParallaxMap())
-			shader->setUniformi("Material_ParallaxMap", bindTexture(material->getParallaxMap()));
+		assignMatTexture(shader, "AmbientTexture",   material->getAmbientTexture());
+		assignMatTexture(shader, "SpecularTexture",  material->getSpecularTexture());
+		assignMatTexture(shader, "ShininessTexture", material->getShininessTexture());
+		assignMatTexture(shader, "NormalMap",        material->getNormalMap());
+		assignMatTexture(shader, "ParallaxMap",      material->getParallaxMap());
 	}
 
 	//Update the material UBO
@@ -199,15 +195,6 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		//Get the shader for rendering
 		Shader* shader = renderShader->getShader();
 
-//		//Get the map of uniforms within the Shader
-//		std::map<std::string, GLint>& uniforms = shader->getUniforms();
-//
-//		//Go through each uniform in the map
-//		for (auto& iterator : uniforms) {
-//			//Check the uniform name
-//			if (iterator.first == "MVPMatrix")
-//				shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
-//		}
 		shaderCoreData.ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
 		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
 		if (mesh->hasData() && mesh->hasRenderData()) {

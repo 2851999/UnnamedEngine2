@@ -61,17 +61,17 @@ const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SHADOW_CUBEMAP        =
 
 ShaderInterface::ShaderInterface() {
 	//Add all required UBOs for the default shaders
-	add(BLOCK_CORE,                  new UBO(NULL, sizeof(ShaderBlock_Core),               GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_CORE));
-	add(BLOCK_MATERIAL,              new UBO(NULL, sizeof(ShaderBlock_Material),           GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_MATERIAL));
-	add(BLOCK_SKINNING,              new UBO(NULL, sizeof(ShaderBlock_Skinning),           GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_SKINNING));
-	add(BLOCK_LIGHTING,              new UBO(NULL, sizeof(ShaderBlock_Lighting),           GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_LIGHTING));
-	add(BLOCK_TERRAIN,               new UBO(NULL, sizeof(ShaderBlock_Terrain),            GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_TERRAIN));
-	add(BLOCK_GAMMA_CORRECTION,      new UBO(NULL, sizeof(ShaderBlock_GammaCorrection),    GL_STATIC_DRAW,  UBO_BINDING_LOCATION_GAMMA_CORRECTION));
-	add(BLOCK_PBR_ENV_MAP_GEN,       new UBO(NULL, sizeof(ShaderBlock_PBREnvMapGen),       GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN));
-	add(BLOCK_PBR_PREFILTER_MAP_GEN, new UBO(NULL, sizeof(ShaderBlock_PBRPrefilterMapGen), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN));
-	add(BLOCK_PBR_LIGHTING_CORE,     new UBO(NULL, sizeof(ShaderBlock_PBRLightingCore),    GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_LIGHTING_CORE));
-	add(BLOCK_BILLBOARD,             new UBO(NULL, sizeof(ShaderBlock_Billboard),          GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_BILLBOARD));
-	add(BLOCK_SHADOW_CUBEMAP,        new UBO(NULL, sizeof(ShaderBlock_ShadowCubemap),      GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_SHADOW_CUBEMAP));
+	add(BLOCK_CORE,                  sizeof(ShaderBlock_Core),               GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_CORE);
+	add(BLOCK_MATERIAL,              sizeof(ShaderBlock_Material),           GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_MATERIAL);
+	add(BLOCK_SKINNING,              sizeof(ShaderBlock_Skinning),           GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_SKINNING);
+	add(BLOCK_LIGHTING,              sizeof(ShaderBlock_Lighting),           GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_LIGHTING);
+	add(BLOCK_TERRAIN,               sizeof(ShaderBlock_Terrain),            GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_TERRAIN);
+	add(BLOCK_GAMMA_CORRECTION,      sizeof(ShaderBlock_GammaCorrection),    GL_STATIC_DRAW,  UBO_BINDING_LOCATION_GAMMA_CORRECTION);
+	add(BLOCK_PBR_ENV_MAP_GEN,       sizeof(ShaderBlock_PBREnvMapGen),       GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN);
+	add(BLOCK_PBR_PREFILTER_MAP_GEN, sizeof(ShaderBlock_PBRPrefilterMapGen), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN);
+	add(BLOCK_PBR_LIGHTING_CORE,     sizeof(ShaderBlock_PBRLightingCore),    GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_LIGHTING_CORE);
+	add(BLOCK_BILLBOARD,             sizeof(ShaderBlock_Billboard),          GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_BILLBOARD);
+	add(BLOCK_SHADOW_CUBEMAP,        sizeof(ShaderBlock_ShadowCubemap),      GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_SHADOW_CUBEMAP);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -81,10 +81,21 @@ ShaderInterface::~ShaderInterface() {
 	ubos.clear();
 }
 
+void ShaderInterface::add(std::string id, unsigned int size, unsigned int usage, unsigned int binding) {
+	//Add the data to the map
+	ubosInfo.insert(std::pair<std::string, UBOInfo>(id, { size, usage, binding }));
+}
+
 UBO* ShaderInterface::getUBO(std::string id) {
 	if (ubos.count(id) > 0)
 		return ubos.at(id);
-	else {
+	else if (ubosInfo.count(id) > 0) {
+		//Create the UBO and then return it after adding it to the created UBO's
+		UBOInfo& info = ubosInfo.at(id);
+		UBO* ubo = new UBO(NULL, info.size, info.usage, info.binding);
+		ubos.insert(std::pair<std::string, UBO*>(id, ubo));
+		return ubo;
+	} else {
 		Logger::log("The UBO with the id '" + id + "' could not be found", "ShaderInterface", LogType::Error);
 		return NULL;
 	}
