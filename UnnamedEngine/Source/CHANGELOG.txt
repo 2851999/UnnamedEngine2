@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 1 | Experimental 4
+
+* Changed RenderData to allow 'texture' in
+  RenderData::TextureInfo to be NULL to allow its write
+  descriptor to be assigned later
+* Changed MeshRenderData so 'setup' is not called and so must
+  be done after creation (RenderData instance is now created
+  in the constructor)
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 1 | Experimental 3
 
 * Changed ShaderInterface to only create UBO's when they are

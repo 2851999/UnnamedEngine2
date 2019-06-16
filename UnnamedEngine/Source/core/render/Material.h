@@ -46,7 +46,7 @@ private:
 	Texture* specularTexture  = NULL;
 	Texture* shininessTexture = NULL;
 
-	Texture* normalMap = NULL;
+	Texture* normalMap   = NULL;
 	Texture* parallaxMap = NULL;
 public:
 	/* The constructor */
@@ -111,7 +111,5 @@ public:
 
 	ShaderBlock_Material& getShaderData() { return shaderData; }
 };
-
-
 
 #endif /* CORE_RENDER_MATERIAL_H_ */

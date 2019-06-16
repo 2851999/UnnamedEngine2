@@ -33,7 +33,7 @@ RenderData::~RenderData() {
 	}
 }
 
-void RenderData::setup() {
+void RenderData::setup(Shader* shader) {
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
 		//Generate the VAO and bind it
 		glGenVertexArrays(1, &vao);
@@ -67,11 +67,7 @@ void RenderData::setup() {
 
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
 		glBindVertexArray(0);
-}
-
-void RenderData::setupVulkan(Shader* shader) {
-	//Setup the descriptor pool and descriptor set for Vulkan
-	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
+	else {
 		unsigned int swapChainImageCount = Vulkan::getSwapChain()->getImageCount();
 
 		//---------------------------CREATE DESCRIPTOR POOL---------------------------
@@ -150,6 +146,19 @@ void RenderData::setupVulkan(Shader* shader) {
 		if (vkAllocateDescriptorSets(Vulkan::getDevice()->getLogical(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
 			Logger::log("Failed to allocate descriptor sets", "VulkanRenderShader", LogType::Error);
 
+		//Setup the pipeline
+		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), vbosFloat[0], Vulkan::getRenderPass(), this, shader);
+
+		//Assign the descriptor write info
+		setupVulkan(shader);
+	}
+}
+
+void RenderData::setupVulkan(Shader* shader) {
+	//Setup the descriptor set write's
+	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
+		unsigned int swapChainImageCount = Vulkan::getSwapChain()->getImageCount();
+
 		//Allows writing of each UBO and texture
 		for (unsigned int i = 0; i < swapChainImageCount; ++i) {
 
@@ -160,27 +169,27 @@ void RenderData::setupVulkan(Shader* shader) {
 				descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
 			}
 			for (TextureInfo textureInfo : textures) {
-				VkDescriptorImageInfo imageInfo = textureInfo.texture->getVkImageInfo();
+				//Only assign if have an actual texture (allows textures to be assigned later)
+				if (textureInfo.texture != NULL) {
+					VkDescriptorImageInfo imageInfo = textureInfo.texture->getVkImageInfo();
 
-				VkWriteDescriptorSet textureWrite;
-				textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				textureWrite.dstSet           = descriptorSets[i];
-				textureWrite.dstBinding       = textureInfo.binding;
-				textureWrite.dstArrayElement  = 0;
-				textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-				textureWrite.descriptorCount  = 1;
-				textureWrite.pBufferInfo      = nullptr;
-				textureWrite.pImageInfo       = &imageInfo;
-				textureWrite.pTexelBufferView = nullptr;
-				textureWrite.pNext            = nullptr;
-				descriptorWrites.push_back(textureWrite);
+					VkWriteDescriptorSet textureWrite;
+					textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+					textureWrite.dstSet           = descriptorSets[i];
+					textureWrite.dstBinding       = textureInfo.binding;
+					textureWrite.dstArrayElement  = 0;
+					textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+					textureWrite.descriptorCount  = 1;
+					textureWrite.pBufferInfo      = nullptr;
+					textureWrite.pImageInfo       = &imageInfo;
+					textureWrite.pTexelBufferView = nullptr;
+					textureWrite.pNext            = nullptr;
+					descriptorWrites.push_back(textureWrite);
+				}
 			}
 
 			vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
-
-		//Setup the pipeline
-		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), vbosFloat[0], Vulkan::getRenderPass(), this, shader);
 	}
 }
 

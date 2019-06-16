@@ -62,7 +62,7 @@ void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
 
 VkSamplerCreateInfo TextureParameters::getVkSamplerCreateInfo() {
 	VkSamplerCreateInfo samplerInfo = {};
-	samplerInfo.sType     = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 
 	if (minFilter == GL_NEAREST)
 		samplerInfo.minFilter = VK_FILTER_NEAREST;

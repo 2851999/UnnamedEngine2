@@ -64,7 +64,7 @@ void Test::created() {
 	quad = new MeshRenderData(data, renderShader);
 	quad->getRenderData()->add(ubo);
 	quad->getRenderData()->add(texture, 1);
-	quad->getRenderData()->setupVulkan(shader);
+	quad->setup(data);
 }
 
 

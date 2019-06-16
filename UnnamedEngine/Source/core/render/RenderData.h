@@ -76,7 +76,6 @@ private:
 	/* The descriptor sets */
 	std::vector<VkDescriptorSet> descriptorSets;
 public:
-
 	/* The constructor */
 	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}
 
@@ -84,7 +83,7 @@ public:
 	virtual ~RenderData();
 
 	/* The method used to setup this data for rendering */
-	void setup();
+	void setup(Shader* shader);
 
 	/* The method used to setup this data for rendering (With Vulkan) */
 	void setupVulkan(Shader* shader);

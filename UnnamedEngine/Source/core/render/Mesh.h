@@ -269,13 +269,12 @@ private:
 	/* Used to identify whether Mesh is indexed */
 	bool hasIndices = false;
 public:
-	MeshRenderData() {}
-	MeshRenderData(MeshData* data, RenderShader* renderShader) { setup(data, renderShader); }
+	MeshRenderData(MeshData* data, RenderShader* renderShader);
 
 	virtual ~MeshRenderData() { destroy(); }
 
-	/* Setups this structure for rendering using OpenGL */
-	void setup(MeshData* data, RenderShader* renderShader);
+	/* Sets up for rendering */
+	void setup(MeshData* data);
 
 	/* Method to render using the data */
 	void render();
@@ -332,6 +331,7 @@ public:
 	/* Method called to setup this mesh for rendering */
 	inline void setup(RenderShader* renderShader) {
 		this->renderData = new MeshRenderData(this->data, renderShader);
+		this->renderData->setup(data);
 	}
 
 	/* Method called to update the animation of this mesh */

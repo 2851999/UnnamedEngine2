@@ -164,6 +164,7 @@ void Renderer::initialise() {
 	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
 	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
 	screenTextureMesh = new MeshRenderData(meshData, getRenderShader(SHADER_FRAMEBUFFER));
+	screenTextureMesh->setup(meshData);
 }
 
 void Renderer::assignMatTexture(Shader* shader, std::string type, Texture* texture) {

@@ -166,11 +166,9 @@ void MeshData::addBoneData(unsigned int boneID, float boneWeight) {
  * The MeshRenderData class
  *****************************************************************************/
 
-void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
-	//Assign the shader used during the setup
+MeshRenderData::MeshRenderData(MeshData* data, RenderShader* renderShader) {
+	//Assign the shader to use during the setup
 	this->setupShader = renderShader;
-	//The shader used for the setup
-	Shader* shader = renderShader->getShader();
 	//Determine the number of vertices
 	if (data->hasIndices()) {
 		//As the data has indices, this will determine the number of vertices
@@ -184,6 +182,11 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 
 	//Create the RenderData instance
 	renderData = new RenderData(data->getRenderMode(), numVertices);
+}
+
+void MeshRenderData::setup(MeshData* data) {
+	//The shader used for the setup
+	Shader* shader = setupShader->getShader();
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
@@ -273,7 +276,7 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 	//TODO: ADD REQUIRED UBO's AND TEXTURES HERE?
 
 	//Setup the render data
-	renderData->setup();
+	renderData->setup(shader);
 }
 
 void MeshRenderData::render() {
