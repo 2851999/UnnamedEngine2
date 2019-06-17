@@ -61,6 +61,7 @@ public:
 void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
+	//getSettings().videoSamples = 0;
 }
 
 void Test::onCreated() {
@@ -210,6 +211,7 @@ void Test::onRender() {
 //	}
 
 //	terrain2->render();
+	//renderScene->showDeferredBuffers();
 }
 
 void Test::onDestroy() {

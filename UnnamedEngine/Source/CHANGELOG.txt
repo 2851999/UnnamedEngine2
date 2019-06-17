@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 1 | Experimental 5
+
+* Changed Material shaders to assign explicit binding locations
+  for textures (Not currently used)
+  
+* Fixed bug: Last experimental broke PBREnvironment
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 1 | Experimental 4
 
 * Changed RenderData to allow 'texture' in

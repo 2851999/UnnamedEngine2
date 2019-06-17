@@ -46,7 +46,7 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().videoVulkan = true; //Validation layers have quite large effect on performance
+	getSettings().videoVulkan = false; //Validation layers have quite large effect on performance
 	getSettings().videoMaxFPS = 0;
 	getSettings().debugShowInformation = false;
 }
