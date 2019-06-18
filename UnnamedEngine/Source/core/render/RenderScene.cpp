@@ -181,10 +181,9 @@ void RenderScene3D::render() {
 			forwardPreRender();
 
 			//Go through all of the objects in this scene
-			for (unsigned int i = 0; i < batches.size(); i++) {
+			for (unsigned int i = 0; i < batches.size(); ++i)
 				//Render the current batch
 				renderLighting(batches[i].shader, i);
-			}
 
 			//Finish forward rendering
 			forwardPostRender();
@@ -234,7 +233,7 @@ void RenderScene3D::forwardPostRender() {
 		postProcessor->stop();
 
 	//Render the output
-	postProcessor->render();
+	postProcessor->render(); //MUST UNBIND THE TEXTURE USED HERE OTHERWISE MAY TRY AND DRAW TO IT WHILE IT IS STILL BOUND (Gives GL_INVALID_OPERATION for draw command)
 
 	//Copy the depth data to the framebuffer
 	postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
@@ -358,7 +357,6 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			}
 		}
 	}
-
 	shader->stopUsing();
 
 	//Stop using blending if it was needed

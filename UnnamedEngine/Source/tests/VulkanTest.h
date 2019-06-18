@@ -20,7 +20,6 @@
 #define TESTS_BASEENGINETEST3D_H_
 
 #include "../core/BaseEngine.h"
-#include "../core/vulkan/VulkanRenderShader.h"
 
 #include "../utils/Utils.h"
 
@@ -28,12 +27,17 @@ class Test : public BaseEngine {
 private:
 	float lastTime = 0;
 
+	struct UBOData {
+		Matrix4f mvpMatrix;
+	};
+
 	UBO* ubo;
 	Shader* shader;
-	VulkanRenderShader* renderShader;
+	RenderShader* renderShader;
 	MeshRenderData* quad;
-	VulkanRenderShader::UBOData uboData;
+	UBOData uboData;
 	Texture* texture;
+	TextureSet* textureSet;
 public:
 	void initialise() override;
 	void created() override;
@@ -43,7 +47,7 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().videoVulkan = true; //Validation layer have quite large effect on performance
+	getSettings().videoVulkan = true; //Validation layers have quite large effect on performance
 	getSettings().videoMaxFPS = 0;
 	getSettings().debugShowInformation = false;
 }
@@ -51,21 +55,22 @@ void Test::initialise() {
 void Test::created() {
 	texture = Texture::loadTexture("resources/textures/texture.jpg");
 
-	ubo = new UBO(NULL, sizeof(VulkanRenderShader::UBOData), GL_DYNAMIC_DRAW, 0);
+	ubo = new UBO(NULL, sizeof(UBOData), GL_DYNAMIC_DRAW, 0);
 
 	MeshData* data = MeshBuilder::createQuad(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture);
 
-	if (getSettings().videoVulkan) {
-		renderShader = new VulkanRenderShader(Shader::loadShader("resources/shaders/vulkan/shader"));
-		renderShader->add(ubo);
-		renderShader->add(texture, 1);
-		renderShader->setup();
-		quad = new MeshRenderData(data, new RenderShader("Shader", renderShader));
-	} else {
-		shader = Shader::loadShader("resources/shaders/vulkan/shader");
-		quad = new MeshRenderData(data, new RenderShader("Shader", shader, NULL));
-	}
+	shader = Shader::loadShader("resources/shaders/vulkan/shader");
+	renderShader = new RenderShader("Shader", shader, NULL);
+
+	quad = new MeshRenderData(data, renderShader);
+	quad->getRenderData()->add(ubo);
+	textureSet = new TextureSet();
+	textureSet->add(1, texture);
+	quad->getRenderData()->addTextureSet(textureSet);
+	std::vector<Material*> materials;
+	quad->setup(data, materials);
 }
+
 
 void Test::update() {
 	if (utils_time::getSeconds() - lastTime > 0.5f) {
@@ -75,15 +80,14 @@ void Test::update() {
 	//Update the UBO
 	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
 
-	ubo->update(&uboData, 0, sizeof(VulkanRenderShader::UBOData));
+	ubo->update(&uboData, 0, sizeof(UBOData));
 }
 
 void Test::render() {
 	if (! getSettings().videoVulkan) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		shader->use();
-		glActiveTexture(GL_TEXTURE1);
-		texture->bind();
+		quad->getRenderData()->getTextureSet(0)->bindGLTextures();
 	}
 	quad->render();
 	if (! getSettings().videoVulkan)
@@ -91,11 +95,10 @@ void Test::render() {
 }
 
 void Test::destroy() {
+	delete textureSet;
 	delete quad;
 
-	//delete texture; Handled by Resource
-	if (getSettings().videoVulkan)
-		delete renderShader;
+	delete renderShader;
 	delete ubo;
 }
 

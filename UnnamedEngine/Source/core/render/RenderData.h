@@ -20,6 +20,10 @@
 #define CORE_RENDER_RENDERDATA_H_
 
 #include "VBO.h"
+#include "UBO.h"
+#include "Texture.h"
+#include "../vulkan/VulkanGraphicsPipeline.h"
+#include "TextureSet.h"
 
 /*****************************************************************************
  * The RenderData class is used for rendering
@@ -48,16 +52,47 @@ private:
 	/* The vertex buffer instances and offsets for Vulkan */
 	std::vector<VkBuffer> vboVkInstances;
 	std::vector<VkDeviceSize> vboVkOffsets;
-public:
 
+	/* The pipeline used to render the data */
+	VulkanGraphicsPipeline* graphicsVkPipeline = NULL;
+
+	/* UBO's used with to render (Does not delete these UBOs) */
+	std::vector<UBO*> ubos;
+
+	/* The texture binding locations used when rendering */
+	std::vector<unsigned int> textureBindings;
+
+	/* TextureSet's stored for rendering (one per material) */
+	std::vector<TextureSet*> textureSets;
+
+	/* The descriptor pool for allocation of descriptors */
+	VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+
+	/* The descriptor set layout */
+	VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+
+	/* Number of swap chain images when created */
+	unsigned int numSwapChainImages = 0;
+
+	/* The descriptor sets */
+	std::vector<VkDescriptorSet> descriptorSets;
+public:
 	/* The constructor */
 	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}
 
 	/* The destructor */
-	virtual ~RenderData() {}
+	virtual ~RenderData();
 
 	/* The method used to setup this data for rendering */
-	void setup();
+	void setup(Shader* shader);
+
+	/* The method used to setup this data for rendering (With Vulkan) */
+	void setupVulkan(Shader* shader);
+
+	/* Methods to add a UBO or Texture to this instance */
+	inline void add(UBO* ubo) { ubos.push_back(ubo); }
+	void add(Texture* texture, unsigned int binding);
+	inline void addTextureSet(TextureSet* set) { textureSets.push_back(set); }
 
 	/* Method used to bind/unbind the VAO/other buffers before/after rendering */
 	void bindBuffers();
@@ -85,6 +120,12 @@ public:
 	inline void setNumInstances(GLsizei primcount) { this->primcount = primcount; }
 
 	inline GLuint getVAO() { return vao; }
+	inline std::vector<UBO*>& getUBOs() { return ubos; }
+	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
+	inline TextureSet* getTextureSet(unsigned int index) { return textureSets[index]; }
+	inline VkDescriptorPool& getVkDescriptorPool() { return descriptorPool; }
+	inline VkDescriptorSetLayout& getVkDescriptorSetLayout() { return descriptorSetLayout; }
+	inline VkDescriptorSet& getVkDescriptorSet(unsigned int index) { return descriptorSets[index]; }
 };
 
 #endif /* CORE_RENDER_RENDERDATA_H_ */

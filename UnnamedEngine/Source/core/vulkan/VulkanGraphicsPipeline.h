@@ -27,11 +27,11 @@
 
 #include "../render/VBO.h"
 
-class VulkanRenderShader;
-
 /*****************************************************************************
  * The VulkanGraphicsPipeline class handles a graphics pipeline in Vulkan
  *****************************************************************************/
+
+class RenderData;
 
 class VulkanGraphicsPipeline {
 private:
@@ -43,7 +43,7 @@ private:
 	VkPipeline       pipeline;
 public:
 	/* Constructor */
-	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, VulkanRenderShader* renderShader);
+	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, RenderData* renderData, Shader* shader);
 
 	/* Destructor */
 	virtual ~VulkanGraphicsPipeline();

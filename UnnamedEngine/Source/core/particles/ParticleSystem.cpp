@@ -71,7 +71,7 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 
 	particles.resize(maxParticles);
 
-	renderData->setup();
+	renderData->setup(shader);
 
 	//Get the UBO for the billboarding
 	shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);

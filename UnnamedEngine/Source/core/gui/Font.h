@@ -34,6 +34,9 @@ private:
 	static const unsigned int ASCII_START = 32;
 	static const unsigned int ASCII_END   = 126;
 
+	/* A spacing value (in pixels) to separate glyphs in the bitmap image */
+	static const unsigned int GLYPH_SPACING = 1;
+
 	/* The FreeType library */
 	static FT_Library ftLibrary;
 

@@ -81,8 +81,8 @@ void Test::created() {
 	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), Renderer::SHADER_MATERIAL);
 	object->setSize(200, 200);
 	object->setPosition(getSettings().windowWidth / 2 - 100, getSettings().windowHeight / 2 - 100);
-	object->getMaterial()->diffuseTexture = texture;
-	object->getMaterial()->diffuseColour = Colour::WHITE;
+	object->getMaterial()->setDiffuse(texture);
+	object->getMaterial()->setDiffuse(Colour::WHITE);
 	object->update();
 
 	sprite = new Sprite(texture, 100, 100);

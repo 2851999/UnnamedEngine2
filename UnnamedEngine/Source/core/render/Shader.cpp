@@ -394,6 +394,13 @@ Shader* Shader::loadShader(std::string path) {
  * The RenderShader class
  *****************************************************************************/
 
+RenderShader::RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader) : name(name) {
+	if (forwardShader)
+		addForwardShader(forwardShader);
+	if (deferredGeomShader)
+		addDeferredGeomShader(deferredGeomShader);
+}
+
 void RenderShader::addForwardShader(Shader* forwardShader) {
 	forwardShaders.push_back(forwardShader);
 }
@@ -419,16 +426,13 @@ void RenderShader::removeLastDeferredGeomShader() {
 }
 
 Shader* RenderShader::getShader() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
-		if (useDeferredGeom) {
-			if (deferredGeomShaders.size() > 0)
-				return getDeferredGeomShader();
-			else {
-				Logger::log("Deferred geometry shader requested but not assigned", "Shader getShader()", LogType::Error);
-				return NULL;
-			}
-		} else
-			return getForwardShader();
+	if (useDeferredGeom) {
+		if (deferredGeomShaders.size() > 0)
+			return getDeferredGeomShader();
+		else {
+			Logger::log("Deferred geometry shader requested but not assigned", "Shader getShader()", LogType::Error);
+			return NULL;
+		}
 	} else
-		return renderShaderVk->getShader();
+		return getForwardShader();
 }

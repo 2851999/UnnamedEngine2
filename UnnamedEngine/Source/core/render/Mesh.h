@@ -240,9 +240,6 @@ private:
 	/* The shader used when assigning attribute locations */
 	RenderShader* setupShader = NULL;
 
-	/* The pipeline used to render the mesh data (for Vulkan) */
-	VulkanGraphicsPipeline* graphicsVkPipeline = NULL;
-
 	/* The various Vertex Buffer Objects for this mesh */
 	VBO<GLfloat>* vboPositions     = NULL;
 	VBO<GLfloat>* vboColours       = NULL;
@@ -272,13 +269,12 @@ private:
 	/* Used to identify whether Mesh is indexed */
 	bool hasIndices = false;
 public:
-	MeshRenderData() {}
-	MeshRenderData(MeshData* data, RenderShader* renderShader) { setup(data, renderShader); }
+	MeshRenderData(MeshData* data, RenderShader* renderShader);
 
 	virtual ~MeshRenderData() { destroy(); }
 
-	/* Setups this structure for rendering using OpenGL */
-	void setup(MeshData* data, RenderShader* renderShader);
+	/* Sets up for rendering */
+	void setup(MeshData* data, std::vector<Material*>& materials);
 
 	/* Method to render using the data */
 	void render();
@@ -333,9 +329,7 @@ public:
 	virtual ~Mesh();
 
 	/* Method called to setup this mesh for rendering */
-	inline void setup(RenderShader* renderShader) {
-		this->renderData = new MeshRenderData(this->data, renderShader);
-	}
+	void setup(RenderShader* renderShader);
 
 	/* Method called to update the animation of this mesh */
 	void updateAnimation(float deltaSeconds);

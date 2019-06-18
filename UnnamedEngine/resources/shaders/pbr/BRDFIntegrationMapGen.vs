@@ -1,4 +1,4 @@
-#version 330
+#version 420
 
 #map attribute Position aPos
 #map attribute TextureCoordinate aTexCoords
@@ -6,7 +6,7 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aTexCoords;
 
-out vec2 texCoords;
+layout(location = 0) out vec2 texCoords;
 
 void main() {
 	texCoords = aTexCoords;

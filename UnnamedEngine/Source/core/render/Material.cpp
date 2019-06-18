@@ -22,13 +22,24 @@
  * The Material class
  ******************************************************************************/
 
-void Material::setDefault(bool pbr) {
-	setAmbient(NULL);
-	setDiffuse(NULL);
-	setSpecular(NULL);
-	setNormalMap(NULL);
-	setParallaxMap(NULL);
+Material::Material(bool pbr) {
+	setDefault(pbr);
 
+	//Add the textures required for the texture set
+	textureSet = new TextureSet();
+	textureSet->add(0, NULL);
+	textureSet->add(1, NULL);
+	textureSet->add(2, NULL);
+	textureSet->add(3, NULL);
+	textureSet->add(4, NULL);
+	textureSet->add(5, NULL);
+}
+
+Material::~Material() {
+	delete textureSet;
+}
+
+void Material::setDefault(bool pbr) {
 	if (! pbr) {
 		shaderData.ambientColour  = Colour(0.1f, 0.1f, 0.1f);
 		shaderData.diffuseColour  = Colour::WHITE;
@@ -42,4 +53,11 @@ void Material::setDefault(bool pbr) {
 	}
 
 	shaderData.parallaxScale = 0.05f;
+
+	shaderData.hasAmbientTexture = false;
+	shaderData.hasDiffuseTexture = false;
+	shaderData.hasSpecularTexture = false;
+	shaderData.hasShininessTexture = false;
+	shaderData.hasNormalMap = false;
+	shaderData.hasParallaxMap = false;
 }

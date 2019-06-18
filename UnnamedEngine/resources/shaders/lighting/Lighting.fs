@@ -11,11 +11,11 @@ uniform UELightTextures ue_lightsTextures[MAX_LIGHTS];
 
 uniform samplerCube ue_environmentMap;
 
-in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
-in mat3 ue_frag_tbnMatrix;
+layout(location = 7) in vec3 ue_tangentViewPos;
+layout(location = 8) in vec3 ue_tangentFragPos;
 
-in vec3 ue_tangentViewPos;
-in vec3 ue_tangentFragPos;
+layout(location = 9) in mat3 ue_frag_tbnMatrix;
+layout(location = 13) in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 
 //Returns the sum of the specular and diffuse strengths */
 vec3 ueCalculateLight(UELight light, vec3 lightDirection, vec3 diffuseColour, vec3 specularColour, vec3 normal, vec3 fragPos, float matShininess) {

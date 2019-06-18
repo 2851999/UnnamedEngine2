@@ -166,11 +166,9 @@ void MeshData::addBoneData(unsigned int boneID, float boneWeight) {
  * The MeshRenderData class
  *****************************************************************************/
 
-void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
-	//Assign the shader used during the setup
+MeshRenderData::MeshRenderData(MeshData* data, RenderShader* renderShader) {
+	//Assign the shader to use during the setup
 	this->setupShader = renderShader;
-	//The shader used for the setup
-	Shader* shader = renderShader->getShader();
 	//Determine the number of vertices
 	if (data->hasIndices()) {
 		//As the data has indices, this will determine the number of vertices
@@ -184,6 +182,11 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 
 	//Create the RenderData instance
 	renderData = new RenderData(data->getRenderMode(), numVertices);
+}
+
+void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
+	//The shader used for the setup
+	Shader* shader = setupShader->getShader();
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
@@ -270,20 +273,16 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 		renderData->setIndicesVBO(vboIndices);
 	}
 
-	//Setup the render data
-	renderData->setup();
+	//Add the required texture sets
+	for (Material* material : materials)
+		renderData->addTextureSet(material->getTextureSet());
 
-	//Setup the graphics pipeline (if using Vulkan)
-	if (Window::getCurrentInstance()->getSettings().videoVulkan)
-		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), vboOthers, Vulkan::getRenderPass(), renderShader->getVkRenderShader());
+	//Setup the render data
+	renderData->setup(shader);
 }
 
 void MeshRenderData::render() {
-	//Bind the pipeline and descriptor set (for Vulkan)
-	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
-		vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsVkPipeline->getInstance());
-		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsVkPipeline->getLayout(), 0, 1, &setupShader->getVkRenderShader()->getDescriptorSet(Vulkan::getCurrentFrame()), 0, nullptr);
-	}
+	//Bind the required textures and render
 	renderData->render();
 }
 
@@ -361,8 +360,6 @@ void MeshRenderData::updateIndices(MeshData* data) {
 }
 
 void MeshRenderData::destroy() {
-	if (graphicsVkPipeline)
-		delete graphicsVkPipeline;
 	delete renderData;
 	delete vboPositions;
 	delete vboColours;
@@ -395,6 +392,11 @@ Mesh::~Mesh() {
 	}
 	delete renderData;
 	delete data;
+}
+
+void Mesh::setup(RenderShader* renderShader) {
+	this->renderData = new MeshRenderData(this->data, renderShader);
+	this->renderData->setup(data, materials);
 }
 
 void Mesh::updateAnimation(float deltaSeconds) {

@@ -85,7 +85,7 @@ GameRenderer::GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, 
 	vboVisibleData->addAttribute(shader->getAttributeLocation("Visible"), 1, 1);
 	renderData->addVBO(vboVisibleData);
 
-	renderData->setup();
+	renderData->setup(shader);
 	renderData->setNumInstances(numObjects);
 }
 

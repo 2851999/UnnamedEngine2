@@ -95,17 +95,17 @@ GLuint Renderer::bindTexture(Texture* texture) {
 	if (loc < boundTextures.size()) {
 		boundTextures.push_back(texture);
 		//It has so return the correct active texture
-		return loc;
+		return loc + 10;
 	} else {
-		glActiveTexture(GL_TEXTURE0 + boundTextures.size());
+		glActiveTexture(GL_TEXTURE10 + boundTextures.size());
 		texture->bind();
 		boundTextures.push_back(texture);
-		return boundTextures.size() - 1;
+		return boundTextures.size() + 10 - 1;
 	}
 }
 
 void Renderer::unbindTexture() {
-	glActiveTexture(GL_TEXTURE0 + boundTextures.size() - 1);
+	glActiveTexture(GL_TEXTURE10 + boundTextures.size() - 1);
 	boundTextures[boundTextures.size() - 1]->unbind();
 	boundTextures.pop_back();
 }
@@ -164,30 +164,29 @@ void Renderer::initialise() {
 	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
 	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
 	screenTextureMesh = new MeshRenderData(meshData, getRenderShader(SHADER_FRAMEBUFFER));
+	std::vector<Material*> materials;
+	screenTextureMesh->setup(meshData, materials);
 }
 
 void Renderer::assignMatTexture(Shader* shader, std::string type, Texture* texture) {
-	type += "Texture";
 	if (texture)
 		//Bind the texture
 		shader->setUniformi("Material_" + type, bindTexture(texture));
 }
 
 void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Material* material) {
-	assignMatTexture(shader, "Diffuse", material->getDiffuseTexture());
-
-	//Check to see whether the shader is for lighting
-	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == SHADER_PBR_LIGHTING) {
-		//Assign other lighting specific properties
-		assignMatTexture(shader, "Ambient", material->getAmbientTexture());
-		assignMatTexture(shader, "Specular", material->getSpecularTexture());
-		assignMatTexture(shader, "Shininess", material->getShininessTexture());
-
-		if (material->getNormalMap())
-			shader->setUniformi("Material_NormalMap", bindTexture(material->getNormalMap()));
-		if (material->getParallaxMap())
-			shader->setUniformi("Material_ParallaxMap", bindTexture(material->getParallaxMap()));
-	}
+//	assignMatTexture(shader, "DiffuseTexture", material->getDiffuseTexture());
+//
+//	//Check to see whether the shader is for lighting
+//	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == SHADER_PBR_LIGHTING) {
+//		//Assign other lighting specific properties
+//		assignMatTexture(shader, "AmbientTexture",   material->getAmbientTexture());
+//		assignMatTexture(shader, "SpecularTexture",  material->getSpecularTexture());
+//		assignMatTexture(shader, "ShininessTexture", material->getShininessTexture());
+//		assignMatTexture(shader, "NormalMap",        material->getNormalMap());
+//		assignMatTexture(shader, "ParallaxMap",      material->getParallaxMap());
+//	}
+	material->getTextureSet()->bindGLTextures();
 
 	//Update the material UBO
 	shaderMaterialUBO->update(&material->getShaderData(), 0, sizeof(ShaderBlock_Material));
@@ -199,15 +198,6 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		//Get the shader for rendering
 		Shader* shader = renderShader->getShader();
 
-//		//Get the map of uniforms within the Shader
-//		std::map<std::string, GLint>& uniforms = shader->getUniforms();
-//
-//		//Go through each uniform in the map
-//		for (auto& iterator : uniforms) {
-//			//Check the uniform name
-//			if (iterator.first == "MVPMatrix")
-//				shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
-//		}
 		shaderCoreData.ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
 		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
 		if (mesh->hasData() && mesh->hasRenderData()) {
@@ -215,7 +205,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			MeshRenderData* renderData = mesh->getRenderData();
 
 			if (mesh->hasSkeleton()) {
-				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); i++)
+				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); ++i)
 					shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
 				shaderSkinningData.ue_useSkinning = true;
 				shaderSkinningUBO->update(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
@@ -228,23 +218,26 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 				renderData->getRenderData()->bindBuffers();
 
 				//Go through each sub data instance
-				for (unsigned int i = 0; i < data->getSubDataCount(); i++) {
-					saveTextures();
+				for (unsigned int i = 0; i < data->getSubDataCount(); ++i) {
+					//saveTextures();
 
 					if (mesh->hasMaterial())
 						setMaterialUniforms(shader, renderShader->getName(), mesh->getMaterial(data->getSubData(i).materialIndex));
 					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex * sizeof(unsigned int), data->getSubData(i).baseVertex);
-
-					releaseNewTextures();
+					if (mesh->hasMaterial())
+						mesh->getMaterial(data->getSubData(i).materialIndex)->getTextureSet()->unbindGLTextures();
+					//releaseNewTextures();
 				}
 
 				renderData->getRenderData()->unbindBuffers();
 			} else {
-				saveTextures();
+				//saveTextures();
 				if (mesh->hasMaterial())
 					setMaterialUniforms(renderShader->getShader(), renderShader->getName(), mesh->getMaterial());
 				renderData->render();
-				releaseNewTextures();
+				if (mesh->hasMaterial())
+					mesh->getMaterial()->getTextureSet()->unbindGLTextures();
+				//releaseNewTextures();
 			}
 		}
 	}

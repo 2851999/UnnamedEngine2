@@ -5,7 +5,7 @@ layout (std140, binding = 6) uniform UEGammaCorrectionData {
 	float exposureIn;
 };
 
-out vec4 FragColour;
+layout(location = 0) out vec4 FragColour;
 
 vec3 ueGammaCorrect(vec3 colour) {
 	const float gamma = 2.2;

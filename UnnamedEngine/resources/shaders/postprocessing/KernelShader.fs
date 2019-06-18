@@ -1,6 +1,6 @@
 #include "PostProcess.fs"
 
-out vec4 FragColour;
+layout(location = 0) out vec4 FragColour;
 
 const float offset = 1.0 / 300; 
 

@@ -60,6 +60,49 @@ void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
 		glBindTexture(target, 0);
 }
 
+VkSamplerCreateInfo TextureParameters::getVkSamplerCreateInfo() {
+	VkSamplerCreateInfo samplerInfo = {};
+	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+
+	if (minFilter == GL_NEAREST)
+		samplerInfo.minFilter = VK_FILTER_NEAREST;
+	else if (minFilter == GL_LINEAR)
+		samplerInfo.minFilter = VK_FILTER_LINEAR;
+
+	if (magFilter == GL_NEAREST)
+		samplerInfo.magFilter = VK_FILTER_NEAREST;
+	else if (magFilter == GL_LINEAR)
+		samplerInfo.magFilter = VK_FILTER_LINEAR;
+
+	if (clamp == GL_CLAMP_TO_EDGE) {
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	} else if (clamp == GL_REPEAT) {
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	}
+
+	unsigned int anisotropicSamples = Window::getCurrentInstance()->getSettings().videoMaxAnisotropicSamples;
+	samplerInfo.anisotropyEnable = anisotropicSamples > 0 ? VK_TRUE : VK_FALSE;
+	samplerInfo.maxAnisotropy = anisotropicSamples;
+
+	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+
+	samplerInfo.unnormalizedCoordinates = VK_FALSE;
+
+	samplerInfo.compareEnable = VK_FALSE; //Useful for PCF shadows
+	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+
+	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	samplerInfo.mipLodBias = 0.0f;
+	samplerInfo.minLod = 0.0f;
+	samplerInfo.maxLod = 0.0f;
+
+	return samplerInfo;
+}
+
 /*****************************************************************************
  * The Texture class
  *****************************************************************************/
@@ -130,29 +173,7 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 		    Logger::log("Failed to create texture image view", "Texture", LogType::Error);
 
 		//------------------------------------------------------CREATE THE SAMPLER------------------------------------------------------
-		VkSamplerCreateInfo samplerInfo = {};
-		samplerInfo.sType     = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR;
-		samplerInfo.minFilter = VK_FILTER_LINEAR;
-
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-
-		samplerInfo.anisotropyEnable = VK_TRUE;
-		samplerInfo.maxAnisotropy = 16;
-
-		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-
-		samplerInfo.unnormalizedCoordinates = VK_FALSE;
-
-		samplerInfo.compareEnable = VK_FALSE; //Useful for PCF shadows
-		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-		samplerInfo.mipLodBias = 0.0f;
-		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = 0.0f;
+		VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
 
 		//NOTE: Sampler not attached to image (can use again in TextureParameters?)
 

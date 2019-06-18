@@ -60,8 +60,14 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	Shader* shader4 = renderShader4->getForwardShader();
 
 	//Create meshes to render a cubemap and 2D texture
-	MeshRenderData* cubeMesh = new MeshRenderData(MeshBuilder::createCube(1.0f, 1.0f, 1.0f), renderShader1);
-	MeshRenderData* quadMesh = new MeshRenderData(MeshBuilder::createQuad(Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(1.0f, 1.0f), Vector2f(-1.0f, 1.0f), NULL), renderShader4);
+	MeshData* cubeMeshData = MeshBuilder::createCube(1.0f, 1.0f, 1.0f);
+	MeshData* quadMeshData = MeshBuilder::createQuad(Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(1.0f, 1.0f), Vector2f(-1.0f, 1.0f), NULL);
+
+	MeshRenderData* cubeMesh = new MeshRenderData(cubeMeshData, renderShader1);
+	MeshRenderData* quadMesh = new MeshRenderData(quadMeshData, renderShader4);
+	std::vector<Material*> materials;
+	cubeMesh->setup(cubeMeshData, materials);
+	quadMesh->setup(quadMeshData, materials);
 
 	//Create and setup the FBO and RBO for rendering
 	unsigned int captureFBO;

@@ -295,9 +295,10 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 			//Load the current material
 			Material* material = loadAssimpMaterial(path, fileName, scene->mMaterials[i], pbr);
 
-			if (i == 0)
+			if (i == 0) {
+				delete mesh->getMaterial();
 				mesh->setMaterial(material);
-			else
+			} else
 				mesh->addMaterial(material);
 		}
 

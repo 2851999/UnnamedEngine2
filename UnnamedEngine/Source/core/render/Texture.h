@@ -69,6 +69,9 @@ public:
 	inline void apply(GLuint texture, bool unbind) { apply(texture, true, unbind); }
 	inline void apply(GLuint texture) { apply(texture, true, false); }
 
+	/* Returns the creation info for a sampler with the properties of this instance (Vulkan) */
+	VkSamplerCreateInfo getVkSamplerCreateInfo();
+
 	/* Setters and getters */
 	inline TextureParameters setTarget(GLuint target) { this->target = target; return (*this); }
 	inline TextureParameters setFilter(GLuint filter) { this->minFilter = filter; this->magFilter = filter; return (*this); }

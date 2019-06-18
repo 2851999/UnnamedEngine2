@@ -1,7 +1,7 @@
 #include "../lighting/Lighting.fs"
 #include "CDLODTerrain.fs"
 
-out vec4 ue_FragColour;
+layout(location = 0) out vec4 ue_FragColour;
 
 // #map uniform GrassTexture grassTexture
 // #map uniform SnowTexture snowTexture

@@ -208,7 +208,7 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 		vboVisibility->addAttribute(shader->getAttributeLocation("Visibility"), 1);
 		renderData->addVBO(vboVisibility);
 
-		renderData->setup();
+		renderData->setup(shader);
 
 		//Obtain the required UBO
 		shaderCoreUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_CORE);
