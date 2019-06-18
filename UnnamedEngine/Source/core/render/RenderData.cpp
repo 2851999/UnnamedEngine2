@@ -26,6 +26,8 @@
  *****************************************************************************/
 
 RenderData::~RenderData() {
+	for (unsigned int i = 0; i < textureSets.size(); ++i)
+		delete textureSets[i];
 	if (descriptorPool != VK_NULL_HANDLE) {
 		delete graphicsVkPipeline;
 		vkDestroyDescriptorSetLayout(Vulkan::getDevice()->getLogical(), descriptorSetLayout, nullptr);
@@ -68,7 +70,8 @@ void RenderData::setup(Shader* shader) {
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
 		glBindVertexArray(0);
 	else {
-		unsigned int swapChainImageCount = Vulkan::getSwapChain()->getImageCount();
+		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
+		unsigned int numDescriptorSets = numSwapChainImages * (textureSets.size() == 0 ? 1 : textureSets.size());
 
 		//---------------------------CREATE DESCRIPTOR POOL---------------------------
 		//Assign the creation info
@@ -76,13 +79,13 @@ void RenderData::setup(Shader* shader) {
 		for (unsigned int i = 0; i < ubos.size(); ++i) {
 			VkDescriptorPoolSize poolSize;
 			poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			poolSize.descriptorCount = static_cast<uint32_t>(swapChainImageCount);
+			poolSize.descriptorCount = static_cast<uint32_t>(numDescriptorSets);
 			poolSizes.push_back(poolSize);
 		}
-		for (unsigned int i = 0; i < textures.size(); ++i) {
+		for (unsigned int i = 0; i < textureBindings.size(); ++i) {
 			VkDescriptorPoolSize poolSize;
 			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			poolSize.descriptorCount = static_cast<uint32_t>(swapChainImageCount); //Have one for each swap chain image
+			poolSize.descriptorCount = static_cast<uint32_t>(numDescriptorSets); //Have one for each swap chain image/texture set combination
 			poolSizes.push_back(poolSize);
 		}
 
@@ -90,12 +93,12 @@ void RenderData::setup(Shader* shader) {
 		poolInfo.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 		poolInfo.pPoolSizes    = poolSizes.data();
-		poolInfo.maxSets       = static_cast<uint32_t>(swapChainImageCount);
+		poolInfo.maxSets       = static_cast<uint32_t>(numDescriptorSets);
 		poolInfo.flags         = 0;
 
 		//Attempt to create the pool
 		if (vkCreateDescriptorPool(Vulkan::getDevice()->getLogical(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
-			Logger::log("Failed to create descriptor pool", "VulkanRenderShader", LogType::Error);
+			Logger::log("Failed to create descriptor pool", "RenderData", LogType::Error);
 
 		//---------------------------CREATE DESCRIPTOR SET LAYOUT---------------------------
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -114,9 +117,9 @@ void RenderData::setup(Shader* shader) {
 		}
 
 		//Go through the textures
-		for (TextureInfo textureInfo : textures) {
+		for (unsigned int textureBinding : textureBindings) {
 			VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
-			samplerLayoutBinding.binding            = textureInfo.binding;
+			samplerLayoutBinding.binding            = textureBinding;
 			samplerLayoutBinding.descriptorCount    = 1;
 			samplerLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			samplerLayoutBinding.pImmutableSamplers = nullptr;
@@ -132,19 +135,19 @@ void RenderData::setup(Shader* shader) {
 
 		//Create the descriptor set layout
 		if (vkCreateDescriptorSetLayout(Vulkan::getDevice()->getLogical(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-			Logger::log("Failed to create descriptor set layout", "VulkanRenderShader", LogType::Error);
+			Logger::log("Failed to create descriptor set layout", "RenderData", LogType::Error);
 
 		//---------------------------CREATE DESCRIPTOR SETS---------------------------
-		std::vector<VkDescriptorSetLayout> layouts(swapChainImageCount, descriptorSetLayout);
+		std::vector<VkDescriptorSetLayout> layouts(numDescriptorSets, descriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo = {};
 		allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool     = descriptorPool;
-		allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainImageCount);
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(numDescriptorSets);
 		allocInfo.pSetLayouts        = layouts.data();
 
-		descriptorSets.resize(swapChainImageCount);
+		descriptorSets.resize(numSwapChainImages);
 		if (vkAllocateDescriptorSets(Vulkan::getDevice()->getLogical(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
-			Logger::log("Failed to allocate descriptor sets", "VulkanRenderShader", LogType::Error);
+			Logger::log("Failed to allocate descriptor sets", "RenderData", LogType::Error);
 
 		//Setup the pipeline
 		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), vbosFloat[0], Vulkan::getRenderPass(), this, shader);
@@ -157,40 +160,63 @@ void RenderData::setup(Shader* shader) {
 void RenderData::setupVulkan(Shader* shader) {
 	//Setup the descriptor set write's
 	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
-		unsigned int swapChainImageCount = Vulkan::getSwapChain()->getImageCount();
+		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
 
 		//Allows writing of each UBO and texture
-		for (unsigned int i = 0; i < swapChainImageCount; ++i) {
+		if (textureSets.size() == 0) {
+			for (unsigned int i = 0; i < numSwapChainImages; ++i) {
+				std::vector<VkWriteDescriptorSet> descriptorWrites = {};
+				for (UBO* ubo : ubos) {
+					VkDescriptorBufferInfo bufferInfo = ubo->getVkBuffer(i)->getBufferInfo();
 
-			std::vector<VkWriteDescriptorSet> descriptorWrites = {};
-			for (UBO* ubo : ubos) {
-				VkDescriptorBufferInfo bufferInfo = ubo->getVkBuffer(i)->getBufferInfo();
+					descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
+				}
 
-				descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
+				vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 			}
-			for (TextureInfo textureInfo : textures) {
-				//Only assign if have an actual texture (allows textures to be assigned later)
-				if (textureInfo.texture != NULL) {
-					VkDescriptorImageInfo imageInfo = textureInfo.texture->getVkImageInfo();
+		} else {
+			for (unsigned int x = 0; x < numSwapChainImages; ++x) {
+				for (unsigned int y = 0; y < textureSets.size(); ++y) {
+					unsigned int i = x * (y + 1);
 
-					VkWriteDescriptorSet textureWrite;
-					textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-					textureWrite.dstSet           = descriptorSets[i];
-					textureWrite.dstBinding       = textureInfo.binding;
-					textureWrite.dstArrayElement  = 0;
-					textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-					textureWrite.descriptorCount  = 1;
-					textureWrite.pBufferInfo      = nullptr;
-					textureWrite.pImageInfo       = &imageInfo;
-					textureWrite.pTexelBufferView = nullptr;
-					textureWrite.pNext            = nullptr;
-					descriptorWrites.push_back(textureWrite);
+					std::vector<VkWriteDescriptorSet> descriptorWrites = {};
+					for (UBO* ubo : ubos) {
+						VkDescriptorBufferInfo bufferInfo = ubo->getVkBuffer(i)->getBufferInfo();
+
+						descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
+					}
+
+					for (TextureSet::TextureInfo textureInfo : textureSets[y]->getTexturesInfo()) {
+						//Only assign if have an actual texture (allows textures to be assigned later)
+						if (textureInfo.texture != NULL) {
+							VkDescriptorImageInfo imageInfo = textureInfo.texture->getVkImageInfo();
+
+							VkWriteDescriptorSet textureWrite;
+							textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+							textureWrite.dstSet           = descriptorSets[i];
+							textureWrite.dstBinding       = textureInfo.binding;
+							textureWrite.dstArrayElement  = 0;
+							textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+							textureWrite.descriptorCount  = 1;
+							textureWrite.pBufferInfo      = nullptr;
+							textureWrite.pImageInfo       = &imageInfo;
+							textureWrite.pTexelBufferView = nullptr;
+							textureWrite.pNext            = nullptr;
+							descriptorWrites.push_back(textureWrite);
+						}
+					}
+
+					vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 				}
 			}
-
-			vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
 	}
+}
+
+void RenderData::add(Texture* texture, unsigned int binding) {
+	textureBindings.push_back(binding);
+	for (unsigned int i = 0; i < textureSets.size(); ++i)
+		textureSets[i]->add(binding, texture);
 }
 
 void RenderData::bindBuffers() {

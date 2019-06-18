@@ -21,7 +21,7 @@
 
 #include "Colour.h"
 #include "Shader.h"
-#include "Texture.h"
+#include "TextureSet.h"
 #include "ShaderInterface.h"
 
 /*****************************************************************************
@@ -40,7 +40,9 @@ class Material {
 private:
 	ShaderBlock_Material shaderData;
 
-	/* The textures */
+	/* The texture set for this material */
+	TextureSet* textureSet;
+
 	Texture* ambientTexture   = NULL;
 	Texture* diffuseTexture   = NULL;
 	Texture* specularTexture  = NULL;
@@ -50,10 +52,10 @@ private:
 	Texture* parallaxMap = NULL;
 public:
 	/* The constructor */
-	Material(bool pbr = false) { setDefault(pbr); }
+	Material(bool pbr = false);
 
 	/* The destructor */
-	virtual ~Material() {}
+	virtual ~Material();
 
 	/* Method called to set the default values */
 	void setDefault(bool pbr = false);

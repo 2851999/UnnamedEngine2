@@ -99,7 +99,7 @@ void Test::onCreated() {
 //	model2->getMesh()->getSkeleton()->startAnimation("");
 	//model2->getMesh()->getSkeleton()->stopAnimation();
 
-	model3 = new GameObject3D(resourceLoader.loadModel("deformablesphere.dae"), Renderer::SHADER_LIGHTING);
+	model3 = new GameObject3D(resourceLoader.loadModel("deformablesphere.dae"), Renderer::SHADER_LIGHTING); //Appears normals are incorrectly transformed by bone matrix
 	model3->setPosition(2.0f, 0.8f, 0.0f);
 	model3->update();
 
@@ -111,10 +111,10 @@ void Test::onCreated() {
 	renderScene->add(model2);
 	renderScene->add(model3);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0.0f, -1.0f, 0.0001f); //->setDiffuseColour(Colour(200.0f, 200.0f, 200.0f));
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f); //->setDiffuseColour(Colour(200.0f, 200.0f, 200.0f));
 	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(0.0f, 1.0f, 0.0f), false))->setDiffuseColour(Colour::RED);
 	Light* light2 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.5f, -1.0f, 0.0001f);
-	//plane->getMesh()->getMaterial(1)->diffuseTexture = light0->getDepthBuffer()->getFramebufferTexture(0);
+	//plane->getMesh()->getMaterial(1)->setDiffuse(light2->getDepthBuffer()->getFramebufferStore(0));
 	light0->update();
 	light1->update();
 	light2->update();
@@ -137,8 +137,8 @@ void Test::onCreated() {
 	particleSystem->effect = new ParticleEffectColourChange(Colour::WHITE, Colour(0.3f, 0.3f, 0.3f, 0.6f));
 	particleSystem->textureAtlas = new TextureAtlas(resourceLoader.loadTexture("smoke.png"), 7, 7, 46);
 
-	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
-	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
+//	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
+//	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
 
 	font = new Font("resources/fonts/CONSOLA.TTF", 64, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
 	text = new Text(font, Colour::WHITE, true);

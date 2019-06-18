@@ -46,7 +46,7 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().videoVulkan = false; //Validation layers have quite large effect on performance
+	getSettings().videoVulkan = true; //Validation layers have quite large effect on performance
 	getSettings().videoMaxFPS = 0;
 	getSettings().debugShowInformation = false;
 }
@@ -63,6 +63,7 @@ void Test::created() {
 
 	quad = new MeshRenderData(data, renderShader);
 	quad->getRenderData()->add(ubo);
+	quad->getRenderData()->addTextureSet();
 	quad->getRenderData()->add(texture, 1);
 	quad->setup(data);
 }
@@ -83,8 +84,7 @@ void Test::render() {
 	if (! getSettings().videoVulkan) {
 		glClear(GL_COLOR_BUFFER_BIT);
 		shader->use();
-		glActiveTexture(GL_TEXTURE1);
-		texture->bind();
+		quad->getRenderData()->getTextureSet(0)->bindGLTextures();
 	}
 	quad->render();
 	if (! getSettings().videoVulkan)

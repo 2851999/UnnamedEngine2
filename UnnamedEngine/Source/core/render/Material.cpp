@@ -22,6 +22,23 @@
  * The Material class
  ******************************************************************************/
 
+Material::Material(bool pbr) {
+	setDefault(pbr);
+
+	//Add the textures required for the texture set
+	textureSet = new TextureSet();
+	textureSet->add(0, ambientTexture);
+	textureSet->add(1, diffuseTexture);
+	textureSet->add(2, specularTexture);
+	textureSet->add(3, shininessTexture);
+	textureSet->add(4, normalMap);
+	textureSet->add(5, parallaxMap);
+}
+
+Material::~Material() {
+	delete textureSet;
+}
+
 void Material::setDefault(bool pbr) {
 	setAmbient(NULL);
 	setDiffuse(NULL);

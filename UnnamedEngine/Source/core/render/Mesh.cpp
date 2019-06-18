@@ -280,6 +280,7 @@ void MeshRenderData::setup(MeshData* data) {
 }
 
 void MeshRenderData::render() {
+	//Bind the required textures and render
 	renderData->render();
 }
 

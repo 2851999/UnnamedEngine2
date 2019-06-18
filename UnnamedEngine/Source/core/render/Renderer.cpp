@@ -95,17 +95,17 @@ GLuint Renderer::bindTexture(Texture* texture) {
 	if (loc < boundTextures.size()) {
 		boundTextures.push_back(texture);
 		//It has so return the correct active texture
-		return loc;
+		return loc + 10;
 	} else {
-		glActiveTexture(GL_TEXTURE0 + boundTextures.size());
+		glActiveTexture(GL_TEXTURE10 + boundTextures.size());
 		texture->bind();
 		boundTextures.push_back(texture);
-		return boundTextures.size() - 1;
+		return boundTextures.size() + 10 - 1;
 	}
 }
 
 void Renderer::unbindTexture() {
-	glActiveTexture(GL_TEXTURE0 + boundTextures.size() - 1);
+	glActiveTexture(GL_TEXTURE10 + boundTextures.size() - 1);
 	boundTextures[boundTextures.size() - 1]->unbind();
 	boundTextures.pop_back();
 }

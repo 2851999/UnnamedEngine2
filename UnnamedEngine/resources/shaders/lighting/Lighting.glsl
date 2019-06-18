@@ -2,7 +2,7 @@
 
 struct UELight {
 	int  type;
-
+	
 	vec4 position;
 	vec4 direction;
 	vec4 diffuseColour;

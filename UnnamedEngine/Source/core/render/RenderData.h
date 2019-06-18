@@ -23,6 +23,7 @@
 #include "UBO.h"
 #include "Texture.h"
 #include "../vulkan/VulkanGraphicsPipeline.h"
+#include "TextureSet.h"
 
 /*****************************************************************************
  * The RenderData class is used for rendering
@@ -58,20 +59,20 @@ private:
 	/* UBO's used with to render (Does not delete these UBOs) */
 	std::vector<UBO*> ubos;
 
-	/* Holds information about a texture being used in the shader */
-	struct TextureInfo {
-		Texture*     texture;
-		unsigned int binding;
-	};
+	/* The texture binding locations used when rendering */
+	std::vector<unsigned int> textureBindings;
 
-	/* Textures used when rendering */
-	std::vector<TextureInfo> textures;
+	/* TextureSet's stored for rendering (one per material) */
+	std::vector<TextureSet*> textureSets;
 
 	/* The descriptor pool for allocation of descriptors */
 	VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
 
 	/* The descriptor set layout */
 	VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+
+	/* Number of swap chain images when created */
+	unsigned int numSwapChainImages = 0;
 
 	/* The descriptor sets */
 	std::vector<VkDescriptorSet> descriptorSets;
@@ -90,11 +91,11 @@ public:
 
 	/* Methods to add a UBO or Texture to this instance */
 	inline void add(UBO* ubo) { ubos.push_back(ubo); }
-	inline void add(Texture* texture, unsigned int binding) {
-		TextureInfo info;
-		info.texture = texture;
-		info.binding = binding;
-		textures.push_back(info);
+	void add(Texture* texture, unsigned int binding);
+	inline TextureSet* addTextureSet() {
+		TextureSet* set = new TextureSet();
+		textureSets.push_back(set);
+		return set;
 	}
 
 	/* Method used to bind/unbind the VAO/other buffers before/after rendering */
@@ -123,7 +124,10 @@ public:
 	inline void setNumInstances(GLsizei primcount) { this->primcount = primcount; }
 
 	inline GLuint getVAO() { return vao; }
+	inline std::vector<UBO*>& getUBOs() { return ubos; }
 	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
+	inline TextureSet* getTextureSet(unsigned int index) { return textureSets[index]; }
+	inline VkDescriptorPool& getVkDescriptorPool() { return descriptorPool; }
 	inline VkDescriptorSetLayout& getVkDescriptorSetLayout() { return descriptorSetLayout; }
 	inline VkDescriptorSet& getVkDescriptorSet(unsigned int index) { return descriptorSets[index]; }
 };
