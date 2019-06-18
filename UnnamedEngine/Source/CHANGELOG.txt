@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 1 | Experimental 7
+
+* Changed RenderData to allocate the texture bindings array
+  using the first texture set added (for Vulkan)
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 1 | Experimental 6
 
 * Added TextureSet

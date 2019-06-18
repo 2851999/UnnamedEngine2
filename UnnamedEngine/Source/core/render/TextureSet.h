@@ -63,7 +63,12 @@ public:
 	void bindGLTextures();
 	void unbindGLTextures();
 
-	inline std::vector<TextureInfo> getTexturesInfo() { return textures; }
+	/* Methods to assign the texture for a particular texture info */
+	inline void setTexture(unsigned int index, Texture* texture) { textures[index].texture = texture; }
+
+	/* Getters */
+	inline std::vector<TextureInfo> getTextureInfos() { return textures; }
+	inline Texture* getTexture(unsigned int index) { return textures[index].texture; }
 };
 
 

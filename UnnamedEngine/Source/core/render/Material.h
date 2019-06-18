@@ -42,14 +42,6 @@ private:
 
 	/* The texture set for this material */
 	TextureSet* textureSet;
-
-	Texture* ambientTexture   = NULL;
-	Texture* diffuseTexture   = NULL;
-	Texture* specularTexture  = NULL;
-	Texture* shininessTexture = NULL;
-
-	Texture* normalMap   = NULL;
-	Texture* parallaxMap = NULL;
 public:
 	/* The constructor */
 	Material(bool pbr = false);
@@ -64,29 +56,29 @@ public:
 	void setAmbient(Colour ambientColour) { shaderData.ambientColour = ambientColour; }
 	void setDiffuse(Colour diffuseColour) { shaderData.diffuseColour = diffuseColour; }
 	void setSpecular(Colour specularColour) { shaderData.specularColour = specularColour; }
-	void setAmbient(Texture* ambientTexture) { this->ambientTexture = ambientTexture; shaderData.hasAmbientTexture = ambientTexture != NULL; }
+	void setAmbient(Texture* ambientTexture) { textureSet->setTexture(0, ambientTexture); shaderData.hasAmbientTexture = ambientTexture != NULL; }
 	void setDiffuse(Texture* diffuseTexture) {
-		this->diffuseTexture = diffuseTexture;
+		textureSet->setTexture(1, diffuseTexture);
 		shaderData.hasDiffuseTexture = diffuseTexture != NULL;
 		if (diffuseTexture != NULL)
 			shaderData.diffuseTextureSRGB = diffuseTexture->getParameters().getSRGB();
 	}
-	void setSpecular(Texture* specularTexture) { this->specularTexture = specularTexture; shaderData.hasSpecularTexture = specularTexture != NULL; }
-	void setShininess(Texture* shininessTexture) { this->shininessTexture = shininessTexture; shaderData.hasShininessTexture = shininessTexture != NULL; }
-	void setNormalMap(Texture* normalMap) { this->normalMap = normalMap; shaderData.hasNormalMap = normalMap != NULL; }
-	void setParallaxMap(Texture* parallaxMap) { this->parallaxMap = parallaxMap; shaderData.hasParallaxMap = parallaxMap != NULL; }
+	void setSpecular(Texture* specularTexture) { textureSet->setTexture(2, specularTexture); shaderData.hasSpecularTexture = specularTexture != NULL; }
+	void setShininess(Texture* shininessTexture) { textureSet->setTexture(3, shininessTexture); shaderData.hasShininessTexture = shininessTexture != NULL; }
+	void setNormalMap(Texture* normalMap) { textureSet->setTexture(4, normalMap); shaderData.hasNormalMap = normalMap != NULL; }
+	void setParallaxMap(Texture* parallaxMap) { textureSet->setTexture(5, parallaxMap); shaderData.hasParallaxMap = parallaxMap != NULL; }
 	void setParallaxScale(float parallaxScale) { shaderData.parallaxScale = parallaxScale; }
 	void setShininess(float shininess) { shaderData.shininess = shininess; }
 
 	Colour getAmbientColour() { return shaderData.ambientColour; }
 	Colour getDiffuseColour() { return shaderData.diffuseColour; }
 	Colour getSpecularColour() { return shaderData.specularColour; }
-	Texture* getAmbientTexture() { return ambientTexture; }
-	Texture* getDiffuseTexture() { return diffuseTexture; }
-	Texture* getSpecularTexture() { return specularTexture; }
-	Texture* getShininessTexture() { return shininessTexture; }
-	Texture* getNormalMap() { return normalMap; }
-	Texture* getParallaxMap() { return parallaxMap; }
+	Texture* getAmbientTexture() { return textureSet->getTexture(0); }
+	Texture* getDiffuseTexture() { return textureSet->getTexture(1); }
+	Texture* getSpecularTexture() { return textureSet->getTexture(2); }
+	Texture* getShininessTexture() { return textureSet->getTexture(3); }
+	Texture* getNormalMap() { return textureSet->getTexture(4); }
+	Texture* getParallaxMap() { return textureSet->getTexture(5); }
 	float getParallaxScale() { return shaderData.parallaxScale; }
 	float getShininess() { return shaderData.shininess; }
 
@@ -101,10 +93,10 @@ public:
 	void setRoughness(Texture* roughnessTexture) { setShininess(roughnessTexture); }
 	void setAO(Texture* aoTexture) { setSpecular(aoTexture); }
 
-	Texture* getMetalnessTexture() { return this->ambientTexture; }
-	Texture* getAlbedoTexture() { return this->diffuseTexture; }
-	Texture* getRoughnessTexture() { return this->shininessTexture; }
-	Texture* getAOTexture() { return this->specularTexture; }
+	inline Texture* getMetalnessTexture() { return getAmbientTexture(); }
+	inline Texture* getAlbedoTexture() { return getDiffuseTexture(); }
+	inline Texture* getRoughnessTexture() { return getShininessTexture(); }
+	inline Texture* getAOTexture() { return getSpecularTexture(); }
 
 	float getMetalnessValue() { return shaderData.ambientColour.getX(); }
 	Colour getAlbedoColour() { return shaderData.diffuseColour; }
@@ -112,6 +104,7 @@ public:
 	float getAOValue() { return shaderData.specularColour.getX(); }
 
 	ShaderBlock_Material& getShaderData() { return shaderData; }
+	TextureSet* getTextureSet() { return textureSet; }
 };
 
 #endif /* CORE_RENDER_MATERIAL_H_ */

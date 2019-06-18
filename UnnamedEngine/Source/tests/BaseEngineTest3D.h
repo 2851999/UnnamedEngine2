@@ -69,7 +69,7 @@ void Test::onCreated() {
 	camera->setFlying(true);
 
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane.obj", false);
-	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane3.obj", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj", false);
@@ -99,7 +99,7 @@ void Test::onCreated() {
 //	model2->getMesh()->getSkeleton()->startAnimation("");
 	//model2->getMesh()->getSkeleton()->stopAnimation();
 
-	model3 = new GameObject3D(resourceLoader.loadModel("deformablesphere.dae"), Renderer::SHADER_LIGHTING); //Appears normals are incorrectly transformed by bone matrix
+	model3 = new GameObject3D(resourceLoader.loadModel("deformablesphere.dae"), Renderer::SHADER_LIGHTING);
 	model3->setPosition(2.0f, 0.8f, 0.0f);
 	model3->update();
 

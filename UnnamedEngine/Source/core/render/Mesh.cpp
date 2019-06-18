@@ -184,7 +184,7 @@ MeshRenderData::MeshRenderData(MeshData* data, RenderShader* renderShader) {
 	renderData = new RenderData(data->getRenderMode(), numVertices);
 }
 
-void MeshRenderData::setup(MeshData* data) {
+void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 	//The shader used for the setup
 	Shader* shader = setupShader->getShader();
 
@@ -273,7 +273,9 @@ void MeshRenderData::setup(MeshData* data) {
 		renderData->setIndicesVBO(vboIndices);
 	}
 
-	//TODO: ADD REQUIRED UBO's AND TEXTURES HERE?
+	//Add the required texture sets
+	for (Material* material : materials)
+		renderData->addTextureSet(material->getTextureSet());
 
 	//Setup the render data
 	renderData->setup(shader);
@@ -390,6 +392,11 @@ Mesh::~Mesh() {
 	}
 	delete renderData;
 	delete data;
+}
+
+void Mesh::setup(RenderShader* renderShader) {
+	this->renderData = new MeshRenderData(this->data, renderShader);
+	this->renderData->setup(data, materials);
 }
 
 void Mesh::updateAnimation(float deltaSeconds) {

@@ -70,6 +70,13 @@ void RenderData::setup(Shader* shader) {
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
 		glBindVertexArray(0);
 	else {
+		//Add the required textures from the texture set's (if there is one)
+		if (textureSets.size() > 0) {
+			//Just use the first one as the example (should all have same textures here anyway)
+			for (TextureSet::TextureInfo& info : textureSets[0]->getTextureInfos())
+				textureBindings.push_back(info.binding);
+		}
+
 		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
 		unsigned int numDescriptorSets = numSwapChainImages * (textureSets.size() == 0 ? 1 : textureSets.size());
 
@@ -186,7 +193,7 @@ void RenderData::setupVulkan(Shader* shader) {
 						descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
 					}
 
-					for (TextureSet::TextureInfo textureInfo : textureSets[y]->getTexturesInfo()) {
+					for (TextureSet::TextureInfo textureInfo : textureSets[y]->getTextureInfos()) {
 						//Only assign if have an actual texture (allows textures to be assigned later)
 						if (textureInfo.texture != NULL) {
 							VkDescriptorImageInfo imageInfo = textureInfo.texture->getVkImageInfo();

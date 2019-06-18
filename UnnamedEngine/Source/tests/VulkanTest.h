@@ -37,6 +37,7 @@ private:
 	MeshRenderData* quad;
 	UBOData uboData;
 	Texture* texture;
+	TextureSet* textureSet;
 public:
 	void initialise() override;
 	void created() override;
@@ -63,9 +64,11 @@ void Test::created() {
 
 	quad = new MeshRenderData(data, renderShader);
 	quad->getRenderData()->add(ubo);
-	quad->getRenderData()->addTextureSet();
-	quad->getRenderData()->add(texture, 1);
-	quad->setup(data);
+	textureSet = new TextureSet();
+	textureSet->add(1, texture);
+	quad->getRenderData()->addTextureSet(textureSet);
+	std::vector<Material*> materials;
+	quad->setup(data, materials);
 }
 
 
@@ -92,6 +95,7 @@ void Test::render() {
 }
 
 void Test::destroy() {
+	delete textureSet;
 	delete quad;
 
 	delete renderShader;

@@ -92,11 +92,7 @@ public:
 	/* Methods to add a UBO or Texture to this instance */
 	inline void add(UBO* ubo) { ubos.push_back(ubo); }
 	void add(Texture* texture, unsigned int binding);
-	inline TextureSet* addTextureSet() {
-		TextureSet* set = new TextureSet();
-		textureSets.push_back(set);
-		return set;
-	}
+	inline void addTextureSet(TextureSet* set) { textureSets.push_back(set); }
 
 	/* Method used to bind/unbind the VAO/other buffers before/after rendering */
 	void bindBuffers();

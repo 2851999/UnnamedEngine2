@@ -274,7 +274,7 @@ public:
 	virtual ~MeshRenderData() { destroy(); }
 
 	/* Sets up for rendering */
-	void setup(MeshData* data);
+	void setup(MeshData* data, std::vector<Material*>& materials);
 
 	/* Method to render using the data */
 	void render();
@@ -329,10 +329,7 @@ public:
 	virtual ~Mesh();
 
 	/* Method called to setup this mesh for rendering */
-	inline void setup(RenderShader* renderShader) {
-		this->renderData = new MeshRenderData(this->data, renderShader);
-		this->renderData->setup(data);
-	}
+	void setup(RenderShader* renderShader);
 
 	/* Method called to update the animation of this mesh */
 	void updateAnimation(float deltaSeconds);
