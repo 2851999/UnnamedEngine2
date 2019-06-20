@@ -78,7 +78,9 @@ void RenderData::setup(Shader* shader) {
 		}
 
 		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
-		unsigned int numDescriptorSets = numSwapChainImages * (textureSets.size() == 0 ? 1 : textureSets.size());
+//		unsigned int numUBODescriptors   = numSwapChainImages * ubos.size();
+//		unsigned int numImageDescriptors = numSwapChainImages * textureSets.size();
+		unsigned int numDescriptorSets   = numSwapChainImages * (textureSets.size() == 0 ? 1 : textureSets.size());
 
 		//---------------------------CREATE DESCRIPTOR POOL---------------------------
 		//Assign the creation info
@@ -86,13 +88,13 @@ void RenderData::setup(Shader* shader) {
 		for (unsigned int i = 0; i < ubos.size(); ++i) {
 			VkDescriptorPoolSize poolSize;
 			poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			poolSize.descriptorCount = static_cast<uint32_t>(numDescriptorSets);
+			poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
 			poolSizes.push_back(poolSize);
 		}
 		for (unsigned int i = 0; i < textureBindings.size(); ++i) {
 			VkDescriptorPoolSize poolSize;
 			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			poolSize.descriptorCount = static_cast<uint32_t>(numDescriptorSets); //Have one for each swap chain image/texture set combination
+			poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
 			poolSizes.push_back(poolSize);
 		}
 
@@ -116,7 +118,7 @@ void RenderData::setup(Shader* shader) {
 			uboLayoutBinding.binding            = ubo.second->getBinding();
 			uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			uboLayoutBinding.descriptorCount    = 1;
-			uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT; //VK_SHADER_STAGE_ALL_GRAPHICS
+			uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_ALL_GRAPHICS; //VK_SHADER_STAGE_ALL_GRAPHICS
 			uboLayoutBinding.pImmutableSamplers = nullptr; //Optional
 
 			//Add the binding
@@ -185,18 +187,22 @@ void RenderData::setupVulkan(Shader* shader) {
 			for (unsigned int x = 0; x < numSwapChainImages; ++x) {
 				for (unsigned int y = 0; y < textureSets.size(); ++y) {
 					unsigned int i = x * (y + 1);
-
 					std::vector<VkWriteDescriptorSet> descriptorWrites = {};
-					for (auto& ubo : ubos) {
-						VkDescriptorBufferInfo bufferInfo = ubo.second->getVkBuffer(i)->getBufferInfo();
 
-						descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
+					std::vector<VkDescriptorBufferInfo> bufferInfos; //Keep in scope
+
+					for (auto& ubo : ubos) {
+						bufferInfos.push_back(ubo.second->getVkBuffer(i)->getBufferInfo());
+
+						descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfos[bufferInfos.size() - 1]));
 					}
 
-					for (TextureSet::TextureInfo textureInfo : textureSets[y]->getTextureInfos()) {
+					std::vector<VkDescriptorImageInfo> imageInfos;
+
+					for (TextureSet::TextureInfo& textureInfo : textureSets[y]->getTextureInfos()) {
 						//Only assign if have an actual texture (allows textures to be assigned later)
 						if (textureInfo.texture != NULL) {
-							VkDescriptorImageInfo imageInfo = textureInfo.texture->getVkImageInfo();
+							imageInfos.push_back(textureInfo.texture->getVkImageInfo());
 
 							VkWriteDescriptorSet textureWrite;
 							textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -206,13 +212,12 @@ void RenderData::setupVulkan(Shader* shader) {
 							textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 							textureWrite.descriptorCount  = 1;
 							textureWrite.pBufferInfo      = nullptr;
-							textureWrite.pImageInfo       = &imageInfo;
+							textureWrite.pImageInfo       = &imageInfos[imageInfos.size() - 1];
 							textureWrite.pTexelBufferView = nullptr;
 							textureWrite.pNext            = nullptr;
 							descriptorWrites.push_back(textureWrite);
 						}
 					}
-
 					vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 				}
 			}

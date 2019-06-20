@@ -29,9 +29,9 @@ layout (std140, binding = 2) uniform UEMaterialData {
 };
 
 /* The texture data */
-layout(binding = 0) uniform sampler2D ue_material_ambientTexture;
-layout(binding = 1) uniform sampler2D ue_material_diffuseTexture;
-layout(binding = 2) uniform sampler2D ue_material_specularTexture;
-layout(binding = 3) uniform sampler2D ue_material_shininessTexture;
-layout(binding = 4) uniform sampler2D ue_material_normalMap;
-layout(binding = 5) uniform sampler2D ue_material_parallaxMap;
+layout(binding = 12) uniform sampler2D ue_material_ambientTexture;
+layout(binding = 13) uniform sampler2D ue_material_diffuseTexture;
+layout(binding = 14) uniform sampler2D ue_material_specularTexture;
+layout(binding = 15) uniform sampler2D ue_material_shininessTexture;
+layout(binding = 16) uniform sampler2D ue_material_normalMap;
+layout(binding = 17) uniform sampler2D ue_material_parallaxMap;

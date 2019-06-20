@@ -21,23 +21,16 @@
 
 #include "../core/BaseEngine.h"
 
+#include "../core/render/MeshLoader.h"
 #include "../utils/Utils.h"
 
 class Test : public BaseEngine {
 private:
 	float lastTime = 0;
 
-	struct UBOData {
-		Matrix4f mvpMatrix;
-	};
-
-	UBO* ubo;
-	Shader* shader;
-	RenderShader* renderShader;
-	MeshRenderData* quad;
-	UBOData uboData;
+	Camera3D* camera;
+	GameObject3D* quad;
 	Texture* texture;
-	TextureSet* textureSet;
 public:
 	void initialise() override;
 	void created() override;
@@ -53,24 +46,21 @@ void Test::initialise() {
 }
 
 void Test::created() {
-	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("VulkanShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+
+	camera = new Camera3D(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
+	camera->setPosition(0.0f, 0.0f, 1.0f);
+	camera->update();
+	Renderer::addCamera(camera);
 
 	texture = Texture::loadTexture("resources/textures/texture.jpg");
-
-	ubo = new UBO(NULL, sizeof(UBOData), GL_DYNAMIC_DRAW, 0);
-
-	MeshData* data = MeshBuilder::createQuad(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture);
-
-	shader = Shader::loadShader("resources/shaders/vulkan/shader");
-	renderShader = new RenderShader(100, shader, NULL);
-
-	quad = new MeshRenderData(data, renderShader);
-	quad->getRenderData()->add(100, ubo);
-	textureSet = new TextureSet();
-	textureSet->add(1, texture);
-	quad->getRenderData()->addTextureSet(textureSet);
-	std::vector<Material*> materials;
-	quad->setup(data, materials);
+	Mesh* mesh = new Mesh(MeshBuilder::createQuad3D(Vector2f(-0.5f, 0.5f), Vector2f(0.5f, 0.5f), Vector2f(0.5f, -0.5f), Vector2f(-0.5f, -0.5f), texture));
+//	mesh->getMaterial()->setDiffuse(texture);
+//	mesh->getMaterial()->setDiffuse(Colour(1.0f, 0.0f, 0.0f, 1.0f));
+//	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/SimpleSphere/", "SimpleSphere.obj", false);
+	mesh->setCullingEnabled(false);
+	quad = new GameObject3D(mesh, Renderer::SHADER_VULKAN);
+	quad->update();
 }
 
 
@@ -79,29 +69,17 @@ void Test::update() {
 		lastTime = utils_time::getSeconds();
 		std::cout << getFPS() << std::endl;
 	}
-	//Update the UBO
-	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-
-	ubo->update(&uboData, 0, sizeof(UBOData));
 }
 
 void Test::render() {
-	if (! getSettings().videoVulkan) {
-		glClear(GL_COLOR_BUFFER_BIT);
-		shader->use();
-		quad->getRenderData()->getTextureSet(0)->bindGLTextures();
-	}
-	quad->render();
 	if (! getSettings().videoVulkan)
-		shader->stopUsing();
+		glClear(GL_COLOR_BUFFER_BIT);
+	quad->render();
 }
 
 void Test::destroy() {
-	delete textureSet;
 	delete quad;
-
-	delete renderShader;
-	delete ubo;
+	delete camera;
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

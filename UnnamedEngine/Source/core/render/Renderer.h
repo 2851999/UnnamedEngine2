@@ -70,6 +70,7 @@ public:
 	static const unsigned int SHADER_PLAIN_TEXTURE;
 	static const unsigned int SHADER_DEFERRED_LIGHTING;
 	static const unsigned int SHADER_TILEMAP;
+	static const unsigned int SHADER_VULKAN;
 
 	static const unsigned int SHADER_PBR_EQUI_TO_CUBE_GEN;
 	static const unsigned int SHADER_PBR_IRRADIANCE_MAP_GEN;

@@ -30,15 +30,15 @@ GameObject::GameObject(Mesh* mesh, RenderShader* shader) : mesh(mesh), renderSha
 }
 
 GameObject::~GameObject() {
-	if (mesh) {
+	if (mesh)
 		delete mesh;
-	}
 }
 
 void GameObject::render() {
 	if (hasMesh()) {
 		if (! shouldCull()) {
-			renderShader->getShader()->use();
+			if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+				renderShader->getShader()->use();
 			Renderer::render(mesh, getModelMatrix(), renderShader);
 		}
 	}

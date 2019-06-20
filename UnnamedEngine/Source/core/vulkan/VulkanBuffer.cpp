@@ -80,11 +80,10 @@ VulkanBuffer::~VulkanBuffer() {
 }
 
 VkDescriptorBufferInfo VulkanBuffer::getBufferInfo() {
-	VkDescriptorBufferInfo bufferInfo = {};
+	VkDescriptorBufferInfo bufferInfo;
 	bufferInfo.buffer = instance;
 	bufferInfo.offset = 0;
 	bufferInfo.range  = VK_WHOLE_SIZE;
-
 	return bufferInfo;
 }
 

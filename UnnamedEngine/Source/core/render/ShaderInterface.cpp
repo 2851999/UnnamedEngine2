@@ -141,6 +141,9 @@ void ShaderInterface::setup(RenderData* renderData, unsigned int shaderID) {
 		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
 	} else if (shaderID == Renderer::SHADER_TILEMAP) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
+	} else if (shaderID == Renderer::SHADER_VULKAN) {
+		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
+		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
 	} else if (shaderID == Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN) {
 		renderData->add(BLOCK_PBR_ENV_MAP_GEN,   getUBO(BLOCK_PBR_ENV_MAP_GEN));
 	} else if (shaderID == Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN) {
@@ -154,7 +157,7 @@ void ShaderInterface::setup(RenderData* renderData, unsigned int shaderID) {
 		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
 		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
 		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
-		renderData->add(BLOCK_PBR_LIGHTING_CORE,        getUBO(BLOCK_PBR_LIGHTING_CORE));
+		renderData->add(BLOCK_PBR_LIGHTING_CORE, getUBO(BLOCK_PBR_LIGHTING_CORE));
 	} else if (shaderID == Renderer::SHADER_PBR_DEFERRED_LIGHTING) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
 		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));

@@ -484,7 +484,7 @@ void Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; //Only used by graphics queue
 
 	if (vkCreateBuffer(device->getLogical(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-		Logger::log("Failed to create vertex buffer", "VulkanBuffer", LogType::Error);
+		Logger::log("Failed to create buffer", "VulkanBuffer", LogType::Error);
 
 	VkMemoryRequirements memoryRequirements;
 	vkGetBufferMemoryRequirements(device->getLogical(), buffer, &memoryRequirements);
@@ -496,7 +496,7 @@ void Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 	allocInfo.memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits, properties);
 
 	if (vkAllocateMemory(device->getLogical(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-		Logger::log("Failed to allocate vertex buffer memory", "VulkanBuffer", LogType::Error);
+		Logger::log("Failed to allocate buffer memory", "VulkanBuffer", LogType::Error);
 
 	//Associate the memory with the buffer
 	vkBindBufferMemory(device->getLogical(), buffer, bufferMemory, 0);

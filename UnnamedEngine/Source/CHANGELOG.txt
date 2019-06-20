@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 2 | Experimental 3
+
+* Added 'createQuad3D' method with a texture in MeshBuilder
+
+* Fixed bug: RenderData would not correcly use multiple
+             textures or UBO's when using Vulkan
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 2 | Experimental 2
 
 * Added methods 'useMaterial' and 'stopUsingMaterial' in

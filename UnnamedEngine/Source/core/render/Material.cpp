@@ -27,12 +27,12 @@ Material::Material(bool pbr) {
 
 	//Add the textures required for the texture set
 	textureSet = new TextureSet();
-	textureSet->add(0, NULL);
-	textureSet->add(1, NULL);
-	textureSet->add(2, NULL);
-	textureSet->add(3, NULL);
-	textureSet->add(4, NULL);
-	textureSet->add(5, NULL);
+	textureSet->add(12, NULL);
+	textureSet->add(13, NULL);
+	textureSet->add(14, NULL);
+	textureSet->add(15, NULL);
+	textureSet->add(16, NULL);
+	textureSet->add(17, NULL);
 }
 
 Material::~Material() {

@@ -497,6 +497,13 @@ MeshData* MeshBuilder::createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vecto
 	return data;
 }
 
+MeshData* MeshBuilder::createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture, MeshData::Flag flags) {
+	MeshData* data = new MeshData(3, flags);
+	addQuadData3D(data, v1, v2, v3, v4, texture);
+	addQuadI(data);
+	return data;
+}
+
 MeshData* MeshBuilder::createQuad3D(float width, float height, MeshData::Flag flags) {
 	MeshData* data = new MeshData(3, flags);
 	addQuadData3D(data, Vector2f(-width / 2, -height / 2), Vector2f(width / 2, -height / 2), Vector2f(width / 2, height / 2), Vector2f(-width / 2, height / 2));
