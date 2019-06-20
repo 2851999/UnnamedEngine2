@@ -150,14 +150,12 @@ void GameRenderer::render() {
 	shader->use();
 	Renderer::saveTextures();
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
+	Renderer::useMaterial(mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex), renderData->getUBO(ShaderInterface::BLOCK_MATERIAL));
 	if (useLighting) {
-		Renderer::setMaterialUniforms(shader, Renderer::SHADER_LIGHTING, mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex));
 		shader->setUniformVector3("Light_Direction", Vector3f(0.0f, -1.0f, -1.0f));
 		shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));
 		shader->setUniformColourRGB("Light_SpecularColour", Colour(1.0f, 1.0f, 1.0f));
 		shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
-	} else {
-		Renderer::setMaterialUniforms(shader, Renderer::SHADER_MATERIAL, mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex));
 	}
 
 	glEnable(GL_CULL_FACE);
@@ -166,6 +164,7 @@ void GameRenderer::render() {
 	renderData->render();
 	glDisable(GL_CULL_FACE);
 
+	Renderer::stopUsingMaterial(mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex));
 	Renderer::releaseNewTextures();
 	shader->stopUsing();
 }

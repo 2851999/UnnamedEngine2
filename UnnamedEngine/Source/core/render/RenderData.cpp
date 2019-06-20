@@ -111,9 +111,9 @@ void RenderData::setup(Shader* shader) {
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
 
 		//Go through the UBO's
-		for (UBO* ubo : ubos) {
+		for (auto& ubo : ubos) {
 			VkDescriptorSetLayoutBinding uboLayoutBinding = {};
-			uboLayoutBinding.binding            = ubo->getBinding();
+			uboLayoutBinding.binding            = ubo.second->getBinding();
 			uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			uboLayoutBinding.descriptorCount    = 1;
 			uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT; //VK_SHADER_STAGE_ALL_GRAPHICS
@@ -173,10 +173,10 @@ void RenderData::setupVulkan(Shader* shader) {
 		if (textureSets.size() == 0) {
 			for (unsigned int i = 0; i < numSwapChainImages; ++i) {
 				std::vector<VkWriteDescriptorSet> descriptorWrites = {};
-				for (UBO* ubo : ubos) {
-					VkDescriptorBufferInfo bufferInfo = ubo->getVkBuffer(i)->getBufferInfo();
+				for (auto& ubo : ubos) {
+					VkDescriptorBufferInfo bufferInfo = ubo.second->getVkBuffer(i)->getBufferInfo();
 
-					descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
+					descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
 				}
 
 				vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
@@ -187,10 +187,10 @@ void RenderData::setupVulkan(Shader* shader) {
 					unsigned int i = x * (y + 1);
 
 					std::vector<VkWriteDescriptorSet> descriptorWrites = {};
-					for (UBO* ubo : ubos) {
-						VkDescriptorBufferInfo bufferInfo = ubo->getVkBuffer(i)->getBufferInfo();
+					for (auto& ubo : ubos) {
+						VkDescriptorBufferInfo bufferInfo = ubo.second->getVkBuffer(i)->getBufferInfo();
 
-						descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
+						descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
 					}
 
 					for (TextureSet::TextureInfo textureInfo : textureSets[y]->getTextureInfos()) {
@@ -285,5 +285,14 @@ void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset
 			if (vboIndices)
 				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, 1, indicesOffset, baseVertex, 0); //Is this correct?
 		}
+	}
+}
+
+UBO* RenderData::getUBO(unsigned int id) {
+	if (ubos.count(id) > 0)
+		return ubos[id];
+	else {
+//		Logger::log("Could not find UBO with id " + utils_string::str(id) + ". Was it added?", "RenderData", LogType::Debug);
+		return NULL;
 	}
 }

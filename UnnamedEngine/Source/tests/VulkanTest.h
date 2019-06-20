@@ -53,31 +53,19 @@ void Test::initialise() {
 }
 
 void Test::created() {
+	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+
 	texture = Texture::loadTexture("resources/textures/texture.jpg");
 
 	ubo = new UBO(NULL, sizeof(UBOData), GL_DYNAMIC_DRAW, 0);
 
-	std::unordered_map<int, int> test;
-	test.insert(std::pair<int, int>(1, 1));
-	test.insert(std::pair<int, int>(2, 1));
-	test.insert(std::pair<int, int>(3, 1));
-	test.insert(std::pair<int, int>(4, 1));
-	test.insert(std::pair<int, int>(5, 1));
-	test.insert(std::pair<int, int>(6, 1));
-	test.insert(std::pair<int, int>(7, 1));
-	test.insert(std::pair<int, int>(8, 1));
-	float time = utils_time::getSeconds();
-	int found = test.at(7);
-	std::cout << (utils_time::getSeconds() - time) << std::endl;
-	std::cout << found << std::endl;
-
 	MeshData* data = MeshBuilder::createQuad(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture);
 
 	shader = Shader::loadShader("resources/shaders/vulkan/shader");
-	renderShader = new RenderShader("Shader", shader, NULL);
+	renderShader = new RenderShader(100, shader, NULL);
 
 	quad = new MeshRenderData(data, renderShader);
-	quad->getRenderData()->add(ubo);
+	quad->getRenderData()->add(100, ubo);
 	textureSet = new TextureSet();
 	textureSet->add(1, texture);
 	quad->getRenderData()->addTextureSet(textureSet);

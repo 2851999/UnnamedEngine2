@@ -1,4 +1,23 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 2 | Experimental 2
+
+* Added methods 'useMaterial' and 'stopUsingMaterial' in
+  Renderer (Replacing 'setMaterialUniforms' method)
+* Added methods 'outputCompleteShaderFile(s)' to Shader to
+  write a whole shader file containing all includes
+* Added 'compileToSPIRV'/'compileEngineShaderToSPIRV' methods
+  to Shader to help compile engine shaders to SPIR-V (Requires
+  glslangValidator)
+
+* Changed MeshRenderData to add the required UBO's to
+  it's RenderData using ShaderInterface
+* Changed 'loadEngineShader' in Renderer to load shaders for
+  Vulkan in a separate folder 'shaders-vulkan'
+  
+* Fixed bug: 'Renderer::destroy' was never called by
+             BaseEngine
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 2 | Experimental 1
 
 * Added 'setup' method in ShaderInterface

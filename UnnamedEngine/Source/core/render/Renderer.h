@@ -33,14 +33,9 @@ class Renderer {
 private:
 	static ShaderInterface* shaderInterface;
 
-	static ShaderBlock_Core shaderCoreData;
-	static UBO* shaderCoreUBO;
-
+	static ShaderBlock_Core     shaderCoreData;
 	static ShaderBlock_Material shaderMaterialData;
-	static UBO* shaderMaterialUBO;
-
 	static ShaderBlock_Skinning shaderSkinningData;
-	static UBO* shaderSkinningUBO;
 
 	static std::vector<Camera*> cameras;
 	static std::vector<Texture*> boundTextures;
@@ -115,8 +110,11 @@ public:
 	/* Method used to initialise the rendering system */
 	static void initialise();
 
-	/* The method used to apply the material properties to a shader assuming it is already being used */
-	static void setMaterialUniforms(Shader* shader, unsigned int shaderID, Material* material);
+	/* TMethod used to apply the material properties to a shader assuming it is already being used */
+	static void useMaterial(Material* material, UBO* materialUBO);
+
+	/* Method used to stop applying a material (unbinds required textures) */
+	static void stopUsingMaterial(Material* material);
 
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);

@@ -29,14 +29,9 @@
 
 ShaderInterface* Renderer::shaderInterface;
 
-ShaderBlock_Core Renderer::shaderCoreData;
-UBO* Renderer::shaderCoreUBO;
-
+ShaderBlock_Core     Renderer::shaderCoreData;
 ShaderBlock_Material Renderer::shaderMaterialData;
-UBO* Renderer::shaderMaterialUBO;
-
 ShaderBlock_Skinning Renderer::shaderSkinningData;
-UBO* Renderer::shaderSkinningUBO;
 
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
@@ -124,79 +119,73 @@ void Renderer::releaseNewTextures() {
 }
 
 void Renderer::initialise() {
-	blank = Texture::loadTexture("resources/textures/blank.png");
-
-	//Setup the UBOs
+	//Create the shader interface
 	shaderInterface = new ShaderInterface();
-	shaderCoreUBO = shaderInterface->getUBO(ShaderInterface::BLOCK_CORE);
-	shaderMaterialUBO = shaderInterface->getUBO(ShaderInterface::BLOCK_MATERIAL);
-	shaderSkinningUBO = shaderInterface->getUBO(ShaderInterface::BLOCK_SKINNING);
 
-	//Setup the shaders
-	addRenderShader(SHADER_MATERIAL,                     "MaterialShader",                   "");
-	addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
-	addRenderShader(SHADER_FONT,                         "FontShader",                       "");
-	addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
-	addRenderShader(SHADER_PARTICLE,                     "ParticleShader",                   "");
-	addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
-	addRenderShader(SHADER_FRAMEBUFFER,                  "FramebufferShader",                "");
-	addRenderShader(SHADER_ENVIRONMENT_MAP,              "EnvironmentMapShader",             "");
-	addRenderShader(SHADER_SHADOW_MAP,                   "lighting/ShadowMapShader",         "");
-	addRenderShader(SHADER_SHADOW_CUBEMAP,               "lighting/ShadowCubemapShader",     "");
-	addRenderShader(SHADER_BILLBOARDED_FONT,             "billboard/BillboardedFontShader",  "");
-	addRenderShader(SHADER_TERRAIN,                      "terrain/Terrain",                  "terrain/TerrainDeferredGeom");
-	addRenderShader(SHADER_PLAIN_TEXTURE,                "PlainTexture",                     "");
-	addRenderShader(SHADER_DEFERRED_LIGHTING,            "lighting/DeferredLighting",        "");
-	addRenderShader(SHADER_TILEMAP,				         "TilemapShader",				     "");
-	addRenderShader(SHADER_PBR_EQUI_TO_CUBE_GEN,         "pbr/EquiToCubeGen",                "");
-	addRenderShader(SHADER_PBR_IRRADIANCE_MAP_GEN,       "pbr/IrradianceMapGen",             "");
-	addRenderShader(SHADER_PBR_PREFILTER_MAP_GEN,        "pbr/PrefilterMapGen",              "");
-	addRenderShader(SHADER_PBR_BRDF_INTEGRATION_MAP_GEN, "pbr/BRDFIntegrationMapGen",        "");
-	addRenderShader(SHADER_PBR_LIGHTING,                 "pbr/PBRShader",                    "pbr/PBRDeferredGeom");
-	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING,        "pbr/PBRDeferredLighting",          "");
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		blank = Texture::loadTexture("resources/textures/blank.png");
 
-	//Setup the screen texture mesh
-	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
-	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-	meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
-	screenTextureMesh = new MeshRenderData(meshData, getRenderShader(SHADER_FRAMEBUFFER));
-	std::vector<Material*> materials;
-	screenTextureMesh->setup(meshData, materials);
+		//Setup the shaders
+		addRenderShader(SHADER_MATERIAL,                     "MaterialShader",                   "");
+		addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
+		addRenderShader(SHADER_FONT,                         "FontShader",                       "");
+		addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
+		addRenderShader(SHADER_PARTICLE,                     "ParticleShader",                   "");
+		addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
+		addRenderShader(SHADER_FRAMEBUFFER,                  "FramebufferShader",                "");
+		addRenderShader(SHADER_ENVIRONMENT_MAP,              "EnvironmentMapShader",             "");
+		addRenderShader(SHADER_SHADOW_MAP,                   "lighting/ShadowMapShader",         "");
+		addRenderShader(SHADER_SHADOW_CUBEMAP,               "lighting/ShadowCubemapShader",     "");
+		addRenderShader(SHADER_BILLBOARDED_FONT,             "billboard/BillboardedFontShader",  "");
+		addRenderShader(SHADER_TERRAIN,                      "terrain/Terrain",                  "terrain/TerrainDeferredGeom");
+		addRenderShader(SHADER_PLAIN_TEXTURE,                "PlainTexture",                     "");
+		addRenderShader(SHADER_DEFERRED_LIGHTING,            "lighting/DeferredLighting",        "");
+		addRenderShader(SHADER_TILEMAP,				         "TilemapShader",				     "");
+		addRenderShader(SHADER_PBR_EQUI_TO_CUBE_GEN,         "pbr/EquiToCubeGen",                "");
+		addRenderShader(SHADER_PBR_IRRADIANCE_MAP_GEN,       "pbr/IrradianceMapGen",             "");
+		addRenderShader(SHADER_PBR_PREFILTER_MAP_GEN,        "pbr/PrefilterMapGen",              "");
+		addRenderShader(SHADER_PBR_BRDF_INTEGRATION_MAP_GEN, "pbr/BRDFIntegrationMapGen",        "");
+		addRenderShader(SHADER_PBR_LIGHTING,                 "pbr/PBRShader",                    "pbr/PBRDeferredGeom");
+		addRenderShader(SHADER_PBR_DEFERRED_LIGHTING,        "pbr/PBRDeferredLighting",          "");
+
+		//Setup the screen texture mesh
+		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+		screenTextureMesh = new MeshRenderData(meshData, getRenderShader(SHADER_FRAMEBUFFER));
+		std::vector<Material*> materials;
+		screenTextureMesh->setup(meshData, materials);
+	}
 }
 
-void Renderer::assignMatTexture(Shader* shader, std::string type, Texture* texture) {
-	if (texture)
-		//Bind the texture
-		shader->setUniformi("Material_" + type, bindTexture(texture));
-}
-
-void Renderer::setMaterialUniforms(Shader* shader, unsigned int shaderID, Material* material) {
-//	assignMatTexture(shader, "DiffuseTexture", material->getDiffuseTexture());
-//
-//	//Check to see whether the shader is for lighting
-//	if (shaderName == SHADER_LIGHTING || shaderName == SHADER_TERRAIN || shaderName == SHADER_PBR_LIGHTING) {
-//		//Assign other lighting specific properties
-//		assignMatTexture(shader, "AmbientTexture",   material->getAmbientTexture());
-//		assignMatTexture(shader, "SpecularTexture",  material->getSpecularTexture());
-//		assignMatTexture(shader, "ShininessTexture", material->getShininessTexture());
-//		assignMatTexture(shader, "NormalMap",        material->getNormalMap());
-//		assignMatTexture(shader, "ParallaxMap",      material->getParallaxMap());
-//	}
+void Renderer::useMaterial(Material* material, UBO* materialUBO) {
+	//Bind the required textures
 	material->getTextureSet()->bindGLTextures();
 
-	//Update the material UBO
-	shaderMaterialUBO->update(&material->getShaderData(), 0, sizeof(ShaderBlock_Material));
+	//Update the material UBO (if there is one)
+	if (materialUBO)
+		materialUBO->update(&material->getShaderData(), 0, sizeof(ShaderBlock_Material));
+}
+
+void Renderer::stopUsingMaterial(Material* material) {
+	//Unbind the textures
+	material->getTextureSet()->unbindGLTextures();
 }
 
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
 	//Ensure there is a Shader and Camera instance for rendering
 	if (renderShader && getCamera()) {
-		//Get the shader for rendering
-		Shader* shader = renderShader->getShader();
+		//Get the render data for rendering
+		RenderData* renderData = mesh->getRenderData()->getRenderData();
+
+		//Obtain the required UBO's for rendering
+		UBO* shaderCoreUBO     = renderData->getUBO(ShaderInterface::BLOCK_CORE);
+		UBO* shaderSkinningUBO = renderData->getUBO(ShaderInterface::BLOCK_SKINNING);
+		UBO* materialUBO       = renderData->getUBO(ShaderInterface::BLOCK_MATERIAL);
 
 		shaderCoreData.ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
 		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
@@ -204,14 +193,16 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			MeshData* data = mesh->getData();
 			MeshRenderData* renderData = mesh->getRenderData();
 
-			if (mesh->hasSkeleton()) {
-				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); ++i)
-					shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
-				shaderSkinningData.ue_useSkinning = true;
-				shaderSkinningUBO->update(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
-			} else {
-				shaderSkinningData.ue_useSkinning = false;
-				shaderSkinningData.updateUseSkinning(shaderSkinningUBO);
+			if (shaderSkinningUBO) {
+				if (mesh->hasSkeleton()) {
+					for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); ++i)
+						shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
+					shaderSkinningData.ue_useSkinning = true;
+					shaderSkinningUBO->update(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
+				} else {
+					shaderSkinningData.ue_useSkinning = false;
+					shaderSkinningData.updateUseSkinning(shaderSkinningUBO);
+				}
 			}
 
 			if (data->hasSubData()) {
@@ -219,25 +210,20 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 				//Go through each sub data instance
 				for (unsigned int i = 0; i < data->getSubDataCount(); ++i) {
-					//saveTextures();
-
 					if (mesh->hasMaterial())
-						setMaterialUniforms(shader, renderShader->getID(), mesh->getMaterial(data->getSubData(i).materialIndex));
+						useMaterial(mesh->getMaterial(data->getSubData(i).materialIndex), materialUBO);
 					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex * sizeof(unsigned int), data->getSubData(i).baseVertex);
 					if (mesh->hasMaterial())
-						mesh->getMaterial(data->getSubData(i).materialIndex)->getTextureSet()->unbindGLTextures();
-					//releaseNewTextures();
+						stopUsingMaterial(mesh->getMaterial(data->getSubData(i).materialIndex));
 				}
 
 				renderData->getRenderData()->unbindBuffers();
 			} else {
-				//saveTextures();
 				if (mesh->hasMaterial())
-					setMaterialUniforms(renderShader->getShader(), renderShader->getID(), mesh->getMaterial());
+					useMaterial(mesh->getMaterial(), materialUBO);
 				renderData->render();
 				if (mesh->hasMaterial())
-					mesh->getMaterial()->getTextureSet()->unbindGLTextures();
-				//releaseNewTextures();
+					stopUsingMaterial(mesh->getMaterial());
 			}
 		}
 	}
@@ -260,13 +246,17 @@ void Renderer::render(FramebufferStore* texture, Shader* shader) {
 
 void Renderer::destroy() {
 	delete shaderInterface;
-	delete screenTextureMesh;
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+		delete screenTextureMesh;
 }
 
 using namespace utils_string;
 
 Shader* Renderer::loadEngineShader(std::string path) {
-	return Shader::loadShader("resources/shaders/" + path);
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+		return Shader::loadShader("resources/shaders/" + path);
+	else
+		return Shader::loadShader("resources/shaders-vulkan/" + path);
 }
 
 void Renderer::prepareForwardShader(unsigned int id, Shader* shader) {
