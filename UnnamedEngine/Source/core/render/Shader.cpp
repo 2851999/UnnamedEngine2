@@ -394,7 +394,7 @@ Shader* Shader::loadShader(std::string path) {
  * The RenderShader class
  *****************************************************************************/
 
-RenderShader::RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader) : name(name) {
+RenderShader::RenderShader(unsigned int id, Shader* forwardShader, Shader* deferredGeomShader) : id(id) {
 	if (forwardShader)
 		addForwardShader(forwardShader);
 	if (deferredGeomShader)

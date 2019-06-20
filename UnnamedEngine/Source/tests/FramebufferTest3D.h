@@ -42,7 +42,7 @@ void Test::onInitialise() {
 void Test::onCreated() {
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 
-	GameObject3D* object = new GameObject3D(resourceLoader.loadModel("teapot.obj"), "Material");
+	GameObject3D* object = new GameObject3D(resourceLoader.loadModel("teapot.obj"), Renderer::SHADER_MATERIAL);
 	object->update();
 
 	renderScene->add(object);

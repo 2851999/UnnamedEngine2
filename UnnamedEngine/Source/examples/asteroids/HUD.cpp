@@ -59,7 +59,7 @@ HUD::HUD(AsteroidsGame* game, Player* player) : game(game), player(player) {
 	add(labelScore);
 
 	//Create the cross hair
-	crossHair = new GameObject2D(new Mesh(MeshBuilder::createQuad(8, 8, game->getResources().getTextureCrossHair())), "Material");
+	crossHair = new GameObject2D(new Mesh(MeshBuilder::createQuad(8, 8, game->getResources().getTextureCrossHair())), Renderer::SHADER_MATERIAL);
 	crossHair->getMaterial()->setDiffuse(game->getResources().getTextureCrossHair());
 	crossHair->setPosition(windowWidth / 2 - crossHair->getWidth() / 2, windowHeight / 2 - crossHair->getHeight() / 2);
 	crossHair->update();

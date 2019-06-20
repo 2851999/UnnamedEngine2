@@ -28,7 +28,7 @@ Text::Text(Font* font, Colour colour, bool billboarded) {
 	this->billboarded = billboarded;
 
 	//The shader type to use
-	std::string shaderType;
+	unsigned int shaderType;
 	if (! billboarded)
 		shaderType = Renderer::SHADER_FONT;
 	else {

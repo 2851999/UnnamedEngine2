@@ -46,7 +46,7 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 
 	renderData = new RenderData(GL_TRIANGLE_STRIP, 4);
 
-	shader = Renderer::getRenderShader("Particle")->getShader();
+	shader = Renderer::getRenderShader(Renderer::SHADER_PARTICLE)->getShader();
 
 	vboVertices = new VBO<GLfloat>(GL_ARRAY_BUFFER, sizeof(vertexBufferData), data, GL_STREAM_DRAW, true);
 	vboVertices->addAttribute(shader->getAttributeLocation("Position"), 3, 0);

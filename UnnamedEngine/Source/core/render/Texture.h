@@ -155,7 +155,7 @@ public:
 
 	/* Basic bind and unbind methods for OpenGL */
 	inline void bind()   { glBindTexture(parameters.getTarget(), texture); }
-	inline void unbind() { glBindTexture(parameters.getTarget(), 0);       }
+	inline void unbind() { glBindTexture(parameters.getTarget(), 0); }
 
 	/* Called to delete this texture */
 	virtual void destroy() override;

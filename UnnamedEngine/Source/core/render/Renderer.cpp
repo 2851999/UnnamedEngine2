@@ -40,36 +40,36 @@ UBO* Renderer::shaderSkinningUBO;
 
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
-std::unordered_map<std::string, std::vector<std::string>> Renderer::renderShaderPaths;
-std::unordered_map<std::string, RenderShader*> Renderer::loadedRenderShaders;
+std::unordered_map<unsigned int, std::vector<std::string>> Renderer::renderShaderPaths;
+std::unordered_map<unsigned int, RenderShader*> Renderer::loadedRenderShaders;
 Texture* Renderer::blank;
 
 MeshRenderData* Renderer::screenTextureMesh;
 
 std::vector<unsigned int> Renderer::boundTexturesOldSize;
 
-const std::string Renderer::SHADER_MATERIAL          = "Material";
-const std::string Renderer::SHADER_SKY_BOX           = "SkyBox";
-const std::string Renderer::SHADER_FONT              = "Font";
-const std::string Renderer::SHADER_BILLBOARD         = "Billboard";
-const std::string Renderer::SHADER_PARTICLE          = "Particle";
-const std::string Renderer::SHADER_LIGHTING          = "Lighting";
-const std::string Renderer::SHADER_FRAMEBUFFER       = "Framebuffer";
-const std::string Renderer::SHADER_ENVIRONMENT_MAP   = "EnvironmentMap";
-const std::string Renderer::SHADER_SHADOW_MAP        = "ShadowMap";
-const std::string Renderer::SHADER_SHADOW_CUBEMAP    = "ShadowCubemap";
-const std::string Renderer::SHADER_BILLBOARDED_FONT  = "BillboardedFont";
-const std::string Renderer::SHADER_TERRAIN           = "Terrain";
-const std::string Renderer::SHADER_PLAIN_TEXTURE     = "PlainTexture";
-const std::string Renderer::SHADER_DEFERRED_LIGHTING = "DeferredLighting";
-const std::string Renderer::SHADER_TILEMAP			 = "Tilemap";
+const unsigned int Renderer::SHADER_MATERIAL          = 1;
+const unsigned int Renderer::SHADER_SKY_BOX           = 2;
+const unsigned int Renderer::SHADER_FONT              = 3;
+const unsigned int Renderer::SHADER_BILLBOARD         = 4;
+const unsigned int Renderer::SHADER_PARTICLE          = 5;
+const unsigned int Renderer::SHADER_LIGHTING          = 6;
+const unsigned int Renderer::SHADER_FRAMEBUFFER       = 7;
+const unsigned int Renderer::SHADER_ENVIRONMENT_MAP   = 8;
+const unsigned int Renderer::SHADER_SHADOW_MAP        = 9;
+const unsigned int Renderer::SHADER_SHADOW_CUBEMAP    = 10;
+const unsigned int Renderer::SHADER_BILLBOARDED_FONT  = 11;
+const unsigned int Renderer::SHADER_TERRAIN           = 12;
+const unsigned int Renderer::SHADER_PLAIN_TEXTURE     = 13;
+const unsigned int Renderer::SHADER_DEFERRED_LIGHTING = 14;
+const unsigned int Renderer::SHADER_TILEMAP			  = 15;
 
-const std::string Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN         = "PBREquiToCubeGen";
-const std::string Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN       = "PBRIrradianceMapGen";
-const std::string Renderer::SHADER_PBR_PREFILTER_MAP_GEN        = "PBRPrefilterMapGen";
-const std::string Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN = "PBRBRDFIntegrationMapGen";
-const std::string Renderer::SHADER_PBR_LIGHTING                 = "PBRLighting";
-const std::string Renderer::SHADER_PBR_DEFERRED_LIGHTING        = "PBRDeferredLighting";
+const unsigned int Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN         = 16;
+const unsigned int Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN       = 17;
+const unsigned int Renderer::SHADER_PBR_PREFILTER_MAP_GEN        = 18;
+const unsigned int Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN = 19;
+const unsigned int Renderer::SHADER_PBR_LIGHTING                 = 20;
+const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING        = 21;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -174,7 +174,7 @@ void Renderer::assignMatTexture(Shader* shader, std::string type, Texture* textu
 		shader->setUniformi("Material_" + type, bindTexture(texture));
 }
 
-void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Material* material) {
+void Renderer::setMaterialUniforms(Shader* shader, unsigned int shaderID, Material* material) {
 //	assignMatTexture(shader, "DiffuseTexture", material->getDiffuseTexture());
 //
 //	//Check to see whether the shader is for lighting
@@ -222,7 +222,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 					//saveTextures();
 
 					if (mesh->hasMaterial())
-						setMaterialUniforms(shader, renderShader->getName(), mesh->getMaterial(data->getSubData(i).materialIndex));
+						setMaterialUniforms(shader, renderShader->getID(), mesh->getMaterial(data->getSubData(i).materialIndex));
 					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex * sizeof(unsigned int), data->getSubData(i).baseVertex);
 					if (mesh->hasMaterial())
 						mesh->getMaterial(data->getSubData(i).materialIndex)->getTextureSet()->unbindGLTextures();
@@ -233,7 +233,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			} else {
 				//saveTextures();
 				if (mesh->hasMaterial())
-					setMaterialUniforms(renderShader->getShader(), renderShader->getName(), mesh->getMaterial());
+					setMaterialUniforms(renderShader->getShader(), renderShader->getID(), mesh->getMaterial());
 				renderData->render();
 				if (mesh->hasMaterial())
 					mesh->getMaterial()->getTextureSet()->unbindGLTextures();
@@ -269,7 +269,7 @@ Shader* Renderer::loadEngineShader(std::string path) {
 	return Shader::loadShader("resources/shaders/" + path);
 }
 
-void Renderer::prepareForwardShader(std::string id, Shader* shader) {
+void Renderer::prepareForwardShader(unsigned int id, Shader* shader) {
 	shader->use();
 	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == SHADER_PBR_LIGHTING || id == SHADER_PBR_DEFERRED_LIGHTING) {
 		shader->addUniform("ShadowMap", "ue_shadowMap");
@@ -286,7 +286,7 @@ void Renderer::prepareForwardShader(std::string id, Shader* shader) {
 	shader->stopUsing();
 }
 
-void Renderer::prepareDeferredGeomShader(std::string id, Shader* shader) {
+void Renderer::prepareDeferredGeomShader(unsigned int id, Shader* shader) {
 	shader->use();
 	if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_PBR_LIGHTING) {
 		shader->addUniform("ShadowMap", "ue_shadowMap");
@@ -298,11 +298,11 @@ void Renderer::prepareDeferredGeomShader(std::string id, Shader* shader) {
 	shader->stopUsing();
 }
 
-void Renderer::addRenderShader(std::string id, std::string forwardShaderPath, std::string deferredGeomShaderPath) {
-	renderShaderPaths.insert(std::pair<std::string, std::vector<std::string>>(id, { forwardShaderPath, deferredGeomShaderPath }));
+void Renderer::addRenderShader(unsigned int id, std::string forwardShaderPath, std::string deferredGeomShaderPath) {
+	renderShaderPaths.insert(std::pair<unsigned int, std::vector<std::string>>(id, { forwardShaderPath, deferredGeomShaderPath }));
 }
 
-void Renderer::loadRenderShader(std::string id) {
+void Renderer::loadRenderShader(unsigned int id) {
 	//Get the paths
 	std::vector<std::string> shaderPaths = renderShaderPaths.at(id);
 	Shader* forwardShader = NULL;
@@ -324,10 +324,10 @@ void Renderer::loadRenderShader(std::string id) {
 }
 
 void Renderer::addRenderShader(RenderShader* renderShader) {
-	loadedRenderShaders.insert(std::pair<std::string, RenderShader*>(renderShader->getName(), renderShader));
+	loadedRenderShaders.insert(std::pair<unsigned int, RenderShader*>(renderShader->getID(), renderShader));
 }
 
-RenderShader* Renderer::getRenderShader(std::string id) {
+RenderShader* Renderer::getRenderShader(unsigned int id) {
 	if (loadedRenderShaders.count(id) > 0)
 		return loadedRenderShaders.at(id);
 	else if (renderShaderPaths.count(id) > 0) {
@@ -336,7 +336,7 @@ RenderShader* Renderer::getRenderShader(std::string id) {
 		return loadedRenderShaders.at(id);
 	}
 	else {
-		Logger::log("The RenderShader with the id '" + id + "' could not be found", "Renderer", LogType::Error);
+		Logger::log("The RenderShader with the id '" + utils_string::str(id) + "' could not be found", "Renderer", LogType::Error);
 		return NULL;
 	}
 }

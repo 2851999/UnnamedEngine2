@@ -57,6 +57,20 @@ void Test::created() {
 
 	ubo = new UBO(NULL, sizeof(UBOData), GL_DYNAMIC_DRAW, 0);
 
+	std::unordered_map<int, int> test;
+	test.insert(std::pair<int, int>(1, 1));
+	test.insert(std::pair<int, int>(2, 1));
+	test.insert(std::pair<int, int>(3, 1));
+	test.insert(std::pair<int, int>(4, 1));
+	test.insert(std::pair<int, int>(5, 1));
+	test.insert(std::pair<int, int>(6, 1));
+	test.insert(std::pair<int, int>(7, 1));
+	test.insert(std::pair<int, int>(8, 1));
+	float time = utils_time::getSeconds();
+	int found = test.at(7);
+	std::cout << (utils_time::getSeconds() - time) << std::endl;
+	std::cout << found << std::endl;
+
 	MeshData* data = MeshBuilder::createQuad(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture);
 
 	shader = Shader::loadShader("resources/shaders/vulkan/shader");

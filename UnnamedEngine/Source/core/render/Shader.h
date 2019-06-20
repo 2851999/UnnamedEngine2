@@ -119,8 +119,8 @@ public:
 
 class RenderShader {
 private:
-	/* The generic name for this RenderShader */
-	std::string name;
+	/* The id for this RenderShader */
+	unsigned int id;
 	/* The shaders used for forward rendering - will always use the last
 	 * shader that was added for rendering to allow them to be overridden */
 	std::vector<Shader*> forwardShaders;
@@ -130,7 +130,7 @@ private:
 	bool useDeferredGeom = false;
 public:
 	/* Various constructors */
-	RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader);
+	RenderShader(unsigned int id, Shader* forwardShader, Shader* deferredGeomShader);
 
 	/* Descructor */
 	virtual ~RenderShader() {}
@@ -155,7 +155,7 @@ public:
 	inline void useGeometryShader(bool use) { useDeferredGeom = use; }
 
 	/* Getters */
-	std::string getName() { return name; }
+	unsigned int getID() { return id; }
 };
 
 #endif /* CORE_RENDER_SHADER_H_ */

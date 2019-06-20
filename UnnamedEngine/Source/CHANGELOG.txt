@@ -1,4 +1,50 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 2 | Experimental 1
+
+* Added 'setup' method in ShaderInterface
+
+* Changed ShaderInterface so the UBO id's are now integer
+  values
+* Changed shader id's in Renderer to use unsigned integers
+  instead of strings
+  
+* Fixed bug: Didn't unbind depth buffer when creating a
+             FramebufferStore
+
+--------------------------------------------------------------
+Release 1 | Beta 2 | Development 2 (V0.3.6)
+
+* Added TextureSet
+
+* Removed VulkanRenderShader
+
+* Changed Texture to use TextureParameters when using Vulkan
+  to generate the texture sampler
+* Changed shaders to use explicit locations (To make more
+  compatible for compilation to SPIR-V)
+* Changed ShaderInterface to only create UBO's when they are
+  obtained using 'getUBO'
+* Changed MeshRenderData so 'setup' is not called and so must
+  be done after creation (RenderData instance is now created
+  in the constructor)
+* Changed Material shaders to assign explicit binding locations
+  for textures (Not currently used)
+* Changed Renderer to temporarily use texture units 10 and
+  above when binding textures
+
+* Moved descriptor set creation from VulkanRenderShader to
+  RenderData
+* Moved 'graphicsVkPipeline' from MeshRenderData to
+  RenderData
+
+* Fixed bug: Font still had overlapping glyphs in the bitmap
+             resulting in lines appearing in text
+* Fixed bug: Font didn't destroy the texture it created when
+             it was destroyed
+
+* More Vulkan
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 1 | Experimental 7
 
 * Changed RenderData to allocate the texture bindings array
