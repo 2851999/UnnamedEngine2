@@ -54,7 +54,7 @@ public:
 	void update(void* data, unsigned int offset, unsigned int size);
 
 	/* Method that returns the descriptor for a particular buffer for Vulkan */
-	VkWriteDescriptorSet getVkWriteDescriptorSet(unsigned int frame, VkDescriptorSet& descriptorSet, const VkDescriptorBufferInfo* bufferInfo);
+	VkWriteDescriptorSet getVkWriteDescriptorSet(unsigned int frame, const VkDescriptorSet descriptorSet, const VkDescriptorBufferInfo* bufferInfo);
 
 	/* Method to get a VulkanBuffer for a particular frame */
 	VulkanBuffer* getVkBuffer(unsigned int frame) { return vulkanBuffers[frame]; }

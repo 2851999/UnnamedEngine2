@@ -179,6 +179,11 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 
 		if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
 			Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
+
+		//Setup the descriptor info
+	    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	    imageInfo.imageView   = textureVkImageView;
+	    imageInfo.sampler     = textureVkSampler;
 	}
 }
 
@@ -193,14 +198,6 @@ void Texture::destroy() {
 
 		vkDestroySampler(Vulkan::getDevice()->getLogical(), textureVkSampler, nullptr);
 	}
-}
-
-VkDescriptorImageInfo Texture::getVkImageInfo() {
-    VkDescriptorImageInfo imageInfo = {};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView   = textureVkImageView;
-    imageInfo.sampler     = textureVkSampler;
-    return imageInfo;
 }
 
 unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& width, int& height, bool srgb) {

@@ -108,7 +108,7 @@ public:
 	/* The method to render this data without binding/unbinding the VAO */
 	void renderWithoutBinding();
 
-	/* Method to render this data using glDrawElementsBaseVertex */
+	/* Method to render this data using glDrawElementsBaseVertex (indices offset should be index offset) */
 	void renderBaseVertex(unsigned int count, unsigned int indicesOffset, unsigned int baseVertex);
 
 	/* The setters and getters */
@@ -125,7 +125,8 @@ public:
 	inline TextureSet* getTextureSet(unsigned int index) { return textureSets[index]; }
 	inline VkDescriptorPool& getVkDescriptorPool() { return descriptorPool; }
 	inline VkDescriptorSetLayout& getVkDescriptorSetLayout() { return descriptorSetLayout; }
-	inline VkDescriptorSet& getVkDescriptorSet(unsigned int index) { return descriptorSets[index]; }
+	inline VulkanGraphicsPipeline* getVkGraphicsPipeline() { return graphicsVkPipeline; }
+	const VkDescriptorSet* getVkDescriptorSet(unsigned int materialIndex);
 };
 
 #endif /* CORE_RENDER_RENDERDATA_H_ */

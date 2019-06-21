@@ -68,8 +68,8 @@ void UBO::update(void* data, unsigned int offset, unsigned int size) {
 	}
 }
 
-VkWriteDescriptorSet UBO::getVkWriteDescriptorSet(unsigned int frame, VkDescriptorSet& descriptorSet, const VkDescriptorBufferInfo* bufferInfo) {
-	VkWriteDescriptorSet writeDescriptor;
+VkWriteDescriptorSet UBO::getVkWriteDescriptorSet(unsigned int frame, const VkDescriptorSet descriptorSet, const VkDescriptorBufferInfo* bufferInfo) {
+	VkWriteDescriptorSet writeDescriptor = {};
 	writeDescriptor.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	writeDescriptor.dstSet           = descriptorSet;
 	writeDescriptor.dstBinding       = blockBinding;

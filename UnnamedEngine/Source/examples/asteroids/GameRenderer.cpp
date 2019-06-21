@@ -150,7 +150,7 @@ void GameRenderer::render() {
 	shader->use();
 	Renderer::saveTextures();
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
-	Renderer::useMaterial(mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex), renderData->getUBO(ShaderInterface::BLOCK_MATERIAL));
+	Renderer::useMaterial(mesh->getRenderData()->getRenderData(), mesh->getData()->getSubData(0).materialIndex, mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex), renderData->getUBO(ShaderInterface::BLOCK_MATERIAL));
 	if (useLighting) {
 		shader->setUniformVector3("Light_Direction", Vector3f(0.0f, -1.0f, -1.0f));
 		shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));

@@ -36,7 +36,7 @@ DebugCamera::DebugCamera(Matrix4f projectionMatrix, InputBindings* bindings) : C
 
 		//Setup default keys
 		axis0->assignKeys(GLFW_KEY_W, GLFW_KEY_S);
-		axis1->assignKeys(GLFW_KEY_A, GLFW_KEY_D);
+		axis1->assignKeys(GLFW_KEY_D, GLFW_KEY_A);
 	} else {
 		//Use the existing one
 		inputBindings = bindings;

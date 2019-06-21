@@ -23,48 +23,59 @@
 
 #include "../core/render/MeshLoader.h"
 #include "../utils/Utils.h"
+#include "../utils/DebugCamera.h"
 
 class Test : public BaseEngine {
 private:
 	float lastTime = 0;
 
-	Camera3D* camera;
-	GameObject3D* quad;
-	Texture* texture;
+	DebugCamera* camera;
+	GameObject3D* model;
 public:
 	void initialise() override;
 	void created() override;
 	void update() override;
 	void render() override;
 	void destroy() override;
+
+	virtual void onKeyPressed(int key) override;
 };
 
 void Test::initialise() {
 	getSettings().videoVulkan = true; //Validation layers have quite large effect on performance
 	getSettings().videoMaxFPS = 0;
 	getSettings().debugShowInformation = false;
+	getSettings().videoMaxAnisotropicSamples = 16;
 }
 
 void Test::created() {
-	Shader::compileEngineShaderToSPIRV("VulkanShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("VulkanShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 
-	camera = new Camera3D(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
+	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 0.0f, 1.0f);
-	camera->update();
+	camera->setFlying(true);
 	Renderer::addCamera(camera);
+	getWindow()->disableCursor();
 
-	texture = Texture::loadTexture("resources/textures/texture.jpg");
-	Mesh* mesh = new Mesh(MeshBuilder::createQuad3D(Vector2f(-0.5f, 0.5f), Vector2f(0.5f, 0.5f), Vector2f(0.5f, -0.5f), Vector2f(-0.5f, -0.5f), texture));
+//	Texture* texture = Texture::loadTexture("resources/textures/texture.jpg");
+//	Mesh* mesh = new Mesh(MeshBuilder::createQuad3D(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture));
 //	mesh->getMaterial()->setDiffuse(texture);
+	//mesh->getMaterial(1)->setDiffuse(texture);
 //	mesh->getMaterial()->setDiffuse(Colour(1.0f, 0.0f, 0.0f, 1.0f));
-//	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/SimpleSphere/", "SimpleSphere.obj", false);
+
+//	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/barrels/", "barrels_obj.obj", false);
+
+	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
+
 	mesh->setCullingEnabled(false);
-	quad = new GameObject3D(mesh, Renderer::SHADER_VULKAN);
-	quad->update();
+	model = new GameObject3D(mesh, Renderer::SHADER_MATERIAL);
+	model->setScale(0.15f, 0.15f, 0.15f);
+	model->update();
 }
 
 
 void Test::update() {
+	camera->update(getDeltaSeconds());
 	if (utils_time::getSeconds() - lastTime > 0.5f) {
 		lastTime = utils_time::getSeconds();
 		std::cout << getFPS() << std::endl;
@@ -74,12 +85,17 @@ void Test::update() {
 void Test::render() {
 	if (! getSettings().videoVulkan)
 		glClear(GL_COLOR_BUFFER_BIT);
-	quad->render();
+	model->render();
 }
 
 void Test::destroy() {
-	delete quad;
+	delete model;
 	delete camera;
+}
+
+void Test::onKeyPressed(int key) {
+	if (key == GLFW_KEY_ESCAPE)
+		requestClose();
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

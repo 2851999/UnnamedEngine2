@@ -33,6 +33,11 @@ VulkanBuffer::VulkanBuffer(VkDeviceSize bufferSize, VulkanDevice* device, VkBuff
 
 	//Create the buffer
 	Vulkan::createBuffer(bufferSize, usage, properties, instance, bufferMemory);
+
+	//Assign the descriptor info
+	bufferInfo.buffer = instance;
+	bufferInfo.offset = 0;
+	bufferInfo.range  = VK_WHOLE_SIZE;
 }
 
 VulkanBuffer::VulkanBuffer(void* data, VkDeviceSize size, VulkanDevice* device, VkBufferUsageFlags usage, bool useStaging) :
@@ -77,14 +82,6 @@ void VulkanBuffer::copyData(void* dataToCopy, unsigned int offset, VkDeviceSize&
 VulkanBuffer::~VulkanBuffer() {
 	vkDestroyBuffer(device->getLogical(), instance, nullptr);
 	vkFreeMemory(device->getLogical(), bufferMemory, nullptr);
-}
-
-VkDescriptorBufferInfo VulkanBuffer::getBufferInfo() {
-	VkDescriptorBufferInfo bufferInfo;
-	bufferInfo.buffer = instance;
-	bufferInfo.offset = 0;
-	bufferInfo.range  = VK_WHOLE_SIZE;
-	return bufferInfo;
 }
 
 

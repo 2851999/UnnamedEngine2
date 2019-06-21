@@ -104,6 +104,7 @@ private:
 	VkImage        textureVkImage       = VK_NULL_HANDLE;
 	VkDeviceMemory textureVkImageMemory = VK_NULL_HANDLE;
 	VkImageView    textureVkImageView   = VK_NULL_HANDLE;
+	VkDescriptorImageInfo imageInfo;
 
 	/* Sampler for this texture (Should change to use one for many rather than
 	 * create one for each texture) */
@@ -177,7 +178,7 @@ public:
 	inline std::string getPath() { return path; }
 	inline bool hasPath() { return path.length() > 0; }
 	VkImageView& getVkImageView() { return textureVkImageView; }
-	VkDescriptorImageInfo getVkImageInfo();
+	const VkDescriptorImageInfo* getVkImageInfo() { return &imageInfo; }
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */

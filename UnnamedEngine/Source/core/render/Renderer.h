@@ -112,7 +112,7 @@ public:
 	static void initialise();
 
 	/* TMethod used to apply the material properties to a shader assuming it is already being used */
-	static void useMaterial(Material* material, UBO* materialUBO);
+	static void useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material, UBO* materialUBO);
 
 	/* Method used to stop applying a material (unbinds required textures) */
 	static void stopUsingMaterial(Material* material);

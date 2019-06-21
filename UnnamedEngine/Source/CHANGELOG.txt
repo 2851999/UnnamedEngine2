@@ -1,4 +1,24 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 2 | Experimental 4
+
+* Changed Renderer and RenderData to support multiple
+  materials using 'SubData' within MeshData
+* Changed culling winding order to counter clockwise in
+  VulkanGraphicsPipeline
+
+* Fixed bug: Occasional crash using Vulkan caused
+             VkDescriptorBufferInfo's 'offset' being changed
+* Fixed bug: DebugCamera assigned 'A' and 'D' keys bindings
+             the wrong way round
+* Fixed bug: Crash trying to use multiple TextureSet's in
+             RenderData
+* Fixed bug: Occasional crash due to wrong number of
+             VkDescriptorSet's being assigned (Could also
+             cause above crash)
+* Fixed bug: RenderData 'renderBaseVertex' supplied an
+             incorrect 'firstIndex' to vkCmdDrawIndexed
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 2 | Experimental 3
 
 * Added 'createQuad3D' method with a texture in MeshBuilder
