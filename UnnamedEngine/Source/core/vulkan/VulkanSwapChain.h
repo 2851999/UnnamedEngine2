@@ -34,7 +34,11 @@ private:
 	/* The images, image views and frame buffers in this swap chain */
 	std::vector<VkImage>       images;
 	std::vector<VkImageView>   imageViews;
-	std::vector<VkFramebuffer> framebuffers;
+
+	/* Resources for the depth buffer */
+	VkImage        depthImage;
+	VkDeviceMemory depthImageMemory;
+	VkImageView    depthImageView;
 
 	/* The format and extent used for this swap chain */
 	VkFormat   format;
@@ -57,6 +61,7 @@ public:
 	/* Getters */
 	VkSwapchainKHR& getInstance() { return instance; }
 	VkImageView& getImageView(unsigned int index) { return imageViews[index]; }
+	VkImageView& getDepthImageView() { return depthImageView; }
 	VkFormat getFormat() { return format; }
 	VkExtent2D& getExtent() { return extent; }
 	VulkanDevice* getDevice() { return device; }

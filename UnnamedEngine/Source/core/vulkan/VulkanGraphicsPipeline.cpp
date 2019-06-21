@@ -109,6 +109,18 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	multisampling.alphaToCoverageEnable = VK_FALSE; //Optional
 	multisampling.alphaToOneEnable      = VK_FALSE; //Optional
 
+	VkPipelineDepthStencilStateCreateInfo depthStencil = {};
+	depthStencil.sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+	depthStencil.depthTestEnable       = VK_TRUE;
+	depthStencil.depthWriteEnable      = VK_TRUE;
+	depthStencil.depthCompareOp        = VK_COMPARE_OP_LESS;
+	depthStencil.depthBoundsTestEnable = VK_FALSE;
+	depthStencil.minDepthBounds        = 0.0f; //Optional
+	depthStencil.maxDepthBounds        = 1.0f; //Optional
+	depthStencil.stencilTestEnable     = VK_FALSE;
+	depthStencil.front                 = {}; //Optional
+	depthStencil.back                  = {}; //Optional
+
 	//Per framebuffer (only have one here)
 	VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
 	colorBlendAttachment.colorWriteMask      = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -158,7 +170,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	pipelineInfo.pViewportState      = &viewportState;
 	pipelineInfo.pRasterizationState = &rasterizer;
 	pipelineInfo.pMultisampleState   = &multisampling;
-	pipelineInfo.pDepthStencilState  = nullptr; //Optional
+	pipelineInfo.pDepthStencilState  = &depthStencil;
 	pipelineInfo.pColorBlendState    = &colorBlending;
 	pipelineInfo.pDynamicState       = nullptr; //Optional
 	pipelineInfo.layout              = pipelineLayout;

@@ -1,4 +1,13 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 2 | Experimental 5
+
+* Added depth testing when using Vulkan
+* Added mipmap generation for textures when using Vulkan
+
+* Fixed bug: 'shouldClamp' was not used in TextureParameters
+             when using Vulkan
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 2 | Experimental 4
 
 * Changed Renderer and RenderData to support multiple

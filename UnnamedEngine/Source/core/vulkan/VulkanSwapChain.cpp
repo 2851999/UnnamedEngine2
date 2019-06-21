@@ -119,6 +119,12 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 		if (vkCreateImageView(device->getLogical(), &imageViewCreateInfo, nullptr, &imageViews[i]) != VK_SUCCESS)
 			Logger::log("Failed to create image view", "VulkanSwapChain", LogType::Error);
 	}
+
+	//Now setup the depth buffer
+	VkFormat depthFormat = Vulkan::findDepthFormat();
+	Vulkan::createImage(extent.width, extent.height, 1, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
+	depthImageView = Vulkan::createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+	Vulkan::transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
 }
 
 VulkanSwapChain::~VulkanSwapChain() {
@@ -126,6 +132,10 @@ VulkanSwapChain::~VulkanSwapChain() {
 	for (auto& imageView : imageViews)
 		vkDestroyImageView(device->getLogical(), imageView, nullptr);
 	vkDestroySwapchainKHR(device->getLogical(), instance, nullptr);
+
+	vkDestroyImageView(device->getLogical(), depthImageView, nullptr);
+    vkDestroyImage(Vulkan::getDevice()->getLogical(), depthImage, nullptr);
+    vkFreeMemory(Vulkan::getDevice()->getLogical(), depthImageMemory, nullptr);
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {

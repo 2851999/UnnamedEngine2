@@ -24,6 +24,7 @@
 #include "../core/render/MeshLoader.h"
 #include "../utils/Utils.h"
 #include "../utils/DebugCamera.h"
+#include "../core/vulkan/Vulkan.h"
 
 class Test : public BaseEngine {
 private:
@@ -42,20 +43,24 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().videoVulkan = true; //Validation layers have quite large effect on performance
+	Vulkan::ENABLE_VALIDATION_LAYERS = false;
+
+	getSettings().videoVulkan = false; //Validation layers have quite large effect on performance
 	getSettings().videoMaxFPS = 0;
 	getSettings().debugShowInformation = false;
 	getSettings().videoMaxAnisotropicSamples = 16;
 }
 
 void Test::created() {
-	//Shader::compileEngineShaderToSPIRV("VulkanShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 0.0f, 1.0f);
 	camera->setFlying(true);
 	Renderer::addCamera(camera);
 	getWindow()->disableCursor();
+
+	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 
 //	Texture* texture = Texture::loadTexture("resources/textures/texture.jpg");
 //	Mesh* mesh = new Mesh(MeshBuilder::createQuad3D(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture));
@@ -83,8 +88,10 @@ void Test::update() {
 }
 
 void Test::render() {
-	if (! getSettings().videoVulkan)
-		glClear(GL_COLOR_BUFFER_BIT);
+	if (! getSettings().videoVulkan) {
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 	model->render();
 }
 
