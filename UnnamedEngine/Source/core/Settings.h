@@ -50,18 +50,18 @@ namespace VideoResolution {
 
 struct Settings {
 	/* Various window settings */
-	std::string  windowTitle      = "Unnamed Engine";
-	unsigned int windowWidth      = 0;
-	unsigned int windowHeight     = 0;
+	std::string  windowTitle       = "Unnamed Engine";
+	unsigned int windowWidth       = 0;
+	unsigned int windowHeight      = 0;
 	float        windowAspectRatio = 0.0f;
-	bool         windowResizable  = false;
-	bool         windowDecorated  = true;
-	bool         windowBorderless = false;
-	bool 		 windowFullscreen = false;
-	bool         windowFloating   = false;
+	bool         windowResizable   = false;
+	bool         windowDecorated   = true;
+	bool         windowBorderless  = false;
+	bool 		 windowFullscreen  = false;
+	bool         windowFloating    = false;
 
 	/* Various video settings */
-	bool         videoVSync       = false;
+	unsigned int videoVSync       = false; //If this value is 2, attempts to use triple buffering (Vulkan)
 	unsigned int videoSamples     = 0;
 	unsigned int videoMaxAnisotropicSamples = 0;
 	unsigned int videoRefreshRate = 60;
@@ -81,8 +81,9 @@ struct Settings {
 	bool         engineSplashScreen = false;
 
 	/* Various debugging settings */
-	bool         debugShowInformation = true;
-	bool         debugConsoleEnabled  = true;
+	bool         debugShowInformation           = true;
+	bool         debugConsoleEnabled            = true;
+	bool         debugVkValidationLayersEnabled = false;
 };
 
 #endif /* CORE_SETTINGS_H_ */

@@ -43,11 +43,9 @@ std::vector<VkSemaphore>     Vulkan::renderFinishedSemaphores;
 std::vector<VkFence>         Vulkan::inFlightFences;
 unsigned int                 Vulkan::currentFrame = 0;
 
-bool Vulkan::ENABLE_VALIDATION_LAYERS = true;
-
 bool Vulkan::initialise(Window* window) {
 	//Initialise Vulkan
-	if (ENABLE_VALIDATION_LAYERS && ! VulkanValidationLayers::checkSupport()) {
+	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled && ! VulkanValidationLayers::checkSupport()) {
 		Logger::log("Required validation layers are not supported", "Vulkan", LogType::Error);
 		return false;
 	}
@@ -73,6 +71,14 @@ bool Vulkan::initialise(Window* window) {
 	if (! device) {
 		Logger::log("Failed to create a VulkanDevice", "Vulkan", LogType::Error);
 		return false;
+	}
+
+	//Use MSAA?
+	if (window->getSettings().videoSamples > 0) {
+		//Obtain the number of MSAA samples to use based on the requested value and what is supported
+		VkSampleCountFlagBits sampleCount = getMaxUsableSampleCount(window->getSettings().videoSamples);
+		//Assign the value based on what was obtained
+		window->getSettings().videoSamples = sampleCount;
 	}
 
 	//Create the command pool
@@ -132,7 +138,7 @@ bool Vulkan::createInstance() {
 	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
 	//Obtain the required validation layers (if they are enabled)
-	if (Vulkan::ENABLE_VALIDATION_LAYERS) {
+	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled) {
 		std::vector<const char*>& requiredValidationLayers = VulkanValidationLayers::getLayers();  //requiredValidationLayers goes out of scope if not using reference causing undefined behaviour
 
 		createInfo.enabledLayerCount   = static_cast<uint32_t>(requiredValidationLayers.size());
@@ -150,7 +156,7 @@ void Vulkan::destroyInstance() {
 
 void Vulkan::createDebugMessenger() {
 	//Only bother if validation layers are enabled
-	if (! Vulkan::ENABLE_VALIDATION_LAYERS)
+	if (! Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled)
 		return;
 
 	//Setup the information required
@@ -167,7 +173,7 @@ void Vulkan::createDebugMessenger() {
 }
 
 void Vulkan::destroyDebugMessenger() {
-	if (ENABLE_VALIDATION_LAYERS)
+	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled)
 		destroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 }
 
@@ -217,7 +223,7 @@ void Vulkan::createCommandBuffers() {
 		Logger::log("Failed to allocate command buffers", "Vulkan", LogType::Error);
 }
 
-void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
+void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType     = VK_IMAGE_TYPE_2D;
@@ -230,7 +236,7 @@ void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, Vk
     imageInfo.tiling        = tiling;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.usage         = usage;
-    imageInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.samples       = numSamples;
     imageInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
 
     if (vkCreateImage(device->getLogical(), &imageInfo, nullptr, &image) != VK_SUCCESS)
@@ -320,6 +326,13 @@ void Vulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout
 
 		sourceStage      = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 		destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	} else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		sourceStage      = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	} else
 	    Logger::log("Unsupported layout transition", "Vulkan", LogType::Error);
 
@@ -513,6 +526,30 @@ void Vulkan::stopDraw() {
 
 	//vkAcquireNextImageKHR semaphore signalled will be the one with this index (so must increase before it is called again)
 	currentFrame = (currentFrame + 1) % swapChain->getImageCount();
+}
+
+VkSampleCountFlagBits Vulkan::getMaxUsableSampleCount(unsigned int targetSamples) {
+	//Obtain the Vulkan representation of the target number of samples
+	VkSampleCountFlagBits targetSampleBits;
+
+	//Obtain the supported values
+	VkPhysicalDeviceProperties physicalDeviceProperties;
+	vkGetPhysicalDeviceProperties(device->getPhysical(), &physicalDeviceProperties);
+	VkSampleCountFlags counts = std::min(physicalDeviceProperties.limits.framebufferColorSampleCounts, physicalDeviceProperties.limits.framebufferDepthSampleCounts);
+
+	//Find the closest supported
+	while (targetSamples > 1) {
+		targetSampleBits = static_cast<VkSampleCountFlagBits>(targetSamples); //Should be same integer value
+
+		if (counts & targetSampleBits)
+			//Supported so stop
+			break;
+		else
+			targetSamples /= 2;
+	}
+
+	//Return the final value
+	return targetSampleBits;
 }
 
 VkFormat Vulkan::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {

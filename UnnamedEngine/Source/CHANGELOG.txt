@@ -1,4 +1,19 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 2 | Experimental 6
+
+* Added MSAA when using Vulkan
+* Added 'debugVkValidationLayersEnabled' in Settings
+
+* Changed 'chooseSwapPresentMode' to try and apply the VSync
+  value in the window settings when using Vulkan
+* Changed 'videoVSync' in Settings to be an 'unsinged int'
+  type so a value of 2 can be used to indicate triple
+  buffering should be used (Vulkan)
+  
+* Fixed bug: SkyBox would not render a texture since
+             Experimental 2
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 2 | Experimental 5
 
 * Added depth testing when using Vulkan

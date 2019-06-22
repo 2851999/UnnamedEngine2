@@ -161,7 +161,7 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 		if (mipLevels > 1)
 			imageUsageFlags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT; //Used as source and destination of transfers (as will copy data for mipmaps)
 
-		Vulkan::createImage(width, height, mipLevels, format, VK_IMAGE_TILING_OPTIMAL, imageUsageFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
+		Vulkan::createImage(width, height, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, imageUsageFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
 
 		//First need to transition texture image to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL then copy from staging buffer to the texture image
 		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)

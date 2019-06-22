@@ -71,7 +71,7 @@ public:
 	void setRefreshRate(int refreshRate);
 	void setFloating(bool floating);
 	void setSamples(int samples);
-	void setVSync(bool vSync);
+	void setVSync(unsigned int vSync);
 	void setPosition(int x, int y);
 
 	/* The method used to enable/disable/toggle the cursor */

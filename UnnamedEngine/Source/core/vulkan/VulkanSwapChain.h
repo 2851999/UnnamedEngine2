@@ -35,6 +35,14 @@ private:
 	std::vector<VkImage>       images;
 	std::vector<VkImageView>   imageViews;
 
+	/* States number of MSAA samples being used */
+	unsigned int numSamples;
+
+	/* Resources for the colour buffer (used for MSAA) */
+	VkImage        colourImage;
+	VkDeviceMemory colourImageMemory;
+	VkImageView    colourImageView;
+
 	/* Resources for the depth buffer */
 	VkImage        depthImage;
 	VkDeviceMemory depthImageMemory;
@@ -49,6 +57,7 @@ private:
 
 	/* Methods used to choose a surface format, present mode and extent based on what is supported */
 	static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+	static bool               isPresentModeAvailable (VkPresentModeKHR presentMode, const std::vector<VkPresentModeKHR>&   availablePresentModes);
 	static VkPresentModeKHR   chooseSwapPresentMode  (const std::vector<VkPresentModeKHR>&   availablePresentModes);
 	static VkExtent2D         chooseSwapExtent       (const VkSurfaceCapabilitiesKHR&        capabilities, Settings& settings);
 public:
@@ -59,13 +68,15 @@ public:
 	virtual ~VulkanSwapChain();
 
 	/* Getters */
-	VkSwapchainKHR& getInstance() { return instance; }
-	VkImageView& getImageView(unsigned int index) { return imageViews[index]; }
-	VkImageView& getDepthImageView() { return depthImageView; }
-	VkFormat getFormat() { return format; }
-	VkExtent2D& getExtent() { return extent; }
-	VulkanDevice* getDevice() { return device; }
-	unsigned int getImageCount() { return images.size(); }
+	inline VkSwapchainKHR& getInstance() { return instance; }
+	inline VkImageView& getImageView(unsigned int index) { return imageViews[index]; }
+	inline unsigned int getNumSamples() { return numSamples; }
+	inline VkImageView& getColourImageView() { return colourImageView; }
+	inline VkImageView& getDepthImageView() { return depthImageView; }
+	inline VkFormat getFormat() { return format; }
+	inline VkExtent2D& getExtent() { return extent; }
+	inline VulkanDevice* getDevice() { return device; }
+	inline unsigned int getImageCount() { return images.size(); }
 };
 
 #endif /* CORE_VULKAN_VULKANSWAPCHAIN_H_ */

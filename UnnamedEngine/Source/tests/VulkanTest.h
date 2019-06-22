@@ -43,11 +43,14 @@ public:
 };
 
 void Test::initialise() {
-	Vulkan::ENABLE_VALIDATION_LAYERS = false;
+	getSettings().debugVkValidationLayersEnabled = false;
 
-	getSettings().videoVulkan = false; //Validation layers have quite large effect on performance
+	getSettings().videoVulkan = true;
 	getSettings().videoMaxFPS = 0;
+	getSettings().videoResolution = VideoResolution::RES_1080p;
+	getSettings().videoVSync = 2;
 	getSettings().debugShowInformation = false;
+	getSettings().videoSamples = 8;
 	getSettings().videoMaxAnisotropicSamples = 16;
 }
 
@@ -61,14 +64,13 @@ void Test::created() {
 	getWindow()->disableCursor();
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
+	MeshLoader::loadDiffuseTexturesAsSRGB = false;
 
 //	Texture* texture = Texture::loadTexture("resources/textures/texture.jpg");
 //	Mesh* mesh = new Mesh(MeshBuilder::createQuad3D(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture));
 //	mesh->getMaterial()->setDiffuse(texture);
 	//mesh->getMaterial(1)->setDiffuse(texture);
 //	mesh->getMaterial()->setDiffuse(Colour(1.0f, 0.0f, 0.0f, 1.0f));
-
-//	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/barrels/", "barrels_obj.obj", false);
 
 	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
 

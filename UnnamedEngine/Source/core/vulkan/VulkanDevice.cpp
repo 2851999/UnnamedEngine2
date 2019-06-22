@@ -69,7 +69,7 @@ VulkanDevice::VulkanDevice(VkPhysicalDevice& physicalDevice) {
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 	//Not required in recent Vulkan implementations (as no distinction between instance and device validation layers)
-	if (Vulkan::ENABLE_VALIDATION_LAYERS) {
+	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled) {
 		createInfo.enabledLayerCount   = static_cast<uint32_t>(deviceExtensions.size());
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 	} else
