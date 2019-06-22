@@ -303,7 +303,6 @@ std::vector<std::string> Shader::loadInclude(std::string path, std::string line)
 }
 
 void Shader::loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source) {
-
 	//Go through each line of file text
 	for (unsigned int i = 0; i < fileText.size(); i++) {
 		//Check for directives
@@ -390,11 +389,49 @@ Shader* Shader::loadShader(std::string path) {
 		return new Shader(createVkShaderModule(readFile(path + "_vert.spv")), createVkShaderModule(readFile(path + "_frag.spv")));
 }
 
+void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputPath) {
+	//Load the source
+	ShaderSource shaderSource = loadShaderSource(inputPath);
+	//Write the shader source
+	utils_file::writeFile(outputPath, shaderSource.source);
+}
+
+void Shader::outputCompleteShaderFiles(std::string inputPath, std::string outputPath) {
+	//Load each individual shader if found
+	if (utils_file::isFile(inputPath + ".vs"))
+		//Output the vertex shader
+		outputCompleteShaderFile(inputPath + ".vs", outputPath + "_complete.vert");
+	if (utils_file::isFile(inputPath + ".gs"))
+		//Output the geometry shader
+		outputCompleteShaderFile(inputPath + "gs", outputPath + "_complete.geom");
+	if (utils_file::isFile(inputPath + ".fs"))
+		//Output the fragment shader
+		outputCompleteShaderFile(inputPath + ".fs", outputPath + "_complete.frag");
+}
+
+void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath) {
+	//Output the complete shader file
+	outputCompleteShaderFiles(inputPath, outputPath);
+
+	//Now compile each shader (if they exist)
+	if (utils_file::isFile(outputPath + "_complete.vert"))
+		std::system((glslangValidatorPath + " -V " + outputPath + "_complete.vert -o " + outputPath + "_vert.spv").c_str());
+	if (utils_file::isFile(outputPath + "_complete.geom"))
+		std::system((glslangValidatorPath + " -V " + outputPath + "_complete.geom -o " + outputPath + "_geom.spv").c_str());
+	if (utils_file::isFile(outputPath + "_complete.frag"))
+		std::system((glslangValidatorPath + " -V " + outputPath + "_complete.frag -o " + outputPath + "_frag.spv").c_str());
+}
+
+void Shader::compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath) {
+	//Add the prefix's to get the input and output paths
+	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path, glslangValidatorPath);
+}
+
 /*****************************************************************************
  * The RenderShader class
  *****************************************************************************/
 
-RenderShader::RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader) : name(name) {
+RenderShader::RenderShader(unsigned int id, Shader* forwardShader, Shader* deferredGeomShader) : id(id) {
 	if (forwardShader)
 		addForwardShader(forwardShader);
 	if (deferredGeomShader)

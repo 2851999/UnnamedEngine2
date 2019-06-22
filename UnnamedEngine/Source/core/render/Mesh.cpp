@@ -273,6 +273,8 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 		renderData->setIndicesVBO(vboIndices);
 	}
 
+	//Add the required UBO's for the shader being used
+	Renderer::getShaderInterface()->setup(renderData, setupShader->getID());
 	//Add the required texture sets
 	for (Material* material : materials)
 		renderData->addTextureSet(material->getTextureSet());
@@ -491,6 +493,13 @@ void MeshBuilder::addQuadT(MeshData* data, float top, float left, float bottom, 
 MeshData* MeshBuilder::createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags) {
 	MeshData* data = new MeshData(3, flags);
 	addQuadData3D(data, v1, v2, v3, v4);
+	addQuadI(data);
+	return data;
+}
+
+MeshData* MeshBuilder::createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture, MeshData::Flag flags) {
+	MeshData* data = new MeshData(3, flags);
+	addQuadData3D(data, v1, v2, v3, v4, texture);
 	addQuadI(data);
 	return data;
 }

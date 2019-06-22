@@ -78,7 +78,9 @@ void RenderData::setup(Shader* shader) {
 		}
 
 		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
-		unsigned int numDescriptorSets = numSwapChainImages * (textureSets.size() == 0 ? 1 : textureSets.size());
+//		unsigned int numUBODescriptors   = numSwapChainImages * ubos.size();
+//		unsigned int numImageDescriptors = numSwapChainImages * textureSets.size();
+		unsigned int numDescriptorSets   = numSwapChainImages * (textureSets.size() == 0 ? 1 : textureSets.size());
 
 		//---------------------------CREATE DESCRIPTOR POOL---------------------------
 		//Assign the creation info
@@ -86,13 +88,13 @@ void RenderData::setup(Shader* shader) {
 		for (unsigned int i = 0; i < ubos.size(); ++i) {
 			VkDescriptorPoolSize poolSize;
 			poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			poolSize.descriptorCount = static_cast<uint32_t>(numDescriptorSets);
+			poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
 			poolSizes.push_back(poolSize);
 		}
 		for (unsigned int i = 0; i < textureBindings.size(); ++i) {
 			VkDescriptorPoolSize poolSize;
 			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			poolSize.descriptorCount = static_cast<uint32_t>(numDescriptorSets); //Have one for each swap chain image/texture set combination
+			poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
 			poolSizes.push_back(poolSize);
 		}
 
@@ -111,12 +113,12 @@ void RenderData::setup(Shader* shader) {
 		std::vector<VkDescriptorSetLayoutBinding> bindings;
 
 		//Go through the UBO's
-		for (UBO* ubo : ubos) {
+		for (auto& ubo : ubos) {
 			VkDescriptorSetLayoutBinding uboLayoutBinding = {};
-			uboLayoutBinding.binding            = ubo->getBinding();
+			uboLayoutBinding.binding            = ubo.second->getBinding();
 			uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			uboLayoutBinding.descriptorCount    = 1;
-			uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT; //VK_SHADER_STAGE_ALL_GRAPHICS
+			uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_ALL_GRAPHICS; //VK_SHADER_STAGE_ALL_GRAPHICS
 			uboLayoutBinding.pImmutableSamplers = nullptr; //Optional
 
 			//Add the binding
@@ -152,7 +154,7 @@ void RenderData::setup(Shader* shader) {
 		allocInfo.descriptorSetCount = static_cast<uint32_t>(numDescriptorSets);
 		allocInfo.pSetLayouts        = layouts.data();
 
-		descriptorSets.resize(numSwapChainImages);
+		descriptorSets.resize(numDescriptorSets);
 		if (vkAllocateDescriptorSets(Vulkan::getDevice()->getLogical(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
 			Logger::log("Failed to allocate descriptor sets", "RenderData", LogType::Error);
 
@@ -173,31 +175,23 @@ void RenderData::setupVulkan(Shader* shader) {
 		if (textureSets.size() == 0) {
 			for (unsigned int i = 0; i < numSwapChainImages; ++i) {
 				std::vector<VkWriteDescriptorSet> descriptorWrites = {};
-				for (UBO* ubo : ubos) {
-					VkDescriptorBufferInfo bufferInfo = ubo->getVkBuffer(i)->getBufferInfo();
 
-					descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
-				}
+				for (auto& ubo : ubos)
+					descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(i, descriptorSets[i], ubo.second->getVkBuffer(i)->getBufferInfo()));
 
 				vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 			}
 		} else {
 			for (unsigned int x = 0; x < numSwapChainImages; ++x) {
 				for (unsigned int y = 0; y < textureSets.size(); ++y) {
-					unsigned int i = x * (y + 1);
-
+					unsigned int i = (y * numSwapChainImages) + x;
 					std::vector<VkWriteDescriptorSet> descriptorWrites = {};
-					for (UBO* ubo : ubos) {
-						VkDescriptorBufferInfo bufferInfo = ubo->getVkBuffer(i)->getBufferInfo();
+					for (auto& ubo : ubos)
+						descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(x, descriptorSets[i], ubo.second->getVkBuffer(x)->getBufferInfo()));
 
-						descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, descriptorSets[i], &bufferInfo));
-					}
-
-					for (TextureSet::TextureInfo textureInfo : textureSets[y]->getTextureInfos()) {
+					for (TextureSet::TextureInfo& textureInfo : textureSets[y]->getTextureInfos()) {
 						//Only assign if have an actual texture (allows textures to be assigned later)
 						if (textureInfo.texture != NULL) {
-							VkDescriptorImageInfo imageInfo = textureInfo.texture->getVkImageInfo();
-
 							VkWriteDescriptorSet textureWrite;
 							textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 							textureWrite.dstSet           = descriptorSets[i];
@@ -206,13 +200,12 @@ void RenderData::setupVulkan(Shader* shader) {
 							textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 							textureWrite.descriptorCount  = 1;
 							textureWrite.pBufferInfo      = nullptr;
-							textureWrite.pImageInfo       = &imageInfo;
+							textureWrite.pImageInfo       = textureInfo.texture->getVkImageInfo();
 							textureWrite.pTexelBufferView = nullptr;
 							textureWrite.pNext            = nullptr;
 							descriptorWrites.push_back(textureWrite);
 						}
 					}
-
 					vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 				}
 			}
@@ -256,10 +249,6 @@ void RenderData::renderWithoutBinding() {
 				glDrawArrays(mode, 0, count);
 		}
 	} else {
-		//Bind the pipeline and descriptor set (for Vulkan)
-		vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsVkPipeline->getInstance());
-		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsVkPipeline->getLayout(), 0, 1, &descriptorSets[Vulkan::getCurrentFrame()], 0, nullptr);
-
 		if (primcount == -1) {
 			//Check for indices
 			if (vboIndices)
@@ -276,14 +265,30 @@ void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset
 		if (primcount == -1) {
 			//Check for indices
 			if (vboIndices)
-				glDrawElementsBaseVertex(mode, count, GL_UNSIGNED_INT, (void*) indicesOffset, baseVertex);
+				glDrawElementsBaseVertex(mode, count, GL_UNSIGNED_INT, (void*) (indicesOffset * sizeof(unsigned int)), baseVertex); //Assume indices stored as unsigned integers
 		}
 	} else {
 		//Check for instancing
 		if (primcount == -1) {
 			//Check for indices
 			if (vboIndices)
-				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, 1, indicesOffset, baseVertex, 0); //Is this correct?
+				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, 1, indicesOffset, baseVertex, 0);
 		}
 	}
+}
+
+UBO* RenderData::getUBO(unsigned int id) {
+	if (ubos.count(id) > 0)
+		return ubos[id];
+	else {
+//		Logger::log("Could not find UBO with id " + utils_string::str(id) + ". Was it added?", "RenderData", LogType::Debug);
+		return NULL;
+	}
+}
+
+const VkDescriptorSet* RenderData::getVkDescriptorSet(unsigned int materialIndex) {
+	//Return the descriptor set for the current frame and requested material index
+	//Note: Have one texture set per material, organised sequentially for each frame
+	return &descriptorSets[(materialIndex * Vulkan::getSwapChain()->getImageCount()) + Vulkan::getCurrentFrame()];
+
 }

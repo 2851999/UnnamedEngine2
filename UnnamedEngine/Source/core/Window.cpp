@@ -114,13 +114,13 @@ void Window::destroy() {
 	glfwTerminate();
 }
 
-void Window::setResizable(bool resizable)    { glfwWindowHint(GLFW_RESIZABLE, resizable); }
-void Window::setDecorated(bool decorated)    { glfwWindowHint(GLFW_DECORATED, decorated); }
-void Window::setRefreshRate(int refreshRate) { glfwWindowHint(GLFW_REFRESH_RATE, refreshRate);              }
-void Window::setFloating(bool floating)      { glfwWindowHint(GLFW_FLOATING, floating);   }
-void Window::setSamples(int samples)         { glfwWindowHint(GLFW_SAMPLES, samples);                       }
-void Window::setVSync(bool vSync)            { glfwSwapInterval(vSync);                                     }
-void Window::setPosition(int x, int y)       { glfwSetWindowPos(instance, x, y);                            }
+void Window::setResizable(bool resizable)    { glfwWindowHint(GLFW_RESIZABLE, resizable);      }
+void Window::setDecorated(bool decorated)    { glfwWindowHint(GLFW_DECORATED, decorated);      }
+void Window::setRefreshRate(int refreshRate) { glfwWindowHint(GLFW_REFRESH_RATE, refreshRate); }
+void Window::setFloating(bool floating)      { glfwWindowHint(GLFW_FLOATING, floating);        }
+void Window::setSamples(int samples)         { glfwWindowHint(GLFW_SAMPLES, samples);          }
+void Window::setVSync(unsigned int vSync)    { glfwSwapInterval(vSync > 0 ? 1 : 0);            }
+void Window::setPosition(int x, int y)       { glfwSetWindowPos(instance, x, y);               }
 
 void Window::enableCursor()  { glfwSetInputMode(instance, GLFW_CURSOR, GLFW_CURSOR_NORMAL);   }
 void Window::disableCursor() { glfwSetInputMode(instance, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }

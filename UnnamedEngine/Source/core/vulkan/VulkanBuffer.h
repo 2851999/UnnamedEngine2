@@ -39,6 +39,9 @@ private:
 	/* The memory used by this buffer */
 	VkDeviceMemory bufferMemory;
 
+	/* The descriptor info about this buffer */
+	VkDescriptorBufferInfo bufferInfo;
+
 	/* Method to copy memory to a buffer (that is accessible to CPU) */
 	void copyData(void* data, unsigned int offset, VkDeviceSize& size, VkDeviceMemory& dest);
 public:
@@ -54,7 +57,7 @@ public:
 
 	/* Setters and getters */
 	VkBuffer& getInstance() { return instance; }
-	VkDescriptorBufferInfo getBufferInfo();
+	const VkDescriptorBufferInfo* getBufferInfo() { return &bufferInfo; } //Require const here otherwise seems to give an occasional error with offset = 0x1b
 };
 
 

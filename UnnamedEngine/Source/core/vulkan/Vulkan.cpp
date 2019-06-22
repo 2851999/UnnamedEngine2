@@ -43,11 +43,9 @@ std::vector<VkSemaphore>     Vulkan::renderFinishedSemaphores;
 std::vector<VkFence>         Vulkan::inFlightFences;
 unsigned int                 Vulkan::currentFrame = 0;
 
-bool Vulkan::ENABLE_VALIDATION_LAYERS = true;
-
 bool Vulkan::initialise(Window* window) {
 	//Initialise Vulkan
-	if (ENABLE_VALIDATION_LAYERS && ! VulkanValidationLayers::checkSupport()) {
+	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled && ! VulkanValidationLayers::checkSupport()) {
 		Logger::log("Required validation layers are not supported", "Vulkan", LogType::Error);
 		return false;
 	}
@@ -75,14 +73,22 @@ bool Vulkan::initialise(Window* window) {
 		return false;
 	}
 
+	//Use MSAA?
+	if (window->getSettings().videoSamples > 0) {
+		//Obtain the number of MSAA samples to use based on the requested value and what is supported
+		VkSampleCountFlagBits sampleCount = getMaxUsableSampleCount(window->getSettings().videoSamples);
+		//Assign the value based on what was obtained
+		window->getSettings().videoSamples = sampleCount;
+	}
+
+	//Create the command pool
+	createCommandPool();
+
 	//Create the swap chain
 	swapChain = new VulkanSwapChain(device, window->getSettings());
 
 	//Create the render pass
 	renderPass = new VulkanRenderPass(swapChain);
-
-	//Create the command pool
-	createCommandPool();
 
 	//Create the command buffers
 	createCommandBuffers();
@@ -132,7 +138,7 @@ bool Vulkan::createInstance() {
 	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
 	//Obtain the required validation layers (if they are enabled)
-	if (Vulkan::ENABLE_VALIDATION_LAYERS) {
+	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled) {
 		std::vector<const char*>& requiredValidationLayers = VulkanValidationLayers::getLayers();  //requiredValidationLayers goes out of scope if not using reference causing undefined behaviour
 
 		createInfo.enabledLayerCount   = static_cast<uint32_t>(requiredValidationLayers.size());
@@ -150,7 +156,7 @@ void Vulkan::destroyInstance() {
 
 void Vulkan::createDebugMessenger() {
 	//Only bother if validation layers are enabled
-	if (! Vulkan::ENABLE_VALIDATION_LAYERS)
+	if (! Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled)
 		return;
 
 	//Setup the information required
@@ -167,7 +173,7 @@ void Vulkan::createDebugMessenger() {
 }
 
 void Vulkan::destroyDebugMessenger() {
-	if (ENABLE_VALIDATION_LAYERS)
+	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled)
 		destroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 }
 
@@ -217,20 +223,20 @@ void Vulkan::createCommandBuffers() {
 		Logger::log("Failed to allocate command buffers", "Vulkan", LogType::Error);
 }
 
-void Vulkan::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
+void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType     = VK_IMAGE_TYPE_2D;
     imageInfo.extent.width  = width;
     imageInfo.extent.height = height;
     imageInfo.extent.depth  = 1;
-    imageInfo.mipLevels     = 1;
+    imageInfo.mipLevels     = mipLevels;
     imageInfo.arrayLayers   = 1;
     imageInfo.format        = format;
     imageInfo.tiling        = tiling;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.usage         = usage;
-    imageInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.samples       = numSamples;
     imageInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
 
     if (vkCreateImage(device->getLogical(), &imageInfo, nullptr, &image) != VK_SUCCESS)
@@ -250,7 +256,26 @@ void Vulkan::createImage(uint32_t width, uint32_t height, VkFormat format, VkIma
 	vkBindImageMemory(device->getLogical(), image, imageMemory, 0);
 }
 
-void Vulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+VkImageView Vulkan::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) {
+	VkImageViewCreateInfo viewInfo = {};
+	viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewInfo.image    = image;
+	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	viewInfo.format   = format;
+	viewInfo.subresourceRange.aspectMask     = aspectFlags;
+	viewInfo.subresourceRange.baseMipLevel   = 0;
+	viewInfo.subresourceRange.levelCount     = mipLevels;
+	viewInfo.subresourceRange.baseArrayLayer = 0;
+	viewInfo.subresourceRange.layerCount     = 1;
+
+	VkImageView imageView;
+	if (vkCreateImageView(device->getLogical(), &viewInfo, nullptr, &imageView) != VK_SUCCESS)
+		Logger::log("Failed to create image view", "Vulkan", LogType::Error);
+
+	return imageView;
+}
+
+void Vulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels) {
 	VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
 	VkImageMemoryBarrier barrier = {};
@@ -260,10 +285,20 @@ void Vulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
-	barrier.image                           = image;
-	barrier.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.image = image;
+
+	//Assign correct aspect mask for depth(possibly with stencil)/texture image
+	if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+		if (hasStencilComponent(format))
+			barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+	} else {
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	}
+
 	barrier.subresourceRange.baseMipLevel   = 0;
-	barrier.subresourceRange.levelCount     = 1;
+	barrier.subresourceRange.levelCount     = mipLevels;
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount     = 1;
 
@@ -284,6 +319,20 @@ void Vulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout
 
 	    sourceStage      = VK_PIPELINE_STAGE_TRANSFER_BIT;
 	    destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	} else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+		sourceStage      = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	} else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		sourceStage      = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 	} else
 	    Logger::log("Unsupported layout transition", "Vulkan", LogType::Error);
 
@@ -426,9 +475,12 @@ void Vulkan::startDraw() {
 	renderPassInfo.renderArea.offset = {0, 0};
 	renderPassInfo.renderArea.extent = swapChain->getExtent();
 
-	VkClearValue clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-	renderPassInfo.clearValueCount = 1;
-	renderPassInfo.pClearValues    = &clearColor;
+	std::array<VkClearValue, 2> clearValues = {};
+	clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
+
+	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+	renderPassInfo.pClearValues = clearValues.data();
 
 	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
@@ -476,6 +528,44 @@ void Vulkan::stopDraw() {
 	currentFrame = (currentFrame + 1) % swapChain->getImageCount();
 }
 
+VkSampleCountFlagBits Vulkan::getMaxUsableSampleCount(unsigned int targetSamples) {
+	//Obtain the Vulkan representation of the target number of samples
+	VkSampleCountFlagBits targetSampleBits;
+
+	//Obtain the supported values
+	VkPhysicalDeviceProperties physicalDeviceProperties;
+	vkGetPhysicalDeviceProperties(device->getPhysical(), &physicalDeviceProperties);
+	VkSampleCountFlags counts = std::min(physicalDeviceProperties.limits.framebufferColorSampleCounts, physicalDeviceProperties.limits.framebufferDepthSampleCounts);
+
+	//Find the closest supported
+	while (targetSamples > 1) {
+		targetSampleBits = static_cast<VkSampleCountFlagBits>(targetSamples); //Should be same integer value
+
+		if (counts & targetSampleBits)
+			//Supported so stop
+			break;
+		else
+			targetSamples /= 2;
+	}
+
+	//Return the final value
+	return targetSampleBits;
+}
+
+VkFormat Vulkan::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+	for (VkFormat format : candidates) {
+		VkFormatProperties props;
+		vkGetPhysicalDeviceFormatProperties(device->getPhysical(), format, &props);
+
+		if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
+			return format;
+		else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
+			return format;
+	}
+	Logger::log("Failed to find suitable format", "Vulkan 'findSupportedFormat'", LogType::Error);
+	return VK_FORMAT_UNDEFINED;
+}
+
 void Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
 	VkBufferCreateInfo bufferInfo = {};
 	bufferInfo.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -484,7 +574,7 @@ void Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; //Only used by graphics queue
 
 	if (vkCreateBuffer(device->getLogical(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-		Logger::log("Failed to create vertex buffer", "VulkanBuffer", LogType::Error);
+		Logger::log("Failed to create buffer", "VulkanBuffer", LogType::Error);
 
 	VkMemoryRequirements memoryRequirements;
 	vkGetBufferMemoryRequirements(device->getLogical(), buffer, &memoryRequirements);
@@ -496,7 +586,7 @@ void Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 	allocInfo.memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits, properties);
 
 	if (vkAllocateMemory(device->getLogical(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-		Logger::log("Failed to allocate vertex buffer memory", "VulkanBuffer", LogType::Error);
+		Logger::log("Failed to allocate buffer memory", "VulkanBuffer", LogType::Error);
 
 	//Associate the memory with the buffer
 	vkBindBufferMemory(device->getLogical(), buffer, bufferMemory, 0);

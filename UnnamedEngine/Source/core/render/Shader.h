@@ -111,6 +111,17 @@ public:
 	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source);
 	static ShaderSource loadShaderSource(std::string path);
 	static Shader* loadShader(std::string path);
+
+	/* Methods to read a shader and output all of the complete files for that shader (with all includes replaced as requested) - these
+	 * will not include mapped uniforms since they are intended for compilation to SPIR-V */
+	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath);
+	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath);
+
+	/* Utility method to use given glslValidator.exe path to compile a shader from the engine to SPIR-V */
+	static void compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath);
+
+	/* Utility method to use the above method to compile an engine shader and place it in the appropriate location */
+	static void compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath);
 };
 
 /*****************************************************************************
@@ -119,8 +130,8 @@ public:
 
 class RenderShader {
 private:
-	/* The generic name for this RenderShader */
-	std::string name;
+	/* The id for this RenderShader */
+	unsigned int id;
 	/* The shaders used for forward rendering - will always use the last
 	 * shader that was added for rendering to allow them to be overridden */
 	std::vector<Shader*> forwardShaders;
@@ -130,7 +141,7 @@ private:
 	bool useDeferredGeom = false;
 public:
 	/* Various constructors */
-	RenderShader(std::string name, Shader* forwardShader, Shader* deferredGeomShader);
+	RenderShader(unsigned int id, Shader* forwardShader, Shader* deferredGeomShader);
 
 	/* Descructor */
 	virtual ~RenderShader() {}
@@ -155,7 +166,7 @@ public:
 	inline void useGeometryShader(bool use) { useDeferredGeom = use; }
 
 	/* Getters */
-	std::string getName() { return name; }
+	unsigned int getID() { return id; }
 };
 
 #endif /* CORE_RENDER_SHADER_H_ */

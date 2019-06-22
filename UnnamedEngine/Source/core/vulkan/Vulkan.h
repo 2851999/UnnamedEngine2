@@ -78,9 +78,6 @@ private:
 		    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		    void* pUserData);
 public:
-	/* States whether validation layers are enabled or not */
-	static bool ENABLE_VALIDATION_LAYERS;
-
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
 
@@ -114,8 +111,9 @@ public:
 	/* Method to create the command buffers */
 	static void createCommandBuffers(); //(Destroyed with command pool)
 
-	static void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	static void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	static VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
+	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	static VkCommandBuffer beginSingleTimeCommands();
 	static void endSingleTimeCommands(VkCommandBuffer commandBuffer);
@@ -137,6 +135,22 @@ public:
 
 	/* Method to stop drawing a frame (and recording to the command buffer) */
 	static void stopDraw();
+
+	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
+	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);
+
+	/* Method to locate an image format based on what is available (used for depth image) */
+	static VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
+	/* Method to find a suitable format for a depth image */
+	static inline VkFormat findDepthFormat() {
+		return findSupportedFormat({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT }, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+	}
+
+	/* Returns whether a depth format has a stencil component (used with above) */
+	static inline bool hasStencilComponent(VkFormat format) {
+		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+	}
 
 	/* Locates a particular kind of graphics memory for a buffer */
 	static uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);

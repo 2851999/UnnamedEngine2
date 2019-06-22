@@ -138,6 +138,8 @@ struct ShaderBlock_ShadowCubemap {
  * The ShaderInterface class handles data transfer to shaders via UBO's
  *****************************************************************************/
 
+class RenderData;
+
 class ShaderInterface {
 public:
 	/* Structure storing the necessary information to create a UBO */
@@ -148,9 +150,9 @@ public:
 	};
 private:
 	/* Map storing UBO information */
-	std::unordered_map<std::string, UBOInfo> ubosInfo;
+	std::unordered_map<unsigned int, UBOInfo> ubosInfo;
 	/* Map used to store UBO's with keys for accessing them */
-	std::unordered_map<std::string, UBO*> ubos;
+	std::unordered_map<unsigned int, UBO*> ubos;
 public:
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
@@ -162,17 +164,17 @@ public:
 	static const unsigned int ATTRIBUTE_LOCATION_BONE_WEIGHTS;
 
 	/* The ids for particular shader blocks */
-	static const std::string BLOCK_CORE;
-	static const std::string BLOCK_MATERIAL;
-	static const std::string BLOCK_SKINNING;
-	static const std::string BLOCK_LIGHTING;
-	static const std::string BLOCK_TERRAIN;
-	static const std::string BLOCK_GAMMA_CORRECTION;
-	static const std::string BLOCK_PBR_ENV_MAP_GEN;
-	static const std::string BLOCK_PBR_PREFILTER_MAP_GEN;
-	static const std::string BLOCK_PBR_LIGHTING_CORE;
-	static const std::string BLOCK_BILLBOARD;
-	static const std::string BLOCK_SHADOW_CUBEMAP;
+	static const unsigned int BLOCK_CORE;
+	static const unsigned int BLOCK_MATERIAL;
+	static const unsigned int BLOCK_SKINNING;
+	static const unsigned int BLOCK_LIGHTING;
+	static const unsigned int BLOCK_TERRAIN;
+	static const unsigned int BLOCK_GAMMA_CORRECTION;
+	static const unsigned int BLOCK_PBR_ENV_MAP_GEN;
+	static const unsigned int BLOCK_PBR_PREFILTER_MAP_GEN;
+	static const unsigned int BLOCK_PBR_LIGHTING_CORE;
+	static const unsigned int BLOCK_BILLBOARD;
+	static const unsigned int BLOCK_SHADOW_CUBEMAP;
 
 	/* Binding locations for shader blocks */
 	static const unsigned int UBO_BINDING_LOCATION_CORE;
@@ -194,10 +196,13 @@ public:
 	virtual ~ShaderInterface();
 
 	/* Method to add a UBO to this interface */
-	void add(std::string id, unsigned int size, unsigned int usage, unsigned int binding);
+	void add(unsigned int id, unsigned int size, unsigned int usage, unsigned int binding);
+
+	/* Method to add required UBO's and data to a particular RenderData instance ready for rendering with a particular shader */
+	void setup(RenderData* renderData, unsigned int shaderID);
 
 	/* Method to obtain a UBO from this interface (Should only call once per object - for Vulkan this will return a new UBO each time) */
-	UBO* getUBO(std::string id);
+	UBO* getUBO(unsigned int id);
 };
 
 

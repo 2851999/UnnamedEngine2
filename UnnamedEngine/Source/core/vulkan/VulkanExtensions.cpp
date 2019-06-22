@@ -43,7 +43,7 @@ void VulkanExtensions::addRequired() {
 	extensions = std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
 	//Check if validation layers are also required
-	if (Vulkan::ENABLE_VALIDATION_LAYERS)
+	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled)
 		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 }
 

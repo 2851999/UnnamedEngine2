@@ -59,11 +59,11 @@ void Test::onInitialise() {
 //	getSettings().videoRefreshRate = 144;
 //	getSettings().windowFullscreen = true;
 
-	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
+	//Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
 }
 
 void Test::onCreated() {
-	Logger::stopFileOutput();
+	//Logger::stopFileOutput();
 
 //	GLint num;
 //	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &num);

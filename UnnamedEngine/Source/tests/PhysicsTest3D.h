@@ -50,11 +50,11 @@ void Test::onCreated() {
 	Mesh* modelA = resourceLoader.loadModel("plane.obj");
 	Mesh* modelB = resourceLoader.loadModel("sphere.obj");
 
-	objectA = new PhysicsObject3D(modelA, "Material");
+	objectA = new PhysicsObject3D(modelA, Renderer::SHADER_MATERIAL);
 //	objectA->setCollider(new SphereCollider(objectA, modelA->getBoundingSphereRadius()));
 	objectA->setCollider(new PlaneCollider3D(objectA, Vector3f(1.0f, 0.0f, 0.0f)));
 	objectA->setRotation(0.0f, 0.0f, 45.0f);
-	objectB = new PhysicsObject3D(modelB, "Material");
+	objectB = new PhysicsObject3D(modelB, Renderer::SHADER_MATERIAL);
 	objectB->setCollider(new SphereCollider(objectB, modelB->getBoundingSphereRadius()));
 	objectB->setPosition(3.0f, 0.0f, 0.0f);
 	objectB->setVelocity(-0.2f, 0.0f, 0.0f);

@@ -21,85 +21,90 @@
 
 #include "../core/BaseEngine.h"
 
+#include "../core/render/MeshLoader.h"
 #include "../utils/Utils.h"
+#include "../utils/DebugCamera.h"
+#include "../core/vulkan/Vulkan.h"
 
 class Test : public BaseEngine {
 private:
 	float lastTime = 0;
 
-	struct UBOData {
-		Matrix4f mvpMatrix;
-	};
-
-	UBO* ubo;
-	Shader* shader;
-	RenderShader* renderShader;
-	MeshRenderData* quad;
-	UBOData uboData;
-	Texture* texture;
-	TextureSet* textureSet;
+	DebugCamera* camera;
+	GameObject3D* model;
 public:
 	void initialise() override;
 	void created() override;
 	void update() override;
 	void render() override;
 	void destroy() override;
+
+	virtual void onKeyPressed(int key) override;
 };
 
 void Test::initialise() {
-	getSettings().videoVulkan = true; //Validation layers have quite large effect on performance
+	getSettings().debugVkValidationLayersEnabled = false;
+
+	getSettings().videoVulkan = true;
 	getSettings().videoMaxFPS = 0;
+	getSettings().videoResolution = VideoResolution::RES_1080p;
+	getSettings().videoVSync = 2;
 	getSettings().debugShowInformation = false;
+	getSettings().videoSamples = 8;
+	getSettings().videoMaxAnisotropicSamples = 16;
 }
 
 void Test::created() {
-	texture = Texture::loadTexture("resources/textures/texture.jpg");
+	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 
-	ubo = new UBO(NULL, sizeof(UBOData), GL_DYNAMIC_DRAW, 0);
+	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
+	camera->setPosition(0.0f, 0.0f, 1.0f);
+	camera->setFlying(true);
+	Renderer::addCamera(camera);
+	getWindow()->disableCursor();
 
-	MeshData* data = MeshBuilder::createQuad(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture);
+	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
+	MeshLoader::loadDiffuseTexturesAsSRGB = false;
 
-	shader = Shader::loadShader("resources/shaders/vulkan/shader");
-	renderShader = new RenderShader("Shader", shader, NULL);
+//	Texture* texture = Texture::loadTexture("resources/textures/texture.jpg");
+//	Mesh* mesh = new Mesh(MeshBuilder::createQuad3D(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture));
+//	mesh->getMaterial()->setDiffuse(texture);
+	//mesh->getMaterial(1)->setDiffuse(texture);
+//	mesh->getMaterial()->setDiffuse(Colour(1.0f, 0.0f, 0.0f, 1.0f));
 
-	quad = new MeshRenderData(data, renderShader);
-	quad->getRenderData()->add(ubo);
-	textureSet = new TextureSet();
-	textureSet->add(1, texture);
-	quad->getRenderData()->addTextureSet(textureSet);
-	std::vector<Material*> materials;
-	quad->setup(data, materials);
+	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
+
+	mesh->setCullingEnabled(false);
+	model = new GameObject3D(mesh, Renderer::SHADER_MATERIAL);
+	model->setScale(0.15f, 0.15f, 0.15f);
+	model->update();
 }
 
 
 void Test::update() {
+	camera->update(getDeltaSeconds());
 	if (utils_time::getSeconds() - lastTime > 0.5f) {
 		lastTime = utils_time::getSeconds();
 		std::cout << getFPS() << std::endl;
 	}
-	//Update the UBO
-	uboData.mvpMatrix = Matrix4f().initOrthographic(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-
-	ubo->update(&uboData, 0, sizeof(UBOData));
 }
 
 void Test::render() {
 	if (! getSettings().videoVulkan) {
-		glClear(GL_COLOR_BUFFER_BIT);
-		shader->use();
-		quad->getRenderData()->getTextureSet(0)->bindGLTextures();
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
-	quad->render();
-	if (! getSettings().videoVulkan)
-		shader->stopUsing();
+	model->render();
 }
 
 void Test::destroy() {
-	delete textureSet;
-	delete quad;
+	delete model;
+	delete camera;
+}
 
-	delete renderShader;
-	delete ubo;
+void Test::onKeyPressed(int key) {
+	if (key == GLFW_KEY_ESCAPE)
+		requestClose();
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

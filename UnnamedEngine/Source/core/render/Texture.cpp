@@ -64,21 +64,27 @@ VkSamplerCreateInfo TextureParameters::getVkSamplerCreateInfo() {
 	VkSamplerCreateInfo samplerInfo = {};
 	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 
-	if (minFilter == GL_NEAREST)
+	if (minFilter == GL_NEAREST || minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR)
 		samplerInfo.minFilter = VK_FILTER_NEAREST;
-	else if (minFilter == GL_LINEAR)
+	else if (minFilter == GL_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_LINEAR_MIPMAP_LINEAR)
 		samplerInfo.minFilter = VK_FILTER_LINEAR;
 
-	if (magFilter == GL_NEAREST)
+	if (magFilter == GL_NEAREST || magFilter == GL_NEAREST_MIPMAP_NEAREST || magFilter == GL_NEAREST_MIPMAP_LINEAR)
 		samplerInfo.magFilter = VK_FILTER_NEAREST;
-	else if (magFilter == GL_LINEAR)
+	else if (magFilter == GL_LINEAR || magFilter == GL_LINEAR_MIPMAP_NEAREST || magFilter == GL_LINEAR_MIPMAP_LINEAR)
 		samplerInfo.magFilter = VK_FILTER_LINEAR;
 
-	if (clamp == GL_CLAMP_TO_EDGE) {
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	} else if (clamp == GL_REPEAT) {
+	if (shouldClamp) {
+		if (clamp == GL_CLAMP_TO_EDGE) {
+			samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		} else if (clamp == GL_REPEAT) {
+			samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		}
+	} else {
 		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -95,10 +101,15 @@ VkSamplerCreateInfo TextureParameters::getVkSamplerCreateInfo() {
 	samplerInfo.compareEnable = VK_FALSE; //Useful for PCF shadows
 	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
 
-	samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	if (minFilter == GL_LINEAR_MIPMAP_NEAREST)
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+	else if (minFilter == GL_LINEAR_MIPMAP_LINEAR)
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	else
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	samplerInfo.mipLodBias = 0.0f;
-	samplerInfo.minLod = 0.0f;
-	samplerInfo.maxLod = 0.0f;
+	samplerInfo.minLod     = 0.0f;
+	samplerInfo.maxLod     = 0.0f; //SHOULD BE ASSIGNED IF MIPMAP USED (see Texture constructor)
 
 	return samplerInfo;
 }
@@ -128,10 +139,15 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 		unbind();
 	} else {
 		//Setup the Vulkan texture
+
+		//Check if mipmaps should be used
+		if (parameters.mipMapRequested())
+			mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+
 		//---------------------------------------------------LOAD AND CREATE THE TEXTURE---------------------------------------------------
-		VkDeviceSize imageSize = width * height * STBI_rgb_alpha; //Don't seem to have support for any other colour formats when tiling (at least on chosen device)
+		VkDeviceSize imageSize = width * height * STBI_rgb_alpha;
 		VkFormat format;
-		Texture::getTextureFormatVk(STBI_rgb_alpha, false, format);
+		Texture::getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), format);
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
@@ -141,31 +157,39 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 		memcpy(data, imageData, static_cast<size_t>(imageSize));
 		vkUnmapMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory);
 
-		Vulkan::createImage(width, height, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
+		VkImageUsageFlags imageUsageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		if (mipLevels > 1)
+			imageUsageFlags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT; //Used as source and destination of transfers (as will copy data for mipmaps)
+
+		Vulkan::createImage(width, height, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, imageUsageFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
 
 		//First need to transition texture image to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL then copy from staging buffer to the texture image
-		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)
+		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)
 		Vulkan::copyBufferToImage(stagingBuffer, textureVkImage, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 
-		//Prepare image for shader access
-		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		if (mipLevels <= 1) //Leave in VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL for mipmap generation
+			//Prepare image for shader access
+			Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mipLevels);
 
 	    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
 	    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);
 
+		if (mipLevels > 1)
+			generateMipmapsVk(); //Transitions image to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL here
+
 		//------------------------------------------------------CREATE THE IMAGE VIEW------------------------------------------------------
 		VkImageViewCreateInfo viewInfo = {};
-		viewInfo.sType      = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewInfo.image      = textureVkImage;
-		viewInfo.viewType   = VK_IMAGE_VIEW_TYPE_2D; //TODO: Use target in parameters
-		viewInfo.format     = format;
+		viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image    = textureVkImage;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; //TODO: Use target in parameters
+		viewInfo.format   = format;
 		viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 		viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
 		viewInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
 		viewInfo.subresourceRange.baseMipLevel   = 0;
-		viewInfo.subresourceRange.levelCount     = 1;
+		viewInfo.subresourceRange.levelCount     = mipLevels;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
 		viewInfo.subresourceRange.layerCount     = 1;
 
@@ -174,11 +198,92 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 
 		//------------------------------------------------------CREATE THE SAMPLER------------------------------------------------------
 		VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
+		samplerInfo.maxLod = static_cast<float>(mipLevels);
 
 		//NOTE: Sampler not attached to image (can use again in TextureParameters?)
 
 		if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
 			Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
+
+		//Setup the descriptor info
+	    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	    imageInfo.imageView   = textureVkImageView;
+	    imageInfo.sampler     = textureVkSampler;
+	}
+}
+
+void Texture::generateMipmapsVk() {
+	//Obtain the format used for this image
+	VkFormat format;
+	getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), format);
+
+	//Check the used image format supports linear blitting
+	VkFormatProperties formatProperties;
+	vkGetPhysicalDeviceFormatProperties(Vulkan::getDevice()->getPhysical(), format, &formatProperties);
+
+	if (! (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
+		Logger::log("Texture image format does not support linear blitting", "Texture", LogType::Error);
+	else {
+		VkCommandBuffer commandBuffer = Vulkan::beginSingleTimeCommands();
+
+		VkImageMemoryBarrier barrier = {};
+		barrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.image                           = textureVkImage;
+		barrier.srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+		barrier.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount     = 1;
+		barrier.subresourceRange.levelCount     = 1;
+
+		int32_t mipWidth  = width;
+		int32_t mipHeight = height;
+
+		for (uint32_t i = 1; i < mipLevels; ++i) {
+			barrier.subresourceRange.baseMipLevel = i - 1;
+			barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+			barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+			barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+			VkImageBlit blit = {};
+			blit.srcOffsets[0]                 = { 0, 0, 0 };
+			blit.srcOffsets[1]                 = { mipWidth, mipHeight, 1 };
+			blit.srcSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+			blit.srcSubresource.mipLevel       = i - 1;
+			blit.srcSubresource.baseArrayLayer = 0;
+			blit.srcSubresource.layerCount     = 1;
+			blit.dstOffsets[0]                 = { 0, 0, 0 };
+			blit.dstOffsets[1]                 = { mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1 };
+			blit.dstSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+			blit.dstSubresource.mipLevel       = i;
+			blit.dstSubresource.baseArrayLayer = 0;
+			blit.dstSubresource.layerCount     = 1;
+
+			vkCmdBlitImage(commandBuffer, textureVkImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, textureVkImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, VK_FILTER_LINEAR); //Can use nearest?
+
+			barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+			barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+			vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+			if (mipWidth > 1)  mipWidth /= 2;
+			if (mipHeight > 1) mipHeight /= 2;
+		}
+
+		barrier.subresourceRange.baseMipLevel = mipLevels - 1;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+		Vulkan::endSingleTimeCommands(commandBuffer);
 	}
 }
 
@@ -193,14 +298,6 @@ void Texture::destroy() {
 
 		vkDestroySampler(Vulkan::getDevice()->getLogical(), textureVkSampler, nullptr);
 	}
-}
-
-VkDescriptorImageInfo Texture::getVkImageInfo() {
-    VkDescriptorImageInfo imageInfo = {};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView   = textureVkImageView;
-    imageInfo.sampler     = textureVkSampler;
-    return imageInfo;
 }
 
 unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& width, int& height, bool srgb) {

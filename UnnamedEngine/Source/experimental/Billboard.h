@@ -28,7 +28,7 @@
 
 class Billboard : public GameObject3D {
 public:
-	Billboard(float width, float height) : GameObject3D(new Mesh(MeshBuilder::createQuad3D(width, height)), "Billboard", width, height) {
+	Billboard(float width, float height) : GameObject3D(new Mesh(MeshBuilder::createQuad3D(width, height)), Renderer::SHADER_BILLBOARD, width, height) {
 		getMaterial()->setDiffuse(Colour::RED);
 	}
 

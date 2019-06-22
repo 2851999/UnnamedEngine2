@@ -38,6 +38,9 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	VkPresentModeKHR   presentMode   = chooseSwapPresentMode(swapChainSupportDetails.presentModes);
 	extent                           = chooseSwapExtent(swapChainSupportDetails.capabilities, settings);
 
+	//Assign the VSync setting based on what is being used
+	Window::getCurrentInstance()->getSettings().videoVSync = (presentMode == VK_PRESENT_MODE_FIFO_KHR);
+
 	//Obtain the queue family indices
 	VulkanDeviceQueueFamilies queueFamilies = device->getQueueFamilies();
 
@@ -119,6 +122,22 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 		if (vkCreateImageView(device->getLogical(), &imageViewCreateInfo, nullptr, &imageViews[i]) != VK_SUCCESS)
 			Logger::log("Failed to create image view", "VulkanSwapChain", LogType::Error);
 	}
+
+	//Obtain the number of samples being used
+	numSamples = settings.videoSamples;
+	//Now setup the colour buffer if necessary
+	if (numSamples > 0) {
+		Vulkan::createImage(extent.width, extent.height, 1, static_cast<VkSampleCountFlagBits>(numSamples), format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colourImage, colourImageMemory);
+		colourImageView = Vulkan::createImageView(colourImage, format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+
+		Vulkan::transitionImageLayout(colourImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
+	}
+
+	//Now setup the depth buffer
+	VkFormat depthFormat = Vulkan::findDepthFormat();
+	Vulkan::createImage(extent.width, extent.height, 1, static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples), depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
+	depthImageView = Vulkan::createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+	Vulkan::transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
 }
 
 VulkanSwapChain::~VulkanSwapChain() {
@@ -126,6 +145,16 @@ VulkanSwapChain::~VulkanSwapChain() {
 	for (auto& imageView : imageViews)
 		vkDestroyImageView(device->getLogical(), imageView, nullptr);
 	vkDestroySwapchainKHR(device->getLogical(), instance, nullptr);
+
+	if (numSamples > 0) {
+		vkDestroyImageView(device->getLogical(), colourImageView, nullptr);
+		vkDestroyImage(Vulkan::getDevice()->getLogical(), colourImage, nullptr);
+		vkFreeMemory(Vulkan::getDevice()->getLogical(), colourImageMemory, nullptr);
+	}
+
+	vkDestroyImageView(device->getLogical(), depthImageView, nullptr);
+    vkDestroyImage(Vulkan::getDevice()->getLogical(), depthImage, nullptr);
+    vkFreeMemory(Vulkan::getDevice()->getLogical(), depthImageMemory, nullptr);
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
@@ -145,19 +174,54 @@ VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<Vk
 	return availableFormats[0];
 }
 
-VkPresentModeKHR VulkanSwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
-	VkPresentModeKHR bestMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-
+bool VulkanSwapChain::isPresentModeAvailable(VkPresentModeKHR presentMode, const std::vector<VkPresentModeKHR>& availablePresentModes) {
 	//Go through the available present modes
 	for (const auto& availablePresentMode : availablePresentModes) {
-		//Prefer triple buffering by default, otherwise try double
-		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-			return availablePresentMode;
-		else if (availablePresentMode == VK_PRESENT_MODE_FIFO_KHR)
-			bestMode = availablePresentMode;
+		if (availablePresentMode == presentMode)
+			//Mode is available
+			return true;
 	}
 
-	return bestMode;
+	//Mode is not available
+	return false;
+}
+
+VkPresentModeKHR VulkanSwapChain::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+	//Obtain the requested mode
+	VkPresentModeKHR requestedMode;
+	if (Window::getCurrentInstance()->getSettings().videoVSync == 0)
+		requestedMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+	else if (Window::getCurrentInstance()->getSettings().videoVSync == 2)
+		requestedMode = VK_PRESENT_MODE_MAILBOX_KHR;
+	else
+		requestedMode = VK_PRESENT_MODE_FIFO_KHR;
+
+	//Note: VK_PRESENT_MODE_FIFO_KHR and therefore VSync should always be available
+
+	//Check if the requested mode is available
+	if (isPresentModeAvailable(requestedMode, availablePresentModes))
+		return requestedMode;
+	else {
+		//Present mode was not available, attempt to find alternative
+		if (requestedMode == VK_PRESENT_MODE_FIFO_KHR)
+			Logger::log("VK_PRESENT_MODE_FIFO_KHR is not supported when it should be", "Vulkan", LogType::Error);
+		else if (requestedMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
+			//Try triple buffering instead (since also doesn't limit frame rate)
+			if (isPresentModeAvailable(VK_PRESENT_MODE_MAILBOX_KHR, availablePresentModes)) {
+				Logger::log("VK_PRESENT_MODE_IMMEDIATE_KHR is not supported so using VK_PRESENT_MODE_MAILBOX_KHR instead", "Vulkan", LogType::Information);
+				return VK_PRESENT_MODE_MAILBOX_KHR;
+			} else {
+				Logger::log("VK_PRESENT_MODE_IMMEDIATE_KHR is not supported so using VK_PRESENT_MODE_FIFO_KHR instead", "Vulkan", LogType::Information);
+				return VK_PRESENT_MODE_FIFO_KHR;
+			}
+		} else if (requestedMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+			//Fall back to double buffering
+			Logger::log("VK_PRESENT_MODE_MAILBOX_KHR is not supported so using VK_PRESENT_MODE_FIFO_KHR instead", "Vulkan", LogType::Information);
+			return VK_PRESENT_MODE_FIFO_KHR;
+		}
+	}
+
+	return requestedMode;
 }
 
 VkExtent2D VulkanSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, Settings& settings) {

@@ -40,13 +40,6 @@ private:
 
 	bool srgb = DEFAULT_SRGB;
 	bool generateMipMapsIfAvailable = true;
-
-	/* Returns whether a mipmap needs to be generated */
-	inline bool mipMapRequested() {
-		return generateMipMapsIfAvailable &&
-			   ((minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_LINEAR_MIPMAP_LINEAR) ||
-			    (magFilter == GL_NEAREST_MIPMAP_NEAREST || magFilter == GL_NEAREST_MIPMAP_LINEAR || magFilter == GL_LINEAR_MIPMAP_NEAREST || magFilter == GL_LINEAR_MIPMAP_LINEAR));
-	}
 public:
 	/* The default values which are assigned unless otherwise specified */
 	static GLuint DEFAULT_TARGET;
@@ -89,6 +82,13 @@ public:
 	inline GLuint getClamp()  { return clamp;  }
 	inline bool getShouldClamp() { return shouldClamp; }
 	inline bool getSRGB() { return srgb; }
+
+	/* Returns whether a mipmap should be generated */
+	inline bool mipMapRequested() {
+		return generateMipMapsIfAvailable &&
+			   ((minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_LINEAR_MIPMAP_LINEAR) ||
+			    (magFilter == GL_NEAREST_MIPMAP_NEAREST || magFilter == GL_NEAREST_MIPMAP_LINEAR || magFilter == GL_LINEAR_MIPMAP_NEAREST || magFilter == GL_LINEAR_MIPMAP_LINEAR));
+	}
 };
 
 /*****************************************************************************
@@ -104,6 +104,7 @@ private:
 	VkImage        textureVkImage       = VK_NULL_HANDLE;
 	VkDeviceMemory textureVkImageMemory = VK_NULL_HANDLE;
 	VkImageView    textureVkImageView   = VK_NULL_HANDLE;
+	VkDescriptorImageInfo imageInfo;
 
 	/* Sampler for this texture (Should change to use one for many rather than
 	 * create one for each texture) */
@@ -119,6 +120,12 @@ private:
 
 	/* The path this texture was loaded from (if applicable) */
 	std::string path;
+
+	/* The number of mip levels for this texture (for Vulkan) */
+	uint32_t mipLevels = 1;
+
+	/* Method to generate mipmaps (for Vulkan) */
+	void generateMipmapsVk();
 protected:
 	/* The texture parameters for this texture */
 	TextureParameters parameters;
@@ -155,7 +162,7 @@ public:
 
 	/* Basic bind and unbind methods for OpenGL */
 	inline void bind()   { glBindTexture(parameters.getTarget(), texture); }
-	inline void unbind() { glBindTexture(parameters.getTarget(), 0);       }
+	inline void unbind() { glBindTexture(parameters.getTarget(), 0); }
 
 	/* Called to delete this texture */
 	virtual void destroy() override;
@@ -177,7 +184,7 @@ public:
 	inline std::string getPath() { return path; }
 	inline bool hasPath() { return path.length() > 0; }
 	VkImageView& getVkImageView() { return textureVkImageView; }
-	VkDescriptorImageInfo getVkImageInfo();
+	const VkDescriptorImageInfo* getVkImageInfo() { return &imageInfo; }
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */

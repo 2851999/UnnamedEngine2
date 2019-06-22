@@ -94,7 +94,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	rasterizer.polygonMode             = VK_POLYGON_MODE_FILL; //Anything else requires GPU feature
 	rasterizer.lineWidth               = 1.0f;
 	rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace               = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizer.depthBiasEnable         = VK_FALSE;
 	rasterizer.depthBiasConstantFactor = 0.0f; //Optional
 	rasterizer.depthBiasClamp          = 0.0f; //Optional
@@ -103,11 +103,23 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineMultisampleStateCreateInfo multisampling = {};
 	multisampling.sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 	multisampling.sampleShadingEnable   = VK_FALSE;
-	multisampling.rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT;
+	multisampling.rasterizationSamples  = static_cast<VkSampleCountFlagBits>(swapChain->getNumSamples() == 0 ? 1 : swapChain->getNumSamples());
 	multisampling.minSampleShading      = 1.0f; //Optional
 	multisampling.pSampleMask           = nullptr; //Optional
 	multisampling.alphaToCoverageEnable = VK_FALSE; //Optional
 	multisampling.alphaToOneEnable      = VK_FALSE; //Optional
+
+	VkPipelineDepthStencilStateCreateInfo depthStencil = {};
+	depthStencil.sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+	depthStencil.depthTestEnable       = VK_TRUE;
+	depthStencil.depthWriteEnable      = VK_TRUE;
+	depthStencil.depthCompareOp        = VK_COMPARE_OP_LESS;
+	depthStencil.depthBoundsTestEnable = VK_FALSE;
+	depthStencil.minDepthBounds        = 0.0f; //Optional
+	depthStencil.maxDepthBounds        = 1.0f; //Optional
+	depthStencil.stencilTestEnable     = VK_FALSE;
+	depthStencil.front                 = {}; //Optional
+	depthStencil.back                  = {}; //Optional
 
 	//Per framebuffer (only have one here)
 	VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
@@ -158,7 +170,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	pipelineInfo.pViewportState      = &viewportState;
 	pipelineInfo.pRasterizationState = &rasterizer;
 	pipelineInfo.pMultisampleState   = &multisampling;
-	pipelineInfo.pDepthStencilState  = nullptr; //Optional
+	pipelineInfo.pDepthStencilState  = &depthStencil;
 	pipelineInfo.pColorBlendState    = &colorBlending;
 	pipelineInfo.pDynamicState       = nullptr; //Optional
 	pipelineInfo.layout              = pipelineLayout;

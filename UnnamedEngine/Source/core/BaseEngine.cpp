@@ -51,11 +51,10 @@ void BaseEngine::create() {
 
 	//Initialise the graphics API and don't continue if it fails
 	if (initGraphicsAPI()) {
+		//Initialise the Renderer therefore loading engine shaders and textures
+		Renderer::initialise();
+
 		if (! getSettings().videoVulkan) {
-
-			//Initialise the Renderer therefore loading engine shaders and textures
-			Renderer::initialise();
-
 			//Initialise the Audio system
 			AudioManager::initialise();
 
@@ -152,6 +151,8 @@ void BaseEngine::create() {
 
 		//Tell the game to destroy everything it created
 		destroy();
+
+		Renderer::destroy();
 
 		if (! getSettings().videoVulkan) {
 			//Destroy all other engine resources

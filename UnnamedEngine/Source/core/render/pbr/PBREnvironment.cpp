@@ -87,6 +87,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	//---------------------------------- RENDER ENVIRONMENT CUBEMAP FROM EQUIRECTANGULAR MAP ----------------------------------
 
+	glActiveTexture(GL_TEXTURE0);
 	//Create the environment cubemap
 	TextureParameters envMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, GL_LINEAR, GL_CLAMP_TO_EDGE, true);
 	envMapParameters.setMinFilter(GL_LINEAR_MIPMAP_LINEAR);
@@ -116,6 +117,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 		cubeMesh->render();
 	}
 
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	shader1->stopUsing();
 
@@ -149,8 +151,8 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 		cubeMesh->render();
 	}
 
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	shader2->stopUsing();
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	//--------------------- RENDER PREFILTER CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP (SPLIT SUM APPROXIMATION) ---------------------
@@ -165,6 +167,8 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, Window::getCurrentInstance()->getSettings().videoMaxAnisotropicSamples);
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP); //Allocate required memory
+
+	prefilterCubemap->unbind();
 
 	shader3->use();
 	glActiveTexture(GL_TEXTURE0);
@@ -198,8 +202,8 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 		}
 	}
 
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	shader3->stopUsing();
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	//-------------------------------------------------- RENDER BDRF INTEGRATION MAP --------------------------------------------------
@@ -220,6 +224,8 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	shader4->use();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	quadMesh->render();
+
+	brdfLUTTexture->unbind();
 
 	shader4->stopUsing();
 

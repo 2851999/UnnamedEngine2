@@ -77,7 +77,7 @@ FramebufferStore* GeometryBuffer::createBuffer(GLenum target, GLint internalForm
 }
 
 void GeometryBuffer::bind() {
-		defaultFBO->bind();
+	defaultFBO->bind();
 }
 
 void GeometryBuffer::unbind() {

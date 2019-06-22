@@ -33,19 +33,14 @@ class Renderer {
 private:
 	static ShaderInterface* shaderInterface;
 
-	static ShaderBlock_Core shaderCoreData;
-	static UBO* shaderCoreUBO;
-
+	static ShaderBlock_Core     shaderCoreData;
 	static ShaderBlock_Material shaderMaterialData;
-	static UBO* shaderMaterialUBO;
-
 	static ShaderBlock_Skinning shaderSkinningData;
-	static UBO* shaderSkinningUBO;
 
 	static std::vector<Camera*> cameras;
 	static std::vector<Texture*> boundTextures;
-	static std::unordered_map<std::string, std::vector<std::string>> renderShaderPaths;
-	static std::unordered_map<std::string, RenderShader*> loadedRenderShaders;
+	static std::unordered_map<unsigned int, std::vector<std::string>> renderShaderPaths;
+	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
 	static Texture* blank;
 
 	/* This mesh is used to render a FramebufferTexture to the screen - useful
@@ -60,28 +55,29 @@ private:
 	static void assignMatTexture(Shader* shader, std::string type, Texture* texture);
 public:
 	/* The names of default shaders loaded into the engine */
-	static const std::string SHADER_MATERIAL;
-	static const std::string SHADER_SKY_BOX;
-	static const std::string SHADER_FONT;
-	static const std::string SHADER_BILLBOARD;
-	static const std::string SHADER_PARTICLE;
-	static const std::string SHADER_LIGHTING;
-	static const std::string SHADER_FRAMEBUFFER;
-	static const std::string SHADER_ENVIRONMENT_MAP;
-	static const std::string SHADER_SHADOW_MAP;
-	static const std::string SHADER_SHADOW_CUBEMAP;
-	static const std::string SHADER_BILLBOARDED_FONT;
-	static const std::string SHADER_TERRAIN;
-	static const std::string SHADER_PLAIN_TEXTURE;
-	static const std::string SHADER_DEFERRED_LIGHTING;
-	static const std::string SHADER_TILEMAP;
+	static const unsigned int SHADER_MATERIAL;
+	static const unsigned int SHADER_SKY_BOX;
+	static const unsigned int SHADER_FONT;
+	static const unsigned int SHADER_BILLBOARD;
+	static const unsigned int SHADER_PARTICLE;
+	static const unsigned int SHADER_LIGHTING;
+	static const unsigned int SHADER_FRAMEBUFFER;
+	static const unsigned int SHADER_ENVIRONMENT_MAP;
+	static const unsigned int SHADER_SHADOW_MAP;
+	static const unsigned int SHADER_SHADOW_CUBEMAP;
+	static const unsigned int SHADER_BILLBOARDED_FONT;
+	static const unsigned int SHADER_TERRAIN;
+	static const unsigned int SHADER_PLAIN_TEXTURE;
+	static const unsigned int SHADER_DEFERRED_LIGHTING;
+	static const unsigned int SHADER_TILEMAP;
+	static const unsigned int SHADER_VULKAN;
 
-	static const std::string SHADER_PBR_EQUI_TO_CUBE_GEN;
-	static const std::string SHADER_PBR_IRRADIANCE_MAP_GEN;
-	static const std::string SHADER_PBR_PREFILTER_MAP_GEN;
-	static const std::string SHADER_PBR_BRDF_INTEGRATION_MAP_GEN;
-	static const std::string SHADER_PBR_LIGHTING;
-	static const std::string SHADER_PBR_DEFERRED_LIGHTING;
+	static const unsigned int SHADER_PBR_EQUI_TO_CUBE_GEN;
+	static const unsigned int SHADER_PBR_IRRADIANCE_MAP_GEN;
+	static const unsigned int SHADER_PBR_PREFILTER_MAP_GEN;
+	static const unsigned int SHADER_PBR_BRDF_INTEGRATION_MAP_GEN;
+	static const unsigned int SHADER_PBR_LIGHTING;
+	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -115,8 +111,11 @@ public:
 	/* Method used to initialise the rendering system */
 	static void initialise();
 
-	/* The method used to apply the material properties to a shader assuming it is already being used */
-	static void setMaterialUniforms(Shader* shader, std::string shaderName, Material* material);
+	/* TMethod used to apply the material properties to a shader assuming it is already being used */
+	static void useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material, UBO* materialUBO);
+
+	/* Method used to stop applying a material (unbinds required textures) */
+	static void stopUsingMaterial(Material* material);
 
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
@@ -131,16 +130,16 @@ public:
 	static Shader* loadEngineShader(std::string path);
 
 	/* Method used to prepare a shader by adding its required uniforms provided the id is recognised */
-	static void prepareForwardShader(std::string id, Shader* shader);
+	static void prepareForwardShader(unsigned int id, Shader* shader);
 
 	/* Method used to prepare a shader by adding its required uniforms provided the id is recognised */
-	static void prepareDeferredGeomShader(std::string id, Shader* shader);
+	static void prepareDeferredGeomShader(unsigned int id, Shader* shader);
 
 	/* Method used to add a RenderShader given a the paths to the shaders */
-	static void addRenderShader(std::string id, std::string forwardShaderPath, std::string deferredGeomShaderPath = "");
+	static void addRenderShader(unsigned int id, std::string forwardShaderPath, std::string deferredGeomShaderPath = "");
 
 	/* Method used to load a render shader from the list of render shaders and store it ready for use */
-	static void loadRenderShader(std::string id);
+	static void loadRenderShader(unsigned int id);
 
 	/* Method used to add a RenderShader */
 	static void addRenderShader(RenderShader* renderShader);
@@ -149,7 +148,7 @@ public:
 	static inline ShaderInterface* getShaderInterface() { return shaderInterface; }
 
 	/* Returns the RenderShader with a specific id */
-	static RenderShader* getRenderShader(std::string id);
+	static RenderShader* getRenderShader(unsigned int id);
 
 	/* Returns the blank texture */
 	static inline Texture* getBlankTexture() { return blank; }

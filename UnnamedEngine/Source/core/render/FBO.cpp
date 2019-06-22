@@ -51,6 +51,7 @@ void FramebufferStore::setup(GLuint fboTarget, bool multisample) {
 
 		//Attach to framebuffer
 		glFramebufferTexture2D(fboTarget, attachment, getParameters().getTarget(), getHandle(), 0);
+		unbind();
 	}
 }
 
@@ -76,6 +77,7 @@ void FramebufferStoreCubemap::setup(GLuint fboTarget, bool multisample) {
 
 	//Attach to framebuffer
 	glFramebufferTexture(fboTarget, attachment, getHandle(), 0);
+	unbind();
 }
 
 /*****************************************************************************
