@@ -19,10 +19,10 @@
 #ifndef CORE_RENDER_RENDERDATA_H_
 #define CORE_RENDER_RENDERDATA_H_
 
+#include "../vulkan/VulkanGraphicsPipeline.h"
 #include "VBO.h"
 #include "UBO.h"
 #include "Texture.h"
-#include "../vulkan/VulkanGraphicsPipeline.h"
 #include "TextureSet.h"
 
 /*****************************************************************************

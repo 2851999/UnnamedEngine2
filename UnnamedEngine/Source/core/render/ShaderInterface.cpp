@@ -81,7 +81,10 @@ ShaderInterface::~ShaderInterface() {
 	//Go through and delete all UBO's
 	for (auto it : ubos)
 		delete it.second;
+	for (UBO* ubo : ubosVk)
+		delete ubo;
 	ubos.clear();
+	ubosVk.clear();
 }
 
 void ShaderInterface::add(unsigned int id, unsigned int size, unsigned int usage, unsigned int binding) {
@@ -174,7 +177,11 @@ UBO* ShaderInterface::getUBO(unsigned int id) {
 		//Create the UBO and then return it after adding it to the created UBO's
 		UBOInfo& info = ubosInfo.at(id);
 		UBO* ubo = new UBO(NULL, info.size, info.usage, info.binding);
-		ubos.insert(std::pair<unsigned int, UBO*>(id, ubo));
+		//Add it to the correct place
+		if (Window::getCurrentInstance()->getSettings().videoVulkan)
+			ubosVk.push_back(ubo);
+		else
+			ubos.insert(std::pair<unsigned int, UBO*>(id, ubo));
 		return ubo;
 	} else {
 		Logger::log("The UBO with the id '" + utils_string::str(id) + "' could not be found", "ShaderInterface", LogType::Error);

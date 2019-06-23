@@ -32,6 +32,7 @@ private:
 
 	DebugCamera* camera;
 	GameObject3D* model;
+	GameObject3D* model2;
 public:
 	void initialise() override;
 	void created() override;
@@ -43,19 +44,20 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
 
 	getSettings().videoVulkan = true;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
-	getSettings().videoVSync = 2;
+	getSettings().videoVSync = 0;
 	getSettings().debugShowInformation = false;
 	getSettings().videoSamples = 8;
 	getSettings().videoMaxAnisotropicSamples = 16;
 }
 
 void Test::created() {
-	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("VulkanShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 0.0f, 1.0f);
@@ -78,6 +80,13 @@ void Test::created() {
 	model = new GameObject3D(mesh, Renderer::SHADER_MATERIAL);
 	model->setScale(0.15f, 0.15f, 0.15f);
 	model->update();
+
+	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
+
+	mesh2->setCullingEnabled(false);
+	model2 = new GameObject3D(mesh2, Renderer::SHADER_VULKAN);
+	model2->setPosition(4.0f, 1.0f, 0.0f);
+	model2->update();
 }
 
 
@@ -95,10 +104,12 @@ void Test::render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	model->render();
+	model2->render();
 }
 
 void Test::destroy() {
 	delete model;
+	delete model2;
 	delete camera;
 }
 

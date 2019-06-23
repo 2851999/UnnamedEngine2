@@ -108,14 +108,14 @@ public:
 	static VkShaderModule createVkShaderModule(const std::vector<char>& code);
 
 	/* Methods used to load a shader */
-	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source);
-	static ShaderSource loadShaderSource(std::string path);
+	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source, unsigned int uboBindingOffset = 0);
+	static ShaderSource loadShaderSource(std::string path, unsigned int uboBindingOffset = 0);
 	static Shader* loadShader(std::string path);
 
 	/* Methods to read a shader and output all of the complete files for that shader (with all includes replaced as requested) - these
 	 * will not include mapped uniforms since they are intended for compilation to SPIR-V */
-	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath);
-	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath);
+	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
+	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
 
 	/* Utility method to use given glslValidator.exe path to compile a shader from the engine to SPIR-V */
 	static void compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath);

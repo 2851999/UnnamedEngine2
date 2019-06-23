@@ -109,6 +109,22 @@ namespace utils_string {
 		return split;
 	}
 
+	std::string strJoin(const std::vector<std::string>& text, char delimeter) {
+		std::string joinedString = text[0];
+		//Append all of the text
+		for (unsigned int i = 1; i < text.size(); ++i)
+			joinedString += delimeter +  text[i];
+		return joinedString;
+	}
+
+	std::string strJoin(const std::vector<std::string>& text, const std::string& delimeter) {
+		std::string joinedString = text[0];
+		//Append all of the text
+		for (unsigned int i = 1; i < text.size(); ++i)
+			joinedString += delimeter +  text[i];
+		return joinedString;
+	}
+
 	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement) {
 		size_t index = 0;
 		std::string str = s;

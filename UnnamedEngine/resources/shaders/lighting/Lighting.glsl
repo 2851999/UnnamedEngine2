@@ -18,7 +18,7 @@ struct UELight {
 	bool useShadowMap;
 };
 
-layout (std140, binding = 4) uniform UELightingData {
+layout(std140, binding = 4) uniform UELightingData {
 	UELight ue_lights[MAX_LIGHTS];
 	mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
 	

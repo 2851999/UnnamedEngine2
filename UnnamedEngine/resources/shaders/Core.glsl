@@ -1,7 +1,7 @@
 #version 420
 //Used for assigning UBO block locations - can remove
 
-layout (std140, binding = 1) uniform UECoreData {
+layout(std140, binding = 1) uniform UECoreData {
 	mat4 ue_mvpMatrix;
 	mat4 ue_modelMatrix;
 	mat4 ue_viewMatrix;

@@ -1,4 +1,70 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 3 | Experimental 1
+
+* Added function 'strJoin' to utils_string
+
+* Changed Shader and UBO to apply an offset to UBO binding
+  locations when using Vulkan
+* Changed 'debugCallback' in Vulkan to output the correct
+  message severity
+  
+* Fixed bug: Rendering multiple objects with Vulkan meant
+             some UBOs were not destroyed
+
+--------------------------------------------------------------
+Release 1 | Beta 2 | Development 3 (V0.3.7)
+
+* Added 'setup' method in ShaderInterface
+* Added methods 'useMaterial' and 'stopUsingMaterial' in
+  Renderer (Replacing 'setMaterialUniforms' method)
+* Added methods 'outputCompleteShaderFile(s)' to Shader to
+  write a whole shader file containing all includes
+* Added 'compileToSPIRV'/'compileEngineShaderToSPIRV' methods
+  to Shader to help compile engine shaders to SPIR-V (Requires
+  glslangValidator)
+* Added 'createQuad3D' method with a texture in MeshBuilder
+* Added MSAA when using Vulkan
+* Added 'debugVkValidationLayersEnabled' in Settings
+
+* Changed ShaderInterface so the UBO id's are now integer
+  values
+* Changed shader id's in Renderer to use unsigned integers
+  instead of strings
+* Changed MeshRenderData to add the required UBO's to
+  it's RenderData using ShaderInterface
+* Changed 'loadEngineShader' in Renderer to load shaders for
+  Vulkan in a separate folder 'shaders-vulkan'
+* Changed Renderer and RenderData to support multiple
+  materials using 'SubData' within MeshData (Vulkan)
+* Changed culling winding order to counter clockwise in
+  VulkanGraphicsPipeline
+* Changed 'chooseSwapPresentMode' to try and apply the VSync
+  value in the window settings when using Vulkan
+* Changed 'videoVSync' in Settings to be an 'unsinged int'
+  type so a value of 2 can be used to indicate triple
+  buffering should be used (Vulkan)
+  
+* Fixed bug: Didn't unbind depth buffer when creating a
+             FramebufferStore
+* Fixed bug: 'Renderer::destroy' was never called by
+             BaseEngine
+* Fixed bug: RenderData would not correcly use multiple
+             textures or UBO's when using Vulkan
+* Fixed bug: Occasional crash using Vulkan caused by
+             VkDescriptorBufferInfo's 'offset' being changed
+* Fixed bug: DebugCamera assigned 'A' and 'D' keys bindings
+             the wrong way round
+* Fixed bug: Crash trying to use multiple TextureSet's in
+             RenderData
+* Fixed bug: Occasional crash due to wrong number of
+             VkDescriptorSet's being assigned (Could also
+             cause above crash)
+* Fixed bug: RenderData 'renderBaseVertex' supplied an
+             incorrect 'firstIndex' to vkCmdDrawIndexed
+* Fixed bug: 'shouldClamp' was not used in TextureParameters
+             when using Vulkan
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 2 | Experimental 6
 
 * Added MSAA when using Vulkan
@@ -26,11 +92,11 @@ Release 1 | Beta 2 | Development 2 | Experimental 5
 Release 1 | Beta 2 | Development 2 | Experimental 4
 
 * Changed Renderer and RenderData to support multiple
-  materials using 'SubData' within MeshData
+  materials using 'SubData' within MeshData (Vulkan)
 * Changed culling winding order to counter clockwise in
   VulkanGraphicsPipeline
 
-* Fixed bug: Occasional crash using Vulkan caused
+* Fixed bug: Occasional crash using Vulkan caused by
              VkDescriptorBufferInfo's 'offset' being changed
 * Fixed bug: DebugCamera assigned 'A' and 'D' keys bindings
              the wrong way round

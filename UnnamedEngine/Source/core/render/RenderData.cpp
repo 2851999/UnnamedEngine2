@@ -21,6 +21,8 @@
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 
+#include "Renderer.h"
+
 /*****************************************************************************
  * The RenderData class
  *****************************************************************************/
@@ -191,7 +193,7 @@ void RenderData::setupVulkan(Shader* shader) {
 
 					for (TextureSet::TextureInfo& textureInfo : textureSets[y]->getTextureInfos()) {
 						//Only assign if have an actual texture (allows textures to be assigned later)
-						if (textureInfo.texture != NULL) {
+						//if (textureInfo.texture != NULL) {
 							VkWriteDescriptorSet textureWrite;
 							textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 							textureWrite.dstSet           = descriptorSets[i];
@@ -200,11 +202,11 @@ void RenderData::setupVulkan(Shader* shader) {
 							textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 							textureWrite.descriptorCount  = 1;
 							textureWrite.pBufferInfo      = nullptr;
-							textureWrite.pImageInfo       = textureInfo.texture->getVkImageInfo();
+							textureWrite.pImageInfo       = textureInfo.texture != NULL ? textureInfo.texture->getVkImageInfo() : Renderer::getBlankTexture()->getVkImageInfo();
 							textureWrite.pTexelBufferView = nullptr;
 							textureWrite.pNext            = nullptr;
 							descriptorWrites.push_back(textureWrite);
-						}
+						//}
 					}
 					vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 				}

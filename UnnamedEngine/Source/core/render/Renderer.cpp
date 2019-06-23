@@ -92,17 +92,17 @@ GLuint Renderer::bindTexture(Texture* texture) {
 	if (loc < boundTextures.size()) {
 		boundTextures.push_back(texture);
 		//It has so return the correct active texture
-		return loc + 20;
+		return loc + 10;
 	} else {
-		glActiveTexture(GL_TEXTURE20 + boundTextures.size());
+		glActiveTexture(GL_TEXTURE10 + boundTextures.size());
 		texture->bind();
 		boundTextures.push_back(texture);
-		return boundTextures.size() + 20 - 1;
+		return boundTextures.size() + 10 - 1;
 	}
 }
 
 void Renderer::unbindTexture() {
-	glActiveTexture(GL_TEXTURE20 + boundTextures.size() - 1);
+	glActiveTexture(GL_TEXTURE10 + boundTextures.size() - 1);
 	boundTextures[boundTextures.size() - 1]->unbind();
 	boundTextures.pop_back();
 }
@@ -124,13 +124,13 @@ void Renderer::initialise() {
 	//Create the shader interface
 	shaderInterface = new ShaderInterface();
 
+	blank = Texture::loadTexture("resources/textures/blank.png");
+
 	//Setup the shaders
 	addRenderShader(SHADER_MATERIAL,                     "MaterialShader",                   "");
 	addRenderShader(SHADER_VULKAN,				         "VulkanShader",				     "");
 
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
-		blank = Texture::loadTexture("resources/textures/blank.png");
-
 		addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
 		addRenderShader(SHADER_FONT,                         "FontShader",                       "");
 		addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
@@ -258,6 +258,7 @@ void Renderer::render(FramebufferStore* texture, Shader* shader) {
 }
 
 void Renderer::destroy() {
+	//delete blank;
 	delete shaderInterface;
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
 		delete screenTextureMesh;

@@ -24,7 +24,7 @@
 #include <fstream>
 
 /*****************************************************************************
- * The VulkanGraphicsPipeline class
+ * The GraphicsPipeline class
  *****************************************************************************/
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, RenderData* renderData, Shader* shader) {
@@ -159,7 +159,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	pipelineLayoutInfo.pPushConstantRanges    = nullptr; //Optional
 
 	if (vkCreatePipelineLayout(swapChain->getDevice()->getLogical(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
-		Logger::log("Failed to create pipeline layout", "VulkanGraphicsPipeline", LogType::Error);
+		Logger::log("Failed to create pipeline layout", "GraphicsPipeline", LogType::Error);
 
 	VkGraphicsPipelineCreateInfo pipelineInfo = {};
 	pipelineInfo.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -181,7 +181,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	pipelineInfo.basePipelineIndex   = -1; //Optional
 
 	if (vkCreateGraphicsPipelines(swapChain->getDevice()->getLogical(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
-		Logger::log("Failed to create graphics pipeline", "VulkanGraphicsPipeline", LogType::Error);
+		Logger::log("Failed to create graphics pipeline", "GraphicsPipeline", LogType::Error);
 }
 
 VulkanGraphicsPipeline::~VulkanGraphicsPipeline() {

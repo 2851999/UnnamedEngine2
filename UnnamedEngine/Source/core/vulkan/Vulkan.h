@@ -23,12 +23,11 @@
 #include "VulkanDevice.h"
 #include "VulkanSwapChain.h"
 #include "VulkanRenderPass.h"
-#include "VulkanGraphicsPipeline.h"
-
 #include "../render/VBO.h"
 #include "../render/UBO.h"
 #include "../render/Texture.h"
 #include "../render/Mesh.h"
+#include "VulkanGraphicsPipeline.h"
 
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan

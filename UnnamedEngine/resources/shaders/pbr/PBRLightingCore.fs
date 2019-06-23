@@ -10,7 +10,7 @@ uniform samplerCube ue_irradianceMap;
 uniform samplerCube ue_prefilterMap;
 uniform sampler2D   ue_brdfLUT;
 
-layout (std140, binding = 9) uniform UEPBRLightingCoreData {
+layout(std140, binding = 9) uniform UEPBRLightingCoreData {
 	bool ue_useAmbient;
 };
 

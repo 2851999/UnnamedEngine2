@@ -153,6 +153,8 @@ private:
 	std::unordered_map<unsigned int, UBOInfo> ubosInfo;
 	/* Map used to store UBO's with keys for accessing them */
 	std::unordered_map<unsigned int, UBO*> ubos;
+	/* UBO's used for Vulkan (Have multiple of same key) */
+	std::vector<UBO*> ubosVk;
 public:
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;

@@ -635,12 +635,18 @@ void Vulkan::destroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMess
 		func(instance, debugMessenger, pAllocator);
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL Vulkan::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-	    VkDebugUtilsMessageTypeFlagsEXT messageType,
-	    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-	    void* pUserData) {
+VKAPI_ATTR VkBool32 VKAPI_CALL Vulkan::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+	LogType logType;
+	if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
+		logType = LogType::Debug;
+	else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+		logType = LogType::Information;
+	else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+		logType = LogType::Warning;
+	else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+		logType = LogType::Error;
 	//Output the message
-	Logger::log(pCallbackData->pMessage, "Vulkan (ValidationLayer)", LogType::Warning);
+	Logger::log(pCallbackData->pMessage, "Vulkan (ValidationLayer)", logType);
 
 	return VK_FALSE;
 }

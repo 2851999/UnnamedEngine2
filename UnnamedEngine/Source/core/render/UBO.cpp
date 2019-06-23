@@ -38,6 +38,9 @@ UBO::UBO(void* data, unsigned int size, GLenum usage, unsigned int blockBinding)
 
 		glBindBufferBase(GL_UNIFORM_BUFFER, blockBinding, buffer);
 	} else {
+		//Apply the offset for Vulkan
+		this->blockBinding += VULKAN_BINDING_OFFSET;
+
 		//Setup the buffer for Vulkan
 		vulkanBuffers.resize(Vulkan::getSwapChain()->getImageCount());
 

@@ -1,7 +1,6 @@
 #version 420
-//Used for assigning UBO block locations - can remove
 
-layout (std140, binding = 1) uniform UECoreData {
+layout(std140, binding = 1) uniform UECoreData {
 	mat4 ue_mvpMatrix;
 	mat4 ue_modelMatrix;
 	mat4 ue_viewMatrix;
@@ -10,7 +9,6 @@ layout (std140, binding = 1) uniform UECoreData {
 	
 	vec4 ue_cameraPosition;
 };
-
 
 #define UE_LOCATION_POSITION 0
 #define UE_LOCATION_TEXTURE_COORD 1
