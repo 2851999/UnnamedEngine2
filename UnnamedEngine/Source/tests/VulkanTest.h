@@ -44,7 +44,7 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().debugVkValidationLayersEnabled = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 
 	getSettings().videoVulkan = true;
 	getSettings().videoMaxFPS = 0;
@@ -58,10 +58,12 @@ void Test::initialise() {
 void Test::created() {
 //	Shader::compileEngineShaderToSPIRV("VulkanShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 0.0f, 1.0f);
 	camera->setFlying(true);
+	camera->setSkyBox(new SkyBox("C:/UnnamedEngine/textures/skybox2/", ".jpg"));
 	Renderer::addCamera(camera);
 	getWindow()->disableCursor();
 
@@ -82,6 +84,7 @@ void Test::created() {
 	model->update();
 
 	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
+	//Mesh* mesh2 = new Mesh(MeshBuilder::createCube(10.0f, 10.0f, 10.0f));
 
 	mesh2->setCullingEnabled(false);
 	model2 = new GameObject3D(mesh2, Renderer::SHADER_VULKAN);
@@ -103,6 +106,9 @@ void Test::render() {
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
+
+	camera->useView();
+
 	model->render();
 	model2->render();
 }

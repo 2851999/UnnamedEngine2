@@ -37,7 +37,7 @@ RenderData::~RenderData() {
 	}
 }
 
-void RenderData::setup(Shader* shader) {
+void RenderData::setup(RenderShader* renderShader) {
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
 		//Generate the VAO and bind it
 		glGenVertexArrays(1, &vao);
@@ -161,14 +161,14 @@ void RenderData::setup(Shader* shader) {
 			Logger::log("Failed to allocate descriptor sets", "RenderData", LogType::Error);
 
 		//Setup the pipeline
-		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), vbosFloat[0], Vulkan::getRenderPass(), this, shader);
+		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), vbosFloat[0], Vulkan::getRenderPass(), this, renderShader);
 
 		//Assign the descriptor write info
-		setupVulkan(shader);
+		setupVulkan(renderShader);
 	}
 }
 
-void RenderData::setupVulkan(Shader* shader) {
+void RenderData::setupVulkan(RenderShader* renderShader) {
 	//Setup the descriptor set write's
 	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
 		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();

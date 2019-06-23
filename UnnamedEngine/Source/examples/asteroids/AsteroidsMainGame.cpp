@@ -44,7 +44,7 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 
 	//Setup the asteroid renderer
 	unsigned int numAsteroids = 1250;
-	asteroidRenderer = new GameRenderer(loader.loadModel("asteroid_model.obj"), loader.loadShader("AsteroidShader"), numAsteroids, true, true, true);
+	asteroidRenderer = new GameRenderer(loader.loadModel("asteroid_model.obj"), new RenderShader(0, loader.loadShader("AsteroidShader"), NULL), numAsteroids, true, true, true);
 
 	//The current number of asteroids generated
 	unsigned int currentNumAsteroids = 0;
@@ -63,7 +63,7 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	}
 
 	unsigned int numEnemies = 10;
-	enemiesRenderer = new GameRenderer(loader.loadModel("enemyship.obj"), loader.loadShader("AsteroidShader"), numEnemies, false, true, false);
+	enemiesRenderer = new GameRenderer(loader.loadModel("enemyship.obj"), new RenderShader(0, loader.loadShader("AsteroidShader"), NULL), numEnemies, false, true, false);
 
 	//Go through the enemies
 	for (unsigned int i = 0; i < numEnemies; i++) {

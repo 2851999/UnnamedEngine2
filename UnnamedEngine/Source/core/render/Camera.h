@@ -28,7 +28,7 @@
  *****************************************************************************/
 
 class Camera {
-private:
+protected:
 	/* The projection and view matrices */
 	Matrix4f projectionMatrix;
 	Matrix4f viewMatrix;

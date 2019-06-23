@@ -100,16 +100,6 @@ private:
 	/* OpenGL handle to the texture */
 	GLuint texture = 0;
 
-	/* Required objects for Vulkan to access and use a texture */
-	VkImage        textureVkImage       = VK_NULL_HANDLE;
-	VkDeviceMemory textureVkImageMemory = VK_NULL_HANDLE;
-	VkImageView    textureVkImageView   = VK_NULL_HANDLE;
-	VkDescriptorImageInfo imageInfo;
-
-	/* Sampler for this texture (Should change to use one for many rather than
-	 * create one for each texture) */
-	VkSampler textureVkSampler = VK_NULL_HANDLE;
-
 	/* The width and height */
 	unsigned int width = 0;
 	unsigned int height = 0;
@@ -129,9 +119,19 @@ private:
 protected:
 	/* The texture parameters for this texture */
 	TextureParameters parameters;
+
+	/* Required objects for Vulkan to access and use a texture */
+	VkImage        textureVkImage       = VK_NULL_HANDLE;
+	VkDeviceMemory textureVkImageMemory = VK_NULL_HANDLE;
+	VkImageView    textureVkImageView   = VK_NULL_HANDLE;
+	VkDescriptorImageInfo imageInfo;
+
+	/* Sampler for this texture (Should change to use one for many rather than
+	 * create one for each texture) */
+	VkSampler textureVkSampler = VK_NULL_HANDLE;
 public:
 	/* The constructors */
-	Texture(TextureParameters parameters = TextureParameters()) : parameters(parameters) { create(); }
+	Texture(TextureParameters parameters = TextureParameters()) : parameters(parameters) { if (! Window::getCurrentInstance()->getSettings().videoVulkan) create(); }
 	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : texture(texture), parameters(parameters) {}
 	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : width(width), height(height), parameters(parameters) { create(); }
 	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : texture(texture), width(width), height(height), parameters(parameters) {}

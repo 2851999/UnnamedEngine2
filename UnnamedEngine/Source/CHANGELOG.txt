@@ -1,4 +1,23 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 3 | Experimental 2
+
+* Added GraphicsState
+* Added basic Cubemap support for Vulkan
+
+* Changed 'setup' methods in RenderData to require a
+  RenderShader instead of a Shader
+* Changed 'initPerspective' in Matrix4f to return a
+  different matrix when using Vulkan (so depth values are
+  in the range 0-1 as Vulkan requires)
+* Changed 'depthCompareOp' to VK_COMPARE_OP_LESS_OR_EQUAL in
+  VulkanPipeline
+
+* Fixed bug: Loaded RenderShaders were not destroyed by
+             Renderer
+* Fixed bug: VBO would not work with Vulkan if there was
+             only one attribute
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 3 | Experimental 1
 
 * Added function 'strJoin' to utils_string

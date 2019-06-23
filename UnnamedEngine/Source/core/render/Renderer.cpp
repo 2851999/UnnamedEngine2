@@ -44,6 +44,8 @@ MeshRenderData* Renderer::screenTextureMesh;
 
 std::vector<unsigned int> Renderer::boundTexturesOldSize;
 
+GraphicsState* Renderer::currentGraphicsState = nullptr;
+
 const unsigned int Renderer::SHADER_MATERIAL          = 1;
 const unsigned int Renderer::SHADER_SKY_BOX           = 2;
 const unsigned int Renderer::SHADER_FONT              = 3;
@@ -128,10 +130,10 @@ void Renderer::initialise() {
 
 	//Setup the shaders
 	addRenderShader(SHADER_MATERIAL,                     "MaterialShader",                   "");
+	addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
 	addRenderShader(SHADER_VULKAN,				         "VulkanShader",				     "");
 
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
-		addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
 		addRenderShader(SHADER_FONT,                         "FontShader",                       "");
 		addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
 		addRenderShader(SHADER_PARTICLE,                     "ParticleShader",                   "");
@@ -185,6 +187,15 @@ void Renderer::stopUsingMaterial(Material* material) {
 		material->getTextureSet()->unbindGLTextures();
 }
 
+void Renderer::useGraphicsState(GraphicsState* graphicsState) {
+	//Ensure using OpenGL
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		//Apply the new state
+		graphicsState->applyGL(currentGraphicsState);
+		currentGraphicsState = graphicsState;
+	}
+}
+
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
 	//Ensure there is a Shader and Camera instance for rendering
 	if (renderShader && getCamera()) {
@@ -195,6 +206,9 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		UBO* shaderCoreUBO     = renderData->getUBO(ShaderInterface::BLOCK_CORE);
 		UBO* shaderSkinningUBO = renderData->getUBO(ShaderInterface::BLOCK_SKINNING);
 		UBO* materialUBO       = renderData->getUBO(ShaderInterface::BLOCK_MATERIAL);
+
+		//Use the correct graphics state
+		useGraphicsState(renderShader->getGraphicsState());
 
 		shaderCoreData.ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
 		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
@@ -258,8 +272,9 @@ void Renderer::render(FramebufferStore* texture, Shader* shader) {
 }
 
 void Renderer::destroy() {
-	//delete blank;
 	delete shaderInterface;
+	for (auto element : loadedRenderShaders)
+		delete element.second;
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
 		delete screenTextureMesh;
 }
@@ -326,8 +341,20 @@ void Renderer::loadRenderShader(unsigned int id) {
 		deferredGeomShader = loadEngineShader(shaderPaths[1]);
 		prepareDeferredGeomShader(id, deferredGeomShader);
 	}
+	//Create the shader
+	RenderShader* renderShader = new RenderShader(id, forwardShader, deferredGeomShader);
+	//Assign the graphics state for the render shader
+	assignGraphicsState(renderShader->getGraphicsState(), id);
 	//Add the shader
-	addRenderShader(new RenderShader(id, forwardShader, deferredGeomShader));
+	addRenderShader(renderShader);
+}
+
+void Renderer::assignGraphicsState(GraphicsState* state, unsigned int shaderID) {
+	//Check the shader ID
+	if (shaderID == SHADER_SKY_BOX) {
+		//Assign the state to use
+		state->depthWriteEnable = false;
+	}
 }
 
 void Renderer::addRenderShader(RenderShader* renderShader) {

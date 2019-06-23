@@ -439,37 +439,206 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 		parameters.setFilter(GL_LINEAR);
 		parameters.setClamp(GL_CLAMP_TO_EDGE);
 		parameters.setShouldClamp(true);
-		//Bind this cubemap
-		bind();
 
-		//Data required for setting up
-		int numComponents, width, height, internalFormat, format;
-		//The current texture
-		unsigned char* image;
+		if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+			//Bind this cubemap
+			bind();
 
-		//Go through each face
-		for (unsigned int i = 0; i < faces.size(); i++) {
-			//Load the image for the current face
-			image = Texture::loadTexture(path + faces[i], numComponents, width, height, parameters.getSRGB());
-			Texture::getTextureFormatGL(numComponents, parameters.getSRGB(), internalFormat, format);
-			//Setup the texture
-			glTexImage2D(
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				0,
-				internalFormat,
-				width,
-				height,
-				0,
-				format,
-				GL_UNSIGNED_BYTE,
-				image
+			//Data required for setting up
+			int numComponents, width, height, internalFormat, format;
+			//The current texture
+			unsigned char* image;
+
+			//Go through each face
+			for (unsigned int i = 0; i < faces.size(); ++i) {
+				//Load the image for the current face
+				image = Texture::loadTexture(path + faces[i], numComponents, width, height, parameters.getSRGB());
+				Texture::getTextureFormatGL(numComponents, parameters.getSRGB(), internalFormat, format);
+				//Setup the texture
+				glTexImage2D(
+					GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+					0,
+					internalFormat,
+					width,
+					height,
+					0,
+					format,
+					GL_UNSIGNED_BYTE,
+					image
+				);
+				//Free the loaded image data
+				Texture::freeTexture(image);
+			}
+
+			//Now that the cubemap is fully loaded, apply the texture parameters
+			applyParameters(false, true);
+		} else {
+			unsigned char* textureData[6];
+
+			//Data required for setting up
+			int numComponents, width, height;
+			for (unsigned int i = 0; i < faces.size(); ++i)
+				//Load the image for the current face
+				textureData[i] = Texture::loadTexture(path + faces[i], numComponents, width, height, parameters.getSRGB());
+
+			const VkDeviceSize layerSize = width * height * STBI_rgb_alpha;
+			const VkDeviceSize imageSize = layerSize * 6; //Assume texture sizes are identical
+
+			VkFormat format;
+			Texture::getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), format);
+
+			//Staging buffer
+			VkBuffer stagingBuffer;
+			VkDeviceMemory stagingBufferMemory;
+			Vulkan::createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+			void* data;
+			vkMapMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, 0, imageSize, 0, &data);
+			for (unsigned int i = 0; i < 6; ++i)
+				memcpy(static_cast<char*>(data) + ((layerSize * i)), textureData[i], static_cast<unsigned int>(layerSize));
+			vkUnmapMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory);
+
+		    VkImageCreateInfo imageCreateInfo = {};
+		    imageCreateInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		    imageCreateInfo.imageType     = VK_IMAGE_TYPE_2D;
+		    imageCreateInfo.extent.width  = width;
+		    imageCreateInfo.extent.height = height;
+		    imageCreateInfo.extent.depth  = 1;
+		    imageCreateInfo.mipLevels     = 1;
+		    imageCreateInfo.arrayLayers   = 6;
+		    imageCreateInfo.format        = format;
+		    imageCreateInfo.tiling        = VK_IMAGE_TILING_OPTIMAL;
+		    imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		    imageCreateInfo.usage         = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		    imageCreateInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
+		    imageCreateInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
+		    imageCreateInfo.flags         = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+
+		    if (vkCreateImage(Vulkan::getDevice()->getLogical(), &imageCreateInfo, nullptr, &textureVkImage) != VK_SUCCESS)
+		    	Logger::log("Failed to create image", "Cubemap", LogType::Error);
+
+		    VkMemoryRequirements memRequirements;
+		    vkGetImageMemoryRequirements(Vulkan::getDevice()->getLogical(), textureVkImage, &memRequirements);
+
+		    VkMemoryAllocateInfo allocInfo = {};
+		    allocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		    allocInfo.allocationSize  = memRequirements.size;
+		    allocInfo.memoryTypeIndex = Vulkan::findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+			if (vkAllocateMemory(Vulkan::getDevice()->getLogical(), &allocInfo, nullptr, &textureVkImageMemory) != VK_SUCCESS)
+				Logger::log("Failed to allocate image memory", "Cubemap", LogType::Error);
+
+			vkBindImageMemory(Vulkan::getDevice()->getLogical(), textureVkImage, textureVkImageMemory, 0);
+
+			VkCommandBuffer copyCommandBuffer = Vulkan::beginSingleTimeCommands();
+
+			std::vector<VkBufferImageCopy> bufferCopyRegions;
+			unsigned int offset = 0;
+
+			for (unsigned int i = 0; i < 6; ++i) {
+				VkBufferImageCopy bufferCopyRegion = {};
+				bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				bufferCopyRegion.imageSubresource.mipLevel = 0;
+				bufferCopyRegion.imageSubresource.baseArrayLayer = i;
+				bufferCopyRegion.imageSubresource.layerCount = 1;
+				bufferCopyRegion.imageExtent.width = width;
+				bufferCopyRegion.imageExtent.height = height;
+				bufferCopyRegion.imageExtent.depth = 1;
+				bufferCopyRegion.bufferOffset = offset;
+
+				bufferCopyRegions.push_back(bufferCopyRegion);
+
+				offset += layerSize;
+			}
+
+			VkImageMemoryBarrier barrier = {};
+			barrier.sType     = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+			barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+			barrier.image = textureVkImage;
+			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+
+			barrier.subresourceRange.baseMipLevel   = 0;
+			barrier.subresourceRange.levelCount     = 1;
+			barrier.subresourceRange.baseArrayLayer = 0;
+			barrier.subresourceRange.layerCount     = 6;
+
+			VkPipelineStageFlags sourceStage;
+			VkPipelineStageFlags destinationStage;
+
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			sourceStage      = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+
+			vkCmdPipelineBarrier(
+					copyCommandBuffer,
+					sourceStage, destinationStage,
+					0,
+					0, nullptr,
+					0, nullptr,
+					1, &barrier
 			);
-			//Free the loaded image data
-			Texture::freeTexture(image);
-		}
 
-		//Now that the cubemap is fully loaded, apply the texture parameters
-		applyParameters(false, true);
+			vkCmdCopyBufferToImage(
+				copyCommandBuffer,
+				stagingBuffer,
+				textureVkImage,
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				static_cast<uint32_t>(bufferCopyRegions.size()),
+				bufferCopyRegions.data()
+			);
+
+			barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			sourceStage      = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+			vkCmdPipelineBarrier(
+					copyCommandBuffer,
+					sourceStage, destinationStage,
+					0,
+					0, nullptr,
+					0, nullptr,
+					1, &barrier
+			);
+
+			Vulkan::endSingleTimeCommands(copyCommandBuffer);
+
+		    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
+		    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);
+
+			VkImageViewCreateInfo viewInfo = {};
+			viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			viewInfo.image    = textureVkImage;
+			viewInfo.viewType = VK_IMAGE_VIEW_TYPE_CUBE; //TODO: Use target in parameters
+			viewInfo.format   = format;
+			viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			viewInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+			viewInfo.subresourceRange.baseMipLevel   = 0;
+			viewInfo.subresourceRange.levelCount     = 1;
+			viewInfo.subresourceRange.baseArrayLayer = 0;
+			viewInfo.subresourceRange.layerCount     = 6;
+
+			if (vkCreateImageView(Vulkan::getDevice()->getLogical(), &viewInfo, nullptr, &textureVkImageView) != VK_SUCCESS)
+			    Logger::log("Failed to create texture image view", "Cubemap", LogType::Error);
+
+			VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
+			samplerInfo.maxLod = static_cast<float>(1);
+
+			if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
+				Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
+
+			//Setup the descriptor info
+		    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		    imageInfo.imageView   = textureVkImageView;
+		    imageInfo.sampler     = textureVkSampler;
+		}
 	} else {
 		//Log an error
 		Logger::log("Need 6 faces for a cubemap texture", "Cubemap", LogType::Error);

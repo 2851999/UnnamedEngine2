@@ -443,10 +443,17 @@ void Shader::compileEngineShaderToSPIRV(std::string path, std::string glslangVal
  *****************************************************************************/
 
 RenderShader::RenderShader(unsigned int id, Shader* forwardShader, Shader* deferredGeomShader) : id(id) {
+	//Create the graphics state
+	graphicsState = new GraphicsState();
+
 	if (forwardShader)
 		addForwardShader(forwardShader);
 	if (deferredGeomShader)
 		addDeferredGeomShader(deferredGeomShader);
+}
+
+RenderShader::~RenderShader() {
+	delete graphicsState;
 }
 
 void RenderShader::addForwardShader(Shader* forwardShader) {

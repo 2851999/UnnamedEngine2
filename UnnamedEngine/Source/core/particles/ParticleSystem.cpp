@@ -46,7 +46,8 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 
 	renderData = new RenderData(GL_TRIANGLE_STRIP, 4);
 
-	shader = Renderer::getRenderShader(Renderer::SHADER_PARTICLE)->getShader();
+	RenderShader* renderShader = Renderer::getRenderShader(Renderer::SHADER_PARTICLE);
+	shader = renderShader->getShader();
 
 	vboVertices = new VBO<GLfloat>(GL_ARRAY_BUFFER, sizeof(vertexBufferData), data, GL_STREAM_DRAW, true);
 	vboVertices->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
@@ -71,7 +72,7 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 
 	particles.resize(maxParticles);
 
-	renderData->setup(shader);
+	renderData->setup(renderShader);
 
 	//Get the UBO for the billboarding
 	shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);

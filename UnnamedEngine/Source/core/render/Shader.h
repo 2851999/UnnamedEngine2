@@ -25,6 +25,7 @@
 #include "Colour.h"
 #include "../Matrix.h"
 #include "../Resource.h"
+#include "GraphicsState.h"
 
 /*****************************************************************************
  * The Shader class handles a shader program
@@ -132,19 +133,25 @@ class RenderShader {
 private:
 	/* The id for this RenderShader */
 	unsigned int id;
+
 	/* The shaders used for forward rendering - will always use the last
 	 * shader that was added for rendering to allow them to be overridden */
 	std::vector<Shader*> forwardShaders;
+
 	/* The shaders used for the geometry pass of deferred rendering */
 	std::vector<Shader*> deferredGeomShaders;
+
 	/* Boolean that states whether the deferred geometry shader should be used */
 	bool useDeferredGeom = false;
+
+	/* The graphics state this shader uses */
+	GraphicsState* graphicsState;
 public:
 	/* Various constructors */
 	RenderShader(unsigned int id, Shader* forwardShader, Shader* deferredGeomShader);
 
 	/* Descructor */
-	virtual ~RenderShader() {}
+	virtual ~RenderShader();
 
 	/* Methods used to add/remove a forward shader */
 	void addForwardShader(Shader* forwardShader);
@@ -167,6 +174,7 @@ public:
 
 	/* Getters */
 	unsigned int getID() { return id; }
+	GraphicsState* getGraphicsState() { return graphicsState; }
 };
 
 #endif /* CORE_RENDER_SHADER_H_ */

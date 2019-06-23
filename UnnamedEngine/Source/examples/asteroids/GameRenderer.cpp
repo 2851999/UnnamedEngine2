@@ -24,9 +24,10 @@
  * The GameRenderer class
  *****************************************************************************/
 
-GameRenderer::GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, bool useTextureCoords, bool useLighting, bool useNormalMapping) : mesh(mesh), shader(shader), numObjects(numObjects), useLighting(useLighting)  {
+GameRenderer::GameRenderer(Mesh* mesh, RenderShader* renderShader, unsigned int numObjects, bool useTextureCoords, bool useLighting, bool useNormalMapping) : mesh(mesh), shader(renderShader->getShader()), numObjects(numObjects), useLighting(useLighting)  {
 	//Get the mesh data
 	MeshData* meshData = mesh->getData();
+
 	//Setup the render data
 	renderData = new RenderData(GL_TRIANGLES, meshData->getNumIndices());
 
@@ -85,7 +86,7 @@ GameRenderer::GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, 
 	vboVisibleData->addAttribute(shader->getAttributeLocation("Visible"), 1, 1);
 	renderData->addVBO(vboVisibleData);
 
-	renderData->setup(shader);
+	renderData->setup(renderShader);
 	renderData->setNumInstances(numObjects);
 }
 

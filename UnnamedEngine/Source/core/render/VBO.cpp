@@ -91,10 +91,14 @@ void VBO<T>::setup() {
 	}
 	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
 		VkBufferUsageFlags usageVulkan;
-		if (target == GL_ARRAY_BUFFER)
+		if (target == GL_ARRAY_BUFFER) {
 			usageVulkan = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		else if (target == GL_ELEMENT_ARRAY_BUFFER)
+		} else if (target == GL_ELEMENT_ARRAY_BUFFER)
 			usageVulkan = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+
+		//Calculate the correct stride if it hasn't been assigned (In OpenGL stride == 0 means tightly packed, but in Vulkan require offset in bytes to next element)
+		if (attributes.size() == 1)
+			stride = sizeof(T) *  attributes[0].size;
 
 		//Create the Vulkan buffer
 		vulkanBuffer = new VulkanBuffer(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan);
@@ -103,7 +107,6 @@ void VBO<T>::setup() {
 		vulkanVertexInputBindingDescription.binding   = 0; //like glVertexAttrib binding
 		vulkanVertexInputBindingDescription.stride    = stride;
 		vulkanVertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; //Move to the next data entry after each vertex
-
 	}
 }
 

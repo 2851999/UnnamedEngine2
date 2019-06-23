@@ -280,11 +280,10 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 		renderData->addTextureSet(material->getTextureSet());
 
 	//Setup the render data
-	renderData->setup(shader);
+	renderData->setup(setupShader);
 }
 
 void MeshRenderData::render() {
-	//Bind the required textures and render
 	renderData->render();
 }
 

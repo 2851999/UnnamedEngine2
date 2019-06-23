@@ -16,42 +16,28 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANGRAPHICSPIPELINE_H_
-#define CORE_VULKAN_VULKANGRAPHICSPIPELINE_H_
-
-#include "../Window.h"
-#include "VulkanBuffer.h"
-
-#include "VulkanSwapChain.h"
-#include "VulkanRenderPass.h"
-
-#include "../render/VBO.h"
+#ifndef CORE_RENDER_GRAPHICSSTATE_H_
+#define CORE_RENDER_GRAPHICSSTATE_H_
 
 /*****************************************************************************
- * The VulkanGraphicsPipeline class handles a graphics pipeline in Vulkan
+ * The GraphicsState class contains information about what should be used
+ * while rendering for both OpenGL and Vulkan e.g. alpha blending
  *****************************************************************************/
 
-class RenderData;
-
-class VulkanGraphicsPipeline {
-private:
-	/* The swap chain for this pipeline */
-	VulkanSwapChain* swapChain;
-
-	/* The layout and pipeline instance */
-	VkPipelineLayout pipelineLayout;
-	VkPipeline       pipeline;
+class GraphicsState {
 public:
+	/* Various states that this class handles */
+	bool depthWriteEnable = true;
+
 	/* Constructor */
-	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, RenderData* renderData, RenderShader* renderShader);
+	GraphicsState() {}
 
 	/* Destructor */
-	virtual ~VulkanGraphicsPipeline();
+	virtual ~GraphicsState() {}
 
-	/* Getters */
-	VkPipeline& getInstance() { return pipeline; }
-	VkPipelineLayout& getLayout() { return pipelineLayout; }
+	/* Method to apply the state given the old one (OpenGL) */
+	void applyGL(GraphicsState* old);
 };
 
 
-#endif /* CORE_VULKAN_VULKANGRAPHICSPIPELINE_H_ */
+#endif /* CORE_RENDER_GRAPHICSSTATE_H_ */

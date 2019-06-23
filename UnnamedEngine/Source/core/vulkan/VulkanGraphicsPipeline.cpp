@@ -27,13 +27,13 @@
  * The GraphicsPipeline class
  *****************************************************************************/
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, RenderData* renderData, Shader* shader) {
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, RenderData* renderData, RenderShader* renderShader) {
 	this->swapChain = swapChain;
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 	vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = shader->getVkVertexShaderModule();
+	vertShaderStageInfo.module = renderShader->getShader()->getVkVertexShaderModule();
 	vertShaderStageInfo.pName  = "main"; //Entry point
 
 	//pSpecializationInfo can be used to specify values for shader constants - faster than using if statements
@@ -42,7 +42,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
 	fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = shader->getVkFragmentShaderModule();
+	fragShaderStageInfo.module = renderShader->getShader()->getVkFragmentShaderModule();
 	fragShaderStageInfo.pName  = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -93,7 +93,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	rasterizer.rasterizerDiscardEnable = VK_FALSE; //If true discards everything, wouldn't render to frame buffer
 	rasterizer.polygonMode             = VK_POLYGON_MODE_FILL; //Anything else requires GPU feature
 	rasterizer.lineWidth               = 1.0f;
-	rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
+	rasterizer.cullMode                = VK_CULL_MODE_NONE; //VK_CULL_MODE_BACK_BIT
 	rasterizer.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizer.depthBiasEnable         = VK_FALSE;
 	rasterizer.depthBiasConstantFactor = 0.0f; //Optional
@@ -112,8 +112,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineDepthStencilStateCreateInfo depthStencil = {};
 	depthStencil.sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 	depthStencil.depthTestEnable       = VK_TRUE;
-	depthStencil.depthWriteEnable      = VK_TRUE;
-	depthStencil.depthCompareOp        = VK_COMPARE_OP_LESS;
+	depthStencil.depthWriteEnable      = renderShader->getGraphicsState()->depthWriteEnable ? VK_TRUE : VK_FALSE;
+	depthStencil.depthCompareOp        = VK_COMPARE_OP_LESS_OR_EQUAL;
 	depthStencil.depthBoundsTestEnable = VK_FALSE;
 	depthStencil.minDepthBounds        = 0.0f; //Optional
 	depthStencil.maxDepthBounds        = 1.0f; //Optional

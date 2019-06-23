@@ -17,13 +17,18 @@
  *****************************************************************************/
 
 #include "Matrix.h"
+#include "Window.h"
 
 const Matrix4f& Matrix4f::initPerspective(float fovy, float aspect, float zNear, float zFar) {
 	float scale = (tan((fovy / 2) * (utils_maths::PI / 180)));
 
 	set(0, 0, 1.0f / (aspect * scale)); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
 	set(1, 0, 0); set(1, 1, 1.0f / scale); set(1, 2, 0); set(1, 3, 0);
-	set(2, 0, 0); set(2, 1, 0); set(2, 2, -(zFar + zNear) / (zFar - zNear)); set(2, 3, -(2 * zFar * zNear) / (zFar - zNear));
+	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		set(2, 0, 0); set(2, 1, 0); set(2, 2, -(zFar + zNear) / (zFar - zNear)); set(2, 3, -(2 * zFar * zNear) / (zFar - zNear));
+	} else {
+		set(2, 0, 0); set(2, 1, 0); set(2, 2, zFar / (zNear - zFar)); set(2, 3,  -(zFar * zNear) / (zFar - zNear)); //Depth values need to be in range 0-1
+	}
 	set(3, 0, 0); set(3, 1, 0); set(3, 2, -1); set(3, 3, 0);
 
 	return (*this);

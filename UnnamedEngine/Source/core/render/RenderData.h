@@ -84,10 +84,10 @@ public:
 	virtual ~RenderData();
 
 	/* The method used to setup this data for rendering */
-	void setup(Shader* shader);
+	void setup(RenderShader* renderShader);
 
 	/* The method used to setup this data for rendering (With Vulkan) */
-	void setupVulkan(Shader* shader);
+	void setupVulkan(RenderShader* renderShader);
 
 	/* Methods to add a UBO or Texture to this instance */
 	inline void add(unsigned int id, UBO* ubo) { ubos.insert(std::pair<unsigned int, UBO*>(id, ubo)); }
