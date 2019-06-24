@@ -1,4 +1,19 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 3 | Experimental 3
+
+* Added basic Vulkan support to RenderScene3D
+* Added support for multiple VBO's in RenderData when using
+  Vulkan
+
+* Cleanup of Cubemap generation
+
+* Fixed bug: Did not free textures loaded during the creation
+             of a cubemap when using Vulkan
+* Fixed bug: Crash on deletion of a Mesh
+* Fixed bug: Did not delete VBO's used for skinning in
+             MeshRenderData
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 3 | Experimental 2
 
 * Added GraphicsState

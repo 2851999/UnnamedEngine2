@@ -35,6 +35,11 @@ void Camera2D::update() {
  * The Camera3D class
  *****************************************************************************/
 
+Camera3D::~Camera3D() {
+	if (skyBox)
+		delete skyBox;
+}
+
 void Camera3D::update() {
 	cameraFront = getTransform()->getRotation().getForward();
 	cameraRight = getTransform()->getRotation().getRight();

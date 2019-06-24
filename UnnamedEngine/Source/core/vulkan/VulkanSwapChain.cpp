@@ -127,17 +127,17 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	numSamples = settings.videoSamples;
 	//Now setup the colour buffer if necessary
 	if (numSamples > 0) {
-		Vulkan::createImage(extent.width, extent.height, 1, static_cast<VkSampleCountFlagBits>(numSamples), format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colourImage, colourImageMemory);
-		colourImageView = Vulkan::createImageView(colourImage, format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+		Vulkan::createImage(extent.width, extent.height, 1, 1, static_cast<VkSampleCountFlagBits>(numSamples), format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colourImage, colourImageMemory);
+		colourImageView = Vulkan::createImageView(colourImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
 
-		Vulkan::transitionImageLayout(colourImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
+		Vulkan::transitionImageLayout(colourImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1, 1);
 	}
 
 	//Now setup the depth buffer
 	VkFormat depthFormat = Vulkan::findDepthFormat();
-	Vulkan::createImage(extent.width, extent.height, 1, static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples), depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
-	depthImageView = Vulkan::createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
-	Vulkan::transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
+	Vulkan::createImage(extent.width, extent.height, 1, 1, static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples), depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
+	depthImageView = Vulkan::createImageView(depthImage, VK_IMAGE_VIEW_TYPE_2D, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1, 1);
+	Vulkan::transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1, 1);
 }
 
 VulkanSwapChain::~VulkanSwapChain() {

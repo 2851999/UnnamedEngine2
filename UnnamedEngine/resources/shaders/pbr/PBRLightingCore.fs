@@ -103,12 +103,12 @@ vec3 ueGetLightingPBR(vec3 normal, vec3 fragPos, vec3 albedo, float metalness, f
     for (int i = 0; i < ue_numLights; i++) {
         if (ue_lights[i].type == 1) {
             if (ue_lights[i].useShadowMap)
-                Lo += ueCalculateDirectionalLightPBR(ue_lights[i], normal, V, fragPos, albedo, metalness, roughness, F0) * (1.0 - ueCalculateShadow(ue_lights[i], ue_lightsTextures[i], fragPosLightSpace[i], normal));
+                Lo += ueCalculateDirectionalLightPBR(ue_lights[i], normal, V, fragPos, albedo, metalness, roughness, F0) * (1.0 - ueCalculateShadow(ue_lights[i], ue_lightTexturesShadowMap[i], fragPosLightSpace[i], normal));
             else
                 Lo += ueCalculateDirectionalLightPBR(ue_lights[i], normal, V, fragPos, albedo, metalness, roughness, F0);
         } else if (ue_lights[i].type == 2) {
 			if (ue_lights[i].useShadowMap)
-				Lo += ueCalculatePointLightPBR(ue_lights[i], normal, V, fragPos, albedo, metalness, roughness, F0) * (1.0 - ueCalculatePointShadow(ue_lights[i], ue_lightsTextures[i], fragPos, ue_cameraPosition.xyz));
+				Lo += ueCalculatePointLightPBR(ue_lights[i], normal, V, fragPos, albedo, metalness, roughness, F0) * (1.0 - ueCalculatePointShadow(ue_lights[i], ue_lightTexturesShadowCubemap[i], fragPos, ue_cameraPosition.xyz));
 			else
 				Lo += ueCalculatePointLightPBR(ue_lights[i], normal, V, fragPos, albedo, metalness, roughness, F0);
         } else if (ue_lights[i].type == 3)

@@ -233,7 +233,7 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 	//Setup bones
 	if (data->hasBones()) {
 		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), GL_STATIC_DRAW);
-		vboBoneIDs->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
+		vboBoneIDs->addAttributeWithType(GL_INT, ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
 		renderData->addVBO(vboBoneIDs);
 
 		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), GL_STATIC_DRAW);
@@ -370,6 +370,8 @@ void MeshRenderData::destroy() {
 	delete vboBitangents;
 	delete vboOthers;
 	delete vboIndices;
+	delete vboBoneIDs;
+	delete vboBoneWeights;
 }
 
 /*****************************************************************************

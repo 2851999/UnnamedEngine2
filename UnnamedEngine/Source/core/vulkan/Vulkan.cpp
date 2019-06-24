@@ -223,7 +223,7 @@ void Vulkan::createCommandBuffers() {
 		Logger::log("Failed to allocate command buffers", "Vulkan", LogType::Error);
 }
 
-void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
+void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType     = VK_IMAGE_TYPE_2D;
@@ -231,13 +231,14 @@ void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, Vk
     imageInfo.extent.height = height;
     imageInfo.extent.depth  = 1;
     imageInfo.mipLevels     = mipLevels;
-    imageInfo.arrayLayers   = 1;
+    imageInfo.arrayLayers   = arrayLayers;
     imageInfo.format        = format;
     imageInfo.tiling        = tiling;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.usage         = usage;
     imageInfo.samples       = numSamples;
     imageInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.flags         = flags;
 
     if (vkCreateImage(device->getLogical(), &imageInfo, nullptr, &image) != VK_SUCCESS)
     	Logger::log("Failed to create image", "Vulkan", LogType::Error);
@@ -256,17 +257,17 @@ void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, Vk
 	vkBindImageMemory(device->getLogical(), image, imageMemory, 0);
 }
 
-VkImageView Vulkan::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) {
+VkImageView Vulkan::createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount) {
 	VkImageViewCreateInfo viewInfo = {};
 	viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image    = image;
-	viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	viewInfo.viewType = viewType;
 	viewInfo.format   = format;
 	viewInfo.subresourceRange.aspectMask     = aspectFlags;
 	viewInfo.subresourceRange.baseMipLevel   = 0;
 	viewInfo.subresourceRange.levelCount     = mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount     = 1;
+	viewInfo.subresourceRange.layerCount     = layerCount;
 
 	VkImageView imageView;
 	if (vkCreateImageView(device->getLogical(), &viewInfo, nullptr, &imageView) != VK_SUCCESS)
@@ -275,8 +276,10 @@ VkImageView Vulkan::createImageView(VkImage image, VkFormat format, VkImageAspec
 	return imageView;
 }
 
-void Vulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels) {
-	VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+void Vulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels, uint32_t layerCount, VkCommandBuffer commandBuffer) {
+	bool createCommandBuffer = (commandBuffer == VK_NULL_HANDLE);
+	if (createCommandBuffer)
+		commandBuffer = beginSingleTimeCommands();
 
 	VkImageMemoryBarrier barrier = {};
 	barrier.sType     = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -300,7 +303,7 @@ void Vulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout
 	barrier.subresourceRange.baseMipLevel   = 0;
 	barrier.subresourceRange.levelCount     = mipLevels;
 	barrier.subresourceRange.baseArrayLayer = 0;
-	barrier.subresourceRange.layerCount     = 1;
+	barrier.subresourceRange.layerCount     = layerCount;
 
 	VkPipelineStageFlags sourceStage;
 	VkPipelineStageFlags destinationStage;
@@ -345,7 +348,8 @@ void Vulkan::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout
 			1, &barrier
 	);
 
-	endSingleTimeCommands(commandBuffer);
+	if (createCommandBuffer)
+		endSingleTimeCommands(commandBuffer);
 }
 
 void Vulkan::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
@@ -508,8 +512,9 @@ void Vulkan::stopDraw() {
 	submitInfo.pSignalSemaphores    = signalSemaphores;
 
 	//Fence added here to be signalled when command buffer finishes executing
-	if (vkQueueSubmit(device->getGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) //vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS
-		Logger::log("Failed to submit draw command buffer", "Vulkan", LogType::Error);
+	VkResult result = vkQueueSubmit(device->getGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]);
+	if (result != VK_SUCCESS) //vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS
+		Logger::log("Failed to submit draw command buffer, result " + utils_string::str(result), "Vulkan", LogType::Error);
 
 	VkPresentInfoKHR presentInfo = {};
 	presentInfo.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

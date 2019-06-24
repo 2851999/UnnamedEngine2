@@ -114,10 +114,7 @@ public:
 		setRotation(rotation);
 		setScale(scale);
 	}
-	virtual ~Camera3D() {
-		if (skyBox)
-			delete skyBox;
-	}
+	virtual ~Camera3D();
 
 	void update() override;
 

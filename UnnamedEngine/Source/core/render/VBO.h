@@ -89,10 +89,10 @@ public:
 	inline void addAttribute(int location, int size, unsigned int divisor = 0) { addAttributeWithType(GL_FLOAT, location, size, divisor); }
 
 	/* Used to create and setup this VBO */
-	void setup();
+	void setup(unsigned int binding); //Binding for Vulkan
 
 	/* Used to setup an attribute */
-	void setupAttribute(unsigned int index);
+	void setupAttribute(unsigned int binding, unsigned int index);
 
 	/* Methods used to setup this VBO just before/after rendering */
 	void startRendering();

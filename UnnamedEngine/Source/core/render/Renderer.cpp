@@ -132,12 +132,12 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_MATERIAL,                     "MaterialShader",                   "");
 	addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
 	addRenderShader(SHADER_VULKAN,				         "VulkanShader",				     "");
+	addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
 
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
 		addRenderShader(SHADER_FONT,                         "FontShader",                       "");
 		addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
 		addRenderShader(SHADER_PARTICLE,                     "ParticleShader",                   "");
-		addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
 		addRenderShader(SHADER_FRAMEBUFFER,                  "FramebufferShader",                "");
 		addRenderShader(SHADER_ENVIRONMENT_MAP,              "EnvironmentMapShader",             "");
 		addRenderShader(SHADER_SHADOW_MAP,                   "lighting/ShadowMapShader",         "");
@@ -295,8 +295,8 @@ void Renderer::prepareForwardShader(unsigned int id, Shader* shader) {
 			shader->addUniform("ShadowMap", "ue_shadowMap");
 
 			for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_SET; i++) {
-				shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lightsTextures[" + str(i) + "].shadowMap");
-				shader->addUniform("Light_ShadowCubemap["  + str(i) + "]", "ue_lightsTextures[" + str(i) + "].shadowCubemap");
+				shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lightTexturesShadowMap[" + str(i) + "]");
+				shader->addUniform("Light_ShadowCubemap["  + str(i) + "]", "ue_lightTexturesShadowCubemap[" + str(i) + "]");
 			}
 
 			shader->addUniform("EnvironmentMap", "ue_environmentMap");
@@ -337,7 +337,7 @@ void Renderer::loadRenderShader(unsigned int id) {
 		forwardShader = loadEngineShader(shaderPaths[0]);
 		prepareForwardShader(id, forwardShader);
 	}
-	if (shaderPaths[1] != "") {
+	if (shaderPaths[1] != "" && (! Window::getCurrentInstance()->getSettings().videoVulkan)) { //Don't load this if using Vulkan yet
 		deferredGeomShader = loadEngineShader(shaderPaths[1]);
 		prepareDeferredGeomShader(id, deferredGeomShader);
 	}

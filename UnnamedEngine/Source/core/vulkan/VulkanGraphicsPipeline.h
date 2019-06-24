@@ -43,7 +43,7 @@ private:
 	VkPipeline       pipeline;
 public:
 	/* Constructor */
-	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, RenderData* renderData, RenderShader* renderShader);
+	VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, RenderData* renderData, RenderShader* renderShader);
 
 	/* Destructor */
 	virtual ~VulkanGraphicsPipeline();

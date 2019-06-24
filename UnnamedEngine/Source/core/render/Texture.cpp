@@ -161,15 +161,15 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 		if (mipLevels > 1)
 			imageUsageFlags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT; //Used as source and destination of transfers (as will copy data for mipmaps)
 
-		Vulkan::createImage(width, height, mipLevels, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, imageUsageFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
+		Vulkan::createImage(width, height, mipLevels, 1, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, imageUsageFlags, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
 
 		//First need to transition texture image to VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL then copy from staging buffer to the texture image
-		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)
+		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels, 1); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)
 		Vulkan::copyBufferToImage(stagingBuffer, textureVkImage, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 
 		if (mipLevels <= 1) //Leave in VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL for mipmap generation
 			//Prepare image for shader access
-			Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mipLevels);
+			Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mipLevels, 1);
 
 	    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
 	    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);
@@ -177,24 +177,8 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 		if (mipLevels > 1)
 			generateMipmapsVk(); //Transitions image to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL here
 
-		//------------------------------------------------------CREATE THE IMAGE VIEW------------------------------------------------------
-		VkImageViewCreateInfo viewInfo = {};
-		viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewInfo.image    = textureVkImage;
-		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D; //TODO: Use target in parameters
-		viewInfo.format   = format;
-		viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-		viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-		viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-		viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-		viewInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-		viewInfo.subresourceRange.baseMipLevel   = 0;
-		viewInfo.subresourceRange.levelCount     = mipLevels;
-		viewInfo.subresourceRange.baseArrayLayer = 0;
-		viewInfo.subresourceRange.layerCount     = 1;
-
-		if (vkCreateImageView(Vulkan::getDevice()->getLogical(), &viewInfo, nullptr, &textureVkImageView) != VK_SUCCESS)
-		    Logger::log("Failed to create texture image view", "Texture", LogType::Error);
+		//Create the image view
+		textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, 1);
 
 		//------------------------------------------------------CREATE THE SAMPLER------------------------------------------------------
 		VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
@@ -494,40 +478,10 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 			void* data;
 			vkMapMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, 0, imageSize, 0, &data);
 			for (unsigned int i = 0; i < 6; ++i)
-				memcpy(static_cast<char*>(data) + ((layerSize * i)), textureData[i], static_cast<unsigned int>(layerSize));
+				memcpy(static_cast<unsigned char*>(data) + ((layerSize * i)), textureData[i], static_cast<unsigned int>(layerSize));
 			vkUnmapMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory);
 
-		    VkImageCreateInfo imageCreateInfo = {};
-		    imageCreateInfo.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		    imageCreateInfo.imageType     = VK_IMAGE_TYPE_2D;
-		    imageCreateInfo.extent.width  = width;
-		    imageCreateInfo.extent.height = height;
-		    imageCreateInfo.extent.depth  = 1;
-		    imageCreateInfo.mipLevels     = 1;
-		    imageCreateInfo.arrayLayers   = 6;
-		    imageCreateInfo.format        = format;
-		    imageCreateInfo.tiling        = VK_IMAGE_TILING_OPTIMAL;
-		    imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		    imageCreateInfo.usage         = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		    imageCreateInfo.samples       = VK_SAMPLE_COUNT_1_BIT;
-		    imageCreateInfo.sharingMode   = VK_SHARING_MODE_EXCLUSIVE;
-		    imageCreateInfo.flags         = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
-
-		    if (vkCreateImage(Vulkan::getDevice()->getLogical(), &imageCreateInfo, nullptr, &textureVkImage) != VK_SUCCESS)
-		    	Logger::log("Failed to create image", "Cubemap", LogType::Error);
-
-		    VkMemoryRequirements memRequirements;
-		    vkGetImageMemoryRequirements(Vulkan::getDevice()->getLogical(), textureVkImage, &memRequirements);
-
-		    VkMemoryAllocateInfo allocInfo = {};
-		    allocInfo.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		    allocInfo.allocationSize  = memRequirements.size;
-		    allocInfo.memoryTypeIndex = Vulkan::findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-			if (vkAllocateMemory(Vulkan::getDevice()->getLogical(), &allocInfo, nullptr, &textureVkImageMemory) != VK_SUCCESS)
-				Logger::log("Failed to allocate image memory", "Cubemap", LogType::Error);
-
-			vkBindImageMemory(Vulkan::getDevice()->getLogical(), textureVkImage, textureVkImageMemory, 0);
+			Vulkan::createImage(width, height, 1, 6, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
 
 			VkCommandBuffer copyCommandBuffer = Vulkan::beginSingleTimeCommands();
 
@@ -550,37 +504,7 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 				offset += layerSize;
 			}
 
-			VkImageMemoryBarrier barrier = {};
-			barrier.sType     = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-			barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-
-			barrier.image = textureVkImage;
-			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-			barrier.subresourceRange.baseMipLevel   = 0;
-			barrier.subresourceRange.levelCount     = 1;
-			barrier.subresourceRange.baseArrayLayer = 0;
-			barrier.subresourceRange.layerCount     = 6;
-
-			VkPipelineStageFlags sourceStage;
-			VkPipelineStageFlags destinationStage;
-
-			barrier.srcAccessMask = 0;
-			barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-			sourceStage      = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-			destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-
-			vkCmdPipelineBarrier(
-					copyCommandBuffer,
-					sourceStage, destinationStage,
-					0,
-					0, nullptr,
-					0, nullptr,
-					1, &barrier
-			);
+			Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, 6, copyCommandBuffer);
 
 			vkCmdCopyBufferToImage(
 				copyCommandBuffer,
@@ -591,42 +515,18 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 				bufferCopyRegions.data()
 			);
 
-			barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-			sourceStage      = VK_PIPELINE_STAGE_TRANSFER_BIT;
-			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-
-			vkCmdPipelineBarrier(
-					copyCommandBuffer,
-					sourceStage, destinationStage,
-					0,
-					0, nullptr,
-					0, nullptr,
-					1, &barrier
-			);
+			Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, 6, copyCommandBuffer);
 
 			Vulkan::endSingleTimeCommands(copyCommandBuffer);
 
 		    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
 		    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);
 
-			VkImageViewCreateInfo viewInfo = {};
-			viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			viewInfo.image    = textureVkImage;
-			viewInfo.viewType = VK_IMAGE_VIEW_TYPE_CUBE; //TODO: Use target in parameters
-			viewInfo.format   = format;
-			viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-			viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-			viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-			viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-			viewInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-			viewInfo.subresourceRange.baseMipLevel   = 0;
-			viewInfo.subresourceRange.levelCount     = 1;
-			viewInfo.subresourceRange.baseArrayLayer = 0;
-			viewInfo.subresourceRange.layerCount     = 6;
+		    for (unsigned int i = 0; i < 6; ++i)
+				//Free the loaded image data
+				Texture::freeTexture(textureData[i]);
 
-			if (vkCreateImageView(Vulkan::getDevice()->getLogical(), &viewInfo, nullptr, &textureVkImageView) != VK_SUCCESS)
-			    Logger::log("Failed to create texture image view", "Cubemap", LogType::Error);
+		    textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_CUBE, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 6);
 
 			VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
 			samplerInfo.maxLod = static_cast<float>(1);

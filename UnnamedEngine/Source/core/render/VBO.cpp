@@ -37,7 +37,7 @@ void VBO<T>::addAttributeWithType(GLuint type, GLint location, GLint size, GLuin
 }
 
 template <typename T>
-void VBO<T>::setup() {
+void VBO<T>::setup(unsigned int binding) {
 	//Check whether using Vulkan or OpenGL
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
 		//Get OpenGL to generate the buffer
@@ -78,7 +78,7 @@ void VBO<T>::setup() {
 			attributes[i].offset = currentOffset;
 
 			//Setup the current attribute
-			setupAttribute(i);
+			setupAttribute(binding, i);
 
 			//Increment the current offset
 			currentOffset += attributes[i].size * sizeof(data[0]);
@@ -87,7 +87,7 @@ void VBO<T>::setup() {
 		//Go through all of the attributes
 		for (unsigned int i = 0; i < attributes.size(); i++)
 			//Setup the current attribute
-			setupAttribute(i);
+			setupAttribute(binding, i);
 	}
 	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
 		VkBufferUsageFlags usageVulkan;
@@ -104,14 +104,14 @@ void VBO<T>::setup() {
 		vulkanBuffer = new VulkanBuffer(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan);
 
 		//Assign the vertex input binding description
-		vulkanVertexInputBindingDescription.binding   = 0; //like glVertexAttrib binding
+		vulkanVertexInputBindingDescription.binding   = binding; //like glVertexAttrib binding
 		vulkanVertexInputBindingDescription.stride    = stride;
 		vulkanVertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; //Move to the next data entry after each vertex
 	}
 }
 
 template <typename T>
-void VBO<T>::setupAttribute(unsigned int index) {
+void VBO<T>::setupAttribute(unsigned int binding, unsigned int index) {
 	//Get a reference to the attribute being assigned
 	Attribute& attribute = attributes[index];
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
@@ -126,15 +126,28 @@ void VBO<T>::setupAttribute(unsigned int index) {
 		}
 	} else {
 		//Setup the attribute description for the attribute
-		vulkanAttributeDescriptions[index].binding  = 0;
+		vulkanAttributeDescriptions[index].binding  = binding;
 		vulkanAttributeDescriptions[index].location = attribute.location; //Location for shader
 		VkFormat format;
-		if (attribute.size == 1)
-			format = VK_FORMAT_R32_SFLOAT;
-		else if (attribute.size == 2)
-			format = VK_FORMAT_R32G32_SFLOAT;
-		else if (attribute.size == 3)
-			format = VK_FORMAT_R32G32B32_SFLOAT;
+		if (attribute.type == GL_INT) {
+			if (attribute.size == 1)
+				format = VK_FORMAT_R32_SINT;
+			else if (attribute.size == 2)
+				format = VK_FORMAT_R32G32_SINT;
+			else if (attribute.size == 3)
+				format = VK_FORMAT_R32G32B32_SINT;
+			else if (attribute.size == 4)
+				format = VK_FORMAT_R32G32B32A32_SINT;
+		} else {
+			if (attribute.size == 1)
+				format = VK_FORMAT_R32_SFLOAT;
+			else if (attribute.size == 2)
+				format = VK_FORMAT_R32G32_SFLOAT;
+			else if (attribute.size == 3)
+				format = VK_FORMAT_R32G32B32_SFLOAT;
+			else if (attribute.size == 4)
+				format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		}
 
 		vulkanAttributeDescriptions[index].format = format;
 		vulkanAttributeDescriptions[index].offset = attribute.offset;

@@ -27,7 +27,7 @@
  * The GraphicsPipeline class
  *****************************************************************************/
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, RenderData* renderData, RenderShader* renderShader) {
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, RenderData* renderData, RenderShader* renderShader) {
 	this->swapChain = swapChain;
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
@@ -50,11 +50,11 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-	auto bindingDescription    = vertexBuffer->getVkBindingDescription();
-	auto attributeDescriptions = vertexBuffer->getVkAttributeDescriptions();
+	auto bindingDescription    = renderData->getVkBindingDescriptions();
+	auto attributeDescriptions = renderData->getVkAttributeDescriptions();
 
-	vertexInputInfo.vertexBindingDescriptionCount   = 1;
-	vertexInputInfo.pVertexBindingDescriptions      = &bindingDescription;
+	vertexInputInfo.vertexBindingDescriptionCount   = static_cast<uint32_t>(bindingDescription.size());
+	vertexInputInfo.pVertexBindingDescriptions      = bindingDescription.data();
 	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
 	vertexInputInfo.pVertexAttributeDescriptions    = attributeDescriptions.data();
 
