@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <fstream>
 
+#include "../BaseEngine.h"
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 
@@ -94,7 +95,7 @@ void Shader::stopUsing() {
 }
 
 void Shader::destroy() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		glDeleteProgram(program);
 		//Go through each attached shader and delete them
 		for (unsigned int i = 0; i < attachedShaders.size(); i++)
@@ -389,7 +390,7 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int ubo
 
 Shader* Shader::loadShader(std::string path) {
 	//Check whether using Vulkan
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Check for geometry shader
 		if (utils_file::isFile(path + ".gs"))
 			return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".gs"), loadShaderSource(path + ".fs"));

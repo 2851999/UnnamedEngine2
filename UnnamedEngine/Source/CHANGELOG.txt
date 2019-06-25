@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 3 | Experimental 5
+
+* Added 'usingVulkan' method in BaseEngine
+
+* Fixed bug: Loading some models would cause a crash using
+             the last experimental
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 3 | Experimental 4
   
 * Added VulkanLightingShader for lighting with RenderScene3D

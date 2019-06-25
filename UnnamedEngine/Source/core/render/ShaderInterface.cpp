@@ -18,6 +18,7 @@
 
 #include "ShaderInterface.h"
 
+#include "../BaseEngine.h"
 #include "RenderData.h"
 #include "Renderer.h"
 
@@ -176,14 +177,14 @@ void ShaderInterface::setup(RenderData* renderData, unsigned int shaderID) {
 }
 
 UBO* ShaderInterface::getUBO(unsigned int id) {
-	if (ubos.count(id) > 0 && (! Window::getCurrentInstance()->getSettings().videoVulkan))
+	if (ubos.count(id) > 0 && (! BaseEngine::usingVulkan()))
 		return ubos.at(id);
 	else if (ubosInfo.count(id) > 0) {
 		//Create the UBO and then return it after adding it to the created UBO's
 		UBOInfo& info = ubosInfo.at(id);
 		UBO* ubo = new UBO(NULL, info.size, info.usage, info.binding);
 		//Add it to the correct place
-		if (Window::getCurrentInstance()->getSettings().videoVulkan)
+		if (BaseEngine::usingVulkan())
 			ubosVk.push_back(ubo);
 		else
 			ubos.insert(std::pair<unsigned int, UBO*>(id, ubo));

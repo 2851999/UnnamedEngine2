@@ -30,6 +30,7 @@
 VulkanBuffer::VulkanBuffer(VkDeviceSize bufferSize, VulkanDevice* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, bool useStaging) {
 	this->device = device;
 	this->useStaging = useStaging;
+	this->size = bufferSize;
 
 	//Create the buffer
 	Vulkan::createBuffer(bufferSize, usage, properties, instance, bufferMemory);

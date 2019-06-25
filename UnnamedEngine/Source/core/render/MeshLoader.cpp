@@ -68,7 +68,7 @@ Mesh* MeshLoader::loadModel(std::string path, std::string fileName, bool pbr) {
 
 Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool pbr, bool genNormals) {
 	//Load the file using Assimp
-	unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices | aiProcess_RemoveRedundantMaterials;
+	unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices;
 	if (genNormals)
 		flags = flags | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
 	const struct aiScene* scene = aiImportFile((path + fileName).c_str(), flags); //aiProcess_JoinIdenticalVertices aiProcessPreset_TargetRealtime_MaxQuality

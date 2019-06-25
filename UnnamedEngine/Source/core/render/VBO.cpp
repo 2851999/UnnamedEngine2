@@ -18,6 +18,7 @@
 
 #include "VBO.h"
 
+#include "../BaseEngine.h"
 #include "../vulkan/Vulkan.h"
 
 #include <type_traits>
@@ -39,7 +40,7 @@ void VBO<T>::addAttributeWithType(GLuint type, GLint location, GLint size, GLuin
 template <typename T>
 void VBO<T>::setup(unsigned int binding) {
 	//Check whether using Vulkan or OpenGL
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Get OpenGL to generate the buffer
 		glGenBuffers(1, &buffer);
 		//Bind the buffer
@@ -89,7 +90,7 @@ void VBO<T>::setup(unsigned int binding) {
 			//Setup the current attribute
 			setupAttribute(binding, i);
 	}
-	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (BaseEngine::usingVulkan()) {
 		VkBufferUsageFlags usageVulkan;
 		if (target == GL_ARRAY_BUFFER) {
 			usageVulkan = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -114,7 +115,7 @@ template <typename T>
 void VBO<T>::setupAttribute(unsigned int binding, unsigned int index) {
 	//Get a reference to the attribute being assigned
 	Attribute& attribute = attributes[index];
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Ensure the location is valid
 		if (attribute.location != -1) {
 			//Enable that vertex attribute array and setup its pointer
@@ -156,7 +157,7 @@ void VBO<T>::setupAttribute(unsigned int binding, unsigned int index) {
 
 template <typename T>
 void VBO<T>::startRendering() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		bind();
 
 		//Enable the vertex attribute arrays
@@ -171,7 +172,7 @@ void VBO<T>::startRendering() {
 
 template <typename T>
 void VBO<T>::stopRendering() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Disable the vertex attribute arrays
 		for (unsigned int i = 0; i < attributes.size(); i++)
 			glDisableVertexAttribArray(attributes[i].location);
@@ -180,7 +181,7 @@ void VBO<T>::stopRendering() {
 
 template <typename T>
 void VBO<T>::update() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		bind();
 		glBufferData(target, data.size() * sizeof(data[0]), &data.front(), usage);
 	}
@@ -188,7 +189,7 @@ void VBO<T>::update() {
 
 template <typename T>
 void VBO<T>::updateStream(GLsizeiptr size) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		bind();
 		//Buffer orphaning
 		glBufferData(target, this->size, NULL, usage);

@@ -20,6 +20,7 @@
 
 #include "Texture.h"
 
+#include "../BaseEngine.h"
 #include "../Window.h"
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
@@ -111,7 +112,7 @@ VkSamplerCreateInfo TextureParameters::getVkSamplerCreateInfo() {
 
 Texture::Texture(void* imageData, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters, bool shouldApplyParameters) : width(width), height(height), numComponents(numComponents), parameters(parameters) {
 	//Check whether using OpenGL or Vulkan
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		create();
 		//Bind the texture and then pass the texture data to OpenGL
 		bind();
@@ -277,7 +278,7 @@ void Texture::destroy() {
 
 unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& width, int& height, bool srgb) {
 	//Load the data using stb_image
-	unsigned char* image = stbi_load(path.c_str(), &width, &height, &numComponents, Window::getCurrentInstance()->getSettings().videoVulkan ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
+	unsigned char* image = stbi_load(path.c_str(), &width, &height, &numComponents, BaseEngine::usingVulkan() ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
 
 	//Check that the data was loaded
 	if (image == nullptr) {
@@ -291,7 +292,7 @@ unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& w
 
 float* Texture::loadTexturef(std::string path, int& numComponents, int& width, int& height, bool srgb) {
 	//Load the data using stb_image
-	float* image = stbi_loadf(path.c_str(), &width, &height, &numComponents, Window::getCurrentInstance()->getSettings().videoVulkan ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
+	float* image = stbi_loadf(path.c_str(), &width, &height, &numComponents, BaseEngine::usingVulkan() ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
 
 	//Check that the data was loaded
 	if (image == nullptr) {
@@ -414,7 +415,7 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 		parameters.setFilter(GL_LINEAR);
 		parameters.setClamp(GL_CLAMP_TO_EDGE);
 
-		if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+		if (! BaseEngine::usingVulkan()) {
 			//Bind this cubemap
 			bind();
 

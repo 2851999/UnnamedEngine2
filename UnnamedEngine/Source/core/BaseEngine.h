@@ -126,6 +126,9 @@ public:
 	virtual void onControllerAxis(Controller* controller, int axis, float value) override {}
 	virtual void onControllerButtonPressed(Controller* controller, int index) override {}
 	virtual void onControllerButtonReleased(Controller* controller, int index) override {}
+
+	/* Static method to obtain a boolean representing whether Vulkan is being used */
+	inline static bool usingVulkan() { return Window::getCurrentInstance()->getSettings().videoVulkan; }
 };
 
 

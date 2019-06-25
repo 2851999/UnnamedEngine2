@@ -18,6 +18,7 @@
 
 #include "RenderScene.h"
 
+#include "../../BaseEngine.h"
 #include "Renderer.h"
 #include "../Window.h"
 #include "../../utils/Utils.h"
@@ -34,7 +35,7 @@ RenderScene3D::RenderScene3D() {
 	shaderGammaCorrectionData.gammaCorrect = true;
 	shaderGammaCorrectionData.exposureIn = -1;
 
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Get the required shaders
 		shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getForwardShader();
 		shadowCubemapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_CUBEMAP)->getForwardShader();
@@ -103,7 +104,7 @@ void RenderScene3D::render() {
 	//Ensure lighting is enabled
 	if (lighting) {
 		//Render the scene to the shadow maps as necessary
-		if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+		if (! BaseEngine::usingVulkan())
 			renderShadowMaps();
 		//Check if deferred rendering or not
 		if (deferredRendering) {
@@ -210,7 +211,7 @@ void RenderScene3D::render() {
 }
 
 void RenderScene3D::forwardPreRender() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		if (intermediateFBO)
 			//Render to the intermediate FBO
 			intermediateFBO->start();
@@ -227,7 +228,7 @@ void RenderScene3D::forwardPreRender() {
 }
 
 void RenderScene3D::forwardPostRender() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		if (renderWireframe)
 			utils_gl::disableWireframe();
 
@@ -253,7 +254,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 	//Get the shader to use
 	Shader* shader = renderShader->getShader();
 
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		//Use the shader
 		shader->use();
 
@@ -370,7 +371,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			}
 		}
 	}
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		shader->stopUsing();
 
 	//Stop using blending if it was needed

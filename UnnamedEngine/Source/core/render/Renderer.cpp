@@ -20,6 +20,7 @@
 
 #include <algorithm>
 
+#include "../BaseEngine.h"
 #include "../../utils/Logging.h"
 #include "RenderScene.h"
 #include "../vulkan/Vulkan.h"
@@ -136,7 +137,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
 	addRenderShader(SHADER_VULKAN_LIGHTING,              "VulkanLightingShader",             "");
 
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		addRenderShader(SHADER_FONT,                         "FontShader",                       "");
 		addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
 		addRenderShader(SHADER_PARTICLE,                     "ParticleShader",                   "");
@@ -171,7 +172,7 @@ void Renderer::initialise() {
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material, UBO* materialUBO) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		//Bind the required textures
 		material->getTextureSet()->bindGLTextures();
 	else
@@ -184,14 +185,14 @@ void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, M
 }
 
 void Renderer::stopUsingMaterial(Material* material) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		//Unbind the textures
 		material->getTextureSet()->unbindGLTextures();
 }
 
 void Renderer::useGraphicsState(GraphicsState* graphicsState) {
 	//Ensure using OpenGL
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Apply the new state
 		graphicsState->applyGL(currentGraphicsState);
 		currentGraphicsState = graphicsState;
@@ -231,7 +232,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			}
 
 			//Bind the pipeline to use to render (for Vulkan)
-			if (Window::getCurrentInstance()->getSettings().videoVulkan)
+			if (BaseEngine::usingVulkan())
 				vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getRenderData()->getVkGraphicsPipeline()->getInstance());
 
 			if (data->hasSubData()) {
@@ -277,21 +278,21 @@ void Renderer::destroy() {
 	delete shaderInterface;
 	for (auto element : loadedRenderShaders)
 		delete element.second;
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		delete screenTextureMesh;
 }
 
 using namespace utils_string;
 
 Shader* Renderer::loadEngineShader(std::string path) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		return Shader::loadShader("resources/shaders/" + path);
 	else
 		return Shader::loadShader("resources/shaders-vulkan/" + path);
 }
 
 void Renderer::prepareForwardShader(unsigned int id, Shader* shader) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		shader->use();
 		if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == SHADER_PBR_LIGHTING || id == SHADER_PBR_DEFERRED_LIGHTING) {
 			shader->addUniform("ShadowMap", "ue_shadowMap");
@@ -310,7 +311,7 @@ void Renderer::prepareForwardShader(unsigned int id, Shader* shader) {
 }
 
 void Renderer::prepareDeferredGeomShader(unsigned int id, Shader* shader) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		shader->use();
 		if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_PBR_LIGHTING) {
 			shader->addUniform("ShadowMap", "ue_shadowMap");
@@ -339,7 +340,7 @@ void Renderer::loadRenderShader(unsigned int id) {
 		forwardShader = loadEngineShader(shaderPaths[0]);
 		prepareForwardShader(id, forwardShader);
 	}
-	if (shaderPaths[1] != "" && (! Window::getCurrentInstance()->getSettings().videoVulkan)) { //Don't load this if using Vulkan yet
+	if (shaderPaths[1] != "" && (! BaseEngine::usingVulkan())) { //Don't load this if using Vulkan yet
 		deferredGeomShader = loadEngineShader(shaderPaths[1]);
 		prepareDeferredGeomShader(id, deferredGeomShader);
 	}

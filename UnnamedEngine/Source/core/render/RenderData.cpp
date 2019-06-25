@@ -18,6 +18,7 @@
 
 #include "RenderData.h"
 
+#include "../BaseEngine.h"
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 
@@ -36,7 +37,7 @@ RenderData::~RenderData() {
 }
 
 void RenderData::setup(RenderShader* renderShader) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Generate the VAO and bind it
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
@@ -50,7 +51,7 @@ void RenderData::setup(RenderShader* renderShader) {
 		vbosFloat[i]->setup(i);
 		vbosFloat[i]->startRendering();
 
-		if (Window::getCurrentInstance()->getSettings().videoVulkan) {
+		if (BaseEngine::usingVulkan()) {
 			vboVkInstances[i] = vbosFloat[i]->getVkBuffer()->getInstance();
 			vboVkOffsets[i] = 0;
 
@@ -64,7 +65,7 @@ void RenderData::setup(RenderShader* renderShader) {
 		vbosUInteger[i]->setup(vbosFloat.size() + i);
 		vbosUInteger[i]->startRendering();
 
-		if (Window::getCurrentInstance()->getSettings().videoVulkan) {
+		if (BaseEngine::usingVulkan()) {
 			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkBuffer()->getInstance();
 			vboVkOffsets[vbosFloat.size() + i] = 0;
 
@@ -80,7 +81,7 @@ void RenderData::setup(RenderShader* renderShader) {
 		vboIndices->startRendering();
 	}
 
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		glBindVertexArray(0);
 	else {
 		//Add the required textures from the texture set's (if there is one)
@@ -181,7 +182,7 @@ void RenderData::setup(RenderShader* renderShader) {
 
 void RenderData::setupVulkan(RenderShader* renderShader) {
 	//Setup the descriptor set write's
-	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (BaseEngine::usingVulkan()) {
 		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
 
 		//Allows writing of each UBO and texture
@@ -233,7 +234,7 @@ void RenderData::addTexture(Texture* texture, unsigned int binding) {
 }
 
 void RenderData::bindBuffers() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		glBindVertexArray(vao);
 	else {
 		vkCmdBindVertexBuffers(Vulkan::getCurrentCommandBuffer(), 0, vboVkInstances.size(), vboVkInstances.data(), vboVkOffsets.data());
@@ -241,12 +242,12 @@ void RenderData::bindBuffers() {
 	}
 }
 void RenderData::unbindBuffers() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		glBindVertexArray(0);
 }
 
 void RenderData::renderWithoutBinding() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Check for instancing
 		if (primcount > 0) {
 			//Check for indices
@@ -273,7 +274,7 @@ void RenderData::renderWithoutBinding() {
 }
 
 void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset, unsigned int baseVertex) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Check for instancing
 		if (primcount == -1) {
 			//Check for indices

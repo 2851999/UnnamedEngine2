@@ -16,6 +16,7 @@
  *
  *****************************************************************************/
 
+#include "../BaseEngine.h"
 #include "Renderer.h"
 #include "SkyBox.h"
 
@@ -40,7 +41,7 @@ void SkyBox::update(Vector3f cameraPosition) {
 
 void SkyBox::render() {
 	Shader* shader = NULL;
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		glDepthFunc(GL_LEQUAL);
 		//glDepthMask(false); //Should be applied by GraphicsState
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -54,7 +55,7 @@ void SkyBox::render() {
 
 	box->render();
 
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		shader->stopUsing();
 }
 
