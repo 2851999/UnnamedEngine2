@@ -19,10 +19,10 @@
 #ifndef CORE_RENDER_RENDERDATA_H_
 #define CORE_RENDER_RENDERDATA_H_
 
+#include "../vulkan/VulkanGraphicsPipeline.h"
 #include "VBO.h"
 #include "UBO.h"
 #include "Texture.h"
-#include "../vulkan/VulkanGraphicsPipeline.h"
 #include "TextureSet.h"
 
 /*****************************************************************************
@@ -76,6 +76,10 @@ private:
 
 	/* The descriptor sets */
 	std::vector<VkDescriptorSet> descriptorSets;
+
+	/* The binding and attribute descriptions for Vulkan */
+	std::vector<VkVertexInputBindingDescription> bindingVkDescriptions;
+	std::vector<VkVertexInputAttributeDescription> attributeVkDescriptions;
 public:
 	/* The constructor */
 	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}
@@ -84,14 +88,14 @@ public:
 	virtual ~RenderData();
 
 	/* The method used to setup this data for rendering */
-	void setup(Shader* shader);
+	void setup(RenderShader* renderShader);
 
 	/* The method used to setup this data for rendering (With Vulkan) */
-	void setupVulkan(Shader* shader);
+	void setupVulkan(RenderShader* renderShader);
 
 	/* Methods to add a UBO or Texture to this instance */
 	inline void add(unsigned int id, UBO* ubo) { ubos.insert(std::pair<unsigned int, UBO*>(id, ubo)); }
-	void add(Texture* texture, unsigned int binding);
+	void addTexture(Texture* texture, unsigned int binding);
 	inline void addTextureSet(TextureSet* set) { textureSets.push_back(set); }
 
 	/* Method used to bind/unbind the VAO/other buffers before/after rendering */
@@ -127,6 +131,8 @@ public:
 	inline VkDescriptorSetLayout& getVkDescriptorSetLayout() { return descriptorSetLayout; }
 	inline VulkanGraphicsPipeline* getVkGraphicsPipeline() { return graphicsVkPipeline; }
 	const VkDescriptorSet* getVkDescriptorSet(unsigned int materialIndex);
+	inline std::vector<VkVertexInputBindingDescription> getVkBindingDescriptions() { return bindingVkDescriptions; }
+	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return attributeVkDescriptions; }
 };
 
 #endif /* CORE_RENDER_RENDERDATA_H_ */

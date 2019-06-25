@@ -18,16 +18,17 @@
 
 #include "RenderData.h"
 
+#include "../BaseEngine.h"
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
+
+#include "Renderer.h"
 
 /*****************************************************************************
  * The RenderData class
  *****************************************************************************/
 
 RenderData::~RenderData() {
-	for (unsigned int i = 0; i < textureSets.size(); ++i)
-		delete textureSets[i];
 	if (descriptorPool != VK_NULL_HANDLE) {
 		delete graphicsVkPipeline;
 		vkDestroyDescriptorSetLayout(Vulkan::getDevice()->getLogical(), descriptorSetLayout, nullptr);
@@ -35,39 +36,52 @@ RenderData::~RenderData() {
 	}
 }
 
-void RenderData::setup(Shader* shader) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+void RenderData::setup(RenderShader* renderShader) {
+	if (! BaseEngine::usingVulkan()) {
 		//Generate the VAO and bind it
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 	} else {
-		vboVkInstances.resize(vbosFloat.size());
-		vboVkOffsets.resize(vbosFloat.size());
+		vboVkInstances.resize(vbosFloat.size() + vbosUInteger.size());
+		vboVkOffsets.resize(vbosFloat.size() + vbosUInteger.size());
 	}
 
 	//Go through each VBO and set it up
 	for (unsigned int i = 0; i < vbosFloat.size(); i++) {
-		vbosFloat[i]->setup();
+		vbosFloat[i]->setup(i);
 		vbosFloat[i]->startRendering();
 
-		if (Window::getCurrentInstance()->getSettings().videoVulkan) {
+		if (BaseEngine::usingVulkan()) {
 			vboVkInstances[i] = vbosFloat[i]->getVkBuffer()->getInstance();
-			vboVkOffsets[i] = 0; //Is this right offset???
+			vboVkOffsets[i] = 0;
+
+			bindingVkDescriptions.push_back(vbosFloat[i]->getVkBindingDescription());
+			std::vector<VkVertexInputAttributeDescription> attributeDescriptions = vbosFloat[i]->getVkAttributeDescriptions();
+			attributeVkDescriptions.insert(attributeVkDescriptions.end(), attributeDescriptions.begin(), attributeDescriptions.end());
 		}
 	}
 
 	for (unsigned int i = 0; i < vbosUInteger.size(); i++) {
-		vbosUInteger[i]->setup();
+		vbosUInteger[i]->setup(vbosFloat.size() + i);
 		vbosUInteger[i]->startRendering();
+
+		if (BaseEngine::usingVulkan()) {
+			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkBuffer()->getInstance();
+			vboVkOffsets[vbosFloat.size() + i] = 0;
+
+			bindingVkDescriptions.push_back(vbosUInteger[i]->getVkBindingDescription());
+			std::vector<VkVertexInputAttributeDescription> attributeDescriptions = vbosUInteger[i]->getVkAttributeDescriptions();
+			attributeVkDescriptions.insert(attributeVkDescriptions.end(), attributeDescriptions.begin(), attributeDescriptions.end());
+		}
 	}
 
 	//Now setup the indices VBO if assigned
 	if (vboIndices) {
-		vboIndices->setup();
+		vboIndices->setup(0);
 		vboIndices->startRendering();
 	}
 
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		glBindVertexArray(0);
 	else {
 		//Add the required textures from the texture set's (if there is one)
@@ -159,16 +173,16 @@ void RenderData::setup(Shader* shader) {
 			Logger::log("Failed to allocate descriptor sets", "RenderData", LogType::Error);
 
 		//Setup the pipeline
-		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), vbosFloat[0], Vulkan::getRenderPass(), this, shader);
+		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), Vulkan::getRenderPass(), this, renderShader);
 
 		//Assign the descriptor write info
-		setupVulkan(shader);
+		setupVulkan(renderShader);
 	}
 }
 
-void RenderData::setupVulkan(Shader* shader) {
+void RenderData::setupVulkan(RenderShader* renderShader) {
 	//Setup the descriptor set write's
-	if (Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (BaseEngine::usingVulkan()) {
 		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
 
 		//Allows writing of each UBO and texture
@@ -191,7 +205,7 @@ void RenderData::setupVulkan(Shader* shader) {
 
 					for (TextureSet::TextureInfo& textureInfo : textureSets[y]->getTextureInfos()) {
 						//Only assign if have an actual texture (allows textures to be assigned later)
-						if (textureInfo.texture != NULL) {
+						//if (textureInfo.texture != NULL) {
 							VkWriteDescriptorSet textureWrite;
 							textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 							textureWrite.dstSet           = descriptorSets[i];
@@ -200,11 +214,11 @@ void RenderData::setupVulkan(Shader* shader) {
 							textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 							textureWrite.descriptorCount  = 1;
 							textureWrite.pBufferInfo      = nullptr;
-							textureWrite.pImageInfo       = textureInfo.texture->getVkImageInfo();
+							textureWrite.pImageInfo       = textureInfo.texture != NULL ? textureInfo.texture->getVkImageInfo() : Renderer::getBlankTexture()->getVkImageInfo();
 							textureWrite.pTexelBufferView = nullptr;
 							textureWrite.pNext            = nullptr;
 							descriptorWrites.push_back(textureWrite);
-						}
+						//}
 					}
 					vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 				}
@@ -213,27 +227,27 @@ void RenderData::setupVulkan(Shader* shader) {
 	}
 }
 
-void RenderData::add(Texture* texture, unsigned int binding) {
+void RenderData::addTexture(Texture* texture, unsigned int binding) {
 	textureBindings.push_back(binding);
 	for (unsigned int i = 0; i < textureSets.size(); ++i)
 		textureSets[i]->add(binding, texture);
 }
 
 void RenderData::bindBuffers() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		glBindVertexArray(vao);
 	else {
-		vkCmdBindVertexBuffers(Vulkan::getCurrentCommandBuffer(), 0, 1, vboVkInstances.data(), vboVkOffsets.data());
+		vkCmdBindVertexBuffers(Vulkan::getCurrentCommandBuffer(), 0, vboVkInstances.size(), vboVkInstances.data(), vboVkOffsets.data());
 		vkCmdBindIndexBuffer(Vulkan::getCurrentCommandBuffer(), vboIndices->getVkBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
 	}
 }
 void RenderData::unbindBuffers() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+	if (! BaseEngine::usingVulkan())
 		glBindVertexArray(0);
 }
 
 void RenderData::renderWithoutBinding() {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Check for instancing
 		if (primcount > 0) {
 			//Check for indices
@@ -260,7 +274,7 @@ void RenderData::renderWithoutBinding() {
 }
 
 void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset, unsigned int baseVertex) {
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Check for instancing
 		if (primcount == -1) {
 			//Check for indices

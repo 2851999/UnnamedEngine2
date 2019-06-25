@@ -31,7 +31,7 @@ Font* GUIComponentRenderer::DEFAULT_FONT = NULL;
 
 void GUIComponentRenderer::setup() {
 	//Assign the text instance
-	textInstance = new Text(DEFAULT_FONT);
+	textInstance = new Text(DEFAULT_FONT, Colour::WHITE, 100);
 	//Set the default colour and texture
 	getMaterial()->setDiffuse(Colour::WHITE);
 	getMaterial()->setDiffuse(Renderer::getBlankTexture());

@@ -51,6 +51,9 @@ private:
 	 * called */
 	static std::vector<unsigned int> boundTexturesOldSize;
 
+	/* The current graphics state being used */
+	static GraphicsState* currentGraphicsState;
+
 	/* Assigns texture uniforms for a material */
 	static void assignMatTexture(Shader* shader, std::string type, Texture* texture);
 public:
@@ -71,6 +74,7 @@ public:
 	static const unsigned int SHADER_DEFERRED_LIGHTING;
 	static const unsigned int SHADER_TILEMAP;
 	static const unsigned int SHADER_VULKAN;
+	static const unsigned int SHADER_VULKAN_LIGHTING;
 
 	static const unsigned int SHADER_PBR_EQUI_TO_CUBE_GEN;
 	static const unsigned int SHADER_PBR_IRRADIANCE_MAP_GEN;
@@ -117,6 +121,9 @@ public:
 	/* Method used to stop applying a material (unbinds required textures) */
 	static void stopUsingMaterial(Material* material);
 
+	/* Method used to apply a graphics state */
+	static void useGraphicsState(GraphicsState* state);
+
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
 
@@ -140,6 +147,9 @@ public:
 
 	/* Method used to load a render shader from the list of render shaders and store it ready for use */
 	static void loadRenderShader(unsigned int id);
+
+	/* Assigns the graphics state for a particular shader based on its ID */
+	static void assignGraphicsState(GraphicsState* state, unsigned int shaderID);
 
 	/* Method used to add a RenderShader */
 	static void addRenderShader(RenderShader* renderShader);

@@ -16,6 +16,7 @@
  *
  *****************************************************************************/
 
+#include "../BaseEngine.h"
 #include "Renderer.h"
 #include "SkyBox.h"
 
@@ -24,11 +25,12 @@
  *****************************************************************************/
 
 SkyBox::SkyBox(Cubemap* cubemap) {
-	//Create the skybox
-	box = new GameObject3D(new Mesh(MeshBuilder::createCube(1.0f, 1.0f, 1.0f)), Renderer::getRenderShader(Renderer::SHADER_SKY_BOX));
 	//Assign the cubemap
 	this->cubemap = cubemap;
-	box->getMaterial()->setDiffuse(cubemap);
+	//Create the skybox
+	Mesh* mesh = new Mesh(MeshBuilder::createCube(1.0f, 1.0f, 1.0f));
+	mesh->getMaterial()->setDiffuse(cubemap);
+	box = new GameObject3D(mesh, Renderer::getRenderShader(Renderer::SHADER_SKY_BOX));
 }
 
 void SkyBox::update(Vector3f cameraPosition) {
@@ -38,20 +40,23 @@ void SkyBox::update(Vector3f cameraPosition) {
 }
 
 void SkyBox::render() {
-	glDepthFunc(GL_LEQUAL);
-	glDepthMask(false);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-	//To work the skybox must be drawn before anything else
-	Shader* shader = box->getShader();
-	shader->use();
+	Shader* shader = NULL;
+	if (! BaseEngine::usingVulkan()) {
+		glDepthFunc(GL_LEQUAL);
+		//glDepthMask(false); //Should be applied by GraphicsState
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		//To work the skybox must be drawn before anything else
+		shader = box->getShader();
+		shader->use();
+	}
 
 	Renderer::getShaderBlock_Core().ue_viewMatrix = Renderer::getCamera()->getViewMatrix();
 	Renderer::getShaderBlock_Core().ue_projectionMatrix =  Renderer::getCamera()->getProjectionMatrix();
 
 	box->render();
 
-	shader->stopUsing();
-	glDepthMask(true);
+	if (! BaseEngine::usingVulkan())
+		shader->stopUsing();
 }
 
 void SkyBox::destroy() {

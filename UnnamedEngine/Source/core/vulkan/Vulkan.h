@@ -23,12 +23,11 @@
 #include "VulkanDevice.h"
 #include "VulkanSwapChain.h"
 #include "VulkanRenderPass.h"
-#include "VulkanGraphicsPipeline.h"
-
 #include "../render/VBO.h"
 #include "../render/UBO.h"
 #include "../render/Texture.h"
 #include "../render/Mesh.h"
+#include "VulkanGraphicsPipeline.h"
 
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
@@ -38,9 +37,6 @@ class Vulkan {
 private:
 	/* The actual instance handled by this class */
 	static VkInstance instance;
-
-	/* Debug messenger */
-	static VkDebugUtilsMessengerEXT debugMessenger;
 
 	/* The surface used for rendering to the window */
 	static VkSurfaceKHR windowSurface;
@@ -65,18 +61,6 @@ private:
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
-
-	/* Method to create a debug messenger */
-	static VkResult createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
-
-	/* Method to destroy a debug messenger */
-	static void destroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
-
-	/* Callback method for debug messeges */
-	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-		    VkDebugUtilsMessageTypeFlagsEXT messageType,
-		    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-		    void* pUserData);
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -89,12 +73,6 @@ public:
 
 	/* Method to destroy the Vulkan instance */
 	static void destroyInstance();
-
-	/* Method to create a debug messenger for displaying output for validation layers */
-	static void createDebugMessenger();
-
-	/* Method to destroy the debug messenger */
-	static void destroyDebugMessenger();
 
 	/* Method to create the window surface (Returns whether the creation was successful) */
 	static bool createWindowSurface(Window* window);
@@ -111,9 +89,9 @@ public:
 	/* Method to create the command buffers */
 	static void createCommandBuffers(); //(Destroyed with command pool)
 
-	static void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-	static VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
-	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+	static void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount);
+	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels, uint32_t layerCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE); //Pass VK_NULL_HANDLE for command buffer to let this method create one
 	static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	static VkCommandBuffer beginSingleTimeCommands();
 	static void endSingleTimeCommands(VkCommandBuffer commandBuffer);

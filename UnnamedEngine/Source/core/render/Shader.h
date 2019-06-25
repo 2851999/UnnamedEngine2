@@ -25,6 +25,7 @@
 #include "Colour.h"
 #include "../Matrix.h"
 #include "../Resource.h"
+#include "GraphicsState.h"
 
 /*****************************************************************************
  * The Shader class handles a shader program
@@ -108,14 +109,14 @@ public:
 	static VkShaderModule createVkShaderModule(const std::vector<char>& code);
 
 	/* Methods used to load a shader */
-	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source);
-	static ShaderSource loadShaderSource(std::string path);
+	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source, unsigned int uboBindingOffset = 0);
+	static ShaderSource loadShaderSource(std::string path, unsigned int uboBindingOffset = 0);
 	static Shader* loadShader(std::string path);
 
 	/* Methods to read a shader and output all of the complete files for that shader (with all includes replaced as requested) - these
 	 * will not include mapped uniforms since they are intended for compilation to SPIR-V */
-	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath);
-	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath);
+	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
+	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
 
 	/* Utility method to use given glslValidator.exe path to compile a shader from the engine to SPIR-V */
 	static void compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath);
@@ -132,19 +133,25 @@ class RenderShader {
 private:
 	/* The id for this RenderShader */
 	unsigned int id;
+
 	/* The shaders used for forward rendering - will always use the last
 	 * shader that was added for rendering to allow them to be overridden */
 	std::vector<Shader*> forwardShaders;
+
 	/* The shaders used for the geometry pass of deferred rendering */
 	std::vector<Shader*> deferredGeomShaders;
+
 	/* Boolean that states whether the deferred geometry shader should be used */
 	bool useDeferredGeom = false;
+
+	/* The graphics state this shader uses */
+	GraphicsState* graphicsState;
 public:
 	/* Various constructors */
 	RenderShader(unsigned int id, Shader* forwardShader, Shader* deferredGeomShader);
 
 	/* Descructor */
-	virtual ~RenderShader() {}
+	virtual ~RenderShader();
 
 	/* Methods used to add/remove a forward shader */
 	void addForwardShader(Shader* forwardShader);
@@ -167,6 +174,7 @@ public:
 
 	/* Getters */
 	unsigned int getID() { return id; }
+	GraphicsState* getGraphicsState() { return graphicsState; }
 };
 
 #endif /* CORE_RENDER_SHADER_H_ */

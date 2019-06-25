@@ -44,6 +44,9 @@ private:
 	/* The block binding of this UBO */
 	unsigned int blockBinding;
 public:
+	/* Offset used for binding locations when using Vulkan */
+	static const unsigned int VULKAN_BINDING_OFFSET = 20;
+
 	/* Constructor */
 	UBO(void* data, unsigned int size, GLenum usage, unsigned int blockBinding);
 

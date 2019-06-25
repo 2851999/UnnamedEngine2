@@ -18,6 +18,7 @@
 
 #include "ShaderInterface.h"
 
+#include "../BaseEngine.h"
 #include "RenderData.h"
 #include "Renderer.h"
 
@@ -81,7 +82,10 @@ ShaderInterface::~ShaderInterface() {
 	//Go through and delete all UBO's
 	for (auto it : ubos)
 		delete it.second;
+	for (UBO* ubo : ubosVk)
+		delete ubo;
 	ubos.clear();
+	ubosVk.clear();
 }
 
 void ShaderInterface::add(unsigned int id, unsigned int size, unsigned int usage, unsigned int binding) {
@@ -106,6 +110,11 @@ void ShaderInterface::setup(RenderData* renderData, unsigned int shaderID) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
 		renderData->add(BLOCK_BILLBOARD,         getUBO(BLOCK_BILLBOARD));
 	} else if (shaderID == Renderer::SHADER_LIGHTING) {
+		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
+		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
+		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
+		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
+	} else if (shaderID == Renderer::SHADER_VULKAN_LIGHTING) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
 		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
 		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
@@ -168,13 +177,17 @@ void ShaderInterface::setup(RenderData* renderData, unsigned int shaderID) {
 }
 
 UBO* ShaderInterface::getUBO(unsigned int id) {
-	if (ubos.count(id) > 0 && (! Window::getCurrentInstance()->getSettings().videoVulkan))
+	if (ubos.count(id) > 0 && (! BaseEngine::usingVulkan()))
 		return ubos.at(id);
 	else if (ubosInfo.count(id) > 0) {
 		//Create the UBO and then return it after adding it to the created UBO's
 		UBOInfo& info = ubosInfo.at(id);
 		UBO* ubo = new UBO(NULL, info.size, info.usage, info.binding);
-		ubos.insert(std::pair<unsigned int, UBO*>(id, ubo));
+		//Add it to the correct place
+		if (BaseEngine::usingVulkan())
+			ubosVk.push_back(ubo);
+		else
+			ubos.insert(std::pair<unsigned int, UBO*>(id, ubo));
 		return ubo;
 	} else {
 		Logger::log("The UBO with the id '" + utils_string::str(id) + "' could not be found", "ShaderInterface", LogType::Error);

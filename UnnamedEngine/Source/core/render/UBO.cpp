@@ -18,6 +18,7 @@
 
 #include "UBO.h"
 
+#include "../BaseEngine.h"
 #include "../vulkan/Vulkan.h"
 
 /*****************************************************************************
@@ -29,7 +30,7 @@ UBO::UBO(void* data, unsigned int size, GLenum usage, unsigned int blockBinding)
 	this->blockBinding = blockBinding;
 
 	//Check whether using Vulkan or OpenGL
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		//Setup the UBO
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
@@ -38,6 +39,9 @@ UBO::UBO(void* data, unsigned int size, GLenum usage, unsigned int blockBinding)
 
 		glBindBufferBase(GL_UNIFORM_BUFFER, blockBinding, buffer);
 	} else {
+		//Apply the offset for Vulkan
+		this->blockBinding += VULKAN_BINDING_OFFSET;
+
 		//Setup the buffer for Vulkan
 		vulkanBuffers.resize(Vulkan::getSwapChain()->getImageCount());
 
@@ -58,7 +62,7 @@ UBO::~UBO() {
 
 void UBO::update(void* data, unsigned int offset, unsigned int size) {
 	//Check whether using Vulkan or OpenGL
-	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
+	if (! BaseEngine::usingVulkan()) {
 		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
 		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);

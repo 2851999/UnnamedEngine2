@@ -140,8 +140,8 @@ void Test::onCreated() {
 //	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
 //	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
 
-	font = new Font("resources/fonts/CONSOLA.TTF", 64, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
-	text = new Text(font, Colour::WHITE, true);
+	font = new Font("resources/fonts/CONSOLA.TTF", 64, TextureParameters().setFilter(GL_LINEAR));
+	text = new Text(font, Colour::WHITE, 100, true);
 	text->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
 
 //	terrain = new HeightMapTerrain();

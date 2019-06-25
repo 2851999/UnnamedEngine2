@@ -20,6 +20,7 @@
 #define CORE_VULKAN_VULKANVALIDATIONLAYERS_H_
 
 #include <vector>
+#include "../Window.h"
 
 /*****************************************************************************
  * The VulkanValidationLayers class
@@ -29,9 +30,30 @@ class VulkanValidationLayers {
 private:
 	/* Stores all the requested validation layers to use */
 	static std::vector<const char*> validationLayers;
+
+	/* Debug messenger */
+	static VkDebugUtilsMessengerEXT debugMessenger;
+
+	/* Method to create a debug messenger */
+	static VkResult createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
+
+	/* Method to destroy a debug messenger */
+	static void destroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
+
+	/* Callback method for debug messeges */
+	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+		    VkDebugUtilsMessageTypeFlagsEXT messageType,
+		    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+		    void* pUserData);
 public:
 	/* Returns whether the validation layers required are supported */
 	static bool checkSupport();
+
+	/* Method to create a debug messenger for displaying output for validation layers */
+	static void createDebugMessenger();
+
+	/* Method to destroy the debug messenger */
+	static void destroyDebugMessenger();
 
 	/* Returns a list of the required validation layers */
 	static std::vector<const char*>& getLayers() { return validationLayers; }

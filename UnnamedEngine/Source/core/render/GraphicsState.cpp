@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2019 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,18 +16,30 @@
  *
  *****************************************************************************/
 
-#include "tests/VulkanTest.h"
-//#include "examples/basic/BasicRendering3D.h"
-//#include "examples/asteroids/AsteroidsGame.h"
+#include "GraphicsState.h"
 
-int main() {
-	Test test;
-	test.create();
-//	AsteroidsGame asteroids;
-//	asteroids.create();
+#include "../Window.h"
 
-//	Tutorial tutorial;
-//	tutorial.create();
-
-	return 0;
+void GraphicsState::applyGL(GraphicsState* oldState) {
+	if (oldState != nullptr) {
+		//Check what needs to be changed and change them
+		if (depthWriteEnable != oldState->depthWriteEnable)
+			glDepthMask(depthWriteEnable);
+		if (alphaBlending != oldState->alphaBlending) {
+			if (alphaBlending) {
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			} else
+				glDisable(GL_BLEND);
+		}
+	} else {
+		//Apply everything
+		glDepthMask(depthWriteEnable);
+		if (alphaBlending) {
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		} else
+			glDisable(GL_BLEND);
+	}
 }
+

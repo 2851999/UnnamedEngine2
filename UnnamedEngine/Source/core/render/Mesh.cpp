@@ -18,6 +18,7 @@
 
 #include "Mesh.h"
 
+#include "../BaseEngine.h"
 #include "Renderer.h"
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
@@ -233,7 +234,7 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 	//Setup bones
 	if (data->hasBones()) {
 		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), GL_STATIC_DRAW);
-		vboBoneIDs->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
+		vboBoneIDs->addAttributeWithType(GL_INT, ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
 		renderData->addVBO(vboBoneIDs);
 
 		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), GL_STATIC_DRAW);
@@ -280,85 +281,126 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 		renderData->addTextureSet(material->getTextureSet());
 
 	//Setup the render data
-	renderData->setup(shader);
+	renderData->setup(setupShader);
 }
 
 void MeshRenderData::render() {
-	//Bind the required textures and render
 	renderData->render();
 }
 
 void MeshRenderData::updatePositions(MeshData* data) {
-	//Determine the number of vertices
-	if (data->hasIndices()) {
-		//As the data has indices, this will determine the number of vertices
-		numVertices = data->getNumIndices();
-		hasIndices = true;
-	} else {
-		//As there are no indices, the number of positions will be the number of vertices
-		numVertices = data->getNumPositions();
-		hasIndices = false;
-	}
+	if (vboPositions) {
+		//Determine the number of vertices
+		if (data->hasIndices()) {
+			//As the data has indices, this will determine the number of vertices
+			numVertices = data->getNumIndices();
+			hasIndices = true;
+		} else {
+			//As there are no indices, the number of positions will be the number of vertices
+			numVertices = data->getNumPositions();
+			hasIndices = false;
+		}
 
-	glBindVertexArray(renderData->getVAO());
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboPositions->update();
+			vboPositions->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboPositions->update();
+	} else
+		Logger::log("Cannot update positions as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateColours() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboColours) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboColours->update();
+			vboColours->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboColours->update();
+	} else
+		Logger::log("Cannot update colours as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateTextureCoords() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboTextureCoords) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboTextureCoords->update();
+			vboTextureCoords->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboTextureCoords->update();
+	} else
+		Logger::log("Cannot update texture coordinates as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateNormals() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboNormals) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboNormals->update();
+			vboNormals->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboNormals->update();
+	} else
+		Logger::log("Cannot update normals as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateTangents() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboTangents) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboTangents->update();
+			vboTangents->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboTangents->update();
+	} else
+		Logger::log("Cannot update tangents as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateBitangents() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboBitangents) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboBitangents->update();
+			vboBitangents->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboBitangents->update();
+	} else
+		Logger::log("Cannot update bitangents as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateIndices(MeshData* data) {
-	//As the data has indices, this will determine the number of vertices
-	numVertices = data->getNumIndices();
-	hasIndices = true;
+	if (vboIndices) {
+		//As the data has indices, this will determine the number of vertices
+		numVertices = data->getNumIndices();
+		hasIndices = true;
 
-	renderData->setCount(numVertices);
+		renderData->setCount(numVertices);
 
-	glBindVertexArray(renderData->getVAO());
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboIndices->update();
+			vboIndices->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboIndices->update();
+	} else
+		Logger::log("Cannot update indices as the VBO is not assigned", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::destroy() {
@@ -371,6 +413,8 @@ void MeshRenderData::destroy() {
 	delete vboBitangents;
 	delete vboOthers;
 	delete vboIndices;
+	delete vboBoneIDs;
+	delete vboBoneWeights;
 }
 
 /*****************************************************************************

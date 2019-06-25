@@ -24,16 +24,16 @@
 #include <fstream>
 
 /*****************************************************************************
- * The VulkanGraphicsPipeline class
+ * The GraphicsPipeline class
  *****************************************************************************/
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<float>* vertexBuffer, VulkanRenderPass* renderPass, RenderData* renderData, Shader* shader) {
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VulkanRenderPass* renderPass, RenderData* renderData, RenderShader* renderShader) {
 	this->swapChain = swapChain;
 
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 	vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = shader->getVkVertexShaderModule();
+	vertShaderStageInfo.module = renderShader->getShader()->getVkVertexShaderModule();
 	vertShaderStageInfo.pName  = "main"; //Entry point
 
 	//pSpecializationInfo can be used to specify values for shader constants - faster than using if statements
@@ -42,7 +42,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
 	fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = shader->getVkFragmentShaderModule();
+	fragShaderStageInfo.module = renderShader->getShader()->getVkFragmentShaderModule();
 	fragShaderStageInfo.pName  = "main";
 
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
@@ -50,11 +50,11 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-	auto bindingDescription    = vertexBuffer->getVkBindingDescription();
-	auto attributeDescriptions = vertexBuffer->getVkAttributeDescriptions();
+	auto bindingDescription    = renderData->getVkBindingDescriptions();
+	auto attributeDescriptions = renderData->getVkAttributeDescriptions();
 
-	vertexInputInfo.vertexBindingDescriptionCount   = 1;
-	vertexInputInfo.pVertexBindingDescriptions      = &bindingDescription;
+	vertexInputInfo.vertexBindingDescriptionCount   = static_cast<uint32_t>(bindingDescription.size());
+	vertexInputInfo.pVertexBindingDescriptions      = bindingDescription.data();
 	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
 	vertexInputInfo.pVertexAttributeDescriptions    = attributeDescriptions.data();
 
@@ -93,7 +93,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	rasterizer.rasterizerDiscardEnable = VK_FALSE; //If true discards everything, wouldn't render to frame buffer
 	rasterizer.polygonMode             = VK_POLYGON_MODE_FILL; //Anything else requires GPU feature
 	rasterizer.lineWidth               = 1.0f;
-	rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
+	rasterizer.cullMode                = VK_CULL_MODE_NONE; //VK_CULL_MODE_BACK_BIT
 	rasterizer.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizer.depthBiasEnable         = VK_FALSE;
 	rasterizer.depthBiasConstantFactor = 0.0f; //Optional
@@ -112,8 +112,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	VkPipelineDepthStencilStateCreateInfo depthStencil = {};
 	depthStencil.sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 	depthStencil.depthTestEnable       = VK_TRUE;
-	depthStencil.depthWriteEnable      = VK_TRUE;
-	depthStencil.depthCompareOp        = VK_COMPARE_OP_LESS;
+	depthStencil.depthWriteEnable      = renderShader->getGraphicsState()->depthWriteEnable ? VK_TRUE : VK_FALSE;
+	depthStencil.depthCompareOp        = VK_COMPARE_OP_LESS_OR_EQUAL;
 	depthStencil.depthBoundsTestEnable = VK_FALSE;
 	depthStencil.minDepthBounds        = 0.0f; //Optional
 	depthStencil.maxDepthBounds        = 1.0f; //Optional
@@ -124,21 +124,24 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	//Per framebuffer (only have one here)
 	VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
 	colorBlendAttachment.colorWriteMask      = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	colorBlendAttachment.blendEnable         = VK_FALSE;
-	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; //Optional
-	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; //Optional
-	colorBlendAttachment.colorBlendOp        = VK_BLEND_OP_ADD; //Optional
-	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; //Optional
-	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; //Optional
-	colorBlendAttachment.alphaBlendOp        = VK_BLEND_OP_ADD; //Optional
+//	colorBlendAttachment.blendEnable         = VK_FALSE;
+//	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; //Optional
+//	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; //Optional
+//	colorBlendAttachment.colorBlendOp        = VK_BLEND_OP_ADD; //Optional
+//	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; //Optional
+//	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; //Optional
+//	colorBlendAttachment.alphaBlendOp        = VK_BLEND_OP_ADD; //Optional
 
-//	colorBlendAttachment.blendEnable = VK_TRUE;
-//	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-//	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-//	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-//	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-//	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-//	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+	if (renderShader->getGraphicsState()->alphaBlending) {
+		colorBlendAttachment.blendEnable = VK_TRUE;
+		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+		colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+	} else
+		colorBlendAttachment.blendEnable = VK_FALSE;
 
 	VkPipelineColorBlendStateCreateInfo colorBlending = {};
 	colorBlending.sType             = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -159,7 +162,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	pipelineLayoutInfo.pPushConstantRanges    = nullptr; //Optional
 
 	if (vkCreatePipelineLayout(swapChain->getDevice()->getLogical(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
-		Logger::log("Failed to create pipeline layout", "VulkanGraphicsPipeline", LogType::Error);
+		Logger::log("Failed to create pipeline layout", "GraphicsPipeline", LogType::Error);
 
 	VkGraphicsPipelineCreateInfo pipelineInfo = {};
 	pipelineInfo.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -181,7 +184,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, VBO<f
 	pipelineInfo.basePipelineIndex   = -1; //Optional
 
 	if (vkCreateGraphicsPipelines(swapChain->getDevice()->getLogical(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
-		Logger::log("Failed to create graphics pipeline", "VulkanGraphicsPipeline", LogType::Error);
+		Logger::log("Failed to create graphics pipeline", "GraphicsPipeline", LogType::Error);
 }
 
 VulkanGraphicsPipeline::~VulkanGraphicsPipeline() {

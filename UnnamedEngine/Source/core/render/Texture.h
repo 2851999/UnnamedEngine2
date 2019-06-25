@@ -36,7 +36,6 @@ private:
 	GLuint minFilter = DEFAULT_FILTER;
 	GLuint magFilter = DEFAULT_FILTER;
 	GLuint clamp     = DEFAULT_CLAMP;
-	bool shouldClamp = DEFAULT_SHOULD_CLAMP;
 
 	bool srgb = DEFAULT_SRGB;
 	bool generateMipMapsIfAvailable = true;
@@ -45,17 +44,14 @@ public:
 	static GLuint DEFAULT_TARGET;
 	static GLuint DEFAULT_FILTER;
 	static GLuint DEFAULT_CLAMP;
-	static bool   DEFAULT_SHOULD_CLAMP;
 	static bool   DEFAULT_SRGB;
 
 	/* Various constructors */
 	TextureParameters() {}
-	TextureParameters(bool shouldClamp) : shouldClamp(shouldClamp) {}
 	TextureParameters(GLuint target) : target(target) {}
-	TextureParameters(GLuint target, bool shouldClamp) : target(target), shouldClamp(shouldClamp) {}
 	TextureParameters(GLuint target, GLuint filter) : target(target), minFilter(filter), magFilter(filter) {}
-	TextureParameters(GLuint target, GLuint filter, GLuint clamp) : target(target), minFilter(filter), magFilter(filter), clamp(clamp) { shouldClamp = true; }
-	TextureParameters(GLuint target, GLuint filter, GLuint clamp, bool shouldClamp, bool srgb = DEFAULT_SRGB) : target(target), minFilter(filter), magFilter(filter), clamp(clamp), shouldClamp(shouldClamp), srgb(srgb) {}
+	TextureParameters(GLuint target, GLuint filter, GLuint clamp) : target(target), minFilter(filter), magFilter(filter), clamp(clamp) {}
+	TextureParameters(GLuint target, GLuint filter, GLuint clamp, bool srgb = DEFAULT_SRGB) : target(target), minFilter(filter), magFilter(filter), clamp(clamp), srgb(srgb) {}
 
 	/* Methods used to apply the texture parameters to a texture */
 	void apply(GLuint texture, bool bind, bool unbind);
@@ -71,7 +67,6 @@ public:
 	inline TextureParameters setMinFilter(GLuint minFilter) { this->minFilter = minFilter; return (*this); }
 	inline TextureParameters setMagFilter(GLuint magFilter) { this->magFilter = magFilter; return (*this); }
 	inline TextureParameters setClamp(GLuint clamp)   { this->clamp  = clamp;  return (*this); }
-	inline TextureParameters setShouldClamp(bool shouldClamp) { this->shouldClamp = shouldClamp; return (*this); }
 	inline TextureParameters setSRGB(bool srgb) { this->srgb = srgb; return (*this); }
 
 	inline void preventGenerateMipMaps() { generateMipMapsIfAvailable = false; }
@@ -80,7 +75,6 @@ public:
 	inline GLuint getMinFilter() { return minFilter; }
 	inline GLuint getMagFilter() { return magFilter; }
 	inline GLuint getClamp()  { return clamp;  }
-	inline bool getShouldClamp() { return shouldClamp; }
 	inline bool getSRGB() { return srgb; }
 
 	/* Returns whether a mipmap should be generated */
@@ -99,16 +93,6 @@ class Texture : public Resource {
 private:
 	/* OpenGL handle to the texture */
 	GLuint texture = 0;
-
-	/* Required objects for Vulkan to access and use a texture */
-	VkImage        textureVkImage       = VK_NULL_HANDLE;
-	VkDeviceMemory textureVkImageMemory = VK_NULL_HANDLE;
-	VkImageView    textureVkImageView   = VK_NULL_HANDLE;
-	VkDescriptorImageInfo imageInfo;
-
-	/* Sampler for this texture (Should change to use one for many rather than
-	 * create one for each texture) */
-	VkSampler textureVkSampler = VK_NULL_HANDLE;
 
 	/* The width and height */
 	unsigned int width = 0;
@@ -129,13 +113,24 @@ private:
 protected:
 	/* The texture parameters for this texture */
 	TextureParameters parameters;
+
+	/* Required objects for Vulkan to access and use a texture */
+	VkImage        textureVkImage       = VK_NULL_HANDLE;
+	VkDeviceMemory textureVkImageMemory = VK_NULL_HANDLE;
+	VkImageView    textureVkImageView   = VK_NULL_HANDLE;
+	VkDescriptorImageInfo imageInfo;
+
+	/* Sampler for this texture (Should change to use one for many rather than
+	 * create one for each texture) */
+	VkSampler textureVkSampler = VK_NULL_HANDLE;
 public:
 	/* The constructors */
-	Texture(TextureParameters parameters = TextureParameters()) : parameters(parameters) { create(); }
+	Texture(TextureParameters parameters = TextureParameters());
 	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : texture(texture), parameters(parameters) {}
 	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : width(width), height(height), parameters(parameters) { create(); }
 	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : texture(texture), width(width), height(height), parameters(parameters) {}
 	Texture(void* data, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool shouldApplyParameters = true);
+	Texture(unsigned int width, unsigned int height, VkImage textureVkImage, VkDeviceMemory textureVkImageMemory, VkImageView textureVkImageView, TextureParameters parameters = TextureParameters());
 
 	/* The destructor */
 	virtual ~Texture() { destroy(); }

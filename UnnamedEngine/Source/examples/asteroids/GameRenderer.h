@@ -60,7 +60,7 @@ private:
 	bool useLighting;
 public:
 	/* The constructor */
-	GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, bool useTextureCoords, bool useLighting, bool useNormalMapping);
+	GameRenderer(Mesh* mesh, RenderShader* renderShader, unsigned int numObjects, bool useTextureCoords, bool useLighting, bool useNormalMapping);
 
 	/* The destructor */
 	virtual ~GameRenderer();

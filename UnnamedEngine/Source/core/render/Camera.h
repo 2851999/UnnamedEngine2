@@ -28,7 +28,7 @@
  *****************************************************************************/
 
 class Camera {
-private:
+protected:
 	/* The projection and view matrices */
 	Matrix4f projectionMatrix;
 	Matrix4f viewMatrix;
@@ -114,10 +114,7 @@ public:
 		setRotation(rotation);
 		setScale(scale);
 	}
-	virtual ~Camera3D() {
-		if (skyBox)
-			delete skyBox;
-	}
+	virtual ~Camera3D();
 
 	void update() override;
 

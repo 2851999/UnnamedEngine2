@@ -10,7 +10,7 @@
 uniform sampler2D ue_heightMap;
 
 /* The terrain data */
-layout (std140, binding = 5) uniform UETerrainData {
+layout(std140, binding = 5) uniform UETerrainData {
 	uniform vec4 ue_translation;
 	uniform vec2 ue_gridSize;
 	uniform float ue_scale;

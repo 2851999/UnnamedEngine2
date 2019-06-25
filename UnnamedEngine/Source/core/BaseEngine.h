@@ -32,8 +32,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.3.7";
-	const std::string DateCreated = "22/06/2019";
+	const std::string Version     = "V0.3.8";
+	const std::string DateCreated = "25/06/2019";
 	const std::string Build       = "Development";
 }
 
@@ -126,6 +126,9 @@ public:
 	virtual void onControllerAxis(Controller* controller, int axis, float value) override {}
 	virtual void onControllerButtonPressed(Controller* controller, int index) override {}
 	virtual void onControllerButtonReleased(Controller* controller, int index) override {}
+
+	/* Static method to obtain a boolean representing whether Vulkan is being used */
+	inline static bool usingVulkan() { return Window::getCurrentInstance()->getSettings().videoVulkan; }
 };
 
 

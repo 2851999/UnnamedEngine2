@@ -17,6 +17,8 @@
  *****************************************************************************/
 
 #include "Object.h"
+
+#include "BaseEngine.h"
 #include "render/Renderer.h"
 
 /*****************************************************************************
@@ -37,7 +39,7 @@ GameObject::~GameObject() {
 void GameObject::render() {
 	if (hasMesh()) {
 		if (! shouldCull()) {
-			if (! Window::getCurrentInstance()->getSettings().videoVulkan)
+			if (! BaseEngine::usingVulkan())
 				renderShader->getShader()->use();
 			Renderer::render(mesh, getModelMatrix(), renderShader);
 		}

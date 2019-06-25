@@ -18,8 +18,10 @@
 
 #include "VulkanValidationLayers.h"
 
-#include "../Window.h"
 #include <cstdint>
+#include "Vulkan.h"
+
+#include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The VulkanValidationLayers class
@@ -28,6 +30,8 @@
 std::vector<const char*> VulkanValidationLayers::validationLayers = {
 		"VK_LAYER_LUNARG_standard_validation"
 };
+
+VkDebugUtilsMessengerEXT VulkanValidationLayers::debugMessenger;
 
 bool VulkanValidationLayers::checkSupport() {
 	//Obtain the supported layers
@@ -55,3 +59,58 @@ bool VulkanValidationLayers::checkSupport() {
 
 	return true;
 }
+
+void VulkanValidationLayers::createDebugMessenger() {
+	//Only bother if validation layers are enabled
+	if (! Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled)
+		return;
+
+	//Setup the information required
+	VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+	createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+	createInfo.pfnUserCallback = debugCallback;
+	createInfo.pUserData = nullptr;
+
+	//Attempt to create the messenger
+	if (createDebugUtilsMessengerEXT(Vulkan::getInstance(), &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
+		Logger::log("Failed to create a debug messenger", "VulkanValidationLayers", LogType::Error);
+}
+
+void VulkanValidationLayers::destroyDebugMessenger() {
+	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled)
+		destroyDebugUtilsMessengerEXT(Vulkan::getInstance(), debugMessenger, nullptr);
+}
+
+VkResult VulkanValidationLayers::createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
+	auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+	if (func != nullptr)
+		return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+	else
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+	//vkCreateDebugUtilsMessengerEXT is from extension, so not loaded by default
+}
+
+void VulkanValidationLayers::destroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
+	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+	if (func != nullptr)
+		func(instance, debugMessenger, pAllocator);
+}
+
+VKAPI_ATTR VkBool32 VKAPI_CALL VulkanValidationLayers::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+	LogType logType;
+	if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
+		logType = LogType::Debug;
+	else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+		logType = LogType::Information;
+	else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+		logType = LogType::Warning;
+	else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+		logType = LogType::Error;
+	//Output the message
+	Logger::log(pCallbackData->pMessage, "Vulkan (ValidationLayer)", logType);
+
+	return VK_FALSE;
+}
+

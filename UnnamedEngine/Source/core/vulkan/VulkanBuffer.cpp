@@ -30,6 +30,7 @@
 VulkanBuffer::VulkanBuffer(VkDeviceSize bufferSize, VulkanDevice* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, bool useStaging) {
 	this->device = device;
 	this->useStaging = useStaging;
+	this->size = bufferSize;
 
 	//Create the buffer
 	Vulkan::createBuffer(bufferSize, usage, properties, instance, bufferMemory);
@@ -69,14 +70,18 @@ void VulkanBuffer::copyData(void* dataToCopy, unsigned int offset, VkDeviceSize 
 }
 
 void VulkanBuffer::copyData(void* dataToCopy, unsigned int offset, VkDeviceSize& size, VkDeviceMemory& dest) {
-	//Map buffer memory into CPU accessible memory
-	void* data;
-	vkMapMemory(device->getLogical(), dest, offset, size, 0, &data); //Data is now mapped
-	memcpy(data, dataToCopy, (size_t) size);
-	vkUnmapMemory(device->getLogical(), dest); //Driver not necessarily copied yet, can either use heap that is host coherent,
-	//or use vkFlushMappedMemoryRanges/vkInvalidateMappedMemoryRanges
-	//First option ensures mapped memory always matches the contents of allocated memory (may lead to worse performance than explicit flushing - but doesn't matter?)
-	//Guaranteed to be complete as of next vkQueueSubmit
+	//Ensure the data can fit
+	if (size <= this->size) {
+		//Map buffer memory into CPU accessible memory
+		void* data;
+		vkMapMemory(device->getLogical(), dest, offset, size, 0, &data); //Data is now mapped
+		memcpy(data, dataToCopy, (size_t) size);
+		vkUnmapMemory(device->getLogical(), dest); //Driver not necessarily copied yet, can either use heap that is host coherent,
+		//or use vkFlushMappedMemoryRanges/vkInvalidateMappedMemoryRanges
+		//First option ensures mapped memory always matches the contents of allocated memory (may lead to worse performance than explicit flushing - but doesn't matter?)
+		//Guaranteed to be complete as of next vkQueueSubmit
+	} else
+		Logger::log("Buffer is too small to copy the given data into", "VulkanBuffer", LogType::Warning);
 }
 
 VulkanBuffer::~VulkanBuffer() {
