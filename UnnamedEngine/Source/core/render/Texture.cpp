@@ -110,6 +110,11 @@ VkSamplerCreateInfo TextureParameters::getVkSamplerCreateInfo() {
  * The Texture class
  *****************************************************************************/
 
+Texture::Texture(TextureParameters parameters) : parameters(parameters) {
+	if (! BaseEngine::usingVulkan())
+		create();
+}
+
 Texture::Texture(void* imageData, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters, bool shouldApplyParameters) : width(width), height(height), numComponents(numComponents), parameters(parameters) {
 	//Check whether using OpenGL or Vulkan
 	if (! BaseEngine::usingVulkan()) {

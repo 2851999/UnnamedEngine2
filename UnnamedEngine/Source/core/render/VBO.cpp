@@ -184,7 +184,9 @@ void VBO<T>::update() {
 	if (! BaseEngine::usingVulkan()) {
 		bind();
 		glBufferData(target, data.size() * sizeof(data[0]), &data.front(), usage);
-	}
+	} else
+		//Copy the data into the buffer
+		vulkanBuffer->copyData(data.data(), 0, data.size() * sizeof(T));
 }
 
 template <typename T>

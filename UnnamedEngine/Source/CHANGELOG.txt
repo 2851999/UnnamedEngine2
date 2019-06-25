@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 3 | Experimental 6
+
+* Added ability to update the contents of a VBO using Vulkan
+  (Will not resize the buffer)
+* Added warning messages and checks for updating
+  MeshRenderData
+  
+* Fixed bug: Last commit wouldn't compile
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 3 | Experimental 5
 
 * Added 'usingVulkan' method in BaseEngine

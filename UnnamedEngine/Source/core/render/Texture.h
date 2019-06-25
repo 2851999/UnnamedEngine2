@@ -125,7 +125,7 @@ protected:
 	VkSampler textureVkSampler = VK_NULL_HANDLE;
 public:
 	/* The constructors */
-	Texture(TextureParameters parameters = TextureParameters()) : parameters(parameters) { if (! BaseEngine::usingVulkan()) create(); }
+	Texture(TextureParameters parameters = TextureParameters());
 	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : texture(texture), parameters(parameters) {}
 	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : width(width), height(height), parameters(parameters) { create(); }
 	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : texture(texture), width(width), height(height), parameters(parameters) {}
