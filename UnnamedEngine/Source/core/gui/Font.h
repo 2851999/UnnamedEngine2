@@ -61,7 +61,7 @@ public:
 	static const float RENDER_SCALE;
 
 	/* The constructors */
-	Font(std::string path, unsigned int size = 18, TextureParameters parameters = TextureParameters().setShouldClamp(true).setFilter(GL_NEAREST)) { setup(path, size, parameters); }
+	Font(std::string path, unsigned int size = 18, TextureParameters parameters = TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST)) { setup(path, size, parameters); }
 	/* The destructors */
 	virtual ~Font() {} //Destroy should be called when resource is released
 

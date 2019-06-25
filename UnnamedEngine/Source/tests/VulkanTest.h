@@ -64,7 +64,7 @@ void Test::created() {
 //	Shader::compileEngineShaderToSPIRV("VulkanShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
-//	Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 0.0f, 1.0f);
@@ -90,18 +90,17 @@ void Test::created() {
 	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
 
 	mesh->setCullingEnabled(false);
-	model = new GameObject3D(mesh, Renderer::SHADER_MATERIAL);
+	model = new GameObject3D(mesh, Renderer::SHADER_VULKAN_LIGHTING);
 	model->setScale(0.15f, 0.15f, 0.15f);
 	model->update();
 	renderScene->add(model);
-	renderScene->disableLighting();
 
 	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae");
-	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
+	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
 	//Mesh* mesh2 = new Mesh(MeshBuilder::createCube(10.0f, 10.0f, 10.0f));
 
 	mesh2->setCullingEnabled(false);
-	model2 = new GameObject3D(mesh2, Renderer::SHADER_MATERIAL);
+	model2 = new GameObject3D(mesh2, Renderer::SHADER_VULKAN_LIGHTING);
 	model2->setPosition(4.0f, 1.0f, 0.0f);
 	model2->update();
 	renderScene->add(model2);

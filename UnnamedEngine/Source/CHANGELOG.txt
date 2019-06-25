@@ -1,4 +1,16 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 3 | Experimental 4
+  
+* Added VulkanLightingShader for lighting with RenderScene3D
+  
+* Changed 'DEFAULT_CLAMP' in TextureParameters to be GL_REPEAT
+
+* Moved debug messenger in Vulkan to VulkanValidationLayers
+
+* Removed 'shouldClamp' in TextureParameters (since default
+  is GL_REPEAT anyway)
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 3 | Experimental 3
 
 * Added basic Vulkan support to RenderScene3D

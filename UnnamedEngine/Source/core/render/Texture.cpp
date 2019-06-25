@@ -29,11 +29,10 @@
  *****************************************************************************/
 
 /* Define the default parameters */
-GLuint TextureParameters::DEFAULT_TARGET       = GL_TEXTURE_2D;
-GLuint TextureParameters::DEFAULT_FILTER       = GL_NEAREST;
-GLuint TextureParameters::DEFAULT_CLAMP        = GL_CLAMP_TO_EDGE;
-bool   TextureParameters::DEFAULT_SHOULD_CLAMP = false;
-bool   TextureParameters::DEFAULT_SRGB         = false;
+GLuint TextureParameters::DEFAULT_TARGET = GL_TEXTURE_2D;
+GLuint TextureParameters::DEFAULT_FILTER = GL_NEAREST;
+GLuint TextureParameters::DEFAULT_CLAMP  = GL_REPEAT;
+bool   TextureParameters::DEFAULT_SRGB   = false;
 
 void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
 	//Bind the texture if necessary
@@ -42,14 +41,12 @@ void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
 	//Setup the filter
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minFilter);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, magFilter);
-	//Setup texture clamping if necessary
-	if (shouldClamp) {
-		glTexParameteri(target, GL_TEXTURE_WRAP_S, clamp);
-		glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp);
-		//One more value for cube maps
-		if (target == GL_TEXTURE_CUBE_MAP)
-			glTexParameteri(target, GL_TEXTURE_WRAP_R, clamp);
-	}
+	//Setup texture clamping
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, clamp);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp);
+	//One more value for cube maps
+	if (target == GL_TEXTURE_CUBE_MAP)
+		glTexParameteri(target, GL_TEXTURE_WRAP_R, clamp);
 	//Sets up mip-mapping if requested
 	if (mipMapRequested()) {
 		glGenerateMipmap(target);
@@ -74,17 +71,11 @@ VkSamplerCreateInfo TextureParameters::getVkSamplerCreateInfo() {
 	else if (magFilter == GL_LINEAR || magFilter == GL_LINEAR_MIPMAP_NEAREST || magFilter == GL_LINEAR_MIPMAP_LINEAR)
 		samplerInfo.magFilter = VK_FILTER_LINEAR;
 
-	if (shouldClamp) {
-		if (clamp == GL_CLAMP_TO_EDGE) {
-			samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-			samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-			samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		} else if (clamp == GL_REPEAT) {
-			samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-			samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-			samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		}
-	} else {
+	if (clamp == GL_CLAMP_TO_EDGE) {
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	} else if (clamp == GL_REPEAT) {
 		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -422,7 +413,6 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 		parameters.setTarget(GL_TEXTURE_CUBE_MAP);
 		parameters.setFilter(GL_LINEAR);
 		parameters.setClamp(GL_CLAMP_TO_EDGE);
-		parameters.setShouldClamp(true);
 
 		if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
 			//Bind this cubemap

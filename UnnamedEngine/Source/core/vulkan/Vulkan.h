@@ -38,9 +38,6 @@ private:
 	/* The actual instance handled by this class */
 	static VkInstance instance;
 
-	/* Debug messenger */
-	static VkDebugUtilsMessengerEXT debugMessenger;
-
 	/* The surface used for rendering to the window */
 	static VkSurfaceKHR windowSurface;
 
@@ -64,18 +61,6 @@ private:
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
-
-	/* Method to create a debug messenger */
-	static VkResult createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
-
-	/* Method to destroy a debug messenger */
-	static void destroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
-
-	/* Callback method for debug messeges */
-	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-		    VkDebugUtilsMessageTypeFlagsEXT messageType,
-		    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-		    void* pUserData);
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -88,12 +73,6 @@ public:
 
 	/* Method to destroy the Vulkan instance */
 	static void destroyInstance();
-
-	/* Method to create a debug messenger for displaying output for validation layers */
-	static void createDebugMessenger();
-
-	/* Method to destroy the debug messenger */
-	static void destroyDebugMessenger();
 
 	/* Method to create the window surface (Returns whether the creation was successful) */
 	static bool createWindowSurface(Window* window);

@@ -62,13 +62,14 @@ const unsigned int Renderer::SHADER_PLAIN_TEXTURE     = 13;
 const unsigned int Renderer::SHADER_DEFERRED_LIGHTING = 14;
 const unsigned int Renderer::SHADER_TILEMAP			  = 15;
 const unsigned int Renderer::SHADER_VULKAN			  = 16;
+const unsigned int Renderer::SHADER_VULKAN_LIGHTING   = 17;
 
-const unsigned int Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN         = 17;
-const unsigned int Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN       = 18;
-const unsigned int Renderer::SHADER_PBR_PREFILTER_MAP_GEN        = 19;
-const unsigned int Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN = 20;
-const unsigned int Renderer::SHADER_PBR_LIGHTING                 = 21;
-const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING        = 22;
+const unsigned int Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN         = 18;
+const unsigned int Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN       = 19;
+const unsigned int Renderer::SHADER_PBR_PREFILTER_MAP_GEN        = 20;
+const unsigned int Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN = 21;
+const unsigned int Renderer::SHADER_PBR_LIGHTING                 = 22;
+const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING        = 23;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -133,6 +134,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
 	addRenderShader(SHADER_VULKAN,				         "VulkanShader",				     "");
 	addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
+	addRenderShader(SHADER_VULKAN_LIGHTING,              "VulkanLightingShader",             "");
 
 	if (! Window::getCurrentInstance()->getSettings().videoVulkan) {
 		addRenderShader(SHADER_FONT,                         "FontShader",                       "");

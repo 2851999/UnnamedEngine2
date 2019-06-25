@@ -113,6 +113,11 @@ void ShaderInterface::setup(RenderData* renderData, unsigned int shaderID) {
 		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
 		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
 		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
+	} else if (shaderID == Renderer::SHADER_VULKAN_LIGHTING) {
+		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
+		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
+		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
+		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
 	} else if (shaderID == Renderer::SHADER_FRAMEBUFFER) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
 	} else if (shaderID == Renderer::SHADER_ENVIRONMENT_MAP) {
