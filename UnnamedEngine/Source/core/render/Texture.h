@@ -130,6 +130,7 @@ public:
 	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : width(width), height(height), parameters(parameters) { create(); }
 	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : texture(texture), width(width), height(height), parameters(parameters) {}
 	Texture(void* data, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool shouldApplyParameters = true);
+	Texture(unsigned int width, unsigned int height, VkImage textureVkImage, VkDeviceMemory textureVkImageMemory, VkImageView textureVkImageView, TextureParameters parameters = TextureParameters());
 
 	/* The destructor */
 	virtual ~Texture() { destroy(); }

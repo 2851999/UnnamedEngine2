@@ -1,4 +1,14 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 3 | Experimental 7
+
+* Added Vulkan support to Font and Text (Although it can only
+  be updated to use as many characters as 'maxCharacters' in
+  its constructor - default is 1000)
+* Added 'alphaBlending' in GraphicsState
+
+* Fixed bug: BaseEngine did not delete its Text instance
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 3 | Experimental 6
 
 * Added ability to update the contents of a VBO using Vulkan

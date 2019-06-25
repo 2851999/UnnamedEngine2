@@ -136,9 +136,9 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_VULKAN,				         "VulkanShader",				     "");
 	addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
 	addRenderShader(SHADER_VULKAN_LIGHTING,              "VulkanLightingShader",             "");
+	addRenderShader(SHADER_FONT,                         "FontShader",                       "");
 
 	if (! BaseEngine::usingVulkan()) {
-		addRenderShader(SHADER_FONT,                         "FontShader",                       "");
 		addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
 		addRenderShader(SHADER_PARTICLE,                     "ParticleShader",                   "");
 		addRenderShader(SHADER_FRAMEBUFFER,                  "FramebufferShader",                "");
@@ -354,10 +354,13 @@ void Renderer::loadRenderShader(unsigned int id) {
 
 void Renderer::assignGraphicsState(GraphicsState* state, unsigned int shaderID) {
 	//Check the shader ID
-	if (shaderID == SHADER_SKY_BOX) {
+	if (shaderID == SHADER_SKY_BOX)
 		//Assign the state to use
 		state->depthWriteEnable = false;
-	}
+	else if (shaderID == SHADER_FONT)
+		state->alphaBlending = true;
+	else if (shaderID == SHADER_PARTICLE)
+		state->alphaBlending = true;
 }
 
 void Renderer::addRenderShader(RenderShader* renderShader) {

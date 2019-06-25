@@ -193,6 +193,22 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 	}
 }
 
+Texture::Texture(unsigned int width, unsigned int height, VkImage textureVkImage, VkDeviceMemory textureVkImageMemory, VkImageView textureVkImageView, TextureParameters parameters) : width(width), height(height), parameters(parameters), textureVkImage(textureVkImage), textureVkImageMemory(textureVkImageMemory), textureVkImageView(textureVkImageView) {
+	//------------------------------------------------------CREATE THE SAMPLER------------------------------------------------------
+	VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
+	samplerInfo.maxLod = static_cast<float>(mipLevels);
+
+	//NOTE: Sampler not attached to image (can use again in TextureParameters?)
+
+	if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
+		Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
+
+	//Setup the descriptor info
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView   = this->textureVkImageView;
+    imageInfo.sampler     = textureVkSampler;
+}
+
 void Texture::generateMipmapsVk() {
 	//Obtain the format used for this image
 	VkFormat format;

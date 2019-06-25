@@ -54,21 +54,21 @@ void BaseEngine::create() {
 		//Initialise the Renderer therefore loading engine shaders and textures
 		Renderer::initialise();
 
+		//Initialise the font system
+		Font::initialiseFreeType();
+
+		//Assign the default font and text instance
+		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
+		textInstance = new Text(defaultFont, Colour::WHITE, 400);
+		//Create the debug camera
+		debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
+		debugCamera->update();
+
+		GUIComponentRenderer::DEFAULT_FONT = defaultFont;
+
 		if (! getSettings().videoVulkan) {
 			//Initialise the Audio system
 			AudioManager::initialise();
-
-			//Initialise the font system
-			Font::initialiseFreeType();
-
-			//Assign the default font and text instance
-			defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
-			textInstance = new Text(defaultFont, Colour::WHITE);
-			//Create the debug camera
-			debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
-			debugCamera->update();
-
-			GUIComponentRenderer::DEFAULT_FONT = defaultFont;
 
 			//Create the debug console
 			if (getSettings().debugConsoleEnabled) {
@@ -133,9 +133,10 @@ void BaseEngine::create() {
 				Vulkan::startDraw();
 			render();
 
+			if (getSettings().debugShowInformation)
+				renderDebugInfo();
+
 			if (! getSettings().videoVulkan) {
-				if (getSettings().debugShowInformation)
-					renderDebugInfo();
 				if (getSettings().debugConsoleEnabled)
 					renderDebugConsole();
 			} else
@@ -152,15 +153,15 @@ void BaseEngine::create() {
 		//Tell the game to destroy everything it created
 		destroy();
 
+		//Destroy all other engine resources
 		Renderer::destroy();
+		Font::destroyFreeType();
+		delete textInstance;
+		delete debugCamera;
 
 		if (! getSettings().videoVulkan) {
-			//Destroy all other engine resources
-			Font::destroyFreeType();
 			AudioManager::destroy();
 
-			//Delete all of the objects required by the BaseEngine class
-			delete debugCamera;
 			if (debugConsole)
 				delete debugConsole;
 		}
@@ -179,15 +180,17 @@ void BaseEngine::create() {
 using namespace utils_string;
 
 void BaseEngine::renderDebugInfo() {
-	glEnable(GL_TEXTURE_2D);
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (! BaseEngine::usingVulkan()) {
+		glEnable(GL_TEXTURE_2D);
+		glDisable(GL_DEPTH_TEST);
+//		glEnable(GL_BLEND);
+//		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		if (debugConsole->isWireframeEnabled())
+			utils_gl::disableWireframe();
+	}
 
 	Renderer::addCamera(debugCamera);
-
-	if (debugConsole->isWireframeEnabled())
-		utils_gl::disableWireframe();
 
 	textInstance->render(str("----------- DEBUG -----------\n") +
 							 "Engine Version : " + str(Engine::Version) + "\n" +
@@ -208,11 +211,13 @@ void BaseEngine::renderDebugInfo() {
 
 	Renderer::removeCamera();
 
-	if (debugConsole->isWireframeEnabled())
-		utils_gl::enableWireframe();
+	if (! BaseEngine::usingVulkan()) {
+		if (debugConsole->isWireframeEnabled())
+			utils_gl::enableWireframe();
 
-	glDisable(GL_BLEND);
-	glDisable(GL_TEXTURE_2D);
+//		glDisable(GL_BLEND);
+		glDisable(GL_TEXTURE_2D);
+	}
 }
 
 void BaseEngine::renderDebugConsole() {

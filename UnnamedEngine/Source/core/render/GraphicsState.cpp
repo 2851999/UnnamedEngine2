@@ -25,9 +25,21 @@ void GraphicsState::applyGL(GraphicsState* oldState) {
 		//Check what needs to be changed and change them
 		if (depthWriteEnable != oldState->depthWriteEnable)
 			glDepthMask(depthWriteEnable);
+		if (alphaBlending != oldState->alphaBlending) {
+			if (alphaBlending) {
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			} else
+				glDisable(GL_BLEND);
+		}
 	} else {
 		//Apply everything
 		glDepthMask(depthWriteEnable);
+		if (alphaBlending) {
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		} else
+			glDisable(GL_BLEND);
 	}
 }
 

@@ -28,6 +28,7 @@ class GraphicsState {
 public:
 	/* Various states that this class handles */
 	bool depthWriteEnable = true;
+	bool alphaBlending    = false; //For transparency
 
 	/* Constructor */
 	GraphicsState() {}

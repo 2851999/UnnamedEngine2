@@ -48,20 +48,20 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().debugVkValidationLayersEnabled = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 
 	getSettings().videoVulkan = true;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
 	getSettings().videoVSync = 0;
-	getSettings().debugShowInformation = false;
+	getSettings().debugShowInformation = true;
 	getSettings().videoSamples = 8;
 	getSettings().videoMaxAnisotropicSamples = 16;
 }
 
 void Test::created() {
 //	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
-//	Shader::compileEngineShaderToSPIRV("VulkanShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
