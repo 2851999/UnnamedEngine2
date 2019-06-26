@@ -7,7 +7,7 @@
 
 #map uniform HeightMap ue_heightMap
 
-uniform sampler2D ue_heightMap;
+layout(binding = 6) uniform sampler2D ue_heightMap;
 
 /* The terrain data */
 layout(std140, binding = 5) uniform UETerrainData {

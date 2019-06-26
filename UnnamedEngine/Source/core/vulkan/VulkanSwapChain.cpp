@@ -99,29 +99,9 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	//Create the image views
 	imageViews.resize(images.size());
 
-	for (unsigned int i = 0; i < images.size(); ++i) {
-		VkImageViewCreateInfo imageViewCreateInfo = {};
-		imageViewCreateInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		imageViewCreateInfo.image    = images[i];
-		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		imageViewCreateInfo.format   = format;
-
-		//Use default component mapping
-		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-		imageViewCreateInfo.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-		imageViewCreateInfo.subresourceRange.baseMipLevel   = 0;
-		imageViewCreateInfo.subresourceRange.levelCount     = 1;
-		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-		imageViewCreateInfo.subresourceRange.layerCount     = 1;
-
-		//Attemot to create the image view
-		if (vkCreateImageView(device->getLogical(), &imageViewCreateInfo, nullptr, &imageViews[i]) != VK_SUCCESS)
-			Logger::log("Failed to create image view", "VulkanSwapChain", LogType::Error);
-	}
+	for (unsigned int i = 0; i < images.size(); ++i)
+		//Create the image view
+		imageViews[i] = Vulkan::createImageView(images[i], VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
 
 	//Obtain the number of samples being used
 	numSamples = settings.videoSamples;

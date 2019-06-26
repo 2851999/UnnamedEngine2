@@ -30,8 +30,7 @@
 
 class Test : public BaseEngine {
 private:
-	float lastTime = 0;
-
+	unsigned int count = 0;
 	DebugCamera* camera;
 	RenderScene3D* renderScene;
 	GameObject3D* model;
@@ -95,7 +94,9 @@ void Test::created() {
 	model->update();
 	renderScene->add(model);
 
-	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae");
+//	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae");
+//	mesh2->getSkeleton()->startAnimation("");
+
 	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
 	//Mesh* mesh2 = new Mesh(MeshBuilder::createCube(10.0f, 10.0f, 10.0f));
 
@@ -109,10 +110,6 @@ void Test::created() {
 
 void Test::update() {
 	camera->update(getDeltaSeconds());
-	if (utils_time::getSeconds() - lastTime > 0.5f) {
-		lastTime = utils_time::getSeconds();
-		std::cout << getFPS() << std::endl;
-	}
 
 	if (Keyboard::isPressed(GLFW_KEY_UP))
 		light0->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
@@ -123,10 +120,14 @@ void Test::update() {
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		light0->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 	light0->update();
+
+//	model2->getMesh()->updateAnimation(getDeltaSeconds());
 }
 
 void Test::render() {
-	//requestClose();
+	count++;
+//	if (count == 4)
+//		requestClose();
 	if (! getSettings().videoVulkan) {
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

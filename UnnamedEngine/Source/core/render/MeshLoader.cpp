@@ -117,7 +117,7 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 			}
 			//Go through each face in the current mesh
 			for (unsigned int b = 0; b < currentMesh->mNumFaces; ++b) {
-				//Thee current face of the current mesh
+				//The current face of the current mesh
 				struct aiFace& currentFace = currentMesh->mFaces[b];
 
 				//Goes through each vertex of the face, this assumes the model is triangulated i.e. there are

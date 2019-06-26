@@ -66,9 +66,10 @@ void BaseEngine::create() {
 
 		GUIComponentRenderer::DEFAULT_FONT = defaultFont;
 
+		//Initialise the Audio system
+		AudioManager::initialise();
+
 		if (! getSettings().videoVulkan) {
-			//Initialise the Audio system
-			AudioManager::initialise();
 
 			//Create the debug console
 			if (getSettings().debugConsoleEnabled) {
@@ -97,7 +98,7 @@ void BaseEngine::create() {
 				textInstance->setColour(Colour::BLACK);
 				textInstance->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);
 				textInstance->setFont(font2);
-				textInstance->render(Engine::Build + " " + Engine::Version, getSettings().windowWidth / 2 - font2->getWidth(Engine::Build + " " + Engine::Version) / 2, (getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2) + 38.0f);
+				textInstance->render(Engine::Build + " " + Engine::Version, getSettings().windowWidth / 2 - font2->getWidth(Engine::Build + " " + Engine::Version) / 2, (getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2) + 42.0f);
 
 				glDisable(GL_BLEND);
 				Renderer::removeCamera();
@@ -159,9 +160,9 @@ void BaseEngine::create() {
 		delete textInstance;
 		delete debugCamera;
 
-		if (! getSettings().videoVulkan) {
-			AudioManager::destroy();
+		AudioManager::destroy();
 
+		if (! getSettings().videoVulkan) {
 			if (debugConsole)
 				delete debugConsole;
 		}

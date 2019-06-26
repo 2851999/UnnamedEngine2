@@ -244,9 +244,6 @@ void AsteroidsMainGame::render() {
 	glEnable(GL_MULTISAMPLE_ARB);
 	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
 
-	//Render the player
-	player->render();
-
 	//Render the asteroids
 	asteroidRenderer->render();
 
@@ -254,6 +251,9 @@ void AsteroidsMainGame::render() {
 	enemiesRenderer->render();
 	for (unsigned int i = 0; i < enemies.size(); i++)
 			enemies[i]->render();
+
+	//Render the player
+	player->render();
 
 	//Render the HUD
 	hud->render();

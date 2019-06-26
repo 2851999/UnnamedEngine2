@@ -36,6 +36,7 @@
 #include "../core/gui/GUIGroup.h"
 #include "../core/gui/GUIRadioCheckBox.h"
 #include "../core/ml/ML.h"
+#include "../utils/GLUtils.h"
 
 class Test : public BaseEngine {
 private:
@@ -202,8 +203,7 @@ void Test::render() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_TEXTURE_2D);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//utils_gl::setupAlphaBlendingMSAA();
 
 	panel->render();
 }
