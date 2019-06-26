@@ -66,9 +66,10 @@ void BaseEngine::create() {
 
 		GUIComponentRenderer::DEFAULT_FONT = defaultFont;
 
+		//Initialise the Audio system
+		AudioManager::initialise();
+
 		if (! getSettings().videoVulkan) {
-			//Initialise the Audio system
-			AudioManager::initialise();
 
 			//Create the debug console
 			if (getSettings().debugConsoleEnabled) {
@@ -159,9 +160,9 @@ void BaseEngine::create() {
 		delete textInstance;
 		delete debugCamera;
 
-		if (! getSettings().videoVulkan) {
-			AudioManager::destroy();
+		AudioManager::destroy();
 
+		if (! getSettings().videoVulkan) {
 			if (debugConsole)
 				delete debugConsole;
 		}

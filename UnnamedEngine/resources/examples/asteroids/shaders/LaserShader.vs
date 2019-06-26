@@ -1,4 +1,4 @@
-#version 140
+#version 420
 
 #map uniform ViewProjectionMatrix vpMatrix
 #map attribute Visible visible
@@ -9,7 +9,7 @@ uniform mat4 vpMatrix;
 
 in float visible;
 
-in vec3 position;
+layout(location = 0) in vec3 position;
 in mat4 modelMatrix;
 
 out float frag_visible;

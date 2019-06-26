@@ -251,6 +251,9 @@ void RenderScene3D::forwardPostRender() {
 void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch) {
 	Renderer::saveTextures();
 
+	//Ignore graphics states
+	Renderer::ignoreGraphicsStates(true);
+
 	//Get the shader to use
 	Shader* shader = renderShader->getShader();
 
@@ -380,6 +383,9 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 		glDepthMask(true);
 		glDisable(GL_BLEND);
 	}
+
+	//Stop ignoring graphics states
+	Renderer::ignoreGraphicsStates(false);
 
 	Renderer::releaseNewTextures();
 }

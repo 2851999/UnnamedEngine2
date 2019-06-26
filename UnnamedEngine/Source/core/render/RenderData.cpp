@@ -47,7 +47,7 @@ void RenderData::setup(RenderShader* renderShader) {
 	}
 
 	//Go through each VBO and set it up
-	for (unsigned int i = 0; i < vbosFloat.size(); i++) {
+	for (unsigned int i = 0; i < vbosFloat.size(); ++i) {
 		vbosFloat[i]->setup(i);
 		vbosFloat[i]->startRendering();
 
@@ -61,7 +61,7 @@ void RenderData::setup(RenderShader* renderShader) {
 		}
 	}
 
-	for (unsigned int i = 0; i < vbosUInteger.size(); i++) {
+	for (unsigned int i = 0; i < vbosUInteger.size(); ++i) {
 		vbosUInteger[i]->setup(vbosFloat.size() + i);
 		vbosUInteger[i]->startRendering();
 

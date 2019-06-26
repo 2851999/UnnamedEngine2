@@ -30,8 +30,8 @@
 Font* GUIComponentRenderer::DEFAULT_FONT = NULL;
 
 void GUIComponentRenderer::setup() {
-	//Assign the text instance
-	textInstance = new Text(DEFAULT_FONT, Colour::WHITE, 100);
+	//Assign the font
+	setFont(DEFAULT_FONT);
 	//Set the default colour and texture
 	getMaterial()->setDiffuse(Colour::WHITE);
 	getMaterial()->setDiffuse(Renderer::getBlankTexture());
@@ -45,6 +45,7 @@ void GUIComponentRenderer::update() {
 	if (colours.size() > renderIndex)
 		//Assign the colour
 		getMaterial()->setDiffuse(colours[renderIndex]);
+
 	//Now to do the same for the textures
 	if (textures.size() > renderIndex)
 		getMaterial()->setDiffuse(textures[renderIndex]);
@@ -84,6 +85,13 @@ void GUIComponentRenderer::setTexture(Texture* texture) {
 		for (unsigned int i = 0; i < textures.size(); i++)
 			textures[i] = texture;
 	}
+}
+
+void GUIComponentRenderer::setFont(Font* font) {
+	this->font = font;
+	if (! textInstance)
+		textInstance = new Text(DEFAULT_FONT, Colour::WHITE, 100);
+	textInstance->setFont(font);
 }
 
 /*****************************************************************************

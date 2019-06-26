@@ -1,4 +1,64 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 4 | Experimental 1
+
+* Added error message if 'vkQueuePresentKHR' fails
+
+* Fixed bug: OpenAL not initialised when using Vulkan
+* Fixed bug: GraphicsState would have stopped RenderScene3D
+             from applying many lights correctly
+* Fixed bug: GUILabel would cause crash on creation
+
+* Some cleanup
+
+--------------------------------------------------------------
+Release 1 | Beta 2 | Development 4 (V0.3.8)
+
+* Added GraphicsState
+* Added function 'strJoin' to utils_string
+* Added basic Cubemap support for Vulkan
+* Added basic Vulkan support to RenderScene3D
+* Added support for multiple VBO's in RenderData when using
+  Vulkan
+* Added VulkanLightingShader for lighting with RenderScene3D
+* Added 'usingVulkan' method in BaseEngine
+* Added ability to update the contents of a VBO using Vulkan
+  (Will not resize the buffer)
+* Added warning messages and checks for updating
+  MeshRenderData
+* Added Vulkan support to Font and Text (Although it can only
+  be updated to use as many characters as 'maxCharacters' in
+  its constructor - default is 1000)
+
+* Changed Shader and UBO to apply an offset to UBO binding
+  locations when using Vulkan
+* Changed 'debugCallback' in Vulkan to output the correct
+  message severity
+* Changed 'setup' methods in RenderData to require a
+  RenderShader instead of a Shader
+* Changed 'initPerspective' in Matrix4f to return a
+  different matrix when using Vulkan (so depth values are
+  in the range 0-1 as Vulkan requires)
+* Changed 'depthCompareOp' to VK_COMPARE_OP_LESS_OR_EQUAL in
+  VulkanPipeline
+* Changed 'DEFAULT_CLAMP' in TextureParameters to be GL_REPEAT
+
+* Moved debug messenger in Vulkan to VulkanValidationLayers
+
+* Removed 'shouldClamp' in TextureParameters (since default
+  is GL_REPEAT anyway)
+    
+* Fixed bug: Rendering multiple objects with Vulkan meant
+             some UBOs were not destroyed
+* Fixed bug: Loaded RenderShaders were not destroyed by
+             Renderer
+* Fixed bug: VBO would not work with Vulkan if there was
+             only one attribute
+* Fixed bug: Crash on deletion of a Mesh
+* Fixed bug: Did not delete VBO's used for skinning in
+             MeshRenderData
+* Fixed bug: BaseEngine did not delete its Text instance
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 3 | Experimental 7
 
 * Added Vulkan support to Font and Text (Although it can only

@@ -156,6 +156,7 @@ public:
 	inline Colour getAmbientLight() { return ambientLight; }
 	inline bool isLightingEnabled() { return lighting; }
 	inline PBREnvironment* getPBREnvironment() { return pbrEnvironment; }
+	inline bool hasObjects() { return batches.size() > 0; }
 
 	/* Used to apply some post processing options */
 	void enableGammaCorrection();

@@ -54,6 +54,9 @@ private:
 	/* The current graphics state being used */
 	static GraphicsState* currentGraphicsState;
 
+	/* States whether graphics states should be ignored */
+	static bool shouldIgnoreGraphicsStates;
+
 	/* Assigns texture uniforms for a material */
 	static void assignMatTexture(Shader* shader, std::string type, Texture* texture);
 public:
@@ -114,6 +117,9 @@ public:
 
 	/* Method used to initialise the rendering system */
 	static void initialise();
+
+	/* Used to ignore the graphics states */
+	static inline void ignoreGraphicsStates(bool value) { shouldIgnoreGraphicsStates = value; }
 
 	/* TMethod used to apply the material properties to a shader assuming it is already being used */
 	static void useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material, UBO* materialUBO);

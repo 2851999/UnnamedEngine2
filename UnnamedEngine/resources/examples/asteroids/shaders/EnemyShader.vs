@@ -1,4 +1,4 @@
-#version 140
+#version 420
 
 #map uniform ViewProjectionMatrix vpMatrix
 #map attribute Visible visible
@@ -11,8 +11,8 @@ uniform mat4 vpMatrix;
 
 in float visible;
 
-in vec3 position;
-in vec3 normal;
+layout(location = 0) in vec3 position;
+layout(location = 2) in vec3 normal;
 in mat4 modelMatrix;
 in mat3 normalMatrix;
 

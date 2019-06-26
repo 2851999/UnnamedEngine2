@@ -46,6 +46,7 @@ MeshRenderData* Renderer::screenTextureMesh;
 std::vector<unsigned int> Renderer::boundTexturesOldSize;
 
 GraphicsState* Renderer::currentGraphicsState = nullptr;
+bool Renderer::shouldIgnoreGraphicsStates = false;
 
 const unsigned int Renderer::SHADER_MATERIAL          = 1;
 const unsigned int Renderer::SHADER_SKY_BOX           = 2;
@@ -185,14 +186,14 @@ void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, M
 }
 
 void Renderer::stopUsingMaterial(Material* material) {
-	if (! BaseEngine::usingVulkan())
+	if (! BaseEngine::usingVulkan() && ! shouldIgnoreGraphicsStates)
 		//Unbind the textures
 		material->getTextureSet()->unbindGLTextures();
 }
 
 void Renderer::useGraphicsState(GraphicsState* graphicsState) {
 	//Ensure using OpenGL
-	if (! BaseEngine::usingVulkan()) {
+	if (! BaseEngine::usingVulkan() && ! shouldIgnoreGraphicsStates) {
 		//Apply the new state
 		graphicsState->applyGL(currentGraphicsState);
 		currentGraphicsState = graphicsState;
@@ -359,7 +360,11 @@ void Renderer::assignGraphicsState(GraphicsState* state, unsigned int shaderID) 
 		state->depthWriteEnable = false;
 	else if (shaderID == SHADER_FONT)
 		state->alphaBlending = true;
+	else if (shaderID == SHADER_MATERIAL)
+		state->alphaBlending = true;
 	else if (shaderID == SHADER_PARTICLE)
+		state->alphaBlending = true;
+	else if (shaderID == SHADER_LIGHTING)
 		state->alphaBlending = true;
 }
 

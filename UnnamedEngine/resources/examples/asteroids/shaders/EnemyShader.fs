@@ -1,4 +1,4 @@
-#version 140
+#version 420
 
 #map uniform Material_AmbientColour ambientColour
 #map uniform Material_DiffuseColour diffuseColour
@@ -9,9 +9,29 @@
 #map uniform CameraPosition camera_position
 #map uniform Material_Shininess shininess
 
-uniform vec3 ambientColour;
-uniform vec4 diffuseColour;
-uniform vec3 specularColour;
+/* The material structure */
+struct UEMaterial {
+	vec4 ambientColour;
+	vec4 diffuseColour;
+	vec4 specularColour;
+	
+	bool hasAmbientTexture;
+	bool hasDiffuseTexture;
+	bool diffuseTextureSRGB;
+	bool hasSpecularTexture;
+	bool hasShininessTexture;
+	bool hasNormalMap;
+	bool hasParallaxMap;
+	
+	float parallaxScale;
+	float shininess;
+};
+
+/* The material data */
+layout(std140, binding = 2) uniform UEMaterialData {
+	UEMaterial ue_material;
+};
+
 uniform vec3 light_direction;
 uniform vec3 light_diffuseColour;
 uniform vec3 light_specularColour;
@@ -43,7 +63,7 @@ void main() {
 	if (frag_visible > 0.5) {
 		vec3 normal = normalize(frag_normal);
 
-		FragColour = vec4(vec3(0.1, 0.1, 0.1) + calculateDirectionalLight(vec3(diffuseColour), specularColour, normal), 1.0);
+		FragColour = vec4(vec3(0.1, 0.1, 0.1) + calculateDirectionalLight(vec3(ue_material.diffuseColour), ue_material.specularColour.rgb, normal), 1.0);
 	} else
 		discard;
 }

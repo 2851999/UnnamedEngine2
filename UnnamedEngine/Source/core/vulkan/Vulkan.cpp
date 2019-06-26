@@ -503,7 +503,9 @@ void Vulkan::stopDraw() {
 	presentInfo.pImageIndices  = &currentFrame;
 	presentInfo.pResults       = nullptr;
 
-	vkQueuePresentKHR(device->getPresentQueue(), &presentInfo);
+	result = vkQueuePresentKHR(device->getPresentQueue(), &presentInfo);
+	if (result != VK_SUCCESS)
+		Logger::log("Failed to present image from queue " + utils_string::str(result), "Vulkan", LogType::Error);
 
 	//vkAcquireNextImageKHR semaphore signalled will be the one with this index (so must increase before it is called again)
 	currentFrame = (currentFrame + 1) % swapChain->getImageCount();

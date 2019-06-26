@@ -1,4 +1,4 @@
-#version 140
+#version 420
 
 #map uniform ViewProjectionMatrix vpMatrix
 #map uniform UseNormalMap useNormalMap
@@ -16,11 +16,11 @@ uniform bool useNormalMap;
 
 in float visible;
 
-in vec3 position;
-in vec2 textureCoord;
-in vec3 normal;
-in vec3 tangent;
-in vec3 bitangent;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 textureCoord;
+layout(location = 2) in vec3 normal;
+layout(location = 3) in vec3 tangent;
+layout(location = 4) in vec3 bitangent;
 in mat4 modelMatrix;
 in mat3 normalMatrix;
 
