@@ -74,15 +74,14 @@ void Test::initialise() {
 
 void Test::created() {
 	TextureParameters::DEFAULT_CLAMP = GL_CLAMP_TO_EDGE;
-	TextureParameters::DEFAULT_SHOULD_CLAMP = true;
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR;
 
 	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));
 	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), Renderer::SHADER_MATERIAL);
 	object->setSize(200, 200);
 	object->setPosition(getSettings().windowWidth / 2 - 100, getSettings().windowHeight / 2 - 100);
-	object->getMaterial()->diffuseTexture = texture;
-	object->getMaterial()->diffuseColour = Colour::WHITE;
+	object->getMaterial()->setDiffuse(texture);
+	object->getMaterial()->setDiffuse(Colour::WHITE);
 	object->update();
 
 	sprite = new Sprite(texture, 100, 100);

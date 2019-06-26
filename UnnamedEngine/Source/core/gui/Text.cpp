@@ -18,17 +18,26 @@
 
 #include "Text.h"
 
+#include "../BaseEngine.h"
 #include "../render/Renderer.h"
+#include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The Text class
  *****************************************************************************/
 
-Text::Text(Font* font, Colour colour, bool billboarded) {
+unsigned int Text::DEFAULT_MAX_CHARACTERS = 1000;
+
+Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboarded) {
 	this->billboarded = billboarded;
+	this->maxCharacters = maxCharacters;
+
+	if (maxCharacters == 0)
+		//Use the default number
+		maxCharacters = DEFAULT_MAX_CHARACTERS;
 
 	//The shader type to use
-	std::string shaderType;
+	unsigned int shaderType;
 	if (! billboarded)
 		shaderType = Renderer::SHADER_FONT;
 	else {
@@ -40,38 +49,59 @@ Text::Text(Font* font, Colour colour, bool billboarded) {
 	//Create the Mesh instance and assign the texture
 	Texture* fontTexture = font->getTexture();
 
-	setMesh(new Mesh(MeshBuilder::createQuad3D(fontTexture->getWidth(), fontTexture->getHeight(), fontTexture, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(shaderType));
+	MeshData* meshData;
+	if (! BaseEngine::usingVulkan())
+		meshData = MeshBuilder::createQuad3D(fontTexture->getWidth(), fontTexture->getHeight(), fontTexture, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS);
+	else {
+		meshData = new MeshData(3, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS);
+
+		unsigned int numPositions = maxCharacters * 12;;
+		unsigned int numTextureCoords = maxCharacters * 8;
+		unsigned int numIndices = maxCharacters * 6;
+		meshData->getPositions().resize(numPositions);
+		meshData->getTextureCoords().resize(numTextureCoords);
+		meshData->getIndices().resize(numIndices);
+		meshData->setNumPositions(maxCharacters);
+		meshData->setNumTextureCoords(numTextureCoords);
+		meshData->setNumIndices(numIndices);
+	}
+
+	Mesh* mesh = new Mesh(meshData);
+	//Assign the font
+	this->font = font;
+	mesh->getMaterial()->setDiffuse(fontTexture);
+	setMesh(mesh, Renderer::getRenderShader(shaderType));
 
 	//Assign the colour and other properties
 	setColour(colour);
 	setScale(1.0f / (float) Font::RENDER_SCALE, 1.0f / (float) Font::RENDER_SCALE, 1.0f);
 	getMesh()->setCullingEnabled(false);
 
-	//Assign the font
-	setFont(font);
-
 	GameObject3D::update();
 }
 
 void Text::update(std::string text) {
-	//Assign the current text
-	currentText = text;
+	if ((! BaseEngine::usingVulkan()) || text.size() <= maxCharacters) {
+		//Assign the current text
+		currentText = text;
 
-	//The MeshData to update
-	MeshData* data = getMesh()->getData();
+		//The MeshData to update
+		MeshData* data = getMesh()->getData();
 
-	//Clear the previous data
-	data->clearPositions();
-	data->clearTextureCoords();
-	data->clearIndices();
+		//Clear the previous data
+		data->clearPositions();
+		data->clearTextureCoords();
+		data->clearIndices();
 
-	//Assign the new data
-	font->assignMeshData(data, text, billboarded);
+		//Assign the new data
+		font->assignMeshData(data, text, billboarded);
 
-	//Update the data
-	getMesh()->getRenderData()->updatePositions(data);
-	getMesh()->getRenderData()->updateTextureCoords();
-	getMesh()->getRenderData()->updateIndices(data);
+		//Update the data
+		getMesh()->getRenderData()->updatePositions(data);
+		getMesh()->getRenderData()->updateTextureCoords();
+		getMesh()->getRenderData()->updateIndices(data);
+	} else
+		Logger::log("Cannot update text as the requested text exceeds the maximum number of characters", "Text", LogType::Warning);
 }
 
 void Text::update(std::string text, Vector2f position) {

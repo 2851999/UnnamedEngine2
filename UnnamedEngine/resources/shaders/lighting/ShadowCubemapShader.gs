@@ -5,7 +5,7 @@ layout (triangle_strip, max_vertices=18) out; //1 triangle in, 6 out (18 vertice
 
 #include "ShadowCubemapShader.glsl"
 
-out vec4 FragPos;
+layout(location = 0) out vec4 FragPos;
 
 void main() {
 	for (int face = 0; face < 6; ++face) {

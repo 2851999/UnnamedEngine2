@@ -6,7 +6,7 @@
 uniform vec4 ue_colour;
 uniform sampler2D ue_tex;
 
-out vec4 ue_FragColour;
+layout(location = 0) out vec4 ue_FragColour;
 
 void main() {
 	//Assign the final colour

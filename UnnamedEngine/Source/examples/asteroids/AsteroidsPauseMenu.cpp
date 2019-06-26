@@ -32,7 +32,7 @@ AsteroidsPauseMenu::AsteroidsPauseMenu(AsteroidsGame* game) : game(game) {
 
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
-	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
+	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, Renderer::SHADER_MATERIAL);
 	background->getMaterial()->setDiffuse(backgroundTexture);
 	background->getMaterial()->setDiffuse(Colour(1.0f, 1.0f, 1.0f, 0.8f));
 	background->update();

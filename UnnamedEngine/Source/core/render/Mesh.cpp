@@ -18,7 +18,9 @@
 
 #include "Mesh.h"
 
+#include "../BaseEngine.h"
 #include "Renderer.h"
+#include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -165,11 +167,9 @@ void MeshData::addBoneData(unsigned int boneID, float boneWeight) {
  * The MeshRenderData class
  *****************************************************************************/
 
-void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
-	//Assign the shader used during the setup
+MeshRenderData::MeshRenderData(MeshData* data, RenderShader* renderShader) {
+	//Assign the shader to use during the setup
 	this->setupShader = renderShader;
-	//The shader used for the setup
-	Shader* shader = renderShader->getShader();
 	//Determine the number of vertices
 	if (data->hasIndices()) {
 		//As the data has indices, this will determine the number of vertices
@@ -183,57 +183,62 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 
 	//Create the RenderData instance
 	renderData = new RenderData(data->getRenderMode(), numVertices);
+}
+
+void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
+	//The shader used for the setup
+	Shader* shader = setupShader->getShader();
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
 		vboPositions = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getPositions().size() * sizeof(data->getPositions()[0]), data->getPositions(), usagePositions);
-		vboPositions->addAttribute(shader->getAttributeLocation("Position"), data->getNumDimensions());
+		vboPositions->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, data->getNumDimensions());
 		renderData->addVBO(vboPositions);
 	}
 
 	//Setup colours
 	if (data->hasColours() && data->separateColours()) {
 		vboColours = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getColours().size() * sizeof(data->getColours()[0]), data->getColours(), usageColours);
-		vboColours->addAttribute(shader->getAttributeLocation("Colour"), 4);
+		vboColours->addAttribute(shader->getAttributeLocation("Colour"), 4); //Won't work for Vulkan
 		renderData->addVBO(vboColours);
 	}
 
 	//Setup texture coordinates
 	if (data->hasTextureCoords() && data->separateTextureCoords()) {
 		vboTextureCoords = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getTextureCoords().size() * sizeof(data->getTextureCoords()[0]), data->getTextureCoords(), usageTextureCoords);
-		vboTextureCoords->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2);
+		vboTextureCoords->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, 2);
 		renderData->addVBO(vboTextureCoords);
 	}
 
 	//Setup normals
 	if (data->hasNormals() && data->separateNormals()) {
 		vboNormals = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getNormals().size() * sizeof(data->getNormals()[0]), data->getNormals(), usageNormals);
-		vboNormals->addAttribute(shader->getAttributeLocation("Normal"), 3);
+		vboNormals->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, 3);
 		renderData->addVBO(vboNormals);
 	}
 
 	//Setup tangents
 	if (data->hasTangents() && data->separateTangents()) {
 		vboTangents = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getTangents().size() * sizeof(data->getTangents()[0]), data->getTangents(), usageTangents);
-		vboTangents->addAttribute(shader->getAttributeLocation("Tangent"), 3);
+		vboTangents->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, 3);
 		renderData->addVBO(vboTangents);
 	}
 
 	//Setup bitangents
 	if (data->hasBitangents() && data->separateBitangents()) {
 		vboBitangents = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBitangents().size() * sizeof(data->getBitangents()[0]), data->getBitangents(), usageBitangents);
-		vboBitangents->addAttribute(shader->getAttributeLocation("Bitangent"), 3);
+		vboBitangents->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, 3);
 		renderData->addVBO(vboBitangents);
 	}
 
 	//Setup bones
 	if (data->hasBones()) {
 		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), GL_STATIC_DRAW);
-		vboBoneIDs->addAttribute(shader->getAttributeLocation("BoneIDs"), 4);
+		vboBoneIDs->addAttributeWithType(GL_INT, ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
 		renderData->addVBO(vboBoneIDs);
 
 		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), GL_STATIC_DRAW);
-		vboBoneWeights->addAttribute(shader->getAttributeLocation("BoneWeights"), 4);
+		vboBoneWeights->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, 4);
 		renderData->addVBO(vboBoneWeights);
 	}
 
@@ -243,22 +248,22 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 		vboOthers = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getOthers().size() * sizeof(data->getOthers()[0]), data->getOthers(), usageOthers);
 
 		if (data->hasPositions() && ! data->separatePositions())
-			vboOthers->addAttribute(shader->getAttributeLocation("Position"), data->getNumDimensions());
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, data->getNumDimensions());
 
 		if (data->hasColours() && ! data->separateColours())
-			vboOthers->addAttribute(shader->getAttributeLocation("Colour"), 4);
+			vboOthers->addAttribute(shader->getAttributeLocation("Colour"), 4); //Won't work for Vulkan
 
 		if (data->hasTextureCoords() && ! data->separateTextureCoords())
-			vboOthers->addAttribute(shader->getAttributeLocation("TextureCoordinate"), 2);
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, 2);
 
 		if (data->hasNormals() && ! data->separateNormals())
-			vboOthers->addAttribute(shader->getAttributeLocation("Normal"), 3);
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, 3);
 
 		if (data->hasTangents() && ! data->separateTangents())
-			vboOthers->addAttribute(shader->getAttributeLocation("Tangent"), 3);
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, 3);
 
 		if (data->hasBitangents() && ! data->separateBitangents())
-			vboOthers->addAttribute(shader->getAttributeLocation("Bitangent"), 3);
+			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, 3);
 
 		renderData->addVBO(vboOthers);
 	}
@@ -269,8 +274,14 @@ void MeshRenderData::setup(MeshData* data, RenderShader* renderShader) {
 		renderData->setIndicesVBO(vboIndices);
 	}
 
+	//Add the required UBO's for the shader being used
+	Renderer::getShaderInterface()->setup(renderData, setupShader->getID());
+	//Add the required texture sets
+	for (Material* material : materials)
+		renderData->addTextureSet(material->getTextureSet());
+
 	//Setup the render data
-	renderData->setup();
+	renderData->setup(setupShader);
 }
 
 void MeshRenderData::render() {
@@ -278,76 +289,118 @@ void MeshRenderData::render() {
 }
 
 void MeshRenderData::updatePositions(MeshData* data) {
-	//Determine the number of vertices
-	if (data->hasIndices()) {
-		//As the data has indices, this will determine the number of vertices
-		numVertices = data->getNumIndices();
-		hasIndices = true;
-	} else {
-		//As there are no indices, the number of positions will be the number of vertices
-		numVertices = data->getNumPositions();
-		hasIndices = false;
-	}
+	if (vboPositions) {
+		//Determine the number of vertices
+		if (data->hasIndices()) {
+			//As the data has indices, this will determine the number of vertices
+			numVertices = data->getNumIndices();
+			hasIndices = true;
+		} else {
+			//As there are no indices, the number of positions will be the number of vertices
+			numVertices = data->getNumPositions();
+			hasIndices = false;
+		}
 
-	glBindVertexArray(renderData->getVAO());
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboPositions->update();
+			vboPositions->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboPositions->update();
+	} else
+		Logger::log("Cannot update positions as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateColours() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboColours) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboColours->update();
+			vboColours->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboColours->update();
+	} else
+		Logger::log("Cannot update colours as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateTextureCoords() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboTextureCoords) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboTextureCoords->update();
+			vboTextureCoords->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboTextureCoords->update();
+	} else
+		Logger::log("Cannot update texture coordinates as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateNormals() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboNormals) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboNormals->update();
+			vboNormals->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboNormals->update();
+	} else
+		Logger::log("Cannot update normals as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateTangents() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboTangents) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboTangents->update();
+			vboTangents->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboTangents->update();
+	} else
+		Logger::log("Cannot update tangents as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateBitangents() {
-	glBindVertexArray(renderData->getVAO());
+	if (vboBitangents) {
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboBitangents->update();
+			vboBitangents->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboBitangents->update();
+	} else
+		Logger::log("Cannot update bitangents as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::updateIndices(MeshData* data) {
-	//As the data has indices, this will determine the number of vertices
-	numVertices = data->getNumIndices();
-	hasIndices = true;
+	if (vboIndices) {
+		//As the data has indices, this will determine the number of vertices
+		numVertices = data->getNumIndices();
+		hasIndices = true;
 
-	renderData->setCount(numVertices);
+		renderData->setCount(numVertices);
 
-	glBindVertexArray(renderData->getVAO());
+		if (! BaseEngine::usingVulkan()) {
+			glBindVertexArray(renderData->getVAO());
 
-	vboIndices->update();
+			vboIndices->update();
 
-	glBindVertexArray(0);
+			glBindVertexArray(0);
+		} else
+			vboIndices->update();
+	} else
+		Logger::log("Cannot update indices as the VBO is not assigned", "MeshRenderData", LogType::Warning);
 }
 
 void MeshRenderData::destroy() {
@@ -358,7 +411,10 @@ void MeshRenderData::destroy() {
 	delete vboNormals;
 	delete vboTangents;
 	delete vboBitangents;
+	delete vboOthers;
 	delete vboIndices;
+	delete vboBoneIDs;
+	delete vboBoneWeights;
 }
 
 /*****************************************************************************
@@ -382,6 +438,11 @@ Mesh::~Mesh() {
 	}
 	delete renderData;
 	delete data;
+}
+
+void Mesh::setup(RenderShader* renderShader) {
+	this->renderData = new MeshRenderData(this->data, renderShader);
+	this->renderData->setup(data, materials);
 }
 
 void Mesh::updateAnimation(float deltaSeconds) {
@@ -476,6 +537,13 @@ void MeshBuilder::addQuadT(MeshData* data, float top, float left, float bottom, 
 MeshData* MeshBuilder::createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags) {
 	MeshData* data = new MeshData(3, flags);
 	addQuadData3D(data, v1, v2, v3, v4);
+	addQuadI(data);
+	return data;
+}
+
+MeshData* MeshBuilder::createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture, MeshData::Flag flags) {
+	MeshData* data = new MeshData(3, flags);
+	addQuadData3D(data, v1, v2, v3, v4, texture);
 	addQuadI(data);
 	return data;
 }

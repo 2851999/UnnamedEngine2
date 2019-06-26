@@ -26,6 +26,7 @@
 #include "Skinning.h"
 #include "VBO.h"
 #include "../Sphere.h"
+#include "../vulkan/VulkanGraphicsPipeline.h"
 
 /*****************************************************************************
  * The MeshData class stores information about a mesh
@@ -268,13 +269,12 @@ private:
 	/* Used to identify whether Mesh is indexed */
 	bool hasIndices = false;
 public:
-	MeshRenderData() {}
-	MeshRenderData(MeshData* data, RenderShader* renderShader) { setup(data, renderShader); }
+	MeshRenderData(MeshData* data, RenderShader* renderShader);
 
 	virtual ~MeshRenderData() { destroy(); }
 
-	/* Setups this structure for rendering using OpenGL */
-	void setup(MeshData* data, RenderShader* renderShader);
+	/* Sets up for rendering */
+	void setup(MeshData* data, std::vector<Material*>& materials);
 
 	/* Method to render using the data */
 	void render();
@@ -329,9 +329,7 @@ public:
 	virtual ~Mesh();
 
 	/* Method called to setup this mesh for rendering */
-	inline void setup(RenderShader* renderShader) {
-		this->renderData = new MeshRenderData(this->data, renderShader);
-	}
+	void setup(RenderShader* renderShader);
 
 	/* Method called to update the animation of this mesh */
 	void updateAnimation(float deltaSeconds);
@@ -404,6 +402,8 @@ public:
 
 	/* Method used to create a MeshData instance for a quad, given its 4 corners */
 	static MeshData* createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags = MeshData::NONE);
+	/* Method used to create a MeshData instance for a quad, given its 4 corners and the texture */
+	static MeshData* createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture, MeshData::Flag flags = MeshData::NONE);
 	/* Method used to create a MeshData instance for a quad (rectangle/square in this case) given its width and height */
 	static MeshData* createQuad3D(float width, float height, MeshData::Flag flags = MeshData::NONE);
 	/* Method used to create a MeshData instance for a textured quad (rectangle/square in this case) given its width and height */

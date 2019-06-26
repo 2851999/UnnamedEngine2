@@ -18,6 +18,7 @@
 
 #include "RenderScene.h"
 
+#include "../BaseEngine.h"
 #include "Renderer.h"
 #include "../Window.h"
 #include "../../utils/Utils.h"
@@ -28,32 +29,35 @@
  *****************************************************************************/
 
 RenderScene3D::RenderScene3D() {
-	//Get the required shaders
-	shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getForwardShader();
-	shadowCubemapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_CUBEMAP)->getForwardShader();
-	//Setup the post processor
-	postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader", false);
-
-	//Get the lighting and gamma correction UBOs
-	shaderLightingUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_LIGHTING);
-	shaderGammaCorrectionUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_GAMMA_CORRECTION);
-
 	//Assign some default values
 	shaderLightingData.ue_useEnvironmentMap = false;
 
 	shaderGammaCorrectionData.gammaCorrect = true;
 	shaderGammaCorrectionData.exposureIn = -1;
 
-	//Assign the default data
-	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
+	if (! BaseEngine::usingVulkan()) {
+		//Get the required shaders
+		shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getForwardShader();
+		shadowCubemapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_CUBEMAP)->getForwardShader();
 
-	//Get the PBR lighting core and shadow cubemap UBO's
-	shaderPBRLightingCoreUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_PBR_LIGHTING_CORE);
-	shaderShadowCubemapUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_SHADOW_CUBEMAP);
+		//Setup the post processor
+		postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader", false);
 
-	//Setup the intermediate FBO if it is needed
-	if (Window::getCurrentInstance()->getSettings().videoSamples > 0)
-		intermediateFBO = new PostProcessor(true);
+		//Get the lighting and gamma correction UBOs
+		shaderLightingUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_LIGHTING);
+		shaderGammaCorrectionUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_GAMMA_CORRECTION);
+
+		//Assign the default data
+		shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
+
+		//Get the PBR lighting core and shadow cubemap UBO's
+		shaderPBRLightingCoreUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_PBR_LIGHTING_CORE);
+		shaderShadowCubemapUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_SHADOW_CUBEMAP);
+
+		//Setup the intermediate FBO if it is needed
+		if (Window::getCurrentInstance()->getSettings().videoSamples > 0)
+			intermediateFBO = new PostProcessor(true);
+	}
 }
 
 RenderScene3D::~RenderScene3D() {
@@ -100,7 +104,8 @@ void RenderScene3D::render() {
 	//Ensure lighting is enabled
 	if (lighting) {
 		//Render the scene to the shadow maps as necessary
-		renderShadowMaps();
+		if (! BaseEngine::usingVulkan())
+			renderShadowMaps();
 		//Check if deferred rendering or not
 		if (deferredRendering) {
 
@@ -181,10 +186,9 @@ void RenderScene3D::render() {
 			forwardPreRender();
 
 			//Go through all of the objects in this scene
-			for (unsigned int i = 0; i < batches.size(); i++) {
+			for (unsigned int i = 0; i < batches.size(); ++i)
 				//Render the current batch
 				renderLighting(batches[i].shader, i);
-			}
 
 			//Finish forward rendering
 			forwardPostRender();
@@ -207,47 +211,55 @@ void RenderScene3D::render() {
 }
 
 void RenderScene3D::forwardPreRender() {
-	if (intermediateFBO)
-		//Render to the intermediate FBO
-		intermediateFBO->start();
-	else
-		postProcessor->start();
+	if (! BaseEngine::usingVulkan()) {
+		if (intermediateFBO)
+			//Render to the intermediate FBO
+			intermediateFBO->start();
+		else
+			postProcessor->start();
 
-	//Render a wireframe instead if requested
-	if (renderWireframe)
-		utils_gl::enableWireframe();
+		//Render a wireframe instead if requested
+		if (renderWireframe)
+			utils_gl::enableWireframe();
+	}
 
 	//Assign the camera position
 	Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
 }
 
 void RenderScene3D::forwardPostRender() {
-	if (renderWireframe)
-		utils_gl::disableWireframe();
+	if (! BaseEngine::usingVulkan()) {
+		if (renderWireframe)
+			utils_gl::disableWireframe();
 
-	if (intermediateFBO) {
-		//Stop rendering to the intermediate FBO
-		intermediateFBO->stop();
-		//Copy the colour data to the postprocessor
-		intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	} else
-		postProcessor->stop();
+		if (intermediateFBO) {
+			//Stop rendering to the intermediate FBO
+			intermediateFBO->stop();
+			//Copy the colour data to the postprocessor
+			intermediateFBO->copyToFramebuffer(postProcessor->getFBO(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		} else
+			postProcessor->stop();
 
-	//Render the output
-	postProcessor->render();
+		//Render the output
+		postProcessor->render(); //MUST UNBIND THE TEXTURE USED HERE OTHERWISE MAY TRY AND DRAW TO IT WHILE IT IS STILL BOUND (Gives GL_INVALID_OPERATION for draw command)
 
-	//Copy the depth data to the framebuffer
-	postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
+		//Copy the depth data to the framebuffer
+		postProcessor->copyToScreen(GL_DEPTH_BUFFER_BIT);
+	}
 }
 
 void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch) {
 	Renderer::saveTextures();
 
+	//Ignore graphics states
+	Renderer::ignoreGraphicsStates(true);
+
 	//Get the shader to use
 	Shader* shader = renderShader->getShader();
 
-	//Use the shader
-	shader->use();
+	if (! BaseEngine::usingVulkan())
+		//Use the shader
+		shader->use();
 
 	//Assign any uniforms that are needed for all kinds of lighting
 	Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
@@ -337,13 +349,13 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 				shaderLightingData.ue_lights[lightIndexInSet].useShadowMap = 0;
 		}
 
-		shaderLightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
-
 		//Now check whether forward or deferred rendering
-		if (deferredRendering)
+		if (deferredRendering) {
+			shaderLightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
+
 			//Deferred rendering, so render the quad on the screen with the current set of lights
 			Renderer::getScreenTextureMesh()->render();
-		else {
+		} else {
 			//Go through each object in the current batch and render it with the shader
 			for (unsigned int j = 0; j < batches[indexOfBatch].objects.size(); ++j) {
 				//Get the model matrix for the current object
@@ -353,13 +365,17 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 				Renderer::getShaderBlock_Core().ue_modelMatrix = modelMatrix;
 				Renderer::getShaderBlock_Core().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
 
+				UBO* lightingUBO = batches[indexOfBatch].objects[j]->getMesh()->getRenderData()->getRenderData()->getUBO(ShaderInterface::BLOCK_LIGHTING);
+				if (lightingUBO)
+					lightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
+
 				//Render the object with the shadow map shader
 				batches[indexOfBatch].objects[j]->render();
 			}
 		}
 	}
-
-	shader->stopUsing();
+	if (! BaseEngine::usingVulkan())
+		shader->stopUsing();
 
 	//Stop using blending if it was needed
 	if (blendNeeded) {
@@ -367,6 +383,9 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 		glDepthMask(true);
 		glDisable(GL_BLEND);
 	}
+
+	//Stop ignoring graphics states
+	Renderer::ignoreGraphicsStates(false);
 
 	Renderer::releaseNewTextures();
 }

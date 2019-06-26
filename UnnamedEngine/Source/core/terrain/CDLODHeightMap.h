@@ -44,14 +44,14 @@ private:
 	Texture* texture;
 
 	/* Method used to setup this height map */
-	void setup(unsigned char* data, int numComponents, int width, int height, int internalFormat, int format);
+	void setup(unsigned char* data, int numComponents, int width, int height);
 
 	/* Method used to get the 'normal' for a particular point */
 	Vector3f calculateNormal(float x, float y);
 public:
 	/* The constructors */
 	CDLODHeightMap(std::string path);
-	CDLODHeightMap(unsigned char* data, int numComponents, int width, int height, int internalFormat, int format);
+	CDLODHeightMap(unsigned char* data, int numComponents, int width, int height);
 
 	/* The destructor */
 	virtual ~CDLODHeightMap();

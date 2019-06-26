@@ -2,20 +2,16 @@
 #include "../Material.fs"
 #include "Lighting.glsl"
 
-struct UELightTextures {
-	sampler2D shadowMap;
-	samplerCube shadowCubemap;
-};
+layout(location = 7) in vec3 ue_tangentViewPos;
+layout(location = 8) in vec3 ue_tangentFragPos;
 
-uniform UELightTextures ue_lightsTextures[MAX_LIGHTS];
+layout(location = 9) in mat3 ue_frag_tbnMatrix;
+layout(location = 13) in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 
-uniform samplerCube ue_environmentMap;
+layout(binding = 6) uniform samplerCube ue_environmentMap;
 
-in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
-in mat3 ue_frag_tbnMatrix;
-
-in vec3 ue_tangentViewPos;
-in vec3 ue_tangentFragPos;
+layout(binding = 7) uniform sampler2D ue_lightTexturesShadowMap[MAX_LIGHTS];
+layout(binding = 13) uniform samplerCube ue_lightTexturesShadowCubemap[MAX_LIGHTS];
 
 //Returns the sum of the specular and diffuse strengths */
 vec3 ueCalculateLight(UELight light, vec3 lightDirection, vec3 diffuseColour, vec3 specularColour, vec3 normal, vec3 fragPos, float matShininess) {
@@ -77,11 +73,11 @@ vec3 ueCalculateSpotLight(UELight light, vec3 diffuseColour, vec3 specularColour
 }
 
 //Returns a float value which states how much in shadow a particular fragment is
-float ueCalculateShadow(UELight light, UELightTextures lightTextures, vec4 fragPosLightSpace, vec3 normal) {
+float ueCalculateShadow(UELight light, sampler2D shadowMap, vec4 fragPosLightSpace, vec3 normal) {
 	//Perspective divide
 	vec3 projectedCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
 	projectedCoords = projectedCoords * 0.5 + 0.5;
-	//float closestDepth = texture(light.shadowMap, projectedCoords.xy).r;
+	//float closestDepth = texture(shadowMap, projectedCoords.xy).r;
 	float currentDepth = projectedCoords.z;
 	
 	float bias = max(0.01 * (1.0 - dot(normal, light.direction.xyz)), 0.005);
@@ -89,10 +85,10 @@ float ueCalculateShadow(UELight light, UELightTextures lightTextures, vec4 fragP
 	//float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
 	
 	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(lightTextures.shadowMap, 0);
+	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 	for(int x = -1; x <= 1; ++x) {
 		for(int y = -1; y <= 1; ++y) {
-			float pcfDepth = texture(lightTextures.shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r; 
+			float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r; 
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
 		}    
 	}
@@ -102,7 +98,7 @@ float ueCalculateShadow(UELight light, UELightTextures lightTextures, vec4 fragP
 }
 
 //Same as above, but for a point light
-float ueCalculatePointShadow(UELight light, UELightTextures lightTextures, vec3 fragPos, vec3 viewPos) {
+float ueCalculatePointShadow(UELight light, samplerCube shadowCubemap, vec3 fragPos, vec3 viewPos) {
 	vec3 fragToLight = fragPos - light.position.xyz;
 	float farPlane = 25.0;
 	float currentDepth = length(fragToLight);
@@ -121,14 +117,14 @@ float ueCalculatePointShadow(UELight light, UELightTextures lightTextures, vec3 
 	float diskRadius = (1.0 + (viewDistance / farPlane)) / 25.0;
 	
 	for (int i = 0; i < samples; ++i) {
-		float closestDepth = texture(lightTextures.shadowCubemap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
+		float closestDepth = texture(shadowCubemap, fragToLight + sampleOffsetDirections[i] * diskRadius).r;
 		closestDepth *= farPlane;
 		if (currentDepth - bias > closestDepth)
 			shadow += 1.0;
 	}
 	
 	return shadow /= float(samples);
-	//return texture(light.shadowCubemap, fragToLight).r;
+	//return texture(shadowCubemap, fragToLight).r;
 }
 
 //Returns the result of applying all lighting calculations
@@ -150,19 +146,20 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 	
 	//Go through the lights
 	for (int i = 0; i < ue_numLights; i++) {
+		UELight light = ue_lights[i];
 		//Check the light type
-		if (ue_lights[i].type == 1) {
-			if (ue_lights[i].useShadowMap)
-				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(ue_lights[i], ue_lightsTextures[i], fragPosLightSpace[i], normal));
+		if (light.type == 1) {
+			if (light.useShadowMap)
+				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap[i], fragPosLightSpace[i], normal));
 			else
-				otherLight += ueCalculateDirectionalLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
-		} else if (ue_lights[i].type == 2) {
-			if (ue_lights[i].useShadowMap)
-				otherLight += ueCalculatePointLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess)* (1.0 - ueCalculatePointShadow(ue_lights[i], ue_lightsTextures[i], fragPos, ue_cameraPosition.xyz));
+				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+		} else if (light.type == 2) {
+			if (light.useShadowMap)
+				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess)* (1.0 - ueCalculatePointShadow(light, ue_lightTexturesShadowCubemap[i], fragPos, ue_cameraPosition.xyz));
 			else
-				otherLight += ueCalculatePointLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
-		} else if (ue_lights[i].type == 3)
-			otherLight += ueCalculateSpotLight(ue_lights[i], diffuseColour, specularColour, normal, fragPos, matShininess);
+				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+		} else if (light.type == 3)
+			otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
 	}
 
 	return ambientLight + otherLight;

@@ -6,11 +6,11 @@
 #map attribute Colour ue_colour
 
 //Mesh data
-in vec4 ue_positionsData;  //Contains the position, and size of the current particle
-in vec4 ue_textureData;	//Contains the top, left, bottom and right coordinates of the texture for the current particle
-in vec4 ue_colour;
+layout(location = 7) in vec4 ue_positionsData;  //Contains the position, and size of the current particle
+layout(location = 8) in vec4 ue_textureData;	//Contains the top, left, bottom and right coordinates of the texture for the current particle
+layout(location = 9) in vec4 ue_colour;
 
-out vec4 ue_frag_colour;
+layout(location = 3) out vec4 ue_frag_colour;
 
 void main() {
 	//Get the needed data

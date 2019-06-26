@@ -84,7 +84,7 @@ public:
 	void setTexture(Texture* texture);
 
 	/* Setters and getters */
-	inline void setFont(Font* font) { this->font = font; textInstance->setFont(font); }
+	void setFont(Font* font);
 	inline void setTextColour(Colour colour) { textInstance->setColour(colour); }
 
 	inline bool hasFont() { return font; }

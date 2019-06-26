@@ -44,9 +44,9 @@ void HeightMapTerrain::setup(std::string filePath, unsigned int bitsPerPixel) {
 	meshData->setRenderMode(GL_TRIANGLES);
 
 	//The data needed for the texture
-	int numComponents, width, height, internalFormat, format;
+	int numComponents, width, height;
 	//Obtain the texture data
-	unsigned char* image = Texture::loadTexture(filePath, numComponents, width, height, internalFormat, format, false);
+	unsigned char* image = Texture::loadTexture(filePath, numComponents, width, height, false);
 
 	//Various terrain values
 	const unsigned int bytesPerPixel = (bitsPerPixel / 8);

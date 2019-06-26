@@ -24,9 +24,10 @@
  * The GameRenderer class
  *****************************************************************************/
 
-GameRenderer::GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, bool useTextureCoords, bool useLighting, bool useNormalMapping) : mesh(mesh), shader(shader), numObjects(numObjects), useLighting(useLighting)  {
+GameRenderer::GameRenderer(Mesh* mesh, RenderShader* renderShader, unsigned int numObjects, bool useTextureCoords, bool useLighting, bool useNormalMapping) : mesh(mesh), shader(renderShader->getShader()), numObjects(numObjects), useLighting(useLighting)  {
 	//Get the mesh data
 	MeshData* meshData = mesh->getData();
+
 	//Setup the render data
 	renderData = new RenderData(GL_TRIANGLES, meshData->getNumIndices());
 
@@ -85,7 +86,12 @@ GameRenderer::GameRenderer(Mesh* mesh, Shader* shader, unsigned int numObjects, 
 	vboVisibleData->addAttribute(shader->getAttributeLocation("Visible"), 1, 1);
 	renderData->addVBO(vboVisibleData);
 
-	renderData->setup();
+	renderData->add(ShaderInterface::UBO_BINDING_LOCATION_MATERIAL, Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_MATERIAL));
+
+	for (Material* material : mesh->getMaterials())
+		renderData->addTextureSet(material->getTextureSet());
+
+	renderData->setup(renderShader);
 	renderData->setNumInstances(numObjects);
 }
 
@@ -150,22 +156,19 @@ void GameRenderer::render() {
 	shader->use();
 	Renderer::saveTextures();
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
+	Renderer::useMaterial(renderData, mesh->getData()->getSubData(0).materialIndex, mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex), renderData->getUBO(ShaderInterface::BLOCK_MATERIAL));
 	if (useLighting) {
-		Renderer::setMaterialUniforms(shader, Renderer::SHADER_LIGHTING, mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex));
 		shader->setUniformVector3("Light_Direction", Vector3f(0.0f, -1.0f, -1.0f));
 		shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));
 		shader->setUniformColourRGB("Light_SpecularColour", Colour(1.0f, 1.0f, 1.0f));
 		shader->setUniformVector3("CameraPosition", ((Camera3D*) Renderer::getCamera())->getPosition());
-	} else {
-		Renderer::setMaterialUniforms(shader, Renderer::SHADER_MATERIAL, mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex));
 	}
-
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
 	glCullFace(GL_BACK);
 	renderData->render();
 	glDisable(GL_CULL_FACE);
-
+	Renderer::stopUsingMaterial(mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex));
 	Renderer::releaseNewTextures();
 	shader->stopUsing();
 }

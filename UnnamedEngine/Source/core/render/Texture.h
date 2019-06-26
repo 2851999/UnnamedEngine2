@@ -19,7 +19,7 @@
 #ifndef CORE_RENDER_TEXTURE_H_
 #define CORE_RENDER_TEXTURE_H_
 
-#include <GL/glew.h>
+#include "../Window.h"
 #include <string>
 
 #include "../Resource.h"
@@ -32,42 +32,34 @@
 class TextureParameters {
 private:
 	/* The texture parameters with their default values */
-	GLuint target = DEFAULT_TARGET;
+	GLuint target    = DEFAULT_TARGET;
 	GLuint minFilter = DEFAULT_FILTER;
 	GLuint magFilter = DEFAULT_FILTER;
-	GLuint clamp  = DEFAULT_CLAMP;
-	bool shouldClamp = DEFAULT_SHOULD_CLAMP;
+	GLuint clamp     = DEFAULT_CLAMP;
 
 	bool srgb = DEFAULT_SRGB;
 	bool generateMipMapsIfAvailable = true;
-
-	/* Returns whether a mipmap needs to be generated */
-	inline bool mipMapRequested() {
-		return generateMipMapsIfAvailable &&
-			   ((minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_LINEAR_MIPMAP_LINEAR) ||
-			    (magFilter == GL_NEAREST_MIPMAP_NEAREST || magFilter == GL_NEAREST_MIPMAP_LINEAR || magFilter == GL_LINEAR_MIPMAP_NEAREST || magFilter == GL_LINEAR_MIPMAP_LINEAR));
-	}
 public:
 	/* The default values which are assigned unless otherwise specified */
 	static GLuint DEFAULT_TARGET;
 	static GLuint DEFAULT_FILTER;
 	static GLuint DEFAULT_CLAMP;
-	static bool   DEFAULT_SHOULD_CLAMP;
 	static bool   DEFAULT_SRGB;
 
 	/* Various constructors */
 	TextureParameters() {}
-	TextureParameters(bool shouldClamp) : shouldClamp(shouldClamp) {}
 	TextureParameters(GLuint target) : target(target) {}
-	TextureParameters(GLuint target, bool shouldClamp) : target(target), shouldClamp(shouldClamp) {}
 	TextureParameters(GLuint target, GLuint filter) : target(target), minFilter(filter), magFilter(filter) {}
-	TextureParameters(GLuint target, GLuint filter, GLuint clamp) : target(target), minFilter(filter), magFilter(filter), clamp(clamp) { shouldClamp = true; }
-	TextureParameters(GLuint target, GLuint filter, GLuint clamp, bool shouldClamp, bool srgb = DEFAULT_SRGB) : target(target), minFilter(filter), magFilter(filter), clamp(clamp), shouldClamp(shouldClamp), srgb(srgb) {}
+	TextureParameters(GLuint target, GLuint filter, GLuint clamp) : target(target), minFilter(filter), magFilter(filter), clamp(clamp) {}
+	TextureParameters(GLuint target, GLuint filter, GLuint clamp, bool srgb = DEFAULT_SRGB) : target(target), minFilter(filter), magFilter(filter), clamp(clamp), srgb(srgb) {}
 
 	/* Methods used to apply the texture parameters to a texture */
 	void apply(GLuint texture, bool bind, bool unbind);
 	inline void apply(GLuint texture, bool unbind) { apply(texture, true, unbind); }
 	inline void apply(GLuint texture) { apply(texture, true, false); }
+
+	/* Returns the creation info for a sampler with the properties of this instance (Vulkan) */
+	VkSamplerCreateInfo getVkSamplerCreateInfo();
 
 	/* Setters and getters */
 	inline TextureParameters setTarget(GLuint target) { this->target = target; return (*this); }
@@ -75,7 +67,6 @@ public:
 	inline TextureParameters setMinFilter(GLuint minFilter) { this->minFilter = minFilter; return (*this); }
 	inline TextureParameters setMagFilter(GLuint magFilter) { this->magFilter = magFilter; return (*this); }
 	inline TextureParameters setClamp(GLuint clamp)   { this->clamp  = clamp;  return (*this); }
-	inline TextureParameters setShouldClamp(bool shouldClamp) { this->shouldClamp = shouldClamp; return (*this); }
 	inline TextureParameters setSRGB(bool srgb) { this->srgb = srgb; return (*this); }
 
 	inline void preventGenerateMipMaps() { generateMipMapsIfAvailable = false; }
@@ -84,8 +75,14 @@ public:
 	inline GLuint getMinFilter() { return minFilter; }
 	inline GLuint getMagFilter() { return magFilter; }
 	inline GLuint getClamp()  { return clamp;  }
-	inline bool getShouldClamp() { return shouldClamp; }
 	inline bool getSRGB() { return srgb; }
+
+	/* Returns whether a mipmap should be generated */
+	inline bool mipMapRequested() {
+		return generateMipMapsIfAvailable &&
+			   ((minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_LINEAR_MIPMAP_LINEAR) ||
+			    (magFilter == GL_NEAREST_MIPMAP_NEAREST || magFilter == GL_NEAREST_MIPMAP_LINEAR || magFilter == GL_LINEAR_MIPMAP_NEAREST || magFilter == GL_LINEAR_MIPMAP_LINEAR));
+	}
 };
 
 /*****************************************************************************
@@ -107,15 +104,33 @@ private:
 
 	/* The path this texture was loaded from (if applicable) */
 	std::string path;
+
+	/* The number of mip levels for this texture (for Vulkan) */
+	uint32_t mipLevels = 1;
+
+	/* Method to generate mipmaps (for Vulkan) */
+	void generateMipmapsVk();
 protected:
 	/* The texture parameters for this texture */
 	TextureParameters parameters;
+
+	/* Required objects for Vulkan to access and use a texture */
+	VkImage        textureVkImage       = VK_NULL_HANDLE;
+	VkDeviceMemory textureVkImageMemory = VK_NULL_HANDLE;
+	VkImageView    textureVkImageView   = VK_NULL_HANDLE;
+	VkDescriptorImageInfo imageInfo;
+
+	/* Sampler for this texture (Should change to use one for many rather than
+	 * create one for each texture) */
+	VkSampler textureVkSampler = VK_NULL_HANDLE;
 public:
 	/* The constructors */
-	Texture(TextureParameters parameters = TextureParameters()) : parameters(parameters) { create(); }
+	Texture(TextureParameters parameters = TextureParameters());
 	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : texture(texture), parameters(parameters) {}
 	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : width(width), height(height), parameters(parameters) { create(); }
 	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : texture(texture), width(width), height(height), parameters(parameters) {}
+	Texture(void* data, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool shouldApplyParameters = true);
+	Texture(unsigned int width, unsigned int height, VkImage textureVkImage, VkDeviceMemory textureVkImageMemory, VkImageView textureVkImageView, TextureParameters parameters = TextureParameters());
 
 	/* The destructor */
 	virtual ~Texture() { destroy(); }
@@ -142,13 +157,10 @@ public:
 
 	/* Basic bind and unbind methods for OpenGL */
 	inline void bind()   { glBindTexture(parameters.getTarget(), texture); }
-	inline void unbind() { glBindTexture(parameters.getTarget(), 0);       }
+	inline void unbind() { glBindTexture(parameters.getTarget(), 0); }
 
 	/* Called to delete this texture */
-	virtual void destroy() override {
-		if (texture > 0)
-			glDeleteTextures(1, &texture);
-	}
+	virtual void destroy() override;
 
 	/* The setters and getters */
 	inline void setParameters(TextureParameters& parameters) { this->parameters = parameters; }
@@ -166,20 +178,26 @@ public:
 	inline bool hasTexture() { return texture > 0; }
 	inline std::string getPath() { return path; }
 	inline bool hasPath() { return path.length() > 0; }
+	VkImageView& getVkImageView() { return textureVkImageView; }
+	const VkDescriptorImageInfo* getVkImageInfo() { return &imageInfo; }
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */
-	static unsigned char* loadTexture(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& internalFormat, GLint& format, bool srgb);
+	static unsigned char* loadTexture(std::string path, int& numComponents, int& width, int& height, bool srgb);
 	/* Returns the data necessary to load a texture taking the data as a float, again the
 	 * texture should be freed afterwards*/
-	static float* loadTexturef(std::string path, int& numComponents, GLsizei& width, GLsizei &height, GLint& internalFormat, GLint& format, bool srgb);
+	static float* loadTexturef(std::string path, int& numComponents, int& width, int& height, bool srgb);
 
-	/* Returns the OpenGL texture format an image should have from its number of colour
+	/* Obtains the OpenGL texture format and internal format that an image should have from its number of colour
 	 * components and whether it should be SRGB */
-	static GLint getTextureFormat(int numComponents, bool srgb);
+	static void getTextureFormatGL(int numComponents, bool srgb, GLint& internalFormat, GLint& format);
+
+	/* Obtains the Vulkan format that an image should have from its number of colour
+	 * components and whether it should be SRGB */
+	static void getTextureFormatVk(int numComponents, bool srgb, VkFormat& format);
 
 	/* Returns a texture instance created using the data given */
-	static Texture* createTexture(std::string path, void* data, int numComponents, GLsizei width, GLsizei height, GLint internalFormat, GLint format, GLenum type, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
+	static Texture* createTexture(std::string path, void* data, int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool applyParameters = true);
 
 	/* Calls stbi_image_free */
 	static void freeTexture(void* texture);

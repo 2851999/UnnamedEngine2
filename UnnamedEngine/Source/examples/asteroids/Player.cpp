@@ -118,11 +118,11 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 }
 
 void Player::render() {
-	//Use then camera's view
-	camera->useView();
-
 	//Render the lasers
 	Ship::render();
+
+	//Use then camera's view
+	camera->useView();
 }
 
 /* Called when an asteroid has been destroyed by this ship's lasers */

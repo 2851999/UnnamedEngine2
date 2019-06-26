@@ -17,6 +17,8 @@
  *****************************************************************************/
 
 #include "Object.h"
+
+#include "BaseEngine.h"
 #include "render/Renderer.h"
 
 /*****************************************************************************
@@ -30,15 +32,15 @@ GameObject::GameObject(Mesh* mesh, RenderShader* shader) : mesh(mesh), renderSha
 }
 
 GameObject::~GameObject() {
-	if (mesh) {
+	if (mesh)
 		delete mesh;
-	}
 }
 
 void GameObject::render() {
 	if (hasMesh()) {
 		if (! shouldCull()) {
-			renderShader->getShader()->use();
+			if (! BaseEngine::usingVulkan())
+				renderShader->getShader()->use();
 			Renderer::render(mesh, getModelMatrix(), renderShader);
 		}
 	}
@@ -62,7 +64,7 @@ GameObject2D::GameObject2D(float width, float height) : GameObject(NULL, NULL) {
 	size = Vector2f(width, height);
 }
 
-GameObject2D::GameObject2D(Mesh* mesh, std::string shaderID, float width , float height) :
+GameObject2D::GameObject2D(Mesh* mesh, unsigned int shaderID, float width , float height) :
 		GameObject2D(mesh, Renderer::getRenderShader(shaderID), width, height) {}
 
 void GameObject2D::update() {
@@ -85,7 +87,7 @@ GameObject3D::GameObject3D(float width, float height, float depth) : GameObject(
 	size = Vector3f(width, height, depth);
 }
 
-GameObject3D::GameObject3D(Mesh* mesh, std::string shaderID, float width , float height, float depth) :
+GameObject3D::GameObject3D(Mesh* mesh, unsigned int shaderID, float width , float height, float depth) :
 		GameObject3D(mesh, Renderer::getRenderShader(shaderID), width, height, depth) {}
 
 void GameObject3D::update() {

@@ -3,10 +3,10 @@
 #map attribute Position ue_position
 #map attribute TextureCoordinate ue_textureCoord
 
-in vec3 ue_position;
-in vec2 ue_textureCoord;
+layout(location = 0) in vec3 ue_position;
+layout(location = 1) in vec2 ue_textureCoord;
 
-out vec2 ue_frag_textureCoord; 
+layout(location = 0) out vec2 ue_frag_textureCoord;
 
 void main() {
 	ue_frag_textureCoord = ue_textureCoord;

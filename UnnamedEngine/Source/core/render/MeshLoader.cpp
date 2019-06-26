@@ -116,13 +116,13 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 				}
 			}
 			//Go through each face in the current mesh
-			for (unsigned int b = 0; b < currentMesh->mNumFaces; b++) {
-				//Thee current face of the current mesh
+			for (unsigned int b = 0; b < currentMesh->mNumFaces; ++b) {
+				//The current face of the current mesh
 				struct aiFace& currentFace = currentMesh->mFaces[b];
 
 				//Goes through each vertex of the face, this assumes the model is triangulated i.e. there are
 				//3 vertices per face in the mesh
-				for (int c = 0; c < 3; c++)
+				for (int c = 0; c < 3; ++c)
 					//Add the indices for the current face
 					currentData->addIndex(currentFace.mIndices[c]);
 			}
@@ -156,11 +156,11 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 			addChildren(scene->mRootNode, necessaryNodes);
 
 			//Go through each mesh
-			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
+			for (unsigned int a = 0; a < scene->mNumMeshes; ++a) {
 				//The current mesh instance
 				const aiMesh* currentMesh = scene->mMeshes[a];
 				//Go through each bone in the mesh
-				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
+				for (unsigned int b = 0; b < currentMesh->mNumBones; ++b) {
 					//Find the corresponding node in the scene's hierarchy
 					const aiNode* correspondingNode = scene->mRootNode->FindNode(currentMesh->mBones[b]->mName);
 					//Add the node to the necessary nodes if it was found
@@ -176,21 +176,21 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 				currentIndex++;
 			}
 
-			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
+			for (unsigned int a = 0; a < scene->mNumMeshes; ++a) {
 				//Pointer to the current mesh being read
 				const struct aiMesh* currentMesh = scene->mMeshes[a];
-				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
+				for (unsigned int b = 0; b < currentMesh->mNumBones; ++b) {
 					unsigned int boneIndex = boneIndices[std::string(currentMesh->mBones[b]->mName.C_Str())];
 
-					for (unsigned int c = 0; c < currentMesh->mBones[b]->mNumWeights; c++) {
+					for (unsigned int c = 0; c < currentMesh->mBones[b]->mNumWeights; ++c) {
 						unsigned int vertexID = currentData->getSubData(a).baseVertex + currentMesh->mBones[b]->mWeights[c].mVertexId;
 						float weight = currentMesh->mBones[b]->mWeights[c].mWeight;
 						verticesBonesData[vertexID].addBoneData(boneIndex, weight);
 					}
 				}
 			}
-			for (unsigned int a = 0; a < verticesBonesData.size(); a++) {
-				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; b++)
+			for (unsigned int a = 0; a < verticesBonesData.size(); ++a) {
+				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; ++b)
 					currentData->addBoneData(verticesBonesData[a].ids[b], verticesBonesData[a].weights[b]);
 			}
 
@@ -239,7 +239,7 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 			animations.resize(scene->mNumAnimations);
 
 			//Now go through all of the animations
-			for (unsigned int b = 0; b < scene->mNumAnimations; b++) {
+			for (unsigned int b = 0; b < scene->mNumAnimations; ++b) {
 				//Create the current animation
 				Animation* currentAnimation = new Animation(std::string(scene->mAnimations[b]->mName.C_Str()), scene->mAnimations[b]->mTicksPerSecond, scene->mAnimations[b]->mDuration);
 				//The current aiAnimation instance
@@ -249,17 +249,17 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 				//Make room for the bone animation data
 				boneData.resize(currentAssimpAnim->mNumChannels);
 				//Go through each animation channel
-				for (unsigned int c = 0; c < currentAssimpAnim->mNumChannels; c++) {
+				for (unsigned int c = 0; c < currentAssimpAnim->mNumChannels; ++c) {
 					//The current aiNodeAnim instance
 					const aiNodeAnim* currentAnimNode = currentAssimpAnim->mChannels[c];
 					//Create the bone animation data instance
 					BoneAnimationData* currentBoneData = new BoneAnimationData(boneIndices[std::string(currentAnimNode->mNodeName.C_Str())], currentAnimNode->mNumPositionKeys, currentAnimNode->mNumRotationKeys, currentAnimNode->mNumScalingKeys);
 					//Go through and assign all of the data
-					for (unsigned int d = 0; d < currentAnimNode->mNumPositionKeys; d++)
+					for (unsigned int d = 0; d < currentAnimNode->mNumPositionKeys; ++d)
 						currentBoneData->setKeyframePosition(d, toVector3f(currentAnimNode->mPositionKeys[d].mValue), currentAnimNode->mPositionKeys[d].mTime);
-					for (unsigned int d = 0; d < currentAnimNode->mNumRotationKeys; d++)
+					for (unsigned int d = 0; d < currentAnimNode->mNumRotationKeys; ++d)
 						currentBoneData->setKeyframeRotation(d, toQuaternion(currentAnimNode->mRotationKeys[d].mValue), currentAnimNode->mRotationKeys[d].mTime);
-					for (unsigned int d = 0; d < currentAnimNode->mNumScalingKeys; d++)
+					for (unsigned int d = 0; d < currentAnimNode->mNumScalingKeys; ++d)
 						currentBoneData->setKeyframeScale(d, toVector3f(currentAnimNode->mScalingKeys[d].mValue), currentAnimNode->mScalingKeys[d].mTime);
 					//Add the bone data
 					boneData[c] = currentBoneData;
@@ -291,13 +291,14 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 		mesh->setCullingEnabled(true);
 
 		//Load and add the materials
-		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
+		for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
 			//Load the current material
 			Material* material = loadAssimpMaterial(path, fileName, scene->mMaterials[i], pbr);
 
-			if (i == 0)
+			if (i == 0) {
+				delete mesh->getMaterial();
 				mesh->setMaterial(material);
-			else
+			} else
 				mesh->addMaterial(material);
 		}
 

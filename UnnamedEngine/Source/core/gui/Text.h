@@ -39,9 +39,15 @@ private:
 	/* UBO and data structure for billboarding */
 	UBO* shaderBillboardUBO;
 	ShaderBlock_Billboard shaderBillboardData;
+
+	/* The maximum number of characters this instance can render (only relevant for Vulkan) */
+	unsigned int maxCharacters;
 public:
+	/* The default maximum number of characters */
+	static unsigned int DEFAULT_MAX_CHARACTERS;
+
 	/* The constructors */
-	Text(Font* font, Colour colour = Colour::WHITE, bool billboarded = false);
+	Text(Font* font, Colour colour = Colour::WHITE, unsigned int maxCharacters = 0, bool billboarded = false); //0 in maxCharacters indicates the default number should be used
 
 	/* The destructor */
 	virtual ~Text() {}

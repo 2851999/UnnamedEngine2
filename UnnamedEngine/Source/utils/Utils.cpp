@@ -109,6 +109,22 @@ namespace utils_string {
 		return split;
 	}
 
+	std::string strJoin(const std::vector<std::string>& text, char delimeter) {
+		std::string joinedString = text[0];
+		//Append all of the text
+		for (unsigned int i = 1; i < text.size(); ++i)
+			joinedString += delimeter +  text[i];
+		return joinedString;
+	}
+
+	std::string strJoin(const std::vector<std::string>& text, const std::string& delimeter) {
+		std::string joinedString = text[0];
+		//Append all of the text
+		for (unsigned int i = 1; i < text.size(); ++i)
+			joinedString += delimeter +  text[i];
+		return joinedString;
+	}
+
 	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement) {
 		size_t index = 0;
 		std::string str = s;
@@ -317,6 +333,7 @@ namespace utils_settings {
 		video.add(MLAttribute("refreshRate", utils_string::str(settings.videoRefreshRate)));
 		video.add(MLAttribute("resolution", VideoResolution::toString(settings.videoResolution)));
 		video.add(MLAttribute("maxFPS", utils_string::str(settings.videoMaxFPS)));
+		video.add(MLAttribute("vulkan", utils_string::str(settings.videoVulkan)));
 		settingsElement.add(video);
 
 		MLElement audio("audio");
@@ -336,6 +353,7 @@ namespace utils_settings {
 		MLElement debugging("debug");
 		debugging.add(MLAttribute("showInformation", utils_string::str(settings.debugShowInformation)));
 		debugging.add(MLAttribute("consoleEnabled", utils_string::str(settings.debugConsoleEnabled)));
+		debugging.add(MLAttribute("vkValidationLayersEnabled", utils_string::str(settings.debugVkValidationLayersEnabled)));
 		settingsElement.add(debugging);
 
 		//Add the settings element, or replace the current one if one already exists
@@ -390,7 +408,7 @@ namespace utils_settings {
 					} else if (child.getName() == "video") {
 						//Check the attribute name
 						if (attrib.getName() == "vSync")
-							settings.videoVSync = attrib.getDataAsBool();
+							settings.videoVSync = attrib.getDataAsUInt();
 						else if (attrib.getName() == "samples")
 							settings.videoSamples = attrib.getDataAsUInt();
 						else if (attrib.getName() == "maxAnisotropicSamples")
@@ -401,6 +419,8 @@ namespace utils_settings {
 							settings.videoResolution = VideoResolution::toVector(attrib.getData());
 						else if (attrib.getName() == "maxFPS")
 							settings.videoMaxFPS = attrib.getDataAsUInt();
+						else if (attrib.getName() == "vulkan")
+							settings.videoVulkan = attrib.getDataAsBool();
 					} else if (child.getName() == "audio") {
 						//Check the attribute name
 						if (attrib.getName() == "soundEffectVolume")
@@ -423,6 +443,8 @@ namespace utils_settings {
 							settings.debugShowInformation = attrib.getDataAsBool();
 						else if (attrib.getName() == "consoleEnabled")
 							settings.debugConsoleEnabled = attrib.getDataAsBool();
+						else if (attrib.getName() == "vkValidationLayersEnabled")
+							settings.debugVkValidationLayersEnabled = attrib.getDataAsBool();
 					}
 				}
 			}

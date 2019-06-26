@@ -6,7 +6,7 @@
 //The environment map to apply
 uniform samplerCube ue_environmentMap;
 
-out vec4 ue_FragColour;
+layout (location = 0) out vec4 ue_FragColour;
 
 void main() {
 	//Calculate the incident vector

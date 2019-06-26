@@ -191,7 +191,8 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 
 		//Setup for rendering
 		renderData = new RenderData(GL_TRIANGLES, numIndices);
-		shader = Renderer::getRenderShader(Renderer::SHADER_TILEMAP)->getShader();
+		RenderShader* renderShader = Renderer::getRenderShader(Renderer::SHADER_TILEMAP);
+		shader = renderShader->getShader();
 
 		vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, mapIndices.size() * sizeof(mapIndices[0]), mapIndices, usage);
 		renderData->setIndicesVBO(vboIndices);
@@ -208,7 +209,7 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 		vboVisibility->addAttribute(shader->getAttributeLocation("Visibility"), 1);
 		renderData->addVBO(vboVisibility);
 
-		renderData->setup();
+		renderData->setup(renderShader);
 
 		//Obtain the required UBO
 		shaderCoreUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_CORE);

@@ -18,8 +18,10 @@
 
 #include "Font.h"
 
+#include "../BaseEngine.h"
 #include "../render/Renderer.h"
 #include "../../utils/Logging.h"
+#include "../vulkan/Vulkan.h"
 
 /*****************************************************************************
  * The Font class
@@ -56,45 +58,103 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 			return;
 		}
 		//Add onto the width
-		width += glyphSlot->bitmap.width;
+		width += glyphSlot->bitmap.width + GLYPH_SPACING;
 		//Update the height to make it the same as the tallest letter
 		height = utils_maths::max(height, glyphSlot->bitmap.rows);
 	}
-	//Create and bind the texture atlas
-	texture = new Texture(width, height, parameters);
-	texture->bind();
-	//Allows textures that are not a multiple of 4 in size
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	//Define the texture
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
+	if (! BaseEngine::usingVulkan()) {
+		//Create and bind the texture atlas
+		texture = new Texture(width, height, parameters);
+		texture->bind();
+		//Allows textures that are not a multiple of 4 in size
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	//The current x offset
-	GLint xOffset = 0;
-	//Go through each character required's ASCII code again
-	for (unsigned int i = ASCII_START; i <= ASCII_END; i++) {
-		//Load the current character
-		FT_Load_Char(face, i, FT_LOAD_RENDER);
-		//Put the data into the texture
-		glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, 0, glyphSlot->bitmap.width, glyphSlot->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyphSlot->bitmap.buffer);
+		//Define the texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
 
-		//Assign the character info data
-		glyphs[i - ASCII_START].advanceX    = glyphSlot->advance.x;
-		glyphs[i - ASCII_START].advanceY    = glyphSlot->advance.y;
-		glyphs[i - ASCII_START].glyphWidth  = glyphSlot->bitmap.width;
-		glyphs[i - ASCII_START].glyphHeight = glyphSlot->bitmap.rows;
-		glyphs[i - ASCII_START].glyphLeft   = glyphSlot->bitmap_left;
-		glyphs[i - ASCII_START].glyphTop    = glyphSlot->bitmap_top;
-		glyphs[i - ASCII_START].xOffset     = xOffset;
+		//The current x offset
+		GLint xOffset = 0;
+		//Go through each character required's ASCII code again
+		for (unsigned int i = ASCII_START; i <= ASCII_END; ++i) {
+			//Load the current character
+			FT_Load_Char(face, i, FT_LOAD_RENDER);
+			//Put the data into the texture
+			glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, 0, glyphSlot->bitmap.width, glyphSlot->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyphSlot->bitmap.buffer);
 
-		//Increment the x offset
-		xOffset += glyphSlot->bitmap.width;
+			//Assign the character info data
+			glyphs[i - ASCII_START].advanceX    = glyphSlot->advance.x;
+			glyphs[i - ASCII_START].advanceY    = glyphSlot->advance.y;
+			glyphs[i - ASCII_START].glyphWidth  = glyphSlot->bitmap.width;
+			glyphs[i - ASCII_START].glyphHeight = glyphSlot->bitmap.rows;
+			glyphs[i - ASCII_START].glyphLeft   = glyphSlot->bitmap_left;
+			glyphs[i - ASCII_START].glyphTop    = glyphSlot->bitmap_top;
+			glyphs[i - ASCII_START].xOffset     = xOffset;
+
+			//Increment the x offset
+			xOffset += glyphSlot->bitmap.width + GLYPH_SPACING;
+		}
+
+		texture->applyParameters(false, true);
+
+		//Return the GL_UNPACK_ALIGNMENT to its default state
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	} else {
+		const VkDeviceSize imageSize = width * height;
+		VkFormat format = VK_FORMAT_R8_SRGB;
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		Vulkan::createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+		void* data;
+		vkMapMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, 0, imageSize, 0, &data);
+
+		std::vector<unsigned char> values(imageSize, 0);
+
+		//The current x offset
+		int xOffset = 0;
+		//Go through each character required's ASCII code again
+		for (unsigned int i = ASCII_START; i <= ASCII_END; ++i) {
+			//Load the current character
+			FT_Load_Char(face, i, FT_LOAD_RENDER);
+
+			for (unsigned int j = 0; j < (unsigned int) (glyphSlot->bitmap.rows); ++j) {
+				for (unsigned int k = 0; k < (unsigned int) (glyphSlot->bitmap.width); ++k) {
+					unsigned int index = ((xOffset + k) + (width * j));
+					unsigned int index2 = (j * glyphSlot->bitmap.width) + k;
+					values[index] = glyphSlot->bitmap.buffer[index2];
+				}
+			}
+
+			//Assign the character info data
+			glyphs[i - ASCII_START].advanceX    = glyphSlot->advance.x;
+			glyphs[i - ASCII_START].advanceY    = glyphSlot->advance.y;
+			glyphs[i - ASCII_START].glyphWidth  = glyphSlot->bitmap.width;
+			glyphs[i - ASCII_START].glyphHeight = glyphSlot->bitmap.rows;
+			glyphs[i - ASCII_START].glyphLeft   = glyphSlot->bitmap_left;
+			glyphs[i - ASCII_START].glyphTop    = glyphSlot->bitmap_top;
+			glyphs[i - ASCII_START].xOffset     = xOffset;
+
+			//Increment the x offset
+			xOffset += glyphSlot->bitmap.width + GLYPH_SPACING;
+		}
+
+		memcpy(static_cast<unsigned char*>(data), values.data(), static_cast<unsigned int>(values.size()));
+		vkUnmapMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory);
+
+		VkImage textureVkImage;
+		VkDeviceMemory textureVkImageMemory;
+		Vulkan::createImage(width, height, 1, 1, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
+
+		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, 1); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)
+		Vulkan::copyBufferToImage(stagingBuffer, textureVkImage, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+
+	    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
+	    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);
+		VkImageView textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+
+		texture = new Texture(width, height, textureVkImage, textureVkImageMemory, textureVkImageView, parameters);
 	}
-
-	texture->applyParameters(false, true);
-
-	//Return the GL_UNPACK_ALIGNMENT to its default state
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 	FT_Done_Face(face);
 }
@@ -137,14 +197,10 @@ void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
 			data->addPosition(Vector3f(xPos + width, yPos + height, 0.0f));
 			data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
 
-			//Pad the texture coordinates to reduce bleeding artifacts
-			float offsetX = 0.002f / (float) texture->getWidth();
-			float offsetY = 0.002f / (float) texture->getHeight();
-
-			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()) + offsetX, 0.0f + offsetY));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()) - offsetX, 0.0f + offsetY));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()) - offsetX, (info.glyphHeight / (float) texture->getHeight()) - offsetY));
-			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()) + offsetX, (info.glyphHeight / (float) texture->getHeight()) - offsetY));
+			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()), 0.0f));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()), 0.0f));
+			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()), (info.glyphHeight / (float) texture->getHeight())));
+			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()), (info.glyphHeight / (float) texture->getHeight())));
 
 			unsigned int ip = (i - newLineCount) * 4;
 
@@ -161,7 +217,7 @@ void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
 }
 
 void Font::destroy() {
-
+	delete texture;
 }
 
 float Font::getWidth(std::string text) {

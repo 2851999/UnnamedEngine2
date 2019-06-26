@@ -59,8 +59,9 @@ public:
 };
 
 void Test::onInitialise() {
-	//getSettings().videoVSync = false;
-	//getSettings().videoMaxFPS = 0;
+	getSettings().videoVSync = false;
+	getSettings().videoMaxFPS = 0;
+	//getSettings().videoSamples = 0;
 }
 
 void Test::onCreated() {
@@ -68,7 +69,7 @@ void Test::onCreated() {
 	camera->setFlying(true);
 
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane.obj", false);
-	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
+//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane3.obj", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh", false);
 //	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj", false);
@@ -110,10 +111,10 @@ void Test::onCreated() {
 	renderScene->add(model2);
 	renderScene->add(model3);
 
-	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0.0f, -1.0f, 0.0001f); //->setDiffuseColour(Colour(200.0f, 200.0f, 200.0f));
+	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f); //->setDiffuseColour(Colour(200.0f, 200.0f, 200.0f));
 	Light* light1 = (new Light(Light::TYPE_POINT, Vector3f(0.0f, 1.0f, 0.0f), false))->setDiffuseColour(Colour::RED);
 	Light* light2 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.5f, -1.0f, 0.0001f);
-	//plane->getMesh()->getMaterial(1)->diffuseTexture = light0->getDepthBuffer()->getFramebufferTexture(0);
+	//plane->getMesh()->getMaterial(1)->setDiffuse(light2->getDepthBuffer()->getFramebufferStore(0));
 	light0->update();
 	light1->update();
 	light2->update();
@@ -136,11 +137,11 @@ void Test::onCreated() {
 	particleSystem->effect = new ParticleEffectColourChange(Colour::WHITE, Colour(0.3f, 0.3f, 0.3f, 0.6f));
 	particleSystem->textureAtlas = new TextureAtlas(resourceLoader.loadTexture("smoke.png"), 7, 7, 46);
 
-	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
-	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
+//	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
+//	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
 
-	font = new Font("resources/fonts/CONSOLA.TTF", 64, TextureParameters().setShouldClamp(true).setFilter(GL_LINEAR));
-	text = new Text(font, Colour::WHITE, true);
+	font = new Font("resources/fonts/CONSOLA.TTF", 64, TextureParameters().setFilter(GL_LINEAR));
+	text = new Text(font, Colour::WHITE, 100, true);
 	text->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
 
 //	terrain = new HeightMapTerrain();
@@ -210,6 +211,7 @@ void Test::onRender() {
 //	}
 
 //	terrain2->render();
+	//renderScene->showDeferredBuffers();
 }
 
 void Test::onDestroy() {

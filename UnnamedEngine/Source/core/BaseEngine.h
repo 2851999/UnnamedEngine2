@@ -32,8 +32,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.3.4";
-	const std::string DateCreated = "02/06/2019";
+	const std::string Version     = "V0.3.9";
+	const std::string DateCreated = "26/06/2019";
 	const std::string Build       = "Beta";
 }
 
@@ -62,6 +62,9 @@ private:
 	Camera2D* debugCamera = NULL;
 	/* Debug console */
 	DebugConsole* debugConsole = NULL;
+
+	/* Method used to initialise the graphics API being used for rendering (Returns whether initialisation was successful) */
+	bool initGraphicsAPI();
 public:
 	/* The constructor */
 	BaseEngine();
@@ -123,6 +126,9 @@ public:
 	virtual void onControllerAxis(Controller* controller, int axis, float value) override {}
 	virtual void onControllerButtonPressed(Controller* controller, int index) override {}
 	virtual void onControllerButtonReleased(Controller* controller, int index) override {}
+
+	/* Static method to obtain a boolean representing whether Vulkan is being used */
+	inline static bool usingVulkan() { return Window::getCurrentInstance()->getSettings().videoVulkan; }
 };
 
 
