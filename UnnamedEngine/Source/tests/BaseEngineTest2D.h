@@ -74,7 +74,6 @@ void Test::initialise() {
 
 void Test::created() {
 	TextureParameters::DEFAULT_CLAMP = GL_CLAMP_TO_EDGE;
-	TextureParameters::DEFAULT_SHOULD_CLAMP = true;
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR;
 
 	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));

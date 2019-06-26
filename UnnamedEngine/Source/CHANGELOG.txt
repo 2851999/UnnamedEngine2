@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 1 | Beta 2 | Development 4 | Experimental 2
+
+* Fixed bug: Splash screen had overlapping text
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 4 | Experimental 1
 
 * Added error message if 'vkQueuePresentKHR' fails

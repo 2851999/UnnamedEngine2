@@ -16,15 +16,15 @@
  *
  *****************************************************************************/
 
-//#include "tests/GUITest.h"
+#include "tests/VulkanTest.h"
 //#include "examples/basic/BasicRendering3D.h"
-#include "examples/asteroids/AsteroidsGame.h"
+//#include "examples/asteroids/AsteroidsGame.h"
 
 int main() {
-//	Test test;
-//	test.create();
-	AsteroidsGame asteroids;
-	asteroids.create();
+	Test test;
+	test.create();
+//	AsteroidsGame asteroids;
+//	asteroids.create();
 
 //	Tutorial tutorial;
 //	tutorial.create();
