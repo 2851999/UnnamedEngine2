@@ -31,9 +31,9 @@ GameOverMenu::GameOverMenu(AsteroidsGame* game, Player* player) : game(game), pl
 
 	//Setup the background
 	Texture* backgroundTexture = game->getResourceLoader().loadTexture("MainMenu_Background.png");
-	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, "Material");
-	background->getMaterial()->diffuseTexture = backgroundTexture;
-	background->getMaterial()->diffuseColour = Colour(1.0f, 1.0f, 1.0f, 0.8f);
+	background = new GameObject2D({ new Mesh(MeshBuilder::createQuad(windowWidth, windowHeight, backgroundTexture)) }, Renderer::SHADER_MATERIAL);
+	background->getMaterial()->setDiffuse(backgroundTexture);
+	background->getMaterial()->setDiffuse(Colour(1.0f, 1.0f, 1.0f, 0.8f));
 	background->update();
 
 	buttonExit = new GUIButton("Exit", 400, 30, game->getResources().getTexturesButtons());
@@ -80,11 +80,11 @@ void GameOverMenu::show() {
 	HighScores& highScores = game->getHighScores();
 
 	if (highScores.isHighScore(player->getScore())) {
-		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - A new highscore! :)");
+		labelScore->setText("You scored " + utils_string::str(player->getScore()) + " - A new highscore! :)");
 		nameTextBox->setActive(true);
 		nameTextBox->setVisible(true);
 	} else if (highScores.isOnTable(player->getScore())) {
-		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " - You're on the highscore table!");
+		labelScore->setText("You scored " + utils_string::str(player->getScore()) + " - You're on the highscore table!");
 		nameTextBox->setActive(true);
 		nameTextBox->setVisible(true);
 	} else {
@@ -92,7 +92,7 @@ void GameOverMenu::show() {
 		nameTextBox->setActive(false);
 		nameTextBox->setVisible(false);
 
-		labelScore->setText("You scored " + StrUtils::str(player->getScore()) + " :(");
+		labelScore->setText("You scored " + utils_string::str(player->getScore()) + " :(");
 	}
 
 	labelScore->setPosition(game->getSettings().windowWidth / 2 - labelScore->getWidth() / 2, labelGameOver->getPosition().getY() + labelGameOver->getHeight() + 10.0f);

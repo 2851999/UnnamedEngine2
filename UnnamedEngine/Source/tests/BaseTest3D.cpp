@@ -19,6 +19,7 @@
 #include "BaseTest3D.h"
 
 #include "../core/render/Renderer.h"
+#include "../utils/GLUtils.h"
 
 void BaseTest3D::initialise() {
 	resourceLoader.setPath("C:/UnnamedEngine/");
@@ -30,7 +31,8 @@ void BaseTest3D::initialise() {
 	settings.windowTitle = "Test";
 	settings.videoMaxAnisotropicSamples = 16;
 	settings.videoSamples = 16;
-	settings.videoVSync = false;
+	settings.videoVSync = true;
+	settings.videoMaxFPS = 0;
 
 	onInitialise();
 }
@@ -41,7 +43,7 @@ void BaseTest3D::created() {
 	InputBindings* bindings = new InputBindings();
 	bindings->load(resourceLoader.getPath() + "config/Controller.xml", getWindow()->getInputManager());
 
-	camera = new DebugCamera(110.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
+	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
 
 	physicsScene = new PhysicsScene3D();
 	renderScene = new RenderScene3D();
@@ -66,10 +68,14 @@ void BaseTest3D::update() {
 }
 
 void BaseTest3D::render() {
+	utils_gl::setupSimple3DView(true);
+
+	if (renderScene->hasObjects())
+		renderScene->render();
+
 	onRender();
 
-	camera->useView();
-	renderScene->render();
+	camera->useView(); //In case of deferred rendering forward rendered objects should be rendered after the deferred
 }
 
 void BaseTest3D::destroy() {

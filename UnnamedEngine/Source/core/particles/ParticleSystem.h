@@ -23,6 +23,7 @@
 #include "../render/RenderData.h"
 #include "../render/TextureAtlas.h"
 #include "../render/VBO.h"
+#include "../render/ShaderInterface.h"
 
 /*****************************************************************************
  * The ParticleSystem class is used to manage, update and render a set of
@@ -95,6 +96,10 @@ private:
 
 	/* The maximum number of particles for this system */
 	unsigned int maxParticles = 1800;
+
+	/* UBO and data structure for billboarding */
+	UBO* shaderBillboardUBO;
+	ShaderBlock_Billboard shaderBillboardData;
 public:
 	/* The particle effect (Can be NULL) */
 	ParticleEffect* effect = NULL;

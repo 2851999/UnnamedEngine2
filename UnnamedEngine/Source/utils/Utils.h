@@ -27,7 +27,7 @@
  * Various string utilities
  *****************************************************************************/
 
-namespace StrUtils {
+namespace utils_string {
 
 	template<typename T>
 	inline std::string str(T value) {
@@ -51,6 +51,9 @@ namespace StrUtils {
 
 	std::vector<std::string> strSplit(const std::string &s, char delimeter);
 	std::vector<std::string> strSplit(const std::string& text, const std::string& delimeter);
+	std::vector<std::string> strSplitLast(const std::string& text, const std::string& delimeter);
+	std::string strJoin(const std::vector<std::string>& text, char delimeter);
+	std::string strJoin(const std::vector<std::string>& text, const std::string& delimeter);
 
 	inline std::string substring(const std::string &s, int begin, int end) {
 		return s.substr(begin, end - begin);
@@ -66,7 +69,7 @@ namespace StrUtils {
  * Various maths utilities
  *****************************************************************************/
 
-namespace MathsUtils {
+namespace utils_maths {
 	const float PI = 3.14159265;
 
 	inline float toRadians(float degrees) {
@@ -75,6 +78,11 @@ namespace MathsUtils {
 
 	inline float toDegrees(float radians) {
 		return radians * (180.0f / PI);
+	}
+
+	/* Works for powers of 10 - roundNearest(0.08f, 0.1f) = 0.1f */
+	inline float roundNearest(float value, float precision) {
+		return (float) floor(value / precision + 0.5) * precision;
 	}
 
 	template<typename T>
@@ -111,6 +119,9 @@ namespace MathsUtils {
 			return value;
 	}
 
+	template<typename T>
+	inline T lerp(T a, T b, T factor) { return (a + ((b - a) * factor)); }
+
 	/* Returns a value that is a multiple of the interval, closest to the
 	 * value given */
 	float clampToClosestInterval(float value, float interval);
@@ -122,7 +133,7 @@ namespace MathsUtils {
 
 #include <vector>
 
-namespace FileUtils {
+namespace utils_file {
 	/* Reads the contents of a file to a string - useful for shaders */
 	std::string readFileToString(std::string path);
 
@@ -149,12 +160,12 @@ namespace FileUtils {
  * Various time utilities
  *****************************************************************************/
 
-namespace TimeUtils {
+namespace utils_time {
 	/* Returns the time in seconds since the active window was created */
 	double getSeconds();
 
 	/* Returns the time elapsed in milliseconds (rounded) since the GLFW was initialised */
-	inline long getMilliseconds() { return (long) (getSeconds() * 1000); }
+	inline float getMilliseconds() { return (float) (getSeconds() * 1000); }
 
 	/* Pauses the thread for a set amount of time given in milliseconds */
 	void sleep(long milliseconds);
@@ -167,7 +178,7 @@ namespace TimeUtils {
  * Various random utilities
  *****************************************************************************/
 
-namespace RandomUtils {
+namespace utils_random {
 	/* Method used to initialise the random generator with the current time */
 	void initialise();
 
@@ -185,7 +196,7 @@ namespace RandomUtils {
 class Settings;
 class MLDocument;
 
-namespace SettingsUtils {
+namespace utils_settings {
 	/* Writes settings to a document */
 	void writeToDocument(MLDocument& document, Settings& settings);
 
@@ -203,7 +214,7 @@ namespace SettingsUtils {
  * Various clipboard utilities
  *****************************************************************************/
 
-namespace ClipboardUtils {
+namespace utils_clipboard {
 	/* Sets the clipboard text */
 	void setText(std::string text);
 
@@ -215,7 +226,7 @@ namespace ClipboardUtils {
  * Various controller utilities
  *****************************************************************************/
 
-namespace ControllerUtils {
+namespace utils_controller {
 	/* Returns the index of a controller given its name or -1 if not found */
 	int getControllerIndexByName(std::string name);
 

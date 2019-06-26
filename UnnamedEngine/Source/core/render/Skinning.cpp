@@ -64,6 +64,7 @@ Vector3f BoneAnimationData::getInterpolatedPosition(float animationTime) {
 	float deltaTime = keyframePositionsTimes[nextIndex] - keyframePositionsTimes[lastIndex];
 	//Calculate the interpolation factor
 	float factor = (animationTime - keyframePositionsTimes[lastIndex]) / deltaTime;
+
 	//Interpolate and return the result
 	return Vector3f::lerp(keyframePositions[lastIndex], keyframePositions[nextIndex], factor);
 }
@@ -81,6 +82,7 @@ Quaternion BoneAnimationData::getInterpolatedRotation(float animationTime) {
 	float deltaTime = keyframeRotationsTimes[nextIndex] - keyframeRotationsTimes[lastIndex];
 	//Calculate the interpolation factor
 	float factor = (animationTime - keyframeRotationsTimes[lastIndex]) / deltaTime;
+
 	//Interpolate and return the result
 	return Quaternion::slerp(keyframeRotations[lastIndex], keyframeRotations[nextIndex], factor).normalise();
 }
@@ -116,7 +118,7 @@ unsigned int BoneAnimationData::getPositionIndex(float animationTime) {
 		}
 	}
 	//Log an error
-	Logger::log("Position not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
+	Logger::log("Position not found for animation at a time of '" + utils_string::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
 	return 0;
 }
 
@@ -134,7 +136,7 @@ unsigned int BoneAnimationData::getRotationIndex(float animationTime) {
 		}
 	}
 	//Log an error
-	Logger::log("Rotation not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
+	Logger::log("Rotation not found for animation at a time of '" + utils_string::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
 	return 0;
 }
 
@@ -152,7 +154,7 @@ unsigned int BoneAnimationData::getScaleIndex(float animationTime) {
 		}
 	}
 	//Log an error
-	Logger::log("Scale not found for animation at a time of '" + StrUtils::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
+	Logger::log("Scale not found for animation at a time of '" + utils_string::str(animationTime) + "'", "BoneAnimationData", LogType::Error);
 	return 0;
 }
 
@@ -182,7 +184,7 @@ BoneAnimationData* Animation::getBoneAnimationData(unsigned int boneIndex) {
 			return boneData[i];
 	}
 	//Log an error
-	//Logger::log("BoneAnimationData with the index '" + StrUtils::str(boneIndex) + "' was not found in the animation with the name '" + name + "'", "Animation", LogType::Error);
+	//Logger::log("BoneAnimationData with the index '" + utils_string::str(boneIndex) + "' was not found in the animation with the name '" + name + "'", "Animation", LogType::Error);
 	//Return NULL if not found
 	return NULL;
 }

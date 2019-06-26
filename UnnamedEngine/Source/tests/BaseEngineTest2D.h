@@ -24,14 +24,19 @@
 #include "../core/render/Renderer.h"
 #include "../core/gui/Font.h"
 #include "../core/Sprite.h"
+#include "../core/render/Tilemap.h"
 #include "../utils/GLUtils.h"
+#include "../core/ml/ML.h"
+#include "../core/audio/SoundSystem.h"
 
 class Test : public BaseEngine {
 private:
 	Camera2D* camera;
 	GameObject2D* object;
 	Font* font;
-	Sprite2D* sprite;
+	Sprite* sprite;
+	Tilemap* tilemap;
+	SoundSystem* soundSystem;
 public:
 	virtual ~Test() {}
 
@@ -49,7 +54,7 @@ public:
 	virtual void onKeyReleased(int key) override {}
 	virtual void onChar(int key, char character) override {}
 
-	virtual void onMousePressed(int button) override {}
+	virtual void onMousePressed(int button) override;
 	virtual void onMouseReleased(int button) override {}
 	virtual void onMouseMoved(double x, double y, double dx, double dy) override {}
 	virtual void onMouseDragged(double x, double y, double dx, double dy) override {}
@@ -61,18 +66,25 @@ public:
 
 void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
+	getSettings().videoVSync = 1;
+//	getSettings().videoMaxFPS = 0;
+	getSettings().videoSamples = 16;
+	getSettings().videoMaxAnisotropicSamples = 16;
 }
 
 void Test::created() {
+	TextureParameters::DEFAULT_CLAMP = GL_CLAMP_TO_EDGE;
+	TextureParameters::DEFAULT_FILTER = GL_LINEAR;
+
 	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));
-	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), "Material");
+	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), Renderer::SHADER_MATERIAL);
 	object->setSize(200, 200);
 	object->setPosition(getSettings().windowWidth / 2 - 100, getSettings().windowHeight / 2 - 100);
-	object->getMaterial()->diffuseTexture = texture;
-	object->getMaterial()->diffuseColour = Colour::WHITE;
+	object->getMaterial()->setDiffuse(texture);
+	object->getMaterial()->setDiffuse(Colour::WHITE);
 	object->update();
 
-	sprite = new Sprite2D(texture, 100, 100);
+	sprite = new Sprite(texture, 100, 100);
 	sprite->setPosition(400, 100);
 	//Animation2D* animation = new TextureAnimation2D(sprite, new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/ParticleAtlas3.png"), 8, 8, 64), 0.05f);
 	sprite->addAnimation("Smoke", new TextureAnimation2D(new TextureAtlas(Texture::loadTexture("C:/UnnamedEngine/textures/smoke.png"), 7, 7, 46), 0.05f, true));
@@ -83,24 +95,54 @@ void Test::created() {
 	camera->update();
 
 	Renderer::addCamera(camera);
+
+	tilemap = Tilemap::loadTilemap("C:/UnnamedEngine/maps/", "Map3.tmx", true);
+
+	soundSystem = new SoundSystem();
+	soundSystem->createListener();
+	soundSystem->addMusic("Music", AudioLoader::loadFile("C:/UnnamedEngine/maps/music.ogg"));
+	soundSystem->getSource("Music")->setLoop(true);
+	soundSystem->play("Music");
 }
 
 void Test::update() {
+	if (Keyboard::isPressed(GLFW_KEY_W))
+		camera->getTransform()->translate(0.0f, -256.0f * getDeltaSeconds());
+	if (Keyboard::isPressed(GLFW_KEY_S))
+		camera->getTransform()->translate(0.0f, 256.0f * getDeltaSeconds());
+	if (Keyboard::isPressed(GLFW_KEY_A))
+		camera->getTransform()->translate(-256.0f * getDeltaSeconds(), 0.0f);
+	if (Keyboard::isPressed(GLFW_KEY_D))
+		camera->getTransform()->translate(256.0f * getDeltaSeconds(), 0.0f);
+	camera->update();
+
 	object->getTransform()->rotate(60.0f * getDeltaSeconds());
 	object->update();
 
 	sprite->update(getDeltaSeconds());
 }
 
+void Test::onMousePressed(int button) {
+	Vector3f cameraPos = camera->getPosition();
+	Vector2d mousePos = Mouse::getPosition();
+	float worldX = (float) mousePos.getX() + cameraPos.getX();
+	float worldY = (float) mousePos.getY() + cameraPos.getY();
+//	std::cout << tilemap->getLayers()[0]->getTileID(worldX, worldY) << std::endl;
+	tilemap->getLayers()[0]->setTileID(worldX, worldY, 1);
+}
+
 void Test::render() {
-	GLUtils::setupSimple2DView();
+	utils_gl::setupSimple2DView();
 
 	object->render();
 
 	sprite->render();
+
+	tilemap->render();
 }
 
 void Test::destroy() {
+	delete soundSystem;
 	delete object;
 	delete camera;
 }

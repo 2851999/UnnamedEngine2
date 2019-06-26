@@ -36,7 +36,7 @@ void GUIDropDownMenu::setupMenu() {
 		//Go through each button added
 		for (unsigned int i = 0; i < buttons.size(); i++) {
 			//Assign the width to the maximum width
-			width = MathsUtils::max(width, buttons[i]->getWidth());
+			width = utils_maths::max(width, buttons[i]->getWidth());
 			//Add onto the height
 			height += buttons[i]->getHeight();
 
@@ -82,7 +82,7 @@ GUIDropDownMenu::~GUIDropDownMenu() {
 
 void GUIDropDownMenu::addButton(GUIButton* button) {
 	//Set the button's parent to this
-	menuButton->setParent(this);
+	button->setParent(this);
 	//Set the buttons active and visible properties
 	button->setActive(false);
 	button->setVisible(false);
@@ -137,8 +137,13 @@ void GUIDropDownMenu::onComponentUpdate() {
 	menuButton->update();
 
 	if (menuOpen) {
-		for (unsigned int i = 0; i < buttons.size(); i++)
+		for (unsigned int i = 0; i < buttons.size(); i++) {
 			buttons[i]->update();
+//			std::cout << "START" << std::endl;
+//			std::cout << getPosition().toString() << std::endl;
+//			std::cout << buttons[i]->getTransform()->getParent() << std::endl;
+//			std::cout << buttons[i]->getPosition().toString() << std::endl;
+		}
 	}
 }
 

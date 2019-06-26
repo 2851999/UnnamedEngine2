@@ -1,11 +1,7 @@
-#version 140
+#include "PostProcess.fs"
 
-uniform sampler2D tex;
-
-in vec2 frag_textureCoord;
-
-out vec4 FragColour;
+layout(location = 0) out vec4 FragColour;
 
 void main() {
-	FragColour = vec4(1.0 - texture(tex, frag_textureCoord).xyz, 1.0);
+	FragColour = vec4(1.0 - texture(ue_texture, ue_frag_textureCoord).xyz, 1.0);
 }

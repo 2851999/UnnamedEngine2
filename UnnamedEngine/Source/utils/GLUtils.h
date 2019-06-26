@@ -27,7 +27,7 @@
  * Various OpenGL utilities
  *****************************************************************************/
 
-namespace GLUtils {
+namespace utils_gl {
 	/* Various setup methods for rendering */
 	inline void clearColourBuffer()  { glClear(GL_COLOR_BUFFER_BIT); }
 	inline void clearDepthBuffer()   { glClear(GL_DEPTH_BUFFER_BIT); }

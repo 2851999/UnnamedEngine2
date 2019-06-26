@@ -36,8 +36,8 @@ Player::Player(AsteroidsGame* game, std::vector<Enemy*>& enemies) : Ship(game), 
 	currentDelta = 0.0f;
 
 	//Setup the camera
-	camera = new Camera3D(110.0f, game->getSettings().windowAspectRatio, 0.1f, 100.0f);
-	camera->setSkyBox(new SkyBox(game->getResourceLoader().getPath() + "skybox/", "skyboxBK.png", "skyboxFT.png", "skyboxLF.png", "skyboxRT.png", "skyboxUP.png", "skyboxDN.png", 100.0f));
+	camera = new Camera3D(70.0f, game->getSettings().windowAspectRatio, 0.1f, 1000.0f);
+	camera->setSkyBox(new SkyBox(game->getResourceLoader().getPath() + "skybox/", "skyboxBK.png", "skyboxFT.png", "skyboxLF.png", "skyboxRT.png", "skyboxUP.png", "skyboxDN.png"));
 	camera->setFlying(true);
 	camera->setParent(this);
 
@@ -78,7 +78,7 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 		getTransform()->rotate(Vector3f(0.0f, 1.0f, 0.0f), -axisLookX->getValue() * 80.0f * currentDelta);
 		getTransform()->rotate(getTransform()->getRotation().getRight(), -axisLookY->getValue() * 80.0f * currentDelta);
 		Vector3f currentRot = getTransform()->getLocalRotation().toEuler();
-		currentRot.setX(MathsUtils::clamp(currentRot.getX(), -89.0f, 89.0f));
+		currentRot.setX(utils_maths::clamp(currentRot.getX(), -89.0f, 89.0f));
 		getTransform()->setRotation(currentRot);
 
 		//Move the player
@@ -118,11 +118,11 @@ void Player::update(float deltaSeconds, AsteroidGroup& closestAsteroids) {
 }
 
 void Player::render() {
-	//Use then camera's view
-	camera->useView();
-
 	//Render the lasers
 	Ship::render();
+
+	//Use then camera's view
+	camera->useView();
 }
 
 /* Called when an asteroid has been destroyed by this ship's lasers */

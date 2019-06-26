@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2018 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_BASIC_BASICSETUP_H_
-#define EXAMPLES_BASIC_BASICSETUP_H_
+#ifndef EXAMPLES_BASIC_BASICRENDERING_H_
+#define EXAMPLES_BASIC_BASICRENDERING_H_
 
 /*****************************************************************************
  * The Basic Rendering Example Program
  *
  * Tutorial Number: 3
  * Tutorial Name: Basic Rendering
- * Engine Version: V0.1.9 (0::3::2::2)
+ * Engine Version: V0.3.5 (1::2::1::2)
  * Date Created: 17/10/2016
- * Date Updated: 13/12/2016
+ * Date Updated: 14/06/2019
  *
  * Description: Demonstrates how to start rendering in 2D
  *****************************************************************************/
@@ -57,7 +57,7 @@ void Tutorial::initialise() {
 	//Assign some Settings
 	getSettings().windowTitle = "Tutorial 3 - Basic Rendering";
 	getSettings().videoResolution = VideoResolution::RES_1280x720;
-	getSettings().debuggingShowInformation = true;
+	getSettings().debugShowInformation = true;
 }
 
 void Tutorial::created() {
@@ -69,23 +69,23 @@ void Tutorial::created() {
 
 	//Now we can change the colour of the mesh, or modify other
 	//material properties
-	mesh->getMaterial()->diffuseColour = Colour::ORANGE;
+	mesh->getMaterial()->setDiffuse(Colour::ORANGE);
 
 	//Now create the object instance, passing the mesh, and the shader to
 	//use when rendering it (in this case the 'Material' shader)
 	object = new GameObject2D(mesh, Renderer::SHADER_MATERIAL, 100, 100);
 
-	//We can also change the material using the game object:
-	object->getMaterial()->diffuseColour = Colour::RED;
-
-	//But when using more complex objects with multiple meshes, this will
-	//only assign the material of the first mesh added, so will only work
-	//properly in a case such as this where there is only one mesh
-
 	//The last two parameters above are to assign the width and height values of the
 	//object, which ensures that rotations performed on it will always occur about
 	//it's centre due to the way the MeshBuilder creates the mesh using window
 	//coordinates
+
+	//We can also change the material using the game object:
+	object->getMaterial()->setDiffuse(Colour::RED);
+
+	//But when using more complex objects with multiple meshes, this will
+	//only assign the material of the first mesh added, so will only work
+	//properly in a case such as this where there is only one mesh
 
 	//Now we can change various properties of the object
 	object->setPosition(400, 200);
@@ -120,8 +120,6 @@ void Tutorial::update() {
 	//getDeltaSeconds() returns the time between the current frame, and the
 	//last frame in seconds
 	object->setRotation(object->getLocalRotationEuler() + 5.0f * getDeltaSeconds());
-	//The engine uses quaternions to handle rotations, but above we are using
-	//Euler angles in degrees
 
 	//Now to update the object's model matrix so the changes to it's rotation
 	//become visible the next time it is rendered
@@ -129,7 +127,7 @@ void Tutorial::update() {
 }
 
 void Tutorial::render() {
-	GLUtils::setupSimple2DView();
+	utils_gl::setupSimple2DView();
 
 	//Now render the object
 	object->render();
@@ -143,11 +141,11 @@ void Tutorial::destroy() {
 void Tutorial::onKeyPressed(int key) {
 	//Check the key
 	if (key == GLFW_KEY_R)
-		object->getMaterial()->diffuseColour = Colour::RED;
+		object->getMaterial()->setDiffuse(Colour::RED);
 	else if (key == GLFW_KEY_O)
-		object->getMaterial()->diffuseColour = Colour::ORANGE;
+		object->getMaterial()->setDiffuse(Colour::ORANGE);
 	else if (key == GLFW_KEY_Q)
-		object->getMaterial()->diffuseColour = Colour(1.0, 0.5f, 0.5f);
+		object->getMaterial()->setDiffuse(Colour(1.0, 0.5f, 0.5f));
 }
 
-#endif /* EXAMPLES_BASIC_BASICSETUP_H_ */
+#endif /* EXAMPLES_BASIC_BASICRENDERING_H_ */

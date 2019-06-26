@@ -65,14 +65,18 @@ public:
 /*****************************************************************************
  * The Resource class is inherited from to allow data to be managed
  *****************************************************************************/
+#include <iostream>
 
 class Resource {
+private:
+	/* Pointer to the resource manager this is loaded in */
+	ResourceManager* manager;
 public:
 	/* The constructor */
-	Resource() { ResourceManager::getCurrent()->add(this); }
+	Resource() { manager = ResourceManager::getCurrent(); manager->add(this); }
 
 	/* The destructor */
-	virtual ~Resource() {}
+	virtual ~Resource() { manager->remove(this); }
 
 	/* The method called when all resources being used should be released */
 	virtual void destroy() {}

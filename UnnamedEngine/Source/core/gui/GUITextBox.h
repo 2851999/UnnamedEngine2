@@ -133,6 +133,9 @@ public:
 	/* The font used when rendering the default text */
 	Font* defaultTextFont = NULL;
 
+	/* The colour the default text should be rendered using */
+	Colour defaultTextColour;
+
 	/* The current cursor index - this is the position in the text the cursor
 	 * currently is */
 	unsigned int cursorIndex;
@@ -236,6 +239,7 @@ public:
 	inline void setMask(std::string mask) { this->mask = mask; }
 	inline void setDefaultText(std::string defaultText) { this->defaultText = defaultText; }
 	inline void setDefaultTextFont(Font* defaultTextFont) { this->defaultTextFont = defaultTextFont; }
+	inline void setDefaultTextColour(Colour defaultTextColour) { this->defaultTextColour = defaultTextColour; }
 	inline void setCursorIndex(int cursorIndex) { this->cursorIndex = cursorIndex; }
 	inline std::string getText() { return text; }
 	inline std::string getRenderText() { return renderText; }

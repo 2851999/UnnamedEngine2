@@ -20,7 +20,7 @@
 #define CORE_INPUT_INPUT_H_
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 #include "Controller.h"
 #include "../Vector.h"
@@ -101,7 +101,7 @@ private:
 	CursorData cursorData;
 
 	/* All of the added controllers */
-	std::map<int, Controller*> controllers;
+	std::unordered_map<int, Controller*> controllers;
 public:
 	/* The constructor */
 	InputManager(Window* window) { this->window = window; }

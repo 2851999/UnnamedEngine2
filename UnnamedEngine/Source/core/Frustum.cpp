@@ -85,3 +85,22 @@ bool Frustum::pointInFrustum(Vector3f point) {
 	}
 	return true;
 }
+
+//http://www.txutxi.com/?p=584
+bool Frustum::AABBInFrustum(Vector3f min, Vector3f max) {
+	Vector3f box[] = { min, max };
+	for (unsigned int i = 0; i < 6; i++) {
+		const FrustumPlane &p = planes[i];
+
+		const int px = static_cast<int>(p.a > 0.0f);
+		const int py = static_cast<int>(p.b > 0.0f);
+		const int pz = static_cast<int>(p.c > 0.0f);
+
+		const float dp = (p.a * box[px].getX()) + (p.b * box[py].getY()) + (p.c * box[pz].getZ());
+
+		if (dp < -p.d) {
+			return false;
+		}
+	}
+	return true;
+}

@@ -32,7 +32,7 @@
  * Various string utilities
  *****************************************************************************/
 
-namespace StrUtils {
+namespace utils_string {
 	unsigned int strToUInt(const std::string& string) {
 		unsigned int value = 0;
 		std::stringstream ss(string);
@@ -97,6 +97,34 @@ namespace StrUtils {
 		return split;
 	}
 
+	std::vector<std::string> strSplitLast(const std::string& text, const std::string& delimeter) {
+		std::vector<std::string> split;
+		//The location of the last instance of the delimeter
+		size_t loc = text.find_last_of(delimeter);
+		//Add the first and last parts of the string to the array when split
+		split.push_back(text.substr(0, loc));
+		split.push_back(text.substr(loc + 1, split.size() - loc - 2));
+
+		//Return the result
+		return split;
+	}
+
+	std::string strJoin(const std::vector<std::string>& text, char delimeter) {
+		std::string joinedString = text[0];
+		//Append all of the text
+		for (unsigned int i = 1; i < text.size(); ++i)
+			joinedString += delimeter +  text[i];
+		return joinedString;
+	}
+
+	std::string strJoin(const std::vector<std::string>& text, const std::string& delimeter) {
+		std::string joinedString = text[0];
+		//Append all of the text
+		for (unsigned int i = 1; i < text.size(); ++i)
+			joinedString += delimeter +  text[i];
+		return joinedString;
+	}
+
 	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement) {
 		size_t index = 0;
 		std::string str = s;
@@ -121,7 +149,7 @@ namespace StrUtils {
  * Various maths utilities
  *****************************************************************************/
 
-namespace MathsUtils {
+namespace utils_maths {
 	float clampToClosestInterval(float value, float interval) {
 		float remainder = fmod(value, interval);
 		if (remainder < interval / 2.0f)
@@ -136,7 +164,7 @@ namespace MathsUtils {
  * Various file utilities
  *****************************************************************************/
 
-namespace FileUtils {
+namespace utils_file {
 	std::string readFileToString(std::string path) {
 		std::ifstream input;
 		std::string   line;
@@ -222,7 +250,7 @@ namespace FileUtils {
 
 #include <ctime>
 
-namespace TimeUtils {
+namespace utils_time {
 	double getSeconds() {
 		return glfwGetTime();
 	}
@@ -236,9 +264,9 @@ namespace TimeUtils {
 		time_t t = time(NULL);
 		struct tm* now = localtime(&t);
 
-		std::string hour = StrUtils::str(now->tm_hour);
-		std::string minute = StrUtils::str(now->tm_min);
-		std::string second = StrUtils::str(now->tm_sec);
+		std::string hour = utils_string::str(now->tm_hour);
+		std::string minute = utils_string::str(now->tm_min);
+		std::string second = utils_string::str(now->tm_sec);
 
 		if (hour.length() == 1)
 			hour = "0" + hour;
@@ -257,7 +285,7 @@ namespace TimeUtils {
 
 #include <cstdlib>
 
-namespace RandomUtils {
+namespace utils_random {
 	/* Method used to initialise the random generator with the current time */
 	void initialise() {
 		std::srand(std::time(0));
@@ -280,7 +308,7 @@ namespace RandomUtils {
 
 #include "../core/Settings.h"
 
-namespace SettingsUtils {
+namespace utils_settings {
 	/* Writes settings to a document */
 	void writeToDocument(MLDocument& document, Settings& settings) {
 		//Create the settings element for the settings
@@ -289,45 +317,47 @@ namespace SettingsUtils {
 		//Add all of the elements
 		MLElement window("window");
 		window.add(MLAttribute("title", settings.windowTitle));
-		window.add(MLAttribute("width", StrUtils::str(settings.windowWidth)));
-		window.add(MLAttribute("height", StrUtils::str(settings.windowHeight)));
-		window.add(MLAttribute("resizable", StrUtils::str(settings.windowResizable)));
-		window.add(MLAttribute("decorated", StrUtils::str(settings.windowDecorated)));
-		window.add(MLAttribute("borderless", StrUtils::str(settings.windowBorderless)));
-		window.add(MLAttribute("fullscreen", StrUtils::str(settings.windowFullscreen)));
-		window.add(MLAttribute("floating", StrUtils::str(settings.windowFloating)));
+		window.add(MLAttribute("width", utils_string::str(settings.windowWidth)));
+		window.add(MLAttribute("height", utils_string::str(settings.windowHeight)));
+		window.add(MLAttribute("resizable", utils_string::str(settings.windowResizable)));
+		window.add(MLAttribute("decorated", utils_string::str(settings.windowDecorated)));
+		window.add(MLAttribute("borderless", utils_string::str(settings.windowBorderless)));
+		window.add(MLAttribute("fullscreen", utils_string::str(settings.windowFullscreen)));
+		window.add(MLAttribute("floating", utils_string::str(settings.windowFloating)));
 		settingsElement.add(window);
 
 		MLElement video("video");
-		video.add(MLAttribute("vSync", StrUtils::str(settings.videoVSync)));
-		video.add(MLAttribute("samples", StrUtils::str(settings.videoSamples)));
-		video.add(MLAttribute("maxAnisotropicSamples", StrUtils::str(settings.videoMaxAnisotropicSamples)));
-		video.add(MLAttribute("refreshRate", StrUtils::str(settings.videoRefreshRate)));
+		video.add(MLAttribute("vSync", utils_string::str(settings.videoVSync)));
+		video.add(MLAttribute("samples", utils_string::str(settings.videoSamples)));
+		video.add(MLAttribute("maxAnisotropicSamples", utils_string::str(settings.videoMaxAnisotropicSamples)));
+		video.add(MLAttribute("refreshRate", utils_string::str(settings.videoRefreshRate)));
 		video.add(MLAttribute("resolution", VideoResolution::toString(settings.videoResolution)));
-		video.add(MLAttribute("maxFPS", StrUtils::str(settings.videoMaxFPS)));
+		video.add(MLAttribute("maxFPS", utils_string::str(settings.videoMaxFPS)));
+		video.add(MLAttribute("vulkan", utils_string::str(settings.videoVulkan)));
 		settingsElement.add(video);
 
 		MLElement audio("audio");
-		audio.add(MLAttribute("soundEffectVolume", StrUtils::str(settings.audioSoundEffectVolume)));
-		audio.add(MLAttribute("musicVolume", StrUtils::str(settings.audioMusicVolume)));
+		audio.add(MLAttribute("soundEffectVolume", utils_string::str(settings.audioSoundEffectVolume)));
+		audio.add(MLAttribute("musicVolume", utils_string::str(settings.audioMusicVolume)));
 		settingsElement.add(audio);
 
 		MLElement input("input");
-		input.add(MLAttribute("repeatKeyboardEvents", StrUtils::str(settings.inputRepeatKeyboardEvents)));
-		input.add(MLAttribute("repeatMouseEvents", StrUtils::str(settings.inputRepeatMouseEvents)));
+		input.add(MLAttribute("repeatKeyboardEvents", utils_string::str(settings.inputRepeatKeyboardEvents)));
+		input.add(MLAttribute("repeatMouseEvents", utils_string::str(settings.inputRepeatMouseEvents)));
 		settingsElement.add(input);
 
 		MLElement engine("engine");
-		engine.add(MLAttribute("splashScreen", StrUtils::str(settings.engineSplashScreen)));
+		engine.add(MLAttribute("splashScreen", utils_string::str(settings.engineSplashScreen)));
 		settingsElement.add(engine);
 
-		MLElement debugging("debugging");
-		debugging.add(MLAttribute("showInformation", StrUtils::str(settings.debuggingShowInformation)));
-		debugging.add(MLAttribute("consoleEnabled", StrUtils::str(settings.debuggingConsoleEnabled)));
+		MLElement debugging("debug");
+		debugging.add(MLAttribute("showInformation", utils_string::str(settings.debugShowInformation)));
+		debugging.add(MLAttribute("consoleEnabled", utils_string::str(settings.debugConsoleEnabled)));
+		debugging.add(MLAttribute("vkValidationLayersEnabled", utils_string::str(settings.debugVkValidationLayersEnabled)));
 		settingsElement.add(debugging);
 
 		//Add the settings element, or replace the current one if one already exists
-		int index = document.getRoot().find("settings");
+		int index = document.getRoot().findChild("settings");
 		if (index >= 0)
 			document.getRoot().setChild(index, settingsElement);
 		else
@@ -349,7 +379,7 @@ namespace SettingsUtils {
 		//The settings instance
 		Settings settings;
 		//Attempt to get the index of the settings element in the document
-		int index = document.getRoot().find("settings");
+		int index = document.getRoot().findChild("settings");
 		//Check whether the settings element was found
 		if (index >= 0) {
 			//Go through each child attribute in the document
@@ -378,7 +408,7 @@ namespace SettingsUtils {
 					} else if (child.getName() == "video") {
 						//Check the attribute name
 						if (attrib.getName() == "vSync")
-							settings.videoVSync = attrib.getDataAsBool();
+							settings.videoVSync = attrib.getDataAsUInt();
 						else if (attrib.getName() == "samples")
 							settings.videoSamples = attrib.getDataAsUInt();
 						else if (attrib.getName() == "maxAnisotropicSamples")
@@ -389,6 +419,8 @@ namespace SettingsUtils {
 							settings.videoResolution = VideoResolution::toVector(attrib.getData());
 						else if (attrib.getName() == "maxFPS")
 							settings.videoMaxFPS = attrib.getDataAsUInt();
+						else if (attrib.getName() == "vulkan")
+							settings.videoVulkan = attrib.getDataAsBool();
 					} else if (child.getName() == "audio") {
 						//Check the attribute name
 						if (attrib.getName() == "soundEffectVolume")
@@ -405,12 +437,14 @@ namespace SettingsUtils {
 						//Check the attribute name
 						if (attrib.getName() == "splashScreen")
 							settings.engineSplashScreen = attrib.getDataAsBool();
-					} else if (child.getName() == "debugging") {
+					} else if (child.getName() == "debug") {
 						//Check the attribute name
 						if (attrib.getName() == "showInformation")
-							settings.debuggingShowInformation = attrib.getDataAsBool();
+							settings.debugShowInformation = attrib.getDataAsBool();
 						else if (attrib.getName() == "consoleEnabled")
-							settings.debuggingConsoleEnabled = attrib.getDataAsBool();
+							settings.debugConsoleEnabled = attrib.getDataAsBool();
+						else if (attrib.getName() == "vkValidationLayersEnabled")
+							settings.debugVkValidationLayersEnabled = attrib.getDataAsBool();
 					}
 				}
 			}
@@ -435,7 +469,7 @@ namespace SettingsUtils {
  * Various clipboard utilities
  *****************************************************************************/
 
-namespace ClipboardUtils {
+namespace utils_clipboard {
 	void setText(std::string text) {
 		glfwSetClipboardString(Window::getCurrentInstance()->getInstance(), text.c_str());
 	}
@@ -449,7 +483,7 @@ namespace ClipboardUtils {
  * Various controller utilities
  *****************************************************************************/
 
-namespace ControllerUtils {
+namespace utils_controller {
 	/* Returns the index of a controller given its name or -1 if not found */
 	int getControllerIndexByName(std::string name) {
 		//Go through each possible index

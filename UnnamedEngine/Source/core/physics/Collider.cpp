@@ -36,6 +36,41 @@ CollisionData3D SphereCollider::intersects(Collider3D* collider) {
 
 		//Return the result
 		return CollisionData3D(distanceBetween < (radius + other->getRadius()), relPos.normalise());
+	} else if (collider->getType() == TYPE_PLANE) {
+		//Cast the other collider to a PlaneCollider3D
+		PlaneCollider3D* other = (PlaneCollider3D*) collider;
+
+		//Check for an intersection and return the result
+		return other->intersects(this);
+	}
+
+	return CollisionData3D(false, 0);
+}
+
+/*****************************************************************************
+ * The PlaneCollider3D class
+ *****************************************************************************/
+
+CollisionData3D PlaneCollider3D::intersects(Collider3D* collider) {
+	//Check the other collider's type
+	if (collider->getType() == TYPE_SPHERE) {
+		//Cast the other collider to a SphereCollider
+		SphereCollider* other = (SphereCollider*) collider;
+
+		//Get the normal correctly rotated
+		Vector3f norm = Quaternion::rotate(normal, getRotation());
+		norm.normalise();
+
+		//Get the relative position between the two spheres
+		Vector3f relPos = other->getPosition() - getPosition();
+
+		//Calculate perpendicular distance between the centre of the sphere
+		//and the plane (using vector projection, and that the normal should
+		//be normalised)
+		float lambda = relPos.dot(norm) / norm.dot(norm);
+
+		//Return the result
+		return CollisionData3D(lambda < other->getRadius(), norm);
 	}
 
 	return CollisionData3D(false, 0);

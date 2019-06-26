@@ -22,6 +22,7 @@
 #include <GL/glew.h>
 
 #include "Shader.h"
+#include "../vulkan/VulkanBuffer.h"
 
 /*****************************************************************************
  * The VBO class is used to manage a vertex buffer object
@@ -34,13 +35,12 @@ public:
 	 * attribute within a shader */
 	struct Attribute {
 		/* Various pieces of data for OpenGL */
-		GLint  location;
-		GLint  size; //This is not literal size, but the number of
-					 //components
-		GLuint offset;
-		GLuint stride;
+		int  location;
+		int  size; //This is not literal size, but the number of
+				   //components
+		unsigned int offset;
 
-		GLuint divisor;
+		unsigned int divisor;
 
 		GLuint type;
 	};
@@ -52,10 +52,20 @@ private:
 	std::vector<T>&       data;
 	GLenum                usage;
 
+	/* The stride for data in this VBO */
+	unsigned int          stride = 0;
+
 	bool                  instanced;
+
+	/* The bulkan buffer for use with Vulkan */
+	VulkanBuffer* vulkanBuffer = NULL;
 
 	/* The attributes this VBO supplies */
 	std::vector<Attribute> attributes;
+
+	/* The binding/attribute descriptions for Vulkan */
+	VkVertexInputBindingDescription vulkanVertexInputBindingDescription;
+	std::vector<VkVertexInputAttributeDescription> vulkanAttributeDescriptions;
 public:
 	/* The constructors */
 	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, GLenum usage, bool instanced = false) :
@@ -65,6 +75,10 @@ public:
 	virtual ~VBO() {
 		if (buffer > 0)
 			glDeleteBuffers(1, &buffer);
+		if (vulkanBuffer != NULL) {
+			delete vulkanBuffer;
+			vulkanBuffer = NULL;
+		}
 	}
 
 	/* Various OpenGL methods */
@@ -72,13 +86,13 @@ public:
 
 	/* Used to add an attribute */
 	void addAttributeWithType(GLuint type, GLint location, GLint size, GLuint divisor = 0);
-	inline void addAttribute(GLint location, GLint size, GLuint divisor = 0) { addAttributeWithType(GL_FLOAT, location, size, divisor); }
+	inline void addAttribute(int location, int size, unsigned int divisor = 0) { addAttributeWithType(GL_FLOAT, location, size, divisor); }
 
 	/* Used to create and setup this VBO */
-	void setup();
+	void setup(unsigned int binding); //Binding for Vulkan
 
 	/* Used to setup an attribute */
-	void setup(Attribute& attribute);
+	void setupAttribute(unsigned int binding, unsigned int index);
 
 	/* Methods used to setup this VBO just before/after rendering */
 	void startRendering();
@@ -90,6 +104,9 @@ public:
 
 	/* Setters and getters */
 	inline std::vector<T>& getData() { return data; }
+	inline VulkanBuffer* getVkBuffer() { return vulkanBuffer; }
+	inline VkVertexInputBindingDescription getVkBindingDescription() { return vulkanVertexInputBindingDescription; }
+	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };
 
 template class VBO<GLfloat>;

@@ -2,16 +2,15 @@
 #include "Material.fs"
 
 #map uniform EnvironmentMap ue_environmentMap
-#map uniform CameraPosition ue_cameraPos
 
 //The environment map to apply
 uniform samplerCube ue_environmentMap;
-//The current camera position
-uniform vec3 ue_cameraPos;
+
+layout (location = 0) out vec4 ue_FragColour;
 
 void main() {
 	//Calculate the incident vector
-	vec3 I = normalize(ue_frag_position - ue_cameraPos);
+	vec3 I = normalize(ue_frag_position - ue_cameraPosition.xyz);
 	//Now calculate the reflection vector by reflecting about the mesh's normal
 	vec3 R = reflect(I, normalize(ue_frag_normal));
 	

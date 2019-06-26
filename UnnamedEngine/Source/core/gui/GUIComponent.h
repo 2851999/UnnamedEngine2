@@ -19,7 +19,7 @@
 #ifndef CORE_GUI_GUICOMPONENT_H_
 #define CORE_GUI_GUICOMPONENT_H_
 
-#include "Font.h"
+#include "Text.h"
 
 #include "../Object.h"
 #include "../input/Input.h"
@@ -43,6 +43,9 @@ private:
 	/* The font used to render text */
 	Font* font = DEFAULT_FONT;
 
+	/* The text instance used to render text */
+	Text* textInstance = NULL;
+
 	/* Method used to setup the renderer when it is created */
 	void setup();
 protected:
@@ -50,7 +53,7 @@ protected:
 	unsigned int renderIndex = 0;
 public:
 	/* The default font used when creating component renderer's */
-	static Font* DEFAULT_FONT ;
+	static Font* DEFAULT_FONT;
 
 	/* The constructors */
 	GUIComponentRenderer() {}
@@ -64,7 +67,7 @@ public:
 		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)), Renderer::SHADER_MATERIAL, width, height), colours(colours), textures(textures) { setup(); }
 
 	/* Destructor */
-	virtual ~GUIComponentRenderer() {}
+	virtual ~GUIComponentRenderer() { delete textInstance; }
 
 	/* The method used to update this component ready for rendering */
 	virtual void update() override;
@@ -81,9 +84,13 @@ public:
 	void setTexture(Texture* texture);
 
 	/* Setters and getters */
-	inline void setFont(Font* font) { this->font = font; }
+	void setFont(Font* font);
+	inline void setTextColour(Colour colour) { textInstance->setColour(colour); }
+
 	inline bool hasFont() { return font; }
 	inline Font* getFont() { return font; }
+	inline Text* getTextInstance() { return textInstance; }
+	inline Colour getTextColour() { return textInstance->getColour(); }
 
 	inline std::vector<Colour>& getColours() { return colours; }
 	inline std::vector<Texture*>& getTextures() { return textures; }

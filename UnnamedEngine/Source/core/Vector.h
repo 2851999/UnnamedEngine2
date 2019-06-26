@@ -152,11 +152,11 @@ public:
 	inline static Vector<T, N> slerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) {
 		//https://keithmaggio.wordpress.com/2011/02/15/math-magician-lerp-slerp-and-nlerp/
 		float dot = a.dot(b);
-		dot = MathsUtils::clamp(dot, -1.0f, 1.0f);
+		dot = utils_maths::clamp(dot, -1.0f, 1.0f);
 		float theta = acosf(dot) * factor;
 		Vector<T, N> relative = b - a * dot;
 		relative.normalise();
-		return ((a * cosf(theta)) + (relative * sin(theta)));
+		return ((a * cosf(theta)) + (relative * sinf(theta)));
 	}
 	inline static Vector<T, N> nlerp(const Vector<T, N>& a, const Vector<T, N>& b, T factor) { return lerp(a, b, factor).normalise(); }
 
@@ -236,7 +236,7 @@ public:
 	std::string toString() {
 		std::string value = "(";
 		for (unsigned int i = 0; i < N; i++) {
-			value += StrUtils::str(values[i]);
+			value += utils_string::str(values[i]);
 			if (i != N - 1)
 				value += ",";
 		}
@@ -259,6 +259,7 @@ class Vector2 : public Vector<T, 2> {
 public:
 	Vector2() {}
 	Vector2(const Vector<T, 2> &base) : Vector<T, 2>(base) {}
+	Vector2(T value) { (*this)[0] = value; (*this)[1] = value; }
 	Vector2(T x, T y) { (*this)[0] = x; (*this)[1] = y; }
 	Vector2(const Vector<T, 3> &base) { setX(base[0]); setY(base[1]); }
 
@@ -273,6 +274,7 @@ class Vector3 : public Vector<T, 3> {
 public:
 	Vector3() {}
 	Vector3(const Vector<T, 3> &base) : Vector<T, 3>(base) {}
+	Vector3(T value) { (*this)[0] = value; (*this)[1] = value; (*this)[2] = value; }
 	Vector3(T x, T y, T z) { (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; }
 	Vector3(const Vector<T, 2> &base, T z) { setX(base[0]); setY(base[1]); setZ(z); }
 	Vector3(const Vector<T, 4> &base) { setX(base[0]); setY(base[1]); setZ(base[2]); }
@@ -296,6 +298,7 @@ class Vector4 : public Vector<T, 4> {
 public:
 	Vector4() {}
 	Vector4(const Vector<T, 4> &base) : Vector<T, 4>(base) {}
+	Vector4(T value) { (*this)[0] = value; (*this)[1] = value; (*this)[2] = value; (*this)[3] = value; }
 	Vector4(T x, T y, T z, T w) { (*this)[0] = x; (*this)[1] = y; (*this)[2] = z; (*this)[3] = w; }
 	Vector4(const Vector<T, 3> &base, T w) { setX(base[0]); setY(base[1]); setZ(base[2]); setW(w); }
 
@@ -317,28 +320,32 @@ class Vector2i : public Vector2<int> {
 public:
 	Vector2i(const Vector<int, 2> &base) : Vector2<int>(base) {}
 	Vector2i(const Vector2<int> &base) : Vector2<int>(base) {}
-	Vector2i(int x = 0, int y = 0) : Vector2<int>(x, y) {}
+	Vector2i(int value = 0) : Vector2<int>(value, value) {}
+	Vector2i(int x, int y) : Vector2<int>(x, y) {}
 };
 
 class Vector2f : public Vector2<float> {
 public:
 	Vector2f(const Vector<float, 2> &base) : Vector2<float>(base) {}
 	Vector2f(const Vector2<float> &base) : Vector2<float>(base) {}
-	Vector2f(float x = 0, float y = 0) : Vector2<float>(x, y) {}
+	Vector2f(float value = 0) : Vector2<float>(value) {}
+	Vector2f(float x, float y) : Vector2<float>(x, y) {}
 };
 
 class Vector2d : public Vector2<double> {
 public:
 	Vector2d(const Vector<double, 2> &base) : Vector2<double>(base) {}
 	Vector2d(const Vector2<double> &base) : Vector2<double>(base) {}
-	Vector2d(double x = 0, double y = 0) : Vector2<double>(x, y) {}
+	Vector2d(double value = 0) : Vector2<double>(value) {}
+	Vector2d(double x, double y) : Vector2<double>(x, y) {}
 };
 
 class Vector3i : public Vector3<int> {
 public:
 	Vector3i(const Vector<int, 3> &base) : Vector3<int>(base) {}
 	Vector3i(const Vector3<int> &base) : Vector3<int>(base) {}
-	Vector3i(int x = 0, int y = 0, int z = 0) : Vector3<int>(x, y, z) {}
+	Vector3i(int value = 0) : Vector3<int>(value) {}
+	Vector3i(int x, int y, int z) : Vector3<int>(x, y, z) {}
 	Vector3i(const Vector<int, 2> &base, int z) : Vector3<int>(base, z) {}
 	Vector3i(const Vector2<int> &base, int z) : Vector3<int>(base, z) {}
 };
@@ -347,7 +354,8 @@ class Vector3f : public Vector3<float> {
 public:
 	Vector3f(const Vector<float, 3> &base) : Vector3<float>(base) {}
 	Vector3f(const Vector3<float> &base) : Vector3<float>(base) {}
-	Vector3f(float x = 0, float y = 0, float z = 0) : Vector3<float>(x, y, z) {}
+	Vector3f(float value = 0) : Vector3<float>(value) {}
+	Vector3f(float x, float y, float z) : Vector3<float>(x, y, z) {}
 	Vector3f(Vector2f vec2, float z = 0) : Vector3<float>(vec2.getX(), vec2.getY(), 0) {}
 	Vector3f(const Vector<float, 2> &base, float z) : Vector3<float>(base, z) {}
 	Vector3f(const Vector2<float> &base, float z) : Vector3<float>(base, z) {}
@@ -357,7 +365,8 @@ class Vector3d : public Vector3<double> {
 public:
 	Vector3d(const Vector<double, 3> &base) : Vector3<double>(base) {}
 	Vector3d(const Vector3<double> &base) : Vector3<double>(base) {}
-	Vector3d(double x = 0, double y = 0, double z = 0) : Vector3<double>(x, y, z) {}
+	Vector3d(double value = 0) : Vector3<double>(value) {}
+	Vector3d(double x, double y, double z) : Vector3<double>(x, y, z) {}
 	Vector3d(const Vector<double, 2> &base, double z) : Vector3<double>(base, z) {}
 	Vector3d(const Vector2<double> &base, double z) : Vector3<double>(base, z) {}
 };
@@ -366,7 +375,8 @@ class Vector4i : public Vector4<int> {
 public:
 	Vector4i(const Vector<int, 4> &base) : Vector4<int>(base) {}
 	Vector4i(const Vector4<int> &base) : Vector4<int>(base) {}
-	Vector4i(int x = 0, int y = 0, int z = 0, int w = 0) : Vector4<int>(x, y, z, w) {}
+	Vector4i(int value = 0) : Vector4<int>(value) {}
+	Vector4i(int x, int y, int z, int w) : Vector4<int>(x, y, z, w) {}
 	Vector4i(const Vector<int, 3> &base, int w) : Vector4<int>(base, w) {}
 	Vector4i(const Vector3<int> &base, int w) : Vector4<int>(base, w) {}
 };
@@ -375,7 +385,8 @@ class Vector4f : public Vector4<float> {
 public:
 	Vector4f(const Vector<float, 4> &base) : Vector4<float>(base) {}
 	Vector4f(const Vector4<float> &base) : Vector4<float>(base) {}
-	Vector4f(float x = 0, float y = 0, float z = 0, float w = 0) : Vector4<float>(x, y, z, w) {}
+	Vector4f(float value = 0) : Vector4<float>(value) {}
+	Vector4f(float x, float y, float z, float w) : Vector4<float>(x, y, z, w) {}
 	Vector4f(const Vector<float, 3> &base, float w) : Vector4<float>(base, w) {}
 	Vector4f(const Vector3<float> &base, float w) : Vector4<float>(base, w) {}
 };
@@ -384,7 +395,8 @@ class Vector4d : public Vector4<double> {
 public:
 	Vector4d(const Vector<double, 4> &base) : Vector4<double>(base) {}
 	Vector4d(const Vector4<double> &base) : Vector4<double>(base) {}
-	Vector4d(double x = 0, double y = 0, double z = 0, double w = 0) : Vector4<double>(x, y, z,w) {}
+	Vector4d(double value = 0) : Vector4<double>(value) {}
+	Vector4d(double x, double y, double z, double w) : Vector4<double>(x, y, z, w) {}
 	Vector4d(const Vector<double, 3> &base, double w) : Vector4<double>(base, w) {}
 	Vector4d(const Vector3<double> &base, double w) : Vector4<double>(base, w) {}
 };

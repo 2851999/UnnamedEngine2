@@ -16,6 +16,7 @@
  *
  *****************************************************************************/
 
+#include "../BaseEngine.h"
 #include "Renderer.h"
 #include "SkyBox.h"
 
@@ -23,13 +24,13 @@
  * The SkyBox class
  *****************************************************************************/
 
-SkyBox::SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom, float size) {
+SkyBox::SkyBox(Cubemap* cubemap) {
+	//Assign the cubemap
+	this->cubemap = cubemap;
 	//Create the skybox
-	box = new GameObject3D({ new Mesh(MeshBuilder::createCube(size, size, size)) }, Renderer::getRenderShader("SkyBox"));
-	//Load the texture
-	cubemap = new Cubemap(path, { right, left, top, bottom, back, front });
-	//Assign the texture in the skybox
-	box->getMaterial()->diffuseTexture = cubemap;
+	Mesh* mesh = new Mesh(MeshBuilder::createCube(1.0f, 1.0f, 1.0f));
+	mesh->getMaterial()->setDiffuse(cubemap);
+	box = new GameObject3D(mesh, Renderer::getRenderShader(Renderer::SHADER_SKY_BOX));
 }
 
 void SkyBox::update(Vector3f cameraPosition) {
@@ -39,10 +40,23 @@ void SkyBox::update(Vector3f cameraPosition) {
 }
 
 void SkyBox::render() {
-	glDepthMask(false);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	Shader* shader = NULL;
+	if (! BaseEngine::usingVulkan()) {
+		glDepthFunc(GL_LEQUAL);
+		//glDepthMask(false); //Should be applied by GraphicsState
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		//To work the skybox must be drawn before anything else
+		shader = box->getShader();
+		shader->use();
+	}
+
+	Renderer::getShaderBlock_Core().ue_viewMatrix = Renderer::getCamera()->getViewMatrix();
+	Renderer::getShaderBlock_Core().ue_projectionMatrix =  Renderer::getCamera()->getProjectionMatrix();
+
 	box->render();
-	glDepthMask(true);
+
+	if (! BaseEngine::usingVulkan())
+		shader->stopUsing();
 }
 
 void SkyBox::destroy() {

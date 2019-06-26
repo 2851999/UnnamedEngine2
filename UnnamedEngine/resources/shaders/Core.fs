@@ -1,11 +1,5 @@
 #include "Core.glsl"
 
-#map uniform Camera_Position ue_camera_position
-
-uniform vec3 ue_camera_position;
-
-in vec3 ue_frag_position;
-in vec2 ue_frag_textureCoord;
-in vec3 ue_frag_normal;
-
-out vec4 ue_FragColour;
+layout(location = 0) in vec3 ue_frag_position;
+layout(location = 1) in vec2 ue_frag_textureCoord;
+layout(location = 2) in vec3 ue_frag_normal;

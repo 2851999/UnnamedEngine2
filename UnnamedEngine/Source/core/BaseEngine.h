@@ -32,8 +32,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.2.3";
-	const std::string DateCreated = "22/01/2017";
+	const std::string Version     = "V0.3.9";
+	const std::string DateCreated = "26/06/2019";
 	const std::string Build       = "Release";
 }
 
@@ -55,10 +55,16 @@ private:
 	/* The default font */
 	Font* defaultFont = NULL;
 
+	/* Default text instance */
+	Text* textInstance = NULL;
+
 	/* Debug camera used when rendering debug information */
 	Camera2D* debugCamera = NULL;
 	/* Debug console */
 	DebugConsole* debugConsole = NULL;
+
+	/* Method used to initialise the graphics API being used for rendering (Returns whether initialisation was successful) */
+	bool initGraphicsAPI();
 public:
 	/* The constructor */
 	BaseEngine();
@@ -83,7 +89,10 @@ public:
 	virtual void destroy() {}
 
 	/* Method called to render debugging information */
-	void renderDebuggingInfo();
+	void renderDebugInfo();
+
+	/* Method called to render the debug console */
+	void renderDebugConsole();
 
 	/* This will end the main game loop */
 	void requestClose() { closeRequested = true; }
@@ -97,7 +106,7 @@ public:
 	bool hasDebugConsole() { return debugConsole; }
 
 	unsigned int getFPS() { return fpsCalculator.getFPS(); }
-	long getDelta() { return fpsCalculator.getDelta(); }
+	float getDelta() { return fpsCalculator.getDelta(); }
 	float getDeltaSeconds() { return fpsCalculator.getDeltaSeconds(); }
 
 	/* Input methods */
@@ -117,6 +126,9 @@ public:
 	virtual void onControllerAxis(Controller* controller, int axis, float value) override {}
 	virtual void onControllerButtonPressed(Controller* controller, int index) override {}
 	virtual void onControllerButtonReleased(Controller* controller, int index) override {}
+
+	/* Static method to obtain a boolean representing whether Vulkan is being used */
+	inline static bool usingVulkan() { return Window::getCurrentInstance()->getSettings().videoVulkan; }
 };
 
 

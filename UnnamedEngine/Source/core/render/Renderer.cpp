@@ -20,31 +20,58 @@
 
 #include <algorithm>
 
+#include "../BaseEngine.h"
 #include "../../utils/Logging.h"
+#include "RenderScene.h"
+#include "../vulkan/Vulkan.h"
 
 /*****************************************************************************
  * The Renderer class
  *****************************************************************************/
 
+ShaderInterface* Renderer::shaderInterface;
+
+ShaderBlock_Core     Renderer::shaderCoreData;
+ShaderBlock_Material Renderer::shaderMaterialData;
+ShaderBlock_Skinning Renderer::shaderSkinningData;
+
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
-std::map<std::string, RenderShader*> Renderer::renderShaders;
+std::unordered_map<unsigned int, std::vector<std::string>> Renderer::renderShaderPaths;
+std::unordered_map<unsigned int, RenderShader*> Renderer::loadedRenderShaders;
 Texture* Renderer::blank;
 
 MeshRenderData* Renderer::screenTextureMesh;
 
-unsigned int Renderer::boundTexturesOldSize;
+std::vector<unsigned int> Renderer::boundTexturesOldSize;
 
-const std::string Renderer::SHADER_MATERIAL         = "Material";
-const std::string Renderer::SHADER_SKY_BOX          = "SkyBox";
-const std::string Renderer::SHADER_FONT             = "Font";
-const std::string Renderer::SHADER_BILLBOARD        = "Billboard";
-const std::string Renderer::SHADER_PARTICLE         = "Particle";
-const std::string Renderer::SHADER_LIGHTING         = "Lighting";
-const std::string Renderer::SHADER_FRAMEBUFFER      = "Framebuffer";
-const std::string Renderer::SHADER_ENVIRONMENT_MAP  = "EnvironmentMap";
-const std::string Renderer::SHADER_SHADOW_MAP       = "ShadowMap";
-const std::string Renderer::SHADER_BILLBOARDED_FONT = "BillboardedFont";
+GraphicsState* Renderer::currentGraphicsState = nullptr;
+bool Renderer::shouldIgnoreGraphicsStates = false;
+
+const unsigned int Renderer::SHADER_MATERIAL          = 1;
+const unsigned int Renderer::SHADER_SKY_BOX           = 2;
+const unsigned int Renderer::SHADER_FONT              = 3;
+const unsigned int Renderer::SHADER_BILLBOARD         = 4;
+const unsigned int Renderer::SHADER_PARTICLE          = 5;
+const unsigned int Renderer::SHADER_LIGHTING          = 6;
+const unsigned int Renderer::SHADER_FRAMEBUFFER       = 7;
+const unsigned int Renderer::SHADER_ENVIRONMENT_MAP   = 8;
+const unsigned int Renderer::SHADER_SHADOW_MAP        = 9;
+const unsigned int Renderer::SHADER_SHADOW_CUBEMAP    = 10;
+const unsigned int Renderer::SHADER_BILLBOARDED_FONT  = 11;
+const unsigned int Renderer::SHADER_TERRAIN           = 12;
+const unsigned int Renderer::SHADER_PLAIN_TEXTURE     = 13;
+const unsigned int Renderer::SHADER_DEFERRED_LIGHTING = 14;
+const unsigned int Renderer::SHADER_TILEMAP			  = 15;
+const unsigned int Renderer::SHADER_VULKAN			  = 16;
+const unsigned int Renderer::SHADER_VULKAN_LIGHTING   = 17;
+
+const unsigned int Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN         = 18;
+const unsigned int Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN       = 19;
+const unsigned int Renderer::SHADER_PBR_PREFILTER_MAP_GEN        = 20;
+const unsigned int Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN = 21;
+const unsigned int Renderer::SHADER_PBR_LIGHTING                 = 22;
+const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING        = 23;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -70,141 +97,172 @@ GLuint Renderer::bindTexture(Texture* texture) {
 	if (loc < boundTextures.size()) {
 		boundTextures.push_back(texture);
 		//It has so return the correct active texture
-		return loc;
+		return loc + 10;
 	} else {
-		glActiveTexture(GL_TEXTURE0 + boundTextures.size());
+		glActiveTexture(GL_TEXTURE10 + boundTextures.size());
 		texture->bind();
 		boundTextures.push_back(texture);
-		return boundTextures.size() - 1;
+		return boundTextures.size() + 10 - 1;
 	}
 }
 
 void Renderer::unbindTexture() {
-	glActiveTexture(GL_TEXTURE0 + boundTextures.size() - 1);
+	glActiveTexture(GL_TEXTURE10 + boundTextures.size() - 1);
 	boundTextures[boundTextures.size() - 1]->unbind();
 	boundTextures.pop_back();
 }
 
+void Renderer::saveTextures() {
+	boundTexturesOldSize.push_back(boundTextures.size());
+}
+
+void Renderer::releaseNewTextures() {
+	//Get the previous size
+	unsigned int previousSize = boundTexturesOldSize[boundTexturesOldSize.size() - 1];
+	boundTexturesOldSize.pop_back();
+
+	while (boundTextures.size() > previousSize)
+		unbindTexture();
+}
+
 void Renderer::initialise() {
-	glewInit();
+	//Create the shader interface
+	shaderInterface = new ShaderInterface();
 
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the shaders
-	addRenderShader(SHADER_MATERIAL,         Shader::loadShader("resources/shaders/MaterialShader"));
-	addRenderShader(SHADER_SKY_BOX,          Shader::loadShader("resources/shaders/SkyBoxShader"));
-	addRenderShader(SHADER_FONT,             Shader::loadShader("resources/shaders/FontShader"));
-	addRenderShader(SHADER_BILLBOARD,        Shader::loadShader("resources/shaders/BillboardShader"));
-	addRenderShader(SHADER_PARTICLE,         Shader::loadShader("resources/shaders/ParticleShader"));
-	addRenderShader(SHADER_LIGHTING,         Shader::loadShader("resources/shaders/LightingShader"));
-	addRenderShader(SHADER_FRAMEBUFFER,      Shader::loadShader("resources/shaders/FramebufferShader"));
-	addRenderShader(SHADER_ENVIRONMENT_MAP,  Shader::loadShader("resources/shaders/EnvironmentMapShader"));
-	addRenderShader(SHADER_SHADOW_MAP,       Shader::loadShader("resources/shaders/ShadowMapShader"));
-	addRenderShader(SHADER_BILLBOARDED_FONT, Shader::loadShader("resources/shaders/BillboardedFontShader"));
+	addRenderShader(SHADER_MATERIAL,                     "MaterialShader",                   "");
+	addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
+	addRenderShader(SHADER_VULKAN,				         "VulkanShader",				     "");
+	addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
+	addRenderShader(SHADER_VULKAN_LIGHTING,              "VulkanLightingShader",             "");
+	addRenderShader(SHADER_FONT,                         "FontShader",                       "");
 
-	//Setup the screen texture mesh
-	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
-	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-	meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
-	screenTextureMesh = new MeshRenderData(meshData, getRenderShader(SHADER_FRAMEBUFFER));
+	if (! BaseEngine::usingVulkan()) {
+		addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
+		addRenderShader(SHADER_PARTICLE,                     "ParticleShader",                   "");
+		addRenderShader(SHADER_FRAMEBUFFER,                  "FramebufferShader",                "");
+		addRenderShader(SHADER_ENVIRONMENT_MAP,              "EnvironmentMapShader",             "");
+		addRenderShader(SHADER_SHADOW_MAP,                   "lighting/ShadowMapShader",         "");
+		addRenderShader(SHADER_SHADOW_CUBEMAP,               "lighting/ShadowCubemapShader",     "");
+		addRenderShader(SHADER_BILLBOARDED_FONT,             "billboard/BillboardedFontShader",  "");
+		addRenderShader(SHADER_TERRAIN,                      "terrain/Terrain",                  "terrain/TerrainDeferredGeom");
+		addRenderShader(SHADER_PLAIN_TEXTURE,                "PlainTexture",                     "");
+		addRenderShader(SHADER_DEFERRED_LIGHTING,            "lighting/DeferredLighting",        "");
+		addRenderShader(SHADER_TILEMAP,				         "TilemapShader",				     "");
+		addRenderShader(SHADER_PBR_EQUI_TO_CUBE_GEN,         "pbr/EquiToCubeGen",                "");
+		addRenderShader(SHADER_PBR_IRRADIANCE_MAP_GEN,       "pbr/IrradianceMapGen",             "");
+		addRenderShader(SHADER_PBR_PREFILTER_MAP_GEN,        "pbr/PrefilterMapGen",              "");
+		addRenderShader(SHADER_PBR_BRDF_INTEGRATION_MAP_GEN, "pbr/BRDFIntegrationMapGen",        "");
+		addRenderShader(SHADER_PBR_LIGHTING,                 "pbr/PBRShader",                    "pbr/PBRDeferredGeom");
+		addRenderShader(SHADER_PBR_DEFERRED_LIGHTING,        "pbr/PBRDeferredLighting",          "");
+
+		//Setup the screen texture mesh
+		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+		screenTextureMesh = new MeshRenderData(meshData, getRenderShader(SHADER_FRAMEBUFFER));
+		std::vector<Material*> materials;
+		screenTextureMesh->setup(meshData, materials);
+	}
 }
 
-void Renderer::setMaterialUniforms(Shader* shader, std::string shaderName, Material* material) {
-	shader->setUniformColourRGBA("Material_DiffuseColour", material->diffuseColour);
-
-	if (material->diffuseTexture)
-		shader->setUniformi("Material_DiffuseTexture", bindTexture(material->diffuseTexture));
+void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material, UBO* materialUBO) {
+	if (! BaseEngine::usingVulkan())
+		//Bind the required textures
+		material->getTextureSet()->bindGLTextures();
 	else
-		shader->setUniformi("Material_DiffuseTexture", bindTexture(Renderer::getBlankTexture()));
+		//Bind the required descriptor set
+		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getVkGraphicsPipeline()->getLayout(), 0, 1, renderData->getVkDescriptorSet(materialIndex), 0, nullptr);
 
-	//Check to see whether the shader is for lighting
-	if (shaderName == SHADER_LIGHTING) {
-		//Assign other lighting specific properties
-		shader->setUniformColourRGB("Material_AmbientColour", material->ambientColour);
-		shader->setUniformColourRGB("Material_SpecularColour", material->specularColour);
+	//Update the material UBO (if there is one)
+	if (materialUBO)
+		materialUBO->update(&material->getShaderData(), 0, sizeof(ShaderBlock_Material));
+}
 
-		if (material->specularTexture)
-			shader->setUniformi("Material_SpecularTexture", bindTexture(material->specularTexture));
-		else
-			shader->setUniformi("Material_SpecularTexture", Renderer::bindTexture(Renderer::getBlankTexture()));
+void Renderer::stopUsingMaterial(Material* material) {
+	if (! BaseEngine::usingVulkan() && ! shouldIgnoreGraphicsStates)
+		//Unbind the textures
+		material->getTextureSet()->unbindGLTextures();
+}
 
-		if (material->normalMap) {
-			shader->setUniformi("Material_NormalMap", bindTexture(material->normalMap));
-			shader->setUniformi("UseNormalMap", 1);
-		} else
-			shader->setUniformi("UseNormalMap", 0);
-
-		if (material->parallaxMap) {
-			shader->setUniformi("Material_ParallaxMap", bindTexture(material->parallaxMap));
-			shader->setUniformf("Material_ParallaxScale", material->parallaxScale);
-			shader->setUniformi("UseParallaxMap", 1);
-		} else
-			shader->setUniformi("UseParallaxMap", 0);
-
-		shader->setUniformf("Material_Shininess", material->shininess);
+void Renderer::useGraphicsState(GraphicsState* graphicsState) {
+	//Ensure using OpenGL
+	if (! BaseEngine::usingVulkan() && ! shouldIgnoreGraphicsStates) {
+		//Apply the new state
+		graphicsState->applyGL(currentGraphicsState);
+		currentGraphicsState = graphicsState;
 	}
 }
 
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
 	//Ensure there is a Shader and Camera instance for rendering
 	if (renderShader && getCamera()) {
-		//Get the shader for rendering
-		Shader* shader = renderShader->getShader();
+		//Get the render data for rendering
+		RenderData* renderData = mesh->getRenderData()->getRenderData();
 
-//		//Get the map of uniforms within the Shader
-//		std::map<std::string, GLint>& uniforms = shader->getUniforms();
-//
-//		//Go through each uniform in the map
-//		for (auto& iterator : uniforms) {
-//			//Check the uniform name
-//			if (iterator.first == "MVPMatrix")
-//				shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
-//		}
-		shader->setUniformMatrix4("MVPMatrix", (getCamera()->getProjectionViewMatrix() * modelMatrix));
+		//Obtain the required UBO's for rendering
+		UBO* shaderCoreUBO     = renderData->getUBO(ShaderInterface::BLOCK_CORE);
+		UBO* shaderSkinningUBO = renderData->getUBO(ShaderInterface::BLOCK_SKINNING);
+		UBO* materialUBO       = renderData->getUBO(ShaderInterface::BLOCK_MATERIAL);
+
+		//Use the correct graphics state
+		useGraphicsState(renderShader->getGraphicsState());
+
+		shaderCoreData.ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
+		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
 		if (mesh->hasData() && mesh->hasRenderData()) {
 			MeshData* data = mesh->getData();
 			MeshRenderData* renderData = mesh->getRenderData();
 
-			if (mesh->hasSkeleton()) {
-				for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); i++)
-					shader->setUniformMatrix4("Bones[" + StrUtils::str(i) + "]", mesh->getSkeleton()->getBone(i)->getFinalTransform());
-				shader->setUniformi("UseSkinning", 1);
-			} else
-				shader->setUniformi("UseSkinning", 0);
+			if (shaderSkinningUBO) {
+				if (mesh->hasSkeleton()) {
+					for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); ++i)
+						shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
+					shaderSkinningData.ue_useSkinning = true;
+					shaderSkinningUBO->update(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
+				} else {
+					shaderSkinningData.ue_useSkinning = false;
+					shaderSkinningData.updateUseSkinning(shaderSkinningUBO);
+				}
+			}
+
+			//Bind the pipeline to use to render (for Vulkan)
+			if (BaseEngine::usingVulkan())
+				vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getRenderData()->getVkGraphicsPipeline()->getInstance());
 
 			if (data->hasSubData()) {
-				renderData->getRenderData()->bindVAO();
+				renderData->getRenderData()->bindBuffers();
 
 				//Go through each sub data instance
-				for (unsigned int i = 0; i < data->getSubDataCount(); i++) {
-					saveTextures();
-
+				for (unsigned int i = 0; i < data->getSubDataCount(); ++i) {
 					if (mesh->hasMaterial())
-						setMaterialUniforms(renderShader->getShader(), renderShader->getName(), mesh->getMaterial(data->getSubData(i).materialIndex));
-					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex * sizeof(unsigned int), data->getSubData(i).baseVertex);
-
-					releaseNewTextures();
+						useMaterial(renderData->getRenderData(), data->getSubData(i).materialIndex, mesh->getMaterial(data->getSubData(i).materialIndex), materialUBO);
+					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex, data->getSubData(i).baseVertex);
+					if (mesh->hasMaterial())
+						stopUsingMaterial(mesh->getMaterial(data->getSubData(i).materialIndex));
 				}
 
-				renderData->getRenderData()->unbindVAO();
+				renderData->getRenderData()->unbindBuffers();
 			} else {
-				saveTextures();
 				if (mesh->hasMaterial())
-					setMaterialUniforms(renderShader->getShader(), renderShader->getName(), mesh->getMaterial());
+					useMaterial(renderData->getRenderData(), 0, mesh->getMaterial(), materialUBO);
 				renderData->render();
-				releaseNewTextures();
+				if (mesh->hasMaterial())
+					stopUsingMaterial(mesh->getMaterial());
 			}
 		}
 	}
 }
 
-void Renderer::render(FramebufferTexture* texture, Shader* shader) {
+void Renderer::render(FramebufferStore* texture, Shader* shader) {
 	if (shader == NULL)
-		shader = getRenderShader(SHADER_LIGHTING)->getShader();
+		shader = getRenderShader(SHADER_PLAIN_TEXTURE)->getShader();
 
 	shader->use();
 
@@ -218,62 +276,111 @@ void Renderer::render(FramebufferTexture* texture, Shader* shader) {
 }
 
 void Renderer::destroy() {
-	delete screenTextureMesh;
+	delete shaderInterface;
+	for (auto element : loadedRenderShaders)
+		delete element.second;
+	if (! BaseEngine::usingVulkan())
+		delete screenTextureMesh;
 }
 
-using namespace StrUtils;
-void Renderer::addRenderShader(std::string id, Shader* shader) {
-	shader->use();
-	if (id == SHADER_LIGHTING) {
-		shader->addUniform("UseNormalMap", "ue_useNormalMap");
-		shader->addUniform("LightSpaceMatrix", "ue_lightSpaceMatrix");
+using namespace utils_string;
 
-		shader->addUniform("UseShadowMap", "ue_useShadowMap");
-		shader->addUniform("ShadowMap", "ue_shadowMap");
-		shader->addUniform("UseParallaxMap", "ue_useParallaxMap");
+Shader* Renderer::loadEngineShader(std::string path) {
+	if (! BaseEngine::usingVulkan())
+		return Shader::loadShader("resources/shaders/" + path);
+	else
+		return Shader::loadShader("resources/shaders-vulkan/" + path);
+}
 
-		for (unsigned int i = 0; i < 6; i++) {
-			shader->addUniform("Light_Type["           + str(i) + "]", "ue_lights[" + str(i) + "].type");
-			shader->addUniform("Light_Position["       + str(i) + "]", "ue_lights[" + str(i) + "].position");
-			shader->addUniform("Light_Direction["      + str(i) + "]", "ue_lights[" + str(i) + "].direction");
-			shader->addUniform("Light_DiffuseColour["  + str(i) + "]", "ue_lights[" + str(i) + "].diffuseColour");
-			shader->addUniform("Light_SpecularColour[" + str(i) + "]", "ue_lights[" + str(i) + "].specularColour");
-			shader->addUniform("Light_Constant["       + str(i) + "]", "ue_lights[" + str(i) + "].constant");
-			shader->addUniform("Light_Linear["         + str(i) + "]", "ue_lights[" + str(i) + "].linear");
-			shader->addUniform("Light_Quadratic["      + str(i) + "]", "ue_lights[" + str(i) + "].quadratic");
-			shader->addUniform("Light_Cutoff["         + str(i) + "]", "ue_lights[" + str(i) + "].cutoff");
-			shader->addUniform("Light_OuterCutoff["    + str(i) + "]", "ue_lights[" + str(i) + "].outerCutoff");
+void Renderer::prepareForwardShader(unsigned int id, Shader* shader) {
+	if (! BaseEngine::usingVulkan()) {
+		shader->use();
+		if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == SHADER_PBR_LIGHTING || id == SHADER_PBR_DEFERRED_LIGHTING) {
+			shader->addUniform("ShadowMap", "ue_shadowMap");
+
+			for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_SET; i++) {
+				shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lightTexturesShadowMap[" + str(i) + "]");
+				shader->addUniform("Light_ShadowCubemap["  + str(i) + "]", "ue_lightTexturesShadowCubemap[" + str(i) + "]");
+			}
+
+			shader->addUniform("EnvironmentMap", "ue_environmentMap");
+			shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
 		}
 
-		for (unsigned int i = 0; i < 80; i++)
-			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
-
-		shader->addUniform("NumLights", "ue_numLights");
-		shader->addUniform("Light_Ambient", "ue_light_ambient");
-		shader->addUniform("Camera_Position", "ue_camera_position");
-
-		shader->addUniform("EnvironmentMap", "ue_environmentMap");
-		shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
-	} else if (id == SHADER_SHADOW_MAP) {
-		for (unsigned int i = 0; i < 80; i++)
-			shader->addUniform("Bones[" + str(i) + "]", "ue_bones[" + str(i) + "]");
+		shader->stopUsing();
 	}
+}
 
-	shader->stopUsing();
+void Renderer::prepareDeferredGeomShader(unsigned int id, Shader* shader) {
+	if (! BaseEngine::usingVulkan()) {
+		shader->use();
+		if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_PBR_LIGHTING) {
+			shader->addUniform("ShadowMap", "ue_shadowMap");
 
+			shader->addUniform("EnvironmentMap", "ue_environmentMap");
+			shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
+		}
+
+		shader->stopUsing();
+	}
+}
+
+void Renderer::addRenderShader(unsigned int id, std::string forwardShaderPath, std::string deferredGeomShaderPath) {
+	renderShaderPaths.insert(std::pair<unsigned int, std::vector<std::string>>(id, { forwardShaderPath, deferredGeomShaderPath }));
+}
+
+void Renderer::loadRenderShader(unsigned int id) {
+	//Get the paths
+	std::vector<std::string> shaderPaths = renderShaderPaths.at(id);
+	Shader* forwardShader = NULL;
+	Shader* deferredGeomShader = NULL;
+
+	//Load the shaders if the paths have been assigned
+	//Setup the shader
+	if (shaderPaths[0] != "") {
+		forwardShader = loadEngineShader(shaderPaths[0]);
+		prepareForwardShader(id, forwardShader);
+	}
+	if (shaderPaths[1] != "" && (! BaseEngine::usingVulkan())) { //Don't load this if using Vulkan yet
+		deferredGeomShader = loadEngineShader(shaderPaths[1]);
+		prepareDeferredGeomShader(id, deferredGeomShader);
+	}
+	//Create the shader
+	RenderShader* renderShader = new RenderShader(id, forwardShader, deferredGeomShader);
+	//Assign the graphics state for the render shader
+	assignGraphicsState(renderShader->getGraphicsState(), id);
 	//Add the shader
-	addRenderShader(new RenderShader(id, shader));
+	addRenderShader(renderShader);
+}
+
+void Renderer::assignGraphicsState(GraphicsState* state, unsigned int shaderID) {
+	//Check the shader ID
+	if (shaderID == SHADER_SKY_BOX)
+		//Assign the state to use
+		state->depthWriteEnable = false;
+	else if (shaderID == SHADER_FONT)
+		state->alphaBlending = true;
+	else if (shaderID == SHADER_MATERIAL)
+		state->alphaBlending = true;
+	else if (shaderID == SHADER_PARTICLE)
+		state->alphaBlending = true;
+	else if (shaderID == SHADER_LIGHTING)
+		state->alphaBlending = true;
 }
 
 void Renderer::addRenderShader(RenderShader* renderShader) {
-	renderShaders.insert(std::pair<std::string, RenderShader*>(renderShader->getName(), renderShader));
+	loadedRenderShaders.insert(std::pair<unsigned int, RenderShader*>(renderShader->getID(), renderShader));
 }
 
-RenderShader* Renderer::getRenderShader(std::string id) {
-	if (renderShaders.count(id) > 0)
-		return renderShaders.at(id);
-	else {
-		Logger::log("The RenderShader with the id '" + id + "' could not be found", "Renderer", LogType::Error);
+RenderShader* Renderer::getRenderShader(unsigned int id) {
+	if (loadedRenderShaders.count(id) > 0)
+		return loadedRenderShaders.at(id);
+	else if (renderShaderPaths.count(id) > 0) {
+		//Load the render shader then return it
+		loadRenderShader(id);
+		return loadedRenderShaders.at(id);
+	} else {
+		Logger::log("The RenderShader with the id '" + utils_string::str(id) + "' could not be found", "Renderer", LogType::Error);
 		return NULL;
 	}
 }

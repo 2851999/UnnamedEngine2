@@ -21,6 +21,7 @@
 
 #include <windows.h>
 #include <GL/glew.h>
+#include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
 #include "Settings.h"
@@ -53,7 +54,6 @@ private:
 	/* The current instance being used */
 	static Window* currentInstance;
 public:
-
 	/* Constructor and destructor */
 	Window();
 	virtual ~Window() { destroy(); }
@@ -71,7 +71,7 @@ public:
 	void setRefreshRate(int refreshRate);
 	void setFloating(bool floating);
 	void setSamples(int samples);
-	void setVSync(bool vSync);
+	void setVSync(unsigned int vSync);
 	void setPosition(int x, int y);
 
 	/* The method used to enable/disable/toggle the cursor */

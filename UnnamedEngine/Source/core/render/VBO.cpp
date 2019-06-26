@@ -18,6 +18,9 @@
 
 #include "VBO.h"
 
+#include "../BaseEngine.h"
+#include "../vulkan/Vulkan.h"
+
 #include <type_traits>
 
 /*****************************************************************************
@@ -29,23 +32,27 @@ void VBO<T>::addAttributeWithType(GLuint type, GLint location, GLint size, GLuin
 	attrib.location = location;
 	attrib.size     = size;
 	attrib.offset   = 0;
-	attrib.stride   = 0;
 	attrib.divisor  = divisor;
 	attrib.type     = type;
 	attributes.push_back(attrib);
 }
 
 template <typename T>
-void VBO<T>::setup() {
-	//Get OpenGL to generate the buffer
-	glGenBuffers(1, &buffer);
-	//Bind the buffer
-	bind();
-	//Pass the data to OpenGL
-	if (data.size() > 0)
-		glBufferData(target, size, &data.front(), usage);
-	else
-		glBufferData(target, size, NULL, usage);
+void VBO<T>::setup(unsigned int binding) {
+	//Check whether using Vulkan or OpenGL
+	if (! BaseEngine::usingVulkan()) {
+		//Get OpenGL to generate the buffer
+		glGenBuffers(1, &buffer);
+		//Bind the buffer
+		bind();
+		//Pass the data to OpenGL
+		if (data.size() > 0)
+			glBufferData(target, size, &data.front(), usage);
+		else
+			glBufferData(target, size, NULL, usage);
+	} else
+		vulkanAttributeDescriptions.resize(attributes.size());
+
 	//Check to see whether the Attributes is > 1, as if this is the case
 	//this VBO is interleaved
 	if (attributes.size() > 1) {
@@ -53,10 +60,10 @@ void VBO<T>::setup() {
 		//calculated
 
 		//The stride to use
-		GLint stride = 0;
+		stride = 0;
 
 		//Go through all of their attributes
-		for (unsigned int i = 0; i < attributes.size(); i++)
+		for (unsigned int i = 0; i < attributes.size(); ++i)
 			stride += attributes[i].size;
 		stride *= sizeof(data[0]);
 
@@ -67,13 +74,12 @@ void VBO<T>::setup() {
 		GLint currentOffset = 0;
 
 		//Go through all of the attributes
-		for (unsigned int i = 0; i < attributes.size(); i++) {
+		for (unsigned int i = 0; i < attributes.size(); ++i) {
 			//Assign the offset and stride
 			attributes[i].offset = currentOffset;
-			attributes[i].stride = stride;
 
 			//Setup the current attribute
-			setup(attributes[i]);
+			setupAttribute(binding, i);
 
 			//Increment the current offset
 			currentOffset += attributes[i].size * sizeof(data[0]);
@@ -82,53 +88,113 @@ void VBO<T>::setup() {
 		//Go through all of the attributes
 		for (unsigned int i = 0; i < attributes.size(); i++)
 			//Setup the current attribute
-			setup(attributes[i]);
+			setupAttribute(binding, i);
+	}
+	if (BaseEngine::usingVulkan()) {
+		VkBufferUsageFlags usageVulkan;
+		if (target == GL_ARRAY_BUFFER) {
+			usageVulkan = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		} else if (target == GL_ELEMENT_ARRAY_BUFFER)
+			usageVulkan = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+
+		//Calculate the correct stride if it hasn't been assigned (In OpenGL stride == 0 means tightly packed, but in Vulkan require offset in bytes to next element)
+		if (attributes.size() == 1)
+			stride = sizeof(T) *  attributes[0].size;
+
+		//Create the Vulkan buffer
+		vulkanBuffer = new VulkanBuffer(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan);
+
+		//Assign the vertex input binding description
+		vulkanVertexInputBindingDescription.binding   = binding; //like glVertexAttrib binding
+		vulkanVertexInputBindingDescription.stride    = stride;
+		vulkanVertexInputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; //Move to the next data entry after each vertex
 	}
 }
 
 template <typename T>
-void VBO<T>::setup(Attribute& attribute) {
-	//Ensure the location is valid
-	if (attribute.location != -1) {
-		//Enable that vertex attribute array and setup its pointer
-		glEnableVertexAttribArray(attribute.location);
-		if (attribute.type == GL_UNSIGNED_INT || attribute.type == GL_INT)
-			glVertexAttribIPointer(attribute.location, attribute.size, attribute.type, attribute.stride, (void*) attribute.offset);
-		else
-			glVertexAttribPointer(attribute.location, attribute.size, attribute.type, GL_FALSE, attribute.stride, (void*) attribute.offset);
+void VBO<T>::setupAttribute(unsigned int binding, unsigned int index) {
+	//Get a reference to the attribute being assigned
+	Attribute& attribute = attributes[index];
+	if (! BaseEngine::usingVulkan()) {
+		//Ensure the location is valid
+		if (attribute.location != -1) {
+			//Enable that vertex attribute array and setup its pointer
+			glEnableVertexAttribArray(attribute.location);
+			if (attribute.type == GL_UNSIGNED_INT || attribute.type == GL_INT)
+				glVertexAttribIPointer(attribute.location, attribute.size, attribute.type, stride, (void*) attribute.offset);
+			else
+				glVertexAttribPointer(attribute.location, attribute.size, attribute.type, GL_FALSE, stride, (void*) attribute.offset);
+		}
+	} else {
+		//Setup the attribute description for the attribute
+		vulkanAttributeDescriptions[index].binding  = binding;
+		vulkanAttributeDescriptions[index].location = attribute.location; //Location for shader
+		VkFormat format;
+		if (attribute.type == GL_INT) {
+			if (attribute.size == 1)
+				format = VK_FORMAT_R32_SINT;
+			else if (attribute.size == 2)
+				format = VK_FORMAT_R32G32_SINT;
+			else if (attribute.size == 3)
+				format = VK_FORMAT_R32G32B32_SINT;
+			else if (attribute.size == 4)
+				format = VK_FORMAT_R32G32B32A32_SINT;
+		} else {
+			if (attribute.size == 1)
+				format = VK_FORMAT_R32_SFLOAT;
+			else if (attribute.size == 2)
+				format = VK_FORMAT_R32G32_SFLOAT;
+			else if (attribute.size == 3)
+				format = VK_FORMAT_R32G32B32_SFLOAT;
+			else if (attribute.size == 4)
+				format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		}
+
+		vulkanAttributeDescriptions[index].format = format;
+		vulkanAttributeDescriptions[index].offset = attribute.offset;
 	}
 }
 
 template <typename T>
 void VBO<T>::startRendering() {
-	bind();
+	if (! BaseEngine::usingVulkan()) {
+		bind();
 
-	//Enable the vertex attribute arrays
-	for (unsigned int i = 0; i < attributes.size(); i++) {
-		glEnableVertexAttribArray(attributes[i].location);
-		//Check for instancing
-		if (instanced)
-			glVertexAttribDivisor(attributes[i].location, attributes[i].divisor);
+		//Enable the vertex attribute arrays
+		for (unsigned int i = 0; i < attributes.size(); i++) {
+			glEnableVertexAttribArray(attributes[i].location);
+			//Check for instancing
+			if (instanced)
+				glVertexAttribDivisor(attributes[i].location, attributes[i].divisor);
+		}
 	}
 }
 
 template <typename T>
 void VBO<T>::stopRendering() {
-	//Disable the vertex attribute arrays
-	for (unsigned int i = 0; i < attributes.size(); i++)
-		glDisableVertexAttribArray(attributes[i].location);
+	if (! BaseEngine::usingVulkan()) {
+		//Disable the vertex attribute arrays
+		for (unsigned int i = 0; i < attributes.size(); i++)
+			glDisableVertexAttribArray(attributes[i].location);
+	}
 }
 
 template <typename T>
 void VBO<T>::update() {
-	bind();
-	glBufferData(target, data.size() * sizeof(data[0]), &data.front(), usage);
+	if (! BaseEngine::usingVulkan()) {
+		bind();
+		glBufferData(target, data.size() * sizeof(data[0]), &data.front(), usage);
+	} else
+		//Copy the data into the buffer
+		vulkanBuffer->copyData(data.data(), 0, data.size() * sizeof(T));
 }
 
 template <typename T>
 void VBO<T>::updateStream(GLsizeiptr size) {
-	bind();
-	//Buffer orphaning
-	glBufferData(target, this->size, NULL, usage);
-	glBufferSubData(target, 0, size, &data.front());
+	if (! BaseEngine::usingVulkan()) {
+		bind();
+		//Buffer orphaning
+		glBufferData(target, this->size, NULL, usage);
+		glBufferSubData(target, 0, size, &data.front());
+	}
 }

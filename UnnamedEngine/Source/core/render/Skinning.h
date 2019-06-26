@@ -212,17 +212,20 @@ private:
 	/* Recursive method used to update a bone */
 	void updateBone(float animationTime, Bone* parentBone, const Matrix4f& parentMatrix);
 
+	/* Method called to update all of the bones given an animation time */
+	void updateBones(float animationTime);
+
 	/* Recursive method used to set the bind pose of a bone */
 	void setBoneBindPose(Bone* parentBone, const Matrix4f& parentMatrix);
 public:
+	/* Maximum number of bones for an animated model */
+	static const unsigned int SKINNING_MAX_BONES = 90;
+
 	/* The constructor */
 	Skeleton() {}
 
 	/* The destructor */
 	virtual ~Skeleton() {}
-
-	/* Method called to update all of the bones given an animation time */
-	void updateBones(float animationTime);
 
 	/* Method called to update this model */
 	void update(float deltaSeconds);

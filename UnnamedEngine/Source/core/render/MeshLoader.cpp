@@ -24,7 +24,9 @@
  * The MeshLoader class
  *****************************************************************************/
 
-void MeshLoader::addChildren(const aiNode* node, std::map<const aiNode*, const aiBone*>& nodes) {
+bool MeshLoader::loadDiffuseTexturesAsSRGB = true;
+
+void MeshLoader::addChildren(const aiNode* node, std::unordered_map<const aiNode*, const aiBone*>& nodes) {
 	if (nodes.count(node) == 0)
 		nodes.insert(std::pair<const aiNode*, const aiBone*>(node, NULL));
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -57,14 +59,14 @@ const aiMatrix4x4 MeshLoader::calculateMatrix(const aiNode* current, aiMatrix4x4
 	return currentMatrix;
 }
 
-Mesh* MeshLoader::loadModel(std::string path, std::string fileName) {
-	if (StrUtils::strEndsWith(fileName, ".model"))
+Mesh* MeshLoader::loadModel(std::string path, std::string fileName, bool pbr) {
+	if (utils_string::strEndsWith(fileName, ".model"))
 		return loadEngineModel(path, fileName);
 	else
-		return loadAssimpModel(path, fileName);
+		return loadAssimpModel(path, fileName, pbr);
 }
 
-Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool genNormals) {
+Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool pbr, bool genNormals) {
 	//Load the file using Assimp
 	unsigned int flags = aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_OptimizeMeshes | aiProcess_JoinIdenticalVertices;
 	if (genNormals)
@@ -114,13 +116,13 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 				}
 			}
 			//Go through each face in the current mesh
-			for (unsigned int b = 0; b < currentMesh->mNumFaces; b++) {
-				//Thee current face of the current mesh
+			for (unsigned int b = 0; b < currentMesh->mNumFaces; ++b) {
+				//The current face of the current mesh
 				struct aiFace& currentFace = currentMesh->mFaces[b];
 
 				//Goes through each vertex of the face, this assumes the model is triangulated i.e. there are
 				//3 vertices per face in the mesh
-				for (int c = 0; c < 3; c++)
+				for (int c = 0; c < 3; ++c)
 					//Add the indices for the current face
 					currentData->addIndex(currentFace.mIndices[c]);
 			}
@@ -143,8 +145,8 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 			skeleton->setGlobalInverseTransform(toMatrix4f(matrix.Inverse()));
 
 			//Necessary nodes
-			std::map<const aiNode*, const aiBone*> necessaryNodes;
-			std::map<std::string, unsigned int>    boneIndices;
+			std::unordered_map<const aiNode*, const aiBone*> necessaryNodes;
+			std::unordered_map<std::string, unsigned int>    boneIndices;
 			std::vector<MeshData::VertexBoneData> verticesBonesData;
 			//Place to store all of the created bones
 			std::vector<Bone*> bones;
@@ -154,11 +156,11 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 			addChildren(scene->mRootNode, necessaryNodes);
 
 			//Go through each mesh
-			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
+			for (unsigned int a = 0; a < scene->mNumMeshes; ++a) {
 				//The current mesh instance
 				const aiMesh* currentMesh = scene->mMeshes[a];
 				//Go through each bone in the mesh
-				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
+				for (unsigned int b = 0; b < currentMesh->mNumBones; ++b) {
 					//Find the corresponding node in the scene's hierarchy
 					const aiNode* correspondingNode = scene->mRootNode->FindNode(currentMesh->mBones[b]->mName);
 					//Add the node to the necessary nodes if it was found
@@ -174,21 +176,21 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 				currentIndex++;
 			}
 
-			for (unsigned int a = 0; a < scene->mNumMeshes; a++) {
+			for (unsigned int a = 0; a < scene->mNumMeshes; ++a) {
 				//Pointer to the current mesh being read
 				const struct aiMesh* currentMesh = scene->mMeshes[a];
-				for (unsigned int b = 0; b < currentMesh->mNumBones; b++) {
+				for (unsigned int b = 0; b < currentMesh->mNumBones; ++b) {
 					unsigned int boneIndex = boneIndices[std::string(currentMesh->mBones[b]->mName.C_Str())];
 
-					for (unsigned int c = 0; c < currentMesh->mBones[b]->mNumWeights; c++) {
+					for (unsigned int c = 0; c < currentMesh->mBones[b]->mNumWeights; ++c) {
 						unsigned int vertexID = currentData->getSubData(a).baseVertex + currentMesh->mBones[b]->mWeights[c].mVertexId;
 						float weight = currentMesh->mBones[b]->mWeights[c].mWeight;
 						verticesBonesData[vertexID].addBoneData(boneIndex, weight);
 					}
 				}
 			}
-			for (unsigned int a = 0; a < verticesBonesData.size(); a++) {
-				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; b++)
+			for (unsigned int a = 0; a < verticesBonesData.size(); ++a) {
+				for (unsigned int b = 0; b < NUM_BONES_PER_VERTEX; ++b)
 					currentData->addBoneData(verticesBonesData[a].ids[b], verticesBonesData[a].weights[b]);
 			}
 
@@ -222,6 +224,10 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 				currentIndex++;
 			}
 
+			//Check if number of bones in model exceeds the maximum supported
+			if (bones.size() > Skeleton::SKINNING_MAX_BONES)
+				Logger::log("Model exceeds maximum number of bones for rendering", "MeshLoader", LogType::Warning);
+
 			//Assign the bones in the skeleton
 			skeleton->setBones(bones);
 			skeleton->setRootBone(rootBoneIndex);
@@ -233,7 +239,7 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 			animations.resize(scene->mNumAnimations);
 
 			//Now go through all of the animations
-			for (unsigned int b = 0; b < scene->mNumAnimations; b++) {
+			for (unsigned int b = 0; b < scene->mNumAnimations; ++b) {
 				//Create the current animation
 				Animation* currentAnimation = new Animation(std::string(scene->mAnimations[b]->mName.C_Str()), scene->mAnimations[b]->mTicksPerSecond, scene->mAnimations[b]->mDuration);
 				//The current aiAnimation instance
@@ -243,17 +249,17 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 				//Make room for the bone animation data
 				boneData.resize(currentAssimpAnim->mNumChannels);
 				//Go through each animation channel
-				for (unsigned int c = 0; c < currentAssimpAnim->mNumChannels; c++) {
+				for (unsigned int c = 0; c < currentAssimpAnim->mNumChannels; ++c) {
 					//The current aiNodeAnim instance
 					const aiNodeAnim* currentAnimNode = currentAssimpAnim->mChannels[c];
 					//Create the bone animation data instance
 					BoneAnimationData* currentBoneData = new BoneAnimationData(boneIndices[std::string(currentAnimNode->mNodeName.C_Str())], currentAnimNode->mNumPositionKeys, currentAnimNode->mNumRotationKeys, currentAnimNode->mNumScalingKeys);
 					//Go through and assign all of the data
-					for (unsigned int d = 0; d < currentAnimNode->mNumPositionKeys; d++)
+					for (unsigned int d = 0; d < currentAnimNode->mNumPositionKeys; ++d)
 						currentBoneData->setKeyframePosition(d, toVector3f(currentAnimNode->mPositionKeys[d].mValue), currentAnimNode->mPositionKeys[d].mTime);
-					for (unsigned int d = 0; d < currentAnimNode->mNumRotationKeys; d++)
+					for (unsigned int d = 0; d < currentAnimNode->mNumRotationKeys; ++d)
 						currentBoneData->setKeyframeRotation(d, toQuaternion(currentAnimNode->mRotationKeys[d].mValue), currentAnimNode->mRotationKeys[d].mTime);
-					for (unsigned int d = 0; d < currentAnimNode->mNumScalingKeys; d++)
+					for (unsigned int d = 0; d < currentAnimNode->mNumScalingKeys; ++d)
 						currentBoneData->setKeyframeScale(d, toVector3f(currentAnimNode->mScalingKeys[d].mValue), currentAnimNode->mScalingKeys[d].mTime);
 					//Add the bone data
 					boneData[c] = currentBoneData;
@@ -280,20 +286,19 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 		//Assign the mesh's skeleton
 		mesh->setSkeleton(skeleton);
 
-		//Calculate the bounding sphere for the mesh
-		MeshData::BoundingSphere sphere = currentData->calculateBoundingSphere();
-		//Assign the bounding sphere properties
-		mesh->setBoundingSphereCentre(sphere.centre);
-		mesh->setBoundingSphereRadius(sphere.radius);
+		//Calculate and assign the bounding sphere for the mesh
+		mesh->setBoundingSphere(currentData->calculateBoundingSphere());
+		mesh->setCullingEnabled(true);
 
 		//Load and add the materials
-		for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
+		for (unsigned int i = 0; i < scene->mNumMaterials; ++i) {
 			//Load the current material
-			Material* material = loadAssimpMaterial(path, fileName, scene->mMaterials[i]);
+			Material* material = loadAssimpMaterial(path, fileName, scene->mMaterials[i], pbr);
 
-			if (i == 0)
+			if (i == 0) {
+				delete mesh->getMaterial();
 				mesh->setMaterial(material);
-			else
+			} else
 				mesh->addMaterial(material);
 		}
 
@@ -308,40 +313,51 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool g
 	}
 }
 
-Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName, const aiMaterial* mat) {
+Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName, const aiMaterial* mat, bool pbr) {
 	//Create the material instance
-	Material* material = new Material();
+	Material* material = new Material(pbr);
 
 	//Load and assign the textures
-	material->ambientTexture  = loadAssimpTexture(path, mat, aiTextureType_AMBIENT);
-	material->diffuseTexture  = loadAssimpTexture(path, mat, aiTextureType_DIFFUSE);
-	material->specularTexture = loadAssimpTexture(path, mat, aiTextureType_SPECULAR);
+	material->setAmbient(loadAssimpTexture(path, mat, aiTextureType_AMBIENT));
+	material->setDiffuse(loadAssimpTexture(path, mat, aiTextureType_DIFFUSE, loadDiffuseTexturesAsSRGB));
+	material->setSpecular(loadAssimpTexture(path, mat, aiTextureType_SPECULAR));
+
+	if (pbr)
+		material->setShininess(loadAssimpTexture(path, mat, aiTextureType_SHININESS)); //No standard way of using this for phong shading
 
 	//Check to see whether the material has a normal map
 	if (mat->GetTextureCount(aiTextureType_NORMALS) != 0)
-		material->normalMap = loadAssimpTexture(path, mat, aiTextureType_NORMALS);
-	else if (StrUtils::strEndsWith(fileName, ".obj") && (mat->GetTextureCount(aiTextureType_HEIGHT) != 0))
-		material->normalMap = loadAssimpTexture(path, mat, aiTextureType_HEIGHT);
+		material->setNormalMap(loadAssimpTexture(path, mat, aiTextureType_NORMALS));
+	else if (utils_string::strEndsWith(fileName, ".obj") && (mat->GetTextureCount(aiTextureType_HEIGHT) != 0))
+		material->setNormalMap(loadAssimpTexture(path, mat, aiTextureType_HEIGHT));
 
 	if (mat->GetTextureCount(aiTextureType_DISPLACEMENT) != 0)
-		material->parallaxMap = loadAssimpTexture(path, mat, aiTextureType_DISPLACEMENT);
+		material->setParallaxMap(loadAssimpTexture(path, mat, aiTextureType_DISPLACEMENT));
 
 	//Load and assign the colours
-	material->ambientColour  = loadAssimpColour(mat, AI_MATKEY_COLOR_AMBIENT);
-	material->diffuseColour  = loadAssimpColour(mat, AI_MATKEY_COLOR_DIFFUSE);
-	material->specularColour = loadAssimpColour(mat, AI_MATKEY_COLOR_SPECULAR);
+	material->setAmbient(loadAssimpColour(mat, AI_MATKEY_COLOR_AMBIENT));
+	material->setDiffuse(loadAssimpColour(mat, AI_MATKEY_COLOR_DIFFUSE));
+	material->setSpecular(loadAssimpColour(mat, AI_MATKEY_COLOR_SPECULAR));
+
+	float value;
+	if ((mat->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS) && value != 0.0f) {
+		if (pbr)
+			value /= 4.0f; //Assimp multiplies this by 4
+		material->setShininess(value);
+	}
 
 	return material;
 }
 
-Texture* MeshLoader::loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type) {
+Texture* MeshLoader::loadAssimpTexture(std::string path, const aiMaterial* material, const aiTextureType type, bool srgb) {
 	//Check whether the texture is defined
 	if (material->GetTextureCount(type) != 0) {
 		//Get the path of the texture
 		aiString p;
 		material->GetTexture(type, 0, &p);
+
 		//Return the loaded texture
-		return Texture::loadTexture(path + StrUtils::str(p.C_Str()));
+		return Texture::loadTexture(path + utils_string::str(p.C_Str()), TextureParameters().setSRGB(srgb));
 	} else
 		return NULL;
 }
@@ -733,60 +749,70 @@ Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 	Mesh* mesh = new Mesh(data);
 	mesh->setSkeleton(skeleton);
 	mesh->setMaterials(materials);
-	mesh->setBoundingSphereCentre(boundingSphereCentre);
-	mesh->setBoundingSphereRadius(boundingSphereRadius);
+	mesh->setCullingEnabled(true);
+	mesh->setBoundingSphere(Sphere(boundingSphereCentre, boundingSphereRadius));
 	mesh->setMatrix(meshTransform);
 
 	return mesh;
 }
 
-void MeshLoader::convertToEngineModel(std::string path, std::string fileName, bool genNormals) {
+void MeshLoader::convertToEngineModel(std::string path, std::string fileName, bool pbr, bool genNormals) {
 	std::string newFileName = fileName.substr(0, fileName.find_last_of(".")) + ".model";
-	Mesh* mesh = loadAssimpModel(path, fileName, genNormals);
+	Mesh* mesh = loadAssimpModel(path, fileName, pbr, genNormals);
 	saveEngineModel(path, newFileName, mesh);
 	delete mesh;
 }
 
 void MeshLoader::writeMaterial(BinaryFile& file, Material* material, std::string path) {
-	file.writeVector4f(material->ambientColour);
-	file.writeVector4f(material->diffuseColour);
-	file.writeVector4f(material->specularColour);
-	writeTexture(file, material->ambientTexture, path);
-	writeTexture(file, material->diffuseTexture, path);
-	writeTexture(file, material->specularTexture, path);
-	writeTexture(file, material->normalMap, path);
-	writeTexture(file, material->parallaxMap, path);
-	file.writeFloat(material->parallaxScale);
-	file.writeFloat(material->shininess);
+	file.writeVector4f(material->getAmbientColour());
+	file.writeVector4f(material->getDiffuseColour());
+	file.writeVector4f(material->getSpecularColour());
+	writeTexture(file, material->getAmbientTexture(), path);
+	writeTexture(file, material->getDiffuseTexture(), path);
+	writeTexture(file, material->getSpecularTexture(), path);
+	writeTexture(file, material->getShininessTexture(), path);
+	writeTexture(file, material->getNormalMap(), path);
+	writeTexture(file, material->getParallaxMap(), path);
+	file.writeFloat(material->getParallaxScale());
+	file.writeFloat(material->getShininess());
 }
 
 void MeshLoader::writeTexture(BinaryFile& file, Texture* texture, std::string path) {
 	if (texture == NULL)
 		file.writeString("NULL");
 	else
-		file.writeString(StrUtils::remove(texture->getPath(), path));
+		file.writeString(utils_string::remove(texture->getPath(), path));
 }
 
 void MeshLoader::readMaterial(BinaryFile& file, std::vector<Material*>& materials, std::string path) {
 	Material* material = new Material();
-	file.readVector4f(material->ambientColour);
-	file.readVector4f(material->diffuseColour);
-	file.readVector4f(material->specularColour);
-	material->ambientTexture = readTexture(file, path);
-	material->diffuseTexture = readTexture(file, path);
-	material->specularTexture = readTexture(file, path);
-	material->normalMap = readTexture(file, path);
-	material->parallaxMap = readTexture(file, path);
-	file.readFloat(material->parallaxScale);
-	file.readFloat(material->shininess);
+	Vector4f readVectorValue;
+	file.readVector4f(readVectorValue);
+	material->setAmbient(readVectorValue);
+	file.readVector4f(readVectorValue);
+	material->setDiffuse(readVectorValue);
+	file.readVector4f(readVectorValue);
+	material->setSpecular(readVectorValue);
+	material->setAmbient(readTexture(file, path));
+	material->setDiffuse(readTexture(file, path, loadDiffuseTexturesAsSRGB));
+	material->setSpecular(readTexture(file, path));
+	material->setShininess(readTexture(file, path));
+	material->setNormalMap(readTexture(file, path));
+	material->setParallaxMap(readTexture(file, path));
+	float readFloatValue;
+	file.readFloat(readFloatValue);
+	material->setParallaxScale(readFloatValue);
+	file.readFloat(readFloatValue);
+	material->setShininess(readFloatValue);
 	materials.push_back(material);
 }
 
-Texture* MeshLoader::readTexture(BinaryFile& file, std::string path) {
+Texture* MeshLoader::readTexture(BinaryFile& file, std::string path, bool srgb) {
 	std::string value;
 	file.readString(value);
+
 	if (value == std::string("NULL"))
 		return NULL;
 	else
-		return Texture::loadTexture(path + value);
+		return Texture::loadTexture(path + value, TextureParameters().setSRGB(srgb));
 }

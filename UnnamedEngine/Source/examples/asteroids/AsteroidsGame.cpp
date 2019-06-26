@@ -45,7 +45,7 @@ void AsteroidsGame::initialise() {
 	Logger::startFileOutput(resourceLoader.getPath() + "logs.txt");
 
 	//Setup the settings
-	getSettings() = SettingsUtils::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
+	getSettings() = utils_settings::readFromFile(resourceLoader.getPath() + "settings/settings.txt");
 	getSettings().windowTitle = "Asteroids";
 	getSettings().engineSplashScreen = true;
 

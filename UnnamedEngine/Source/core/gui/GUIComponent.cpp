@@ -30,9 +30,11 @@
 Font* GUIComponentRenderer::DEFAULT_FONT = NULL;
 
 void GUIComponentRenderer::setup() {
+	//Assign the font
+	setFont(DEFAULT_FONT);
 	//Set the default colour and texture
-	getMaterial()->diffuseColour = Colour::WHITE;
-	getMaterial()->diffuseTexture = Renderer::getBlankTexture();
+	getMaterial()->setDiffuse(Colour::WHITE);
+	getMaterial()->setDiffuse(Renderer::getBlankTexture());
 }
 
 void GUIComponentRenderer::update() {
@@ -42,17 +44,18 @@ void GUIComponentRenderer::update() {
 	//Check that there are colours and the render index is within its bounds
 	if (colours.size() > renderIndex)
 		//Assign the colour
-		getMaterial()->diffuseColour = colours[renderIndex];
+		getMaterial()->setDiffuse(colours[renderIndex]);
+
 	//Now to do the same for the textures
 	if (textures.size() > renderIndex)
-		getMaterial()->diffuseTexture = textures[renderIndex];
+		getMaterial()->setDiffuse(textures[renderIndex]);
 }
 
 void GUIComponentRenderer::renderText(std::string text, Vector2f relPos) {
-	//Make sure there is a font instance
-	if (font)
+	//Make sure there is a text instance
+	if (textInstance)
 		//Render the text
-		font->render(text, Vector2f(getPosition().getX(), getPosition().getY()) + relPos);
+		textInstance->render(text, Vector2f(getPosition().getX(), getPosition().getY()) + relPos);
 }
 
 void GUIComponentRenderer::renderTextAtCentre(std::string text) {
@@ -63,7 +66,7 @@ void GUIComponentRenderer::renderTextAtCentre(std::string text) {
 }
 
 unsigned int GUIComponentRenderer::getMaxRenderIndex() {
-	return MathsUtils::max(colours.size(), textures.size());
+	return utils_maths::max(colours.size(), textures.size());
 }
 
 void GUIComponentRenderer::setColour(Colour colour) {
@@ -82,6 +85,13 @@ void GUIComponentRenderer::setTexture(Texture* texture) {
 		for (unsigned int i = 0; i < textures.size(); i++)
 			textures[i] = texture;
 	}
+}
+
+void GUIComponentRenderer::setFont(Font* font) {
+	this->font = font;
+	if (! textInstance)
+		textInstance = new Text(DEFAULT_FONT, Colour::WHITE, 100);
+	textInstance->setFont(font);
 }
 
 /*****************************************************************************

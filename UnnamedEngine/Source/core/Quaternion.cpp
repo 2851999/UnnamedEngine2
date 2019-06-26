@@ -27,7 +27,7 @@
 Quaternion& Quaternion::initFromAxisAngle(const Vector3f& axis, float angle) {
 	//Calculate some needed constants for transforming it into the
 	//quaternion representation
-	float a = MathsUtils::toRadians(angle / 2.0f);
+	float a = utils_maths::toRadians(angle / 2.0f);
 	float s = sin(a);
 	float c = cos(a);
 	//Assign the values
@@ -40,9 +40,9 @@ Quaternion& Quaternion::initFromAxisAngle(const Vector3f& axis, float angle) {
 }
 
 Quaternion& Quaternion::initFromEulerAngles(const Vector3f& angles) {
-	float h = MathsUtils::toRadians(angles.getY());
-	float a = MathsUtils::toRadians(angles.getZ());
-	float b = MathsUtils::toRadians(angles.getX());
+	float h = utils_maths::toRadians(angles.getY());
+	float a = utils_maths::toRadians(angles.getZ());
+	float b = utils_maths::toRadians(angles.getX());
 
     float c1 = cosf(h / 2.0f);
     float s1 = sinf(h / 2.0f);
@@ -97,6 +97,39 @@ Quaternion& Quaternion::lookAt(const Vector3f& eye, const Vector3f& centre, cons
 	return initFromRotationMatrix(Matrix4f().initLookAt(eye, centre, up));
 }
 
+Quaternion Quaternion::slerp(const Quaternion& a, const Quaternion& b, float factor) {
+	//https://en.wikipedia.org/wiki/Slerp
+	Quaternion v0 = a;
+	Quaternion v1 = b;
+	Quaternion result;
+
+	float dot = v0.dot(v1);
+	if (dot < 0.0f) {
+		v0 = v0 * -1.0f;
+		dot = -dot;
+	}
+
+	float s0 = 1.0f - factor;
+	float s1 = factor;
+
+	const float THRESHOLD = 0.9995;
+	if (dot < THRESHOLD) {
+		float theta = acosf(dot);
+		float invSin = 1.0f / sinf(theta);
+
+		s0 = sinf(s0 * theta) * invSin;
+		s1 = sinf(s1 * theta) * invSin;
+	}
+
+	result[0] = (s0 * v0[0]) + (s1 * v1[0]);
+	result[1] = (s0 * v0[1]) + (s1 * v1[1]);
+	result[2] = (s0 * v0[2]) + (s1 * v1[2]);
+	result[3] = (s0 * v0[3]) + (s1 * v1[3]);
+
+	//Interpolate and return the result
+	return result.normalise();
+}
+
 Matrix4f Quaternion::toRotationMatrix() {
 	//https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
 	Matrix4f m;
@@ -129,21 +162,21 @@ Vector3f Quaternion::toEuler() {
     float sqx = getX() * getX();
     float sqy = getY() * getY();
     float sqz = getZ() * getZ();
-	float unit = sqx + sqy + sqz + sqw; //If this quaternion is normalised, this is one
+	float unit = sqx + sqy + sqz + sqw;
 	float test = getX() * getY() + getZ() * getW();
 	float h, a, b;
-	if (test > 0.499f * unit) { //Singularity at north pole
+	if (test > 0.499f * unit) {
 		h = 2 * atan2f(getX(),getW());
-		a = MathsUtils::PI / 2.0f;
+		a = utils_maths::PI / 2.0f;
 		b = 0;
-	} else if (test < -0.499f * unit) { //Singularity at south pole
+	} else if (test < -0.499f * unit) {
 		h = -2 * atan2f(getX(),getW());
-		a = -MathsUtils::PI / 2.0f;
+		a = -utils_maths::PI / 2.0f;
 		b = 0;
 	} else {
 	    h = atan2f(2 * getY() * getW() -2.0f * getX() * getZ(), sqx - sqy - sqz + sqw);
 		a = asinf(2 * test / unit);
 		b = atan2f(2 * getX() * getW() -2.0f * getY() * getZ() , -sqx + sqy - sqz + sqw);
 	}
-	return Vector3f(MathsUtils::toDegrees(b), MathsUtils::toDegrees(h), MathsUtils::toDegrees(a));
+	return Vector3f(utils_maths::toDegrees(b), utils_maths::toDegrees(h), utils_maths::toDegrees(a));
 }

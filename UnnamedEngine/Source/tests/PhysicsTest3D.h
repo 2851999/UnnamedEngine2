@@ -27,8 +27,8 @@
 
 class Test : public BaseTest3D {
 private:
-	PhysicsObject3D* sphereA;
-	PhysicsObject3D* sphereB;
+	PhysicsObject3D* objectA;
+	PhysicsObject3D* objectB;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -46,45 +46,50 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
-	std::vector<Mesh*> meshes1 = resourceLoader.loadModel("sphere.obj");
-	std::vector<Mesh*> meshes2 = resourceLoader.loadModel("sphere.obj");
+//	Mesh* modelA = resourceLoader.loadModel("sphere.obj");
+	Mesh* modelA = resourceLoader.loadModel("plane.obj");
+	Mesh* modelB = resourceLoader.loadModel("sphere.obj");
 
-	sphereA = new PhysicsObject3D(meshes1, "Material");
-	sphereA->setCollider(new SphereCollider(sphereA, 1.0f));
-	sphereB = new PhysicsObject3D(meshes2, "Material");
-	sphereB->setCollider(new SphereCollider(sphereB, 1.0f));
-	sphereB->setPosition(3.0f, 0.0f, 0.0f);
-	sphereB->setVelocity(-0.2f, 0.0f, 0.0f);
+	objectA = new PhysicsObject3D(modelA, Renderer::SHADER_MATERIAL);
+//	objectA->setCollider(new SphereCollider(objectA, modelA->getBoundingSphereRadius()));
+	objectA->setCollider(new PlaneCollider3D(objectA, Vector3f(1.0f, 0.0f, 0.0f)));
+	objectA->setRotation(0.0f, 0.0f, 45.0f);
+	objectB = new PhysicsObject3D(modelB, Renderer::SHADER_MATERIAL);
+	objectB->setCollider(new SphereCollider(objectB, modelB->getBoundingSphereRadius()));
+	objectB->setPosition(3.0f, 0.0f, 0.0f);
+	objectB->setVelocity(-0.2f, 0.0f, 0.0f);
 
-	renderScene->add(sphereA);
-	physicsScene->add(sphereA);
-	renderScene->add(sphereB);
-	physicsScene->add(sphereB);
+	renderScene->add(objectA);
+	physicsScene->add(objectA);
+	renderScene->add(objectB);
+	physicsScene->add(objectB);
+
+	renderScene->disableLighting();
 
 	physicsScene->setCollisionCallback(std::bind(onCollision, this, 0, 0));
 
-	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg", 100.0f));
+	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
 }
 
 void Test::onUpdate() {
 	if (Keyboard::isPressed(GLFW_KEY_UP))
-		sphereA->setAcceleration(0.0f, 0.0f, -1.0f);
+		objectA->setAcceleration(0.0f, 0.0f, -1.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_DOWN))
-		sphereA->setAcceleration(0.0f, 0.0f, 1.0f);
+		objectA->setAcceleration(0.0f, 0.0f, 1.0f);
 	if (Keyboard::isPressed(GLFW_KEY_LEFT))
-		sphereA->setAcceleration(-1.0f, 0.0f, 0.0f);
+		objectA->setAcceleration(-1.0f, 0.0f, 0.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
-		sphereA->setAcceleration(1.0f, 0.0f, 0.0f);
+		objectA->setAcceleration(1.0f, 0.0f, 0.0f);
 }
 
 void Test::onRender() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
-
-	glEnable(GL_MULTISAMPLE_ARB);
-	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	glEnable(GL_TEXTURE_2D);
+//	glEnable(GL_DEPTH_TEST);
+//
+//	glEnable(GL_MULTISAMPLE_ARB);
+//	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
 }
 
 void Test::onDestroy() {

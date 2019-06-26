@@ -16,17 +16,17 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_BASIC_BASICSETUP_H_
-#define EXAMPLES_BASIC_BASICSETUP_H_
+#ifndef EXAMPLES_BASIC_BASICINPUT_H_
+#define EXAMPLES_BASIC_BASICINPUT_H_
 
 /*****************************************************************************
  * The Basic Input Example Program
  *
  * Tutorial Number: 2
  * Tutorial Name: Input
- * Engine Version: V0.1.0 (0::1::2::3)
+ * Engine Version: V0.2.9 (1::0::6::4)
  * Date Created: 17/10/2016
- * Date Updated: 19/01/2017
+ * Date Updated: 13/04/2018
  *
  * Description: Demonstrates how to receive user input.
  *****************************************************************************/
@@ -80,7 +80,7 @@ void Tutorial::initialise() {
 	//Assign some Settings
 	getSettings().windowTitle = "Tutorial 2 - Basic Input";
 	getSettings().videoResolution = VideoResolution::RES_1280x720;
-	getSettings().debuggingShowInformation = true;
+	getSettings().debugShowInformation = true;
 }
 
 void Tutorial::created() {
@@ -113,7 +113,7 @@ void Tutorial::update() {
 
 void Tutorial::render() {
 	//Seen from the last tutorial
-	GLUtils::setupSimple2DView();
+	utils_gl::setupSimple2DView();
 }
 
-#endif /* EXAMPLES_BASIC_BASICSETUP_H_ */
+#endif /* EXAMPLES_BASIC_BASICINPUT_H_ */

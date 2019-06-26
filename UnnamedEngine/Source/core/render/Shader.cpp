@@ -21,6 +21,8 @@
 #include <algorithm>
 #include <fstream>
 
+#include "../BaseEngine.h"
+#include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -36,6 +38,11 @@ Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 	if (geometryShader)
 		attach(geometryShader);
 	attach(fragmentShader);
+}
+
+Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule fragmentShaderModule) {
+	this->vertexShaderModule = vertexShaderModule;
+	this->fragmentShaderModule = fragmentShaderModule;
 }
 
 Shader::~Shader() {
@@ -55,7 +62,7 @@ void Shader::attach(GLuint shader) {
 	if (! status) {
 		GLchar error[1024];
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
-		Logger::log("Error linking shader" + StrUtils::str(error), "Shader", LogType::Error);
+		Logger::log("Error linking shader" + utils_string::str(error), "Shader", LogType::Error);
 	}
 
 	status = 0;
@@ -64,7 +71,7 @@ void Shader::attach(GLuint shader) {
 	if (! status) {
 		GLchar error[1024];
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
-		Logger::log("Error validating shader program " + StrUtils::str(error), "Shader", LogType::Error);
+		Logger::log("Error validating shader program " + utils_string::str(error), "Shader", LogType::Error);
 	}
 }
 
@@ -88,11 +95,17 @@ void Shader::stopUsing() {
 }
 
 void Shader::destroy() {
-	glDeleteProgram(program);
-	//Go through each attached shader and delete them
-	for (unsigned int i = 0; i < attachedShaders.size(); i++)
-		glDeleteShader(attachedShaders[i]);
-	attachedShaders.clear();
+	if (! BaseEngine::usingVulkan()) {
+		glDeleteProgram(program);
+		//Go through each attached shader and delete them
+		for (unsigned int i = 0; i < attachedShaders.size(); i++)
+			glDeleteShader(attachedShaders[i]);
+		attachedShaders.clear();
+	} else {
+		//Destroy the shader modules
+		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
+		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
+	}
 }
 
 void Shader::addUniform(std::string id, std::string name) {
@@ -180,7 +193,7 @@ GLint Shader::createShader(std::string source, GLenum type) {
 	if (! status) {
 		GLchar error[1024];
 		glGetShaderInfoLog(shader, sizeof(error), NULL, error);
-		Logger::log("Error compiling shader: " + StrUtils::str(error) + " Source:\n" + source, "Shader", LogType::Error);
+		Logger::log("Error compiling shader: " + utils_string::str(error) + " Source:\n" + source, "Shader", LogType::Error);
 
 		glDeleteShader(shader);
 
@@ -233,35 +246,99 @@ Shader* Shader::createShader(ShaderSource vertexSource, ShaderSource geometrySou
 	return shader;
 }
 
-Shader::ShaderSource Shader::loadShaderSource(std::string path) {
-	//The ShaderSource
-	Shader::ShaderSource source;
+VkShaderModule Shader::createVkShaderModule(const std::vector<char>& code) {
+	//Assign the creation info
+	VkShaderModuleCreateInfo createInfo = {};
+	createInfo.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	createInfo.codeSize = code.size();
+	createInfo.pCode    = reinterpret_cast<const uint32_t*>(code.data());
 
-	//Get the file text
-	std::vector<std::string> fileText = FileUtils::readFile(path);
+	//Load the shader module
+	VkShaderModule shaderModule;
+	if (vkCreateShaderModule(Vulkan::getDevice()->getLogical(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+		Logger::log("Failed to create shader module", "VulkanGraphicsPipeline", LogType::Error);
 
+	return shaderModule;
+}
+
+std::vector<char> Shader::readFile(const std::string& path) {
+	std::ifstream file(path, std::ios::ate | std::ios::binary); //Read at end as can tell size of file from position
+
+	if (! file.is_open())
+		Logger::log("Failed to open file " + path, "Shader", LogType::Error);
+
+	size_t fileSize = (size_t) file.tellg();
+	std::vector<char> buffer(fileSize);
+
+	file.seekg(0);
+	file.read(buffer.data(), fileSize);
+
+	file.close();
+
+	return buffer;
+}
+
+std::vector<std::string> Shader::loadInclude(std::string path, std::string line) {
+	//The directory the shader is in
+	std::string dir = "";
+	size_t pos = path.rfind("/") + 1;
+	if (pos != std::string::npos)
+		dir = path.substr(0, pos);
+
+	//The relative file path (removes the "")
+	std::string filePath = line.substr(line.find("\"") + 1, line.rfind("\"") - line.find("\"") - 1);
+
+	while (utils_string::strStartsWith(filePath, "../")) {
+		filePath = utils_string::remove(filePath, "../");
+
+		//Remove last /
+		dir = dir.substr(0, dir.length() - 1);
+		//Remove last directory
+		dir = dir.substr(0, dir.rfind("/") + 1);
+	}
+
+	//Get the new text
+	std::vector<std::string> newText = utils_file::readFile(dir + filePath);
+
+	return newText;
+}
+
+void Shader::loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source, unsigned int uboBindingOffset) {
 	//Go through each line of file text
 	for (unsigned int i = 0; i < fileText.size(); i++) {
 		//Check for directives
-		if (StrUtils::strStartsWith(fileText[i], "#include ")) {
-			//The directory the shader is in
+		if (utils_string::strStartsWith(fileText[i], "#include ")) {
+
 			std::string dir = "";
 			size_t pos = path.rfind("/") + 1;
 			if (pos != std::string::npos)
 				dir = path.substr(0, pos);
-			//The file name (removes the "")
-			std::string fileName = fileText[i].substr(fileText[i].find("\"") + 1, fileText[i].rfind("\"") - fileText[i].find("\"") - 1);
-			//Get the new text
-			std::vector<std::string> newText = FileUtils::readFile(dir + fileName);
+
+			//The relative file path (removes the "")
+			std::string filePath = fileText[i].substr(fileText[i].find("\"") + 1, fileText[i].rfind("\"") - fileText[i].find("\"") - 1);
+
+			while (utils_string::strStartsWith(filePath, "../")) {
+				filePath = utils_string::remove(filePath, "../");
+
+				//Remove last /
+				dir = dir.substr(0, dir.length() - 1);
+				//Remove last directory
+				dir = dir.substr(0, dir.rfind("/") + 1);
+			}
+
+			//Load the new text
+			std::vector<std::string> newText = utils_file::readFile(dir + filePath);
+			loadShaderSource(dir + filePath, newText, source);
+
 			//Insert the new text into the file text
 			fileText.insert(fileText.begin() + i + 1, newText.begin(), newText.end());
 			//Remove the current line
 			fileText.erase(fileText.begin() + i);
 
 			i -= 1;
-		} else if (StrUtils::strStartsWith(fileText[i], "#map ")) {
+		} else if (utils_string::strStartsWith(fileText[i], "#map ")) {
 			//Split up the line by a space
-			std::vector<std::string> line = StrUtils::strSplit(fileText[i], ' ');
+			std::vector<std::string> line = utils_string::strSplit(fileText[i], ' ');
 			//Check the type and add the values
 			if (line[1] == "uniform")
 				source.uniforms.insert(std::pair<std::string, std::string>(line[2], line[3]));
@@ -272,8 +349,28 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path) {
 			fileText.erase(fileText.begin() + i);
 
 			i -= 1;
+		} else if (uboBindingOffset > 0 && utils_string::strStartsWith(fileText[i], "layout(std140, binding = ")) {
+			//Want to apply an offset to the UBO location
+
+			//Split up the line by a space
+			std::vector<std::string> line = utils_string::strSplit(fileText[i], ' ');
+
+			//Add the offset
+			line[3] = utils_string::str(utils_string::strToUInt(utils_string::remove(line[3], ")")) + uboBindingOffset) + ")";
+
+			//Assign the new line of text
+			fileText[i] = utils_string::strJoin(line, ' ');
 		}
 	}
+}
+
+Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int uboBindingOffset) {
+	//The ShaderSource
+	Shader::ShaderSource source;
+
+	std::vector<std::string> fileText = utils_file::readFile(path);
+
+	loadShaderSource(path, fileText, source, uboBindingOffset);
 
 	//Assign the source
 	source.source = "";
@@ -292,12 +389,73 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path) {
 }
 
 Shader* Shader::loadShader(std::string path) {
-	return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".fs"));
+	//Check whether using Vulkan
+	if (! BaseEngine::usingVulkan()) {
+		//Check for geometry shader
+		if (utils_file::isFile(path + ".gs"))
+			return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".gs"), loadShaderSource(path + ".fs"));
+		else
+			return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".fs"));
+	} else
+		//Load the shader
+		return new Shader(createVkShaderModule(readFile(path + "_vert.spv")), createVkShaderModule(readFile(path + "_frag.spv")));
+}
+
+void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset) {
+	//Load the source
+	ShaderSource shaderSource = loadShaderSource(inputPath, uboBindingOffset);
+	//Write the shader source
+	utils_file::writeFile(outputPath, shaderSource.source);
+}
+
+void Shader::outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset) {
+	//Load each individual shader if found
+	if (utils_file::isFile(inputPath + ".vs"))
+		//Output the vertex shader
+		outputCompleteShaderFile(inputPath + ".vs", outputPath + "_complete.vert", uboBindingOffset);
+	if (utils_file::isFile(inputPath + ".gs"))
+		//Output the geometry shader
+		outputCompleteShaderFile(inputPath + "gs", outputPath + "_complete.geom", uboBindingOffset);
+	if (utils_file::isFile(inputPath + ".fs"))
+		//Output the fragment shader
+		outputCompleteShaderFile(inputPath + ".fs", outputPath + "_complete.frag", uboBindingOffset);
+}
+
+void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath) {
+	//Output the complete shader file
+	outputCompleteShaderFiles(inputPath, outputPath, UBO::VULKAN_BINDING_OFFSET);
+
+	//Now compile each shader (if they exist)
+	if (utils_file::isFile(outputPath + "_complete.vert"))
+		std::system((glslangValidatorPath + " -V " + outputPath + "_complete.vert -o " + outputPath + "_vert.spv").c_str());
+	if (utils_file::isFile(outputPath + "_complete.geom"))
+		std::system((glslangValidatorPath + " -V " + outputPath + "_complete.geom -o " + outputPath + "_geom.spv").c_str());
+	if (utils_file::isFile(outputPath + "_complete.frag"))
+		std::system((glslangValidatorPath + " -V " + outputPath + "_complete.frag -o " + outputPath + "_frag.spv").c_str());
+}
+
+void Shader::compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath) {
+	//Add the prefix's to get the input and output paths
+	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path, glslangValidatorPath);
 }
 
 /*****************************************************************************
  * The RenderShader class
  *****************************************************************************/
+
+RenderShader::RenderShader(unsigned int id, Shader* forwardShader, Shader* deferredGeomShader) : id(id) {
+	//Create the graphics state
+	graphicsState = new GraphicsState();
+
+	if (forwardShader)
+		addForwardShader(forwardShader);
+	if (deferredGeomShader)
+		addDeferredGeomShader(deferredGeomShader);
+}
+
+RenderShader::~RenderShader() {
+	delete graphicsState;
+}
 
 void RenderShader::addForwardShader(Shader* forwardShader) {
 	forwardShaders.push_back(forwardShader);
@@ -311,6 +469,26 @@ void RenderShader::removeLastForwardShader() {
 	forwardShaders.pop_back();
 }
 
+void RenderShader::addDeferredGeomShader(Shader* deferredGeomShader) {
+	deferredGeomShaders.push_back(deferredGeomShader);
+}
+
+void RenderShader::removeDeferredGeomShader(Shader* deferredGeomShader) {
+	deferredGeomShaders.erase(std::remove(deferredGeomShaders.begin(), deferredGeomShaders.end(), deferredGeomShader), deferredGeomShaders.end());
+}
+
+void RenderShader::removeLastDeferredGeomShader() {
+	deferredGeomShaders.pop_back();
+}
+
 Shader* RenderShader::getShader() {
-	return forwardShaders.back();
+	if (useDeferredGeom) {
+		if (deferredGeomShaders.size() > 0)
+			return getDeferredGeomShader();
+		else {
+			Logger::log("Deferred geometry shader requested but not assigned", "Shader getShader()", LogType::Error);
+			return NULL;
+		}
+	} else
+		return getForwardShader();
 }

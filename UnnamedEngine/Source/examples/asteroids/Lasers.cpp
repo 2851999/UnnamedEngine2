@@ -33,8 +33,8 @@ Lasers::Lasers(AsteroidsGame* game, Ship* ship) : soundSystem(game->getSoundSyst
 	instanceNumber = numInstances;
 
 	//Add audio source's for this set of lasers
-	soundSystem->addSoundEffect("Laser" + StrUtils::str(instanceNumber), game->getResources().getAudioLaser());
-	soundSystem->addSoundEffect("Explosion" + StrUtils::str(instanceNumber), game->getResources().getAudioExplosion());
+	soundSystem->addSoundEffect("Laser" + utils_string::str(instanceNumber), game->getResources().getAudioLaser());
+	soundSystem->addSoundEffect("Explosion" + utils_string::str(instanceNumber), game->getResources().getAudioExplosion());
 
 	//Assign the maximum number of lasers
 	maxLasers = 20;
@@ -43,7 +43,7 @@ Lasers::Lasers(AsteroidsGame* game, Ship* ship) : soundSystem(game->getSoundSyst
 	ResourceLoader& loader = game->getResourceLoader();
 
 	//Setup the lasers renderer
-	renderer = new GameRenderer(MeshLoader::loadAssimpModel(loader.getAbsPathModels(), "lasernew.obj", false), loader.loadShader("LaserShader"), maxLasers, false, false, false);
+	renderer = new GameRenderer(MeshLoader::loadAssimpModel(loader.getAbsPathModels(), "lasernew.obj", false, false), new RenderShader(0, loader.loadShader("LaserShader"), NULL), maxLasers, false, false, false);
 
 	for (unsigned int i = 0; i < maxLasers; i++) {
 		GameObject3D* object = new GameObject3D();
@@ -168,15 +168,15 @@ void Lasers::explode(Vector3f position, float maxSpeed) {
 	particleEmitter->emitParticles(100);
 	particleEmitter->particleMaxSpeed = maxSpeed;
 	//Play the explosion sound effect at the position of the asteroid
-	soundSystem->getSource("Explosion" + StrUtils::str(instanceNumber))->setPosition(position);
-	soundSystem->play("Explosion" + StrUtils::str(instanceNumber));
+	soundSystem->getSource("Explosion" + utils_string::str(instanceNumber))->setPosition(position);
+	soundSystem->play("Explosion" + utils_string::str(instanceNumber));
 }
 
 void Lasers::fire(Vector3f position, Quaternion rotation, Vector3f front, Vector3f currentVelocity) {
 	//Ensure the lasers can fire
 	if (canFire()) {
 		//Assign the new time the last laser was fired
-		timeLastLaserFired = TimeUtils::getSeconds();
+		timeLastLaserFired = utils_time::getSeconds();
 		//Assign the object's properties
 		objects[nextIndex]->setPosition(position);
 		objects[nextIndex]->setVelocity(currentVelocity + (front * 20.0f));
@@ -184,8 +184,8 @@ void Lasers::fire(Vector3f position, Quaternion rotation, Vector3f front, Vector
 		timesLeft[nextIndex] = 3.0f;
 
 		//Play the sound effect
-		soundSystem->getSource("Laser" + StrUtils::str(instanceNumber))->setParent(objects[nextIndex]);
-		soundSystem->play("Laser" + StrUtils::str(instanceNumber));
+		soundSystem->getSource("Laser" + utils_string::str(instanceNumber))->setParent(objects[nextIndex]);
+		soundSystem->play("Laser" + utils_string::str(instanceNumber));
 
 		//Make the laser visible
 		renderer->show(nextIndex);

@@ -44,7 +44,7 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 
 	//Setup the asteroid renderer
 	unsigned int numAsteroids = 1250;
-	asteroidRenderer = new GameRenderer(loader.loadModel("asteroid_model.obj"), loader.loadShader("AsteroidShader"), numAsteroids, true, true, true);
+	asteroidRenderer = new GameRenderer(loader.loadModel("asteroid_model.obj"), new RenderShader(0, loader.loadShader("AsteroidShader"), NULL), numAsteroids, true, true, true);
 
 	//The current number of asteroids generated
 	unsigned int currentNumAsteroids = 0;
@@ -63,7 +63,7 @@ AsteroidsMainGame::AsteroidsMainGame(AsteroidsGame* game) : game(game) {
 	}
 
 	unsigned int numEnemies = 10;
-	enemiesRenderer = new GameRenderer(loader.loadModel("enemyship.obj"), loader.loadShader("AsteroidShader"), numEnemies, false, true, false);
+	enemiesRenderer = new GameRenderer(loader.loadModel("enemyship.obj"), new RenderShader(0, loader.loadShader("AsteroidShader"), NULL), numEnemies, false, true, false);
 
 	//Go through the enemies
 	for (unsigned int i = 0; i < numEnemies; i++) {
@@ -224,7 +224,7 @@ void AsteroidsMainGame::spawnEnemy() {
 			enemiesRenderer->show(i);
 
 			//Assign the time until the next enemy
-			timeForNextEnemy = RandomUtils::randomFloat(10.0f, 60.0f);
+			timeForNextEnemy = utils_random::randomFloat(10.0f, 60.0f);
 
 			//Reset the timer
 			timer->restart();
@@ -244,9 +244,6 @@ void AsteroidsMainGame::render() {
 	glEnable(GL_MULTISAMPLE_ARB);
 	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
 
-	//Render the player
-	player->render();
-
 	//Render the asteroids
 	asteroidRenderer->render();
 
@@ -254,6 +251,9 @@ void AsteroidsMainGame::render() {
 	enemiesRenderer->render();
 	for (unsigned int i = 0; i < enemies.size(); i++)
 			enemies[i]->render();
+
+	//Render the player
+	player->render();
 
 	//Render the HUD
 	hud->render();

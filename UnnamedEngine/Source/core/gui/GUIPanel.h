@@ -60,10 +60,10 @@ private:
 	GUIPanel* current = NULL;
 
 	/* The GUIPanel instances in this group */
-	std::map<std::string, GUIPanel*> panels;
+	std::unordered_map<std::string, GUIPanel*> panels;
 
 	/* The buttons used for switching between groups */
-	std::map<GUIComponent*, std::string> buttons;
+	std::unordered_map<GUIComponent*, std::string> buttons;
 public:
 	/* The constructor */
 	GUIPanelGroup() {}

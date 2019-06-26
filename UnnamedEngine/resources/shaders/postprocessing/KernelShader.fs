@@ -1,10 +1,6 @@
-#version 140
+#include "PostProcess.fs"
 
-uniform sampler2D tex;
-
-in vec2 frag_textureCoord;
-
-out vec4 FragColour;
+layout(location = 0) out vec4 FragColour;
 
 const float offset = 1.0 / 300; 
 
@@ -44,7 +40,7 @@ void main() {
 	
 	vec3 sampleTex[9];
     for(int i = 0; i < 9; i++) {
-		sampleTex[i] = vec3(texture(tex, frag_textureCoord.st + offsets[i]));
+		sampleTex[i] = vec3(texture(ue_texture, ue_frag_textureCoord.st + offsets[i]));
 	}
 	vec3 col = vec3(0.0);
 	for(int i = 0; i < 9; i++)

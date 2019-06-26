@@ -17,6 +17,8 @@
  *****************************************************************************/
 
 #include "Object.h"
+
+#include "BaseEngine.h"
 #include "render/Renderer.h"
 
 /*****************************************************************************
@@ -24,22 +26,33 @@
  *****************************************************************************/
 
 GameObject::GameObject(Mesh* mesh, RenderShader* shader) : mesh(mesh), renderShader(shader) {
-	if (this->mesh)
+	//Setup the mesh if needed
+	if (this->mesh && shader)
 		this->mesh->setup(shader);
 }
 
 GameObject::~GameObject() {
-	if (mesh) {
+	if (mesh)
 		delete mesh;
-	}
 }
 
 void GameObject::render() {
 	if (hasMesh()) {
 		if (! shouldCull()) {
-			renderShader->getShader()->use();
+			if (! BaseEngine::usingVulkan())
+				renderShader->getShader()->use();
 			Renderer::render(mesh, getModelMatrix(), renderShader);
 		}
+	}
+}
+
+void GameObject::setMesh(Mesh* mesh, RenderShader* shader) {
+	if (this->mesh != NULL)
+		delete this->mesh;
+	this->mesh = mesh;
+	if (shader) {
+		mesh->setup(shader);
+		this->renderShader = shader;
 	}
 }
 
@@ -51,8 +64,8 @@ GameObject2D::GameObject2D(float width, float height) : GameObject(NULL, NULL) {
 	size = Vector2f(width, height);
 }
 
-GameObject2D::GameObject2D(Mesh* mesh, std::string shaderId, float width , float height) :
-		GameObject2D(mesh, Renderer::getRenderShader(shaderId), width, height) {}
+GameObject2D::GameObject2D(Mesh* mesh, unsigned int shaderID, float width , float height) :
+		GameObject2D(mesh, Renderer::getRenderShader(shaderID), width, height) {}
 
 void GameObject2D::update() {
 	//Check to make sure this object has a mesh
@@ -74,8 +87,8 @@ GameObject3D::GameObject3D(float width, float height, float depth) : GameObject(
 	size = Vector3f(width, height, depth);
 }
 
-GameObject3D::GameObject3D(Mesh* mesh, std::string shaderId, float width , float height, float depth) :
-		GameObject3D(mesh, Renderer::getRenderShader(shaderId), width, height, depth) {}
+GameObject3D::GameObject3D(Mesh* mesh, unsigned int shaderID, float width , float height, float depth) :
+		GameObject3D(mesh, Renderer::getRenderShader(shaderID), width, height, depth) {}
 
 void GameObject3D::update() {
 	//Check to make sure this object has a mesh
@@ -92,9 +105,13 @@ Vector3f GameObject3D::getSize() {
 	return size * getScale();
 }
 
-bool GameObject3D::shouldCull() {
+bool GameObject3D::shouldCull(Frustum& frustum) {
 	if (hasMesh() && getMesh()->cullingEnabled()) {
-		return ! ((Camera3D*) Renderer::getCamera())->getFrustum().sphereInFrustum(cullingCentre, getMesh()->getBoundingSphereRadius());
+		return ! frustum.sphereInFrustum(cullingCentre, getMesh()->getBoundingSphereRadius() * getScale().max());
 	}
 	return false;
+}
+
+bool GameObject3D::shouldCull() {
+	 return shouldCull(((Camera3D*) Renderer::getCamera())->getFrustum());
 }

@@ -217,7 +217,7 @@ public:
 		for (unsigned int row = 0; row < N; row++) {
 			for (unsigned int col = 0; col < N; col++) {
 				//Add the current value onto the string
-				value += StrUtils::str(get(row, col));
+				value += utils_string::str(get(row, col));
 				//Check whether a comma should be added, and if so, add one
 				if (col != N - 1)
 					value += ",";
@@ -361,6 +361,12 @@ public:
 class Matrix4f : public Matrix4<float> {
 public:
 	Matrix4f() : Matrix4<float>() {}
+	Matrix4f(const Matrix<float, 3> &base) : Matrix4<float>() {
+		set(0, 0, base.get(0, 0)); 		set(0, 1, base.get(0, 1));		set(0, 2, base.get(0, 2));		set(0, 3, 0);
+		set(1, 0, base.get(1, 0)); 		set(1, 1, base.get(1, 1));		set(1, 2, base.get(1, 2));		set(1, 3, 0);
+		set(2, 0, base.get(2, 0)); 		set(2, 1, base.get(2, 1));		set(2, 2, base.get(2, 2));		set(2, 3, 0);
+		set(3, 0, 0);                   set(3, 1, 0);                   set(3, 2, 0);                   set(3, 3, 0);
+	}
 	Matrix4f(const Matrix<float, 4> &base) : Matrix4<float>(base) {}
 	Matrix4f(const Matrix4<float> &base) : Matrix4<float>(base) {}
 
@@ -421,16 +427,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initPerspective(float fovy, float aspect, float zNear, float zFar) {
-		float scale = (tan(fovy / 2 * (MathsUtils::PI / 360)));
-
-		set(0, 0, 1.0f / (aspect * scale)); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
-		set(1, 0, 0); set(1, 1, 1.0f / scale); set(1, 2, 0); set(1, 3, 0);
-		set(2, 0, 0); set(2, 1, 0); set(2, 2, -(zFar + zNear) / (zFar - zNear)); set(2, 3, -(2 * zFar * zNear) / (zFar - zNear));
-		set(3, 0, 0); set(3, 1, 0); set(3, 2, -1); set(3, 3, 1);
-
-		return (*this);
-	}
+	const Matrix4f& initPerspective(float fovy, float aspect, float zNear, float zFar);
 
 	const Matrix4f& initTranslation(const Vector2f& vector) {
 		set(0, 0, 1); set(0, 1, 0); set(0, 2, 0); set(0, 3, vector.getX());
@@ -451,8 +448,8 @@ public:
 	}
 
 	const Matrix4& initRotation(float angle, bool x, bool y, bool z) {
-		float c = (float) cos(MathsUtils::toRadians(angle));
-		float s = (float) sin(MathsUtils::toRadians(angle));
+		float c = (float) cos(utils_maths::toRadians(angle));
+		float s = (float) sin(utils_maths::toRadians(angle));
 
 		if (x) {
 			set(0, 0, 1); set(0, 1, 0); set(0, 2, 0); set(0, 3, 0);
@@ -492,21 +489,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initLookAt(const Vector3f& eye, const Vector3f& centre, const Vector3f& up) {
-		//EXPLANATION: http://stackoverflow.com/questions/21152556/an-inconsistency-in-my-understanding-of-the-glm-lookat-function
-
-		Vector3f forward = (centre - eye).normalise();
-		Vector3f u = up.normalised();
-		Vector3f side = forward.cross(u).normalise();
-		u = side.cross(forward);
-
-		set(0, 0, side.getX());     set(0, 1, side.getY());     set(0, 2, side.getZ());     set(0, 3, -side.dot(eye));
-		set(1, 0, u.getX());        set(1, 1, u.getY());        set(1, 2, u.getZ());        set(1, 3, -up.dot(eye));
-		set(2, 0, -forward.getX()); set(2, 1, -forward.getY()); set(2, 2, -forward.getZ()); set(2, 3, forward.dot(eye));
-		set(3, 0, 0);               set(3, 1, 0);               set(3, 2, 0);               set(3, 3, 1);
-
-		return (*this);
-	}
+	const Matrix4f& initLookAt(const Vector3f& eye, const Vector3f& centre, const Vector3f& up);
 
 	inline void translate(Vector2f vector) { (*this) *= Matrix4f().initTranslation(vector); }
 	inline void translate(Vector3f vector) { (*this) *= Matrix4f().initTranslation(vector); }

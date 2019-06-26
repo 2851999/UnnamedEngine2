@@ -25,6 +25,8 @@
 #include "Shader.h"
 #include "Skinning.h"
 #include "VBO.h"
+#include "../Sphere.h"
+#include "../vulkan/VulkanGraphicsPipeline.h"
 
 /*****************************************************************************
  * The MeshData class stores information about a mesh
@@ -63,6 +65,9 @@ public:
 		float radius;
 	};
 private:
+	/* The rendering mode to use */
+	GLenum renderMode = GL_TRIANGLES;
+
 	/* The raw data stored for this mesh */
 	std::vector<float> positions;
 	std::vector<float> colours;
@@ -121,7 +126,7 @@ public:
 	}
 
 	/* Method to calculate and return a bounding sphere for this mesh */
-	BoundingSphere calculateBoundingSphere();
+	Sphere calculateBoundingSphere();
 
 	/* Method called to setup the bones structures */
 	void setupBones(unsigned int numVertices);
@@ -139,6 +144,7 @@ public:
 
 	void addBoneData(unsigned int boneID, float boneWeight);
 
+	inline void setRenderMode(GLenum mode) { this->renderMode = mode; }
 	inline void setNumPositions(unsigned int numPositions) { this->numPositions = numPositions; }
 	inline void setNumColours(unsigned int numColours) { this->numColours = numColours; }
 	inline void setNumTextureCoords(unsigned int numTextureCoords) { this->numTextureCoords = numTextureCoords; }
@@ -189,6 +195,7 @@ public:
 	inline bool hasBones()         { return numBones > 0;         }
 
 	/* Methods to get the data */
+	GLenum       getRenderMode()       { return renderMode;       }
 	unsigned int getNumPositions()     { return numPositions;     }
 	unsigned int getNumColours()       { return numColours;       }
 	unsigned int getNumTextureCoords() { return numTextureCoords; }
@@ -230,6 +237,9 @@ private:
 	/* The render data for this mesh */
 	RenderData* renderData = NULL;
 
+	/* The shader used when assigning attribute locations */
+	RenderShader* setupShader = NULL;
+
 	/* The various Vertex Buffer Objects for this mesh */
 	VBO<GLfloat>* vboPositions     = NULL;
 	VBO<GLfloat>* vboColours       = NULL;
@@ -259,13 +269,12 @@ private:
 	/* Used to identify whether Mesh is indexed */
 	bool hasIndices = false;
 public:
-	MeshRenderData() {}
-	MeshRenderData(MeshData* data, RenderShader* renderShader) { setup(data, renderShader); }
+	MeshRenderData(MeshData* data, RenderShader* renderShader);
 
 	virtual ~MeshRenderData() { destroy(); }
 
-	/* Setups this structure for rendering using OpenGL */
-	void setup(MeshData* data, RenderShader* renderShader);
+	/* Sets up for rendering */
+	void setup(MeshData* data, std::vector<Material*>& materials);
 
 	/* Method to render using the data */
 	void render();
@@ -284,6 +293,7 @@ public:
 
 	/* Setters and getters */
 	inline RenderData* getRenderData() { return renderData; }
+	inline RenderShader* getSetupShader() { return setupShader; }
 };
 
 /*****************************************************************************
@@ -306,14 +316,11 @@ private:
 	/* The skeleton for this mesh */
 	Skeleton* skeleton = NULL;
 
-	/* The centre of this mesh */
-	Vector3f centre;
-
-	/* The radius of this mesh's bounding sphere */
-	float radius = 1.0f;
+	/* The bounding sphere for this mesh */
+	Sphere boundingSphere;
 
 	/* Boolean that states whether this mesh should be culled where possible */
-	bool culling = true;
+	bool culling = false;
 public:
 	/* The constructor */
 	Mesh(MeshData* data);
@@ -322,9 +329,10 @@ public:
 	virtual ~Mesh();
 
 	/* Method called to setup this mesh for rendering */
-	inline void setup(RenderShader* renderShader) {
-		this->renderData = new MeshRenderData(this->data, renderShader);
-	}
+	void setup(RenderShader* renderShader);
+
+	/* Method called to update the animation of this mesh */
+	void updateAnimation(float deltaSeconds);
 
 	/* Method to add a material */
 	inline void addMaterial(Material* material) { materials.push_back(material); }
@@ -340,8 +348,7 @@ public:
 	}
 	inline void setMaterials(std::vector<Material*>& materials) { this->materials = materials; }
 	inline void setSkeleton(Skeleton* skeleton) { this->skeleton = skeleton; }
-	inline void setBoundingSphereCentre(Vector3f centre) { this->centre = centre; }
-	inline void setBoundingSphereRadius(float radius)    { this->radius = radius; }
+	inline void setBoundingSphere(Sphere sphere) { this->boundingSphere = sphere; }
 	inline void setCullingEnabled(bool enabled) { this->culling = enabled; }
 
 	inline Matrix4f getMatrix() { return transform; }
@@ -355,8 +362,8 @@ public:
 	inline bool hasMaterial() { return materials.size() > 0; }
 	inline Skeleton* getSkeleton() { return skeleton; }
 	inline bool hasSkeleton() { return skeleton; }
-	inline Vector3f getBoundingSphereCentre() { return centre; }
-	inline float getBoundingSphereRadius() { return radius; }
+	inline Vector3f getBoundingSphereCentre() { return boundingSphere.centre; }
+	inline float getBoundingSphereRadius() { return boundingSphere.radius; }
 	inline bool cullingEnabled() { return data->getNumDimensions() == MeshData::DIMENSIONS_3D && culling; }
 	inline bool isCullingEnabled() { return culling; }
 };
@@ -375,6 +382,8 @@ public:
 
 	/* Method used to create a MeshData instance for a quad, given its 4 corners */
 	static MeshData* createQuad(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags = MeshData::NONE);
+	/* Method used to create a MeshData instance for a quad, given its 4 corners and texture */
+	static MeshData* createQuad(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture, MeshData::Flag flags = MeshData::NONE);
 	/* Method used to create a MeshData instance for a quad (rectangle/square in this case) given its width and height */
 	static MeshData* createQuad(float width, float height, MeshData::Flag flags = MeshData::NONE);
 	/* Method used to create a MeshData instance for a textured quad (rectangle/square in this case) given its width and height */
@@ -393,6 +402,8 @@ public:
 
 	/* Method used to create a MeshData instance for a quad, given its 4 corners */
 	static MeshData* createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags = MeshData::NONE);
+	/* Method used to create a MeshData instance for a quad, given its 4 corners and the texture */
+	static MeshData* createQuad3D(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture, MeshData::Flag flags = MeshData::NONE);
 	/* Method used to create a MeshData instance for a quad (rectangle/square in this case) given its width and height */
 	static MeshData* createQuad3D(float width, float height, MeshData::Flag flags = MeshData::NONE);
 	/* Method used to create a MeshData instance for a textured quad (rectangle/square in this case) given its width and height */

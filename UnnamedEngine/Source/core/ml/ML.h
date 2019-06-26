@@ -40,10 +40,10 @@ public:
 
 	/* Various methods to convert the data into another data type before
 	 * returning it */
-	inline unsigned int getDataAsUInt()  { return StrUtils::strToUInt(data);  }
-	inline int  		getDataAsInt()   { return StrUtils::strToInt(data);   }
-	inline bool 		getDataAsBool()  { return StrUtils::strToBool(data);  }
-	inline float 		getDataAsFloat() { return StrUtils::strToFloat(data); }
+	inline unsigned int getDataAsUInt()  { return utils_string::strToUInt(data);  }
+	inline int  		getDataAsInt()   { return utils_string::strToInt(data);   }
+	inline bool 		getDataAsBool()  { return utils_string::strToBool(data);  }
+	inline float 		getDataAsFloat() { return utils_string::strToFloat(data); }
 
 	/* Various setters and getters */
 	inline void setName(std::string name) { this->name = name; }
@@ -70,6 +70,9 @@ private:
 
 	/* The child tags */
 	std::vector<MLElement> children;
+
+	/* Any other contents of this element */
+	std::string contents = "";
 public:
 	/* The constructor */
 	MLElement();
@@ -79,15 +82,24 @@ public:
 	inline void add(MLAttribute attribute) { attributes.push_back(attribute); }
 	inline void add(MLElement child) { children.push_back(child); }
 
+	/* Method to add to the contents */
+	inline void addContent(std::string content) { contents += content; }
+
 	/* Method used to find an element given its name and return the index of the
 	 * first occurrence if it exists - otherwise it will return -1 */
-	int find(std::string name);
+	int findChild(std::string name);
+
+	/* Returns the index of the first occurrence of an attribute with a certain name */
+	int findAttribute(std::string name);
 
 	/* Various setters and getters */
 	inline void setName(std::string name) { this->name = name; }
+	inline void setContents(std::string contents) { this->contents = contents; }
 	inline void setChild(unsigned int index, MLElement& element) { children[index] = element; }
 	inline std::string& getName() { return name; }
+	inline std::string& getContents() { return contents; }
 	inline std::vector<MLAttribute>& getAttributes() { return attributes; }
+	inline MLAttribute& getAttribute(unsigned int index) { return attributes[index]; }
 	inline std::vector<MLElement>& getChildren() { return children; }
 	inline MLElement& getChild(unsigned int index) { return children[index]; }
 

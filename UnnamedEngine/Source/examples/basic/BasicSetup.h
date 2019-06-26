@@ -24,9 +24,9 @@
  *
  * Tutorial Number: 1
  * Tutorial Name: Basic Setup
- * Engine Version: V0.1.0 (0::1::2::3)
+ * Engine Version: V0.2.9 (1::0::6::4)
  * Date Created: 16/10/2016
- * Date Updated: 16/10/2016
+ * Date Updated: 13/04/2018
  *
  * Description: Demonstrates the setup process to use the engine.
  *****************************************************************************/
@@ -72,7 +72,7 @@ void Tutorial::initialise() {
 	//Assign some Settings
 	getSettings().windowTitle = "Tutorial 1 - Basic Setup"; //The title of the window
 	getSettings().videoResolution = VideoResolution::RES_1280x720; //The video resolution
-	getSettings().debuggingShowInformation = true; //Shows some engine/performance data
+	getSettings().debugShowInformation = true; //Shows some engine/performance data
 
 	//The video resolution is used to determine the size of the window
 	//whether it is full screen or not, and when the window is actually
@@ -88,7 +88,7 @@ void Tutorial::render() {
 	//When rendering some OpenGL stuff needs to be performed, but
 	//in this case the below can be used so we do not need to worry
 	//about it
-	GLUtils::setupSimple2DView();
+	utils_gl::setupSimple2DView();
 }
 
 void Tutorial::destroy() {}
