@@ -1,4 +1,364 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 0 | Experimental 1
+
+* Added CSVFile
+* Added methods to MLAttribute to obtain data as a
+  Vector2/3/4f
+
+* Fixed bug: GUILabel would not work with a NULL font
+* Fixed bug: utils_string::strSplit with a character for a
+             delimeter behaved differently to the same method
+             for a string type (if string's last letter was
+             the given delimeter then it would not return an
+             empty string for it)
+
+--------------------------------------------------------------
+Release 2 (V0.3.9)
+
+* Added Sphere
+* Added CDLODHeightMap
+* Added CDLODQuadTreeNode
+* Added CDLODTerrain
+* Added HeightMapGenerator
+* Added SimplexNoise
+* Added GeometryBuffer
+* Added PBREnvironment
+* Added PlaneCollider3D
+* Added Tilemap
+* Added TilemapLayer
+* Added AudioSequence
+* Added ResourcePack
+* Added FramebufferStoreCubemap
+* Added Text
+* Added UBO
+* Added ShaderInterface
+* Added Vulkan
+* Added VulkanDevice
+* Added VulkanExtensions
+* Added VulkanSwapChain
+* Added VulkanValidationLayers
+* Added VulkanRenderPass
+* Added VulkanGraphicsPipeline
+* Added VulkanBuffer
+* Added TextureSet
+* Added GraphicsState
+* Added method 'setMesh' in GameObject
+* Added 'renderMode' to MeshData
+* Added 'setupShader' to MeshRenderData
+* Added 'AABBInFrustum' method in Frustum
+* Added 'updateAnimation' in Mesh
+* Added 'createTexture' method in Texture
+* Added some getters and setters to DebugCamera
+* Added convenience methods for setting the x, y and z
+  positions of a transform/object separately
+* Added an alternative constructor for FramebufferTexture
+* Added deferred rendering in RenderScene3D
+* Added geometry shader support in RenderShader for use with
+  deferred rendering (used for the geometry pass)
+* Added srgb setting in TextureParameters
+* Added support for "../" in include paths for shaders
+* Added loadTexturef in Texture to load textures with float
+  data
+* Added separate minFilter and magFilter properties in
+  TextureParameters (when filter supplied both assigned)
+* Added support for deferred PBR rendering using
+  RenderScene3D
+* Added option to use multisampled FBO's and PostProcessors
+* Added methods in RenderScene3D to change the exposure
+  and enable/disable gamma correction
+* Added 'showDeferredBuffers' method in RenderScene3D
+* Added methods to enable and disable wireframe rendering in
+  RenderScene
+* Added methods findAttribute and getAttribute in MLElement
+* Added method strSplitLast in utils_string
+* Added ability to read content in an element in MLDocument
+* Added 'startFrame' to Animation2D
+* Added 'getCurrentAnimationName' and 'getCurrentAnimation'
+  to Sprite
+* Added 'setTextureCoords' in Sprite
+* Added 'roundNearest' in utils_maths
+* Added 'Offsets' to TextureAtlas
+* Added 'fadeIn' and 'fadeOut' methods to AudioSource and
+  SoundSystem
+* Added error messages in AudioLoader for files that don't
+  exist
+* Added 'setup' methods in Sprite
+* Added error messages to SoundSystem
+* Added point light shadows
+* Added methods to Font that only update either the position
+  that text will be rendered or the actual text to be rendered
+* Added 'getCurrentFrameInAnimation' method in Animation2D
+* Added 1440p to VideoResolution
+* Added constructor in Matrix4f to initialise data from a
+  Matrix3f
+* Added 'videoVulkan' setting in Settings
+* Added methods 'useMaterial' and 'stopUsingMaterial' in
+  Renderer (Replacing 'setMaterialUniforms' method)
+* Added methods 'outputCompleteShaderFile(s)' to Shader to
+  write a whole shader file containing all includes
+* Added 'compileToSPIRV'/'compileEngineShaderToSPIRV' methods
+  to Shader to help compile engine shaders to SPIR-V (Requires
+  glslangValidator)
+* Added 'createQuad3D' method with a texture in MeshBuilder
+* Added 'debugVkValidationLayersEnabled' in Settings
+* Added function 'strJoin' to utils_string
+* Added 'usingVulkan' method in BaseEngine
+* Added warning messages and checks for updating
+  MeshRenderData
+
+* Changed default value of 'culling' in Mesh to false, and
+  changed all models to assign this value to true
+* Changed 'updateBones' to be prinvate in Skeleton
+* Changed resources so that they remove themselves from their
+  ResourceManager when deleted
+* Changed getDelta() methods to be of type float to be
+  more accurate
+* Changed debugging settings to debug
+* Changed ModelLoader to load diffuse textures as SRGB by
+  default with the variable 'loadDiffuseTexturesAsSRGB' to
+  change this when loading a model
+* Changed Material structure to a class
+* Changed saveTextures and releaseNewTextures in Renderer
+  so that it can be called more than once to allow more than
+  one state to be saved (releaseNewTextures will unbind the
+  textures that were added since the last saveTextures call)
+* Changed frustum culling for rendering shadow maps to be
+  with the light's view frustum in RenderScene3D
+* Changed vectors to work more like GLSL with Vector3f(0.0f)
+  for example assigning all components in the vector to 0.0f
+  instead of just the x one
+* Changed MLParser to allow for closing an element on the
+  same line
+* Changed ML to allow it to read some XML files
+* Changed 'entity' to 'sprite' in Animation2D
+* Changed Camera2D to invert its position to make its
+  movement more intuitive
+* Changed Animation2D to reset the animation when starting
+* Changed Sprite to set currentAnimation to NULL when it
+  has finished running
+* Changed 'update' method in Sprite to be overridable
+* Changed TextureAnimation2D to assign the texture for the
+  first frame of animation when it is started
+* Changed 'loadShader' method in Shader to load a geometry
+  shader if it is also available
+* Changed Material so variables are no longer public (use
+  methods to access instead) allowing faster transfer of data
+  using UBO's
+* Changed rendering system and shaders to use UBO's to assign
+  the majority of data (This has increased the shader
+  performance)
+* Changed Renderer to only load shaders being used (can also
+  use 'loadRenderShader' to load shaders manually)
+* Changed MeshRenderData to assign specific attribute
+  locations matching the ones defined in the shaders
+* Changed shaders to use explicit locations (To make more
+  compatible for compilation to SPIR-V)
+* Changed MeshRenderData so 'setup' is not called and so must
+  be done after creation (RenderData instance is now created
+  in the constructor)
+* Changed Material shaders to assign explicit binding locations
+  for textures
+* Changed Renderer to use texture units 10 and above when
+  binding textures (to support old method of binding textures)
+* Changed shader id's in Renderer to use unsigned integers
+  instead of strings
+* Changed 'loadEngineShader' in Renderer to load shaders for
+  Vulkan in a separate folder 'shaders-vulkan'
+* Changed 'videoVSync' in Settings to be an 'unsinged int'
+  type so a value of 2 can be used to indicate triple
+  buffering should be used (Vulkan)
+* Changed 'setup' methods in RenderData to require a
+  RenderShader instead of a Shader
+* Changed 'initPerspective' in Matrix4f to return a
+  different matrix when using Vulkan (so depth values are
+  in the range 0-1 as Vulkan requires)
+* Changed 'DEFAULT_CLAMP' in TextureParameters to be GL_REPEAT
+
+
+* Cleaned up some shaders
+
+* Improved accuracy of FPSLimiter
+* Improved Audio to include loop intervals and a way to
+  request a looping sound to stop
+  
+* Increased maximum number of bones in a model from 80 to 90
+
+* Replaced all instances of std::map with std::unordered_map
+  as the order was not necessary
+
+* Renamed all utility namespaces from things like StrUtils
+  to utils_string, and FileUtils to utils_file
+* Renamed cutoff to innerCutoff in Light
+* Renamed FramebufferTexture to FramebufferStore
+* Renamed find to findChild in MLElement
+* Renamed Sprite2D to Sprite
+* Renamed 'timeBetweenFrame' to 'timeBetweenFrames' in
+  Animation2D
+  
+* Removed 'shouldClamp' in TextureParameters (since default
+  is GL_REPEAT anyway)
+  
+* Moved some of the shaders around
+
+* Removed BoundingSphere structure (Replaced with sphere)
+* Removed size parameter for SkyBox
+
+* Fixed bug: Frustum culling did not take into account the
+             scale of the object
+* Fixed bug: Shadow's would repeat themselves if far enough
+             away
+* Fixed bug: DebugCamera was incorrectly calculating mouse
+             movement
+* Fixed bug: GUIDropDownMenu and hence GUIDropDownList did
+             not assign added button's transform
+* Fixed bug: Horizontal GUISlider did not work correctly
+* Fixed bug: Matrix4f used half the value it should have for
+             the fov
+* Fixed bug: Shininess value was not loaded from materials
+* Fixed bug: Was incorrectly calculating spot lights
+* Fixed bug: Parallax disaplcement mapping was wrong when
+             objects were rotated (seems like bitangents from
+             assimp may be in the wrong direction)
+* Fixed bug: Radius for the bounding sphere of a mesh was
+             calculated incorrectly
+* Fixed bug: MLDocument incorrectly delt with elements that
+             were closed on the same line
+* Fixed bug: TextureAtlas would not work properly with
+             non-square textures
+* Fixed bug: AudioLoader incorrectly loaded stereo sounds
+* Fixed bug: Potential OpenAL crash upon failure to find a
+             device
+* Fixed bug: Font 'getWidth' could cause a segmentation fault
+             with '\n' in the text
+* Fixed bug: Font getHeight only measured the height of one
+             line if \n was included
+* Fixed bug: Rotations for skeletal animation weren't
+             interpolated correctly
+* Fixed bug: Depth sorting for particles ignored the last
+  			 particle
+* Fixed bug: Didn't delete 'vboOthers' in MeshRenderData
+* Fixed bug: Fonth had overlapping glyphs in the bitmap
+             resulting in lines appearing in text
+* Fixed bug: Font didn't destroy the texture it created when
+             it was destroyed
+* Fixed bug: Didn't unbind depth buffer when creating a
+             FramebufferStore
+* Fixed bug: 'Renderer::destroy' was never called by
+             BaseEngine
+* Fixed bug: DebugCamera assigned 'A' and 'D' key bindings
+             the wrong way round
+* Fixed bug: Loaded RenderShaders were not destroyed by
+             Renderer
+* Fixed bug: Did not delete VBO's used for skinning in
+             MeshRenderData
+
+* Started adding Vulkan support
+             
+* Note: Text handles rendering of a Font instead of Font
+
+--------------------------------------------------------------
+Release 1 | Beta 3 (V0.3.9)
+
+* Added Vulkan
+* Added VulkanDevice
+* Added VulkanExtensions
+* Added VulkanSwapChain
+* Added VulkanValidationLayers
+* Added VulkanRenderPass
+* Added VulkanGraphicsPipeline
+* Added VulkanBuffer
+* Added TextureSet
+* Added GraphicsState
+* Added 'videoVulkan' setting in Settings
+* Added 'setup' method in ShaderInterface
+* Added methods 'useMaterial' and 'stopUsingMaterial' in
+  Renderer (Replacing 'setMaterialUniforms' method)
+* Added methods 'outputCompleteShaderFile(s)' to Shader to
+  write a whole shader file containing all includes
+* Added 'compileToSPIRV'/'compileEngineShaderToSPIRV' methods
+  to Shader to help compile engine shaders to SPIR-V (Requires
+  glslangValidator)
+* Added 'createQuad3D' method with a texture in MeshBuilder
+* Added 'debugVkValidationLayersEnabled' in Settings
+* Added function 'strJoin' to utils_string
+* Added VulkanLightingShader for lighting with RenderScene3D
+* Added 'usingVulkan' method in BaseEngine
+* Added warning messages and checks for updating
+  MeshRenderData
+
+* Changed Renderer to only load shaders being used (can also
+  use 'loadRenderShader' to load shaders manually)
+* Changed MeshRenderData and ShaderInterface to assign
+  specific attribute locations matching the ones defined in
+  the shaders
+* Changed shaders to use explicit locations (To make more
+  compatible for compilation to SPIR-V)
+* Changed ShaderInterface to only create UBO's when they are
+  obtained using 'getUBO'
+* Changed MeshRenderData so 'setup' is not called and so must
+  be done after creation (RenderData instance is now created
+  in the constructor)
+* Changed Material shaders to assign explicit binding locations
+  for textures
+* Changed Renderer to use texture units 10 and above when
+  binding textures (to support old method of binding textures)
+* Changed ShaderInterface so the UBO id's are now integer
+  values
+* Changed shader id's in Renderer to use unsigned integers
+  instead of strings
+* Changed MeshRenderData to add the required UBO's to
+  it's RenderData using ShaderInterface
+* Changed 'loadEngineShader' in Renderer to load shaders for
+  Vulkan in a separate folder 'shaders-vulkan'
+* Changed 'videoVSync' in Settings to be an 'unsinged int'
+  type so a value of 2 can be used to indicate triple
+  buffering should be used (Vulkan)
+* Changed 'setup' methods in RenderData to require a
+  RenderShader instead of a Shader
+* Changed 'initPerspective' in Matrix4f to return a
+  different matrix when using Vulkan (so depth values are
+  in the range 0-1 as Vulkan requires)
+* Changed 'DEFAULT_CLAMP' in TextureParameters to be GL_REPEAT
+  
+* Removed 'shouldClamp' in TextureParameters (since default
+  is GL_REPEAT anyway)
+  
+* Fixed bug: Didn't delete 'vboOthers' in MeshRenderData
+* Fixed bug: Font still had overlapping glyphs in the bitmap
+             resulting in lines appearing in text
+* Fixed bug: Font didn't destroy the texture it created when
+             it was destroyed
+* Fixed bug: Didn't unbind depth buffer when creating a
+             FramebufferStore
+* Fixed bug: 'Renderer::destroy' was never called by
+             BaseEngine
+* Fixed bug: DebugCamera assigned 'A' and 'D' keys bindings
+             the wrong way round
+* Fixed bug: Loaded RenderShaders were not destroyed by
+             Renderer
+* Fixed bug: Crash on deletion of a Mesh
+* Fixed bug: Did not delete VBO's used for skinning in
+             MeshRenderData
+* Fixed bug: BaseEngine did not delete its Text instance
+* Fixed bug: GUILabel would cause crash on creation
+* Fixed bug: Splash screen had overlapping text
+
+* Started adding Vulkan support
+
+--------------------------------------------------------------
+Release 1 | Beta 2 | Development 5 (V0.3.9)
+
+* Added error message if 'vkQueuePresentKHR' fails
+
+* Fixed bug: OpenAL not initialised when using Vulkan
+* Fixed bug: GraphicsState would have stopped RenderScene3D
+             from applying many lights correctly
+* Fixed bug: GUILabel would cause crash on creation
+* Fixed bug: Splash screen had overlapping text
+
+* Some cleanup
+
+--------------------------------------------------------------
 Release 1 | Beta 2 | Development 4 | Experimental 2
 
 * Fixed bug: Splash screen had overlapping text
@@ -594,472 +954,3 @@ Release 1 | Beta 2 (V0.3.4)
              line if \n was included
              
 * Note: Text handles rendering of a Font instead of Font
-		     
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 4 (V0.3.4)
-
-* Added UBO
-* Added ShaderInterface
-* Added UEMaterialTextures struct in material shaders to keep
-  samplers separate to data (preparing to use UBOs)
-* Added constructor in Matrix4f to initialise data from a
-  Matrix3f
-  
-* Changed Material so variables are no longer public (use
-  methods to access instead) allowing faster transfer of data
-  using UBO's
-* Changed rendering system and shaders to use UBO's to assign
-  the majority of data (This has increased the shader
-  performance)
-
-* Replaced ue_useNormal/ParallaxMap with hasNormal/ParallaxMap
-  within the UEMaterial structure in shaders
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 3 | Experimental 8
-
-* Fixed bug: Tilemap didn't assign the mvp matix since
-             changing to use UBO's
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 3 | Experimental 7
-
-* Changed shaders to use UBO's more
-
-* Fixed bug: Previous commit stopped assigning parallax maps
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 3 | Experimental 6
-
-* Changed shaders to use UBO's more
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 3 | Experimental 5
-
-* Added constructor in Matrix4f to initialise data from a
-  Matrix3f
-  
-* Changed shaders to use UBO's more
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 3 | Experimental 4
-
-* Changed Material so variables are no longer public (use
-  methods to access instead) allowing faster transfer of data
-  using UBO's
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 3 | Experimental 3
-
-* Added ShaderInterface
-
-* Cleaned up Renderer slightly
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 3 | Experimental 2
-
-* Changed rendering of lighting to use UBOs
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 3 | Experimental 1
-
-* Added UBO
-* Added UEMaterialTextures struct in material shaders to keep
-  samplers separate to data (preparing to use UBOs)
-  
-* Changed Renderer and shaders to use a UBO for material and
-  skinning data (This has increased the shader performance)
-
-* Replaced ue_useNormal/ParallaxMap with hasNormal/ParallaxMap
-  within the UEMaterial structure in shaders
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 3 (V0.3.3)
-
-* Added FramebufferStoreCubemap
-* Added Text
-* Added point light shadows
-* Added methods to Font that only update either the position
-  that text will be rendered or the actual text to be rendered
-* Added 'getCurrentFrameInAnimation' method in Animation2D
-* Added ability to add fonts to ResourcePack
-* Added 1440p to VideoResolution
-
-* Changed 'loadShader' method in Shader to load a geometry
-  shader if it is also available
-  
-* Renamed 'timeBetweenFrame' to 'timeBetweenFrames' in
-  Animation2D
-
-* Cleaned up RenderScene3D slightly
-
-* Increased maximum number of bones in a model from 80 to 90
-
-* Fixed bug: RenderScene3D didn't use wireframes correctly
-             when not using lighting
-* Fixed bug: Rotations for skeletal animation weren't
-             interpolated correctly
-* Fixed bug: Depth sorting for particles ignored the last
-  			 particle
-* Fixed bug: Font getHeight only measured the height of one
-             line if \n was included
-
-* Note: Text handles rendering of a Font instead of Font
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 2 | Experimental 5
-
-* Added ability to add fonts to ResourcePack
-* Added 1440p to VideoResolution
-
-* Fixed bug: Font getHeight only measured the height of one
-             line if \n was included
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 2 | Experimental 4
-
-* Added Text
-
-* Added methods to Font that only update either the position
-  that text will be rendered or the actual text to be rendered
-* Added 'getCurrentFrameInAnimation' method in Animation2D
-  
-* Renamed 'timeBetweenFrame' to 'timeBetweenFrames' in
-  Animation2D
-  
-* Fixed bug: Depth sorting for particles ignored the last
-  			 particle
-  			 
-* Note: Text handles rendering of a Font instead of Font
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 2 | Experimental 3
-
-* Added FramebufferStoreCubemap
-* Added point light shadows
-
-* Changed loadShader method in Shader to load a geometry
-  shader if it is also available
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 2 | Experimental 2
-
-* Increased maximum number of bones in a model from 80 to 90
-
-* Fixed bug: Rotations for skeletal animation weren't
-             interpolated correctly
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 2 | Experimental 1
-
-* Cleaned up RenderScene3D slightly
-
-* Fixed bug: RenderScene3D didn't use wireframes correctly
-             when not using lighting
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 2 (V0.3.2)
-
-* Added Tilemap
-* Added TilemapLayer
-* Added AudioSequence
-* Added ResourcePack
-* Added methods findAttribute and getAttribute in MLElement
-* Added method strSplitLast in utils_string
-* Added ability to read content in an element in MLDocument
-* Added padding to texture coordinates for Font to reduce
-  texture bleeding artifacts
-* Added 'startFrame' to Animation2D
-* Added 'getCurrentAnimationName' and 'getCurrentAnimation'
-  to Sprite
-* Added 'setTextureCoords' in Sprite
-* Added 'roundNearest' in utils_maths
-* Added 'Offsets' to TextureAtlas
-* Added 'fadeIn' and 'fadeOut' methods to AudioSource and
-  SoundSystem
-* Added error messages in AudioLoader for files that don't
-  exist
-* Added 'setup' methods in Sprite
-* Added error messages to SoundSystem
-
-* Changed ML to allow it to read some XML files
-* Changed 'entity' to 'sprite' in Animation2D
-* Changed Camera2D to invert its position to make its
-  movement more intuitive
-* Changed Animation2D to reset the animation when starting
-* Changed Sprite to set currentAnimation to NULL when it
-  has finished running
-* Changed 'update' method in Sprite to be overridable
-* Changed TextureAnimation2D to assign the texture for the
-  first frame of animation when it is started
-  
-* Improved Audio to include loop intervals and a way to
-  request a looping sound to stop
-
-* Renamed find to findChild in MLElement
-* Renamed Sprite2D to Sprite
-
-* Fixed bug: MLDocument incorrectly delt with elements that
-             were closed on the same line
-* Fixed bug: TextureAtlas would not work properly with
-             non-square textures
-* Fixed bug: AudioLoader incorrectly loaded stereo sounds
-* Fixed bug: Potential OpenAL crash upon failure to find a
-             device
-* Fixed bug: Font 'getWidth' could cause a segmentation fault
-             with '\n' in the text
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 1 | Experimental 8
-
-* Added 'editable' parameter for tilemaps and improved
-  performance for rendering when this is false
-* Added 'getGridWidth' and 'getGridHeight' in TilemapLayer and
-  Tilemap
-
-* Fixed bug: Font 'getWidth' could cause a segmentation fault
-             with '\n' in the text
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 1 | Experimental 7
-
-* Added ResourcePack
-* Added 'setup' methods in Sprite
-* Added error messages to SoundSystem
-
-* Renamed Sprite2D to Sprite
-
-* Fixed bug: Potential OpenAL crash upon failure to find a
-             device
-* Fixed bug: 'fadeIn' in AudioSource did not start without
-			 sound
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 1 | Experimental 6
-
-* Added 'fade' methods to AudioSequence
-* Added 'getTileWidth' and 'getTileHeight' methods to Tilemap
-  and TilemapLayer
-* Added error messages in AudioLoader for files that don't
-  exist
-  
-* Changed Animation2D to reset the animation when starting
-* Changed Sprite2D to set currentAnimation to NULL when it
-  has finished running
-* Changed 'update' method in Sprite2D to be overridable
-* Changed TextureAnimation2D to assign the texture for the
-  first frame of animation when it is started
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 1 | Experimental 5
-
-* Added AudioSequence
-* Added 'Offsets' to TextureAtlas
-* Added 'fadeIn' and 'fadeOut' methods to AudioSource and
-  SoundSystem
-
-* Improved Audio to include loop intervals and a way to
-  request a looping sound to stop
-
-* Fixed bug: Tilemap had its width and height values reversed
-             as well as its rows and columns
-* Fixed bug: AudioLoader incorrectly loaded stereo sounds
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 1 | Experimental 4
-
-* Added 'visibility' to TilemapLayer
-* Added 'startFrame' to Animation2D
-* Added 'getCurrentAnimationName' and 'getCurrentAnimation'
-  to Sprite2D
-* Added 'setTextureCoords' in Sprite2D
-* Added 'name' to TilemapLayer
-* Added 'roundNearest' in utils_maths
-  
-* Changed 'entity' to 'sprite' in Animation2D
-* Changed Camera2D to invert its position to make its
-  movement more intuitive
-
-* Fixed bug: Tilemap might not have loaded multiple tilemaps
-  properly
-* Fixed bug: TextureAtlas would not work properly with
-             non-square textures
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 1 | Experimental 3
-
-* Added padding to texture coordinates for Font to reduce
-  texture bleeding artifacts
-
-* Renamed Tilemap to TilemapLayer and created Tilemap class
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 1 | Experimental 2
-
-* Added methods findAttribute and getAttribute in MLElement
-* Added method loadTileset in Tilemap
-* Added method strSplitLast in utils_string
-* Added ability to read content in an element in MLDocument
-
-* Renamed find to findChild in MLElement
-
-* Fixed bug: MLDocument incorrectly delt with elements that
-             were closed on the same line
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 1 | Experimental 1
-
-* Added Tilemap
-
-* Changed ML to allow it to read some XML files
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 1 (V0.3.1)
-
-* Added PlaneCollider3D
-* Added methods to enable and disable wireframe rendering in
-  RenderScene
-* Added 'getSteepness' mehtod in CDLODHeightMap
-
-* Changed MLParser to allow for closing an element on the
-  same line
-
-* Removed temporary (incorrect) antialiasing for deferred
-  rendering
-
-* Fixed bug: Radius for the bounding sphere of a mesh was
-             calculated incorrectly
-* Fixed bug: CDLODHeightMap could cause a crash when using
-		     getMinHeight and getMaxHeight
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 0 | Experimental 3
-
-* Changed MLParser to allow for closing an element on the
-  same line
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 0 | Experimental 2
-
-* Added methods to enable and disable wireframe rendering in
-  RenderScene
-* Added 'getSteepness' mehtod in CDLODHeightMap
-
-* Removed temporary (incorrect) antialiasing for deferred
-  rendering
-  
-* Fixed bug: CDLODHeightMap could cause a crash when using
-		     getMinHeight and getMaxHeight
-* Fixed bug: Previous experimental wouldn't output depth
-             information to the default framebuffer correctly
-
---------------------------------------------------------------
-Release 1 | Beta 1 | Development 0 | Experimental 1
-
-* Added PlaneCollider3D
-
-* Fixed bug: Radius for the bounding sphere of a mesh was
-             calculated incorrectly
-* Fixed bug: PostProcessing and GeometryBuffer potentially
-			 caused some rendering artifacts
-
---------------------------------------------------------------
-Release 1 | Beta 1 (V0.3.0)
-
-* Added Sphere
-* Added CDLODHeightMap
-* Added CDLODQuadTreeNode
-* Added CDLODTerrain
-* Added HeightMapGenerator
-* Added SimplexNoise
-* Added GeometryBuffer
-* Added PBREnvironment
-* Added method 'setMesh' in GameObject
-* Added 'renderMode' to MeshData
-* Added 'setupShader' to MeshRenderData
-* Added 'AABBInFrustum' method in Frustum
-* Added 'updateAnimation' in Mesh
-* Added 'createTexture' method in Texture
-* Added some getters and setters to DebugCamera
-* Added convenience methods for setting the x, y and z
-  positions of a transform/object separately
-* Added an alternative constructor for FramebufferTexture
-* Added deferred rendering in RenderScene3D
-* Added geometry shader support in RenderShader for use with
-  deferred rendering (used for the geometry pass)
-* Added srgb setting in TextureParameters
-* Added support for "../" in include paths for shaders
-* Added loadTexturef in Texture to load textures with float
-  data
-* Added separate minFilter and magFilter properties in
-  TextureParameters (when filter supplied both assigned)
-* Added support for deferred PBR rendering using
-  RenderScene3D
-* Added option to use multisampled FBO's and PostProcessors
-* Added methods in RenderScene3D to change the exposure
-  and enable/disable gamma correction
-* Added showDeferredBuffers method in RenderScene3D
-  (only works with antialiasing turned off)
-
-* Changed default value of 'culling' in Mesh to false, and
-  changed all models to assign this value to true
-* Changed 'updateBones' to be prinvate in Skeleton
-* Changed resources so that they remove themselves from their
-  ResourceManager when deleted
-* Changed getDelta() methods to be of type float to be
-  more accurate
-* Changed debugging settings to debug
-* Changed ModelLoader to load diffuse textures as SRGB by
-  default with the variable 'loadDiffuseTexturesAsSRGB' to
-  change this when loading a model
-* Changed Material structure to a class
-* Changed saveTextures and releaseNewTextures in Renderer
-  so that it can be called more than once to allow more than
-  one state to be saved (releaseNewTextures will unbind the
-  textures that were added since the last saveTextures call)
-* Changed frustum culling for rendering shadow maps to be
-  with the light's view frustum in RenderScene3D
-* Changed vectors to work more like GLSL with Vector3f(0.0f)
-  for example assigning all components in the vector to 0.0f
-  instead of just the x one
-  
-* Cleaned up some shaders
-
-* Improved accuracy of FPSLimiter
-
-* Replaced all instances of std::map with std::unordered_map
-  as the order was not necessary
-
-* Renamed all utility namespaces from things like StrUtils
-  to utils_string, and FileUtils to utils_file
-* Renamed cutoff to innerCutoff in Light
-* Renamed FramebufferTexture to FramebufferStore
-  
-* Rewritten render method in RenderScene
-  
-* Moved some of the shaders around
-
-* Removed BoundingSphere structure (Replaced with sphere)
-* Removed size parameter for SkyBox
-
-* Fixed bug: Not all resources were deleted when the engine
-             stopped
-* Fixed bug: Frustum culling did not take into account the
-             scale of the object
-* Fixed bug: Shadow's would repeat themselves if far enough
-             away
-* Fixed bug: DebugCamera was incorrectly calculating mouse
-             movement
-* Fixed bug: GUIDropDownMenu and hence GUIDropDownList did
-             not assign added button's transform
-* Fixed bug: Horizontal GUISlider did not work correctly
-* Fixed bug: Matrix4f used half the value it should have for
-             the fov
-* Fixed bug: Shininess value was not loaded from materials
-* Fixed bug: Was incorrectly calculating spot lights
-* Fixed bug: Parallax disaplcement mapping was wrong when
-             objects were rotated (seems like bitangents from
-             assimp may be in the wrong direction)
-
-* NOTE: MSAA in deferred rendering is not strictly correct
-        and can produce lighting artifacts
