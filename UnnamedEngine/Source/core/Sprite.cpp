@@ -92,14 +92,20 @@ void Animation2D::update(float deltaSeconds) {
 
 TextureAnimation2D::TextureAnimation2D(Sprite* sprite, TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat, unsigned int startFrame, int numFrames) :
 		Animation2D(sprite, timeBetweenFrame, numFrames == -1 ? textureAtlas->getNumTextures() : numFrames, repeat, startFrame), textureAtlas(textureAtlas) {
-
+	textureLayers.push_back(textureAtlas->getTexture());
 }
 
 void TextureAnimation2D::onStart() {
 	//Assign the texture in the entity
 	if (sprite) {
-		//Assign the texture
-		sprite->getMaterial()->setDiffuse(textureAtlas->getTexture());
+		//Check the number of layers required have been allocted
+		if (sprite->getNumLayers() < textureLayers.size())
+			Logger::log("Not enough Sprite layers assigned for animation", "TextureAnimation2D", LogType::Error);
+		//Assign the required textures
+		for (unsigned int i = 0; i < textureLayers.size(); ++i)
+			sprite->setLayer(i, textureLayers[i]);
+		//Assign the visible layers
+		sprite->setVisibleLayers(textureLayers.size());
 		//Assign the texture for the first frame
 		sprite->setTextureCoords(textureAtlas, currentFrame);
 	}
@@ -107,10 +113,9 @@ void TextureAnimation2D::onStart() {
 
 void TextureAnimation2D::updateFrame() {
 	//Ensure the entity has been assigned
-	if (sprite) {
+	if (sprite)
 		//Assign the texture coordinates
 		sprite->setTextureCoords(textureAtlas, currentFrame);
-	}
 }
 
 /*****************************************************************************
@@ -124,32 +129,66 @@ Sprite::~Sprite() {
 	animations.clear();
 }
 
+void Sprite::setupMesh(Texture* texture) {
+	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	//Add a sub data
+	getMesh()->getData()->addSubData(0, 0, 6, 0);
+	getMaterial()->setDiffuse(texture);
+}
+
 void Sprite::setup(Texture* texture) {
 	setWidth(texture->getWidth());
 	setHeight(texture->getHeight());
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	setupMesh(texture);
 	getMaterial()->setDiffuse(texture);
 }
 
 void Sprite::setup(Texture* texture, float width, float height) {
 	setWidth(width);
 	setHeight(height);
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	setupMesh(texture);
 	getMaterial()->setDiffuse(texture);
 }
 
 void Sprite::setup(TextureAtlas* textureAtlas) {
 	setWidth(textureAtlas->getSubTextureWidth());
 	setHeight(textureAtlas->getSubTextureHeight());
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), textureAtlas->getTexture(), MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
-	getMaterial()->setDiffuse(textureAtlas->getTexture());
+	setupMesh(textureAtlas->getTexture());
+	setVisibleLayers(getNumLayers());
 }
 
 void Sprite::setup(TextureAtlas* textureAtlas, float width, float height) {
 	setWidth(width);
 	setHeight(height);
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), textureAtlas->getTexture(), MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
-	getMaterial()->setDiffuse(textureAtlas->getTexture());
+	setupMesh(textureAtlas->getTexture());
+	setVisibleLayers(getNumLayers());
+}
+
+void Sprite::addMaxLayers(unsigned int maxLayers) {
+	while (getMesh()->getNumMaterials() < maxLayers)
+		//Add a Material for this new layer
+		getMesh()->addMaterial(new Material());
+}
+
+void Sprite::setLayer(unsigned int layer, Texture* texture) {
+	//Assign the required texture
+	getMesh()->getMaterial(layer)->setDiffuse(texture);
+}
+
+void Sprite::setVisibleLayers(unsigned int count) {
+	unsigned int endIndex = count - 1;
+	//Get the current maximum index
+	unsigned int currentMaxIndex = getMesh()->getData()->getSubDataCount() - 1;
+	//Check whether some should be added or removed
+	if (currentMaxIndex > endIndex) {
+		//Remove the last few
+		for (unsigned int i = endIndex; i < currentMaxIndex; ++i)
+			getMesh()->getData()->removeSubData(endIndex + 1);
+	} else if (currentMaxIndex < endIndex) {
+		//Add the required ones
+		for (unsigned int i = currentMaxIndex; i <= endIndex; ++i)
+			getMesh()->getData()->addSubData(0, 0, 6, getMesh()->getNumMaterials() - 1);
+	}
 }
 
 void Sprite::update(float deltaSeconds) {

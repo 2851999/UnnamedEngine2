@@ -102,10 +102,16 @@ class TextureAnimation2D : public Animation2D {
 private:
 	/* The texture atlas for the animation */
 	TextureAtlas* textureAtlas;
+
+	/* Other layers for this animation */
+	std::vector<Texture*> textureLayers;
 public:
 	/* The constructors */
 	TextureAnimation2D(Sprite* sprite, TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat = false, unsigned int startFrame = 0, int numFrames = -1);
 	TextureAnimation2D(TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat = false, unsigned int startFrame = 0, int numFrames = -1) : TextureAnimation2D(NULL, textureAtlas, timeBetweenFrame, repeat, startFrame, numFrames) {}
+
+	/* Method to add a layer to this texture animation */
+	inline void addLayer(Texture* texture) { textureLayers.push_back(texture); }
 
 	/* Method called when the frame needs to change */
 	virtual void updateFrame() override;
@@ -120,6 +126,14 @@ public:
  *****************************************************************************/
 
 class Sprite : public GameObject2D {
+public:
+	/* Stores for collision bounds (separate to bounds returned by GameObject2D get bounds) */
+	struct Offsets {
+		float left = 0.0f;
+		float right = 0.0f;
+		float top = 0.0f;
+		float bottom = 0.0f;
+	};
 private:
 	/* The animations for this sprite */
 	std::unordered_map<std::string, Animation2D*> animations;
@@ -127,6 +141,9 @@ private:
 	/* The current animation being played */
 	std::string currentAnimationName = "";
 	Animation2D* currentAnimation = NULL;
+
+	/* The collision bounds offsets */
+	Offsets collisionOffsets;
 public:
 	/* The constructors */
 	Sprite() {}
@@ -136,6 +153,7 @@ public:
 	Sprite(TextureAtlas* textureAtlas, float width, float height) { setup(textureAtlas, width, height); }
 
 	/* Sets the mesh given various things */
+	void setupMesh(Texture* texture);
 	void setup(Texture* texture);
 	void setup(Texture* texture, float width, float height);
 	void setup(TextureAtlas* textureAtlas);
@@ -143,6 +161,15 @@ public:
 
 	/* The destructor */
 	virtual ~Sprite();
+
+	/* Method add layers up to a maximum value */
+	void addMaxLayers(unsigned int maxLayers);
+	/* Method to assign the texture of a particular layer */
+	void setLayer(unsigned int layer, Texture* texture);
+
+	/* Method used to set the number layers of this sprite that should be visible
+	 * (starts with first layer and ensures 'count' layers are visible) */
+	void setVisibleLayers(unsigned int count);
 
 	/* Method called to update this sprite */
 	virtual void update(float deltaSeconds);
@@ -166,6 +193,17 @@ public:
 	inline std::string getCurrentAnimationName() { return currentAnimationName; }
 	/* Returns the current animation */
 	inline Animation2D* getCurrentAnimation() { return currentAnimation; }
+	/* Returns the number of layers in this Sprite */
+	inline unsigned int getNumLayers() { return getMesh()->getMaterials().size(); }
+	/* Returns a reference to the collision offsets */
+	inline Offsets& getCollisionOffsets() { return collisionOffsets; }
+	/* Returns various collision locations */
+	inline float getCollisionX() { return getPosition().getX() + collisionOffsets.left; }
+	inline float getCollisionY() { return getPosition().getY() + collisionOffsets.top; }
+	inline float getCollisionWidth() { return getSize().getX() - collisionOffsets.left - collisionOffsets.right; }
+	inline float getCollisionHeight() { return getSize().getY() - collisionOffsets.top - collisionOffsets.bottom; }
+	/* Returns the collision bounds of this Sprite in the form of a Rectangle */
+	inline Rect getCollisionBounds() { return Rect(getCollisionX(), getCollisionY(), getCollisionWidth(), getCollisionHeight()); }
 };
 
 #endif /* CORE_SPRITE_H_ */

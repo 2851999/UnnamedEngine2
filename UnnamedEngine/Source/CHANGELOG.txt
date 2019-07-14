@@ -1,4 +1,17 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 0 | Experimental 2
+
+* Added method to remove a SubData from MeshData
+* Added method to Sprite to obtain a specific collision
+  rectangle for the sprite with certain applied offsets (like
+  offsets in TextureAtlas)
+* Changed Sprite and TextureAnimation2D to allow multiple
+  textures to be added as layers for when multiple textures
+  should be rendered at the same time
+  
+* Removed 'Offsets' from TextureAtlas
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 0 | Experimental 1
 
 * Added CSVFile

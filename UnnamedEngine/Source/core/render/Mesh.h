@@ -166,6 +166,9 @@ public:
 		addSubData(data);
 	}
 
+	/* Method used to remove a sub data structure */
+	inline void removeSubData(unsigned int index) { subData.erase(subData.begin() + index); }
+
 	/* Methods to remove data */
 	inline void clearPositions()     { positions.clear();     numPositions     = 0; }
 	inline void clearColours()       { colours.clear();       numColours       = 0; }
