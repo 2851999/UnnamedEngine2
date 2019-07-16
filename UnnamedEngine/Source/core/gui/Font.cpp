@@ -60,7 +60,7 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 		//Add onto the width
 		width += glyphSlot->bitmap.width + GLYPH_SPACING;
 		//Update the height to make it the same as the tallest letter
-		height = utils_maths::max(height, glyphSlot->bitmap.rows);
+		height = utils_maths::max(height, (int) glyphSlot->bitmap.rows);
 	}
 
 	if (! BaseEngine::usingVulkan()) {

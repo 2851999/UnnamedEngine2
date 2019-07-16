@@ -303,7 +303,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 	//Go through each set of lights
 	for (unsigned int s = 0; s < lights.size(); s += NUM_LIGHTS_IN_SET) {
 		//Calculate the number of lights in this set
-		uniformNumLights = utils_maths::min(NUM_LIGHTS_IN_SET, lights.size() - s);
+		uniformNumLights = utils_maths::min<unsigned int>(NUM_LIGHTS_IN_SET, lights.size() - s);
 
 		//Check if blending needs to be setup
 		if (s == NUM_LIGHTS_IN_SET) {

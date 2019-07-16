@@ -19,6 +19,7 @@
 #ifndef CORE_WINDOW_H_
 #define CORE_WINDOW_H_
 
+#define NOMINMAX
 #include <windows.h>
 #include <GL/glew.h>
 #include <vulkan/vulkan.h>

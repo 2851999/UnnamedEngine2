@@ -134,7 +134,7 @@ void Test::onCreated() {
 	sphere->update();
 	renderScene->add(sphere);
 
-	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "plane.obj"), pbrRenderShader);
+	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "plane.dae"), pbrRenderShader);
 	sphere2->setPosition(10.0f, 0.8f, 0.0f);
 	sphere2->update();
 	renderScene->add(sphere2);

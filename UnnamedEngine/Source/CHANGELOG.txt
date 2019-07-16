@@ -1,4 +1,15 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 0 | Experimental 4
+
+* Changed MeshLoader to output the error text from Assimp if
+  a file fails to load
+* Fixed bug: Crash when loading a tilemap with Tilemap and
+             TilemapLayer
+* Fixed bug: Crash when updating Text with an empty string
+* Fixed bug: Explicit instantiations of VBO should have been
+             after the defininitions in VBO.cpp
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 0 | Experimental 3
 
 * Fixed bug: Sprite's 'setVisibleLayers' wasn't working

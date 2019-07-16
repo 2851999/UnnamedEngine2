@@ -66,8 +66,11 @@ public:
 
 	/* Methods used to update and render some text */
 	inline void render(std::string text, Vector2f position) {
-		update(text, position);
-		render();
+		//Only update and render if there is text
+		if (text.size() > 0) {
+			update(text, position);
+			render();
+		}
 	}
 
 	inline void render(std::string text, float x, float y) {
@@ -75,8 +78,11 @@ public:
 	}
 
 	inline void render(std::string text, Vector3f position) {
-		update(text, position);
-		render();
+		//Only update and render if there is text
+		if (text.size() > 0) {
+			update(text, position);
+			render();
+		}
 	}
 
 	inline void render(std::string text, float x, float y, float z) {

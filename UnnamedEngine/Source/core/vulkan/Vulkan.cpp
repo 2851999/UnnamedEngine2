@@ -25,6 +25,7 @@
 #include "../../utils/Logging.h"
 
 #include <limits>
+#include <array>
 
 /*****************************************************************************
  * The Vulkan class
