@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 0 | Experimental 3
+
+* Fixed bug: Sprite's 'setVisibleLayers' wasn't working
+             correctly
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 0 | Experimental 2
 
 * Added method to remove a SubData from MeshData

@@ -113,6 +113,15 @@ public:
 	/* Method to add a layer to this texture animation */
 	inline void addLayer(Texture* texture) { textureLayers.push_back(texture); }
 
+	/* Method add layers up to a maximum value (initialised with NULL) */
+	void addMaxLayers(unsigned int maxLayers);
+
+	/* Method used to assign a particular layer */
+	inline void setLayer(unsigned int index, Texture* texture) { textureLayers[index] = texture; }
+
+	/* Returns the number of layers */
+	inline unsigned int getNumLayers() { return textureLayers.size(); }
+
 	/* Method called when the frame needs to change */
 	virtual void updateFrame() override;
 

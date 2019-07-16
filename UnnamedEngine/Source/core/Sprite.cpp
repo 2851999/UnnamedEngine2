@@ -95,17 +95,26 @@ TextureAnimation2D::TextureAnimation2D(Sprite* sprite, TextureAtlas* textureAtla
 	textureLayers.push_back(textureAtlas->getTexture());
 }
 
+void TextureAnimation2D::addMaxLayers(unsigned int maxLayers) {
+	while (textureLayers.size() < maxLayers)
+		textureLayers.push_back(NULL);
+}
+
 void TextureAnimation2D::onStart() {
 	//Assign the texture in the entity
 	if (sprite) {
-		//Check the number of layers required have been allocted
+		//Check the number of layers required have been allocated
 		if (sprite->getNumLayers() < textureLayers.size())
 			Logger::log("Not enough Sprite layers assigned for animation", "TextureAnimation2D", LogType::Error);
+		unsigned int numVisible = 0;
 		//Assign the required textures
-		for (unsigned int i = 0; i < textureLayers.size(); ++i)
-			sprite->setLayer(i, textureLayers[i]);
+		for (unsigned int i = 0; i < textureLayers.size(); ++i) {
+			sprite->setLayer(numVisible, textureLayers[i]);
+			if (textureLayers[i])
+				++numVisible;
+		}
 		//Assign the visible layers
-		sprite->setVisibleLayers(textureLayers.size());
+		sprite->setVisibleLayers(numVisible);
 		//Assign the texture for the first frame
 		sprite->setTextureCoords(textureAtlas, currentFrame);
 	}
@@ -186,8 +195,8 @@ void Sprite::setVisibleLayers(unsigned int count) {
 			getMesh()->getData()->removeSubData(endIndex + 1);
 	} else if (currentMaxIndex < endIndex) {
 		//Add the required ones
-		for (unsigned int i = currentMaxIndex; i <= endIndex; ++i)
-			getMesh()->getData()->addSubData(0, 0, 6, getMesh()->getNumMaterials() - 1);
+		for (unsigned int i = currentMaxIndex; i < endIndex; ++i)
+			getMesh()->getData()->addSubData(0, 0, 6, i + 1);
 	}
 }
 
