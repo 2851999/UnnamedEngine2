@@ -28,62 +28,83 @@
 Animation2D::Animation2D(Sprite* sprite, float timeBetweenFrame, unsigned int totalFrames, bool repeat, unsigned int startFrame) :
 		sprite(sprite), timeBetweenFrames(timeBetweenFrame), totalFrames(totalFrames), repeat(repeat), startFrame(startFrame) {
 	currentFrame = startFrame;
-	running = false;
-	currentTime = 0.0f;
+	timer.reset();
 }
 
 Animation2D::~Animation2D() {
-
+	
 }
 
 void Animation2D::start() {
 	//Start the animation, after ensuring all the variables are reset ready to start
 	reset();
-	running = true;
+	timer.start();
 	onStart();
+}
+
+void Animation2D::pause() {
+	//Pause the animation
+	timer.pause();
+}
+
+void Animation2D::resume() {
+	//Resume the animation
+	timer.resume();
 }
 
 void Animation2D::stop() {
 	//Stop
-	running = false;
+	timer.stop();
 	onStop();
 }
 
 void Animation2D::reset() {
 	//Reset all of the values
 	currentFrame = startFrame;
-	running = false;
-	currentTime = 0.0f;
+	timer.reset();
 	onReset();
 }
 
 void Animation2D::update(float deltaSeconds) {
 	//Check whether the animation is running
-	if (running) {
-		//Increment the current time
-		currentTime += deltaSeconds;
-
+	if (isRunning()) {
+		//Obtain the current frame that should be visible
+		unsigned int currentFrameIndex = startFrame + (unsigned int) std::floor(timer.getSeconds() / timeBetweenFrames);
 		//Check whether the animation should update
-		if (currentTime >= timeBetweenFrames) {
+		if (currentFrameIndex != currentFrame) {
 			//Check whether the current frame is the last (NOTE: First frame can be index 0)
-			if (currentFrame == startFrame + totalFrames - 1) {
+			if (currentFrame >= startFrame + totalFrames - 1) {
 				//Restart the animation if it should repeat
 				if (repeat) {
 					currentFrame = startFrame;
-					currentTime = 0;
+					timer.restart();
 					//Update the animation to the current frame
 					updateFrame();
 				} else
 					stop();
 			} else {
-				//Increment the current frame, and reset the time
-				currentFrame++;
-				currentTime = 0;
+				//Assign the frame
+				currentFrame = currentFrameIndex;
 				//Update the animation to the current frame
 				updateFrame();
 			}
 		}
 	}
+}
+
+void Animation2D::updateTimeBetweenFrames(float time) {
+	//Check if the animation is running
+	if (isRunning() && time != timeBetweenFrames) {
+		//Calculate the new frame in the animation
+		unsigned int currentFrameIndex = (unsigned int) std::floor(timer.getSeconds() / timeBetweenFrames);
+
+		float newFrameTime = (currentFrameIndex + ((timer.getSeconds() / timeBetweenFrames) - ((float) currentFrameIndex))) * time;
+
+		//Assign the new time
+		timer.setSeconds(newFrameTime);
+	}
+	//Assign the time
+	this->timeBetweenFrames = time;
 }
 
 /*****************************************************************************
@@ -206,7 +227,7 @@ void Sprite::update(float deltaSeconds) {
 		//Update the current animation
 		currentAnimation->update(deltaSeconds);
 		//Check if the animation has finished
-		if (! currentAnimation->isRunning())
+		if (currentAnimation->isStopped())
 			stopAnimation();
 	}
 	//Update this object

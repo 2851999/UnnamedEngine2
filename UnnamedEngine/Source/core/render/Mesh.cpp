@@ -498,6 +498,20 @@ MeshData* MeshBuilder::createQuad(float width, float height, Texture* texture, M
 	return data;
 }
 
+MeshData* MeshBuilder::createQuadWireframe(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags) {
+	MeshData* data = new MeshData(2, flags);
+	addQuadData(data, v1, v2, v3, v4);
+	addQuadIWireframe(data);
+	return data;
+}
+
+MeshData* MeshBuilder::createQuadWireframe(float width, float height, MeshData::Flag flags) {
+	MeshData* data = new MeshData(2, flags);
+	addQuadData(data, Vector2f(0, 0), Vector2f(width, 0), Vector2f(width, height), Vector2f(0, height));
+	addQuadIWireframe(data);
+	return data;
+}
+
 void MeshBuilder::addQuadData(MeshData* data, Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4) {
 	data->addPosition(v1);
 	data->addPosition(v2);
@@ -523,6 +537,17 @@ void MeshBuilder::addQuadI(MeshData* data) {
 	data->addIndex(3);
 	data->addIndex(0);
 	data->addIndex(2);
+}
+
+void MeshBuilder::addQuadIWireframe(MeshData* data) {
+	data->addIndex(0);
+	data->addIndex(1);
+	data->addIndex(1);
+	data->addIndex(2);
+	data->addIndex(2);
+	data->addIndex(3);
+	data->addIndex(3);
+	data->addIndex(0);
 }
 
 void MeshBuilder::addQuadT(MeshData* data, float top, float left, float bottom, float right) {

@@ -45,17 +45,14 @@ private:
 	/* The total number of frames within this animation */
 	unsigned int totalFrames = 0;
 
-	/* States whether this animation is running */
-	bool running = false;
-
 	/* States whether this animation should keep repeating */
 	bool repeat = false;
 
+	/* The timer for this animation */
+	Timer timer;
+
 	/* The start frame in this animation */
 	unsigned int startFrame;
-
-	/* The current time for the animation */
-	float currentTime = 0.0f;
 public:
 	/* The constructors */
 	Animation2D(Sprite* sprite, float timeBetweenFrames, unsigned int totalFrames, bool repeat = false, unsigned int startFrame = 0);
@@ -64,8 +61,10 @@ public:
 	/* The destructor */
 	virtual ~Animation2D();
 
-	/* Methods called to start/stop/reset/restart this animation */
+	/* Methods called to start/pause/resume/stop/reset/restart this animation */
 	void start(); //This will continue where it left of, unless reset() is called
+	void pause();
+	void resume();
 	void stop();
 	void reset();
 	inline void restart() { reset(); start(); }
@@ -81,6 +80,10 @@ public:
 	/* Method called when the frame needs to change */
 	virtual void updateFrame() {}
 
+	/* Method to update the time between frames while also assigning the new frame
+	   in the animation if it is running*/
+	void updateTimeBetweenFrames(float time);
+
 	/* Setters and getters */
 	inline void setTimeBetweenFrames(float time) { timeBetweenFrames = time; }
 	inline void setRepeat(bool repeat) { this->repeat = repeat; }
@@ -88,9 +91,12 @@ public:
 
 	/* Returns index of current frame within this animation (relative to the start frame) */
 	inline unsigned int getCurrentFrameInAnimation() { return currentFrame - startFrame; }
+	inline unsigned int getNumFrames() { return totalFrames; }
 	inline float getTimeBetweenFrames() { return timeBetweenFrames; }
-	inline bool  doesRepeat() { return repeat; }
-	inline bool  isRunning()  { return running; }
+	inline bool  doesRepeat()  { return repeat; }
+	inline bool  isRunning()   { return timer.isRunning(); }
+	inline bool  isPaused()    { return timer.isPaused(); }
+	inline bool  isStopped()   { return timer.isStopped(); }
 	inline Sprite* getSprite() { return sprite; }
 };
 
