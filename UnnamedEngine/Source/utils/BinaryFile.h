@@ -27,12 +27,12 @@
 #include "../core/Matrix.h"
 
 /*****************************************************************************
- * The BianryFile class helps to read/write from/to a binary file
+ * The BianaryFile class helps to read/write from/to a binary file
  *****************************************************************************/
 
 class BinaryFile {
 private:
-	/* The path if the file */
+	/* The path of the file */
 	std::string path;
 
 	/* The input/output streams */

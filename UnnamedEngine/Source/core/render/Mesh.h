@@ -166,6 +166,9 @@ public:
 		addSubData(data);
 	}
 
+	/* Method used to remove a sub data structure */
+	inline void removeSubData(unsigned int index) { subData.erase(subData.begin() + index); }
+
 	/* Methods to remove data */
 	inline void clearPositions()     { positions.clear();     numPositions     = 0; }
 	inline void clearColours()       { colours.clear();       numColours       = 0; }
@@ -389,12 +392,19 @@ public:
 	/* Method used to create a MeshData instance for a textured quad (rectangle/square in this case) given its width and height */
 	static MeshData* createQuad(float width, float height, Texture* texture, MeshData::Flag flags = MeshData::NONE);
 
+	/* Method used to create a MeshData instance for a quad wireframe, given its 4 corners (Use with GL_LINES) */
+	static MeshData* createQuadWireframe(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags = MeshData::NONE);
+	/* Method used to create a MeshData instance for a quad wireframe (rectangle/square in this case) given its width and height (Use with GL_LINES) */
+	static MeshData* createQuadWireframe(float width, float height, MeshData::Flag flags = MeshData::NONE);
+
 	/* Method used to add the required data for a quad to a MeshData instance given its 4 corners */
 	static void addQuadData(MeshData* data, Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4);
 	/* Method used to add the required data for a textured quad to a MeshData instance given its 4 corners */
 	static void addQuadData(MeshData* data, Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture);
 	/* Method used to add the indices for a quad to a MeshData instance */
 	static void addQuadI(MeshData* data);
+	/* Method used to add the indices for a quad wireframe to a MeshData instance */
+	static void addQuadIWireframe(MeshData* data);
 	/* Method used to add the texture coordinates for a quad to a MeshData instance */
 	static void addQuadT(MeshData* data, float top, float left, float bottom, float right);
 

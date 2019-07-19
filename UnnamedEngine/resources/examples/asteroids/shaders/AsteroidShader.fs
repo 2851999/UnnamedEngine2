@@ -1,28 +1,40 @@
-#version 140
+#version 420
 
-#map uniform Material_DiffuseTexture diffuseTexture
-#map uniform Material_AmbientColour ambientColour
-#map uniform Material_DiffuseColour diffuseColour
-#map uniform Material_SpecularColour specularColour
-#map uniform Material_NormalMap normalMap
-#map uniform UseNormalMap useNormalMap
 #map uniform Light_Direction light_direction
 #map uniform Light_DiffuseColour light_diffuseColour
 #map uniform Light_SpecularColour light_specularColour
 #map uniform CameraPosition camera_position
-#map uniform Material_Shininess shininess
 
-uniform sampler2D diffuseTexture;
-uniform sampler2D normalMap;
-uniform vec3 ambientColour;
-uniform vec4 diffuseColour;
-uniform vec3 specularColour;
-uniform bool useNormalMap;
+layout(binding = 1) uniform sampler2D diffuseTexture;
+layout(binding = 4) uniform sampler2D normalMap;
+
+/* The material structure */
+struct UEMaterial {
+	vec4 ambientColour;
+	vec4 diffuseColour;
+	vec4 specularColour;
+	
+	bool hasAmbientTexture;
+	bool hasDiffuseTexture;
+	bool diffuseTextureSRGB;
+	bool hasSpecularTexture;
+	bool hasShininessTexture;
+	bool hasNormalMap;
+	bool hasParallaxMap;
+	
+	float parallaxScale;
+	float shininess;
+};
+
+/* The material data */
+layout(std140, binding = 2) uniform UEMaterialData {
+	UEMaterial ue_material;
+};
+
 uniform vec3 light_direction;
 uniform vec3 light_diffuseColour;
 uniform vec3 light_specularColour;
 uniform vec3 camera_position;
-uniform float shininess;
 
 in float frag_visible;
 in vec3 frag_position;
@@ -42,7 +54,7 @@ vec3 calculateDirectionalLight(vec3 diffuseC, vec3 specularColour, vec3 normal) 
 	vec3 viewDirection = normalize(camera_position - frag_position);
 	vec3 halfwayDirection = normalize(lightDirection + viewDirection);
 	
-	float specularStrength = pow(max(dot(normal, halfwayDirection), 0.0), shininess);
+	float specularStrength = pow(max(dot(normal, halfwayDirection), 0.0), ue_material.shininess);
 	vec3 specularLight = specularStrength * (light_specularColour * specularColour);
 	
 	return diffuseLight + specularLight;
@@ -52,7 +64,7 @@ void main() {
 	if (frag_visible > 0.5) {
 		vec3 normal = normalize(frag_normal);
 		
-		if (useNormalMap) {
+		if (ue_material.hasNormalMap) {
 			normal = texture(normalMap, frag_textureCoord).rgb;
 			normal.y = 1 - normal.y;
 			
@@ -60,7 +72,7 @@ void main() {
 			normal = normalize(frag_tbnMatrix * normal);
 		}
 
-		FragColour = vec4(vec3(0.1, 0.1, 0.1) + calculateDirectionalLight(vec3(diffuseColour * texture(diffuseTexture, frag_textureCoord)), specularColour, normal), 1.0);
+		FragColour = vec4(vec3(0.1, 0.1, 0.1) + calculateDirectionalLight(vec3(ue_material.diffuseColour * texture(diffuseTexture, frag_textureCoord)), ue_material.specularColour.rgb, normal), 1.0);
 	} else
 		discard;
 }

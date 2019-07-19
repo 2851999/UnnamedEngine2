@@ -19,8 +19,8 @@
 #ifndef CORE_AUDIO_AUDIO_H_
 #define CORE_AUDIO_AUDIO_H_
 
-#include <AL/al.h>
-#include <AL/alc.h>
+#include <al.h>
+#include <alc.h>
 
 #include "../Object.h"
 

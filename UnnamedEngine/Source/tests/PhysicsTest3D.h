@@ -22,6 +22,7 @@
 #include "BaseTest3D.h"
 
 #include <iostream>
+#include <functional>
 
 #include "../core/render/Renderer.h"
 
@@ -66,7 +67,7 @@ void Test::onCreated() {
 
 	renderScene->disableLighting();
 
-	physicsScene->setCollisionCallback(std::bind(onCollision, this, 0, 0));
+	physicsScene->setCollisionCallback(std::bind(&Test::onCollision, this, 0, 0));
 
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);

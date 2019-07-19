@@ -22,6 +22,8 @@ GUILabel::GUILabel(std::string text, Font* font) : GUIComponent() {
 	//Assign the font if given
 	if (font)
 		setFont(font);
+	else
+		setFont(DEFAULT_FONT);
 	//Assign the text
 	setText(text);
 }

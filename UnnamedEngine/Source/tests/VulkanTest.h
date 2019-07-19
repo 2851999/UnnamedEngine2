@@ -97,7 +97,7 @@ void Test::created() {
 //	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae");
 //	mesh2->getSkeleton()->startAnimation("");
 
-	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
+	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj"); //Assimp won't load this file
 	//Mesh* mesh2 = new Mesh(MeshBuilder::createCube(10.0f, 10.0f, 10.0f));
 
 	mesh2->setCullingEnabled(false);

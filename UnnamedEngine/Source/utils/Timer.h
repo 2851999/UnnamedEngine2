@@ -59,6 +59,9 @@ public:
 	/* Returns the current time in milliseconds */
 	long getTime();
 
+	/* Assigns the value of this timer */
+	void setTime(long time);
+
 	/* Various methods to check whether a certain amount of time has passed
 	 * according to this timer */
 	bool hasTimePassed(long time);
@@ -70,6 +73,11 @@ public:
 	inline float getSeconds() { return ((float) getTime()) / 1000.0f; }
 	inline float getMinutes() { return ((float) getTime()) / 1000.0f / 60.0f; }
 	inline float getHours()   { return ((float) getTime()) / 1000.0f / 60.0f / 60.0f; }
+
+	/* Various other methods to set the current time in other formats */
+	inline void setSeconds(float seconds) { setTime(seconds * 1000.0f); }
+	inline void setMinutes(float minutes) { setTime(minutes * 1000.0f * 60.0f); }
+	inline void setHours(float hours) { setTime(hours * 1000.0f * 60.0f * 60.0f); }
 
 	/* Various methods to check the current state of this timer */
 	inline bool isRunning() { return state == State::RUNNING; }

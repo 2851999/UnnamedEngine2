@@ -308,7 +308,7 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 		return mesh;
 	} else {
 		//Log an error as Assimp didn't manage to load the model correctly
-		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", LogType::Error);
+		Logger::log("The model '" + path + fileName + "' could not be loaded. Assimp: " + utils_string::str(aiGetErrorString()), "Mesh", LogType::Error);
 		return NULL;
 	}
 }
