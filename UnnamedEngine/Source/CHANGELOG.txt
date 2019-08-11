@@ -1,4 +1,48 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 | Experimental 1
+
+* Added screen space reflections for PBR deferred rendering
+  in RenderScene
+
+* Removed 'deltaSeconds' from Sprite
+
+--------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 (V0.4.0)
+
+* Added CSVFile
+* Added methods to MLAttribute to obtain data as a
+  Vector2/3/4f
+* Added method to remove a SubData from MeshData
+* Added method to Sprite to obtain a specific collision
+  rectangle for the sprite with certain applied offsets (like
+  offsets in TextureAtlas)
+* Added methods to assign the time of a Timer
+* Added methods in MeshBuilder to build a wireframe quad
+* Added 'updateTimeBetweenFrames' method in Animation2D
+* Changed Sprite and TextureAnimation2D to allow multiple
+  textures to be added as layers for when multiple textures
+  should be rendered at the same time
+* Changed MeshLoader to output the error text from Assimp if
+  a file fails to load
+* Changed Animation2D to use a Timer to work out the current
+  frame (Should make behaviour better if the delta is very
+  small or large)
+
+* Removed 'Offsets' from TextureAtlas
+
+* Fixed bug: GUILabel would not work with a NULL font
+* Fixed bug: utils_string::strSplit with a character for a
+             delimeter behaved differently to the same method
+             for a string type (if string's last letter was
+             the given delimeter then it would not return an
+             empty string for it)
+* Fixed bug: Crash when loading a tilemap with Tilemap and
+             TilemapLayer
+* Fixed bug: Crash when updating Text with an empty string
+* Fixed bug: Explicit instantiations of VBO should have been
+             after the defininitions in VBO.cpp
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 0 | Experimental 5
 
 * Added methods to assign the time of a Timer

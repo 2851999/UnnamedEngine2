@@ -40,7 +40,8 @@ RenderScene3D::RenderScene3D() {
 		shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getForwardShader();
 		shadowCubemapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_CUBEMAP)->getForwardShader();
 
-		//Setup the post processor
+		//Setup the post processors
+		postProcessorSSR = new PostProcessor("resources/shaders/postprocessing/SSRShader", false);
 		postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader", false);
 
 		//Get the lighting and gamma correction UBOs
@@ -122,7 +123,7 @@ void RenderScene3D::render() {
 				utils_gl::enableWireframe();
 
 			//Assign the camera position
-			Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
+			Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*)Renderer::getCamera())->getPosition(), 0.0f);
 
 			//Go through all of the objects in this scene
 			for (unsigned int i = 0; i < batches.size(); i++) {
@@ -162,23 +163,63 @@ void RenderScene3D::render() {
 			//Stop rendering to the geometry buffer
 			gBuffer->unbind();
 
-			//Render to the post processor's framebuffer
-			postProcessor->start();
+			if (pbr) {
+				//Render to the post processor's framebuffer
+				postProcessorSSR->start();
 
-			//Render to the screen with the correct lighting shader
-			if (pbr)
-				renderLighting(Renderer::getRenderShader(Renderer::SHADER_PBR_DEFERRED_LIGHTING), -1);
-			else
-				renderLighting(Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING), -1);
+				//Render to the screen with the correct lighting shader
+				if (pbr)
+					renderLighting(Renderer::getRenderShader(Renderer::SHADER_PBR_DEFERRED_LIGHTING), -1);
+				else
+					renderLighting(Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING), -1);
 
-			//Stop using the post processor's framebuffer
-			postProcessor->stop();
+				//Stop using the post processor's framebuffer
+				postProcessorSSR->stop();
 
-			//Render the final output
-			postProcessor->render();
+				postProcessor->start();
 
-			//Copy depth data to the default framebuffer so forward rendering is still possible after this scene was rendered
-			gBuffer->outputDepthInfo();
+				Renderer::saveTextures();
+
+				Shader* shader = postProcessorSSR->getShader();
+				shader->use();
+
+				//Bind the textures
+				shader->setUniformi("PositionBuffer", Renderer::bindTexture(gBuffer->getPositionBuffer()));
+				shader->setUniformi("NormalBuffer", Renderer::bindTexture(gBuffer->getNormalBuffer()));
+				//shader->setUniformi("AlbedoBuffer", Renderer::bindTexture(postProcessorSSR->getFBO()->getFramebufferStore(0))); //Stored under 'Texture'
+				shader->setUniformi("MetalnessAOBuffer", Renderer::bindTexture(gBuffer->getMetalnessAOBuffer()));
+
+				//Render the output of the SSR
+				postProcessorSSR->render();
+
+				Renderer::releaseNewTextures();
+
+				postProcessor->stop();
+
+				//Render the final output
+				postProcessor->render();
+
+				//Copy depth data to the default framebuffer so forward rendering is still possible after this scene was rendered
+				gBuffer->outputDepthInfo();
+			} else {
+				//Render to the post processor's framebuffer
+				postProcessor->start();
+
+				//Render to the screen with the correct lighting shader
+				if (pbr)
+					renderLighting(Renderer::getRenderShader(Renderer::SHADER_PBR_DEFERRED_LIGHTING), -1);
+				else
+					renderLighting(Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING), -1);
+
+				//Stop using the post processor's framebuffer
+				postProcessor->stop();
+
+				//Render the final output
+				postProcessor->render();
+
+				//Copy depth data to the default framebuffer so forward rendering is still possible after this scene was rendered
+				gBuffer->outputDepthInfo();
+			}
 		} else {
 			//Forward rendering
 
@@ -352,6 +393,10 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 		//Now check whether forward or deferred rendering
 		if (deferredRendering) {
 			shaderLightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
+
+			Renderer::getShaderBlock_Core().ue_projectionMatrix = ((Camera3D*) Renderer::getCamera())->getProjectionMatrix();
+			Renderer::getShaderBlock_Core().ue_viewMatrix = ((Camera3D*)Renderer::getCamera())->getViewMatrix();
+			Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_CORE)->update(&Renderer::getShaderBlock_Core(), 0, sizeof(ShaderBlock_Core));
 
 			//Deferred rendering, so render the quad on the screen with the current set of lights
 			Renderer::getScreenTextureMesh()->render();

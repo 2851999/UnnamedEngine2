@@ -55,7 +55,7 @@ void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
-//	getSettings().videoResolution = VideoResolution::RES_1440p;
+	getSettings().videoResolution = VideoResolution::RES_1080p;
 //	getSettings().videoRefreshRate = 144;
 //	getSettings().windowFullscreen = true;
 
@@ -88,7 +88,7 @@ void Test::onCreated() {
 	if (deferred)
 		renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
-	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 
 	//camera->setProjectionMatrix(light0->getLightProjectionMatrix());
 
@@ -134,8 +134,9 @@ void Test::onCreated() {
 	sphere->update();
 	renderScene->add(sphere);
 
-	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "plane.dae"), pbrRenderShader);
-	sphere2->setPosition(10.0f, 0.8f, 0.0f);
+	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj"), pbrRenderShader);
+	sphere2->setPosition(15.0f, 1.8f, 0.0f);
+	sphere2->setScale(2.0f, 2.0f, 2.0f);
 	sphere2->update();
 	renderScene->add(sphere2);
 

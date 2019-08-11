@@ -65,7 +65,7 @@ void Animation2D::reset() {
 	onReset();
 }
 
-void Animation2D::update(float deltaSeconds) {
+void Animation2D::update() {
 	//Check whether the animation is running
 	if (isRunning()) {
 		//Obtain the current frame that should be visible
@@ -221,11 +221,11 @@ void Sprite::setVisibleLayers(unsigned int count) {
 	}
 }
 
-void Sprite::update(float deltaSeconds) {
+void Sprite::update() {
 	//Check whether there is a current animation
 	if (currentAnimation) {
 		//Update the current animation
-		currentAnimation->update(deltaSeconds);
+		currentAnimation->update();
 		//Check if the animation has finished
 		if (currentAnimation->isStopped())
 			stopAnimation();

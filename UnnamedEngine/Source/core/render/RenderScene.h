@@ -72,6 +72,9 @@ private:
 	/* The environment used for PBR */
 	PBREnvironment* pbrEnvironment = NULL;
 
+	/* Post processor used for applying screen space reflections */
+	PostProcessor* postProcessorSSR;
+
 	/* Post processor used for applying gamma correction */
 	PostProcessor* postProcessor = NULL;
 

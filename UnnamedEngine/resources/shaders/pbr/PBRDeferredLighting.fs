@@ -33,8 +33,16 @@ void main() {
 	}
 	
     vec3 colour = ueGetLightingPBR(normal, fragPosition, albedo, metalness, roughness, ao, fragPosLightSpace);
-
+	
 	ue_FragColour = vec4(colour, 1.0);
+	
+	/*float maxDistance = stepValue * maxSteps;
+	float dist = length(viewPos);
+	if (dist < maxDistance)
+		ue_FragColour = vec4(colour, 1.0);
+	else
+		ue_FragColour = vec4(colour * 0.1, 1.0);*/
+	
 	//ue_FragColour = vec4(vec3(ue_lights[0].quadratic), 1.0);
 	//ue_FragColour = vec4(vec3(ueCalculatePointShadow(ue_lights[0], fragPosition, ue_cameraPosition)), 1.0);
 }

@@ -70,7 +70,7 @@ public:
 	inline void restart() { reset(); start(); }
 
 	/* Method called to update this animation */
-	void update(float deltaSeconds);
+	void update();
 
 	/* Various methods that are called when certain things happen */
 	virtual void onStart() {}
@@ -187,7 +187,7 @@ public:
 	void setVisibleLayers(unsigned int count);
 
 	/* Method called to update this sprite */
-	virtual void update(float deltaSeconds);
+	virtual void update();
 
 	/* Method used to add an animation */
 	inline void addAnimation(std::string name, Animation2D* animation) {
