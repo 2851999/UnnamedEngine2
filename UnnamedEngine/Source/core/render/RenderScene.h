@@ -72,6 +72,13 @@ private:
 	/* The environment used for PBR */
 	PBREnvironment* pbrEnvironment = NULL;
 
+	/* Post processor used for applying bloom */
+	PostProcessor* postProcessorBloom;
+
+	/* Post processor used for applying a gaussian blur bloom */
+	PostProcessor* postProcessorBlur1;
+	PostProcessor* postProcessorBlur2;
+
 	/* Post processor used for applying screen space reflections */
 	PostProcessor* postProcessorSSR;
 

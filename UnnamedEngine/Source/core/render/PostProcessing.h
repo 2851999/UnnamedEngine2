@@ -29,6 +29,9 @@
 
 class PostProcessor {
 private:
+	/* The number of colour attachments in the FBO */
+	unsigned int numColourAttachments;
+
 	/* The frame buffer object used for rendering */
 	FBO* fbo = NULL;
 
@@ -36,8 +39,8 @@ private:
 	Shader* shader = NULL;
 public:
 	/* The constructors */
-	PostProcessor(bool multisample);
-	PostProcessor(std::string path, bool multisample);
+	PostProcessor(bool multisample, unsigned int numColourAttachments = 1);
+	PostProcessor(const std::string& path, bool multisample, unsigned int numColourAttachments = 1);
 
 	/* The destructor */
 	virtual ~PostProcessor() { delete fbo; }

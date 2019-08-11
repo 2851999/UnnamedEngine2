@@ -4,14 +4,16 @@ layout(location = 0) in vec2 ue_frag_textureCoord;
 
 #map uniform PositionBuffer ue_gPosition
 #map uniform NormalBuffer ue_gNormal
-#map uniform Texture ue_gAlbedo
+#map uniform Texture0 ue_gAlbedo
 #map uniform MetalnessAOBuffer ue_gMetalnessAO
+#map uniform Texture1 ue_bloomTexture
 
 /* Input data for the SSR */
 uniform sampler2D ue_gPosition;
 uniform sampler2D ue_gNormal;
 uniform sampler2D ue_gAlbedo;
 uniform sampler2D ue_gMetalnessAO;
+uniform sampler2D ue_bloomTexture;
 
 /* Various constants for the SSR */
 const float stepValue = 0.1;
@@ -137,6 +139,7 @@ void main() {
 	float reflectionMultiplier = pow(metalness, reflectionSpecularFalloffExponent) * screenEdgeFactor * -reflected.z;
 	
 	vec3 colour = albedo + texture(ue_gAlbedo, coords.xy).rgb * clamp(reflectionMultiplier, 0.0, 0.9) * fresnel;
+	colour += texture(ue_bloomTexture, ue_frag_textureCoord).rgb;
 	
 	//colour += texture(ue_gAlbedo, coords.xy).rgb;
 	

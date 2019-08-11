@@ -1,4 +1,12 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 | Experimental 2
+
+* Added bloom for PBR deferred rendering
+
+* Changed PostProcessor to allow for rendering to multiple
+  colour attachments
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 1 | Experimental 1
 
 * Added screen space reflections for PBR deferred rendering

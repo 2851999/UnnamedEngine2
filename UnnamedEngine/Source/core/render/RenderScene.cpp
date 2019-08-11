@@ -41,8 +41,11 @@ RenderScene3D::RenderScene3D() {
 		shadowCubemapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_CUBEMAP)->getForwardShader();
 
 		//Setup the post processors
-		postProcessorSSR = new PostProcessor("resources/shaders/postprocessing/SSRShader", false);
-		postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader", false);
+		postProcessorBloom = new PostProcessor(std::string("resources/shaders/postprocessing/BloomShader"), false, 2);
+		postProcessorBlur1 = new PostProcessor(std::string("resources/shaders/postprocessing/GaussianBlur"), false, 2);
+		postProcessorBlur2 = new PostProcessor(std::string("resources/shaders/postprocessing/GaussianBlur"), false, 2);
+		postProcessorSSR = new PostProcessor(std::string("resources/shaders/postprocessing/SSRShader"), false, 2);
+		postProcessor = new PostProcessor(std::string("resources/shaders/postprocessing/GammaCorrectionShader"), false);
 
 		//Get the lighting and gamma correction UBOs
 		shaderLightingUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_LIGHTING);
@@ -165,7 +168,7 @@ void RenderScene3D::render() {
 
 			if (pbr) {
 				//Render to the post processor's framebuffer
-				postProcessorSSR->start();
+				postProcessorBloom->start();
 
 				//Render to the screen with the correct lighting shader
 				if (pbr)
@@ -174,6 +177,45 @@ void RenderScene3D::render() {
 					renderLighting(Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING), -1);
 
 				//Stop using the post processor's framebuffer
+				postProcessorBloom->stop();
+
+				//Blur the bright texture
+				bool horizontal = true;
+				bool firstIteration = true;
+				int amount = 10;
+				PostProcessor* current = postProcessorBlur1;
+				PostProcessor* previous = postProcessorBlur2;
+
+				current->start();
+				postProcessorBloom->render();
+				current->stop();
+
+				current = postProcessorBlur2;
+				previous = postProcessorBlur1;
+
+				for (unsigned int i = 0; i < amount - 1; ++i) {
+					previous->getShader()->use();
+					previous->getShader()->setUniformi("Horizontal", horizontal);
+
+					current->start();
+					previous->render();
+					current->stop();
+
+					current = previous;
+					if (current == postProcessorBlur1)
+						previous = postProcessorBlur2;
+					else
+						previous = postProcessorBlur1;
+
+					horizontal = ! horizontal;
+					if (firstIteration)
+						firstIteration = false;
+				}
+
+				postProcessorSSR->start();
+				previous->getShader()->use();
+				previous->getShader()->setUniformi("Horizontal", horizontal);
+				previous->render();
 				postProcessorSSR->stop();
 
 				postProcessor->start();
