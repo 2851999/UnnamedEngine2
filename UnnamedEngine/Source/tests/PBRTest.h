@@ -56,8 +56,8 @@ void Test::onInitialise() {
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
-//	getSettings().videoRefreshRate = 144;
-//	getSettings().windowFullscreen = true;
+	//getSettings().videoRefreshRate = 144;
+	//getSettings().windowFullscreen = true;
 
 	//Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
 }
@@ -84,11 +84,17 @@ void Test::onCreated() {
 
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
 	renderScene->enablePBR();
+	renderScene->enableBloom();
+	renderScene->enableSSR();
 	renderScene->setPBREnvironment(environment);
 	if (deferred)
 		renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+
+	for (unsigned int i = 0; i < 10; ++i) {
+		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(0.0f, 1.0f), utils_random::randomFloat(0.0f, 1.0f), utils_random::randomFloat(0.0f, 10.0f))));
+	}
 
 	//camera->setProjectionMatrix(light0->getLightProjectionMatrix());
 

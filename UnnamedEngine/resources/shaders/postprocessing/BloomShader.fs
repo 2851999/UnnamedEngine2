@@ -1,14 +1,12 @@
 #include "PostProcess.fs"
 
-#map uniform Texture1 ue_brightTexture
+#map uniform BloomTexture ue_bloomTexture
 
-uniform sampler2D ue_brightTexture;
+uniform sampler2D ue_bloomTexture;
 
 layout(location = 0) out vec4 ue_FragColour;
-layout(location = 1) out vec4 ue_FragColourBright;
 
 void main() {
 	//Output the colour
-	ue_FragColour = vec4(texture(ue_texture, ue_frag_textureCoord).rgb, 1.0);
-	ue_FragColourBright = vec4(texture(ue_brightTexture, ue_frag_textureCoord).rgb, 1.0);
+	ue_FragColour = vec4(texture(ue_texture, ue_frag_textureCoord).rgb + texture(ue_bloomTexture, ue_frag_textureCoord).rgb, 1.0);
 }

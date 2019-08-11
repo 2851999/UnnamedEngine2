@@ -40,11 +40,53 @@ RenderScene3D::RenderScene3D() {
 		shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getForwardShader();
 		shadowCubemapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_CUBEMAP)->getForwardShader();
 
+		lightingFramebuffer = new FBO(GL_FRAMEBUFFER, false);
+		lightingFramebuffer->attach(new FramebufferStore(
+			GL_TEXTURE_2D,
+			GL_RGBA16F,
+			Window::getCurrentInstance()->getSettings().windowWidth,
+			Window::getCurrentInstance()->getSettings().windowHeight,
+			GL_RGBA,
+			GL_FLOAT,
+			GL_COLOR_ATTACHMENT0,
+			GL_NEAREST,
+			GL_CLAMP_TO_EDGE,
+			true
+		));
+
+		lightingFramebuffer->attach(new FramebufferStore(
+			GL_TEXTURE_2D,
+			GL_RGBA16F,
+			Window::getCurrentInstance()->getSettings().windowWidth,
+			Window::getCurrentInstance()->getSettings().windowHeight,
+			GL_RGBA,
+			GL_FLOAT,
+			GL_COLOR_ATTACHMENT1,
+			GL_NEAREST,
+			GL_CLAMP_TO_EDGE,
+			true
+		));
+
+		lightingFramebuffer->attach(new FramebufferStore(
+			GL_RENDERBUFFER,
+			GL_DEPTH_COMPONENT32,
+			Window::getCurrentInstance()->getSettings().windowWidth,
+			Window::getCurrentInstance()->getSettings().windowHeight,
+			GL_DEPTH_COMPONENT,
+			GL_UNSIGNED_INT,
+			GL_DEPTH_ATTACHMENT,
+			GL_NEAREST,
+			GL_CLAMP_TO_EDGE,
+			true
+		));
+
+		lightingFramebuffer->setup();
+
 		//Setup the post processors
-		postProcessorBloom = new PostProcessor(std::string("resources/shaders/postprocessing/BloomShader"), false, 2);
-		postProcessorBlur1 = new PostProcessor(std::string("resources/shaders/postprocessing/GaussianBlur"), false, 2);
-		postProcessorBlur2 = new PostProcessor(std::string("resources/shaders/postprocessing/GaussianBlur"), false, 2);
-		postProcessorSSR = new PostProcessor(std::string("resources/shaders/postprocessing/SSRShader"), false, 2);
+		postProcessorBloom = new PostProcessor(std::string("resources/shaders/postprocessing/BloomShader"), false);
+		postProcessorBlur1 = new PostProcessor(std::string("resources/shaders/postprocessing/GaussianBlur"), false);
+		postProcessorBlur2 = new PostProcessor(std::string("resources/shaders/postprocessing/GaussianBlur"), false);
+		postProcessorSSR = new PostProcessor(std::string("resources/shaders/postprocessing/SSRShader"), false);
 		postProcessor = new PostProcessor(std::string("resources/shaders/postprocessing/GammaCorrectionShader"), false);
 
 		//Get the lighting and gamma correction UBOs
@@ -166,19 +208,23 @@ void RenderScene3D::render() {
 			//Stop rendering to the geometry buffer
 			gBuffer->unbind();
 
-			if (pbr) {
-				//Render to the post processor's framebuffer
-				postProcessorBloom->start();
+			//Render to framebuffer
+			lightingFramebuffer->bind();
 
-				//Render to the screen with the correct lighting shader
-				if (pbr)
-					renderLighting(Renderer::getRenderShader(Renderer::SHADER_PBR_DEFERRED_LIGHTING), -1);
-				else
-					renderLighting(Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING), -1);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_DEPTH_TEST);
 
-				//Stop using the post processor's framebuffer
-				postProcessorBloom->stop();
+			//Render to the screen with the correct lighting shader
+			if (pbr)
+				renderLighting(Renderer::getRenderShader(Renderer::SHADER_PBR_DEFERRED_LIGHTING), -1);
+			else
+				renderLighting(Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING), -1);
 
+			//Stop rendering to the framebuffer
+			lightingFramebuffer->unbind();
+
+			//Check if bloom is in use
+			if (bloom) {
 				//Blur the bright texture
 				bool horizontal = true;
 				bool firstIteration = true;
@@ -186,19 +232,12 @@ void RenderScene3D::render() {
 				PostProcessor* current = postProcessorBlur1;
 				PostProcessor* previous = postProcessorBlur2;
 
-				current->start();
-				postProcessorBloom->render();
-				current->stop();
-
-				current = postProcessorBlur2;
-				previous = postProcessorBlur1;
-
-				for (unsigned int i = 0; i < amount - 1; ++i) {
+				for (unsigned int i = 0; i < amount; ++i) {
 					previous->getShader()->use();
 					previous->getShader()->setUniformi("Horizontal", horizontal);
 
 					current->start();
-					previous->render();
+					Renderer::render(firstIteration ? lightingFramebuffer->getFramebufferStore(1) : previous->getFBO()->getFramebufferStore(0), previous->getShader(), "Texture0");
 					current->stop();
 
 					current = previous;
@@ -207,17 +246,27 @@ void RenderScene3D::render() {
 					else
 						previous = postProcessorBlur1;
 
-					horizontal = ! horizontal;
+					horizontal = !horizontal;
 					if (firstIteration)
 						firstIteration = false;
 				}
 
-				postProcessorSSR->start();
-				previous->getShader()->use();
-				previous->getShader()->setUniformi("Horizontal", horizontal);
-				previous->render();
-				postProcessorSSR->stop();
+				//Now 'previous' holds the final blurred texture
 
+				//Combine the result with the lighting result
+				postProcessorBloom->start();
+				Renderer::saveTextures();
+				postProcessorBloom->getShader()->use();
+				postProcessorBloom->getShader()->setUniformi("Texture0", Renderer::bindTexture(lightingFramebuffer->getFramebufferStore(0)));
+				postProcessorBloom->getShader()->setUniformi("BloomTexture", Renderer::bindTexture(previous->getFBO()->getFramebufferStore(0)));
+				Renderer::getScreenTextureMesh()->render();
+				postProcessorBloom->getShader()->stopUsing();
+				Renderer::releaseNewTextures();
+				postProcessorBloom->stop();
+			}
+
+			//Check if SSR should be used
+			if (ssr && pbr) {
 				postProcessor->start();
 
 				Renderer::saveTextures();
@@ -230,6 +279,7 @@ void RenderScene3D::render() {
 				shader->setUniformi("NormalBuffer", Renderer::bindTexture(gBuffer->getNormalBuffer()));
 				//shader->setUniformi("AlbedoBuffer", Renderer::bindTexture(postProcessorSSR->getFBO()->getFramebufferStore(0))); //Stored under 'Texture'
 				shader->setUniformi("MetalnessAOBuffer", Renderer::bindTexture(gBuffer->getMetalnessAOBuffer()));
+				shader->setUniformi("AlbedoBuffer", bloom ? Renderer::bindTexture(postProcessorBloom->getFBO()->getFramebufferStore(0)) : Renderer::bindTexture(lightingFramebuffer->getFramebufferStore(0)));
 
 				//Render the output of the SSR
 				postProcessorSSR->render();
@@ -240,28 +290,12 @@ void RenderScene3D::render() {
 
 				//Render the final output
 				postProcessor->render();
-
-				//Copy depth data to the default framebuffer so forward rendering is still possible after this scene was rendered
-				gBuffer->outputDepthInfo();
-			} else {
-				//Render to the post processor's framebuffer
-				postProcessor->start();
-
-				//Render to the screen with the correct lighting shader
-				if (pbr)
-					renderLighting(Renderer::getRenderShader(Renderer::SHADER_PBR_DEFERRED_LIGHTING), -1);
-				else
-					renderLighting(Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING), -1);
-
-				//Stop using the post processor's framebuffer
-				postProcessor->stop();
-
+			} else
 				//Render the final output
-				postProcessor->render();
+				Renderer::render(bloom ? postProcessorBloom->getFBO()->getFramebufferStore(0) : lightingFramebuffer->getFramebufferStore(0), postProcessor->getShader(), "Texture0");
 
-				//Copy depth data to the default framebuffer so forward rendering is still possible after this scene was rendered
-				gBuffer->outputDepthInfo();
-			}
+			//Copy depth data to the default framebuffer so forward rendering is still possible after this scene was rendered
+			gBuffer->outputDepthInfo();
 		} else {
 			//Forward rendering
 

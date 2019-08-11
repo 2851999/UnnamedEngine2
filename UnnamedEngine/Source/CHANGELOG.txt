@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 | Experimental 3
+
+* Cleanup of RenderScene
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 1 | Experimental 2
 
 * Added bloom for PBR deferred rendering

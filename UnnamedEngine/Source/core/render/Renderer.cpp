@@ -260,13 +260,13 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 	}
 }
 
-void Renderer::render(FramebufferStore* texture, Shader* shader) {
+void Renderer::render(FramebufferStore* texture, Shader* shader, std::string textureUniform) {
 	if (shader == NULL)
 		shader = getRenderShader(SHADER_PLAIN_TEXTURE)->getShader();
 
 	shader->use();
 
-	shader->setUniformi("Texture", bindTexture(texture));
+	shader->setUniformi(textureUniform, bindTexture(texture));
 
 	screenTextureMesh->render();
 
