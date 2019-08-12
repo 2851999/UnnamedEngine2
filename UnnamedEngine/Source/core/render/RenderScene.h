@@ -80,6 +80,7 @@ private:
 
 	/* Framebuffer for storing lighting output with a 'bright' texture for bloom */
 	FBO* lightingFramebuffer;
+
 	/* Post processor used for applying bloom */
 	PostProcessor* postProcessorBloom;
 
@@ -184,6 +185,8 @@ public:
 	void enableGammaCorrection();
 	void disableGammaCorrection();
 	void setExposure(float exposure);
+	void enableFXAA();
+	void disableFXAA();
 };
 
 #endif /* CORE_RENDER_RENDERSCENE_H_ */

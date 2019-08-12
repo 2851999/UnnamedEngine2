@@ -100,7 +100,7 @@ vec3 ueGetLightingPBR(vec3 normal, vec3 fragPos, vec3 albedo, float metalness, f
 
     vec3 Lo = vec3(0.0);
 
-    for (int i = 0; i < ue_numLights; i++) {
+    for (int i = 0; i < ue_numLights; ++i) {
         if (ue_lights[i].type == 1) {
             if (ue_lights[i].useShadowMap)
                 Lo += ueCalculateDirectionalLightPBR(ue_lights[i], normal, V, fragPos, albedo, metalness, roughness, F0) * (1.0 - ueCalculateShadow(ue_lights[i], ue_lightTexturesShadowMap[i], fragPosLightSpace[i], normal));

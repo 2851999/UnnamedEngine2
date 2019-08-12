@@ -1,4 +1,11 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 | Experimental 4
+
+* Added FXAA to RenderScene
+
+* Changed Light to update on creation if they cast shadows
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 1 | Experimental 3
 
 * Cleanup of RenderScene

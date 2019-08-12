@@ -32,8 +32,10 @@ RenderScene3D::RenderScene3D() {
 	//Assign some default values
 	shaderLightingData.ue_useEnvironmentMap = false;
 
+	shaderGammaCorrectionData.inverseTextureSize = Vector2f(1.0f / Window::getCurrentInstance()->getSettings().windowWidth, 1.0f / Window::getCurrentInstance()->getSettings().windowHeight);
 	shaderGammaCorrectionData.gammaCorrect = true;
 	shaderGammaCorrectionData.exposureIn = -1;
+	shaderGammaCorrectionData.fxaa = true;
 
 	if (! BaseEngine::usingVulkan()) {
 		//Get the required shaders
@@ -228,7 +230,7 @@ void RenderScene3D::render() {
 				//Blur the bright texture
 				bool horizontal = true;
 				bool firstIteration = true;
-				int amount = 10;
+				int amount = 6;
 				PostProcessor* current = postProcessorBlur1;
 				PostProcessor* previous = postProcessorBlur2;
 
@@ -246,7 +248,7 @@ void RenderScene3D::render() {
 					else
 						previous = postProcessorBlur1;
 
-					horizontal = !horizontal;
+					horizontal = ! horizontal;
 					if (firstIteration)
 						firstIteration = false;
 				}
@@ -640,6 +642,20 @@ void RenderScene3D::disableGammaCorrection() {
 
 void RenderScene3D::setExposure(float exposure) {
 	shaderGammaCorrectionData.exposureIn = exposure;
+
+	//Update the data
+	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
+}
+
+void RenderScene3D::enableFXAA() {
+	shaderGammaCorrectionData.fxaa = true;
+
+	//Update the data
+	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
+}
+
+void RenderScene3D::disableFXAA() {
+	shaderGammaCorrectionData.fxaa = false;
 
 	//Update the data
 	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));

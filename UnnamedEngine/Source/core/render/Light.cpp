@@ -69,6 +69,8 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 			//Setup the projection matrix for the shadow map rendering
 			lightProjection.initPerspective(90.0f, (float) shadowMapSize / (float) shadowMapSize, 1.0f, 25.0f);
 		}
+		//Update this light (in case it is static)
+		update();
 	}
 }
 

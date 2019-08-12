@@ -92,9 +92,9 @@ void Test::onCreated() {
 
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 
-	for (unsigned int i = 0; i < 10; ++i) {
-		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(0.0f, 1.0f), utils_random::randomFloat(0.0f, 1.0f), utils_random::randomFloat(0.0f, 10.0f))));
-	}
+	utils_random::initialise();
+	for (unsigned int i = 0; i < 10; ++i)
+		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f))));
 
 	//camera->setProjectionMatrix(light0->getLightProjectionMatrix());
 
@@ -222,6 +222,10 @@ void Test::onKeyPressed(int key) {
 		renderScene->setExposure(4.0f);
 	else if (key == GLFW_KEY_6)
 		renderScene->setExposure(8.0f);
+	else if (key == GLFW_KEY_9)
+		renderScene->enableFXAA();
+	else if (key == GLFW_KEY_0)
+		renderScene->disableFXAA();
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */
