@@ -1,6 +1,6 @@
 #version 420
 
-#map uniform Texture ue_texture
+#map uniform Texture0 ue_texture
 
 uniform sampler2D ue_texture;
 

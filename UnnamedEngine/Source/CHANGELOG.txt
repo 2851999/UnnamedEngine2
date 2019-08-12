@@ -1,5 +1,47 @@
 --------------------------------------------------------------
-Release 2 | Beta 0 | Development 1
+Release 2 | Beta 0 | Development 2 (V0.4.1)
+
+* Added screen space reflections for PBR deferred rendering
+  in RenderScene
+* Added bloom for PBR deferred rendering in RenderScene
+* Added FXAA to RenderScene
+
+* Changed PostProcessor to allow for rendering to multiple
+  colour attachments
+* Changed Light to update on creation if they cast shadows
+
+* Removed 'deltaSeconds' from Sprite
+
+--------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 | Experimental 4
+
+* Added FXAA to RenderScene
+
+* Changed Light to update on creation if they cast shadows
+
+--------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 | Experimental 3
+
+* Cleanup of RenderScene
+
+--------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 | Experimental 2
+
+* Added bloom for PBR deferred rendering
+
+* Changed PostProcessor to allow for rendering to multiple
+  colour attachments
+
+--------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 | Experimental 1
+
+* Added screen space reflections for PBR deferred rendering
+  in RenderScene
+
+* Removed 'deltaSeconds' from Sprite
+
+--------------------------------------------------------------
+Release 2 | Beta 0 | Development 1 (V0.4.0)
 
 * Added CSVFile
 * Added methods to MLAttribute to obtain data as a

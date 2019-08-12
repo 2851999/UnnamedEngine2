@@ -11,10 +11,10 @@ uniform sampler2D ue_gAlbedo;
 uniform sampler2D ue_gMetalnessAO;
 
 layout(location = 0) out vec4 ue_FragColour;
+layout(location = 1) out vec4 ue_FragColourBright;
 
 void main() {
 	vec3 fragPosition = texture(ue_gPosition, ue_frag_textureCoord).rgb;
-
 	vec3 albedo = texture(ue_gAlbedo, ue_frag_textureCoord).rgb;
 	
 	vec4 normalRough = texture(ue_gNormal, ue_frag_textureCoord);
@@ -33,8 +33,24 @@ void main() {
 	}
 	
     vec3 colour = ueGetLightingPBR(normal, fragPosition, albedo, metalness, roughness, ao, fragPosLightSpace);
-
+	
 	ue_FragColour = vec4(colour, 1.0);
+	
+	/*float maxDistance = stepValue * maxSteps;
+	float dist = length(viewPos);
+	if (dist < maxDistance)
+		ue_FragColour = vec4(colour, 1.0);
+	else
+		ue_FragColour = vec4(colour * 0.1, 1.0);*/
+	
 	//ue_FragColour = vec4(vec3(ue_lights[0].quadratic), 1.0);
 	//ue_FragColour = vec4(vec3(ueCalculatePointShadow(ue_lights[0], fragPosition, ue_cameraPosition)), 1.0);
+
+	//Bloom
+	float brightness = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
+	if (brightness > 1.0) {
+		ue_FragColourBright = vec4(albedo.rgb, 1.0);
+		ue_FragColour = ue_FragColourBright;
+	} else
+		ue_FragColourBright = vec4(0.0, 0.0, 0.0, 1.0);
 }

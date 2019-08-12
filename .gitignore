@@ -42,3 +42,6 @@
 /UnnamedEngine/boost_filesystem-vc141-mt-gd-x64-1_70.dll
 /UnnamedEngine/assimp-vc140-mt.dll
 /UnnamedEngine/resources/textures
+/UnnamedEngine/x64/Release
+/UnnamedEngine/boost_filesystem-vc141-mt-x64-1_70.dll
+/.gitattributes

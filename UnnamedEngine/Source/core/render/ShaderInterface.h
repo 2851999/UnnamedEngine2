@@ -103,8 +103,10 @@ struct ShaderBlock_Terrain {
 };
 
 struct ShaderBlock_GammaCorrection {
+	Vector2f inverseTextureSize;
 	int gammaCorrect;
 	float exposureIn;
+	int fxaa;
 };
 
 struct ShaderBlock_PBREnvMapGen {
