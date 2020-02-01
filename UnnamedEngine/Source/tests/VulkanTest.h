@@ -47,7 +47,7 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
 
 	getSettings().videoVulkan = true;
 	getSettings().videoMaxFPS = 0;

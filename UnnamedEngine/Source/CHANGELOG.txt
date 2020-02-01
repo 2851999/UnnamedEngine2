@@ -1,4 +1,24 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 2 | Experimental 1
+
+* Fixed bug: Using MSAA with Vulkan would cause a crash on
+             some systems
+
+--------------------------------------------------------------
+Release 2 | Beta 0 | Development 2 (V0.4.1)
+
+* Added screen space reflections for PBR deferred rendering
+  in RenderScene
+* Added bloom for PBR deferred rendering in RenderScene
+* Added FXAA to RenderScene
+
+* Changed PostProcessor to allow for rendering to multiple
+  colour attachments
+* Changed Light to update on creation if they cast shadows
+
+* Removed 'deltaSeconds' from Sprite
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 1 | Experimental 4
 
 * Added FXAA to RenderScene

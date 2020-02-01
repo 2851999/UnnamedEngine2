@@ -55,7 +55,7 @@ void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
-	getSettings().videoResolution = VideoResolution::RES_1080p;
+	getSettings().videoResolution = VideoResolution::RES_720p;
 	//getSettings().videoRefreshRate = 144;
 	//getSettings().windowFullscreen = true;
 
