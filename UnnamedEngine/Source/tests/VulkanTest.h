@@ -47,9 +47,9 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().debugVkValidationLayersEnabled = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 
-	getSettings().videoVulkan = true;
+	getSettings().videoVulkan = false;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
 	getSettings().videoVSync = 0;
@@ -78,6 +78,11 @@ void Test::created() {
 	renderScene = new RenderScene3D();
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	renderScene->addLight(light0);
+
+	if (!getSettings().videoVulkan)
+		//Ensure Vulkan and OpenGL apply same post processing (i.e. none as not supported for Vulkan currently)
+		renderScene->disableGammaCorrection();
+
 //	renderScene->disableLighting();
 
 //	Texture* texture = Texture::loadTexture("resources/textures/texture.jpg");
@@ -134,9 +139,10 @@ void Test::render() {
 
 		utils_gl::setupAlphaBlendingMSAA();
 	}
-	camera->useView();
 
 	renderScene->render();
+
+	camera->useView();
 }
 
 void Test::destroy() {

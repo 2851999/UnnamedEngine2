@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 2 | Experimental 2
+
+* Change to VulkanTest to make OpenGL and Vulkan look similar
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 2 | Experimental 1
 
 * Fixed bug: Using MSAA with Vulkan would cause a crash on
