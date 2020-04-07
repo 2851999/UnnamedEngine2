@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 2 | Experimental 3
+
+* Added spot light shadows
+* Added 'videoVulkan' setting to debug info
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 2 | Experimental 2
 
 * Change to VulkanTest to make OpenGL and Vulkan look similar
@@ -85,7 +91,7 @@ Release 2 | Beta 0 | Development 1 (V0.4.0)
              TilemapLayer
 * Fixed bug: Crash when updating Text with an empty string
 * Fixed bug: Explicit instantiations of VBO should have been
-             after the defininitions in VBO.cpp
+             after the definitions in VBO.cpp
 
 --------------------------------------------------------------
 Release 2 | Beta 0 | Development 0 | Experimental 5

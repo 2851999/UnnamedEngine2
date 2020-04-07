@@ -49,7 +49,7 @@ public:
 void Test::initialise() {
 	getSettings().debugVkValidationLayersEnabled = false;
 
-	getSettings().videoVulkan = false;
+	getSettings().videoVulkan = true;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
 	getSettings().videoVSync = 0;
@@ -64,6 +64,7 @@ void Test::created() {
 //	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 0.0f, 1.0f);

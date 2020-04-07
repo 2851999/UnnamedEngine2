@@ -161,7 +161,7 @@ void VBO<T>::startRendering() {
 		bind();
 
 		//Enable the vertex attribute arrays
-		for (unsigned int i = 0; i < attributes.size(); i++) {
+		for (unsigned int i = 0; i < attributes.size(); ++i) {
 			glEnableVertexAttribArray(attributes[i].location);
 			//Check for instancing
 			if (instanced)
@@ -174,7 +174,7 @@ template <typename T>
 void VBO<T>::stopRendering() {
 	if (! BaseEngine::usingVulkan()) {
 		//Disable the vertex attribute arrays
-		for (unsigned int i = 0; i < attributes.size(); i++)
+		for (unsigned int i = 0; i < attributes.size(); ++i)
 			glDisableVertexAttribArray(attributes[i].location);
 	}
 }

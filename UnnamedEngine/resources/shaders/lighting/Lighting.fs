@@ -158,8 +158,12 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess)* (1.0 - ueCalculatePointShadow(light, ue_lightTexturesShadowCubemap[i], fragPos, ue_cameraPosition.xyz));
 			else
 				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
-		} else if (light.type == 3)
-			otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+		} else if (light.type == 3) {
+			if (light.useShadowMap)
+				otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap[i], fragPosLightSpace[i], normal));
+			else
+				otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+		}
 	}
 
 	return ambientLight + otherLight;
