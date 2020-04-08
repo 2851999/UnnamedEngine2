@@ -77,11 +77,13 @@ VulkanRenderPass::VulkanRenderPass(VulkanSwapChain* swapChain) {
 
 	std::vector<VkAttachmentDescription> attachments = { colourAttachment, depthAttachment };
 
+	//Colour attachment to resolve to for MSAA (try and keep in scope for vkCreateRenderPass)
+	VkAttachmentDescription colourAttachmentResolve = {};
+	VkAttachmentReference colourAttachmentResolveRef = {};
+
 	//Check for MSAA
 	if (swapChain->getNumSamples() > 0) {
 		//Also need to resolve colour attachment (which should be in VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) before displaying
-
-		VkAttachmentDescription colourAttachmentResolve = {};
 		colourAttachmentResolve.format         = swapChain->getFormat();
 		colourAttachmentResolve.samples        = VK_SAMPLE_COUNT_1_BIT;
 		colourAttachmentResolve.loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -91,7 +93,6 @@ VulkanRenderPass::VulkanRenderPass(VulkanSwapChain* swapChain) {
 		colourAttachmentResolve.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
 		colourAttachmentResolve.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-		VkAttachmentReference colourAttachmentResolveRef = {};
 		colourAttachmentResolveRef.attachment = 2;
 		colourAttachmentResolveRef.layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 

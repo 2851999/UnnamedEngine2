@@ -59,11 +59,17 @@ void Test::initialise() {
 }
 
 void Test::created() {
+	if (getSettings().videoVulkan) {
+		std::cout << Vulkan::getDevice()->listLimits() << std::endl;
+		std::cout << Vulkan::getDevice()->listSupportedExtensions() << std::endl;
+	}
+
 //	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
 //	Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 0.0f, 1.0f);
@@ -78,6 +84,11 @@ void Test::created() {
 	renderScene = new RenderScene3D();
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	renderScene->addLight(light0);
+
+	if (!getSettings().videoVulkan)
+		//Ensure Vulkan and OpenGL apply same post processing (i.e. none as not supported for Vulkan currently)
+		renderScene->disableGammaCorrection();
+
 //	renderScene->disableLighting();
 
 //	Texture* texture = Texture::loadTexture("resources/textures/texture.jpg");
@@ -134,9 +145,10 @@ void Test::render() {
 
 		utils_gl::setupAlphaBlendingMSAA();
 	}
-	camera->useView();
 
 	renderScene->render();
+
+	camera->useView();
 }
 
 void Test::destroy() {

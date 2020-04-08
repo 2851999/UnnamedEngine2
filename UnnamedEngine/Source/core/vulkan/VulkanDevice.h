@@ -80,6 +80,10 @@ public:
 	/* Destructor */
 	virtual ~VulkanDevice();
 
+	/* Utility methods to find out more about this device */
+	std::string listLimits();
+	std::string listSupportedExtensions();
+
 	/* Setters and getters */
 	VkPhysicalDevice& getPhysical() { return physicalDevice; }
 	VkDevice&         getLogical()  { return logicalDevice;  }

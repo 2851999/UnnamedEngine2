@@ -25,6 +25,7 @@
 #include "../core/physics/PhysicsScene.h"
 #include "../core/render/RenderScene.h"
 #include "../utils/DebugCamera.h"
+#include "../utils/DebugProfiler.h"
 
 class BaseTest3D : public BaseEngine {
 protected:
@@ -32,6 +33,7 @@ protected:
 	RenderScene3D* renderScene;
 	PhysicsScene3D* physicsScene;
 	SoundSystem* soundSystem;
+	DebugProfiler profiler;
 
 	ResourceLoader resourceLoader;
 public:
@@ -46,6 +48,12 @@ public:
 	virtual void onUpdate() {}
 	virtual void onRender() {}
 	virtual void onDestroy() {}
+
+	/* Method to start profiling */
+	inline void startProfile(float timeSeconds) { profiler.start(timeSeconds, profilerCallback); }
+
+	/* Callback for the profiler */
+	static void profilerCallback(DebugProfiler::Result result);
 
 	/* Input methods */
 	virtual void onKeyPressed(int key) override;

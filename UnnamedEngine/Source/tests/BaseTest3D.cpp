@@ -61,6 +61,7 @@ void BaseTest3D::created() {
 void BaseTest3D::update() {
 	onUpdate();
 
+	profiler.update(getFPS());
 	camera->update(getDeltaSeconds());
 	physicsScene->update(getDeltaSeconds());
 
@@ -89,4 +90,11 @@ void BaseTest3D::destroy() {
 void BaseTest3D::onKeyPressed(int key) {
 	if (key == GLFW_KEY_ESCAPE)
 		requestClose();
+	else if (key == GLFW_KEY_P)
+		startProfile(5.0f);
+}
+
+void BaseTest3D::profilerCallback(DebugProfiler::Result result) {
+	//Output the result
+	DebugProfiler::printResult(result);
 }

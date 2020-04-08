@@ -173,7 +173,7 @@ void RenderScene3D::render() {
 			Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*)Renderer::getCamera())->getPosition(), 0.0f);
 
 			//Go through all of the objects in this scene
-			for (unsigned int i = 0; i < batches.size(); i++) {
+			for (unsigned int i = 0; i < batches.size(); ++i) {
 				//Ensure the geometry shader is used to render all of the objects in this batch
 				batches[i].shader->useGeometryShader(true);
 
@@ -185,7 +185,7 @@ void RenderScene3D::render() {
 				shaderLightingData.ue_numLights = 0;
 
 				//Go through all of the objects in the current batch
-				for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
+				for (unsigned int j = 0; j < batches[i].objects.size(); ++j) {
 					//Pointer to the current object
 					GameObject3D* object = batches[i].objects[j];
 
@@ -319,8 +319,8 @@ void RenderScene3D::render() {
 		forwardPreRender();
 
 		//Go through and render all of the objects in this scene
-		for (unsigned int i = 0; i < batches.size(); i++) {
-			for (unsigned int j = 0; j < batches[i].objects.size(); j++)
+		for (unsigned int i = 0; i < batches.size(); ++i) {
+			for (unsigned int j = 0; j < batches[i].objects.size(); ++j)
 				batches[i].objects[j]->render();
 		}
 

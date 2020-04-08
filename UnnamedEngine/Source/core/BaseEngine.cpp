@@ -204,6 +204,7 @@ void BaseEngine::renderDebugInfo() {
 							 "VSync          : " + str(getSettings().videoVSync) + "\n" +
 							 "MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
 							 "Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
+							 "Vulkan         : " + str(getSettings().videoVulkan) + "\n" +
 							 "----------- AUDIO -----------\n" +
 							 "Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
 							 "SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
