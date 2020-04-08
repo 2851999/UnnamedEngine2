@@ -58,7 +58,7 @@ void DebugConsole::process(std::string command) {
 			baseEngine->getSettings().debugShowInformation = false;
 
 		//Go through the functions and attempt to process the data
-		for (unsigned int i = 0; i < functions.size(); i++)
+		for (unsigned int i = 0; i < functions.size(); ++i)
 			functions[i](split);
 	}
 }

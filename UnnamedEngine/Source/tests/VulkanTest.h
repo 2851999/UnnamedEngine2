@@ -59,6 +59,11 @@ void Test::initialise() {
 }
 
 void Test::created() {
+	if (getSettings().videoVulkan) {
+		std::cout << Vulkan::getDevice()->listLimits() << std::endl;
+		std::cout << Vulkan::getDevice()->listSupportedExtensions() << std::endl;
+	}
+
 //	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
 //	Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
 //	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");

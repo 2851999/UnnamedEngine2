@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 2 | Beta 0 | Development 2 | Experimental 4
+
+* Added DebugProfiler
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 2 | Experimental 3
 
 * Added spot light shadows
