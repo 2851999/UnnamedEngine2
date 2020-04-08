@@ -121,9 +121,9 @@ void VBO<T>::setupAttribute(unsigned int binding, unsigned int index) {
 			//Enable that vertex attribute array and setup its pointer
 			glEnableVertexAttribArray(attribute.location);
 			if (attribute.type == GL_UNSIGNED_INT || attribute.type == GL_INT)
-				glVertexAttribIPointer(attribute.location, attribute.size, attribute.type, stride, (void*) attribute.offset);
+				glVertexAttribIPointer(attribute.location, attribute.size, attribute.type, stride, (static_cast<const char*>(0) + attribute.offset));
 			else
-				glVertexAttribPointer(attribute.location, attribute.size, attribute.type, GL_FALSE, stride, (void*) attribute.offset);
+				glVertexAttribPointer(attribute.location, attribute.size, attribute.type, GL_FALSE, stride, (static_cast<const char*>(0) + attribute.offset));
 		}
 	} else {
 		//Setup the attribute description for the attribute
@@ -161,7 +161,7 @@ void VBO<T>::startRendering() {
 		bind();
 
 		//Enable the vertex attribute arrays
-		for (unsigned int i = 0; i < attributes.size(); i++) {
+		for (unsigned int i = 0; i < attributes.size(); ++i) {
 			glEnableVertexAttribArray(attributes[i].location);
 			//Check for instancing
 			if (instanced)
@@ -174,7 +174,7 @@ template <typename T>
 void VBO<T>::stopRendering() {
 	if (! BaseEngine::usingVulkan()) {
 		//Disable the vertex attribute arrays
-		for (unsigned int i = 0; i < attributes.size(); i++)
+		for (unsigned int i = 0; i < attributes.size(); ++i)
 			glDisableVertexAttribArray(attributes[i].location);
 	}
 }
@@ -198,3 +198,6 @@ void VBO<T>::updateStream(GLsizeiptr size) {
 		glBufferSubData(target, 0, size, &data.front());
 	}
 }
+
+template class VBO<GLfloat>;
+template class VBO<unsigned int>;

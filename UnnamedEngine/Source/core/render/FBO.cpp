@@ -106,12 +106,8 @@ void FBO::setup() {
 		//No colour attachment
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
-	} else {
-		unsigned int attachments[colourAttachments.size()];
-		for (unsigned int i = 0; i < colourAttachments.size(); i++)
-			attachments[i] = colourAttachments[i];
-		glDrawBuffers(colourAttachments.size(), attachments);
-	}
+	} else
+		glDrawBuffers(colourAttachments.size(), colourAttachments.data());
 
 	//Check to see whether the setup was successful
 	int status = glCheckFramebufferStatus(target);

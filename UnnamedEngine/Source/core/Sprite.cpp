@@ -28,62 +28,83 @@
 Animation2D::Animation2D(Sprite* sprite, float timeBetweenFrame, unsigned int totalFrames, bool repeat, unsigned int startFrame) :
 		sprite(sprite), timeBetweenFrames(timeBetweenFrame), totalFrames(totalFrames), repeat(repeat), startFrame(startFrame) {
 	currentFrame = startFrame;
-	running = false;
-	currentTime = 0.0f;
+	timer.reset();
 }
 
 Animation2D::~Animation2D() {
-
+	
 }
 
 void Animation2D::start() {
 	//Start the animation, after ensuring all the variables are reset ready to start
 	reset();
-	running = true;
+	timer.start();
 	onStart();
+}
+
+void Animation2D::pause() {
+	//Pause the animation
+	timer.pause();
+}
+
+void Animation2D::resume() {
+	//Resume the animation
+	timer.resume();
 }
 
 void Animation2D::stop() {
 	//Stop
-	running = false;
+	timer.stop();
 	onStop();
 }
 
 void Animation2D::reset() {
 	//Reset all of the values
 	currentFrame = startFrame;
-	running = false;
-	currentTime = 0.0f;
+	timer.reset();
 	onReset();
 }
 
-void Animation2D::update(float deltaSeconds) {
+void Animation2D::update() {
 	//Check whether the animation is running
-	if (running) {
-		//Increment the current time
-		currentTime += deltaSeconds;
-
+	if (isRunning()) {
+		//Obtain the current frame that should be visible
+		unsigned int currentFrameIndex = startFrame + (unsigned int) std::floor(timer.getSeconds() / timeBetweenFrames);
 		//Check whether the animation should update
-		if (currentTime >= timeBetweenFrames) {
+		if (currentFrameIndex != currentFrame) {
 			//Check whether the current frame is the last (NOTE: First frame can be index 0)
-			if (currentFrame == startFrame + totalFrames - 1) {
+			if (currentFrame >= startFrame + totalFrames - 1) {
 				//Restart the animation if it should repeat
 				if (repeat) {
 					currentFrame = startFrame;
-					currentTime = 0;
+					timer.restart();
 					//Update the animation to the current frame
 					updateFrame();
 				} else
 					stop();
 			} else {
-				//Increment the current frame, and reset the time
-				currentFrame++;
-				currentTime = 0;
+				//Assign the frame
+				currentFrame = currentFrameIndex;
 				//Update the animation to the current frame
 				updateFrame();
 			}
 		}
 	}
+}
+
+void Animation2D::updateTimeBetweenFrames(float time) {
+	//Check if the animation is running
+	if (isRunning() && time != timeBetweenFrames) {
+		//Calculate the new frame in the animation
+		unsigned int currentFrameIndex = (unsigned int) std::floor(timer.getSeconds() / timeBetweenFrames);
+
+		float newFrameTime = (currentFrameIndex + ((timer.getSeconds() / timeBetweenFrames) - ((float) currentFrameIndex))) * time;
+
+		//Assign the new time
+		timer.setSeconds(newFrameTime);
+	}
+	//Assign the time
+	this->timeBetweenFrames = time;
 }
 
 /*****************************************************************************
@@ -92,14 +113,29 @@ void Animation2D::update(float deltaSeconds) {
 
 TextureAnimation2D::TextureAnimation2D(Sprite* sprite, TextureAtlas* textureAtlas, float timeBetweenFrame, bool repeat, unsigned int startFrame, int numFrames) :
 		Animation2D(sprite, timeBetweenFrame, numFrames == -1 ? textureAtlas->getNumTextures() : numFrames, repeat, startFrame), textureAtlas(textureAtlas) {
+	textureLayers.push_back(textureAtlas->getTexture());
+}
 
+void TextureAnimation2D::addMaxLayers(unsigned int maxLayers) {
+	while (textureLayers.size() < maxLayers)
+		textureLayers.push_back(NULL);
 }
 
 void TextureAnimation2D::onStart() {
 	//Assign the texture in the entity
 	if (sprite) {
-		//Assign the texture
-		sprite->getMaterial()->setDiffuse(textureAtlas->getTexture());
+		//Check the number of layers required have been allocated
+		if (sprite->getNumLayers() < textureLayers.size())
+			Logger::log("Not enough Sprite layers assigned for animation", "TextureAnimation2D", LogType::Error);
+		unsigned int numVisible = 0;
+		//Assign the required textures
+		for (unsigned int i = 0; i < textureLayers.size(); ++i) {
+			sprite->setLayer(numVisible, textureLayers[i]);
+			if (textureLayers[i])
+				++numVisible;
+		}
+		//Assign the visible layers
+		sprite->setVisibleLayers(numVisible);
 		//Assign the texture for the first frame
 		sprite->setTextureCoords(textureAtlas, currentFrame);
 	}
@@ -107,10 +143,9 @@ void TextureAnimation2D::onStart() {
 
 void TextureAnimation2D::updateFrame() {
 	//Ensure the entity has been assigned
-	if (sprite) {
+	if (sprite)
 		//Assign the texture coordinates
 		sprite->setTextureCoords(textureAtlas, currentFrame);
-	}
 }
 
 /*****************************************************************************
@@ -124,41 +159,75 @@ Sprite::~Sprite() {
 	animations.clear();
 }
 
+void Sprite::setupMesh(Texture* texture) {
+	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	//Add a sub data
+	getMesh()->getData()->addSubData(0, 0, 6, 0);
+	getMaterial()->setDiffuse(texture);
+}
+
 void Sprite::setup(Texture* texture) {
 	setWidth(texture->getWidth());
 	setHeight(texture->getHeight());
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	setupMesh(texture);
 	getMaterial()->setDiffuse(texture);
 }
 
 void Sprite::setup(Texture* texture, float width, float height) {
 	setWidth(width);
 	setHeight(height);
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	setupMesh(texture);
 	getMaterial()->setDiffuse(texture);
 }
 
 void Sprite::setup(TextureAtlas* textureAtlas) {
 	setWidth(textureAtlas->getSubTextureWidth());
 	setHeight(textureAtlas->getSubTextureHeight());
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), textureAtlas->getTexture(), MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
-	getMaterial()->setDiffuse(textureAtlas->getTexture());
+	setupMesh(textureAtlas->getTexture());
+	setVisibleLayers(getNumLayers());
 }
 
 void Sprite::setup(TextureAtlas* textureAtlas, float width, float height) {
 	setWidth(width);
 	setHeight(height);
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), textureAtlas->getTexture(), MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
-	getMaterial()->setDiffuse(textureAtlas->getTexture());
+	setupMesh(textureAtlas->getTexture());
+	setVisibleLayers(getNumLayers());
 }
 
-void Sprite::update(float deltaSeconds) {
+void Sprite::addMaxLayers(unsigned int maxLayers) {
+	while (getMesh()->getNumMaterials() < maxLayers)
+		//Add a Material for this new layer
+		getMesh()->addMaterial(new Material());
+}
+
+void Sprite::setLayer(unsigned int layer, Texture* texture) {
+	//Assign the required texture
+	getMesh()->getMaterial(layer)->setDiffuse(texture);
+}
+
+void Sprite::setVisibleLayers(unsigned int count) {
+	unsigned int endIndex = count - 1;
+	//Get the current maximum index
+	unsigned int currentMaxIndex = getMesh()->getData()->getSubDataCount() - 1;
+	//Check whether some should be added or removed
+	if (currentMaxIndex > endIndex) {
+		//Remove the last few
+		for (unsigned int i = endIndex; i < currentMaxIndex; ++i)
+			getMesh()->getData()->removeSubData(endIndex + 1);
+	} else if (currentMaxIndex < endIndex) {
+		//Add the required ones
+		for (unsigned int i = currentMaxIndex; i < endIndex; ++i)
+			getMesh()->getData()->addSubData(0, 0, 6, i + 1);
+	}
+}
+
+void Sprite::update() {
 	//Check whether there is a current animation
 	if (currentAnimation) {
 		//Update the current animation
-		currentAnimation->update(deltaSeconds);
+		currentAnimation->update();
 		//Check if the animation has finished
-		if (! currentAnimation->isRunning())
+		if (currentAnimation->isStopped())
 			stopAnimation();
 	}
 	//Update this object

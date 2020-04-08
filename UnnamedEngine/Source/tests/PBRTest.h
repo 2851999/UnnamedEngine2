@@ -55,9 +55,9 @@ void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
-//	getSettings().videoResolution = VideoResolution::RES_1440p;
-//	getSettings().videoRefreshRate = 144;
-//	getSettings().windowFullscreen = true;
+	getSettings().videoResolution = VideoResolution::RES_720p;
+	//getSettings().videoRefreshRate = 144;
+	//getSettings().windowFullscreen = true;
 
 	//Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
 }
@@ -84,11 +84,21 @@ void Test::onCreated() {
 
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
 	renderScene->enablePBR();
+	renderScene->enableBloom();
+	renderScene->enableSSR();
 	renderScene->setPBREnvironment(environment);
 	if (deferred)
 		renderScene->enableDeferred(); //Should be enabled after PBR so the correct buffers are setup
 
-	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	//light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+
+	light0 = (new Light(Light::TYPE_SPOT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+
+	utils_random::initialise();
+	/*
+	for (unsigned int i = 0; i < 10; ++i)
+		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f))));
+	*/
 
 	//camera->setProjectionMatrix(light0->getLightProjectionMatrix());
 
@@ -97,7 +107,7 @@ void Test::onCreated() {
 	renderScene->addLight(light0);
 //	renderScene->addLight(light1);
 //	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
-//	renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.0f, 3.0f, 0.0f), false))->setDirection(0.0f, -1.0f, 0.0f)->setInnerCutoff(25.0f)->setOuterCutoff(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f))); //Sphere appears off-centre
+//	renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.0f, 3.0f, 0.0f), false))->setDirection(0.0f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f))); //Sphere appears off-centre
 //	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 
 	//std::string path = "C:/UnnamedEngine/textures/PBR/";
@@ -134,8 +144,9 @@ void Test::onCreated() {
 	sphere->update();
 	renderScene->add(sphere);
 
-	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "plane.obj"), pbrRenderShader);
-	sphere2->setPosition(10.0f, 0.8f, 0.0f);
+	GameObject3D* sphere2 = new GameObject3D(resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj"), pbrRenderShader);
+	sphere2->setPosition(15.0f, 1.8f, 0.0f);
+	sphere2->setScale(2.0f, 2.0f, 2.0f);
 	sphere2->update();
 	renderScene->add(sphere2);
 
@@ -215,6 +226,10 @@ void Test::onKeyPressed(int key) {
 		renderScene->setExposure(4.0f);
 	else if (key == GLFW_KEY_6)
 		renderScene->setExposure(8.0f);
+	else if (key == GLFW_KEY_9)
+		renderScene->enableFXAA();
+	else if (key == GLFW_KEY_0)
+		renderScene->disableFXAA();
 }
 
 #endif /* TESTS_BASEENGINETEST3D_H_ */

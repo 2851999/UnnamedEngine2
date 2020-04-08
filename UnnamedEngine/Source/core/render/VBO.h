@@ -109,7 +109,4 @@ public:
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };
 
-template class VBO<GLfloat>;
-template class VBO<unsigned int>;
-
 #endif /* CORE_RENDER_VBO_H_ */

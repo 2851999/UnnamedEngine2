@@ -71,6 +71,9 @@ namespace utils_string {
 		std::vector<std::string> split;
 		while (std::getline(ss, item, delimeter))
 			split.push_back(item);
+		//Add on an empty string so that splitting a,b, by a ',' gives 3 elements instead of 2
+		if (s[s.length() - 1] == delimeter)
+			split.push_back("");
 		return split;
 	}
 

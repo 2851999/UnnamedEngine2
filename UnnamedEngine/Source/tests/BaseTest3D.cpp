@@ -43,7 +43,7 @@ void BaseTest3D::created() {
 	InputBindings* bindings = new InputBindings();
 	bindings->load(resourceLoader.getPath() + "config/Controller.xml", getWindow()->getInputManager());
 
-	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
+	camera = new DebugCamera(90.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
 
 	physicsScene = new PhysicsScene3D();
 	renderScene = new RenderScene3D();
@@ -61,6 +61,7 @@ void BaseTest3D::created() {
 void BaseTest3D::update() {
 	onUpdate();
 
+	profiler.update(getFPS());
 	camera->update(getDeltaSeconds());
 	physicsScene->update(getDeltaSeconds());
 
@@ -89,4 +90,11 @@ void BaseTest3D::destroy() {
 void BaseTest3D::onKeyPressed(int key) {
 	if (key == GLFW_KEY_ESCAPE)
 		requestClose();
+	else if (key == GLFW_KEY_P)
+		startProfile(5.0f);
+}
+
+void BaseTest3D::profilerCallback(DebugProfiler::Result result) {
+	//Output the result
+	DebugProfiler::printResult(result);
 }

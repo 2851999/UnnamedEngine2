@@ -32,16 +32,64 @@ RenderScene3D::RenderScene3D() {
 	//Assign some default values
 	shaderLightingData.ue_useEnvironmentMap = false;
 
+	shaderGammaCorrectionData.inverseTextureSize = Vector2f(1.0f / Window::getCurrentInstance()->getSettings().windowWidth, 1.0f / Window::getCurrentInstance()->getSettings().windowHeight);
 	shaderGammaCorrectionData.gammaCorrect = true;
 	shaderGammaCorrectionData.exposureIn = -1;
+	shaderGammaCorrectionData.fxaa = true;
 
 	if (! BaseEngine::usingVulkan()) {
 		//Get the required shaders
 		shadowMapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_MAP)->getForwardShader();
 		shadowCubemapShader = Renderer::getRenderShader(Renderer::SHADER_SHADOW_CUBEMAP)->getForwardShader();
 
-		//Setup the post processor
-		postProcessor = new PostProcessor("resources/shaders/postprocessing/GammaCorrectionShader", false);
+		lightingFramebuffer = new FBO(GL_FRAMEBUFFER, false);
+		lightingFramebuffer->attach(new FramebufferStore(
+			GL_TEXTURE_2D,
+			GL_RGBA16F,
+			Window::getCurrentInstance()->getSettings().windowWidth,
+			Window::getCurrentInstance()->getSettings().windowHeight,
+			GL_RGBA,
+			GL_FLOAT,
+			GL_COLOR_ATTACHMENT0,
+			GL_NEAREST,
+			GL_CLAMP_TO_EDGE,
+			true
+		));
+
+		lightingFramebuffer->attach(new FramebufferStore(
+			GL_TEXTURE_2D,
+			GL_RGBA16F,
+			Window::getCurrentInstance()->getSettings().windowWidth,
+			Window::getCurrentInstance()->getSettings().windowHeight,
+			GL_RGBA,
+			GL_FLOAT,
+			GL_COLOR_ATTACHMENT1,
+			GL_NEAREST,
+			GL_CLAMP_TO_EDGE,
+			true
+		));
+
+		lightingFramebuffer->attach(new FramebufferStore(
+			GL_RENDERBUFFER,
+			GL_DEPTH_COMPONENT32,
+			Window::getCurrentInstance()->getSettings().windowWidth,
+			Window::getCurrentInstance()->getSettings().windowHeight,
+			GL_DEPTH_COMPONENT,
+			GL_UNSIGNED_INT,
+			GL_DEPTH_ATTACHMENT,
+			GL_NEAREST,
+			GL_CLAMP_TO_EDGE,
+			true
+		));
+
+		lightingFramebuffer->setup();
+
+		//Setup the post processors
+		postProcessorBloom = new PostProcessor(std::string("resources/shaders/postprocessing/BloomShader"), false);
+		postProcessorBlur1 = new PostProcessor(std::string("resources/shaders/postprocessing/GaussianBlur"), false);
+		postProcessorBlur2 = new PostProcessor(std::string("resources/shaders/postprocessing/GaussianBlur"), false);
+		postProcessorSSR = new PostProcessor(std::string("resources/shaders/postprocessing/SSRShader"), false);
+		postProcessor = new PostProcessor(std::string("resources/shaders/postprocessing/GammaCorrectionShader"), false);
 
 		//Get the lighting and gamma correction UBOs
 		shaderLightingUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_LIGHTING);
@@ -122,10 +170,10 @@ void RenderScene3D::render() {
 				utils_gl::enableWireframe();
 
 			//Assign the camera position
-			Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f);
+			Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*)Renderer::getCamera())->getPosition(), 0.0f);
 
 			//Go through all of the objects in this scene
-			for (unsigned int i = 0; i < batches.size(); i++) {
+			for (unsigned int i = 0; i < batches.size(); ++i) {
 				//Ensure the geometry shader is used to render all of the objects in this batch
 				batches[i].shader->useGeometryShader(true);
 
@@ -137,7 +185,7 @@ void RenderScene3D::render() {
 				shaderLightingData.ue_numLights = 0;
 
 				//Go through all of the objects in the current batch
-				for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
+				for (unsigned int j = 0; j < batches[i].objects.size(); ++j) {
 					//Pointer to the current object
 					GameObject3D* object = batches[i].objects[j];
 
@@ -162,8 +210,11 @@ void RenderScene3D::render() {
 			//Stop rendering to the geometry buffer
 			gBuffer->unbind();
 
-			//Render to the post processor's framebuffer
-			postProcessor->start();
+			//Render to framebuffer
+			lightingFramebuffer->bind();
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_DEPTH_TEST);
 
 			//Render to the screen with the correct lighting shader
 			if (pbr)
@@ -171,11 +222,79 @@ void RenderScene3D::render() {
 			else
 				renderLighting(Renderer::getRenderShader(Renderer::SHADER_DEFERRED_LIGHTING), -1);
 
-			//Stop using the post processor's framebuffer
-			postProcessor->stop();
+			//Stop rendering to the framebuffer
+			lightingFramebuffer->unbind();
 
-			//Render the final output
-			postProcessor->render();
+			//Check if bloom is in use
+			if (bloom) {
+				//Blur the bright texture
+				bool horizontal = true;
+				bool firstIteration = true;
+				int amount = 6;
+				PostProcessor* current = postProcessorBlur1;
+				PostProcessor* previous = postProcessorBlur2;
+
+				for (unsigned int i = 0; i < amount; ++i) {
+					previous->getShader()->use();
+					previous->getShader()->setUniformi("Horizontal", horizontal);
+
+					current->start();
+					Renderer::render(firstIteration ? lightingFramebuffer->getFramebufferStore(1) : previous->getFBO()->getFramebufferStore(0), previous->getShader(), "Texture0");
+					current->stop();
+
+					current = previous;
+					if (current == postProcessorBlur1)
+						previous = postProcessorBlur2;
+					else
+						previous = postProcessorBlur1;
+
+					horizontal = ! horizontal;
+					if (firstIteration)
+						firstIteration = false;
+				}
+
+				//Now 'previous' holds the final blurred texture
+
+				//Combine the result with the lighting result
+				postProcessorBloom->start();
+				Renderer::saveTextures();
+				postProcessorBloom->getShader()->use();
+				postProcessorBloom->getShader()->setUniformi("Texture0", Renderer::bindTexture(lightingFramebuffer->getFramebufferStore(0)));
+				postProcessorBloom->getShader()->setUniformi("BloomTexture", Renderer::bindTexture(previous->getFBO()->getFramebufferStore(0)));
+				Renderer::getScreenTextureMesh()->render();
+				postProcessorBloom->getShader()->stopUsing();
+				Renderer::releaseNewTextures();
+				postProcessorBloom->stop();
+			}
+
+			//Check if SSR should be used
+			if (ssr && pbr) {
+				postProcessor->start();
+
+				Renderer::saveTextures();
+
+				Shader* shader = postProcessorSSR->getShader();
+				shader->use();
+
+				//Bind the textures
+				shader->setUniformi("PositionBuffer", Renderer::bindTexture(gBuffer->getPositionBuffer()));
+				shader->setUniformi("NormalBuffer", Renderer::bindTexture(gBuffer->getNormalBuffer()));
+				//shader->setUniformi("AlbedoBuffer", Renderer::bindTexture(postProcessorSSR->getFBO()->getFramebufferStore(0))); //Stored under 'Texture'
+				shader->setUniformi("MetalnessAOBuffer", Renderer::bindTexture(gBuffer->getMetalnessAOBuffer()));
+				shader->setUniformi("AlbedoBuffer", bloom ? Renderer::bindTexture(postProcessorBloom->getFBO()->getFramebufferStore(0)) : Renderer::bindTexture(lightingFramebuffer->getFramebufferStore(0)));
+
+				//Render the output of the SSR
+				postProcessorSSR->render();
+
+				Renderer::releaseNewTextures();
+
+				postProcessor->stop();
+
+				//Render the final output
+				postProcessor->render();
+			} else
+				//Render the final output
+				Renderer::render(bloom ? postProcessorBloom->getFBO()->getFramebufferStore(0) : lightingFramebuffer->getFramebufferStore(0), postProcessor->getShader(), "Texture0");
 
 			//Copy depth data to the default framebuffer so forward rendering is still possible after this scene was rendered
 			gBuffer->outputDepthInfo();
@@ -200,8 +319,8 @@ void RenderScene3D::render() {
 		forwardPreRender();
 
 		//Go through and render all of the objects in this scene
-		for (unsigned int i = 0; i < batches.size(); i++) {
-			for (unsigned int j = 0; j < batches[i].objects.size(); j++)
+		for (unsigned int i = 0; i < batches.size(); ++i) {
+			for (unsigned int j = 0; j < batches[i].objects.size(); ++j)
 				batches[i].objects[j]->render();
 		}
 
@@ -303,7 +422,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 	//Go through each set of lights
 	for (unsigned int s = 0; s < lights.size(); s += NUM_LIGHTS_IN_SET) {
 		//Calculate the number of lights in this set
-		uniformNumLights = utils_maths::min(NUM_LIGHTS_IN_SET, lights.size() - s);
+		uniformNumLights = utils_maths::min<unsigned int>(NUM_LIGHTS_IN_SET, lights.size() - s);
 
 		//Check if blending needs to be setup
 		if (s == NUM_LIGHTS_IN_SET) {
@@ -352,6 +471,10 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 		//Now check whether forward or deferred rendering
 		if (deferredRendering) {
 			shaderLightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
+
+			Renderer::getShaderBlock_Core().ue_projectionMatrix = ((Camera3D*) Renderer::getCamera())->getProjectionMatrix();
+			Renderer::getShaderBlock_Core().ue_viewMatrix = ((Camera3D*)Renderer::getCamera())->getViewMatrix();
+			Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_CORE)->update(&Renderer::getShaderBlock_Core(), 0, sizeof(ShaderBlock_Core));
 
 			//Deferred rendering, so render the quad on the screen with the current set of lights
 			Renderer::getScreenTextureMesh()->render();
@@ -519,6 +642,20 @@ void RenderScene3D::disableGammaCorrection() {
 
 void RenderScene3D::setExposure(float exposure) {
 	shaderGammaCorrectionData.exposureIn = exposure;
+
+	//Update the data
+	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
+}
+
+void RenderScene3D::enableFXAA() {
+	shaderGammaCorrectionData.fxaa = true;
+
+	//Update the data
+	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));
+}
+
+void RenderScene3D::disableFXAA() {
+	shaderGammaCorrectionData.fxaa = false;
 
 	//Update the data
 	shaderGammaCorrectionUBO->update(&shaderGammaCorrectionData, 0, sizeof(ShaderBlock_GammaCorrection));

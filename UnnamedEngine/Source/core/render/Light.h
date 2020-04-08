@@ -45,7 +45,7 @@ private:
 	float linear    = 0.0f;
 	float quadratic = 1.0f;
 
-	/* The inner and outer cutoff values for spot lights (taken in degrees) */
+	/* The inner and outer cutoff values for spot lights (taken as cos of the angle) */
 	float innerCutoff = 0;
 	float outerCutoff = 0;
 
@@ -97,6 +97,8 @@ public:
 	inline Light* setQuadraticAttenuation(float value) { quadratic = value; return this; }
 	inline Light* setInnerCutoff(float innerCutoff) { this->innerCutoff = innerCutoff; return this; }
 	inline Light* setOuterCutoff(float outerCutoff) { this->outerCutoff = outerCutoff; return this; }
+	inline Light* setInnerCutoffDegrees(float innerCutoff) { this->innerCutoff = cos(utils_maths::toRadians(innerCutoff)); return this; }
+	inline Light* setOuterCutoffDegrees(float outerCutoff) { this->outerCutoff = cos(utils_maths::toRadians(outerCutoff)); return this; }
 
 	inline int getType() { return type; }
 	inline Vector3f getDirection() { return direction; }

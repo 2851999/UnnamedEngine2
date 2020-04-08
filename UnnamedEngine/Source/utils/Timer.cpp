@@ -66,6 +66,15 @@ long Timer::getTime() {
 		return 0;
 }
 
+void Timer::setTime(long time) {
+	if (state == State::STOPPED)
+		endTime = startTime + pauseTotal + time;
+	else if (state == State::PAUSED)
+		pauseStart = startTime + pauseTotal + time;
+	else if (state == State::RUNNING)
+		startTime = utils_time::getMilliseconds() - pauseTotal - time;
+}
+
 bool Timer::hasTimePassed(long time) {
 	if (state != State::NONE)
 		return getTime() >= time;

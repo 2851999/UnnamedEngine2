@@ -134,7 +134,7 @@ public:
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
 
 	/* Method used to render a FramebufferStore */
-	static void render(FramebufferStore* texture, Shader* shader = NULL);
+	static void render(FramebufferStore* texture, Shader* shader = NULL, std::string textureUniform = "Texture");
 
 	/* Method use to destroy any objects that were created */
 	static void destroy();

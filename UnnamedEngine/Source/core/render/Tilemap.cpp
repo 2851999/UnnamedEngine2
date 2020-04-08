@@ -70,7 +70,7 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 				unsigned int tileID = data[tileIndex];
 
 				//The texture coordinate values
-				float top, left, bottom, right;
+				float top = 0, left = 0, bottom = 0, right = 0;
 
 				//Visibility of the current tile
 				float tileVisibility = 1.0f;
@@ -382,7 +382,7 @@ TextureAtlas* Tilemap::loadTileset(std::string path, std::string name) {
 	std::vector<MLAttribute> tilesetAttributes = tilesetElement.getAttributes();
 
 	//Info needed
-	unsigned int tileWidth, tileHeight, tileCount = 0;
+	unsigned int tileWidth = 0, tileHeight = 0, tileCount = 0;
 
 	//Go through all of the attributes
 	for (unsigned int i = 0; i < tilesetAttributes.size(); i++) {
@@ -426,7 +426,7 @@ Tilemap* Tilemap::loadTilemap(std::string path, std::string name, bool editable,
 	std::vector<MLAttribute> tilesetAttributes = tilemapElement.getAttributes();
 
 	//Info needed
-	unsigned int rows, columns, tileWidth, tileHeight = 0;
+	unsigned int rows = 0, columns = 0, tileWidth = 0, tileHeight = 0;
 
 	//Go through all of the attributes
 	for (unsigned int i = 0; i < tilesetAttributes.size(); i++) {

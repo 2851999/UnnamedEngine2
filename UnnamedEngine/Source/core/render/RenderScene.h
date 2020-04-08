@@ -69,8 +69,27 @@ private:
 	/* States whether PBR should be used */
 	bool pbr = false;
 
+	/* States whether bloom should be used */
+	bool bloom = false;
+
+	/* States whether screen space reflections should be used */
+	bool ssr = false;
+
 	/* The environment used for PBR */
 	PBREnvironment* pbrEnvironment = NULL;
+
+	/* Framebuffer for storing lighting output with a 'bright' texture for bloom */
+	FBO* lightingFramebuffer;
+
+	/* Post processor used for applying bloom */
+	PostProcessor* postProcessorBloom;
+
+	/* Post processor used for applying a gaussian blur bloom */
+	PostProcessor* postProcessorBlur1;
+	PostProcessor* postProcessorBlur2;
+
+	/* Post processor used for applying screen space reflections */
+	PostProcessor* postProcessorSSR;
 
 	/* Post processor used for applying gamma correction */
 	PostProcessor* postProcessor = NULL;
@@ -152,6 +171,10 @@ public:
 	inline void disableLighting() { lighting = false; }
 	inline void enableWireframe() { renderWireframe = true; }
 	inline void disableWireframe() { renderWireframe = false; }
+	inline void enableSSR() { ssr = true; }
+	inline void disableSSR() { ssr = false; }
+	inline void enableBloom() { bloom = true; }
+	inline void disableBloom() { bloom = false; }
 	inline void setPBREnvironment(PBREnvironment* environment) { this->pbrEnvironment = environment; }
 	inline Colour getAmbientLight() { return ambientLight; }
 	inline bool isLightingEnabled() { return lighting; }
@@ -162,6 +185,8 @@ public:
 	void enableGammaCorrection();
 	void disableGammaCorrection();
 	void setExposure(float exposure);
+	void enableFXAA();
+	void disableFXAA();
 };
 
 #endif /* CORE_RENDER_RENDERSCENE_H_ */

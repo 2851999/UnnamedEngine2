@@ -25,20 +25,24 @@
  * The PostProcessor class
  *****************************************************************************/
 
-PostProcessor::PostProcessor(bool multisample) {
+PostProcessor::PostProcessor(bool multisample, unsigned int numColourAttachments) {
 	fbo = new FBO(GL_FRAMEBUFFER, multisample);
-	fbo->attach(new FramebufferStore(
+	this->numColourAttachments = numColourAttachments;
+
+	for (unsigned int i = 0; i < numColourAttachments; ++i) {
+		fbo->attach(new FramebufferStore(
 			multisample ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D,
 			GL_RGBA16F,
 			Window::getCurrentInstance()->getSettings().windowWidth,
 			Window::getCurrentInstance()->getSettings().windowHeight,
 			GL_RGBA,
 			GL_FLOAT,
-			GL_COLOR_ATTACHMENT0,
+			GL_COLOR_ATTACHMENT0 + i,
 			GL_NEAREST,
 			GL_CLAMP_TO_EDGE,
 			true
-	));
+		));
+	}
 
 	fbo->attach(new FramebufferStore(
 			GL_RENDERBUFFER,
@@ -56,7 +60,7 @@ PostProcessor::PostProcessor(bool multisample) {
 	fbo->setup();
 }
 
-PostProcessor::PostProcessor(std::string path, bool multisampling) : PostProcessor(multisampling) {
+PostProcessor::PostProcessor(const std::string& path, bool multisampling, unsigned int numColourAttachments) : PostProcessor(multisampling, numColourAttachments) {
 	shader = Shader::createShader(Shader::loadShaderSource(path + ".vs"), Shader::loadShaderSource(path + ".fs"));
 }
 
@@ -72,7 +76,18 @@ void PostProcessor::stop() {
 }
 
 void PostProcessor::render() {
-	Renderer::render(fbo->getFramebufferStore(0), shader);
+	shader->use();
+
+	Renderer::saveTextures();
+
+	for (unsigned int i = 0; i < numColourAttachments; ++i)
+		shader->setUniformi("Texture" + utils_string::str(i), Renderer::bindTexture(fbo->getFramebufferStore(i)));
+
+	Renderer::getScreenTextureMesh()->render();
+
+	shader->stopUsing();
+
+	Renderer::releaseNewTextures();
 }
 
 void PostProcessor::copyToScreen(GLbitfield mask) {

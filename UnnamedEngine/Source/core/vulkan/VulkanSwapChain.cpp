@@ -22,6 +22,7 @@
 #include "../../utils/Logging.h"
 
 #include <limits>
+#include <algorithm>
 
 /*****************************************************************************
  * The VulkanSwapChain class
