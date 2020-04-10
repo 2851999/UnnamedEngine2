@@ -23,6 +23,7 @@
 
 #include "../render/Mesh.h"
 #include "../../utils/Logging.h"
+#include "../render/DescriptorSet.h"
 
 #include <limits>
 #include <array>
@@ -31,18 +32,19 @@
  * The Vulkan class
  *****************************************************************************/
 
-VkInstance                   Vulkan::instance;
-VkSurfaceKHR                 Vulkan::windowSurface;
-VulkanDevice*                Vulkan::device;
-VulkanSwapChain*             Vulkan::swapChain;
-VulkanRenderPass*            Vulkan::renderPass;
-VkCommandPool                Vulkan::commandPool;
-std::vector<VkCommandBuffer> Vulkan::commandBuffers;
-std::vector<VkSemaphore>     Vulkan::imageAvailableSemaphores;
-std::vector<VkSemaphore>     Vulkan::renderFinishedSemaphores;
-std::vector<VkFence>         Vulkan::inFlightFences;
-unsigned int                 Vulkan::currentFrame = 0;
-VulkanGraphicsPipeline*      Vulkan::currentGraphicsPipeline = NULL;
+VkInstance                                   Vulkan::instance;
+VkSurfaceKHR                                 Vulkan::windowSurface;
+VulkanDevice*                                Vulkan::device;
+VulkanSwapChain*                             Vulkan::swapChain;
+VulkanRenderPass*                            Vulkan::renderPass;
+VkCommandPool                                Vulkan::commandPool;
+std::vector<VkCommandBuffer>                 Vulkan::commandBuffers;
+std::vector<VkSemaphore>                     Vulkan::imageAvailableSemaphores;
+std::vector<VkSemaphore>                     Vulkan::renderFinishedSemaphores;
+std::vector<VkFence>                         Vulkan::inFlightFences;
+unsigned int                                 Vulkan::currentFrame = 0;
+VulkanGraphicsPipeline*                      Vulkan::currentGraphicsPipeline = NULL;
+std::vector<Vulkan::DescriptorSetUpdateInfo> Vulkan::descriptorSetUpdateQueue;
 
 bool Vulkan::initialise(Window* window) {
 	//Initialise Vulkan
@@ -468,6 +470,10 @@ void Vulkan::startDraw() {
 }
 
 void Vulkan::stopDraw() {
+	//Update descriptor sets
+	updateDescriptorSetQueue();
+
+
 	vkCmdEndRenderPass(commandBuffers[currentFrame]);
 
 	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
@@ -518,6 +524,42 @@ void Vulkan::bindGraphicsPipeline(VulkanGraphicsPipeline* pipeline) {
 
 	//Bind the pipeline
 	vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getInstance());
+}
+
+bool Vulkan::updateDescriptorSetFrame(DescriptorSetUpdateInfo& info) {
+	//Update the set for the current frame
+	info.set->updateVk(info.nextUpdateFrame);
+
+	//Reduce the number of updates left by 1
+	info.updatesLeft--;
+	info.nextUpdateFrame = (info.nextUpdateFrame + 1) % swapChain->getImageCount();
+
+	return info.updatesLeft <= 0;
+}
+
+void Vulkan::updateDescriptorSet(DescriptorSet* set) {
+	//Setup the structure for the queue
+	DescriptorSetUpdateInfo info;
+	info.set             = set;
+	info.nextUpdateFrame = getNextFrame();
+	info.updatesLeft     = getSwapChain()->getImageCount();
+
+	//Add the set to the update queue
+	descriptorSetUpdateQueue.push_back(info);
+}
+
+void Vulkan::updateDescriptorSetQueue() {
+	//Indices of data to be removed
+	unsigned int removeEnd = 0;
+	//Go through the descriptor sets
+	for (unsigned int i = 0; i < descriptorSetUpdateQueue.size(); ++i) {
+		//Update the current set, and prepare to remove it if finished updating
+		if (updateDescriptorSetFrame(descriptorSetUpdateQueue[i]))
+			removeEnd++;
+	}
+	//Remove all finished updates from the queue
+	if (removeEnd > 0)
+		descriptorSetUpdateQueue.erase(descriptorSetUpdateQueue.begin(), descriptorSetUpdateQueue.begin() + removeEnd);
 }
 
 VkSampleCountFlagBits Vulkan::getMaxUsableSampleCount(unsigned int targetSamples) {

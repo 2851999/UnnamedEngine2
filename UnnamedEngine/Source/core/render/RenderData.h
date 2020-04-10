@@ -94,7 +94,7 @@ public:
 	void setupVulkan(RenderShader* renderShader);
 
 
-	void updateVulkan();
+	void updateVk();
 
 	/* Methods to add a UBO or Texture to this instance */
 	inline void add(unsigned int id, UBO* ubo) { ubos.insert(std::pair<unsigned int, UBO*>(id, ubo)); }

@@ -227,7 +227,7 @@ void RenderData::setupVulkan(RenderShader* renderShader) {
 	}
 }
 
-void RenderData::updateVulkan() {
+void RenderData::updateVk() {
 	//Setup the descriptor set write's
 	if (BaseEngine::usingVulkan()) {
 		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();

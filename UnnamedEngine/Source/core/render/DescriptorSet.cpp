@@ -33,7 +33,7 @@ DescriptorSet::~DescriptorSet() {
         vkDestroyDescriptorPool(Vulkan::getDevice()->getLogical(), vulkanDescriptorPool, nullptr);
 }
 
-void DescriptorSet::setupVulkan(DescriptorSetLayout* layout) {
+void DescriptorSet::setupVk(DescriptorSetLayout* layout) {
     //Obtain the number of needed descriptor sets required
     unsigned int numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
     unsigned int numDescriptorSets = numSwapChainImages;
@@ -84,7 +84,7 @@ void DescriptorSet::setupVulkan(DescriptorSetLayout* layout) {
         Logger::log("Failed to allocate Vulkan descriptor sets", "DescriptorSet", LogType::Error);
 }
 
-void DescriptorSet::updateAllVulkan() {
+void DescriptorSet::updateAllVk() {
     //Contains parameters for the write operations of the descriptor set
     std::vector<VkWriteDescriptorSet> descriptorWrites = {};
 
@@ -110,6 +110,35 @@ void DescriptorSet::updateAllVulkan() {
 
             descriptorWrites.push_back(textureWrite);
         }
+    }
+
+    //Update the descriptor sets
+    vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+}
+
+void DescriptorSet::updateVk(unsigned int frame) {
+    //Contains parameters for the write operations of the descriptor set
+    std::vector<VkWriteDescriptorSet> descriptorWrites = {};
+
+    //UBOs
+    for (UBO* ubo : ubos)
+        descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(frame, vulkanDescriptorSets[frame], ubo->getVkBuffer(frame)->getBufferInfo()));
+
+    //Textures
+    for (TextureInfo& textureInfo : textures) {
+        VkWriteDescriptorSet textureWrite;
+        textureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        textureWrite.dstSet = vulkanDescriptorSets[frame];
+        textureWrite.dstBinding = textureInfo.binding;
+        textureWrite.dstArrayElement = 0;
+        textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        textureWrite.descriptorCount = 1;
+        textureWrite.pBufferInfo = nullptr;
+        textureWrite.pImageInfo = textureInfo.texture != NULL ? textureInfo.texture->getVkImageInfo() : Renderer::getBlankTexture()->getVkImageInfo();
+        textureWrite.pTexelBufferView = nullptr;
+        textureWrite.pNext = nullptr;
+
+        descriptorWrites.push_back(textureWrite);
     }
 
     //Update the descriptor sets
@@ -160,7 +189,7 @@ DescriptorSetLayout::~DescriptorSetLayout() {
         vkDestroyDescriptorSetLayout(Vulkan::getDevice()->getLogical(), vulkanDescriptorSetLayout, nullptr);
 }
 
-void DescriptorSetLayout::setupVulkan() {
+void DescriptorSetLayout::setupVk() {
     //Bindings within the descriptor set
     std::vector<VkDescriptorSetLayoutBinding> bindings;
 

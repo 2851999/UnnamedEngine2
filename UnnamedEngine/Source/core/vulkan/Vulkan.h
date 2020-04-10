@@ -29,6 +29,8 @@
 #include "../render/Mesh.h"
 #include "VulkanGraphicsPipeline.h"
 
+class DescriptorSet;
+
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
  *****************************************************************************/
@@ -64,6 +66,29 @@ private:
 
 	/* The current bound graphics pipeline (Used for descriptor set binding) */
 	static VulkanGraphicsPipeline* currentGraphicsPipeline;
+
+	/* Structure for storing info about a requested descriptor set update */
+	struct DescriptorSetUpdateInfo {
+		//The descriptor set instance to be updated
+		DescriptorSet* set;
+
+		//The next frame to update (different to the current to avoid synchronisation problems)
+		unsigned int nextUpdateFrame;
+
+		//Number of updates left to perform
+		unsigned int updatesLeft;
+	};
+
+	/* List of descriptor set updates to perform, will work on assumption
+	   all descriptor sets require same number of updates based on the number
+	   of swap chain images */
+	static std::vector<DescriptorSetUpdateInfo> descriptorSetUpdateQueue;
+
+	/* Method to update a descriptor set for the current frame (Returns whether the set had been fully updated) */
+	static bool updateDescriptorSetFrame(DescriptorSetUpdateInfo& info);
+
+	/* Method to update the descriptor sets in the update queue */
+	static void updateDescriptorSetQueue();
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -105,12 +130,6 @@ public:
 	/* Method to destroy the synchronisation objects */
 	static void destroySyncObjects();
 
-	/* Method to destroy the uniform buffers */
-	static void destroyUniformBuffers();
-
-	/* Method to update the uniform buffer */
-	static void updateUniformBuffer();
-
 	/* Method to start drawing a frame (and recording to the command buffer) */
 	static void startDraw();
 
@@ -119,6 +138,9 @@ public:
 
 	/* Method to bind a graphics pipeline for rendering */
 	static void bindGraphicsPipeline(VulkanGraphicsPipeline* pipeline);
+
+	/* Method to update a descriptor set */
+	static void updateDescriptorSet(DescriptorSet* set);
 
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);
@@ -157,6 +179,7 @@ public:
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }
+	static inline unsigned int getNextFrame() { return (currentFrame + 1) % swapChain->getImageCount(); }
 	static inline VulkanGraphicsPipeline* getCurrentGraphicsPipeline() { return currentGraphicsPipeline; }
 };
 

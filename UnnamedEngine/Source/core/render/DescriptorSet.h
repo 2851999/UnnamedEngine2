@@ -50,7 +50,7 @@ private:
 
     /* Method used to update this descriptor set for Vulkan (This method updates for
        all internal descriptor sets and as such should not be used during rendering) */
-    void updateAllVulkan();
+    void updateAllVk();
 public:
     /* Constructor */
     DescriptorSet() {}
@@ -59,7 +59,10 @@ public:
     virtual ~DescriptorSet();
 
     /* Method used to create the required structures for Vulkan */
-    void setupVulkan(DescriptorSetLayout* layout);
+    void setupVk(DescriptorSetLayout* layout);
+
+    /* Method used to update this set for a certain frame (for Vulkan) */
+    void updateVk(unsigned int frame);
 
     /* Method used to bind this descriptor set */
     void bind();
@@ -97,7 +100,7 @@ public:
     virtual ~DescriptorSetLayout();
 
     /* Method used to create the required structures for Vulkan */
-    void setupVulkan();
+    void setupVk();
 
     /* Returns the VkDescriptorSetLayout corresponding to this layout for Vulkan */
     inline VkDescriptorSetLayout getVkLayout() { return vulkanDescriptorSetLayout; }

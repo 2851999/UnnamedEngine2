@@ -1,4 +1,10 @@
 --------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 2
+
+* Added methods to allow DescriptorSet to be updated when
+  using Vulkan
+
+--------------------------------------------------------------
 Release 2 | Beta 1 | Development 0 | Experimental 1
 
 * Added DescriptorSet
