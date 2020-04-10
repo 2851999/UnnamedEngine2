@@ -18,6 +18,7 @@
 
 #include "VulkanGraphicsPipeline.h"
 
+#include "Vulkan.h"
 #include "../../utils/Logging.h"
 #include "../render/RenderData.h"
 
@@ -191,4 +192,8 @@ VulkanGraphicsPipeline::~VulkanGraphicsPipeline() {
 	//Destroy the pipeline and its layout
 	vkDestroyPipeline(swapChain->getDevice()->getLogical(), pipeline, nullptr);
 	vkDestroyPipelineLayout(swapChain->getDevice()->getLogical(), pipelineLayout, nullptr);
+}
+
+void VulkanGraphicsPipeline::bind() {
+	Vulkan::bindGraphicsPipeline(this);
 }

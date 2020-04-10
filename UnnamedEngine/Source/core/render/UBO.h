@@ -53,6 +53,9 @@ public:
 	/* Destructor */
 	virtual ~UBO();
 
+	/* Method to bind this buffer for use with OpenGL (binding done by descriptor set in Vulkan) */
+	void bindGL();
+
 	/* Method to update the contents of this buffer */
 	void update(void* data, unsigned int offset, unsigned int size);
 

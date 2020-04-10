@@ -234,7 +234,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 			//Bind the pipeline to use to render (for Vulkan)
 			if (BaseEngine::usingVulkan())
-				vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getRenderData()->getVkGraphicsPipeline()->getInstance());
+				renderData->getRenderData()->getVkGraphicsPipeline()->bind();
 
 			if (data->hasSubData()) {
 				renderData->getRenderData()->bindBuffers();

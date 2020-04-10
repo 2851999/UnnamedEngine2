@@ -60,6 +60,11 @@ UBO::~UBO() {
 	}
 }
 
+void UBO::bindGL() {
+	//Bind the buffer
+	glBindBufferBase(GL_UNIFORM_BUFFER, blockBinding, buffer);
+}
+
 void UBO::update(void* data, unsigned int offset, unsigned int size) {
 	//Check whether using Vulkan or OpenGL
 	if (! BaseEngine::usingVulkan()) {

@@ -61,6 +61,9 @@ private:
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
+
+	/* The current bound graphics pipeline (Used for descriptor set binding) */
+	static VulkanGraphicsPipeline* currentGraphicsPipeline;
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -114,6 +117,9 @@ public:
 	/* Method to stop drawing a frame (and recording to the command buffer) */
 	static void stopDraw();
 
+	/* Method to bind a graphics pipeline for rendering */
+	static void bindGraphicsPipeline(VulkanGraphicsPipeline* pipeline);
+
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);
 
@@ -151,6 +157,7 @@ public:
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }
+	static inline VulkanGraphicsPipeline* getCurrentGraphicsPipeline() { return currentGraphicsPipeline; }
 };
 
 

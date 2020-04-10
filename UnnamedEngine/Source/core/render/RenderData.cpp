@@ -196,10 +196,10 @@ void RenderData::setupVulkan(RenderShader* renderShader) {
 				vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 			}
 		} else {
+			std::vector<VkWriteDescriptorSet> descriptorWrites = {};
 			for (unsigned int x = 0; x < numSwapChainImages; ++x) {
 				for (unsigned int y = 0; y < textureSets.size(); ++y) {
 					unsigned int i = (y * numSwapChainImages) + x;
-					std::vector<VkWriteDescriptorSet> descriptorWrites = {};
 					for (auto& ubo : ubos)
 						descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(x, descriptorSets[i], ubo.second->getVkBuffer(x)->getBufferInfo()));
 
@@ -220,7 +220,56 @@ void RenderData::setupVulkan(RenderShader* renderShader) {
 							descriptorWrites.push_back(textureWrite);
 						//}
 					}
-					vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+				}
+			}
+			vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+		}
+	}
+}
+
+void RenderData::updateVulkan() {
+	//Setup the descriptor set write's
+	if (BaseEngine::usingVulkan()) {
+		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
+
+		//Allows writing of each UBO and texture
+		if (textureSets.size() == 0) {
+			for (unsigned int i = 0; i < numSwapChainImages; ++i) {
+				std::vector<VkWriteDescriptorSet> descriptorWrites = {};
+
+				for (auto& ubo : ubos)
+					descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(i, descriptorSets[i], ubo.second->getVkBuffer(i)->getBufferInfo()));
+
+				vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+			}
+		} else {
+			for (unsigned int x = 0; x < numSwapChainImages; ++x) {
+				if (x != Vulkan::getCurrentFrame()) {
+					for (unsigned int y = 0; y < textureSets.size(); ++y) {
+						unsigned int i = (y * numSwapChainImages) + x;
+						std::vector<VkWriteDescriptorSet> descriptorWrites = {};
+						for (auto& ubo : ubos)
+							descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(x, descriptorSets[i], ubo.second->getVkBuffer(x)->getBufferInfo()));
+
+						for (TextureSet::TextureInfo& textureInfo : textureSets[y]->getTextureInfos()) {
+							//Only assign if have an actual texture (allows textures to be assigned later)
+							//if (textureInfo.texture != NULL) {
+							VkWriteDescriptorSet textureWrite;
+							textureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+							textureWrite.dstSet = descriptorSets[i];
+							textureWrite.dstBinding = textureInfo.binding;
+							textureWrite.dstArrayElement = 0;
+							textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+							textureWrite.descriptorCount = 1;
+							textureWrite.pBufferInfo = nullptr;
+							textureWrite.pImageInfo = textureInfo.texture != NULL ? textureInfo.texture->getVkImageInfo() : Renderer::getBlankTexture()->getVkImageInfo();
+							textureWrite.pTexelBufferView = nullptr;
+							textureWrite.pNext = nullptr;
+							descriptorWrites.push_back(textureWrite);
+							//}
+						}
+						vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+					}
 				}
 			}
 		}

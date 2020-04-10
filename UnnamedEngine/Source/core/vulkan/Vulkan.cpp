@@ -42,6 +42,7 @@ std::vector<VkSemaphore>     Vulkan::imageAvailableSemaphores;
 std::vector<VkSemaphore>     Vulkan::renderFinishedSemaphores;
 std::vector<VkFence>         Vulkan::inFlightFences;
 unsigned int                 Vulkan::currentFrame = 0;
+VulkanGraphicsPipeline*      Vulkan::currentGraphicsPipeline = NULL;
 
 bool Vulkan::initialise(Window* window) {
 	//Initialise Vulkan
@@ -510,6 +511,13 @@ void Vulkan::stopDraw() {
 
 	//vkAcquireNextImageKHR semaphore signalled will be the one with this index (so must increase before it is called again)
 	currentFrame = (currentFrame + 1) % swapChain->getImageCount();
+}
+
+void Vulkan::bindGraphicsPipeline(VulkanGraphicsPipeline* pipeline) {
+	currentGraphicsPipeline = pipeline;
+
+	//Bind the pipeline
+	vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getInstance());
 }
 
 VkSampleCountFlagBits Vulkan::getMaxUsableSampleCount(unsigned int targetSamples) {
