@@ -490,7 +490,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 
 				UBO* lightingUBO = batches[indexOfBatch].objects[j]->getMesh()->getRenderData()->getRenderData()->getUBO(ShaderInterface::BLOCK_LIGHTING);
 				if (lightingUBO)
-					lightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
+					lightingUBO->updateFrame(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
 
 				//Render the object with the shadow map shader
 				batches[indexOfBatch].objects[j]->render();
