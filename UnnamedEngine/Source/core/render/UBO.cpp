@@ -65,7 +65,7 @@ void UBO::bindGL() {
 	glBindBufferBase(GL_UNIFORM_BUFFER, blockBinding, buffer);
 }
 
-void UBO::update(void* data, unsigned int offset, unsigned int size) {
+void UBO::updateFrame(void* data, unsigned int offset, unsigned int size) {
 	//Check whether using Vulkan or OpenGL
 	if (! BaseEngine::usingVulkan()) {
 		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
@@ -75,6 +75,17 @@ void UBO::update(void* data, unsigned int offset, unsigned int size) {
 		//Update the current buffer
 		vulkanBuffers[Vulkan::getCurrentFrame()]->copyData(data, offset, size);
 	}
+}
+
+void UBO::update(void* data, unsigned int offset, unsigned int size) {
+	//Check whether using Vulkan or OpenGL
+	if (! BaseEngine::usingVulkan()) {
+		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	} else
+		//Update the current buffer
+		Vulkan::updateUBO(this, data, offset, size);
 }
 
 VkWriteDescriptorSet UBO::getVkWriteDescriptorSet(unsigned int frame, const VkDescriptorSet descriptorSet, const VkDescriptorBufferInfo* bufferInfo) {

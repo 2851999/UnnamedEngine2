@@ -84,11 +84,37 @@ private:
 	   of swap chain images */
 	static std::vector<DescriptorSetUpdateInfo> descriptorSetUpdateQueue;
 
-	/* Method to update a descriptor set for the current frame (Returns whether the set had been fully updated) */
+	/* Method to update a descriptor set for the current frame (Returns whether the set has been fully updated) */
 	static bool updateDescriptorSetFrame(DescriptorSetUpdateInfo& info);
 
 	/* Method to update the descriptor sets in the update queue */
 	static void updateDescriptorSetQueue();
+
+	/* Structure for storing info about a requested UBO update */
+	struct UBOUpdateInfo {
+		//The UBO instance to be updated
+		UBO* ubo;
+
+		//The information needed to perform the update each frame
+		void*        data;
+		unsigned int offset;
+		unsigned int size;
+
+		//The next frame to update (different to the current to avoid synchronisation problems)
+		unsigned int nextUpdateFrame;
+
+		//Number of updates left to perform
+		unsigned int updatesLeft;
+	};
+
+	/* List of UBO updates to perform */
+	static std::vector<UBOUpdateInfo> uboUpdateQueue;
+
+	/* Method to update a UBO for the current frame (Returns whether the set has been fully updated) */
+	static bool updateUBOFrame(UBOUpdateInfo& info);
+
+	/* Method to update UBOs in the update queue*/
+	static void updateUBOQueue();
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -141,6 +167,9 @@ public:
 
 	/* Method to update a descriptor set */
 	static void updateDescriptorSet(DescriptorSet* set);
+
+	/* Method to update a UBO */
+	static void updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size);
 
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);

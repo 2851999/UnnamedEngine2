@@ -120,7 +120,7 @@ void ShaderInterface::setup(RenderData* renderData, unsigned int shaderID) {
 	//Check the shader ID and add the required UBOs/Textures
 	if (shaderID == Renderer::SHADER_MATERIAL) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
+		//renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));  //Moved to DescriptorSet
 	} else if (shaderID == Renderer::SHADER_SKY_BOX) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
 	} else if (shaderID == Renderer::SHADER_FONT) {

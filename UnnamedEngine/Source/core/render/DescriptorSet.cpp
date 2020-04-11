@@ -93,7 +93,6 @@ void DescriptorSet::setupVk() {
         Logger::log("Failed to create descriptor pool", "DescriptorSet", LogType::Error);
 
     //-------------------------------- CREATE DESCRIPTOR SETS --------------------------------
-    //VkDescriptorSetLayout layoutCopy = layout->getVkLayout();
     std::vector<VkDescriptorSetLayout> layouts(numDescriptorSets, layout->getVkLayout());
     VkDescriptorSetAllocateInfo allocInfo = {};
     allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -177,47 +176,6 @@ void DescriptorSet::updateVk(unsigned int frame) {
     vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 }
 
-VkDescriptorSetLayout DescriptorSet::getLayout() {
-    std::vector<VkDescriptorSetLayoutBinding> bindings;
-
-    //Go through the UBO's
-    for (auto& ubo : ubos) {
-        VkDescriptorSetLayoutBinding uboLayoutBinding = {};
-        uboLayoutBinding.binding = ubo->getBinding();
-        uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        uboLayoutBinding.descriptorCount = 1;
-        uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS; //VK_SHADER_STAGE_ALL_GRAPHICS
-        uboLayoutBinding.pImmutableSamplers = nullptr; //Optional
-
-        //Add the binding
-        bindings.push_back(uboLayoutBinding);
-    }
-
-    //Go through the textures
-    for (TextureInfo& textureBinding : textures) {
-        VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
-        samplerLayoutBinding.binding = textureBinding.binding;
-        samplerLayoutBinding.descriptorCount = 1;
-        samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        samplerLayoutBinding.pImmutableSamplers = nullptr;
-        samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-        bindings.push_back(samplerLayoutBinding);
-    }
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-    layoutInfo.pBindings = bindings.data();
-
-    VkDescriptorSetLayout descriptorSetLayout;
-
-    //Create the descriptor set layout
-    if (vkCreateDescriptorSetLayout(Vulkan::getDevice()->getLogical(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
-        Logger::log("Failed to create descriptor set layout", "DescriptorSet", LogType::Error);
-    return descriptorSetLayout;
-}
-
 void DescriptorSet::update() {
     //Check if using Vulkan
     if (BaseEngine::usingVulkan())
@@ -229,7 +187,7 @@ void DescriptorSet::bind() {
     //Check if using Vulkan or not
     if (BaseEngine::usingVulkan())
         //Bind the descriptor set for Vulkan
-        vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, Vulkan::getCurrentGraphicsPipeline()->getLayout(), 0, 1, &vulkanDescriptorSets[Vulkan::getCurrentFrame()], 0, nullptr);
+        vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, Vulkan::getCurrentGraphicsPipeline()->getLayout(), 1, 1, &vulkanDescriptorSets[Vulkan::getCurrentFrame()], 0, nullptr);
     else {
         //Need to bind the appropriate UBOs and textures for OpenGL
 
@@ -317,8 +275,4 @@ void DescriptorSetLayout::setupVk() {
 void DescriptorSetLayout::setup() {
     if (BaseEngine::usingVulkan())
         setupVk();
-}
-
-VkDescriptorSetLayout DescriptorSetLayout::getVkLayout() {
-    return vulkanDescriptorSetLayout;
 }

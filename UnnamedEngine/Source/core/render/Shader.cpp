@@ -360,6 +360,30 @@ void Shader::loadShaderSource(std::string path, std::vector<std::string> &fileTe
 
 			//Assign the new line of text
 			fileText[i] = utils_string::strJoin(line, ' ');
+		} else if (utils_string::strStartsWith(fileText[i], "layout(std140, set = ")) {
+			//Want to apply an offset to the UBO location
+
+			//Split up the line by a space
+			std::vector<std::string> line = utils_string::strSplit(fileText[i], ' ');
+
+			//Apply the offset if needed
+			if (uboBindingOffset > 0)
+				//Add the offset
+				line[6] = utils_string::str(utils_string::strToUInt(utils_string::remove(line[6], ")")) + uboBindingOffset) + ")";
+
+			if (! BaseEngine::usingVulkan()) {
+				//Need to remove 'set =' part
+				line[1] = "";
+				line[2] = "";
+				line[3] = "";
+			}
+
+			//Assign the new line of text
+			fileText[i] = utils_string::strJoin(line, ' ');
+		} else if (utils_string::strStartsWith(fileText[i], "layout(set = ") && ! (BaseEngine::usingVulkan())) {
+			//Remove 'set = x' part
+			unsigned int startIndex = fileText[i].find("(") + 1;
+			fileText[i] = fileText[i].erase(startIndex, fileText[i].find(",") + 2 - startIndex);
 		}
 	}
 }

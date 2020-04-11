@@ -53,7 +53,7 @@ void Test::initialise() {
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
 	getSettings().videoVSync = 0;
-	getSettings().debugShowInformation = true;
+	getSettings().debugShowInformation = false;
 	getSettings().videoSamples = 8;
 	getSettings().videoMaxAnisotropicSamples = 16;
 }
@@ -65,11 +65,11 @@ void Test::created() {
 	}
 
 //	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
-//	Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
-//	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
-//	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
-//	Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
-//	Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 0.0f, 1.0f);
@@ -83,13 +83,13 @@ void Test::created() {
 
 	renderScene = new RenderScene3D();
 	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
-	renderScene->addLight(light0);
+	//renderScene->addLight(light0);
 
 	if (!getSettings().videoVulkan)
 		//Ensure Vulkan and OpenGL apply same post processing (i.e. none as not supported for Vulkan currently)
 		renderScene->disableGammaCorrection();
 
-//	renderScene->disableLighting();
+	renderScene->disableLighting();
 
 //	Texture* texture = Texture::loadTexture("resources/textures/texture.jpg");
 //	Mesh* mesh = new Mesh(MeshBuilder::createQuad3D(Vector2f(-0.5f, -0.5f), Vector2f(0.5f, -0.5f), Vector2f(0.5f, 0.5f), Vector2f(-0.5f, 0.5f), texture));
@@ -100,7 +100,7 @@ void Test::created() {
 	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
 
 	mesh->setCullingEnabled(false);
-	model = new GameObject3D(mesh, Renderer::SHADER_VULKAN_LIGHTING);
+	model = new GameObject3D(mesh, Renderer::SHADER_MATERIAL);
 	model->setScale(0.15f, 0.15f, 0.15f);
 	model->update();
 	renderScene->add(model);
@@ -112,7 +112,7 @@ void Test::created() {
 	//Mesh* mesh2 = new Mesh(MeshBuilder::createCube(10.0f, 10.0f, 10.0f));
 
 	mesh2->setCullingEnabled(false);
-	model2 = new GameObject3D(mesh2, Renderer::SHADER_VULKAN_LIGHTING);
+	model2 = new GameObject3D(mesh2, Renderer::SHADER_MATERIAL);
 	model2->setPosition(4.0f, 1.0f, 0.0f);
 	model2->update();
 	renderScene->add(model2);

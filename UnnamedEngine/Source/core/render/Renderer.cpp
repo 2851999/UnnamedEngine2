@@ -173,6 +173,9 @@ void Renderer::initialise() {
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
+	if (BaseEngine::usingVulkan())
+		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getVkGraphicsPipeline()->getLayout(), 0, 1, renderData->getVkDescriptorSet(0), 0, nullptr);
+
 	//Bind the material descriptor set
 	material->getDescriptorSet()->bind();
 }
@@ -206,7 +209,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		useGraphicsState(renderShader->getGraphicsState());
 
 		shaderCoreData.ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
-		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
+		shaderCoreUBO->updateFrame(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
 		if (mesh->hasData() && mesh->hasRenderData()) {
 			MeshData* data = mesh->getData();
 			MeshRenderData* renderData = mesh->getRenderData();
@@ -216,7 +219,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 					for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); ++i)
 						shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
 					shaderSkinningData.ue_useSkinning = true;
-					shaderSkinningUBO->update(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
+					shaderSkinningUBO->updateFrame(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
 				} else {
 					shaderSkinningData.ue_useSkinning = false;
 					shaderSkinningData.updateUseSkinning(shaderSkinningUBO);
@@ -348,7 +351,7 @@ void Renderer::assignGraphicsState(GraphicsState* state, unsigned int shaderID) 
 	//Check the shader ID
 	if (shaderID == SHADER_SKY_BOX)
 		//Assign the state to use
-		state->depthWriteEnable = false;
+		state->depthWriteEnable = true; //???? Broken if not used
 	else if (shaderID == SHADER_FONT)
 		state->alphaBlending = true;
 	else if (shaderID == SHADER_MATERIAL)

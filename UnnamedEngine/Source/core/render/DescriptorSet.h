@@ -74,8 +74,6 @@ public:
     /* Method used to update this set for a certain frame (for Vulkan) */
     void updateVk(unsigned int frame);
 
-    VkDescriptorSetLayout getLayout();
-
     /* Method used to update this descriptor set */
     void update();
 
@@ -133,7 +131,7 @@ public:
     /* Getters */
     inline std::vector<UBOInfo>& getUBOs() { return ubos; }
     inline std::vector<unsigned int>& getTextureBindings() { return textureBindings;  }
-    VkDescriptorSetLayout getVkLayout();
+    inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout;  }
 };
 
 #endif /* CORE_RENDER_DESCRIPTOR_SET_H_ */

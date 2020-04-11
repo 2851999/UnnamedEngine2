@@ -1,7 +1,12 @@
 --------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 4
+
+* Fixed some Vulkan and OpenGL from previous change
+
+--------------------------------------------------------------
 Release 2 | Beta 1 | Development 0 | Experimental 3
 
-* Replaces TextureSet with DescriptorSet in material
+* Replaced TextureSet with DescriptorSet in material
   (Vulkan broken for now)
 
 --------------------------------------------------------------

@@ -21,6 +21,7 @@
 #include "Vulkan.h"
 #include "../../utils/Logging.h"
 #include "../render/RenderData.h"
+#include "../render/Renderer.h"
 
 #include <fstream>
 
@@ -155,10 +156,14 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, Vulka
 	colorBlending.blendConstants[2] = 0.0f; //Optional
 	colorBlending.blendConstants[3] = 0.0f; //Optional
 
+	std::vector<VkDescriptorSetLayout> layouts;
+	layouts.push_back(renderData->getVkDescriptorSetLayout());
+	layouts.push_back(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_MATERIAL)->getVkLayout());
+
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount         = 1; //Optional
-	pipelineLayoutInfo.pSetLayouts            = &renderData->getVkDescriptorSetLayout(); //Optional
+	pipelineLayoutInfo.setLayoutCount         = static_cast<uint32_t>(layouts.size()); //Optional
+	pipelineLayoutInfo.pSetLayouts            = layouts.data(); //Optional
 	pipelineLayoutInfo.pushConstantRangeCount = 0; //Optional
 	pipelineLayoutInfo.pPushConstantRanges    = nullptr; //Optional
 
