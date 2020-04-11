@@ -176,11 +176,11 @@ void RenderData::setup(RenderShader* renderShader) {
 		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), Vulkan::getRenderPass(), this, renderShader);
 
 		//Assign the descriptor write info
-		setupVulkan(renderShader);
+		setupVk(renderShader);
 	}
 }
 
-void RenderData::setupVulkan(RenderShader* renderShader) {
+void RenderData::setupVk(RenderShader* renderShader) {
 	//Setup the descriptor set write's
 	if (BaseEngine::usingVulkan()) {
 		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();

@@ -88,8 +88,12 @@ GameRenderer::GameRenderer(Mesh* mesh, RenderShader* renderShader, unsigned int 
 
 	renderData->add(ShaderInterface::UBO_BINDING_LOCATION_MATERIAL, Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_MATERIAL));
 
+	//for (Material* material : mesh->getMaterials())
+	//	renderData->addTextureSet(material->getTextureSet());
+
+	//Setup the materials for rendering
 	for (Material* material : mesh->getMaterials())
-		renderData->addTextureSet(material->getTextureSet());
+		material->setup();
 
 	renderData->setup(renderShader);
 	renderData->setNumInstances(numObjects);
@@ -156,7 +160,7 @@ void GameRenderer::render() {
 	shader->use();
 	Renderer::saveTextures();
 	shader->setUniformMatrix4("ViewProjectionMatrix", Renderer::getCamera()->getProjectionViewMatrix());
-	Renderer::useMaterial(renderData, mesh->getData()->getSubData(0).materialIndex, mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex), renderData->getUBO(ShaderInterface::BLOCK_MATERIAL));
+	Renderer::useMaterial(renderData, mesh->getData()->getSubData(0).materialIndex, mesh->getMaterial(mesh->getData()->getSubData(0).materialIndex));
 	if (useLighting) {
 		shader->setUniformVector3("Light_Direction", Vector3f(0.0f, -1.0f, -1.0f));
 		shader->setUniformColourRGB("Light_DiffuseColour", Colour(1.0f, 1.0f, 1.0f));
@@ -186,5 +190,3 @@ void GameRenderer::hideAll() {
 		visibleData[i] = 0.0f;
 	vboVisibleData->updateStream(numObjects * sizeof(GLfloat));
 }
-
-

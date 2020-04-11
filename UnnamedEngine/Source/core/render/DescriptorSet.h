@@ -16,6 +16,9 @@
  *
  *****************************************************************************/
 
+#ifndef CORE_RENDER_DESCRIPTOR_SET_H_
+#define CORE_RENDER_DESCRIPTOR_SET_H_
+
 #include "Texture.h"
 #include "UBO.h"
 
@@ -36,6 +39,9 @@ public:
         Texture* texture = NULL;
     };
 private:
+    /* The layout of this descriptor set */
+    DescriptorSetLayout* layout;
+
     /* The UBOs within this descriptor set */
     std::vector<UBO*> ubos;
 
@@ -53,22 +59,37 @@ private:
     void updateAllVk();
 public:
     /* Constructor */
-    DescriptorSet() {}
+    DescriptorSet(DescriptorSetLayout* layout);
 
     /* Destructor */
     virtual ~DescriptorSet();
 
     /* Method used to create the required structures for Vulkan */
-    void setupVk(DescriptorSetLayout* layout);
+    void setupVk();
+
+    /* Method to setup this descriptor set ready for use preferably run after all properties setup
+       for the first time (to avoid unnecessary calls to update) */
+    void setup();
 
     /* Method used to update this set for a certain frame (for Vulkan) */
     void updateVk(unsigned int frame);
+
+    VkDescriptorSetLayout getLayout();
+
+    /* Method used to update this descriptor set */
+    void update();
 
     /* Method used to bind this descriptor set */
     void bind();
 
     /* Method used to unbind this descriptor set (For textures in OpenGL) */
     void unbind();
+
+    /* Setters and getters */
+    inline void setTexture(unsigned int index, Texture* texture) { textures[index].texture = texture; }
+
+    inline UBO* getUBO(unsigned int index) { return ubos[index]; }
+    inline Texture* getTexture(unsigned int index) { return textures[index].texture; }
 };
 
 /*****************************************************************************
@@ -102,6 +123,17 @@ public:
     /* Method used to create the required structures for Vulkan */
     void setupVk();
 
-    /* Returns the VkDescriptorSetLayout corresponding to this layout for Vulkan */
-    inline VkDescriptorSetLayout getVkLayout() { return vulkanDescriptorSetLayout; }
+    /* Method used to setup this layout */
+    void setup();
+
+    /* Methods to add UBOs and Textures to this layout */
+    inline void addTexture(unsigned int binding) { textureBindings.push_back(binding); }
+    inline void addUBO(unsigned int size, GLenum usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
+
+    /* Getters */
+    inline std::vector<UBOInfo>& getUBOs() { return ubos; }
+    inline std::vector<unsigned int>& getTextureBindings() { return textureBindings;  }
+    VkDescriptorSetLayout getVkLayout();
 };
+
+#endif /* CORE_RENDER_DESCRIPTOR_SET_H_ */

@@ -21,6 +21,7 @@
 
 #include "UBO.h"
 #include "Skinning.h"
+#include "DescriptorSet.h"
 
 /*****************************************************************************
  * Various structures for data in shaders (must follow std140 layout rules)
@@ -151,6 +152,8 @@ public:
 		unsigned int binding;
 	};
 private:
+	/* Map storing descriptor set layouts */
+	std::unordered_map<unsigned int, DescriptorSetLayout*> descriptorSetLayouts;
 	/* Map storing UBO information */
 	std::unordered_map<unsigned int, UBOInfo> ubosInfo;
 	/* Map used to store UBO's with keys for accessing them */
@@ -158,6 +161,9 @@ private:
 	/* UBO's used for Vulkan (Have multiple of same key) */
 	std::vector<UBO*> ubosVk;
 public:
+	/* IDs for descriptor set layouts */
+	static const unsigned int DESCRIPTOR_SET_MATERIAL;
+
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
 	static const unsigned int ATTRIBUTE_LOCATION_TEXTURE_COORD;
@@ -199,11 +205,17 @@ public:
 	/* Destructor */
 	virtual ~ShaderInterface();
 
+	/* Method to add a descriptor set to this interface */
+	void add(unsigned int id, DescriptorSetLayout* layout);
+
 	/* Method to add a UBO to this interface */
 	void add(unsigned int id, unsigned int size, unsigned int usage, unsigned int binding);
 
 	/* Method to add required UBO's and data to a particular RenderData instance ready for rendering with a particular shader */
 	void setup(RenderData* renderData, unsigned int shaderID);
+
+	/* Method used to obtain a descriptor set layout from this interface */
+	DescriptorSetLayout* getDescriptorSetLayout(unsigned int id);
 
 	/* Method to obtain a UBO from this interface (Should only call once per object - for Vulkan this will return a new UBO each time) */
 	UBO* getUBO(unsigned int id);

@@ -91,7 +91,7 @@ public:
 	void setup(RenderShader* renderShader);
 
 	/* The method used to setup this data for rendering (With Vulkan) */
-	void setupVulkan(RenderShader* renderShader);
+	void setupVk(RenderShader* renderShader);
 
 
 	void updateVk();

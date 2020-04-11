@@ -276,9 +276,9 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 
 	//Add the required UBO's for the shader being used
 	Renderer::getShaderInterface()->setup(renderData, setupShader->getID());
-	//Add the required texture sets
+	//Setup the materials for rendering
 	for (Material* material : materials)
-		renderData->addTextureSet(material->getTextureSet());
+		material->setup();
 
 	//Setup the render data
 	renderData->setup(setupShader);

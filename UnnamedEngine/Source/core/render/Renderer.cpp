@@ -172,23 +172,15 @@ void Renderer::initialise() {
 	}
 }
 
-void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material, UBO* materialUBO) {
-	if (! BaseEngine::usingVulkan())
-		//Bind the required textures
-		material->getTextureSet()->bindGLTextures();
-	else
-		//Bind the required descriptor set
-		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getVkGraphicsPipeline()->getLayout(), 0, 1, renderData->getVkDescriptorSet(materialIndex), 0, nullptr);
-
-	//Update the material UBO (if there is one)
-	if (materialUBO)
-		materialUBO->update(&material->getShaderData(), 0, sizeof(ShaderBlock_Material));
+void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
+	//Bind the material descriptor set
+	material->getDescriptorSet()->bind();
 }
 
 void Renderer::stopUsingMaterial(Material* material) {
-	if (! BaseEngine::usingVulkan() && ! shouldIgnoreGraphicsStates)
+	if (! shouldIgnoreGraphicsStates)
 		//Unbind the textures
-		material->getTextureSet()->unbindGLTextures();
+		material->getDescriptorSet()->unbind();
 }
 
 void Renderer::useGraphicsState(GraphicsState* graphicsState) {
@@ -209,7 +201,6 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		//Obtain the required UBO's for rendering
 		UBO* shaderCoreUBO     = renderData->getUBO(ShaderInterface::BLOCK_CORE);
 		UBO* shaderSkinningUBO = renderData->getUBO(ShaderInterface::BLOCK_SKINNING);
-		UBO* materialUBO       = renderData->getUBO(ShaderInterface::BLOCK_MATERIAL);
 
 		//Use the correct graphics state
 		useGraphicsState(renderShader->getGraphicsState());
@@ -242,7 +233,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 				//Go through each sub data instance
 				for (unsigned int i = 0; i < data->getSubDataCount(); ++i) {
 					if (mesh->hasMaterial())
-						useMaterial(renderData->getRenderData(), data->getSubData(i).materialIndex, mesh->getMaterial(data->getSubData(i).materialIndex), materialUBO);
+						useMaterial(renderData->getRenderData(), data->getSubData(i).materialIndex, mesh->getMaterial(data->getSubData(i).materialIndex));
 					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex, data->getSubData(i).baseVertex);
 					if (mesh->hasMaterial())
 						stopUsingMaterial(mesh->getMaterial(data->getSubData(i).materialIndex));
@@ -251,7 +242,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 				renderData->getRenderData()->unbindBuffers();
 			} else {
 				if (mesh->hasMaterial())
-					useMaterial(renderData->getRenderData(), 0, mesh->getMaterial(), materialUBO);
+					useMaterial(renderData->getRenderData(), 0, mesh->getMaterial());
 				renderData->render();
 				if (mesh->hasMaterial())
 					stopUsingMaterial(mesh->getMaterial());
