@@ -24,6 +24,7 @@
 #include "UBO.h"
 #include "Texture.h"
 #include "TextureSet.h"
+#include "ShaderInterface.h"
 
 /*****************************************************************************
  * The RenderData class is used for rendering
@@ -80,6 +81,12 @@ private:
 	/* The binding and attribute descriptions for Vulkan */
 	std::vector<VkVertexInputBindingDescription> bindingVkDescriptions;
 	std::vector<VkVertexInputAttributeDescription> attributeVkDescriptions;
+
+	/* The descriptor set corresponding to this render data (model) */
+	DescriptorSet* descriptorSetModel;
+
+	/* Data for the above descriptor set */
+	ShaderBlock_Model modelData;
 public:
 	/* The constructor */
 	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}
@@ -91,7 +98,7 @@ public:
 	void setup(RenderShader* renderShader);
 
 	/* The method used to setup this data for rendering (With Vulkan) */
-	void setupVulkan(RenderShader* renderShader);
+	void setupVk(RenderShader* renderShader);
 
 	/* Methods to add a UBO or Texture to this instance */
 	inline void add(unsigned int id, UBO* ubo) { ubos.insert(std::pair<unsigned int, UBO*>(id, ubo)); }
@@ -133,6 +140,8 @@ public:
 	const VkDescriptorSet* getVkDescriptorSet(unsigned int materialIndex);
 	inline std::vector<VkVertexInputBindingDescription> getVkBindingDescriptions() { return bindingVkDescriptions; }
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return attributeVkDescriptions; }
+	inline DescriptorSet* getDescriptorSet() { return descriptorSetModel; }
+	inline ShaderBlock_Model& getShaderBlock_Model() { return modelData; }
 };
 
 #endif /* CORE_RENDER_RENDERDATA_H_ */

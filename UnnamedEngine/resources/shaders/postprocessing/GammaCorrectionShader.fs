@@ -1,6 +1,6 @@
 #include "PostProcess.fs"
 
-layout (std140, binding = 6) uniform UEGammaCorrectionData {
+layout (std140, binding = 7) uniform UEGammaCorrectionData {
 	vec2 inverseTextureSize;
 	bool gammaCorrect;
 	float exposureIn;

@@ -29,6 +29,8 @@
 #include "../render/Mesh.h"
 #include "VulkanGraphicsPipeline.h"
 
+class DescriptorSet;
+
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
  *****************************************************************************/
@@ -61,6 +63,58 @@ private:
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
+
+	/* The current bound graphics pipeline (Used for descriptor set binding) */
+	static VulkanGraphicsPipeline* currentGraphicsPipeline;
+
+	/* Structure for storing info about a requested descriptor set update */
+	struct DescriptorSetUpdateInfo {
+		//The descriptor set instance to be updated
+		DescriptorSet* set;
+
+		//The next frame to update (different to the current to avoid synchronisation problems)
+		unsigned int nextUpdateFrame;
+
+		//Number of updates left to perform
+		unsigned int updatesLeft;
+	};
+
+	/* List of descriptor set updates to perform, will work on assumption
+	   all descriptor sets require same number of updates based on the number
+	   of swap chain images */
+	static std::vector<DescriptorSetUpdateInfo> descriptorSetUpdateQueue;
+
+	/* Method to update a descriptor set for the current frame (Returns whether the set has been fully updated) */
+	static bool updateDescriptorSetFrame(DescriptorSetUpdateInfo& info);
+
+	/* Method to update the descriptor sets in the update queue */
+	static void updateDescriptorSetQueue();
+
+	/* Structure for storing info about a requested UBO update */
+	struct UBOUpdateInfo {
+		//The UBO instance to be updated
+		UBO* ubo;
+
+		//The information needed to perform the update each frame
+		void*        data;
+		unsigned int offset;
+		unsigned int size;
+
+		//The next frame to update (different to the current to avoid synchronisation problems)
+		unsigned int nextUpdateFrame;
+
+		//Number of updates left to perform
+		unsigned int updatesLeft;
+	};
+
+	/* List of UBO updates to perform */
+	static std::vector<UBOUpdateInfo> uboUpdateQueue;
+
+	/* Method to update a UBO for the current frame (Returns whether the set has been fully updated) */
+	static bool updateUBOFrame(UBOUpdateInfo& info);
+
+	/* Method to update UBOs in the update queue*/
+	static void updateUBOQueue();
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -102,17 +156,20 @@ public:
 	/* Method to destroy the synchronisation objects */
 	static void destroySyncObjects();
 
-	/* Method to destroy the uniform buffers */
-	static void destroyUniformBuffers();
-
-	/* Method to update the uniform buffer */
-	static void updateUniformBuffer();
-
 	/* Method to start drawing a frame (and recording to the command buffer) */
 	static void startDraw();
 
 	/* Method to stop drawing a frame (and recording to the command buffer) */
 	static void stopDraw();
+
+	/* Method to bind a graphics pipeline for rendering */
+	static void bindGraphicsPipeline(VulkanGraphicsPipeline* pipeline);
+
+	/* Method to update a descriptor set */
+	static void updateDescriptorSet(DescriptorSet* set);
+
+	/* Method to update a UBO */
+	static void updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size);
 
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);
@@ -151,6 +208,8 @@ public:
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }
+	static inline unsigned int getNextFrame() { return (currentFrame + 1) % swapChain->getImageCount(); }
+	static inline VulkanGraphicsPipeline* getCurrentGraphicsPipeline() { return currentGraphicsPipeline; }
 };
 
 

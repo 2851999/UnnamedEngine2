@@ -47,7 +47,7 @@ public:
 };
 
 void Test::initialise() {
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
 
 	getSettings().videoVulkan = true;
 	getSettings().videoMaxFPS = 0;
@@ -65,11 +65,11 @@ void Test::created() {
 	}
 
 //	Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
-//	Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
-//	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
-//	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
-//	Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
-//	Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.1.70.1/Bin32/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+//	Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 0.0f, 1.0f);
@@ -99,8 +99,10 @@ void Test::created() {
 
 	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
 
+	unsigned int shader = Renderer::SHADER_VULKAN_LIGHTING;
+
 	mesh->setCullingEnabled(false);
-	model = new GameObject3D(mesh, Renderer::SHADER_VULKAN_LIGHTING);
+	model = new GameObject3D(mesh, shader);
 	model->setScale(0.15f, 0.15f, 0.15f);
 	model->update();
 	renderScene->add(model);
@@ -108,11 +110,11 @@ void Test::created() {
 //	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae");
 //	mesh2->getSkeleton()->startAnimation("");
 
-	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj"); //Assimp won't load this file
+	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
 	//Mesh* mesh2 = new Mesh(MeshBuilder::createCube(10.0f, 10.0f, 10.0f));
 
 	mesh2->setCullingEnabled(false);
-	model2 = new GameObject3D(mesh2, Renderer::SHADER_VULKAN_LIGHTING);
+	model2 = new GameObject3D(mesh2, shader);
 	model2->setPosition(4.0f, 1.0f, 0.0f);
 	model2->update();
 	renderScene->add(model2);
@@ -147,6 +149,9 @@ void Test::render() {
 	}
 
 	renderScene->render();
+
+	//model2->getMesh()->getMaterial(1)->setDiffuse(Renderer::getBlankTexture());
+	//model2->getMesh()->getMaterial(1)->update();
 
 	camera->useView();
 }

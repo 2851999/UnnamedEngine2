@@ -37,6 +37,11 @@ RenderData::~RenderData() {
 }
 
 void RenderData::setup(RenderShader* renderShader) {
+	//Create the descriptor set
+	descriptorSetModel = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_MODEL));
+	//Setup the descriptor set
+	descriptorSetModel->setup();
+
 	if (! BaseEngine::usingVulkan()) {
 		//Generate the VAO and bind it
 		glGenVertexArrays(1, &vao);
@@ -176,11 +181,11 @@ void RenderData::setup(RenderShader* renderShader) {
 		graphicsVkPipeline = new VulkanGraphicsPipeline(Vulkan::getSwapChain(), Vulkan::getRenderPass(), this, renderShader);
 
 		//Assign the descriptor write info
-		setupVulkan(renderShader);
+		setupVk(renderShader);
 	}
 }
 
-void RenderData::setupVulkan(RenderShader* renderShader) {
+void RenderData::setupVk(RenderShader* renderShader) {
 	//Setup the descriptor set write's
 	if (BaseEngine::usingVulkan()) {
 		numSwapChainImages = Vulkan::getSwapChain()->getImageCount();
@@ -196,10 +201,10 @@ void RenderData::setupVulkan(RenderShader* renderShader) {
 				vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 			}
 		} else {
+			std::vector<VkWriteDescriptorSet> descriptorWrites = {};
 			for (unsigned int x = 0; x < numSwapChainImages; ++x) {
 				for (unsigned int y = 0; y < textureSets.size(); ++y) {
 					unsigned int i = (y * numSwapChainImages) + x;
-					std::vector<VkWriteDescriptorSet> descriptorWrites = {};
 					for (auto& ubo : ubos)
 						descriptorWrites.push_back(ubo.second->getVkWriteDescriptorSet(x, descriptorSets[i], ubo.second->getVkBuffer(x)->getBufferInfo()));
 
@@ -220,9 +225,9 @@ void RenderData::setupVulkan(RenderShader* renderShader) {
 							descriptorWrites.push_back(textureWrite);
 						//}
 					}
-					vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 				}
 			}
+			vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
 	}
 }

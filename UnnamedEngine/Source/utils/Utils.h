@@ -55,7 +55,7 @@ namespace utils_string {
 	std::string strJoin(const std::vector<std::string>& text, char delimeter);
 	std::string strJoin(const std::vector<std::string>& text, const std::string& delimeter);
 
-	inline std::string substring(const std::string &s, int begin, int end) {
+	inline std::string substring(const std::string &s, unsigned int begin, unsigned int end) {
 		return s.substr(begin, end - begin);
 	}
 

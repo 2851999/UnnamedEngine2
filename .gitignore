@@ -45,3 +45,7 @@
 /UnnamedEngine/x64/Release
 /UnnamedEngine/boost_filesystem-vc141-mt-x64-1_70.dll
 /.gitattributes
+/UnnamedEngine/.vs/VSProject/v16
+/UnnamedEngine/UnnamedEngine.licenseheader
+/UnnamedEngine/boost_filesystem-vc142-mt-x64-1_72.dll
+/UnnamedEngine/boost_filesystem-vc142-mt-gd-x64-1_72.dll

@@ -172,23 +172,18 @@ void Renderer::initialise() {
 	}
 }
 
-void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material, UBO* materialUBO) {
-	if (! BaseEngine::usingVulkan())
-		//Bind the required textures
-		material->getTextureSet()->bindGLTextures();
-	else
-		//Bind the required descriptor set
-		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getVkGraphicsPipeline()->getLayout(), 0, 1, renderData->getVkDescriptorSet(materialIndex), 0, nullptr);
+void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
+	if (BaseEngine::usingVulkan()) //WHEN REMOVING ENSURE CAN UPDATE THINGS LIKE VIEW MATRIX WHEN SWITCHING THE CAMERA MID-FRAME
+		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getVkGraphicsPipeline()->getLayout(), 0, 1, renderData->getVkDescriptorSet(0), 0, nullptr);
 
-	//Update the material UBO (if there is one)
-	if (materialUBO)
-		materialUBO->update(&material->getShaderData(), 0, sizeof(ShaderBlock_Material));
+	//Bind the material descriptor set
+	material->getDescriptorSet()->bind();
 }
 
 void Renderer::stopUsingMaterial(Material* material) {
-	if (! BaseEngine::usingVulkan() && ! shouldIgnoreGraphicsStates)
+	if (! shouldIgnoreGraphicsStates)
 		//Unbind the textures
-		material->getTextureSet()->unbindGLTextures();
+		material->getDescriptorSet()->unbind();
 }
 
 void Renderer::useGraphicsState(GraphicsState* graphicsState) {
@@ -200,59 +195,70 @@ void Renderer::useGraphicsState(GraphicsState* graphicsState) {
 	}
 }
 
+void Renderer::preRender() {
+	//Update required data for this frame
+
+}
+
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
 	//Ensure there is a Shader and Camera instance for rendering
 	if (renderShader && getCamera()) {
 		//Get the render data for rendering
 		RenderData* renderData = mesh->getRenderData()->getRenderData();
 
+		//Bind the pipeline to use to render (for Vulkan)
+		if (BaseEngine::usingVulkan())
+			renderData->getVkGraphicsPipeline()->bind();
+
 		//Obtain the required UBO's for rendering
-		UBO* shaderCoreUBO     = renderData->getUBO(ShaderInterface::BLOCK_CORE);
+		UBO* shaderCoreUBO = renderData->getUBO(ShaderInterface::BLOCK_CORE);
+		UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
 		UBO* shaderSkinningUBO = renderData->getUBO(ShaderInterface::BLOCK_SKINNING);
-		UBO* materialUBO       = renderData->getUBO(ShaderInterface::BLOCK_MATERIAL);
 
 		//Use the correct graphics state
 		useGraphicsState(renderShader->getGraphicsState());
 
-		shaderCoreData.ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
-		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
+		renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
+
+		shaderModelUBO->updateFrame(&renderData->getShaderBlock_Model(), 0, sizeof(ShaderBlock_Model));
+
+		shaderCoreUBO->updateFrame(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
+
+		renderData->getDescriptorSet()->bind();
+
 		if (mesh->hasData() && mesh->hasRenderData()) {
 			MeshData* data = mesh->getData();
-			MeshRenderData* renderData = mesh->getRenderData();
+			MeshRenderData* meshRenderData = mesh->getRenderData();
 
 			if (shaderSkinningUBO) {
 				if (mesh->hasSkeleton()) {
 					for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); ++i)
 						shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
 					shaderSkinningData.ue_useSkinning = true;
-					shaderSkinningUBO->update(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
+					shaderSkinningUBO->updateFrame(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
 				} else {
 					shaderSkinningData.ue_useSkinning = false;
 					shaderSkinningData.updateUseSkinning(shaderSkinningUBO);
 				}
 			}
 
-			//Bind the pipeline to use to render (for Vulkan)
-			if (BaseEngine::usingVulkan())
-				vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getRenderData()->getVkGraphicsPipeline()->getInstance());
-
 			if (data->hasSubData()) {
-				renderData->getRenderData()->bindBuffers();
+				renderData->bindBuffers();
 
 				//Go through each sub data instance
 				for (unsigned int i = 0; i < data->getSubDataCount(); ++i) {
 					if (mesh->hasMaterial())
-						useMaterial(renderData->getRenderData(), data->getSubData(i).materialIndex, mesh->getMaterial(data->getSubData(i).materialIndex), materialUBO);
-					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex, data->getSubData(i).baseVertex);
+						useMaterial(renderData, data->getSubData(i).materialIndex, mesh->getMaterial(data->getSubData(i).materialIndex));
+					renderData->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex, data->getSubData(i).baseVertex);
 					if (mesh->hasMaterial())
 						stopUsingMaterial(mesh->getMaterial(data->getSubData(i).materialIndex));
 				}
 
-				renderData->getRenderData()->unbindBuffers();
+				renderData->unbindBuffers();
 			} else {
 				if (mesh->hasMaterial())
-					useMaterial(renderData->getRenderData(), 0, mesh->getMaterial(), materialUBO);
-				renderData->render();
+					useMaterial(renderData, 0, mesh->getMaterial());
+				meshRenderData->render();
 				if (mesh->hasMaterial())
 					stopUsingMaterial(mesh->getMaterial());
 			}
@@ -357,7 +363,7 @@ void Renderer::assignGraphicsState(GraphicsState* state, unsigned int shaderID) 
 	//Check the shader ID
 	if (shaderID == SHADER_SKY_BOX)
 		//Assign the state to use
-		state->depthWriteEnable = false;
+		state->depthWriteEnable = true; //???? Broken if not used
 	else if (shaderID == SHADER_FONT)
 		state->alphaBlending = true;
 	else if (shaderID == SHADER_MATERIAL)

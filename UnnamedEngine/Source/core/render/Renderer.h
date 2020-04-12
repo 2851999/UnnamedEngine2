@@ -122,13 +122,16 @@ public:
 	static inline void ignoreGraphicsStates(bool value) { shouldIgnoreGraphicsStates = value; }
 
 	/* TMethod used to apply the material properties to a shader assuming it is already being used */
-	static void useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material, UBO* materialUBO);
+	static void useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material);
 
 	/* Method used to stop applying a material (unbinds required textures) */
 	static void stopUsingMaterial(Material* material);
 
 	/* Method used to apply a graphics state */
 	static void useGraphicsState(GraphicsState* state);
+
+	/* Method called at the start of the frame (to update per frame data) */
+	static void preRender();
 
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);

@@ -1,4 +1,114 @@
 --------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 (V0.4.3)
+
+* Added DescriptorSet
+* Added DescriptorSetLayout
+* Added basic support for layout(set) for Vulkan in shaders
+  (Removed when using OpenGL)
+
+* Changed shaders to use separate UBO for per-model data and
+  added a descriptor set for this
+
+* Replaced TextureSet with DescriptorSet in Material
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 8
+
+* Some cleanup
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 7
+
+* Fixed bug: Previous commit broke PBR rendering
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 6
+
+* Changed shaders to use separate UBO for per-model data and
+  added a descriptor set for this
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 5
+
+* Fixed text when using Vulkan
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 4
+
+* Added basic support for layout(set) for Vulkan in shaders
+  (Removed when using OpenGL)
+* Fixed some Vulkan and OpenGL from previous change
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 3
+
+* Replaced TextureSet with DescriptorSet in material
+  (Vulkan broken for now)
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 2
+
+* Added methods to allow DescriptorSet to be updated when
+  using Vulkan
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 1
+
+* Added DescriptorSet
+* Added DescriptorSetLayout
+
+--------------------------------------------------------------
+Release 2 | Beta 1 (V0.4.2)
+
+* Added CSVFile
+* Added DebugProfiler
+* Added methods to MLAttribute to obtain data as a
+  Vector2/3/4f
+* Added method to remove a SubData from MeshData
+* Added method to Sprite to obtain a specific collision
+  rectangle for the sprite with certain applied offsets (like
+  offsets in TextureAtlas)
+* Added methods to assign the time of a Timer
+* Added methods in MeshBuilder to build a wireframe quad
+* Added 'updateTimeBetweenFrames' method in Animation2D
+* Added screen space reflections for PBR deferred rendering
+  in RenderScene
+* Added bloom for PBR deferred rendering in RenderScene
+* Added FXAA to RenderScene
+* Added spot light shadows
+* Added 'videoVulkan' setting to debug info
+
+* Changed Sprite and TextureAnimation2D to allow multiple
+  textures to be added as layers for when multiple textures
+  should be rendered at the same time
+* Changed MeshLoader to output the error text from Assimp if
+  a file fails to load
+* Changed Animation2D to use a Timer to work out the current
+  frame (Should make behaviour better if the delta is very
+  small or large)
+* Changed PostProcessor to allow for rendering to multiple
+  colour attachments
+* Changed Light to update on creation if they cast shadows
+* Change to VulkanTest to make OpenGL and Vulkan look similar
+
+* Removed 'Offsets' from TextureAtlas
+* Removed 'deltaSeconds' from Sprite
+
+* Fixed bug: GUILabel would not work with a NULL font
+* Fixed bug: utils_string::strSplit with a character for a
+             delimeter behaved differently to the same method
+             for a string type (if string's last letter was
+             the given delimeter then it would not return an
+             empty string for it)
+* Fixed bug: Crash when loading a tilemap with Tilemap and
+             TilemapLayer
+* Fixed bug: Crash when updating Text with an empty string
+* Fixed bug: Explicit instantiations of VBO should have been
+             after the definitions in VBO.cpp
+* Fixed bug: Using MSAA with Vulkan would cause a crash on
+             some systems
+
+--------------------------------------------------------------
 Release 2 | Beta 0 | Development 3 (V0.4.2)
 
 * Added DebugProfiler
@@ -405,704 +515,5 @@ Release 2 (V0.3.9)
              MeshRenderData
 
 * Started adding Vulkan support
-             
-* Note: Text handles rendering of a Font instead of Font
-
---------------------------------------------------------------
-Release 1 | Beta 3 (V0.3.9)
-
-* Added Vulkan
-* Added VulkanDevice
-* Added VulkanExtensions
-* Added VulkanSwapChain
-* Added VulkanValidationLayers
-* Added VulkanRenderPass
-* Added VulkanGraphicsPipeline
-* Added VulkanBuffer
-* Added TextureSet
-* Added GraphicsState
-* Added 'videoVulkan' setting in Settings
-* Added 'setup' method in ShaderInterface
-* Added methods 'useMaterial' and 'stopUsingMaterial' in
-  Renderer (Replacing 'setMaterialUniforms' method)
-* Added methods 'outputCompleteShaderFile(s)' to Shader to
-  write a whole shader file containing all includes
-* Added 'compileToSPIRV'/'compileEngineShaderToSPIRV' methods
-  to Shader to help compile engine shaders to SPIR-V (Requires
-  glslangValidator)
-* Added 'createQuad3D' method with a texture in MeshBuilder
-* Added 'debugVkValidationLayersEnabled' in Settings
-* Added function 'strJoin' to utils_string
-* Added VulkanLightingShader for lighting with RenderScene3D
-* Added 'usingVulkan' method in BaseEngine
-* Added warning messages and checks for updating
-  MeshRenderData
-
-* Changed Renderer to only load shaders being used (can also
-  use 'loadRenderShader' to load shaders manually)
-* Changed MeshRenderData and ShaderInterface to assign
-  specific attribute locations matching the ones defined in
-  the shaders
-* Changed shaders to use explicit locations (To make more
-  compatible for compilation to SPIR-V)
-* Changed ShaderInterface to only create UBO's when they are
-  obtained using 'getUBO'
-* Changed MeshRenderData so 'setup' is not called and so must
-  be done after creation (RenderData instance is now created
-  in the constructor)
-* Changed Material shaders to assign explicit binding locations
-  for textures
-* Changed Renderer to use texture units 10 and above when
-  binding textures (to support old method of binding textures)
-* Changed ShaderInterface so the UBO id's are now integer
-  values
-* Changed shader id's in Renderer to use unsigned integers
-  instead of strings
-* Changed MeshRenderData to add the required UBO's to
-  it's RenderData using ShaderInterface
-* Changed 'loadEngineShader' in Renderer to load shaders for
-  Vulkan in a separate folder 'shaders-vulkan'
-* Changed 'videoVSync' in Settings to be an 'unsinged int'
-  type so a value of 2 can be used to indicate triple
-  buffering should be used (Vulkan)
-* Changed 'setup' methods in RenderData to require a
-  RenderShader instead of a Shader
-* Changed 'initPerspective' in Matrix4f to return a
-  different matrix when using Vulkan (so depth values are
-  in the range 0-1 as Vulkan requires)
-* Changed 'DEFAULT_CLAMP' in TextureParameters to be GL_REPEAT
-  
-* Removed 'shouldClamp' in TextureParameters (since default
-  is GL_REPEAT anyway)
-  
-* Fixed bug: Didn't delete 'vboOthers' in MeshRenderData
-* Fixed bug: Font still had overlapping glyphs in the bitmap
-             resulting in lines appearing in text
-* Fixed bug: Font didn't destroy the texture it created when
-             it was destroyed
-* Fixed bug: Didn't unbind depth buffer when creating a
-             FramebufferStore
-* Fixed bug: 'Renderer::destroy' was never called by
-             BaseEngine
-* Fixed bug: DebugCamera assigned 'A' and 'D' keys bindings
-             the wrong way round
-* Fixed bug: Loaded RenderShaders were not destroyed by
-             Renderer
-* Fixed bug: Crash on deletion of a Mesh
-* Fixed bug: Did not delete VBO's used for skinning in
-             MeshRenderData
-* Fixed bug: BaseEngine did not delete its Text instance
-* Fixed bug: GUILabel would cause crash on creation
-* Fixed bug: Splash screen had overlapping text
-
-* Started adding Vulkan support
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 5 (V0.3.9)
-
-* Added error message if 'vkQueuePresentKHR' fails
-
-* Fixed bug: OpenAL not initialised when using Vulkan
-* Fixed bug: GraphicsState would have stopped RenderScene3D
-             from applying many lights correctly
-* Fixed bug: GUILabel would cause crash on creation
-* Fixed bug: Splash screen had overlapping text
-
-* Some cleanup
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 4 | Experimental 2
-
-* Fixed bug: Splash screen had overlapping text
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 4 | Experimental 1
-
-* Added error message if 'vkQueuePresentKHR' fails
-
-* Fixed bug: OpenAL not initialised when using Vulkan
-* Fixed bug: GraphicsState would have stopped RenderScene3D
-             from applying many lights correctly
-* Fixed bug: GUILabel would cause crash on creation
-
-* Some cleanup
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 4 (V0.3.8)
-
-* Added GraphicsState
-* Added function 'strJoin' to utils_string
-* Added basic Cubemap support for Vulkan
-* Added basic Vulkan support to RenderScene3D
-* Added support for multiple VBO's in RenderData when using
-  Vulkan
-* Added VulkanLightingShader for lighting with RenderScene3D
-* Added 'usingVulkan' method in BaseEngine
-* Added ability to update the contents of a VBO using Vulkan
-  (Will not resize the buffer)
-* Added warning messages and checks for updating
-  MeshRenderData
-* Added Vulkan support to Font and Text (Although it can only
-  be updated to use as many characters as 'maxCharacters' in
-  its constructor - default is 1000)
-
-* Changed Shader and UBO to apply an offset to UBO binding
-  locations when using Vulkan
-* Changed 'debugCallback' in Vulkan to output the correct
-  message severity
-* Changed 'setup' methods in RenderData to require a
-  RenderShader instead of a Shader
-* Changed 'initPerspective' in Matrix4f to return a
-  different matrix when using Vulkan (so depth values are
-  in the range 0-1 as Vulkan requires)
-* Changed 'depthCompareOp' to VK_COMPARE_OP_LESS_OR_EQUAL in
-  VulkanPipeline
-* Changed 'DEFAULT_CLAMP' in TextureParameters to be GL_REPEAT
-
-* Moved debug messenger in Vulkan to VulkanValidationLayers
-
-* Removed 'shouldClamp' in TextureParameters (since default
-  is GL_REPEAT anyway)
-    
-* Fixed bug: Rendering multiple objects with Vulkan meant
-             some UBOs were not destroyed
-* Fixed bug: Loaded RenderShaders were not destroyed by
-             Renderer
-* Fixed bug: VBO would not work with Vulkan if there was
-             only one attribute
-* Fixed bug: Crash on deletion of a Mesh
-* Fixed bug: Did not delete VBO's used for skinning in
-             MeshRenderData
-* Fixed bug: BaseEngine did not delete its Text instance
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 3 | Experimental 7
-
-* Added Vulkan support to Font and Text (Although it can only
-  be updated to use as many characters as 'maxCharacters' in
-  its constructor - default is 1000)
-* Added 'alphaBlending' in GraphicsState
-
-* Fixed bug: BaseEngine did not delete its Text instance
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 3 | Experimental 6
-
-* Added ability to update the contents of a VBO using Vulkan
-  (Will not resize the buffer)
-* Added warning messages and checks for updating
-  MeshRenderData
-  
-* Fixed bug: Last commit wouldn't compile
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 3 | Experimental 5
-
-* Added 'usingVulkan' method in BaseEngine
-
-* Fixed bug: Loading some models would cause a crash using
-             the last experimental
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 3 | Experimental 4
-  
-* Added VulkanLightingShader for lighting with RenderScene3D
-  
-* Changed 'DEFAULT_CLAMP' in TextureParameters to be GL_REPEAT
-
-* Moved debug messenger in Vulkan to VulkanValidationLayers
-
-* Removed 'shouldClamp' in TextureParameters (since default
-  is GL_REPEAT anyway)
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 3 | Experimental 3
-
-* Added basic Vulkan support to RenderScene3D
-* Added support for multiple VBO's in RenderData when using
-  Vulkan
-
-* Cleanup of Cubemap generation
-
-* Fixed bug: Did not free textures loaded during the creation
-             of a cubemap when using Vulkan
-* Fixed bug: Crash on deletion of a Mesh
-* Fixed bug: Did not delete VBO's used for skinning in
-             MeshRenderData
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 3 | Experimental 2
-
-* Added GraphicsState
-* Added basic Cubemap support for Vulkan
-
-* Changed 'setup' methods in RenderData to require a
-  RenderShader instead of a Shader
-* Changed 'initPerspective' in Matrix4f to return a
-  different matrix when using Vulkan (so depth values are
-  in the range 0-1 as Vulkan requires)
-* Changed 'depthCompareOp' to VK_COMPARE_OP_LESS_OR_EQUAL in
-  VulkanPipeline
-
-* Fixed bug: Loaded RenderShaders were not destroyed by
-             Renderer
-* Fixed bug: VBO would not work with Vulkan if there was
-             only one attribute
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 3 | Experimental 1
-
-* Added function 'strJoin' to utils_string
-
-* Changed Shader and UBO to apply an offset to UBO binding
-  locations when using Vulkan
-* Changed 'debugCallback' in Vulkan to output the correct
-  message severity
-  
-* Fixed bug: Rendering multiple objects with Vulkan meant
-             some UBOs were not destroyed
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 3 (V0.3.7)
-
-* Added 'setup' method in ShaderInterface
-* Added methods 'useMaterial' and 'stopUsingMaterial' in
-  Renderer (Replacing 'setMaterialUniforms' method)
-* Added methods 'outputCompleteShaderFile(s)' to Shader to
-  write a whole shader file containing all includes
-* Added 'compileToSPIRV'/'compileEngineShaderToSPIRV' methods
-  to Shader to help compile engine shaders to SPIR-V (Requires
-  glslangValidator)
-* Added 'createQuad3D' method with a texture in MeshBuilder
-* Added MSAA when using Vulkan
-* Added 'debugVkValidationLayersEnabled' in Settings
-
-* Changed ShaderInterface so the UBO id's are now integer
-  values
-* Changed shader id's in Renderer to use unsigned integers
-  instead of strings
-* Changed MeshRenderData to add the required UBO's to
-  it's RenderData using ShaderInterface
-* Changed 'loadEngineShader' in Renderer to load shaders for
-  Vulkan in a separate folder 'shaders-vulkan'
-* Changed Renderer and RenderData to support multiple
-  materials using 'SubData' within MeshData (Vulkan)
-* Changed culling winding order to counter clockwise in
-  VulkanGraphicsPipeline
-* Changed 'chooseSwapPresentMode' to try and apply the VSync
-  value in the window settings when using Vulkan
-* Changed 'videoVSync' in Settings to be an 'unsinged int'
-  type so a value of 2 can be used to indicate triple
-  buffering should be used (Vulkan)
-  
-* Fixed bug: Didn't unbind depth buffer when creating a
-             FramebufferStore
-* Fixed bug: 'Renderer::destroy' was never called by
-             BaseEngine
-* Fixed bug: RenderData would not correcly use multiple
-             textures or UBO's when using Vulkan
-* Fixed bug: Occasional crash using Vulkan caused by
-             VkDescriptorBufferInfo's 'offset' being changed
-* Fixed bug: DebugCamera assigned 'A' and 'D' keys bindings
-             the wrong way round
-* Fixed bug: Crash trying to use multiple TextureSet's in
-             RenderData
-* Fixed bug: Occasional crash due to wrong number of
-             VkDescriptorSet's being assigned (Could also
-             cause above crash)
-* Fixed bug: RenderData 'renderBaseVertex' supplied an
-             incorrect 'firstIndex' to vkCmdDrawIndexed
-* Fixed bug: 'shouldClamp' was not used in TextureParameters
-             when using Vulkan
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 2 | Experimental 6
-
-* Added MSAA when using Vulkan
-* Added 'debugVkValidationLayersEnabled' in Settings
-
-* Changed 'chooseSwapPresentMode' to try and apply the VSync
-  value in the window settings when using Vulkan
-* Changed 'videoVSync' in Settings to be an 'unsinged int'
-  type so a value of 2 can be used to indicate triple
-  buffering should be used (Vulkan)
-  
-* Fixed bug: SkyBox would not render a texture since
-             Experimental 2
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 2 | Experimental 5
-
-* Added depth testing when using Vulkan
-* Added mipmap generation for textures when using Vulkan
-
-* Fixed bug: 'shouldClamp' was not used in TextureParameters
-             when using Vulkan
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 2 | Experimental 4
-
-* Changed Renderer and RenderData to support multiple
-  materials using 'SubData' within MeshData (Vulkan)
-* Changed culling winding order to counter clockwise in
-  VulkanGraphicsPipeline
-
-* Fixed bug: Occasional crash using Vulkan caused by
-             VkDescriptorBufferInfo's 'offset' being changed
-* Fixed bug: DebugCamera assigned 'A' and 'D' keys bindings
-             the wrong way round
-* Fixed bug: Crash trying to use multiple TextureSet's in
-             RenderData
-* Fixed bug: Occasional crash due to wrong number of
-             VkDescriptorSet's being assigned (Could also
-             cause above crash)
-* Fixed bug: RenderData 'renderBaseVertex' supplied an
-             incorrect 'firstIndex' to vkCmdDrawIndexed
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 2 | Experimental 3
-
-* Added 'createQuad3D' method with a texture in MeshBuilder
-
-* Fixed bug: RenderData would not correcly use multiple
-             textures or UBO's when using Vulkan
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 2 | Experimental 2
-
-* Added methods 'useMaterial' and 'stopUsingMaterial' in
-  Renderer (Replacing 'setMaterialUniforms' method)
-* Added methods 'outputCompleteShaderFile(s)' to Shader to
-  write a whole shader file containing all includes
-* Added 'compileToSPIRV'/'compileEngineShaderToSPIRV' methods
-  to Shader to help compile engine shaders to SPIR-V (Requires
-  glslangValidator)
-
-* Changed MeshRenderData to add the required UBO's to
-  it's RenderData using ShaderInterface
-* Changed 'loadEngineShader' in Renderer to load shaders for
-  Vulkan in a separate folder 'shaders-vulkan'
-  
-* Fixed bug: 'Renderer::destroy' was never called by
-             BaseEngine
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 2 | Experimental 1
-
-* Added 'setup' method in ShaderInterface
-
-* Changed ShaderInterface so the UBO id's are now integer
-  values
-* Changed shader id's in Renderer to use unsigned integers
-  instead of strings
-  
-* Fixed bug: Didn't unbind depth buffer when creating a
-             FramebufferStore
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 2 (V0.3.6)
-
-* Added TextureSet
-
-* Removed VulkanRenderShader
-
-* Changed Texture to use TextureParameters when using Vulkan
-  to generate the texture sampler
-* Changed shaders to use explicit locations (To make more
-  compatible for compilation to SPIR-V)
-* Changed ShaderInterface to only create UBO's when they are
-  obtained using 'getUBO'
-* Changed MeshRenderData so 'setup' is not called and so must
-  be done after creation (RenderData instance is now created
-  in the constructor)
-* Changed Material shaders to assign explicit binding locations
-  for textures (Not currently used)
-* Changed Renderer to temporarily use texture units 10 and
-  above when binding textures
-
-* Moved descriptor set creation from VulkanRenderShader to
-  RenderData
-* Moved 'graphicsVkPipeline' from MeshRenderData to
-  RenderData
-
-* Fixed bug: Font still had overlapping glyphs in the bitmap
-             resulting in lines appearing in text
-* Fixed bug: Font didn't destroy the texture it created when
-             it was destroyed
-
-* More Vulkan
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 1 | Experimental 7
-
-* Changed RenderData to allocate the texture bindings array
-  using the first texture set added (for Vulkan)
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 1 | Experimental 6
-
-* Added TextureSet
-* Added 'bindTextures' and 'unbindTextures' in RenderData
-  these are called by MeshRenderData when rendering
-  
-* Changed Renderer to temporarily use texture units 10 and
-  above when binding textures
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 1 | Experimental 5
-
-* Changed Material shaders to assign explicit binding locations
-  for textures (Not currently used)
-  
-* Fixed bug: Last experimental broke PBREnvironment
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 1 | Experimental 4
-
-* Changed RenderData to allow 'texture' in
-  RenderData::TextureInfo to be NULL to allow its write
-  descriptor to be assigned later
-* Changed MeshRenderData so 'setup' is not called and so must
-  be done after creation (RenderData instance is now created
-  in the constructor)
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 1 | Experimental 3
-
-* Changed ShaderInterface to only create UBO's when they are
-  obtained using 'getUBO'
-  
-* Fixed bug: Font still had overlapping glyphs in the bitmap
-             resulting in lines appearing in text
-* Fixed bug: Font didn't destroy the texture it created when
-             it was destroyed
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 1 | Experimental 2
-
-* Removed VulkanRenderShader
-
-* Moved descriptor set creation from VulkanRenderShader to
-  RenderData
-* Moved 'graphicsVkPipeline' from MeshRenderData to
-  RenderData
-  
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 1 | Experimental 1
-
-* Changed Texture to use TextureParameters when using Vulkan
-  to generate the texture sampler
-* Changed shaders to use explicit locations (To make more
-  compatible for compilation to SPIR-V)
-
-* More Vulkan
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 1 (V0.3.5)
-
-* Added Vulkan
-* Added VulkanDevice
-* Added VulkanExtensions
-* Added VulkanSwapChain
-* Added VulkanValidationLayers
-* Added VulkanRenderPass
-* Added VulkanGraphicsPipeline
-* Added VulkanBuffer
-* Added VulkanRenderShader
-* Added 'videoVulkan' setting in Settings
-
-* Changed Renderer to only load shaders being used (can also
-  use 'loadRenderShader' to load shaders manually
-* Changed MeshRenderData and ShaderInterface to assign
-  specific attribute locations matching the ones defined in
-  the shaders
-  
-* Fixed bug: Didn't delete 'vboOthers' in MeshRenderData
-
-* Started adding Vulkan support
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 12
-
-* More Vulkan
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 11
-
-* Removed VulkanShader
-
-* Fixed bug: Didn't delete 'vboOthers' in MeshRenderData
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 10
-
-* Added basic Vulkan support to Shader
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 9
-
-* Added VulkanShader
-* Added VulkanRenderShader
-
-* Fixed bug: Crash when deleting a UBO instance when using
-             Vulkan
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 8
-
-* Added basic Vulkan support to Texture
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 7
-
-* More Vulkan
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 6
-
-* Started adding Vulkan support to UBO
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 5
-
-* Changed Renderer to only load shaders being used (can also
-  use 'loadRenderShader' to load shaders manually
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 4
-
-* Added basic Vulkan support to RenderData
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 3
-
-* Added basic Vulkan support to VBO
-
-* Modified MeshRenderData and ShaderInterface to assign
-  specific attribute locations matching the ones defined in
-  the shaders
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 2
-
-* Added VulkanRenderPass
-* Added VulkanGraphicsPipeline
-* Added VulkanBuffer
-
---------------------------------------------------------------
-Release 1 | Beta 2 | Development 0 | Experimental 1
-
-* Added Vulkan
-* Added VulkanDevice
-* Added VulkanExtensions
-* Added VulkanSwapChain
-* Added VulkanValidationLayers
-* Added 'videoVulkan' setting in Settings
-
-* Started adding Vulkan support
-
---------------------------------------------------------------
-Release 1 | Beta 2 (V0.3.4)
-
-* Added PlaneCollider3D
-* Added Tilemap
-* Added TilemapLayer
-* Added AudioSequence
-* Added ResourcePack
-* Added FramebufferStoreCubemap
-* Added Text
-* Added UBO
-* Added ShaderInterface
-* Added methods to enable and disable wireframe rendering in
-  RenderScene
-* Added 'getSteepness' mehtod in CDLODHeightMap
-* Added methods findAttribute and getAttribute in MLElement
-* Added method strSplitLast in utils_string
-* Added ability to read content in an element in MLDocument
-* Added padding to texture coordinates for Font to reduce
-  texture bleeding artifacts
-* Added 'startFrame' to Animation2D
-* Added 'getCurrentAnimationName' and 'getCurrentAnimation'
-  to Sprite
-* Added 'setTextureCoords' in Sprite
-* Added 'roundNearest' in utils_maths
-* Added 'Offsets' to TextureAtlas
-* Added 'fadeIn' and 'fadeOut' methods to AudioSource and
-  SoundSystem
-* Added error messages in AudioLoader for files that don't
-  exist
-* Added 'setup' methods in Sprite
-* Added error messages to SoundSystem
-* Added point light shadows
-* Added methods to Font that only update either the position
-  that text will be rendered or the actual text to be rendered
-* Added 'getCurrentFrameInAnimation' method in Animation2D
-* Added ability to add fonts to ResourcePack
-* Added 1440p to VideoResolution
-* Added UEMaterialTextures struct in material shaders to keep
-  samplers separate to data (preparing to use UBOs)
-* Added constructor in Matrix4f to initialise data from a
-  Matrix3f
-
-* Changed MLParser to allow for closing an element on the
-  same line
-* Changed ML to allow it to read some XML files
-* Changed 'entity' to 'sprite' in Animation2D
-* Changed Camera2D to invert its position to make its
-  movement more intuitive
-* Changed Animation2D to reset the animation when starting
-* Changed Sprite to set currentAnimation to NULL when it
-  has finished running
-* Changed 'update' method in Sprite to be overridable
-* Changed TextureAnimation2D to assign the texture for the
-  first frame of animation when it is started
-* Changed 'loadShader' method in Shader to load a geometry
-  shader if it is also available
-* Changed Material so variables are no longer public (use
-  methods to access instead) allowing faster transfer of data
-  using UBO's
-* Changed rendering system and shaders to use UBO's to assign
-  the majority of data (This has increased the shader
-  performance)
-  
-* Renamed find to findChild in MLElement
-* Renamed Sprite2D to Sprite
-* Renamed 'timeBetweenFrame' to 'timeBetweenFrames' in
-  Animation2D
-  
-* Improved Audio to include loop intervals and a way to
-  request a looping sound to stop
-  
-* Cleaned up RenderScene3D slightly
-
-* Increased maximum number of bones in a model from 80 to 90
-
-* Removed temporary (incorrect) antialiasing for deferred
-  rendering
-  
-* Replaced ue_useNormal/ParallaxMap with hasNormal/ParallaxMap
-  within the UEMaterial structure in shaders
-
-* Fixed bug: Radius for the bounding sphere of a mesh was
-             calculated incorrectly
-* Fixed bug: CDLODHeightMap could cause a crash when using
-		     getMinHeight and getMaxHeight
-* Fixed bug: MLDocument incorrectly delt with elements that
-             were closed on the same line
-* Fixed bug: TextureAtlas would not work properly with
-             non-square textures
-* Fixed bug: AudioLoader incorrectly loaded stereo sounds
-* Fixed bug: Potential OpenAL crash upon failure to find a
-             device
-* Fixed bug: Font 'getWidth' could cause a segmentation fault
-             with '\n' in the text
-* Fixed bug: RenderScene3D didn't use wireframes correctly
-             when not using lighting
-* Fixed bug: Rotations for skeletal animation weren't
-             interpolated correctly
-* Fixed bug: Depth sorting for particles ignored the last
-  			 particle
-* Fixed bug: Font getHeight only measured the height of one
-             line if \n was included
              
 * Note: Text handles rendering of a Font instead of Font

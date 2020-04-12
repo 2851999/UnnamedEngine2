@@ -30,6 +30,7 @@ SkyBox::SkyBox(Cubemap* cubemap) {
 	//Create the skybox
 	Mesh* mesh = new Mesh(MeshBuilder::createCube(1.0f, 1.0f, 1.0f));
 	mesh->getMaterial()->setDiffuse(cubemap);
+	//mesh->getMaterial()->update();
 	box = new GameObject3D(mesh, Renderer::getRenderShader(Renderer::SHADER_SKY_BOX));
 }
 

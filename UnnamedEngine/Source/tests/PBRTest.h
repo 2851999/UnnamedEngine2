@@ -129,6 +129,7 @@ void Test::onCreated() {
 		material->setAlbedo(Colour(0.5f, 0.0f, 0.0f));
 		material->setMetalness(x * (1.0f / 3.0f));
 		material->setRoughness(utils_maths::clamp(y * (1.0f / 3.0f), 0.05f, 1.0f));
+		material->update();
 
 		sphere->update();
 

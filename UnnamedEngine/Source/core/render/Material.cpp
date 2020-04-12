@@ -18,6 +18,9 @@
 
 #include "Material.h"
 
+#include "Renderer.h"
+#include "../BaseEngine.h"
+
 /*****************************************************************************
  * The Material class
  ******************************************************************************/
@@ -26,17 +29,11 @@ Material::Material(bool pbr) {
 	setDefault(pbr);
 
 	//Add the textures required for the texture set
-	textureSet = new TextureSet();
-	textureSet->add(0, NULL);
-	textureSet->add(1, NULL);
-	textureSet->add(2, NULL);
-	textureSet->add(3, NULL);
-	textureSet->add(4, NULL);
-	textureSet->add(5, NULL);
+	descriptorSet = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_MATERIAL));
 }
 
 Material::~Material() {
-	delete textureSet;
+	delete descriptorSet;
 }
 
 void Material::setDefault(bool pbr) {
@@ -60,4 +57,18 @@ void Material::setDefault(bool pbr) {
 	shaderData.hasShininessTexture = false;
 	shaderData.hasNormalMap = false;
 	shaderData.hasParallaxMap = false;
+}
+
+void Material::setup() {
+	//Update the material UBO
+	descriptorSet->getUBO(0)->update(&shaderData, 0, sizeof(ShaderBlock_Material));
+	//Setup the descriptor set
+	descriptorSet->setup();
+}
+
+void Material::update() {
+	//Update the material UBO
+	descriptorSet->getUBO(0)->update(&shaderData, 0, sizeof(ShaderBlock_Material));
+	//Update the descriptor set
+	descriptorSet->update();
 }

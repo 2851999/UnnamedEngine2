@@ -132,6 +132,8 @@ void BaseEngine::create() {
 
 			if (getSettings().videoVulkan)
 				Vulkan::startDraw();
+			Renderer::preRender();
+
 			render();
 
 			if (getSettings().debugShowInformation)

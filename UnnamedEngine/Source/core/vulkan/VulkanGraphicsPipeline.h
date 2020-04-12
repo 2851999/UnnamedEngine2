@@ -48,6 +48,9 @@ public:
 	/* Destructor */
 	virtual ~VulkanGraphicsPipeline();
 
+    /* Method used to bind this pipline for use */
+    void bind();
+
 	/* Getters */
 	VkPipeline& getInstance() { return pipeline; }
 	VkPipelineLayout& getLayout() { return pipelineLayout; }
