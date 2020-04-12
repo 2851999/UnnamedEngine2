@@ -151,7 +151,7 @@ void Test::render() {
 	renderScene->render();
 
 	//model2->getMesh()->getMaterial(1)->setDiffuse(Renderer::getBlankTexture());
-	//model2->getMesh()->getRenderData()->getRenderData()->updateVk();
+	//model2->getMesh()->getMaterial(1)->update();
 
 	camera->useView();
 }

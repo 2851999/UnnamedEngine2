@@ -1,4 +1,9 @@
 --------------------------------------------------------------
+Release 2 | Beta 1 | Development 0 | Experimental 8
+
+* Some cleanup
+
+--------------------------------------------------------------
 Release 2 | Beta 1 | Development 0 | Experimental 7
 
 * Fixed bug: Previous commit broke PBR rendering

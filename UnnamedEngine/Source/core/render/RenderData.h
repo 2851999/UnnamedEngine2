@@ -100,9 +100,6 @@ public:
 	/* The method used to setup this data for rendering (With Vulkan) */
 	void setupVk(RenderShader* renderShader);
 
-
-	void updateVk();
-
 	/* Methods to add a UBO or Texture to this instance */
 	inline void add(unsigned int id, UBO* ubo) { ubos.insert(std::pair<unsigned int, UBO*>(id, ubo)); }
 	void addTexture(Texture* texture, unsigned int binding);
