@@ -193,8 +193,8 @@ void RenderScene3D::render() {
 					Matrix4f modelMatrix = object->getModelMatrix();
 
 					//Assign the required matrix uniforms for the object
-					Renderer::getShaderBlock_Core().ue_modelMatrix = modelMatrix;
-					Renderer::getShaderBlock_Core().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
+					object->getMesh()->getRenderData()->getRenderData()->getShaderBlock_Model().ue_modelMatrix = modelMatrix;
+					object->getMesh()->getRenderData()->getRenderData()->getShaderBlock_Model().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
 
 					//Render the object with the geometry shader
 					object->render();
@@ -473,7 +473,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 			shaderLightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
 
 			Renderer::getShaderBlock_Core().ue_projectionMatrix = ((Camera3D*) Renderer::getCamera())->getProjectionMatrix();
-			Renderer::getShaderBlock_Core().ue_viewMatrix = ((Camera3D*)Renderer::getCamera())->getViewMatrix();
+			Renderer::getShaderBlock_Core().ue_viewMatrix = ((Camera3D*) Renderer::getCamera())->getViewMatrix();
 			Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_CORE)->update(&Renderer::getShaderBlock_Core(), 0, sizeof(ShaderBlock_Core));
 
 			//Deferred rendering, so render the quad on the screen with the current set of lights
@@ -485,8 +485,8 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 				Matrix4f modelMatrix = batches[indexOfBatch].objects[j]->getModelMatrix();
 
 				//Assign the required matrix uniforms for the object
-				Renderer::getShaderBlock_Core().ue_modelMatrix = modelMatrix;
-				Renderer::getShaderBlock_Core().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
+				batches[indexOfBatch].objects[j]->getMesh()->getRenderData()->getRenderData()->getShaderBlock_Model().ue_modelMatrix = modelMatrix;
+				batches[indexOfBatch].objects[j]->getMesh()->getRenderData()->getRenderData()->getShaderBlock_Model().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
 
 				UBO* lightingUBO = batches[indexOfBatch].objects[j]->getMesh()->getRenderData()->getRenderData()->getUBO(ShaderInterface::BLOCK_LIGHTING);
 				if (lightingUBO)
@@ -568,11 +568,11 @@ void RenderScene3D::renderShadowMap(Light* light) {
 			if (! culling || ! object->shouldCull(light->getFrustum()) || light->getType() == Light::TYPE_POINT) {
 				//Assign the required uniforms that could not have been done outside of the loop
 				if (light->getType() == Light::TYPE_POINT) {
-					Renderer::getShaderBlock_Core().ue_modelMatrix = object->getModelMatrix();
+					object->getMesh()->getRenderData()->getRenderData()->getShaderBlock_Model().ue_modelMatrix = object->getModelMatrix();
 					//Ensure the object uses the shadow map shader to render
 					object->getRenderShader()->addForwardShader(shadowCubemapShader);
 				} else {
-					Renderer::getShaderBlock_Core().ue_modelMatrix = lightSpaceMatrix * object->getModelMatrix();
+					object->getMesh()->getRenderData()->getRenderData()->getShaderBlock_Model().ue_modelMatrix = lightSpaceMatrix * object->getModelMatrix();
 					//Ensure the object uses the shadow map shader to render
 					object->getRenderShader()->addForwardShader(shadowMapShader);
 				}

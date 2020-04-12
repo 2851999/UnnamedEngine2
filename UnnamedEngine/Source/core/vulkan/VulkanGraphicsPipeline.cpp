@@ -159,6 +159,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, Vulka
 	std::vector<VkDescriptorSetLayout> layouts;
 	layouts.push_back(renderData->getVkDescriptorSetLayout());
 	layouts.push_back(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_MATERIAL)->getVkLayout());
+	layouts.push_back(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_MODEL)->getVkLayout());
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

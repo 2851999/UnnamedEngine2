@@ -99,8 +99,10 @@ void Test::created() {
 
 	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
 
+	unsigned int shader = Renderer::SHADER_VULKAN_LIGHTING;
+
 	mesh->setCullingEnabled(false);
-	model = new GameObject3D(mesh, Renderer::SHADER_VULKAN_LIGHTING);
+	model = new GameObject3D(mesh, shader);
 	model->setScale(0.15f, 0.15f, 0.15f);
 	model->update();
 	renderScene->add(model);
@@ -108,11 +110,11 @@ void Test::created() {
 //	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae");
 //	mesh2->getSkeleton()->startAnimation("");
 
-	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj"); //Assimp won't load this file
+	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
 	//Mesh* mesh2 = new Mesh(MeshBuilder::createCube(10.0f, 10.0f, 10.0f));
 
 	mesh2->setCullingEnabled(false);
-	model2 = new GameObject3D(mesh2, Renderer::SHADER_VULKAN_LIGHTING);
+	model2 = new GameObject3D(mesh2, shader);
 	model2->setPosition(4.0f, 1.0f, 0.0f);
 	model2->update();
 	renderScene->add(model2);

@@ -37,6 +37,11 @@ RenderData::~RenderData() {
 }
 
 void RenderData::setup(RenderShader* renderShader) {
+	//Create the descriptor set
+	descriptorSetModel = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_MODEL));
+	//Setup the descriptor set
+	descriptorSetModel->setup();
+
 	if (! BaseEngine::usingVulkan()) {
 		//Generate the VAO and bind it
 		glGenVertexArrays(1, &vao);

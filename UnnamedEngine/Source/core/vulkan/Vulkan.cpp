@@ -550,20 +550,6 @@ void Vulkan::updateDescriptorSet(DescriptorSet* set) {
 	descriptorSetUpdateQueue.push_back(info);
 }
 
-void Vulkan::updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size) {
-	//Setup the structure for the queue
-	UBOUpdateInfo info;
-	info.ubo             = ubo;
-	info.data            = data;
-	info.offset          = offset;
-	info.size            = size;
-	info.nextUpdateFrame = getNextFrame();
-	info.updatesLeft     = getSwapChain()->getImageCount();
-
-	//Add the set to the update queue
-	uboUpdateQueue.push_back(info);
-}
-
 void Vulkan::updateDescriptorSetQueue() {
 	//Indices of data to be removed
 	unsigned int removeEnd = 0;
@@ -576,6 +562,20 @@ void Vulkan::updateDescriptorSetQueue() {
 	//Remove all finished updates from the queue
 	if (removeEnd > 0)
 		descriptorSetUpdateQueue.erase(descriptorSetUpdateQueue.begin(), descriptorSetUpdateQueue.begin() + removeEnd);
+}
+
+void Vulkan::updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size) {
+	//Setup the structure for the queue
+	UBOUpdateInfo info;
+	info.ubo             = ubo;
+	info.data            = data;
+	info.offset          = offset;
+	info.size            = size;
+	info.nextUpdateFrame = getNextFrame();
+	info.updatesLeft     = getSwapChain()->getImageCount();
+
+	//Add the set to the update queue
+	uboUpdateQueue.push_back(info);
 }
 
 bool Vulkan::updateUBOFrame(UBOUpdateInfo& info) {

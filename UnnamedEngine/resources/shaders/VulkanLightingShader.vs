@@ -1,14 +1,17 @@
 #version 420
 //Used for assigning UBO block locations - can remove
 
-layout(std140, binding = 1) uniform UECoreData {
-	mat4 ue_mvpMatrix;
-	mat4 ue_modelMatrix;
+layout(std140, set = 0, binding = 1) uniform UECoreData {
 	mat4 ue_viewMatrix;
 	mat4 ue_projectionMatrix;
-	mat4 ue_normalMatrix;
 	
 	vec4 ue_cameraPosition;
+};
+
+layout(std140, set = 2, binding = 2) uniform UEModelData {
+	mat4 ue_mvpMatrix;
+	mat4 ue_modelMatrix;
+	mat4 ue_normalMatrix;
 };
 
 
@@ -62,7 +65,7 @@ struct UEMaterial {
 };
 
 /* The material data */
-layout(std140, set = 1, binding = 2) uniform UEMaterialData {
+layout(std140, set = 1, binding = 3) uniform UEMaterialData {
 	UEMaterial ue_material;
 };
 
@@ -76,7 +79,7 @@ layout(set = 1, binding = 5) uniform sampler2D ue_material_parallaxMap;
 
 const int UE_MAX_BONES = 90;
 
-layout(std140, binding = 3) uniform UESkinningData {
+layout(std140, binding = 4) uniform UESkinningData {
 	mat4 ue_bones[UE_MAX_BONES];
 	bool ue_useSkinning;
 };
@@ -112,7 +115,7 @@ struct UELight {
 	bool useShadowMap;
 };
 
-layout(std140, binding = 4) uniform UELightingData {
+layout(std140, binding = 5) uniform UELightingData {
 	UELight ue_lights[MAX_LIGHTS];
 	mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
 	

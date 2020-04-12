@@ -10,7 +10,7 @@ layout(location = 0) out vec4 FragColor;
 
 uniform samplerCube environmentMap;
 
-layout (std140, binding = 8) uniform UEEquiToCubeGenData {
+layout (std140, binding = 9) uniform UEEquiToCubeGenData {
 	float envMapSize;
 	float roughness;
 };

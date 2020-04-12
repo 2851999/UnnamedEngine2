@@ -24,7 +24,7 @@ struct UEMaterial {
 };
 
 /* The material data */
-layout(std140, set = 1, binding = 2) uniform UEMaterialData {
+layout(std140, set = 1, binding = 3) uniform UEMaterialData {
 	UEMaterial ue_material;
 };
 

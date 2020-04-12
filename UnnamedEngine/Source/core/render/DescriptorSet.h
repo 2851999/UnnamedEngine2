@@ -103,6 +103,9 @@ public:
         unsigned int binding;
     };
 private:
+    /* The set number of this set (corresponds to layout(set) in Vulkan shaders) */
+    unsigned int setNumber;
+
     /* UBOs required in this layout*/
     std::vector<UBOInfo> ubos;
 
@@ -113,7 +116,7 @@ private:
     VkDescriptorSetLayout vulkanDescriptorSetLayout = VK_NULL_HANDLE;
 public:
     /* Constructor */
-    DescriptorSetLayout() {}
+    DescriptorSetLayout(unsigned int setNumber) : setNumber(setNumber) {}
 
     /* Destructor */
     virtual ~DescriptorSetLayout();
@@ -129,9 +132,10 @@ public:
     inline void addUBO(unsigned int size, GLenum usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
 
     /* Getters */
+    inline unsigned int getSetNumber() { return setNumber; }
     inline std::vector<UBOInfo>& getUBOs() { return ubos; }
-    inline std::vector<unsigned int>& getTextureBindings() { return textureBindings;  }
-    inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout;  }
+    inline std::vector<unsigned int>& getTextureBindings() { return textureBindings; }
+    inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout; }
 };
 
 #endif /* CORE_RENDER_DESCRIPTOR_SET_H_ */

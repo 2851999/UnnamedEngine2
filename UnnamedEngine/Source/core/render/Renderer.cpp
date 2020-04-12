@@ -173,7 +173,7 @@ void Renderer::initialise() {
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
-	if (BaseEngine::usingVulkan())
+	if (BaseEngine::usingVulkan()) //WHEN REMOVING ENSURE CAN UPDATE THINGS LIKE VIEW MATRIX WHEN SWITCHING THE CAMERA MID-FRAME
 		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getVkGraphicsPipeline()->getLayout(), 0, 1, renderData->getVkDescriptorSet(0), 0, nullptr);
 
 	//Bind the material descriptor set
@@ -195,24 +195,40 @@ void Renderer::useGraphicsState(GraphicsState* graphicsState) {
 	}
 }
 
+void Renderer::preRender() {
+	//Update required data for this frame
+
+}
+
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
 	//Ensure there is a Shader and Camera instance for rendering
 	if (renderShader && getCamera()) {
 		//Get the render data for rendering
 		RenderData* renderData = mesh->getRenderData()->getRenderData();
 
+		//Bind the pipeline to use to render (for Vulkan)
+		if (BaseEngine::usingVulkan())
+			renderData->getVkGraphicsPipeline()->bind();
+
 		//Obtain the required UBO's for rendering
-		UBO* shaderCoreUBO     = renderData->getUBO(ShaderInterface::BLOCK_CORE);
+		UBO* shaderCoreUBO = renderData->getUBO(ShaderInterface::BLOCK_CORE);
+		UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
 		UBO* shaderSkinningUBO = renderData->getUBO(ShaderInterface::BLOCK_SKINNING);
 
 		//Use the correct graphics state
 		useGraphicsState(renderShader->getGraphicsState());
 
-		shaderCoreData.ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
+		renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
+
+		shaderModelUBO->updateFrame(&renderData->getShaderBlock_Model(), 0, sizeof(ShaderBlock_Model));
+
 		shaderCoreUBO->updateFrame(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
+
+		renderData->getDescriptorSet()->bind();
+
 		if (mesh->hasData() && mesh->hasRenderData()) {
 			MeshData* data = mesh->getData();
-			MeshRenderData* renderData = mesh->getRenderData();
+			MeshRenderData* meshRenderData = mesh->getRenderData();
 
 			if (shaderSkinningUBO) {
 				if (mesh->hasSkeleton()) {
@@ -226,27 +242,23 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 				}
 			}
 
-			//Bind the pipeline to use to render (for Vulkan)
-			if (BaseEngine::usingVulkan())
-				renderData->getRenderData()->getVkGraphicsPipeline()->bind();
-
 			if (data->hasSubData()) {
-				renderData->getRenderData()->bindBuffers();
+				renderData->bindBuffers();
 
 				//Go through each sub data instance
 				for (unsigned int i = 0; i < data->getSubDataCount(); ++i) {
 					if (mesh->hasMaterial())
-						useMaterial(renderData->getRenderData(), data->getSubData(i).materialIndex, mesh->getMaterial(data->getSubData(i).materialIndex));
-					renderData->getRenderData()->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex, data->getSubData(i).baseVertex);
+						useMaterial(renderData, data->getSubData(i).materialIndex, mesh->getMaterial(data->getSubData(i).materialIndex));
+					renderData->renderBaseVertex(data->getSubData(i).count, data->getSubData(i).baseIndex, data->getSubData(i).baseVertex);
 					if (mesh->hasMaterial())
 						stopUsingMaterial(mesh->getMaterial(data->getSubData(i).materialIndex));
 				}
 
-				renderData->getRenderData()->unbindBuffers();
+				renderData->unbindBuffers();
 			} else {
 				if (mesh->hasMaterial())
-					useMaterial(renderData->getRenderData(), 0, mesh->getMaterial());
-				renderData->render();
+					useMaterial(renderData, 0, mesh->getMaterial());
+				meshRenderData->render();
 				if (mesh->hasMaterial())
 					stopUsingMaterial(mesh->getMaterial());
 			}

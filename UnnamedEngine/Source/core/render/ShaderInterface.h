@@ -30,13 +30,16 @@
 //https://stackoverflow.com/questions/7451476/opengl-uniform-buffer-std140-layout-a-driver-bug-or-did-i-misunderstand-the-spe
 
 struct ShaderBlock_Core {
-	Matrix4f ue_mvpMatrix;
-	Matrix4f ue_modelMatrix;
 	Matrix4f ue_viewMatrix;
 	Matrix4f ue_projectionMatrix;
-	Matrix4f ue_normalMatrix;
 
 	Vector4f ue_cameraPosition;
+};
+
+struct ShaderBlock_Model {
+	Matrix4f ue_mvpMatrix;
+	Matrix4f ue_modelMatrix;
+	Matrix4f ue_normalMatrix;
 };
 
 struct ShaderBlock_Material {
@@ -163,6 +166,7 @@ private:
 public:
 	/* IDs for descriptor set layouts */
 	static const unsigned int DESCRIPTOR_SET_MATERIAL;
+	static const unsigned int DESCRIPTOR_SET_MODEL;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
@@ -175,6 +179,7 @@ public:
 
 	/* The ids for particular shader blocks */
 	static const unsigned int BLOCK_CORE;
+	static const unsigned int BLOCK_MODEL;
 	static const unsigned int BLOCK_MATERIAL;
 	static const unsigned int BLOCK_SKINNING;
 	static const unsigned int BLOCK_LIGHTING;
@@ -188,6 +193,7 @@ public:
 
 	/* Binding locations for shader blocks */
 	static const unsigned int UBO_BINDING_LOCATION_CORE;
+	static const unsigned int UBO_BINDING_LOCATION_MODEL;
 	static const unsigned int UBO_BINDING_LOCATION_MATERIAL;
 	static const unsigned int UBO_BINDING_LOCATION_SKINNING;
 	static const unsigned int UBO_BINDING_LOCATION_LIGHTING;

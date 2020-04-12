@@ -130,6 +130,9 @@ public:
 	/* Method used to apply a graphics state */
 	static void useGraphicsState(GraphicsState* state);
 
+	/* Method called at the start of the frame (to update per frame data) */
+	static void preRender();
+
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
 

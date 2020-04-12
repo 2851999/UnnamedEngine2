@@ -231,7 +231,7 @@ void TilemapLayer::render() {
 		//Render the map
 		shader->use();
 
-		shaderCoreData.ue_mvpMatrix = Renderer::getCamera()->getProjectionViewMatrix() * Matrix4f().initIdentity();
+		renderData->getShaderBlock_Model().ue_mvpMatrix = Renderer::getCamera()->getProjectionViewMatrix() * Matrix4f().initIdentity();
 		shaderCoreUBO->update(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
 
 		shader->setUniformi("Texture", Renderer::bindTexture(tileset->getTexture()));
