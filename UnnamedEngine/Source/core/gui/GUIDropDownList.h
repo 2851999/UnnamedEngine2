@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUIDROPDOWNLIST_H_
-#define CORE_GUI_GUIDROPDOWNLIST_H_
+#pragma once
 
 #include "GUIDropDownMenu.h"
 
@@ -63,4 +62,3 @@ public:
 	inline std::string getSelection() { return menuButton->getText(); }
 };
 
-#endif /* CORE_GUI_GUIDROPDOWNLIST_H_ */

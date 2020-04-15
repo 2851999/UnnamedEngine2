@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_QUATERNION_H_
-#define CORE_QUATERNION_H_
+#pragma once
 
 #include "Vector.h"
 
@@ -127,4 +126,3 @@ public:
 	}
 };
 
-#endif /* CORE_QUATERNION_H_ */

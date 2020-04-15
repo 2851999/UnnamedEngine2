@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_SHADERINTERFACE_H_
-#define CORE_RENDER_SHADERINTERFACE_H_
+#pragma once
 
 #include "UBO.h"
 #include "Skinning.h"
@@ -228,4 +227,3 @@ public:
 };
 
 
-#endif /* CORE_RENDER_SHADERINTERFACE_H_ */

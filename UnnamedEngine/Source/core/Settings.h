@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_SETTINGS_H_
-#define CORE_SETTINGS_H_
+#pragma once
 
 #include "Vector.h"
 
@@ -86,4 +85,3 @@ struct Settings {
 	bool         debugVkValidationLayersEnabled = false;
 };
 
-#endif /* CORE_SETTINGS_H_ */

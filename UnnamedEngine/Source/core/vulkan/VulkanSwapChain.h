@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANSWAPCHAIN_H_
-#define CORE_VULKAN_VULKANSWAPCHAIN_H_
+#pragma once
 
 #include "VulkanDevice.h"
 
@@ -79,4 +78,3 @@ public:
 	inline unsigned int getImageCount() { return images.size(); }
 };
 
-#endif /* CORE_VULKAN_VULKANSWAPCHAIN_H_ */

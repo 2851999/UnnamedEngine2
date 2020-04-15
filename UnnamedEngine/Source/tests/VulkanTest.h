@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef TESTS_BASEENGINETEST3D_H_
-#define TESTS_BASEENGINETEST3D_H_
+#pragma once
 
 #include "../core/BaseEngine.h"
 #include "../core/render/RenderScene.h"
@@ -168,4 +167,3 @@ void Test::onKeyPressed(int key) {
 		requestClose();
 }
 
-#endif /* TESTS_BASEENGINETEST3D_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_INPUT_CONTROLLER_H_
-#define CORE_INPUT_CONTROLLER_H_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -64,4 +63,3 @@ public:
 	bool getButton(unsigned int index);
 };
 
-#endif /* CORE_INPUT_CONTROLLER_H_ */

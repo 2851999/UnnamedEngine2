@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKAN_H_
-#define CORE_VULKAN_VULKAN_H_
+#pragma once
 
 #include "../Window.h"
 #include "VulkanDevice.h"
@@ -213,4 +212,3 @@ public:
 };
 
 
-#endif /* CORE_VULKAN_VULKAN_H_ */

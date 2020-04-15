@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_LASERS_H_
-#define EXAMPLES_ASTEROIDS_LASERS_H_
+#pragma once
 
 #include "../../core/physics/PhysicsObject.h"
 #include "../../core/particles/ParticleSystem.h"
@@ -108,4 +107,3 @@ public:
 	std::vector<PhysicsObject3D*>& getObjects() { return objects; }
 };
 
-#endif /* EXAMPLES_ASTEROIDS_LASERS_H_ */

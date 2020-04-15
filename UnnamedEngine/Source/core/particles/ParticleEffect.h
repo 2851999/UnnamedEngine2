@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PARTICLES_PARTICLEEFFECT_H_
-#define CORE_PARTICLES_PARTICLEEFFECT_H_
+#pragma once
 
 #include "ParticleSystem.h"
 #include "ParticleEmitter.h"
@@ -68,4 +67,3 @@ public:
 };
 
 
-#endif /* CORE_PARTICLES_PARTICLEEFFECT_H_ */

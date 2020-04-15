@@ -1,4 +1,32 @@
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 1
+
+* Added VulkanTestV2
+* Added RenderSceneV2 in experimental folder
+
+* Replaced include guards with '#pragma once'
+
+* Fixed bug: Font did not transition the texture it uses to
+             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL when
+             using Vulkan
+* Fixed bug: DescriptorSet did not delete the UBO's it created
+* Fixed bug: ShaderInterface did not delete the
+             DescriptorSetLayout's it created
+
 --------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 (V0.4.3)
+
+* Added DescriptorSet
+* Added DescriptorSetLayout
+* Added basic support for layout(set) for Vulkan in shaders
+  (Removed when using OpenGL)
+
+* Changed shaders to use separate UBO for per-model data and
+  added a descriptor set for this
+
+* Replaced TextureSet with DescriptorSet in Material
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 0 | Experimental 8
 
 * Some cleanup

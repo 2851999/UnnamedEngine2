@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef TESTS_BASETEST3D_H_
-#define TESTS_BASETEST3D_H_
+#pragma once
 
 #include "../core/BaseEngine.h"
 #include "../core/ResourceLoader.h"
@@ -74,4 +73,3 @@ public:
 	virtual void onControllerButtonReleased(Controller* controller, int index) override {}
 };
 
-#endif /* TESTS_BASETEST3D_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_RENDERSCENE_H_
-#define CORE_RENDER_RENDERSCENE_H_
+#pragma once
 
 #include "Light.h"
 #include "GeometryBuffer.h"
@@ -189,4 +188,3 @@ public:
 	void disableFXAA();
 };
 
-#endif /* CORE_RENDER_RENDERSCENE_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_UPGRADESMENU_H_
-#define EXAMPLES_ASTEROIDS_UPGRADESMENU_H_
+#pragma once
 
 #include "../../core/render/Renderer.h"
 #include "../../core/render/Camera.h"
@@ -72,4 +71,3 @@ public:
 	void onComponentClicked(GUIComponent* component) override;
 };
 
-#endif /* EXAMPLES_ASTEROIDS_UPGRADESMENU_H_ */

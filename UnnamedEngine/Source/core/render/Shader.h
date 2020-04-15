@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_SHADER_H_
-#define CORE_RENDER_SHADER_H_
+#pragma once
 
 #include "../Window.h"
 #include <unordered_map>
@@ -177,4 +176,3 @@ public:
 	GraphicsState* getGraphicsState() { return graphicsState; }
 };
 
-#endif /* CORE_RENDER_SHADER_H_ */

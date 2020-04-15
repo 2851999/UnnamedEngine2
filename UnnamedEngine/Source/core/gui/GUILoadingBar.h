@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUILOADINGBAR_H_
-#define CORE_GUI_GUILOADINGBAR_H_
+#pragma once
 
 #include "GUIComponent.h"
 
@@ -82,4 +81,3 @@ public:
 	inline unsigned int getCurrentStage() { return currentStage; }
 };
 
-#endif /* CORE_GUI_GUILOADINGBAR_H_ */

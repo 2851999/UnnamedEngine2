@@ -148,6 +148,7 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 
 		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, 1); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)
 		Vulkan::copyBufferToImage(stagingBuffer, textureVkImage, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, 1);
 
 	    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
 	    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);

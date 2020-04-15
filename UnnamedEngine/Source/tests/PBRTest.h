@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef TESTS_BASEENGINETEST3D_H_
-#define TESTS_BASEENGINETEST3D_H_
+#pragma once
 
 #include "BaseTest3D.h"
 
@@ -233,4 +232,3 @@ void Test::onKeyPressed(int key) {
 		renderScene->disableFXAA();
 }
 
-#endif /* TESTS_BASEENGINETEST3D_H_ */

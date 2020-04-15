@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_SHIP_H_
-#define EXAMPLES_ASTEROIDS_SHIP_H_
+#pragma once
 
 #include "Lasers.h"
 
@@ -94,4 +93,3 @@ public:
 };
 
 
-#endif /* EXAMPLES_ASTEROIDS_SHIP_H_ */

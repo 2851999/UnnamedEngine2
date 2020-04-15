@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_GRAPHICSSTATE_H_
-#define CORE_RENDER_GRAPHICSSTATE_H_
+#pragma once
 
 /*****************************************************************************
  * The GraphicsState class contains information about what should be used
@@ -41,4 +40,3 @@ public:
 };
 
 
-#endif /* CORE_RENDER_GRAPHICSSTATE_H_ */

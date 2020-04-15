@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUITEXTBOX_H_
-#define CORE_GUI_GUITEXTBOX_H_
+#pragma once
 
 #include "GUIComponent.h"
 
@@ -253,4 +252,3 @@ public:
 
 /***************************************************************************************************/
 
-#endif /* CORE_GUI_GUITEXTBOX_H_ */

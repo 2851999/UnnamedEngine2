@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_DESCRIPTOR_SET_H_
-#define CORE_RENDER_DESCRIPTOR_SET_H_
+#pragma once
 
 #include "Texture.h"
 #include "UBO.h"
@@ -138,4 +137,3 @@ public:
     inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout; }
 };
 
-#endif /* CORE_RENDER_DESCRIPTOR_SET_H_ */

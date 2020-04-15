@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUIPANEL_H_
-#define CORE_GUI_GUIPANEL_H_
+#pragma once
 
 #include "GUIButton.h"
 #include "GUIGroup.h"
@@ -93,4 +92,3 @@ public:
 	virtual void onComponentClicked(GUIComponent* component) override;
 };
 
-#endif /* CORE_GUI_GUIPANEL_H_ */

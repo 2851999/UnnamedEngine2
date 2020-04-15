@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_BASIC_BASICINPUT_H_
-#define EXAMPLES_BASIC_BASICINPUT_H_
+#pragma once
 
 /*****************************************************************************
  * The Basic Input Example Program
@@ -116,4 +115,3 @@ void Tutorial::render() {
 	utils_gl::setupSimple2DView();
 }
 
-#endif /* EXAMPLES_BASIC_BASICINPUT_H_ */

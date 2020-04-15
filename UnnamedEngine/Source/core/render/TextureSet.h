@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_TEXTURESET_H_
-#define CORE_RENDER_TEXTURESET_H_
+#pragma once
 
 #include "Texture.h"
 #include "UBO.h"
@@ -72,4 +71,3 @@ public:
 };
 
 
-#endif /* CORE_RENDER_TEXTURESET_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_BASIC_BASICRENDERING_H_
-#define EXAMPLES_BASIC_BASICRENDERING_H_
+#pragma once
 
 /*****************************************************************************
  * The Basic Rendering Example Program
@@ -148,4 +147,3 @@ void Tutorial::onKeyPressed(int key) {
 		object->getMaterial()->setDiffuse(Colour(1.0, 0.5f, 0.5f));
 }
 
-#endif /* EXAMPLES_BASIC_BASICRENDERING_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_TILEMAP_H_
-#define CORE_RENDER_TILEMAP_H_
+#pragma once
 
 #include "RenderData.h"
 #include "ShaderInterface.h"
@@ -168,4 +167,3 @@ public:
 	static Tilemap* loadTilemap(std::string path, std::string name, bool editable = false, GLenum usage = GL_STATIC_DRAW);
 };
 
-#endif /* CORE_RENDER_TILEMAP_H_ */

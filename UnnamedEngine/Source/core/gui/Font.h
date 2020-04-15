@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_FONT_H_
-#define CORE_GUI_FONT_H_
+#pragma once
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -84,4 +83,3 @@ public:
 	inline Texture* getTexture() { return texture; }
 };
 
-#endif /* CORE_GUI_FONT_H_ */

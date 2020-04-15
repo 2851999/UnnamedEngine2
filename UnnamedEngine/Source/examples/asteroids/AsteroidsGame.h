@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSGAME_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSGAME_H_
+#pragma once
 
 #include "../../core/BaseEngine.h"
 #include "../../core/ResourceLoader.h"
@@ -101,4 +100,3 @@ public:
 };
 
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSGAME_H_ */

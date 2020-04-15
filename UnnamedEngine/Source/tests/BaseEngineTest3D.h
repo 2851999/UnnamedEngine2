@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef TESTS_BASEENGINETEST3D_H_
-#define TESTS_BASEENGINETEST3D_H_
+#pragma once
 
 #include "BaseTest3D.h"
 
@@ -224,4 +223,3 @@ void Test::onKeyPressed(int key) {
 		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(2.0f, 2.0f, 0.0f), false))->setDiffuseColour(Colour(23.47f, 0.0f, 0.0f)));
 }
 
-#endif /* TESTS_BASEENGINETEST3D_H_ */

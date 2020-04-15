@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef BASEENGINETEST3D_H_
-#define BASEENGINETEST3D_H_
+#pragma once
 
 #include "BaseTest3D.h"
 
@@ -86,5 +85,3 @@ void Test::render() {
 void Test::onDestroy() {
 	delete processor;
 }
-
-#endif /* UTILS_BASEENGINETEST3D_H_ */

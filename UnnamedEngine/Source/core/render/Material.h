@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_MATERIAL_H_
-#define CORE_RENDER_MATERIAL_H_
+#pragma once
 
 #include "Colour.h"
 #include "Shader.h"
@@ -114,4 +113,3 @@ public:
 	DescriptorSet* getDescriptorSet() { return descriptorSet; }
 };
 
-#endif /* CORE_RENDER_MATERIAL_H_ */

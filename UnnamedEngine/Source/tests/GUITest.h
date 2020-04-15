@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef BASEENGINETEST2D_H_
-#define BASEENGINETEST2D_H_
+#pragma once
 
 #include "../core/BaseEngine.h"
 #include "../core/render/Camera.h"
@@ -213,4 +212,3 @@ void Test::destroy() {
 	delete panel;
 }
 
-#endif /* BASEENGINETEST2D_H_ */

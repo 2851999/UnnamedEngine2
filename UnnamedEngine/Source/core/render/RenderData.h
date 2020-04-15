@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_RENDERDATA_H_
-#define CORE_RENDER_RENDERDATA_H_
+#pragma once
 
 #include "../vulkan/VulkanGraphicsPipeline.h"
 #include "VBO.h"
@@ -144,4 +143,3 @@ public:
 	inline ShaderBlock_Model& getShaderBlock_Model() { return modelData; }
 };
 
-#endif /* CORE_RENDER_RENDERDATA_H_ */

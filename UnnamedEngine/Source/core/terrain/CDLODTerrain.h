@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_TERRAIN_CDLODTERRAIN_H_
-#define CORE_TERRAIN_CDLODTERRAIN_H_
+#pragma once
 
 #include "CDLODHeightMap.h"
 #include "CDLODQuadTree.h"
@@ -74,4 +73,3 @@ public:
 	static MeshData* createMeshData(int width, int height);
 };
 
-#endif /* CORE_TERRAIN_CDLODTERRAIN_H_ */

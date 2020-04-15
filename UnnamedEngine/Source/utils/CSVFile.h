@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_CSVFILE_H_
-#define UTILS_CSVFILE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -48,4 +47,3 @@ public:
 	inline std::vector<std::string>& getRow(unsigned int index) { return data[index]; }
 };
 
-#endif /* UTILS_CSVFILE_H_ */

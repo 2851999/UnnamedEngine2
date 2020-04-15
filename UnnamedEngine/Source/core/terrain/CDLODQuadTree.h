@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_TERRAIN_CDLODQUADTREE_H_
-#define CORE_TERRAIN_CDLODQUADTREE_H_
+#pragma once
 
 #include "CDLODHeightMap.h"
 
@@ -74,4 +73,3 @@ public:
 	inline float getRange() { return currentRange; }
 };
 
-#endif /* CORE_TERRAIN_CDLODQUADTREE_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_BASIC_BASICSETUP_H_
-#define EXAMPLES_BASIC_BASICSETUP_H_
+#pragma once
 
 /*****************************************************************************
  * The Basic Setup Example Program
@@ -105,4 +104,3 @@ int main() {
 
  */
 
-#endif /* EXAMPLES_BASIC_BASICSETUP_H_ */

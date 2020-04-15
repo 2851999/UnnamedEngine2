@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_PBR_PBRENVIRONMENT_H_
-#define CORE_RENDER_PBR_PBRENVIRONMENT_H_
+#pragma once
 
 
 /*****************************************************************************
@@ -62,4 +61,3 @@ public:
 };
 
 
-#endif /* CORE_RENDER_PBR_PBRENVIRONMENT_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_PLAYER_H_
-#define EXAMPLES_ASTEROIDS_PLAYER_H_
+#pragma once
 
 #include "../../utils/DebugCamera.h"
 #include "../../core/physics/PhysicsObject.h"
@@ -85,4 +84,3 @@ public:
 
 
 
-#endif /* EXAMPLES_ASTEROIDS_PLAYER_H_ */

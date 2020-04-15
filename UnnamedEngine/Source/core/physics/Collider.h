@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PHYSICS_COLLIDER_H_
-#define CORE_PHYSICS_COLLIDER_H_
+#pragma once
 
 #include "../Object.h"
 
@@ -155,4 +154,3 @@ public:
 	Vector3f getNormal() { return normal; }
 };
 
-#endif /* CORE_PHYSICS_COLLIDER_H_ */

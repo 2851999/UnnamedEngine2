@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_TEXT_H_
-#define CORE_GUI_TEXT_H_
+#pragma once
 
 #include "Font.h"
 
@@ -101,4 +100,3 @@ public:
 	inline Colour getColour() { return getMaterial()->getDiffuseColour(); }
 };
 
-#endif /* CORE_GUI_TEXT_H_ */

@@ -34,6 +34,7 @@ RenderData::~RenderData() {
 		vkDestroyDescriptorSetLayout(Vulkan::getDevice()->getLogical(), descriptorSetLayout, nullptr);
 		vkDestroyDescriptorPool(Vulkan::getDevice()->getLogical(), descriptorPool, nullptr);
 	}
+	delete descriptorSetModel;
 }
 
 void RenderData::setup(RenderShader* renderShader) {

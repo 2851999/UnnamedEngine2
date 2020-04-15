@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_RENDERER_H_
-#define CORE_RENDER_RENDERER_H_
+#pragma once
 
 #include <unordered_map>
 #include "Camera.h"
@@ -179,4 +178,3 @@ public:
 	static inline ShaderBlock_Core& getShaderBlock_Core() { return shaderCoreData; }
 };
 
-#endif /* CORE_RENDER_RENDERER_H_ */

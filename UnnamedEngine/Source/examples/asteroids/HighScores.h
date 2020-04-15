@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_HIGHSCORES_H_
-#define EXAMPLES_ASTEROIDS_HIGHSCORES_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -66,4 +65,3 @@ public:
 	inline unsigned int getScore(unsigned int index) { return scores[index]; }
 };
 
-#endif /* EXAMPLES_ASTEROIDS_HIGHSCORES_H_ */

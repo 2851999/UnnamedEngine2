@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANGRAPHICSPIPELINE_H_
-#define CORE_VULKAN_VULKANGRAPHICSPIPELINE_H_
+#pragma once
 
 #include "../Window.h"
 #include "VulkanBuffer.h"
@@ -57,4 +56,3 @@ public:
 };
 
 
-#endif /* CORE_VULKAN_VULKANGRAPHICSPIPELINE_H_ */

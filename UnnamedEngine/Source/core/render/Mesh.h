@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_MESH_H_
-#define CORE_RENDER_MESH_H_
+#pragma once
 
 #include "Colour.h"
 #include "Material.h"
@@ -433,4 +432,3 @@ public:
 	static void addCubeI(MeshData* data);
 };
 
-#endif /* CORE_RENDER_MESH_H_ */

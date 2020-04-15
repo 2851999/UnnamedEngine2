@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_
+#pragma once
 
 class AsteroidsGame;
 
@@ -113,4 +112,3 @@ public:
 	virtual void onButtonReleased(InputBindingButton* button) override;
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINGAME_H_ */

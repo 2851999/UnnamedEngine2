@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSRESOURCES_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSRESOURCES_H_
+#pragma once
 
 #include "../../core/gui/Font.h"
 #include "../../core/render/Texture.h"
@@ -67,4 +66,3 @@ public:
 	inline AudioData* getAudioExplosion() const { return audioExplosion; }
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSRESOURCES_H_ */

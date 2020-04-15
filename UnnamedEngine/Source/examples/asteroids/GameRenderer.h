@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_GAMERENDERER_H_
-#define EXAMPLES_ASTEROIDS_GAMERENDERER_H_
+#pragma once
 
 #include "../../core/render/RenderData.h"
 #include "../../core/render/Renderer.h"
@@ -89,4 +88,3 @@ public:
 	void hideAll();
 };
 
-#endif /* EXAMPLES_ASTEROIDS_GAMERENDERER_H_ */

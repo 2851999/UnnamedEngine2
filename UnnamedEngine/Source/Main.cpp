@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "tests/VulkanTest.h"
+#include "tests/VulkanTestV2.h"
 //#include "examples/basic/BasicRendering3D.h"
 //#include "examples/asteroids/AsteroidsGame.h"
 

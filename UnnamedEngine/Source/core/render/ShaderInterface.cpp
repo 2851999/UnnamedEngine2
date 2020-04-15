@@ -115,8 +115,11 @@ ShaderInterface::~ShaderInterface() {
 		delete it.second;
 	for (UBO* ubo : ubosVk)
 		delete ubo;
+	for (auto it : descriptorSetLayouts)
+		delete it.second;
 	ubos.clear();
 	ubosVk.clear();
+	descriptorSetLayouts.clear();
 }
 
 void ShaderInterface::add(unsigned int id, DescriptorSetLayout* layout) {

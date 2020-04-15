@@ -54,6 +54,9 @@ DescriptorSet::~DescriptorSet() {
     //Destory Vulkan data
     if (vulkanDescriptorPool != VK_NULL_HANDLE)
         vkDestroyDescriptorPool(Vulkan::getDevice()->getLogical(), vulkanDescriptorPool, nullptr);
+    for (UBO* ubo : ubos)
+        delete ubo;
+    ubos.clear();
 }
 
 void DescriptorSet::setupVk() {

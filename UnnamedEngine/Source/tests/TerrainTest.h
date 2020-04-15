@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef TESTS_BASEENGINETEST3D_H_
-#define TESTS_BASEENGINETEST3D_H_
+#pragma once
 
 #include "BaseTest3D.h"
 
@@ -121,4 +120,3 @@ void Test::onDestroy() {
 	delete scene;
 }
 
-#endif /* TESTS_BASEENGINETEST3D_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSPAUSEMENU_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSPAUSEMENU_H_
+#pragma once
 
 #include "../../core/render/Renderer.h"
 #include "../../core/render/Camera.h"
@@ -61,4 +60,3 @@ public:
 	virtual void onComponentClicked(GUIComponent* component) override;
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSPAUSEMENU_H_ */

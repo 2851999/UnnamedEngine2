@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_HUD_H_
-#define EXAMPLES_ASTEROIDS_HUD_H_
+#pragma once
 
 #include "../../core/gui/GUILoadingBar.h"
 #include "../../core/gui/GUIPanel.h"
@@ -63,4 +62,3 @@ public:
 	virtual void render() override;
 };
 
-#endif /* EXAMPLES_ASTEROIDS_HUD_H_ */

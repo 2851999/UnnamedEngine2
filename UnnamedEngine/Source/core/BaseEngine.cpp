@@ -160,6 +160,7 @@ void BaseEngine::create() {
 		Renderer::destroy();
 		Font::destroyFreeType();
 		delete textInstance;
+		delete defaultFont;
 		delete debugCamera;
 
 		AudioManager::destroy();

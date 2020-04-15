@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RESOURCEPACK_H_
-#define CORE_RESOURCEPACK_H_
+#pragma once
 
 #include <map>
 
@@ -57,4 +56,3 @@ public:
 };
 
 
-#endif /* CORE_RESOURCEPACK_H_ */

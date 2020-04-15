@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDGROUP_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDGROUP_H_
+#pragma once
 
 #include "GameRenderer.h"
 #include "../../core/physics/PhysicsObject.h"
@@ -73,4 +72,3 @@ public:
 };
 
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDGROUP_H_ */

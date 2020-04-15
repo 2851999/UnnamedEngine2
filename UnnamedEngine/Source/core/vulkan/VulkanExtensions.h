@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANEXTENSIONS_H_
-#define CORE_VULKAN_VULKANEXTENSIONS_H_
+#pragma once
 
 #include "../Window.h"
 
@@ -46,4 +45,3 @@ public:
 	static std::vector<const char*>& getDeviceExtentions() { return deviceExtensions; }
 };
 
-#endif /* CORE_VULKAN_VULKANEXTENSIONS_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ENEMY_H_
-#define EXAMPLES_ASTEROIDS_ENEMY_H_
+#pragma once
 
 #include "Ship.h"
 #include "Player.h"
@@ -47,4 +46,3 @@ public:
 	virtual bool checkCollision(PhysicsObject3D* laser) override;
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ENEMY_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUICOMPONENT_H_
-#define CORE_GUI_GUICOMPONENT_H_
+#pragma once
 
 #include "Text.h"
 
@@ -286,4 +285,3 @@ public:
 	inline bool isClicked() { return mouseClicked; }
 };
 
-#endif /* CORE_GUI_GUICOMPONENT_H_ */

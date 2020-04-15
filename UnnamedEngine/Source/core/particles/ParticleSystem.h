@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PARTICLES_PARTICLESYSTEM_H_
-#define CORE_PARTICLES_PARTICLESYSTEM_H_
+#pragma once
 
 #include "../render/Colour.h"
 #include "../render/RenderData.h"
@@ -133,4 +132,3 @@ public:
 	Particle& getParticle(unsigned int index);
 };
 
-#endif /* CORE_PARTICLES_PARTICLESYSTEM_H_ */

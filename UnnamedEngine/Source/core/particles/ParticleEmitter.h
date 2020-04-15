@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PARTICLES_PARTICLEEMITTER_H_
-#define CORE_PARTICLES_PARTICLEEMITTER_H_
+#pragma once
 
 #include "ParticleSystem.h"
 #include "../Object.h"
@@ -95,4 +94,3 @@ public:
 };
 
 
-#endif /* CORE_PARTICLES_PARTICLEEMITTER_H_ */

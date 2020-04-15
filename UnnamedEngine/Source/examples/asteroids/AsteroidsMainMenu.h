@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXAMPLES_ASTEROIDS_ASTEROIDSMAINMENU_H_
-#define EXAMPLES_ASTEROIDS_ASTEROIDSMAINMENU_H_
+#pragma once
 
 #include "../../core/render/Renderer.h"
 #include "../../core/render/Camera.h"
@@ -195,4 +194,3 @@ public:
 	void render();
 };
 
-#endif /* EXAMPLES_ASTEROIDS_ASTEROIDSMAINMENU_H_ */

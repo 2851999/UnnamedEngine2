@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_CAMERA_H_
-#define CORE_RENDER_CAMERA_H_
+#pragma once
 
 #include "../Frustum.h"
 #include "SkyBox.h"
@@ -167,4 +166,3 @@ public:
 	inline Frustum& getFrustum() { return frustum; }
 };
 
-#endif /* CORE_RENDER_CAMERA_H_ */

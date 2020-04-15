@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXPERIMENTAL_SURFACE_H_
-#define EXPERIMENTAL_SURFACE_H_
+#pragma once
 
 #include "../core/Object.h"
 #include "../core/render/Renderer.h"
@@ -38,4 +37,3 @@ public:
 };
 
 
-#endif /* EXPERIMENTAL_SURFACE_H_ */

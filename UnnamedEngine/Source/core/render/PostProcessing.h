@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_POSTPROCESSING_H_
-#define CORE_RENDER_POSTPROCESSING_H_
+#pragma once
 
 #include "FBO.h"
 #include "Shader.h"
@@ -65,4 +64,3 @@ public:
 	inline Shader* getShader() { return shader; }
 };
 
-#endif /* CORE_RENDER_POSTPROCESSING_H_ */
