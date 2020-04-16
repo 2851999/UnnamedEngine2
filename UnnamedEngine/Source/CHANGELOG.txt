@@ -1,4 +1,30 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 3
+
+* Began major rewrite of rendering system to integrate
+  Vulkan better. This will involve temporary removal of many
+  classes and features, eventually re-adding them later.
+
+* Replaced RenderScene with RenderSceneV2
+* Replaced VulkanTest with VulkanTestV2
+
+* Removed BaseEngineTest2D
+* Removed BaseEngineTest3D
+* Removed BaseTest3D
+* Removed FramebufferTest3D
+* Removed GUITest
+* Removed PBRTest
+* Removed PhysicsTest
+* Removed SurfaceTest
+* Removed TerrainTest
+* Removed PBREnvironment
+* Removed Particles
+* Removed Tilemap
+* Removed PostProcessing
+* Removed CDLODTerrain
+* Removed examples folder
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 1 | Experimental 2
 
 * Changed Vulkan to perform queued descriptor set and UBOs

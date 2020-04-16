@@ -41,8 +41,6 @@ std::unordered_map<unsigned int, std::vector<std::string>> Renderer::renderShade
 std::unordered_map<unsigned int, RenderShader*> Renderer::loadedRenderShaders;
 Texture* Renderer::blank;
 
-MeshRenderData* Renderer::screenTextureMesh;
-
 std::vector<unsigned int> Renderer::boundTexturesOldSize;
 
 GraphicsState* Renderer::currentGraphicsState = nullptr;
@@ -51,27 +49,7 @@ bool Renderer::shouldIgnoreGraphicsStates = false;
 const unsigned int Renderer::SHADER_MATERIAL          = 1;
 const unsigned int Renderer::SHADER_SKY_BOX           = 2;
 const unsigned int Renderer::SHADER_FONT              = 3;
-const unsigned int Renderer::SHADER_BILLBOARD         = 4;
-const unsigned int Renderer::SHADER_PARTICLE          = 5;
-const unsigned int Renderer::SHADER_LIGHTING          = 6;
-const unsigned int Renderer::SHADER_FRAMEBUFFER       = 7;
-const unsigned int Renderer::SHADER_ENVIRONMENT_MAP   = 8;
-const unsigned int Renderer::SHADER_SHADOW_MAP        = 9;
-const unsigned int Renderer::SHADER_SHADOW_CUBEMAP    = 10;
-const unsigned int Renderer::SHADER_BILLBOARDED_FONT  = 11;
-const unsigned int Renderer::SHADER_TERRAIN           = 12;
-const unsigned int Renderer::SHADER_PLAIN_TEXTURE     = 13;
-const unsigned int Renderer::SHADER_DEFERRED_LIGHTING = 14;
-const unsigned int Renderer::SHADER_TILEMAP			  = 15;
-const unsigned int Renderer::SHADER_VULKAN			  = 16;
-const unsigned int Renderer::SHADER_VULKAN_LIGHTING   = 17;
-
-const unsigned int Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN         = 18;
-const unsigned int Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN       = 19;
-const unsigned int Renderer::SHADER_PBR_PREFILTER_MAP_GEN        = 20;
-const unsigned int Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN = 21;
-const unsigned int Renderer::SHADER_PBR_LIGHTING                 = 22;
-const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING        = 23;
+const unsigned int Renderer::SHADER_VULKAN_LIGHTING   = 4;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -134,42 +112,8 @@ void Renderer::initialise() {
 	//Setup the shaders
 	addRenderShader(SHADER_MATERIAL,                     "MaterialShader",                   "");
 	addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
-	addRenderShader(SHADER_VULKAN,				         "VulkanShader",				     "");
-	addRenderShader(SHADER_LIGHTING,                     "lighting/LightingShader",          "lighting/LightingDeferredGeom");
 	addRenderShader(SHADER_VULKAN_LIGHTING,              "VulkanLightingShader",             "");
 	addRenderShader(SHADER_FONT,                         "FontShader",                       "");
-
-	if (! BaseEngine::usingVulkan()) {
-		addRenderShader(SHADER_BILLBOARD,                    "billboard/BillboardShader",        "");
-		addRenderShader(SHADER_PARTICLE,                     "ParticleShader",                   "");
-		addRenderShader(SHADER_FRAMEBUFFER,                  "FramebufferShader",                "");
-		addRenderShader(SHADER_ENVIRONMENT_MAP,              "EnvironmentMapShader",             "");
-		addRenderShader(SHADER_SHADOW_MAP,                   "lighting/ShadowMapShader",         "");
-		addRenderShader(SHADER_SHADOW_CUBEMAP,               "lighting/ShadowCubemapShader",     "");
-		addRenderShader(SHADER_BILLBOARDED_FONT,             "billboard/BillboardedFontShader",  "");
-		addRenderShader(SHADER_TERRAIN,                      "terrain/Terrain",                  "terrain/TerrainDeferredGeom");
-		addRenderShader(SHADER_PLAIN_TEXTURE,                "PlainTexture",                     "");
-		addRenderShader(SHADER_DEFERRED_LIGHTING,            "lighting/DeferredLighting",        "");
-		addRenderShader(SHADER_TILEMAP,				         "TilemapShader",				     "");
-		addRenderShader(SHADER_PBR_EQUI_TO_CUBE_GEN,         "pbr/EquiToCubeGen",                "");
-		addRenderShader(SHADER_PBR_IRRADIANCE_MAP_GEN,       "pbr/IrradianceMapGen",             "");
-		addRenderShader(SHADER_PBR_PREFILTER_MAP_GEN,        "pbr/PrefilterMapGen",              "");
-		addRenderShader(SHADER_PBR_BRDF_INTEGRATION_MAP_GEN, "pbr/BRDFIntegrationMapGen",        "");
-		addRenderShader(SHADER_PBR_LIGHTING,                 "pbr/PBRShader",                    "pbr/PBRDeferredGeom");
-		addRenderShader(SHADER_PBR_DEFERRED_LIGHTING,        "pbr/PBRDeferredLighting",          "");
-
-		//Setup the screen texture mesh
-		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
-		screenTextureMesh = new MeshRenderData(meshData, getRenderShader(SHADER_FRAMEBUFFER));
-		std::vector<Material*> materials;
-		screenTextureMesh->setup(meshData, materials);
-	}
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
@@ -266,69 +210,19 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 	}
 }
 
-void Renderer::render(FramebufferStore* texture, Shader* shader, std::string textureUniform) {
-	if (shader == NULL)
-		shader = getRenderShader(SHADER_PLAIN_TEXTURE)->getShader();
-
-	shader->use();
-
-	shader->setUniformi(textureUniform, bindTexture(texture));
-
-	screenTextureMesh->render();
-
-	shader->stopUsing();
-
-	unbindTexture();
-}
-
 void Renderer::destroy() {
 	delete shaderInterface;
 	for (auto element : loadedRenderShaders)
 		delete element.second;
-	if (! BaseEngine::usingVulkan())
-		delete screenTextureMesh;
 }
 
 using namespace utils_string;
 
 Shader* Renderer::loadEngineShader(std::string path) {
-	if (! BaseEngine::usingVulkan())
+	if (!BaseEngine::usingVulkan())
 		return Shader::loadShader("resources/shaders/" + path);
 	else
 		return Shader::loadShader("resources/shaders-vulkan/" + path);
-}
-
-void Renderer::prepareForwardShader(unsigned int id, Shader* shader) {
-	if (! BaseEngine::usingVulkan()) {
-		shader->use();
-		if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_DEFERRED_LIGHTING || id == SHADER_PBR_LIGHTING || id == SHADER_PBR_DEFERRED_LIGHTING) {
-			shader->addUniform("ShadowMap", "ue_shadowMap");
-
-			for (unsigned int i = 0; i < RenderScene3D::NUM_LIGHTS_IN_SET; i++) {
-				shader->addUniform("Light_ShadowMap["      + str(i) + "]", "ue_lightTexturesShadowMap[" + str(i) + "]");
-				shader->addUniform("Light_ShadowCubemap["  + str(i) + "]", "ue_lightTexturesShadowCubemap[" + str(i) + "]");
-			}
-
-			shader->addUniform("EnvironmentMap", "ue_environmentMap");
-			shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
-		}
-
-		shader->stopUsing();
-	}
-}
-
-void Renderer::prepareDeferredGeomShader(unsigned int id, Shader* shader) {
-	if (! BaseEngine::usingVulkan()) {
-		shader->use();
-		if (id == SHADER_LIGHTING || id == SHADER_TERRAIN || id == SHADER_PBR_LIGHTING) {
-			shader->addUniform("ShadowMap", "ue_shadowMap");
-
-			shader->addUniform("EnvironmentMap", "ue_environmentMap");
-			shader->addUniform("UseEnvironmentMap", "ue_useEnvironmentMap");
-		}
-
-		shader->stopUsing();
-	}
 }
 
 void Renderer::addRenderShader(unsigned int id, std::string forwardShaderPath, std::string deferredGeomShaderPath) {
@@ -343,14 +237,11 @@ void Renderer::loadRenderShader(unsigned int id) {
 
 	//Load the shaders if the paths have been assigned
 	//Setup the shader
-	if (shaderPaths[0] != "") {
+	if (shaderPaths[0] != "")
 		forwardShader = loadEngineShader(shaderPaths[0]);
-		prepareForwardShader(id, forwardShader);
-	}
-	if (shaderPaths[1] != "" && (! BaseEngine::usingVulkan())) { //Don't load this if using Vulkan yet
+	if (shaderPaths[1] != "" && (! BaseEngine::usingVulkan())) //Don't load this if using Vulkan yet
 		deferredGeomShader = loadEngineShader(shaderPaths[1]);
-		prepareDeferredGeomShader(id, deferredGeomShader);
-	}
+
 	//Create the shader
 	RenderShader* renderShader = new RenderShader(id, forwardShader, deferredGeomShader);
 	//Assign the graphics state for the render shader
@@ -367,10 +258,6 @@ void Renderer::assignGraphicsState(GraphicsState* state, unsigned int shaderID) 
 	else if (shaderID == SHADER_FONT)
 		state->alphaBlending = true;
 	else if (shaderID == SHADER_MATERIAL)
-		state->alphaBlending = true;
-	else if (shaderID == SHADER_PARTICLE)
-		state->alphaBlending = true;
-	else if (shaderID == SHADER_LIGHTING)
 		state->alphaBlending = true;
 }
 

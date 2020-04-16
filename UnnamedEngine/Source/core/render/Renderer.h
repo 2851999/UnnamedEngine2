@@ -42,10 +42,6 @@ private:
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
 	static Texture* blank;
 
-	/* This mesh is used to render a FramebufferTexture to the screen - useful
-	 * for post processing effects */
-	static MeshRenderData* screenTextureMesh;
-
 	/* Stores the sizes of the boundTextures array, at the moment saveTextures() is
 	 * called */
 	static std::vector<unsigned int> boundTexturesOldSize;
@@ -63,27 +59,7 @@ public:
 	static const unsigned int SHADER_MATERIAL;
 	static const unsigned int SHADER_SKY_BOX;
 	static const unsigned int SHADER_FONT;
-	static const unsigned int SHADER_BILLBOARD;
-	static const unsigned int SHADER_PARTICLE;
-	static const unsigned int SHADER_LIGHTING;
-	static const unsigned int SHADER_FRAMEBUFFER;
-	static const unsigned int SHADER_ENVIRONMENT_MAP;
-	static const unsigned int SHADER_SHADOW_MAP;
-	static const unsigned int SHADER_SHADOW_CUBEMAP;
-	static const unsigned int SHADER_BILLBOARDED_FONT;
-	static const unsigned int SHADER_TERRAIN;
-	static const unsigned int SHADER_PLAIN_TEXTURE;
-	static const unsigned int SHADER_DEFERRED_LIGHTING;
-	static const unsigned int SHADER_TILEMAP;
-	static const unsigned int SHADER_VULKAN;
 	static const unsigned int SHADER_VULKAN_LIGHTING;
-
-	static const unsigned int SHADER_PBR_EQUI_TO_CUBE_GEN;
-	static const unsigned int SHADER_PBR_IRRADIANCE_MAP_GEN;
-	static const unsigned int SHADER_PBR_PREFILTER_MAP_GEN;
-	static const unsigned int SHADER_PBR_BRDF_INTEGRATION_MAP_GEN;
-	static const unsigned int SHADER_PBR_LIGHTING;
-	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -135,20 +111,11 @@ public:
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
 
-	/* Method used to render a FramebufferStore */
-	static void render(FramebufferStore* texture, Shader* shader = NULL, std::string textureUniform = "Texture");
-
 	/* Method use to destroy any objects that were created */
 	static void destroy();
 
 	/* Loads and returns an engine shader from the resources */
 	static Shader* loadEngineShader(std::string path);
-
-	/* Method used to prepare a shader by adding its required uniforms provided the id is recognised */
-	static void prepareForwardShader(unsigned int id, Shader* shader);
-
-	/* Method used to prepare a shader by adding its required uniforms provided the id is recognised */
-	static void prepareDeferredGeomShader(unsigned int id, Shader* shader);
 
 	/* Method used to add a RenderShader given a the paths to the shaders */
 	static void addRenderShader(unsigned int id, std::string forwardShaderPath, std::string deferredGeomShaderPath = "");
@@ -170,9 +137,6 @@ public:
 
 	/* Returns the blank texture */
 	static inline Texture* getBlankTexture() { return blank; }
-
-	/* Returns the screen texture mesh */
-	static inline MeshRenderData* getScreenTextureMesh() { return screenTextureMesh; }
 
 	/* Returns a reference to the data for the core UBO */
 	static inline ShaderBlock_Core& getShaderBlock_Core() { return shaderCoreData; }

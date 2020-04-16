@@ -144,82 +144,14 @@ void ShaderInterface::setup(RenderData* renderData, unsigned int shaderID) {
 	//Check the shader ID and add the required UBOs/Textures
 	if (shaderID == Renderer::SHADER_MATERIAL) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		//renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));  //Moved to DescriptorSet
 	} else if (shaderID == Renderer::SHADER_SKY_BOX) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
 	} else if (shaderID == Renderer::SHADER_FONT) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
 		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-	} else if (shaderID == Renderer::SHADER_BILLBOARD) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_BILLBOARD,         getUBO(BLOCK_BILLBOARD));
-	} else if (shaderID == Renderer::SHADER_PARTICLE) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_BILLBOARD,         getUBO(BLOCK_BILLBOARD));
-	} else if (shaderID == Renderer::SHADER_LIGHTING) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHT_BATCH,       getUBO(BLOCK_LIGHT_BATCH));
 	} else if (shaderID == Renderer::SHADER_VULKAN_LIGHTING) {
 		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		//renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL)); //Moved to DescriptorSet
 		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		//renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING)); //Moved to RenderSceneV2
-	} else if (shaderID == Renderer::SHADER_FRAMEBUFFER) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-	} else if (shaderID == Renderer::SHADER_ENVIRONMENT_MAP) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-	} else if (shaderID == Renderer::SHADER_SHADOW_MAP) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-	} else if (shaderID == Renderer::SHADER_SHADOW_CUBEMAP) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_SHADOW_CUBEMAP,    getUBO(BLOCK_SHADOW_CUBEMAP));
-	} else if (shaderID == Renderer::SHADER_BILLBOARDED_FONT) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_BILLBOARD,         getUBO(BLOCK_BILLBOARD));
-	} else if (shaderID == Renderer::SHADER_TERRAIN) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		//renderData->add(BLOCK_SKINNING,        getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHT_BATCH,       getUBO(BLOCK_LIGHT_BATCH));
-		renderData->add(BLOCK_TERRAIN,           getUBO(BLOCK_TERRAIN));
-	} else if (shaderID == Renderer::SHADER_PLAIN_TEXTURE) {
-
-	} else if (shaderID == Renderer::SHADER_DEFERRED_LIGHTING) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHT_BATCH,       getUBO(BLOCK_LIGHT_BATCH));
-	} else if (shaderID == Renderer::SHADER_TILEMAP) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-	} else if (shaderID == Renderer::SHADER_VULKAN) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-	} else if (shaderID == Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN) {
-		renderData->add(BLOCK_PBR_ENV_MAP_GEN,   getUBO(BLOCK_PBR_ENV_MAP_GEN));
-	} else if (shaderID == Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN) {
-
-	} else if (shaderID == Renderer::SHADER_PBR_PREFILTER_MAP_GEN) {
-		renderData->add(UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN, getUBO(UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN));
-	} else if (shaderID == Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN) {
-
-	} else if (shaderID == Renderer::SHADER_PBR_LIGHTING) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHT_BATCH,       getUBO(BLOCK_LIGHT_BATCH));
-		renderData->add(BLOCK_PBR_LIGHTING_CORE, getUBO(BLOCK_PBR_LIGHTING_CORE));
-	} else if (shaderID == Renderer::SHADER_PBR_DEFERRED_LIGHTING) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHT_BATCH,       getUBO(BLOCK_LIGHT_BATCH));
-		renderData->add(BLOCK_PBR_LIGHTING_CORE, getUBO(BLOCK_PBR_LIGHTING_CORE));
 	}
 }
 
