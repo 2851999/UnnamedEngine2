@@ -155,6 +155,9 @@ public:
 	/* Method to destroy the synchronisation objects */
 	static void destroySyncObjects();
 
+	/* Method to update for rendering this Vulkan (Should be called after update of game loop, before rendering) */
+	static void update();
+
 	/* Method to start drawing a frame (and recording to the command buffer) */
 	static void startDraw();
 

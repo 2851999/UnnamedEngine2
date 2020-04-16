@@ -23,70 +23,70 @@
 
 class DescriptorSetLayout;
 
- /*****************************************************************************
-  * The DescriptorSet class responsible for handeling combinations of Textures
-  * and UBOs when rendering
-  *****************************************************************************/
+/*****************************************************************************
+ * The DescriptorSet class responsible for handeling combinations of Textures
+ * and UBOs when rendering
+ *****************************************************************************/
 
 class DescriptorSet {
 public:
-    /* Structure for storing information about a texture */
-    struct TextureInfo {
-        /* The binding location of this texture */
-        unsigned int binding;
-        /* The texture to be bound here */
-        Texture* texture = NULL;
-    };
+	/* Structure for storing information about a texture */
+	struct TextureInfo {
+		/* The binding location of this texture */
+		unsigned int binding;
+		/* The texture to be bound here */
+		Texture* texture = NULL;
+	};
 private:
-    /* The layout of this descriptor set */
-    DescriptorSetLayout* layout;
+	/* The layout of this descriptor set */
+	DescriptorSetLayout* layout;
 
-    /* The UBOs within this descriptor set */
-    std::vector<UBO*> ubos;
+	/* The UBOs within this descriptor set */
+	std::vector<UBO*> ubos;
 
-    /* The textures within this descriptor set */
-    std::vector<TextureInfo> textures;
+	/* The textures within this descriptor set */
+	std::vector<TextureInfo> textures;
 
-    /* The descriptor pool for the allocation of descriptors in Vulkan */
-    VkDescriptorPool vulkanDescriptorPool = VK_NULL_HANDLE;
+	/* The descriptor pool for the allocation of descriptors in Vulkan */
+	VkDescriptorPool vulkanDescriptorPool = VK_NULL_HANDLE;
 
-    /* The descriptor sets required in Vulkan (one per swap chain image) */
-    std::vector<VkDescriptorSet> vulkanDescriptorSets;
+	/* The descriptor sets required in Vulkan (one per swap chain image) */
+	std::vector<VkDescriptorSet> vulkanDescriptorSets;
 
-    /* Method used to update this descriptor set for Vulkan (This method updates for
-       all internal descriptor sets and as such should not be used during rendering) */
-    void updateAllVk();
+	/* Method used to update this descriptor set for Vulkan (This method updates for
+	   all internal descriptor sets and as such should not be used during rendering) */
+	void updateAllVk();
 public:
-    /* Constructor */
-    DescriptorSet(DescriptorSetLayout* layout);
+	/* Constructor */
+	DescriptorSet(DescriptorSetLayout* layout);
 
-    /* Destructor */
-    virtual ~DescriptorSet();
+	/* Destructor */
+	virtual ~DescriptorSet();
 
-    /* Method used to create the required structures for Vulkan */
-    void setupVk();
+	/* Method used to create the required structures for Vulkan */
+	void setupVk();
 
-    /* Method to setup this descriptor set ready for use preferably run after all properties setup
-       for the first time (to avoid unnecessary calls to update) */
-    void setup();
+	/* Method to setup this descriptor set ready for use preferably run after all properties setup
+	   for the first time (to avoid unnecessary calls to update) */
+	void setup();
 
-    /* Method used to update this set for a certain frame (for Vulkan) */
-    void updateVk(unsigned int frame);
+	/* Method used to update this set for a certain frame (for Vulkan) */
+	void updateVk(unsigned int frame);
 
-    /* Method used to update this descriptor set */
-    void update();
+	/* Method used to update this descriptor set */
+	void update();
 
-    /* Method used to bind this descriptor set */
-    void bind();
+	/* Method used to bind this descriptor set */
+	void bind();
 
-    /* Method used to unbind this descriptor set (For textures in OpenGL) */
-    void unbind();
+	/* Method used to unbind this descriptor set (For textures in OpenGL) */
+	void unbind();
 
-    /* Setters and getters */
-    inline void setTexture(unsigned int index, Texture* texture) { textures[index].texture = texture; }
+	/* Setters and getters */
+	inline void setTexture(unsigned int index, Texture* texture) { textures[index].texture = texture; }
 
-    inline UBO* getUBO(unsigned int index) { return ubos[index]; }
-    inline Texture* getTexture(unsigned int index) { return textures[index].texture; }
+	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
+	inline Texture* getTexture(unsigned int index) { return textures[index].texture; }
 };
 
 /*****************************************************************************
@@ -95,45 +95,45 @@ public:
  *****************************************************************************/
 class DescriptorSetLayout {
 public:
-    /* Stucture for storing information about a UBO */
-    struct UBOInfo {
-        unsigned int size;
-        GLenum       usage;
-        unsigned int binding;
-    };
+	/* Stucture for storing information about a UBO */
+	struct UBOInfo {
+		unsigned int size;
+		GLenum       usage;
+		unsigned int binding;
+	};
 private:
-    /* The set number of this set (corresponds to layout(set) in Vulkan shaders) */
-    unsigned int setNumber;
+	/* The set number of this set (corresponds to layout(set) in Vulkan shaders) */
+	unsigned int setNumber;
 
-    /* UBOs required in this layout*/
-    std::vector<UBOInfo> ubos;
+	/* UBOs required in this layout*/
+	std::vector<UBOInfo> ubos;
 
-    /* Textures required in this layout, specified using their binding number */
-    std::vector<unsigned int> textureBindings;
+	/* Textures required in this layout, specified using their binding number */
+	std::vector<unsigned int> textureBindings;
 
-    /* The descriptor set layout instance for Vulkan*/
-    VkDescriptorSetLayout vulkanDescriptorSetLayout = VK_NULL_HANDLE;
+	/* The descriptor set layout instance for Vulkan*/
+	VkDescriptorSetLayout vulkanDescriptorSetLayout = VK_NULL_HANDLE;
 public:
-    /* Constructor */
-    DescriptorSetLayout(unsigned int setNumber) : setNumber(setNumber) {}
+	/* Constructor */
+	DescriptorSetLayout(unsigned int setNumber) : setNumber(setNumber) {}
 
-    /* Destructor */
-    virtual ~DescriptorSetLayout();
+	/* Destructor */
+	virtual ~DescriptorSetLayout();
 
-    /* Method used to create the required structures for Vulkan */
-    void setupVk();
+	/* Method used to create the required structures for Vulkan */
+	void setupVk();
 
-    /* Method used to setup this layout */
-    void setup();
+	/* Method used to setup this layout */
+	void setup();
 
-    /* Methods to add UBOs and Textures to this layout */
-    inline void addTexture(unsigned int binding) { textureBindings.push_back(binding); }
-    inline void addUBO(unsigned int size, GLenum usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
+	/* Methods to add UBOs and Textures to this layout */
+	inline void addTexture(unsigned int binding) { textureBindings.push_back(binding); }
+	inline void addUBO(unsigned int size, GLenum usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
 
-    /* Getters */
-    inline unsigned int getSetNumber() { return setNumber; }
-    inline std::vector<UBOInfo>& getUBOs() { return ubos; }
-    inline std::vector<unsigned int>& getTextureBindings() { return textureBindings; }
-    inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout; }
+	/* Getters */
+	inline unsigned int getSetNumber() { return setNumber; }
+	inline std::vector<UBOInfo>& getUBOs() { return ubos; }
+	inline std::vector<unsigned int>& getTextureBindings() { return textureBindings; }
+	inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout; }
 };
 

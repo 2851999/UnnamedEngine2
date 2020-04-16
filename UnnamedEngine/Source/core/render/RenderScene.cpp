@@ -92,7 +92,7 @@ RenderScene3D::RenderScene3D() {
 		postProcessor = new PostProcessor(std::string("resources/shaders/postprocessing/GammaCorrectionShader"), false);
 
 		//Get the lighting and gamma correction UBOs
-		shaderLightingUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_LIGHTING);
+		shaderLightingUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_LIGHT_BATCH);
 		shaderGammaCorrectionUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_GAMMA_CORRECTION);
 
 		//Assign the default data
@@ -109,12 +109,15 @@ RenderScene3D::RenderScene3D() {
 }
 
 RenderScene3D::~RenderScene3D() {
-	for (unsigned int i = 0; i < batches.size(); i++) {
-		for (unsigned int j = 0; j < batches[i].objects.size(); j++) {
+	for (unsigned int i = 0; i < batches.size(); ++i) {
+		for (unsigned int j = 0; j < batches[i].objects.size(); ++j) {
 			delete batches[i].objects[j];
 		}
 	}
 	batches.clear();
+	for (Light* light : lights)
+		delete light;
+	lights.clear();
 	if (deferredRendering)
 		delete gBuffer;
 	if (intermediateFBO != NULL)
@@ -470,7 +473,7 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 
 		//Now check whether forward or deferred rendering
 		if (deferredRendering) {
-			shaderLightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
+			shaderLightingUBO->update(&shaderLightingData, 0, sizeof(ShaderBlock_LightBatch));
 
 			Renderer::getShaderBlock_Core().ue_projectionMatrix = ((Camera3D*) Renderer::getCamera())->getProjectionMatrix();
 			Renderer::getShaderBlock_Core().ue_viewMatrix = ((Camera3D*) Renderer::getCamera())->getViewMatrix();
@@ -488,9 +491,9 @@ void RenderScene3D::renderLighting(RenderShader* renderShader, int indexOfBatch)
 				batches[indexOfBatch].objects[j]->getMesh()->getRenderData()->getRenderData()->getShaderBlock_Model().ue_modelMatrix = modelMatrix;
 				batches[indexOfBatch].objects[j]->getMesh()->getRenderData()->getRenderData()->getShaderBlock_Model().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
 
-				UBO* lightingUBO = batches[indexOfBatch].objects[j]->getMesh()->getRenderData()->getRenderData()->getUBO(ShaderInterface::BLOCK_LIGHTING);
+				UBO* lightingUBO = batches[indexOfBatch].objects[j]->getMesh()->getRenderData()->getRenderData()->getUBO(ShaderInterface::BLOCK_LIGHT_BATCH);
 				if (lightingUBO)
-					lightingUBO->updateFrame(&shaderLightingData, 0, sizeof(ShaderBlock_Lighting));
+					lightingUBO->updateFrame(&shaderLightingData, 0, sizeof(ShaderBlock_LightBatch));
 
 				//Render the object with the shadow map shader
 				batches[indexOfBatch].objects[j]->render();

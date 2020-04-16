@@ -106,9 +106,8 @@ Vector3f GameObject3D::getSize() {
 }
 
 bool GameObject3D::shouldCull(Frustum& frustum) {
-	if (hasMesh() && getMesh()->cullingEnabled()) {
+	if (hasMesh() && getMesh()->cullingEnabled())
 		return ! frustum.sphereInFrustum(cullingCentre, getMesh()->getBoundingSphereRadius() * getScale().max());
-	}
 	return false;
 }
 

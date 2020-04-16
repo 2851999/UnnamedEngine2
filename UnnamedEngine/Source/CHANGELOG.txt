@@ -1,4 +1,14 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 2
+
+* Changed Vulkan to perform queued descriptor set and UBOs
+  updates after the update function, rather than at the end
+  of a frame
+
+* Renamed ShaderBlock_Lighting struct to
+  ShaderBlock_LightBatch in ShaderInterface
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 1 | Experimental 1
 
 * Added VulkanTestV2

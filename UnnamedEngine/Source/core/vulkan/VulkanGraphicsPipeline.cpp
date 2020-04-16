@@ -142,6 +142,15 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, Vulka
 		colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
 		colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
 		colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+		//Required to blend lighting
+		//colorBlendAttachment.blendEnable = VK_TRUE;
+		//colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+		//colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+		//colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+		//colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		//colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		//colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 	} else
 		colorBlendAttachment.blendEnable = VK_FALSE;
 
@@ -160,6 +169,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanSwapChain* swapChain, Vulka
 	layouts.push_back(renderData->getVkDescriptorSetLayout());
 	layouts.push_back(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_MATERIAL)->getVkLayout());
 	layouts.push_back(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_MODEL)->getVkLayout());
+	layouts.push_back(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_LIGHT_BATCH)->getVkLayout());
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

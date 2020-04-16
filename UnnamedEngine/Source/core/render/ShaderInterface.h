@@ -86,7 +86,7 @@ struct ShaderStruct_Light {
 	float padding2[2];
 };
 
-struct ShaderBlock_Lighting {
+struct ShaderBlock_LightBatch {
 	ShaderStruct_Light ue_lights[6];
 	Matrix4f ue_lightSpaceMatrix[6];
 
@@ -166,6 +166,7 @@ public:
 	/* IDs for descriptor set layouts */
 	static const unsigned int DESCRIPTOR_SET_MATERIAL;
 	static const unsigned int DESCRIPTOR_SET_MODEL;
+	static const unsigned int DESCRIPTOR_SET_LIGHT_BATCH;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
@@ -181,7 +182,7 @@ public:
 	static const unsigned int BLOCK_MODEL;
 	static const unsigned int BLOCK_MATERIAL;
 	static const unsigned int BLOCK_SKINNING;
-	static const unsigned int BLOCK_LIGHTING;
+	static const unsigned int BLOCK_LIGHT_BATCH;
 	static const unsigned int BLOCK_TERRAIN;
 	static const unsigned int BLOCK_GAMMA_CORRECTION;
 	static const unsigned int BLOCK_PBR_ENV_MAP_GEN;
@@ -195,7 +196,7 @@ public:
 	static const unsigned int UBO_BINDING_LOCATION_MODEL;
 	static const unsigned int UBO_BINDING_LOCATION_MATERIAL;
 	static const unsigned int UBO_BINDING_LOCATION_SKINNING;
-	static const unsigned int UBO_BINDING_LOCATION_LIGHTING;
+	static const unsigned int UBO_BINDING_LOCATION_LIGHT_BATCH;
 	static const unsigned int UBO_BINDING_LOCATION_TERRAIN;
 	static const unsigned int UBO_BINDING_LOCATION_GAMMA_CORRECTION;
 	static const unsigned int UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN;

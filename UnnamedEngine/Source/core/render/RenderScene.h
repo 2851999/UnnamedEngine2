@@ -103,7 +103,7 @@ private:
 	UBO* shaderLightingUBO;
 
 	/* The structure used to update the lighting data UBO */
-	ShaderBlock_Lighting shaderLightingData;
+	ShaderBlock_LightBatch shaderLightingData;
 
 	/* The gamma correction UBO for the shaders */
 	UBO* shaderGammaCorrectionUBO;

@@ -22,19 +22,40 @@
 
 class RenderSceneV2 {
 private:
-    /* Objects within this scene */
-    std::vector<GameObject3D*> objects;
+	/* Objects within this scene */
+	std::vector<GameObject3D*> objects;
 
+	/* Lights in this scene */
+	std::vector<Light*> lights;
+
+	/* Boolean that states whether lighting should be used or not */
+	bool lighting = true;
+
+	/* The light batch descriptor set */
+	DescriptorSet* descriptorSetLightBatch;
+
+	/* The data to be sent to the shader about a light batch when doing lighting */
+	ShaderBlock_LightBatch shaderLightBatchData;
 public:
-    /* Constructor */
-    RenderSceneV2();
+	/* The number of lights that can be rendered at once */
+	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
-    /* Destructor */
-    virtual ~RenderSceneV2();
+	/* Constructor */
+	RenderSceneV2();
 
-    /* Adds an object to the scene */
-    void add(GameObject3D* object);
+	/* Destructor */
+	virtual ~RenderSceneV2();
 
-    /* Method used to render all of the objects */
-    void render();
+	/* Adds an object to the scene */
+	void add(GameObject3D* object);
+
+	/* Adds a light to the scene */
+	inline void addLight(Light* light) { lights.push_back(light); }
+
+	/* Method used to render all of the objects */
+	void render();
+
+	/* Setters and getters */
+	inline void enableLighting() { this->lighting = true; }
+	inline void disableLighting() { this->lighting = false; }
 };

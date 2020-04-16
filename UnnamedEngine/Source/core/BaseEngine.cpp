@@ -130,8 +130,12 @@ void BaseEngine::create() {
 			if (! debugConsole || ! debugConsole->isVisible())
 				update();
 
-			if (getSettings().videoVulkan)
+			if (getSettings().videoVulkan) {
+				//Update Vulkan and begin drawing
+				Vulkan::update();
 				Vulkan::startDraw();
+			}
+
 			Renderer::preRender();
 
 			render();

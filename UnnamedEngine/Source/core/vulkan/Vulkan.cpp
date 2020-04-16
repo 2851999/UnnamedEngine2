@@ -430,6 +430,12 @@ void Vulkan::destroySyncObjects() {
 	}
 }
 
+void Vulkan::update() {
+	//Update descriptor sets and UBOs
+	updateDescriptorSetQueue();
+	updateUBOQueue();
+}
+
 void Vulkan::startDraw() {
 	//Aquire the next swap chain image
 	vkAcquireNextImageKHR(device->getLogical(), swapChain->getInstance(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &currentFrame); //Image index is next in chain
@@ -471,11 +477,6 @@ void Vulkan::startDraw() {
 }
 
 void Vulkan::stopDraw() {
-	//Update descriptor sets and UBOs
-	updateDescriptorSetQueue();
-	updateUBOQueue();
-
-
 	vkCmdEndRenderPass(commandBuffers[currentFrame]);
 
 	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
