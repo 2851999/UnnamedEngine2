@@ -63,7 +63,7 @@ struct ShaderBlock_Skinning {
 	Matrix4f ue_bones[Skeleton::SKINNING_MAX_BONES];
 	int ue_useSkinning;
 
-	void updateUseSkinning(UBO* ubo) { ubo->update(&ue_useSkinning, sizeof(ue_bones), sizeof(ue_useSkinning)); };
+	void updateUseSkinning(UBO* ubo) { ubo->updateFrame(&ue_useSkinning, sizeof(ue_bones), sizeof(ue_useSkinning)); };
 };
 
 struct ShaderStruct_Light {
@@ -168,6 +168,8 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_CAMERA;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_MATERIAL;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;

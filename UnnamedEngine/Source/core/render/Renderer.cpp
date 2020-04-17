@@ -38,6 +38,7 @@ std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
 std::unordered_map<unsigned int, std::string> Renderer::renderShaderPaths;
 std::unordered_map<unsigned int, RenderShader*> Renderer::loadedRenderShaders;
+std::unordered_map<unsigned int, RenderPipeline*> Renderer::renderPipelines;
 Texture* Renderer::blank;
 
 std::vector<unsigned int> Renderer::boundTexturesOldSize;
@@ -49,6 +50,9 @@ const unsigned int Renderer::SHADER_MATERIAL          = 1;
 const unsigned int Renderer::SHADER_SKY_BOX           = 2;
 const unsigned int Renderer::SHADER_FONT              = 3;
 const unsigned int Renderer::SHADER_VULKAN_LIGHTING   = 4;
+
+const unsigned int Renderer::PIPELINE_FONT            = 1;
+const unsigned int Renderer::PIPELINE_LIGHTING        = 2;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -113,6 +117,10 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_SKY_BOX,         "SkyBoxShader");
 	addRenderShader(SHADER_VULKAN_LIGHTING, "VulkanLightingShader");
 	addRenderShader(SHADER_FONT,            "FontShader");
+
+	//Setup the default pipelines
+	addPipeline(PIPELINE_FONT,     new RenderPipeline(getRenderShader(SHADER_FONT), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)));
+	addPipeline(PIPELINE_LIGHTING, new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE)));
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
@@ -151,11 +159,16 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 		//Obtain the required UBO's for rendering
 		UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
+		UBO* shaderSkinningUBO = NULL;
+		if (renderData->getDescriptorSet()->getNumUBOs() > 1 && renderData->getDescriptorSet()->getUBO(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING)
+			shaderSkinningUBO = renderData->getDescriptorSet()->getUBO(1);
 
 		//Use the correct graphics state
 		useGraphicsState(renderShader->getGraphicsState());
 
 		renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
+		renderData->getShaderBlock_Model().ue_modelMatrix = modelMatrix;
+		renderData->getShaderBlock_Model().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
 
 		shaderModelUBO->updateFrame(&renderData->getShaderBlock_Model(), 0, sizeof(ShaderBlock_Model));
 
@@ -164,6 +177,18 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		if (mesh->hasData() && mesh->hasRenderData()) {
 			MeshData* data = mesh->getData();
 			MeshRenderData* meshRenderData = mesh->getRenderData();
+
+			if (shaderSkinningUBO) {
+				if (mesh->hasSkeleton()) {
+					for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); ++i)
+						shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
+					shaderSkinningData.ue_useSkinning = true;
+					shaderSkinningUBO->updateFrame(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
+				} else {
+					shaderSkinningData.ue_useSkinning = false;
+					shaderSkinningData.updateUseSkinning(shaderSkinningUBO);
+				}
+			}
 
 			if (data->hasSubData()) {
 				renderData->bindBuffers();
@@ -193,6 +218,8 @@ void Renderer::destroy() {
 	delete shaderInterface;
 	for (auto element : loadedRenderShaders)
 		delete element.second;
+	for (auto element : renderPipelines)
+		delete element.second;
 }
 
 using namespace utils_string;
@@ -206,6 +233,10 @@ Shader* Renderer::loadEngineShader(std::string path) {
 
 void Renderer::addRenderShader(unsigned int id, std::string forwardShaderPath) {
 	renderShaderPaths.insert(std::pair<unsigned int, std::string>(id, forwardShaderPath));
+}
+
+void Renderer::addPipeline(unsigned int id, RenderPipeline* pipeline) {
+	renderPipelines.insert(std::pair<unsigned int, RenderPipeline*>(id, pipeline));
 }
 
 void Renderer::loadRenderShader(unsigned int id) {
@@ -255,6 +286,15 @@ RenderShader* Renderer::getRenderShader(unsigned int id) {
 		return loadedRenderShaders.at(id);
 	} else {
 		Logger::log("The RenderShader with the id '" + utils_string::str(id) + "' could not be found", "Renderer", LogType::Error);
+		return NULL;
+	}
+}
+
+RenderPipeline* Renderer::getPipeline(unsigned int id) {
+	if (renderPipelines.count(id) > 0)
+		return renderPipelines.at(id);
+	else {
+		Logger::log("The RenderPipeline with the id '" + utils_string::str(id) + "' could not be found", "Renderer", LogType::Error);
 		return NULL;
 	}
 }

@@ -40,6 +40,7 @@ private:
 	static std::vector<Texture*> boundTextures;
 	static std::unordered_map<unsigned int, std::string> renderShaderPaths;
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
+	static std::unordered_map<unsigned int, RenderPipeline*> renderPipelines;
 	static Texture* blank;
 
 	/* Stores the sizes of the boundTextures array, at the moment saveTextures() is
@@ -60,6 +61,10 @@ public:
 	static const unsigned int SHADER_SKY_BOX;
 	static const unsigned int SHADER_FONT;
 	static const unsigned int SHADER_VULKAN_LIGHTING;
+
+	/* The names of default pipelines created for the engine */
+	static const unsigned int PIPELINE_FONT;
+	static const unsigned int PIPELINE_LIGHTING;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -120,6 +125,9 @@ public:
 	/* Method used to add a RenderShader given a the paths to the shaders */
 	static void addRenderShader(unsigned int id, std::string forwardShaderPath);
 
+	/* Method used to add a RenderPipeline */
+	static void addPipeline(unsigned int id, RenderPipeline* pipeline);
+
 	/* Method used to load a render shader from the list of render shaders and store it ready for use */
 	static void loadRenderShader(unsigned int id);
 
@@ -134,6 +142,9 @@ public:
 
 	/* Returns the RenderShader with a specific id */
 	static RenderShader* getRenderShader(unsigned int id);
+
+	/* Returns the RenderPipeline with a specific id */
+	static RenderPipeline* getPipeline(unsigned int id);
 
 	/* Returns the blank texture */
 	static inline Texture* getBlankTexture() { return blank; }

@@ -1,7 +1,7 @@
 #version 420
 //Used for assigning UBO block locations - can remove
 
-layout(std140, set = 0, binding = 1) uniform UECoreData {
+layout(std140, set = 0, binding = 1) uniform UECameraData {
 	mat4 ue_viewMatrix;
 	mat4 ue_projectionMatrix;
 	
@@ -79,7 +79,7 @@ layout(set = 1, binding = 5) uniform sampler2D ue_material_parallaxMap;
 
 const int UE_MAX_BONES = 90;
 
-layout(std140, binding = 4) uniform UESkinningData {
+layout(std140, set = 2, binding = 4) uniform UESkinningData {
 	mat4 ue_bones[UE_MAX_BONES];
 	bool ue_useSkinning;
 };

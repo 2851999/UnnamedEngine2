@@ -52,7 +52,7 @@ void Test::initialise() {
 	getSettings().videoVSync = 0;
 	getSettings().videoSamples = 8;
 	getSettings().videoMaxAnisotropicSamples = 16;
-	getSettings().debugShowInformation = false;
+	getSettings().debugShowInformation = true;
 
 	getSettings().debugVkValidationLayersEnabled = true;
 }
@@ -63,7 +63,6 @@ void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 4.0f, 3.0f);
@@ -76,26 +75,28 @@ void Test::created() {
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 	MeshLoader::loadDiffuseTexturesAsSRGB = false;
 
+	unsigned int shader = Renderer::SHADER_VULKAN_LIGHTING;
+
 	renderScene = new RenderScene();
-	renderScene->disableLighting();
-	//renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
+	//renderScene->disableLighting();
+	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 
 	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
 
-	model = new GameObject3D(mesh, Renderer::SHADER_MATERIAL);
+	model = new GameObject3D(mesh, shader);
 	model->setScale(0.15f, 0.15f, 0.15f);
 	model->update();
 	renderScene->add(model);
 
 	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
 
-	model2 = new GameObject3D(mesh2, Renderer::SHADER_MATERIAL);
+	model2 = new GameObject3D(mesh2, shader);
 	model2->setPosition(4.0f, 1.0f, 0.0f);
 	model2->update();
 	renderScene->add(model2);
 
 	//mitsuba-sphere.obj
-	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), Renderer::SHADER_MATERIAL);
+	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), shader);
 	//mit1->getMesh()->getSkeleton()->startAnimation("");
 	mit1->setPosition(10.0f, 1.0f, 0.0f);
 	mit1->update();

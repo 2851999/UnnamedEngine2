@@ -22,17 +22,18 @@
 
 RenderScene::RenderScene() {
 	//Setup the light batch descriptor set
-	//descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
-	//descriptorSetLightBatch->setup();
+	descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+	descriptorSetLightBatch->setup();
 
-	//Create the render pipeline
+	//Obtain the render pipelines
 	pipelineMaterial = new RenderPipeline(Renderer::getRenderShader(Renderer::SHADER_MATERIAL), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::Flag::NONE));
+	pipelineLighting = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING);
 }
 
 RenderScene::~RenderScene() {
 	//Go through and delete all created objects
 	delete pipelineMaterial;
-	//delete descriptorSetLightBatch;
+	delete descriptorSetLightBatch;
 
 	for (unsigned int i = 0; i < objects.size(); ++i)
 		delete objects[i];
@@ -50,6 +51,9 @@ void RenderScene::add(GameObject3D* object) {
 void RenderScene::render() {
 	//Check whether lighting is enabled
 	if (lighting) {
+		//Use the lighting pipeline
+		pipelineLighting->bind();
+
 		//Ambient light (used for phong shading)
 		shaderLightBatchData.ue_lightAmbient = Vector4f(0.01f, 0.01f, 0.01f, 0.0f);
 

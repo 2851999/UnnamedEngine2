@@ -38,8 +38,9 @@ private:
 	/* The data to be sent to the shader about a light batch when doing lighting */
 	ShaderBlock_LightBatch shaderLightBatchData;
 
-	/* The pipeline to be used for materials */
+	/* The pipelines required for rendering */
 	RenderPipeline* pipelineMaterial;
+	RenderPipeline* pipelineLighting;
 public:
 	/* The number of lights that can be rendered at once */
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;

@@ -86,6 +86,7 @@ public:
 	inline void setTexture(unsigned int index, Texture* texture) { textures[index].texture = texture; }
 
 	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
+	inline unsigned int getNumUBOs() { return ubos.size(); }
 	inline Texture* getTexture(unsigned int index) { return textures[index].texture; }
 };
 

@@ -1,9 +1,18 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 6
+
+* Readded text rendering support
+* Readded basic lighting support
+
+* Fixed bug: 'computeVertexInputData' in MeshData was
+             incorrect when 'flags' was assignined
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 1 | Experimental 5
 
 * Added method 'computeVertexInputData' in MeshData
 
-* Re-added skybox support
+* Readded skybox support
 
 * Note: Now require a pipeline to render anything in Vulkan/
         OpenGL

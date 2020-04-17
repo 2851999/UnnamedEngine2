@@ -215,34 +215,36 @@ RenderPipeline::VertexInputData MeshData::computeVertexInputData(unsigned int nu
 			}
 		}
 	}
-	//The current offset
-	unsigned int currentOffset = 0;
 	//States whether bone data is included
 	bool hasBones = false;
-	//Add others data if necessary
-	for (DataType current : otherData) {
-		if (current == POSITION) {
-			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, currentBinding, numDimensions == 3 ? VK_FORMAT_R32G32B32_SFLOAT : VK_FORMAT_R32G32_SFLOAT, currentOffset));
-			currentOffset += sizeof(float) * numDimensions;
-		} else if (current == TEXTURE_COORD) {
-			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, currentBinding, VK_FORMAT_R32G32_SFLOAT, currentOffset));
-			currentOffset += sizeof(float) * 2;
-		} else if (current == NORMAL) {
-			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, currentOffset));
-			currentOffset += sizeof(float) * 3;
-		} else if (current == TANGENT) {
-			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, currentOffset));
-			currentOffset += sizeof(float) * 3;
-		} else if (current == BITANGENT) {
-			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, currentOffset));
-			currentOffset += sizeof(float) * 3;
-		} else if (current == BONE_ID || current == BONE_WEIGHT) {
-			hasBones = true;
+	if (otherData.size() > 0) {
+		//The current offset
+		unsigned int currentOffset = 0;
+		//Add others data if necessary
+		for (DataType current : otherData) {
+			if (current == POSITION) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, currentBinding, numDimensions == 3 ? VK_FORMAT_R32G32B32_SFLOAT : VK_FORMAT_R32G32_SFLOAT, currentOffset));
+				currentOffset += sizeof(float) * numDimensions;
+			} else if (current == TEXTURE_COORD) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, currentBinding, VK_FORMAT_R32G32_SFLOAT, currentOffset));
+				currentOffset += sizeof(float) * 2;
+			} else if (current == NORMAL) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, currentOffset));
+				currentOffset += sizeof(float) * 3;
+			} else if (current == TANGENT) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, currentOffset));
+				currentOffset += sizeof(float) * 3;
+			} else if (current == BITANGENT) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, currentOffset));
+				currentOffset += sizeof(float) * 3;
+			} else if (current == BONE_ID || current == BONE_WEIGHT) {
+				hasBones = true;
+			}
 		}
+		//Add the other VBO binding
+		data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, currentOffset, VK_VERTEX_INPUT_RATE_VERTEX));
+		currentBinding++;
 	}
-	//Add the other VBO binding
-	data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, currentOffset, VK_VERTEX_INPUT_RATE_VERTEX));
-	currentBinding++;
 
 	if (hasBones) {
 		//Add bone info

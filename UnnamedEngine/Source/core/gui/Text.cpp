@@ -79,6 +79,9 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	getMesh()->setCullingEnabled(false);
 
 	GameObject3D::update();
+
+	//Obtain the pipeline used for rendering
+	pipeline = Renderer::getPipeline(Renderer::PIPELINE_FONT);
 }
 
 void Text::update(std::string text) {
@@ -125,6 +128,9 @@ void Text::update(Vector3f position) {
 }
 
 void Text::render() {
+	//Bind the pipeline
+	pipeline->bind();
+
 	if (billboarded) {
 		Shader* shader = getShader();
 		shader->use();
