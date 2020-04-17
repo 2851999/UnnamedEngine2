@@ -25,7 +25,7 @@
  *****************************************************************************/
 
 namespace utils_vulkan {
-	VkVertexInputBindingDescription initVertexInputBindings(uint32_t binding, uint32_t stride, VkVertexInputRate inputRate) {
+	inline VkVertexInputBindingDescription initVertexInputBindings(uint32_t binding, uint32_t stride, VkVertexInputRate inputRate) {
 		VkVertexInputBindingDescription description;
 		description.binding   = binding;
 		description.stride    = stride;
@@ -33,7 +33,7 @@ namespace utils_vulkan {
 		return description;
 	}
 
-	VkVertexInputAttributeDescription initVertexAttributeDescription(uint32_t location, uint32_t binding, VkFormat format, uint32_t offset) {
+	inline VkVertexInputAttributeDescription initVertexAttributeDescription(uint32_t location, uint32_t binding, VkFormat format, uint32_t offset) {
 		VkVertexInputAttributeDescription description;
 		description.location = location;
 		description.binding  = binding;

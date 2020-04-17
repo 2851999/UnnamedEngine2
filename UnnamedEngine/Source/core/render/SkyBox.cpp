@@ -32,6 +32,9 @@ SkyBox::SkyBox(Cubemap* cubemap) {
 	mesh->getMaterial()->setDiffuse(cubemap);
 	//mesh->getMaterial()->update();
 	box = new GameObject3D(mesh, Renderer::getRenderShader(Renderer::SHADER_SKY_BOX));
+
+	//Create the skybox render pipeline
+	pipelineSkybox = new RenderPipeline(Renderer::getRenderShader(Renderer::SHADER_SKY_BOX), MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE));
 }
 
 void SkyBox::update(Vector3f cameraPosition) {
@@ -46,10 +49,10 @@ void SkyBox::render() {
 		glDepthFunc(GL_LEQUAL);
 		//glDepthMask(false); //Should be applied by GraphicsState
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		//To work the skybox must be drawn before anything else
-		shader = box->getShader();
-		shader->use();
 	}
+
+	//Bind the pipeline
+	pipelineSkybox->bind();
 
 	//Renderer::getShaderBlock_Core().ue_viewMatrix = Renderer::getCamera()->getViewMatrix();
 	//Renderer::getShaderBlock_Core().ue_projectionMatrix =  Renderer::getCamera()->getProjectionMatrix();
@@ -63,4 +66,5 @@ void SkyBox::render() {
 void SkyBox::destroy() {
 	//Destroy created resources
 	delete box;
+	delete pipelineSkybox;
 }

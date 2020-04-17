@@ -38,11 +38,8 @@ GameObject::~GameObject() {
 
 void GameObject::render() {
 	if (hasMesh()) {
-		if (! shouldCull()) {
-			if (! BaseEngine::usingVulkan())
-				renderShader->getShader()->use();
+		if (! shouldCull())
 			Renderer::render(mesh, getModelMatrix(), renderShader);
-		}
 	}
 }
 

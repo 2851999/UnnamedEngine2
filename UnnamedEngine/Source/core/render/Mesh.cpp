@@ -20,8 +20,8 @@
 
 #include "../BaseEngine.h"
 #include "Renderer.h"
-#include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
+#include "../../utils/VulkanUtils.h"
 
 /*****************************************************************************
  * The MeshData class
@@ -163,6 +163,99 @@ void MeshData::addBoneData(unsigned int boneID, float boneWeight) {
 	numBones++;
 }
 
+RenderPipeline::VertexInputData MeshData::computeVertexInputData(unsigned int numDimensions, std::vector<DataType> requiredData, Flag flags) {
+	//The output data
+	RenderPipeline::VertexInputData data;
+
+	unsigned int currentBinding = 0;
+
+	std::vector<DataType> otherData;
+
+	//Go through the required data
+	for (DataType current : requiredData) {
+		if (current == POSITION) {
+			if ((flags & SEPARATE_POSITIONS)) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, currentBinding, numDimensions == 3 ? VK_FORMAT_R32G32B32_SFLOAT : VK_FORMAT_R32G32_SFLOAT, 0));
+				data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, numDimensions * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+				currentBinding++;
+			} else {
+				otherData.push_back(current);
+			}
+		} else if (current == TEXTURE_COORD) {
+			if ((flags & SEPARATE_TEXTURE_COORDS)) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, currentBinding, VK_FORMAT_R32G32_SFLOAT, 0));
+				data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, 2 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+				currentBinding++;
+			} else {
+				otherData.push_back(current);
+			}
+		} else if (current == NORMAL) {
+			if ((flags & SEPARATE_NORMALS)) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, 0));
+				data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, 3 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+				currentBinding++;
+			} else {
+				otherData.push_back(current);
+			}
+		} else if (current == TANGENT) {
+			if ((flags & SEPARATE_TANGENTS)) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, 0));
+				data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, 3 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+				currentBinding++;
+			} else {
+				otherData.push_back(current);
+			}
+		} else if (current == BITANGENT) {
+			if ((flags & SEPARATE_BITANGENTS)) {
+				data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, 0));
+				data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, 3 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+				currentBinding++;
+			} else {
+				otherData.push_back(current);
+			}
+		}
+	}
+	//The current offset
+	unsigned int currentOffset = 0;
+	//States whether bone data is included
+	bool hasBones = false;
+	//Add others data if necessary
+	for (DataType current : otherData) {
+		if (current == POSITION) {
+			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, currentBinding, numDimensions == 3 ? VK_FORMAT_R32G32B32_SFLOAT : VK_FORMAT_R32G32_SFLOAT, currentOffset));
+			currentOffset += sizeof(float) * numDimensions;
+		} else if (current == TEXTURE_COORD) {
+			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, currentBinding, VK_FORMAT_R32G32_SFLOAT, currentOffset));
+			currentOffset += sizeof(float) * 2;
+		} else if (current == NORMAL) {
+			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, currentOffset));
+			currentOffset += sizeof(float) * 3;
+		} else if (current == TANGENT) {
+			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, currentOffset));
+			currentOffset += sizeof(float) * 3;
+		} else if (current == BITANGENT) {
+			data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, currentBinding, VK_FORMAT_R32G32B32_SFLOAT, currentOffset));
+			currentOffset += sizeof(float) * 3;
+		} else if (current == BONE_ID || current == BONE_WEIGHT) {
+			hasBones = true;
+		}
+	}
+	//Add the other VBO binding
+	data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, currentOffset, VK_VERTEX_INPUT_RATE_VERTEX));
+	currentBinding++;
+
+	if (hasBones) {
+		//Add bone info
+		data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, currentBinding, VK_FORMAT_R32G32B32A32_SINT, 0));
+		data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, 4 * sizeof(int), VK_VERTEX_INPUT_RATE_VERTEX));
+		currentBinding++;
+		data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, currentBinding, VK_FORMAT_R32G32B32A32_SFLOAT, 0));
+		data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, 4 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+	}
+
+	return data;
+}
+
 /*****************************************************************************
  * The MeshRenderData class
  *****************************************************************************/
@@ -231,17 +324,6 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 		renderData->addVBO(vboBitangents);
 	}
 
-	//Setup bones
-	if (data->hasBones()) {
-		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), GL_STATIC_DRAW);
-		vboBoneIDs->addAttributeWithType(GL_INT, ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
-		renderData->addVBO(vboBoneIDs);
-
-		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), GL_STATIC_DRAW);
-		vboBoneWeights->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, 4);
-		renderData->addVBO(vboBoneWeights);
-	}
-
 	//Check to see whether the 'other' VBO is required
 	if (data->hasOthers()) {
 
@@ -266,6 +348,17 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, 3);
 
 		renderData->addVBO(vboOthers);
+	}
+
+	//Setup bones
+	if (data->hasBones()) {
+		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), GL_STATIC_DRAW);
+		vboBoneIDs->addAttributeWithType(GL_INT, ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
+		renderData->addVBO(vboBoneIDs);
+
+		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), GL_STATIC_DRAW);
+		vboBoneWeights->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, 4);
+		renderData->addVBO(vboBoneWeights);
 	}
 
 	//Check to see whether indices are needed

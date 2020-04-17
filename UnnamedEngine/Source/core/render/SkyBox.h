@@ -27,6 +27,9 @@
 
 class SkyBox {
 private:
+	/* The pipeline required to render the skybox */
+	RenderPipeline* pipelineSkybox;
+
 	/* The skybox texture */
 	Cubemap* cubemap;
 

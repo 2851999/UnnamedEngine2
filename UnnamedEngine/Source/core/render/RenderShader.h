@@ -59,7 +59,7 @@ public:
 	/* Method used to get a descriptor set given it's set number */
 	inline DescriptorSetLayout* getDescriptorSetLayout(unsigned int setNumber) { return descriptorSetLayouts.at(setNumber); }
 
-	/* Getters */
+	/* Setters and getters */
 	inline unsigned int getID() { return id; }
 	inline Shader* getShader() { return shader; }
 	inline GraphicsState* getGraphicsState() { return graphicsState; }

@@ -26,7 +26,7 @@ RenderScene::RenderScene() {
 	//descriptorSetLightBatch->setup();
 
 	//Create the render pipeline
-	pipelineMaterial = new RenderPipeline(Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	pipelineMaterial = new RenderPipeline(Renderer::getRenderShader(Renderer::SHADER_MATERIAL), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::Flag::NONE));
 }
 
 RenderScene::~RenderScene() {

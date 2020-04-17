@@ -25,6 +25,7 @@
 #include "Skinning.h"
 #include "VBO.h"
 #include "../Sphere.h"
+#include "RenderPipeline.h"
 
 /*****************************************************************************
  * The MeshData class stores information about a mesh
@@ -107,15 +108,26 @@ public:
 	static const unsigned int DIMENSIONS_2D = 2;
 	static const unsigned int DIMENSIONS_3D = 3;
 
+	/* Types of data */
+	enum DataType {
+		POSITION      = 1,
+		TEXTURE_COORD = 2,
+		NORMAL        = 3,
+		TANGENT       = 4,
+		BITANGENT     = 5,
+		BONE_ID       = 6,
+		BONE_WEIGHT   = 7
+	};
+
 	/* Flags */
 	enum Flag {
 		NONE = 0,
-		SEPARATE_POSITIONS  = 1,
-		SEPARATE_COLOURS    = 2,
+		SEPARATE_POSITIONS      = 1,
+		SEPARATE_COLOURS        = 2,
 		SEPARATE_TEXTURE_COORDS = 4,
-		SEPARATE_NORMALS    = 8,
-		SEPARATE_TANGENTS   = 16,
-		SEPARATE_BITANGENTS = 32
+		SEPARATE_NORMALS        = 8,
+		SEPARATE_TANGENTS       = 16,
+		SEPARATE_BITANGENTS     = 32
 	};
 
 	MeshData(unsigned int numDimensions, Flag flags = Flag::NONE) {
@@ -220,6 +232,10 @@ public:
 	inline bool hasSubData() { return subData.size() > 0; }
 	inline unsigned int getSubDataCount() { return subData.size(); }
 	inline SubData& getSubData(unsigned int index) { return subData[index]; }
+
+	/* Static method to construct vertex input bindings and attributes given the
+	   required data and whether they should be separated from vboOthers */
+	static RenderPipeline::VertexInputData computeVertexInputData(unsigned int numDimensions, std::vector<DataType> requiredData, Flag flags);
 private:
 	/* The flags being used */
 	Flag flags = Flag::NONE;

@@ -95,11 +95,11 @@ void Test::created() {
 	renderScene->add(model2);
 
 	//mitsuba-sphere.obj
-	//mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), Renderer::SHADER_MATERIAL);
+	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), Renderer::SHADER_MATERIAL);
 	//mit1->getMesh()->getSkeleton()->startAnimation("");
-	//mit1->setPosition(10.0f, 1.0f, 0.0f);
-	//mit1->update();
-	//renderScene->add(mit1);
+	mit1->setPosition(10.0f, 1.0f, 0.0f);
+	mit1->update();
+	renderScene->add(mit1);
 }
 
 void Test::update() {
@@ -131,7 +131,7 @@ void Test::render() {
 
 	renderScene->render();
 
-	//camera->useView();
+	camera->useView();
 }
 
 void Test::destroy() {

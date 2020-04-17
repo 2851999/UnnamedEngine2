@@ -27,23 +27,9 @@
   * The RenderPipeline class
   *****************************************************************************/
 
-RenderPipeline::RenderPipeline(RenderShader* renderShader) : layout(renderShader->getPipelineLayout()), renderShader(renderShader) {
+RenderPipeline::RenderPipeline(RenderShader* renderShader, VertexInputData vertexInputData) : layout(renderShader->getPipelineLayout()), renderShader(renderShader) {
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
-
-		//Create the default layout
-		std::vector<VkVertexInputBindingDescription> vertexInputBindings = {
-			utils_vulkan::initVertexInputBindings(0, 14 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX)
-		};
-
-		std::vector<VkVertexInputAttributeDescription> vertexInputAttributes = {
-			utils_vulkan::initVertexAttributeDescription(0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0),
-			utils_vulkan::initVertexAttributeDescription(1, 0, VK_FORMAT_R32G32_SFLOAT,    sizeof(float) * 3),
-			utils_vulkan::initVertexAttributeDescription(2, 0, VK_FORMAT_R32G32B32_SFLOAT, sizeof(float) * 5),
-			utils_vulkan::initVertexAttributeDescription(3, 0, VK_FORMAT_R32G32B32_SFLOAT, sizeof(float) * 8),
-			utils_vulkan::initVertexAttributeDescription(4, 0, VK_FORMAT_R32G32B32_SFLOAT, sizeof(float) * 11)
-		};
-
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 		vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -64,10 +50,10 @@ RenderPipeline::RenderPipeline(RenderShader* renderShader) : layout(renderShader
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
-		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexInputBindings.size());
-		vertexInputInfo.pVertexBindingDescriptions = vertexInputBindings.data();
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexInputAttributes.size());
-		vertexInputInfo.pVertexAttributeDescriptions = vertexInputAttributes.data();
+		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexInputData.bindings.size());
+		vertexInputInfo.pVertexBindingDescriptions = vertexInputData.bindings.data();
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexInputData.attributes.size());
+		vertexInputInfo.pVertexAttributeDescriptions = vertexInputData.attributes.data();
 
 		//	vertexInputInfo.vertexBindingDescriptionCount = 0;
 		//	vertexInputInfo.pVertexBindingDescriptions = nullptr;
@@ -191,6 +177,9 @@ RenderPipeline::~RenderPipeline() {
 void RenderPipeline::bind() {
 	if (BaseEngine::usingVulkan())
 		Vulkan::bindGraphicsPipeline(this);
+	else
+		//Use the shader
+		renderShader->getShader()->use();
 }
 
 /*****************************************************************************

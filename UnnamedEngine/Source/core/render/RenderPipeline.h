@@ -39,8 +39,14 @@ private:
 	/* The pipeline instance (For Vulkan) */
 	VkPipeline vulkanPipeline = VK_NULL_HANDLE;
 public:
+	/* Structure used to store data required for creating a render pipeline */
+	struct VertexInputData {
+		std::vector<VkVertexInputBindingDescription>   bindings;
+		std::vector<VkVertexInputAttributeDescription> attributes;
+	};
+
 	/* Constructor */
-	RenderPipeline(RenderShader* renderShader);
+	RenderPipeline(RenderShader* renderShader, VertexInputData vertexInputData);
 
 	/* Destructor */
 	virtual ~RenderPipeline();
