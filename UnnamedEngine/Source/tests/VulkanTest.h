@@ -20,14 +20,14 @@
 
 #include "../core/BaseEngine.h"
 #include "../utils/DebugCamera.h"
-#include "../experimental/RenderSceneV2.h"
+#include "../core/render/RenderScene.h"
 #include "../core/render/MeshLoader.h"
 #include "../utils/GLUtils.h"
 
 class Test : public BaseEngine {
 private:
 	DebugCamera* camera;
-	RenderSceneV2* renderScene;
+	RenderScene* renderScene;
 	GameObject3D* model;
 	GameObject3D* model2;
 	GameObject3D* mit1;
@@ -52,7 +52,7 @@ void Test::initialise() {
 	getSettings().videoVSync = 0;
 	getSettings().videoSamples = 8;
 	getSettings().videoMaxAnisotropicSamples = 16;
-	getSettings().debugShowInformation = true;
+	getSettings().debugShowInformation = false;
 
 	getSettings().debugVkValidationLayersEnabled = true;
 }
@@ -76,7 +76,7 @@ void Test::created() {
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
 	MeshLoader::loadDiffuseTexturesAsSRGB = false;
 
-	renderScene = new RenderSceneV2();
+	renderScene = new RenderScene();
 	renderScene->disableLighting();
 	//renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 
@@ -95,11 +95,11 @@ void Test::created() {
 	renderScene->add(model2);
 
 	//mitsuba-sphere.obj
-	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), Renderer::SHADER_MATERIAL);
-	mit1->getMesh()->getSkeleton()->startAnimation("");
-	mit1->setPosition(10.0f, 1.0f, 0.0f);
-	mit1->update();
-	renderScene->add(mit1);
+	//mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), Renderer::SHADER_MATERIAL);
+	//mit1->getMesh()->getSkeleton()->startAnimation("");
+	//mit1->setPosition(10.0f, 1.0f, 0.0f);
+	//mit1->update();
+	//renderScene->add(mit1);
 }
 
 void Test::update() {
@@ -118,7 +118,7 @@ void Test::update() {
 		model2->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 	model2->update();
 
-	mit1->getMesh()->updateAnimation(getDeltaSeconds());
+	//mit1->getMesh()->updateAnimation(getDeltaSeconds());
 }
 
 void Test::render() {
@@ -131,7 +131,7 @@ void Test::render() {
 
 	renderScene->render();
 
-	camera->useView();
+	//camera->useView();
 }
 
 void Test::destroy() {

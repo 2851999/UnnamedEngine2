@@ -31,13 +31,12 @@
 
 ShaderInterface* Renderer::shaderInterface;
 
-ShaderBlock_Core     Renderer::shaderCoreData;
 ShaderBlock_Material Renderer::shaderMaterialData;
 ShaderBlock_Skinning Renderer::shaderSkinningData;
 
 std::vector<Camera*> Renderer::cameras;
 std::vector<Texture*> Renderer::boundTextures;
-std::unordered_map<unsigned int, std::vector<std::string>> Renderer::renderShaderPaths;
+std::unordered_map<unsigned int, std::string> Renderer::renderShaderPaths;
 std::unordered_map<unsigned int, RenderShader*> Renderer::loadedRenderShaders;
 Texture* Renderer::blank;
 
@@ -110,16 +109,13 @@ void Renderer::initialise() {
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the shaders
-	addRenderShader(SHADER_MATERIAL,                     "MaterialShader",                   "");
-	addRenderShader(SHADER_SKY_BOX,                      "SkyBoxShader",                     "");
-	addRenderShader(SHADER_VULKAN_LIGHTING,              "VulkanLightingShader",             "");
-	addRenderShader(SHADER_FONT,                         "FontShader",                       "");
+	addRenderShader(SHADER_MATERIAL,        "MaterialShader");
+	addRenderShader(SHADER_SKY_BOX,         "SkyBoxShader");
+	addRenderShader(SHADER_VULKAN_LIGHTING, "VulkanLightingShader");
+	addRenderShader(SHADER_FONT,            "FontShader");
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
-	if (BaseEngine::usingVulkan()) //WHEN REMOVING ENSURE CAN UPDATE THINGS LIKE VIEW MATRIX WHEN SWITCHING THE CAMERA MID-FRAME
-		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, renderData->getVkGraphicsPipeline()->getLayout(), 0, 1, renderData->getVkDescriptorSet(0), 0, nullptr);
-
 	//Bind the material descriptor set
 	material->getDescriptorSet()->bind();
 }
@@ -150,14 +146,11 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		//Get the render data for rendering
 		RenderData* renderData = mesh->getRenderData()->getRenderData();
 
-		//Bind the pipeline to use to render (for Vulkan)
-		if (BaseEngine::usingVulkan())
-			renderData->getVkGraphicsPipeline()->bind();
+		//Bind the camera descriptor set
+		getCamera()->getDescriptorSet()->bind();
 
 		//Obtain the required UBO's for rendering
-		UBO* shaderCoreUBO = renderData->getUBO(ShaderInterface::BLOCK_CORE);
 		UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
-		UBO* shaderSkinningUBO = renderData->getUBO(ShaderInterface::BLOCK_SKINNING);
 
 		//Use the correct graphics state
 		useGraphicsState(renderShader->getGraphicsState());
@@ -166,25 +159,11 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 		shaderModelUBO->updateFrame(&renderData->getShaderBlock_Model(), 0, sizeof(ShaderBlock_Model));
 
-		shaderCoreUBO->updateFrame(&shaderCoreData, 0, sizeof(ShaderBlock_Core));
-
 		renderData->getDescriptorSet()->bind();
 
 		if (mesh->hasData() && mesh->hasRenderData()) {
 			MeshData* data = mesh->getData();
 			MeshRenderData* meshRenderData = mesh->getRenderData();
-
-			if (shaderSkinningUBO) {
-				if (mesh->hasSkeleton()) {
-					for (unsigned int i = 0; i < mesh->getSkeleton()->getNumBones(); ++i)
-						shaderSkinningData.ue_bones[i] = mesh->getSkeleton()->getBone(i)->getFinalTransform();
-					shaderSkinningData.ue_useSkinning = true;
-					shaderSkinningUBO->updateFrame(&shaderSkinningData, 0, sizeof(ShaderBlock_Skinning));
-				} else {
-					shaderSkinningData.ue_useSkinning = false;
-					shaderSkinningData.updateUseSkinning(shaderSkinningUBO);
-				}
-			}
 
 			if (data->hasSubData()) {
 				renderData->bindBuffers();
@@ -225,27 +204,29 @@ Shader* Renderer::loadEngineShader(std::string path) {
 		return Shader::loadShader("resources/shaders-vulkan/" + path);
 }
 
-void Renderer::addRenderShader(unsigned int id, std::string forwardShaderPath, std::string deferredGeomShaderPath) {
-	renderShaderPaths.insert(std::pair<unsigned int, std::vector<std::string>>(id, { forwardShaderPath, deferredGeomShaderPath }));
+void Renderer::addRenderShader(unsigned int id, std::string forwardShaderPath) {
+	renderShaderPaths.insert(std::pair<unsigned int, std::string>(id, forwardShaderPath));
 }
 
 void Renderer::loadRenderShader(unsigned int id) {
 	//Get the paths
-	std::vector<std::string> shaderPaths = renderShaderPaths.at(id);
+	std::string shaderPath = renderShaderPaths.at(id);
 	Shader* forwardShader = NULL;
-	Shader* deferredGeomShader = NULL;
 
-	//Load the shaders if the paths have been assigned
+	//Load the shaders if the path has been assigned
 	//Setup the shader
-	if (shaderPaths[0] != "")
-		forwardShader = loadEngineShader(shaderPaths[0]);
-	if (shaderPaths[1] != "" && (! BaseEngine::usingVulkan())) //Don't load this if using Vulkan yet
-		deferredGeomShader = loadEngineShader(shaderPaths[1]);
+	if (shaderPath != "")
+		forwardShader = loadEngineShader(shaderPath);
 
 	//Create the shader
-	RenderShader* renderShader = new RenderShader(id, forwardShader, deferredGeomShader);
+	RenderShader* renderShader = new RenderShader(id, forwardShader);
+	//Add required structures
+	shaderInterface->setup(id, renderShader);
 	//Assign the graphics state for the render shader
 	assignGraphicsState(renderShader->getGraphicsState(), id);
+	//Setup
+	renderShader->setup();
+
 	//Add the shader
 	addRenderShader(renderShader);
 }

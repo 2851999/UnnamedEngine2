@@ -20,7 +20,7 @@
 
 #include <GL/glew.h>
 
-#include "Shader.h"
+#include "RenderShader.h"
 #include "../vulkan/VulkanBuffer.h"
 
 /*****************************************************************************

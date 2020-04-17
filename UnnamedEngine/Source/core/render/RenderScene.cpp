@@ -22,13 +22,17 @@
 
 RenderScene::RenderScene() {
 	//Setup the light batch descriptor set
-	descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_LIGHT_BATCH));
-	descriptorSetLightBatch->setup();
+	//descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+	//descriptorSetLightBatch->setup();
+
+	//Create the render pipeline
+	pipelineMaterial = new RenderPipeline(Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
 }
 
 RenderScene::~RenderScene() {
 	//Go through and delete all created objects
-	delete descriptorSetLightBatch;
+	delete pipelineMaterial;
+	//delete descriptorSetLightBatch;
 
 	for (unsigned int i = 0; i < objects.size(); ++i)
 		delete objects[i];
@@ -90,6 +94,9 @@ void RenderScene::render() {
 				objects[i]->render();
 		}
 	} else {
+		//Use the material pipeline
+		pipelineMaterial->bind();
+
 		//Go through and render all of the objects
 		for (unsigned int i = 0; i < objects.size(); ++i)
 			objects[i]->render();

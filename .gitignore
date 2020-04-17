@@ -42,3 +42,6 @@
 /UnnamedEngine/boost_filesystem-vc142-mt-gd-x64-1_72.dll
 /UnnamedEngine/.vs
 /UnnamedEngine/UnnamedEngine.licenseheader
+/UnnamedEngine/run_vulkan.bat
+/UnnamedEngine/run_opengl.bat
+/UnnamedEngine/both.bat

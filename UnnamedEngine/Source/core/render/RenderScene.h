@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Light.h"
+#include "RenderPipeline.h"
 
 class RenderScene {
 private:
@@ -36,6 +37,9 @@ private:
 
 	/* The data to be sent to the shader about a light batch when doing lighting */
 	ShaderBlock_LightBatch shaderLightBatchData;
+
+	/* The pipeline to be used for materials */
+	RenderPipeline* pipelineMaterial;
 public:
 	/* The number of lights that can be rendered at once */
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;

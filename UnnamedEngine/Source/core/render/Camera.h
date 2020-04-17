@@ -27,26 +27,32 @@
  *****************************************************************************/
 
 class Camera {
+private:
+	/* Descriptor set holding per-camera information */
+	DescriptorSet* descriptorSet;
 protected:
-	/* The projection and view matrices */
-	Matrix4f projectionMatrix;
-	Matrix4f viewMatrix;
+	/* The camera information for shaders */
+	ShaderBlock_Camera shaderData;
+
+	/* Method to update the camera data UBO */
+	void updateUBO();
 public:
-	Camera() {}
-	Camera(Matrix4f projectionMatrix) : projectionMatrix(projectionMatrix) {}
-	Camera(Matrix4f projectionMatrix, Matrix4f viewMatrix) : projectionMatrix(projectionMatrix), viewMatrix(viewMatrix) {}
-	virtual ~Camera() {}
+	Camera();
+	Camera(Matrix4f projectionMatrix) : Camera() { shaderData.ue_projectionMatrix = projectionMatrix; }
+	Camera(Matrix4f projectionMatrix, Matrix4f viewMatrix) : Camera() { shaderData.ue_projectionMatrix = projectionMatrix; shaderData.ue_viewMatrix = viewMatrix; }
+	virtual ~Camera();
 
 	/* Used to update the matrices */
 	virtual void update() {}
 
 	/* Setters and getters */
-	void setProjectionMatrix(Matrix4f projectionMatrix) { this->projectionMatrix = projectionMatrix; }
-	void setViewMatrix(Matrix4f viewMatrix) { this->viewMatrix = viewMatrix; }
+	void setProjectionMatrix(Matrix4f projectionMatrix) { shaderData.ue_projectionMatrix = projectionMatrix; }
+	void setViewMatrix(Matrix4f viewMatrix) { shaderData.ue_viewMatrix = viewMatrix; }
 
-	Matrix4f& getProjectionMatrix() { return projectionMatrix; }
-	Matrix4f& getViewMatrix() { return viewMatrix; }
-	Matrix4f getProjectionViewMatrix() { return projectionMatrix * viewMatrix; }
+	Matrix4f& getProjectionMatrix() { return shaderData.ue_projectionMatrix; }
+	Matrix4f& getViewMatrix() { return shaderData.ue_viewMatrix; }
+	Matrix4f getProjectionViewMatrix() { return shaderData.ue_projectionMatrix * shaderData.ue_viewMatrix; }
+	DescriptorSet* getDescriptorSet() { return descriptorSet; }
 };
 
 /*****************************************************************************

@@ -25,7 +25,6 @@
 #include "Skinning.h"
 #include "VBO.h"
 #include "../Sphere.h"
-#include "../vulkan/VulkanGraphicsPipeline.h"
 
 /*****************************************************************************
  * The MeshData class stores information about a mesh

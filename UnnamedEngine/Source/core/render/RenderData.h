@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "../vulkan/VulkanGraphicsPipeline.h"
 #include "VBO.h"
 #include "UBO.h"
 #include "Texture.h"
@@ -53,30 +52,6 @@ private:
 	std::vector<VkBuffer> vboVkInstances;
 	std::vector<VkDeviceSize> vboVkOffsets;
 
-	/* The pipeline used to render the data */
-	VulkanGraphicsPipeline* graphicsVkPipeline = NULL;
-
-	/* UBO's used to render (Does not delete these UBOs) */
-	std::unordered_map<unsigned int, UBO*> ubos;
-
-	/* The texture binding locations used when rendering */
-	std::vector<unsigned int> textureBindings;
-
-	/* TextureSet's stored for rendering (one per material) */
-	std::vector<TextureSet*> textureSets;
-
-	/* The descriptor pool for allocation of descriptors */
-	VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
-
-	/* The descriptor set layout */
-	VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-
-	/* Number of swap chain images when created */
-	unsigned int numSwapChainImages = 0;
-
-	/* The descriptor sets */
-	std::vector<VkDescriptorSet> descriptorSets;
-
 	/* The binding and attribute descriptions for Vulkan */
 	std::vector<VkVertexInputBindingDescription> bindingVkDescriptions;
 	std::vector<VkVertexInputAttributeDescription> attributeVkDescriptions;
@@ -96,13 +71,8 @@ public:
 	/* The method used to setup this data for rendering */
 	void setup(RenderShader* renderShader);
 
-	/* The method used to setup this data for rendering (With Vulkan) */
-	void setupVk(RenderShader* renderShader);
-
 	/* Methods to add a UBO or Texture to this instance */
-	inline void add(unsigned int id, UBO* ubo) { ubos.insert(std::pair<unsigned int, UBO*>(id, ubo)); }
 	void addTexture(Texture* texture, unsigned int binding);
-	inline void addTextureSet(TextureSet* set) { textureSets.push_back(set); }
 
 	/* Method used to bind/unbind the VAO/other buffers before/after rendering */
 	void bindBuffers();
@@ -130,13 +100,6 @@ public:
 	inline void setNumInstances(GLsizei primcount) { this->primcount = primcount; }
 
 	inline GLuint getVAO() { return vao; }
-	inline std::unordered_map<unsigned int, UBO*>& getUBOs() { return ubos; }
-	UBO* getUBO(unsigned int id);
-	inline TextureSet* getTextureSet(unsigned int index) { return textureSets[index]; }
-	inline VkDescriptorPool& getVkDescriptorPool() { return descriptorPool; }
-	inline VkDescriptorSetLayout& getVkDescriptorSetLayout() { return descriptorSetLayout; }
-	inline VulkanGraphicsPipeline* getVkGraphicsPipeline() { return graphicsVkPipeline; }
-	const VkDescriptorSet* getVkDescriptorSet(unsigned int materialIndex);
 	inline std::vector<VkVertexInputBindingDescription> getVkBindingDescriptions() { return bindingVkDescriptions; }
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return attributeVkDescriptions; }
 	inline DescriptorSet* getDescriptorSet() { return descriptorSetModel; }

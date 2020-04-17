@@ -43,7 +43,7 @@ std::vector<VkSemaphore>                     Vulkan::imageAvailableSemaphores;
 std::vector<VkSemaphore>                     Vulkan::renderFinishedSemaphores;
 std::vector<VkFence>                         Vulkan::inFlightFences;
 unsigned int                                 Vulkan::currentFrame = 0;
-VulkanGraphicsPipeline*                      Vulkan::currentGraphicsPipeline = NULL;
+RenderPipeline*                              Vulkan::currentGraphicsPipeline = NULL;
 std::vector<Vulkan::DescriptorSetUpdateInfo> Vulkan::descriptorSetUpdateQueue;
 std::vector<Vulkan::UBOUpdateInfo>			 Vulkan::uboUpdateQueue;
 
@@ -522,11 +522,11 @@ void Vulkan::stopDraw() {
 	currentFrame = (currentFrame + 1) % swapChain->getImageCount();
 }
 
-void Vulkan::bindGraphicsPipeline(VulkanGraphicsPipeline* pipeline) {
+void Vulkan::bindGraphicsPipeline(RenderPipeline* pipeline) {
 	currentGraphicsPipeline = pipeline;
 
 	//Bind the pipeline
-	vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getInstance());
+	vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getVkInstance());
 }
 
 bool Vulkan::updateDescriptorSetFrame(DescriptorSetUpdateInfo& info) {

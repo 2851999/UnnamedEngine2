@@ -1,4 +1,18 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 4
+
+* Added RenderPipeline
+* Added RenderPipelineLayout
+* Added utils_vulkan
+
+* Moved RenderShader to a different file
+
+* Renamed ShaderBlock_Core struct to ShaderBlock_Camera in
+  ShaderInterface
+
+* Removed VulkanGraphicsPipeline
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 1 | Experimental 3
 
 * Began major rewrite of rendering system to integrate

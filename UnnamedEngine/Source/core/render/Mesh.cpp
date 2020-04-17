@@ -274,8 +274,6 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 		renderData->setIndicesVBO(vboIndices);
 	}
 
-	//Add the required UBO's for the shader being used
-	Renderer::getShaderInterface()->setup(renderData, setupShader->getID());
 	//Setup the materials for rendering
 	for (Material* material : materials)
 		material->setup();

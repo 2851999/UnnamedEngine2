@@ -17,7 +17,29 @@
  *****************************************************************************/
 
 #include "Camera.h"
+
+#include "Renderer.h"
 #include "../../utils/Utils.h"
+
+ /*****************************************************************************
+  * The Camera class
+  *****************************************************************************/
+
+Camera::Camera() {
+	//Create the descriptor set for per-camera information
+	descriptorSet = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA));
+	descriptorSet->setup();
+}
+
+Camera::~Camera() {
+	//Destroy the descriptor set
+	delete descriptorSet;
+}
+
+void Camera::updateUBO() {
+	//Update the UBO
+	descriptorSet->getUBO(0)->updateFrame(&shaderData, 0, sizeof(ShaderBlock_Camera));
+}
 
 /*****************************************************************************
  * The Camera2D class
@@ -29,6 +51,12 @@ void Camera2D::update() {
 //	Vector3f pos = getPosition();
 //	pos = Vector2f(utils_maths::roundNearest(pos.getX(), 0.1f), utils_maths::roundNearest(pos.getY(), 0.1f));
 	getViewMatrix().transformR(getPosition() * -1, getRotation(), getScale()); //Seems to go opposite direction as expected
+
+	//Update the position
+	shaderData.ue_cameraPosition = Vector4f(getPosition(), 0.0f);
+
+	//Update the UBO
+	updateUBO();
 }
 
 /*****************************************************************************
@@ -52,4 +80,10 @@ void Camera3D::update() {
 	//Update the SkyBox if there is one
 	if (skyBox)
 		skyBox->update(getPosition());
+
+	//Update the position
+	shaderData.ue_cameraPosition = Vector4f(getPosition(), 0.0f);
+
+	//Update the UBO
+	updateUBO();
 }

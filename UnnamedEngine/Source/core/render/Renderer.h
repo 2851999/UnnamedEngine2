@@ -23,6 +23,7 @@
 #include "FBO.h"
 #include "UBO.h"
 #include "ShaderInterface.h"
+#include "RenderPipeline.h"
 
 /*****************************************************************************
  * The Renderer class contains everything need to render a Mesh
@@ -32,13 +33,12 @@ class Renderer {
 private:
 	static ShaderInterface* shaderInterface;
 
-	static ShaderBlock_Core     shaderCoreData;
 	static ShaderBlock_Material shaderMaterialData;
 	static ShaderBlock_Skinning shaderSkinningData;
 
 	static std::vector<Camera*> cameras;
 	static std::vector<Texture*> boundTextures;
-	static std::unordered_map<unsigned int, std::vector<std::string>> renderShaderPaths;
+	static std::unordered_map<unsigned int, std::string> renderShaderPaths;
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
 	static Texture* blank;
 
@@ -118,7 +118,7 @@ public:
 	static Shader* loadEngineShader(std::string path);
 
 	/* Method used to add a RenderShader given a the paths to the shaders */
-	static void addRenderShader(unsigned int id, std::string forwardShaderPath, std::string deferredGeomShaderPath = "");
+	static void addRenderShader(unsigned int id, std::string forwardShaderPath);
 
 	/* Method used to load a render shader from the list of render shaders and store it ready for use */
 	static void loadRenderShader(unsigned int id);
@@ -137,8 +137,5 @@ public:
 
 	/* Returns the blank texture */
 	static inline Texture* getBlankTexture() { return blank; }
-
-	/* Returns a reference to the data for the core UBO */
-	static inline ShaderBlock_Core& getShaderBlock_Core() { return shaderCoreData; }
 };
 
