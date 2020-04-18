@@ -47,12 +47,6 @@ private:
 	 * called */
 	static std::vector<unsigned int> boundTexturesOldSize;
 
-	/* The current graphics state being used */
-	static GraphicsState* currentGraphicsState;
-
-	/* States whether graphics states should be ignored */
-	static bool shouldIgnoreGraphicsStates;
-
 	/* Assigns texture uniforms for a material */
 	static void assignMatTexture(Shader* shader, std::string type, Texture* texture);
 public:
@@ -63,8 +57,11 @@ public:
 	static const unsigned int SHADER_VULKAN_LIGHTING;
 
 	/* The names of default pipelines created for the engine */
+	static const unsigned int PIPELINE_MATERIAL;
+	static const unsigned int PIPELINE_SKY_BOX;
 	static const unsigned int PIPELINE_FONT;
 	static const unsigned int PIPELINE_LIGHTING;
+	static const unsigned int PIPELINE_LIGHTING_BLEND;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -98,17 +95,11 @@ public:
 	/* Method used to initialise the rendering system */
 	static void initialise();
 
-	/* Used to ignore the graphics states */
-	static inline void ignoreGraphicsStates(bool value) { shouldIgnoreGraphicsStates = value; }
-
 	/* TMethod used to apply the material properties to a shader assuming it is already being used */
 	static void useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material);
 
 	/* Method used to stop applying a material (unbinds required textures) */
 	static void stopUsingMaterial(Material* material);
-
-	/* Method used to apply a graphics state */
-	static void useGraphicsState(GraphicsState* state);
 
 	/* Method called at the start of the frame (to update per frame data) */
 	static void preRender();
@@ -130,9 +121,6 @@ public:
 
 	/* Method used to load a render shader from the list of render shaders and store it ready for use */
 	static void loadRenderShader(unsigned int id);
-
-	/* Assigns the graphics state for a particular shader based on its ID */
-	static void assignGraphicsState(GraphicsState* state, unsigned int shaderID);
 
 	/* Method used to add a RenderShader */
 	static void addRenderShader(RenderShader* renderShader);

@@ -29,6 +29,34 @@ class RenderPipelineLayout;
   *****************************************************************************/
 
 class RenderPipeline {
+public:
+	/* Various generalised blend states */
+	enum class BlendFactor {
+		ZERO, ONE, SRC_ALPHA, ONE_MINUS_SRC_ALPHA
+	};
+
+	/* Varuous generalised compare operations */
+	enum class CompareOperation {
+		LESS, EQUAL, LESS_OR_EQUAL, GREATER, GREATER_OR_EQUAL
+	};
+
+	/* Structure containing information about the depth state to be used */
+	struct DepthState {
+		bool depthTestEnable  = true;
+		bool depthWriteEnable = true;
+
+		CompareOperation depthCompareOp = CompareOperation::LESS_OR_EQUAL;
+	};
+
+	/* Structure containing information about the colour blend state to be used */
+	struct ColourBlendState {
+		bool blendEnabled = false;
+
+		BlendFactor srcRGB = BlendFactor::ONE;
+		BlendFactor dstRGB = BlendFactor::ZERO;
+		BlendFactor srcAlpha = BlendFactor::ONE;
+		BlendFactor dstAlpha = BlendFactor::ZERO;
+	};
 private:
 	/* The layout of this pipeline */
 	RenderPipelineLayout* layout;
@@ -38,6 +66,12 @@ private:
 
 	/* The pipeline instance (For Vulkan) */
 	VkPipeline vulkanPipeline = VK_NULL_HANDLE;
+
+	/* The colour blend state to use with this pipeline */
+	ColourBlendState colourBlendState;
+
+	/* The depth state to use with this pipeline */
+	DepthState depthState;
 public:
 	/* Structure used to store data required for creating a render pipeline */
 	struct VertexInputData {
@@ -46,13 +80,20 @@ public:
 	};
 
 	/* Constructor */
-	RenderPipeline(RenderShader* renderShader, VertexInputData vertexInputData);
+	RenderPipeline(RenderShader* renderShader, VertexInputData vertexInputData, ColourBlendState colourBlendState, DepthState depthState);
 
 	/* Destructor */
 	virtual ~RenderPipeline();
 
 	/* Method used to bind this pipeline for rendering */
 	void bind();
+
+	/* Methods used to convert the a generalised states to the one required by
+	   OpenGL/Vulkan */
+	GLenum convertToGL(BlendFactor factor);
+	VkBlendFactor convertToVk(BlendFactor factor);
+	GLenum convertToGL(CompareOperation op);
+	VkCompareOp convertToVk(CompareOperation op);
 
 	/* Getters */
 	inline RenderPipelineLayout* getLayout() { return layout; }

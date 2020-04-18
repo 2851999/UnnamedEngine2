@@ -31,6 +31,7 @@ private:
 	GameObject3D* model;
 	GameObject3D* model2;
 	GameObject3D* mit1;
+	Light* light;
 public:
 	static bool useVulkan;
 
@@ -79,7 +80,13 @@ void Test::created() {
 
 	renderScene = new RenderScene();
 	//renderScene->disableLighting();
-	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(0.5f, 2.0f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
+
+	utils_random::initialise();
+
+	//for (unsigned int i = 0; i < 20; ++i)
+		//renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-8.0f, 8.0f), utils_random::randomFloat(0.0f, 10.0f), utils_random::randomFloat(-8.0f, 8.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f))));
+	light = (new Light(Light::TYPE_POINT, Vector3f(1.5f, 1.2f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	renderScene->addLight(light);
 
 	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
 
@@ -110,20 +117,20 @@ void Test::update() {
 	//model2->getMesh()->getMaterial(1)->update();
 
 	if (Keyboard::isPressed(GLFW_KEY_UP))
-		model2->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
+		light->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
 	else if (Keyboard::isPressed(GLFW_KEY_DOWN))
-		model2->getTransform()->translate(0.0f, 0.0f, 0.008f * getDelta());
+		light->getTransform()->translate(0.0f, 0.0f, 0.008f * getDelta());
 	if (Keyboard::isPressed(GLFW_KEY_LEFT))
-		model2->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
+		light->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
-		model2->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
-	model2->update();
+		light->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
+	light->update();
 
 	//mit1->getMesh()->updateAnimation(getDeltaSeconds());
 }
 
 void Test::render() {
-	if (!getSettings().videoVulkan) {
+	if (! getSettings().videoVulkan) {
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

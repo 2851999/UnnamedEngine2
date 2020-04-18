@@ -1,4 +1,20 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 7
+
+* Added ColourBlendState structure to RenderPipeline to
+  change the blending state
+* Added DepthState structure to RenderPipeline to change
+ 
+ * Readded many light support (forward rendering)
+
+* Removed GraphicsState
+
+* Fixed bug: Fullscreen windows using vsync was capped to
+             60Hz even when a higher refresh rate monitor
+			 was used
+* Fixed bug: Text did not delete the pipeline used to render
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 1 | Experimental 6
 
 * Readded text rendering support

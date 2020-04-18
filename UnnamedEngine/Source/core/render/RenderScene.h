@@ -32,8 +32,11 @@ private:
 	/* Boolean that states whether lighting should be used or not */
 	bool lighting = true;
 
-	/* The light batch descriptor set */
-	DescriptorSet* descriptorSetLightBatch;
+	/* The ambient light used in phong shading */
+	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
+
+	/* The light batch descriptor sets */
+	std::vector<DescriptorSet*> descriptorSetLightBatches;
 
 	/* The data to be sent to the shader about a light batch when doing lighting */
 	ShaderBlock_LightBatch shaderLightBatchData;
@@ -41,6 +44,7 @@ private:
 	/* The pipelines required for rendering */
 	RenderPipeline* pipelineMaterial;
 	RenderPipeline* pipelineLighting;
+	RenderPipeline* pipelineLightingBlend;
 public:
 	/* The number of lights that can be rendered at once */
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
@@ -55,7 +59,7 @@ public:
 	void add(GameObject3D* object);
 
 	/* Adds a light to the scene */
-	inline void addLight(Light* light) { lights.push_back(light); }
+	void addLight(Light* light);
 
 	/* Method used to render all of the objects */
 	void render();
@@ -63,4 +67,7 @@ public:
 	/* Setters and getters */
 	inline void enableLighting() { this->lighting = true; }
 	inline void disableLighting() { this->lighting = false; }
+	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
+
+	inline Colour getAmbientLight() { return ambientLight; }
 };

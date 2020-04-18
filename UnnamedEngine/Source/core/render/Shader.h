@@ -24,7 +24,6 @@
 #include "Colour.h"
 #include "../Matrix.h"
 #include "../Resource.h"
-#include "GraphicsState.h"
 
 /*****************************************************************************
  * The Shader class handles a shader program

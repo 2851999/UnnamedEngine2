@@ -35,9 +35,6 @@ private:
 	/* The shader */
 	Shader* shader;
 
-	/* The graphics state this shader uses */
-	GraphicsState* graphicsState;
-
 	/* The layouts of the descriptor sets this render shader requires */
 	std::unordered_map<unsigned int, DescriptorSetLayout*> descriptorSetLayouts;
 
@@ -62,7 +59,6 @@ public:
 	/* Setters and getters */
 	inline unsigned int getID() { return id; }
 	inline Shader* getShader() { return shader; }
-	inline GraphicsState* getGraphicsState() { return graphicsState; }
 	inline std::unordered_map<unsigned int, DescriptorSetLayout*>& getDescriptorSetLayouts() { return descriptorSetLayouts; }
 	inline RenderPipelineLayout* getPipelineLayout() { return pipelineLayout; }
 };

@@ -111,7 +111,7 @@ ShaderInterface::ShaderInterface() {
 	add(DESCRIPTOR_SET_DEFAULT_MODEL, modelLayout);
 
 	//Light batch
-	DescriptorSetLayout* lightBatchLayout = new DescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH);
+	DescriptorSetLayout* lightBatchLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
 	lightBatchLayout->addUBO(sizeof(ShaderBlock_LightBatch), GL_STATIC_DRAW, UBO_BINDING_LOCATION_LIGHT_BATCH);
 	lightBatchLayout->setup();
 

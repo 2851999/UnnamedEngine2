@@ -26,14 +26,11 @@
  *****************************************************************************/
 
 RenderShader::RenderShader(unsigned int id, Shader* shader) : id(id), shader(shader) {
-	//Create the graphics state
-	graphicsState = new GraphicsState();
 	//Create the pipeline layout
 	pipelineLayout = new RenderPipelineLayout();
 }
 
 RenderShader::~RenderShader() {
-	delete graphicsState;
 	delete pipelineLayout;
 }
 

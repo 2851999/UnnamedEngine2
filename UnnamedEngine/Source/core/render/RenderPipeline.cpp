@@ -27,7 +27,7 @@
   * The RenderPipeline class
   *****************************************************************************/
 
-RenderPipeline::RenderPipeline(RenderShader* renderShader, VertexInputData vertexInputData) : layout(renderShader->getPipelineLayout()), renderShader(renderShader) {
+RenderPipeline::RenderPipeline(RenderShader* renderShader, VertexInputData vertexInputData, ColourBlendState colourBlendState, DepthState depthState) : layout(renderShader->getPipelineLayout()), renderShader(renderShader), colourBlendState(colourBlendState), depthState(depthState) {
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
@@ -108,9 +108,9 @@ RenderPipeline::RenderPipeline(RenderShader* renderShader, VertexInputData verte
 
 		VkPipelineDepthStencilStateCreateInfo depthStencil = {};
 		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-		depthStencil.depthTestEnable = VK_TRUE;
-		depthStencil.depthWriteEnable = renderShader->getGraphicsState()->depthWriteEnable ? VK_TRUE : VK_FALSE;
-		depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+		depthStencil.depthTestEnable = depthState.depthTestEnable ? VK_TRUE : VK_FALSE;
+		depthStencil.depthWriteEnable = depthState.depthWriteEnable ? VK_TRUE : VK_FALSE;
+		depthStencil.depthCompareOp = convertToVk(depthState.depthCompareOp);
 		depthStencil.depthBoundsTestEnable = VK_FALSE;
 		depthStencil.minDepthBounds = 0.0f; //Optional
 		depthStencil.maxDepthBounds = 1.0f; //Optional
@@ -121,17 +121,16 @@ RenderPipeline::RenderPipeline(RenderShader* renderShader, VertexInputData verte
 		//Per framebuffer (only have one here)
 		VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
 		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		colorBlendAttachment.blendEnable = colourBlendState.blendEnabled ? VK_TRUE : VK_FALSE;
 
-		if (renderShader->getGraphicsState()->alphaBlending) {
-			colorBlendAttachment.blendEnable = VK_TRUE;
-			colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-			colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		if (colourBlendState.blendEnabled) {
+			colorBlendAttachment.srcColorBlendFactor = convertToVk(colourBlendState.srcRGB);
+			colorBlendAttachment.dstColorBlendFactor = convertToVk(colourBlendState.dstRGB);
 			colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-			colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-			colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			colorBlendAttachment.srcAlphaBlendFactor = convertToVk(colourBlendState.srcAlpha);
+			colorBlendAttachment.dstAlphaBlendFactor = convertToVk(colourBlendState.srcAlpha);
 			colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
-		} else
-			colorBlendAttachment.blendEnable = VK_FALSE;
+		}
 
 		VkPipelineColorBlendStateCreateInfo colorBlending = {};
 		colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -177,9 +176,91 @@ RenderPipeline::~RenderPipeline() {
 void RenderPipeline::bind() {
 	if (BaseEngine::usingVulkan())
 		Vulkan::bindGraphicsPipeline(this);
-	else
+	else {
 		//Use the shader
 		renderShader->getShader()->use();
+
+		//Assign the depth state
+		if (depthState.depthTestEnable) {
+			glEnable(GL_DEPTH_TEST);
+
+			glDepthMask(depthState.depthWriteEnable);
+			glDepthFunc(convertToGL(depthState.depthCompareOp));
+		} else
+			glDisable(GL_DEPTH_TEST);
+
+		//Assign the blend state
+		if (colourBlendState.blendEnabled) {
+			glEnable(GL_BLEND);
+
+			glBlendFuncSeparate(convertToGL(colourBlendState.srcRGB), convertToGL(colourBlendState.dstRGB), convertToGL(colourBlendState.srcAlpha), convertToGL(colourBlendState.dstAlpha));
+		} else
+			glDisable(GL_BLEND);
+	}
+}
+
+GLenum RenderPipeline::convertToGL(BlendFactor factor) {
+	switch (factor) {
+		case BlendFactor::ZERO:
+			return GL_ZERO;
+		case BlendFactor::ONE:
+			return GL_ONE;
+		case BlendFactor::SRC_ALPHA:
+			return GL_SRC_ALPHA;
+		case BlendFactor::ONE_MINUS_SRC_ALPHA:
+			return GL_ONE_MINUS_SRC_ALPHA;
+		default:
+			return GL_ZERO;
+	}
+}
+
+VkBlendFactor RenderPipeline::convertToVk(BlendFactor factor) {
+	switch (factor) {
+		case BlendFactor::ZERO:
+			return VK_BLEND_FACTOR_ZERO;
+		case BlendFactor::ONE:
+			return VK_BLEND_FACTOR_ONE;
+		case BlendFactor::SRC_ALPHA:
+			return VK_BLEND_FACTOR_SRC_ALPHA;
+		case BlendFactor::ONE_MINUS_SRC_ALPHA:
+			return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		default:
+			return VK_BLEND_FACTOR_ZERO;
+	}
+}
+
+GLenum RenderPipeline::convertToGL(CompareOperation op) {
+	switch (op) {
+		case CompareOperation::LESS:
+			return GL_LESS;
+		case CompareOperation::EQUAL:
+			return GL_EQUAL;
+		case CompareOperation::LESS_OR_EQUAL:
+			return GL_LEQUAL;
+		case CompareOperation::GREATER:
+			return GL_GREATER;
+		case CompareOperation::GREATER_OR_EQUAL:
+			return GL_GEQUAL;
+		default:
+			return GL_LESS;
+	}
+}
+
+VkCompareOp RenderPipeline::convertToVk(CompareOperation op) {
+	switch (op) {
+		case CompareOperation::LESS:
+			return VK_COMPARE_OP_LESS;
+		case CompareOperation::EQUAL:
+			return VK_COMPARE_OP_EQUAL;
+		case CompareOperation::LESS_OR_EQUAL:
+			return VK_COMPARE_OP_LESS_OR_EQUAL;
+		case CompareOperation::GREATER:
+			return VK_COMPARE_OP_GREATER;
+		case CompareOperation::GREATER_OR_EQUAL:
+			return VK_COMPARE_OP_GREATER_OR_EQUAL;
+		default:
+			return VK_COMPARE_OP_LESS;
+	}
 }
 
 /*****************************************************************************

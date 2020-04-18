@@ -21,20 +21,16 @@
 #include "../../utils/Logging.h"
 
 RenderScene::RenderScene() {
-	//Setup the light batch descriptor set
-	descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
-	descriptorSetLightBatch->setup();
-
 	//Obtain the render pipelines
-	pipelineMaterial = new RenderPipeline(Renderer::getRenderShader(Renderer::SHADER_MATERIAL), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::Flag::NONE));
-	pipelineLighting = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING);
+	pipelineMaterial      = Renderer::getPipeline(Renderer::PIPELINE_MATERIAL);
+	pipelineLighting      = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING);
+	pipelineLightingBlend = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING_BLEND);
 }
 
 RenderScene::~RenderScene() {
 	//Go through and delete all created objects
-	delete pipelineMaterial;
-	delete descriptorSetLightBatch;
-
+	for (DescriptorSet* descriptorSetLightBatch : descriptorSetLightBatches)
+		delete descriptorSetLightBatch;
 	for (unsigned int i = 0; i < objects.size(); ++i)
 		delete objects[i];
 	objects.clear();
@@ -48,6 +44,18 @@ void RenderScene::add(GameObject3D* object) {
 	objects.push_back(object);
 }
 
+void RenderScene::addLight(Light* light) {
+	lights.push_back(light);
+
+	//Check if require new descriptor set for this
+	if (lights.size() % NUM_LIGHTS_IN_BATCH == 1) {
+		//Add a descriptor set for the new batch
+		DescriptorSet* descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+		descriptorSetLightBatch->setup();
+		descriptorSetLightBatches.push_back(descriptorSetLightBatch);
+	}
+}
+
 void RenderScene::render() {
 	//Check whether lighting is enabled
 	if (lighting) {
@@ -55,10 +63,13 @@ void RenderScene::render() {
 		pipelineLighting->bind();
 
 		//Ambient light (used for phong shading)
-		shaderLightBatchData.ue_lightAmbient = Vector4f(0.01f, 0.01f, 0.01f, 0.0f);
+		shaderLightBatchData.ue_lightAmbient = ambientLight;
 
 		//Number of lights in the current batch (assigned later)
 		unsigned int uniformNumLights;
+
+		//Current batch number
+		unsigned int batchNumber = 0;
 
 		//Go through the each of the light batches
 		for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
@@ -66,11 +77,11 @@ void RenderScene::render() {
 			uniformNumLights = utils_maths::min<unsigned int>(NUM_LIGHTS_IN_BATCH, lights.size() - b);
 
 			if (b == NUM_LIGHTS_IN_BATCH) {
-				//Require blending to combine the light batches
-				Logger::log("Require blending for more than " + utils_string::str(NUM_LIGHTS_IN_BATCH) + " lights which is not currently supported", "RenderSceneV2", LogType::Warning);
-
 				//Ambient light applied, so should remove it so not applied more than once
 				shaderLightBatchData.ue_lightAmbient = Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
+
+				//Start blending the results of other batches
+				pipelineLightingBlend->bind();
 			}
 
 			//The index of the light in the current batch (as it will appear in the shader)
@@ -89,13 +100,15 @@ void RenderScene::render() {
 			shaderLightBatchData.ue_numLights = uniformNumLights;
 
 			//Update the light batch UBO
-			descriptorSetLightBatch->getUBO(0)->updateFrame(&shaderLightBatchData, 0, sizeof(ShaderBlock_LightBatch));
+			descriptorSetLightBatches[batchNumber]->getUBO(0)->updateFrame(&shaderLightBatchData, 0, sizeof(ShaderBlock_LightBatch));
 
 			//Bind the descriptor set and render all of the objects
-			descriptorSetLightBatch->bind();
+			descriptorSetLightBatches[batchNumber]->bind();
 
 			for (unsigned int i = 0; i < objects.size(); ++i)
 				objects[i]->render();
+
+			batchNumber++;
 		}
 	} else {
 		//Use the material pipeline

@@ -43,16 +43,16 @@ Texture* Renderer::blank;
 
 std::vector<unsigned int> Renderer::boundTexturesOldSize;
 
-GraphicsState* Renderer::currentGraphicsState = nullptr;
-bool Renderer::shouldIgnoreGraphicsStates = false;
-
 const unsigned int Renderer::SHADER_MATERIAL          = 1;
 const unsigned int Renderer::SHADER_SKY_BOX           = 2;
 const unsigned int Renderer::SHADER_FONT              = 3;
 const unsigned int Renderer::SHADER_VULKAN_LIGHTING   = 4;
 
-const unsigned int Renderer::PIPELINE_FONT            = 1;
-const unsigned int Renderer::PIPELINE_LIGHTING        = 2;
+const unsigned int Renderer::PIPELINE_MATERIAL        = 1;
+const unsigned int Renderer::PIPELINE_SKY_BOX         = 2;
+const unsigned int Renderer::PIPELINE_FONT            = 3;
+const unsigned int Renderer::PIPELINE_LIGHTING        = 4;
+const unsigned int Renderer::PIPELINE_LIGHTING_BLEND  = 5;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -118,9 +118,43 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_VULKAN_LIGHTING, "VulkanLightingShader");
 	addRenderShader(SHADER_FONT,            "FontShader");
 
+	//Default colour blend state
+	RenderPipeline::ColourBlendState defaultBlendState;
+
+	//Colour blend state for transparency
+	RenderPipeline::ColourBlendState alphaBlendState;
+	alphaBlendState.blendEnabled = true;
+	alphaBlendState.srcRGB = RenderPipeline::BlendFactor::SRC_ALPHA;
+	alphaBlendState.dstRGB = RenderPipeline::BlendFactor::ONE_MINUS_SRC_ALPHA;
+	alphaBlendState.srcAlpha = RenderPipeline::BlendFactor::ONE;
+	alphaBlendState.dstAlpha = RenderPipeline::BlendFactor::ZERO;
+
+	//Colour blend state for blending lighting
+	RenderPipeline::ColourBlendState alphaLightBlendState;
+	alphaLightBlendState.blendEnabled = true;
+	alphaLightBlendState.srcRGB = RenderPipeline::BlendFactor::ONE;
+	alphaLightBlendState.dstRGB = RenderPipeline::BlendFactor::ONE;
+	alphaLightBlendState.srcAlpha = RenderPipeline::BlendFactor::ONE;
+	alphaLightBlendState.dstAlpha = RenderPipeline::BlendFactor::ZERO;
+
+	//Depth state for normal depth testing
+	RenderPipeline::DepthState defaultDepthState;
+
+	//Depth state for lighting
+	RenderPipeline::DepthState lightDepthState;
+	lightDepthState.depthCompareOp = RenderPipeline::CompareOperation::LESS;
+
+	//Depth state for light blending
+	RenderPipeline::DepthState lightBlendDepthState;
+	lightBlendDepthState.depthCompareOp   = RenderPipeline::CompareOperation::LESS_OR_EQUAL;
+	lightBlendDepthState.depthWriteEnable = false;
+
 	//Setup the default pipelines
-	addPipeline(PIPELINE_FONT,     new RenderPipeline(getRenderShader(SHADER_FONT), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS)));
-	addPipeline(PIPELINE_LIGHTING, new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE)));
+	addPipeline(PIPELINE_MATERIAL,       new RenderPipeline(getRenderShader(SHADER_MATERIAL), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, defaultDepthState));
+	addPipeline(PIPELINE_SKY_BOX,        new RenderPipeline(getRenderShader(SHADER_SKY_BOX), MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, defaultDepthState));
+	addPipeline(PIPELINE_FONT,           new RenderPipeline(getRenderShader(SHADER_FONT), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState));
+	addPipeline(PIPELINE_LIGHTING,       new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState));
+	addPipeline(PIPELINE_LIGHTING_BLEND, new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
@@ -129,18 +163,8 @@ void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, M
 }
 
 void Renderer::stopUsingMaterial(Material* material) {
-	if (! shouldIgnoreGraphicsStates)
-		//Unbind the textures
-		material->getDescriptorSet()->unbind();
-}
-
-void Renderer::useGraphicsState(GraphicsState* graphicsState) {
-	//Ensure using OpenGL
-	if (! BaseEngine::usingVulkan() && ! shouldIgnoreGraphicsStates) {
-		//Apply the new state
-		graphicsState->applyGL(currentGraphicsState);
-		currentGraphicsState = graphicsState;
-	}
+	//Unbind the textures
+	material->getDescriptorSet()->unbind();
 }
 
 void Renderer::preRender() {
@@ -162,9 +186,6 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		UBO* shaderSkinningUBO = NULL;
 		if (renderData->getDescriptorSet()->getNumUBOs() > 1 && renderData->getDescriptorSet()->getUBO(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING)
 			shaderSkinningUBO = renderData->getDescriptorSet()->getUBO(1);
-
-		//Use the correct graphics state
-		useGraphicsState(renderShader->getGraphicsState());
 
 		renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
 		renderData->getShaderBlock_Model().ue_modelMatrix = modelMatrix;
@@ -253,24 +274,11 @@ void Renderer::loadRenderShader(unsigned int id) {
 	RenderShader* renderShader = new RenderShader(id, forwardShader);
 	//Add required structures
 	shaderInterface->setup(id, renderShader);
-	//Assign the graphics state for the render shader
-	assignGraphicsState(renderShader->getGraphicsState(), id);
 	//Setup
 	renderShader->setup();
 
 	//Add the shader
 	addRenderShader(renderShader);
-}
-
-void Renderer::assignGraphicsState(GraphicsState* state, unsigned int shaderID) {
-	//Check the shader ID
-	if (shaderID == SHADER_SKY_BOX)
-		//Assign the state to use
-		state->depthWriteEnable = true; //???? Broken if not used
-	else if (shaderID == SHADER_FONT)
-		state->alphaBlending = true;
-	else if (shaderID == SHADER_MATERIAL)
-		state->alphaBlending = true;
 }
 
 void Renderer::addRenderShader(RenderShader* renderShader) {
