@@ -26,6 +26,9 @@ private:
 	/* Objects within this scene */
 	std::vector<GameObject3D*> objects;
 
+	/* Skinned objects within this scene */
+	std::vector<GameObject3D*> skinnedObjects;
+
 	/* Lights in this scene */
 	std::vector<Light*> lights;
 
@@ -45,6 +48,8 @@ private:
 	RenderPipeline* pipelineMaterial;
 	RenderPipeline* pipelineLighting;
 	RenderPipeline* pipelineLightingBlend;
+	RenderPipeline* pipelineLightingSkinning;
+	RenderPipeline* pipelineLightingSkinningBlend;
 public:
 	/* The number of lights that can be rendered at once */
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;

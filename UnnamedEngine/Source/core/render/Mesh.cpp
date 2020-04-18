@@ -213,7 +213,8 @@ RenderPipeline::VertexInputData MeshData::computeVertexInputData(unsigned int nu
 			} else {
 				otherData.push_back(current);
 			}
-		}
+		} else
+			otherData.push_back(current);
 	}
 	//States whether bone data is included
 	bool hasBones = false;
@@ -248,11 +249,11 @@ RenderPipeline::VertexInputData MeshData::computeVertexInputData(unsigned int nu
 
 	if (hasBones) {
 		//Add bone info
-		data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, currentBinding, VK_FORMAT_R32G32B32A32_SINT, 0));
-		data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, 4 * sizeof(int), VK_VERTEX_INPUT_RATE_VERTEX));
-		currentBinding++;
 		data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, currentBinding, VK_FORMAT_R32G32B32A32_SFLOAT, 0));
 		data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, 4 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+		currentBinding++;
+		data.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, currentBinding, VK_FORMAT_R32G32B32A32_SINT, 0));
+		data.bindings.push_back(utils_vulkan::initVertexInputBindings(currentBinding, 4 * sizeof(int), VK_VERTEX_INPUT_RATE_VERTEX));
 	}
 
 	return data;

@@ -22,9 +22,11 @@
 
 RenderScene::RenderScene() {
 	//Obtain the render pipelines
-	pipelineMaterial      = Renderer::getPipeline(Renderer::PIPELINE_MATERIAL);
-	pipelineLighting      = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING);
-	pipelineLightingBlend = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING_BLEND);
+	pipelineMaterial              = Renderer::getPipeline(Renderer::PIPELINE_MATERIAL);
+	pipelineLighting              = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING);
+	pipelineLightingBlend         = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING_BLEND);
+	pipelineLightingSkinning      = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING_SKINNING);
+	pipelineLightingSkinningBlend = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING_SKINNING_BLEND);
 }
 
 RenderScene::~RenderScene() {
@@ -34,6 +36,9 @@ RenderScene::~RenderScene() {
 	for (unsigned int i = 0; i < objects.size(); ++i)
 		delete objects[i];
 	objects.clear();
+	for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
+		delete skinnedObjects[i];
+	skinnedObjects.clear();
 	for (unsigned int i = 0; i < lights.size(); ++i)
 		delete lights[i];
 	lights.clear();
@@ -41,7 +46,10 @@ RenderScene::~RenderScene() {
 
 void RenderScene::add(GameObject3D* object) {
 	//Add the object to the scene
-	objects.push_back(object);
+	if (! object->getMesh()->hasSkeleton())
+		objects.push_back(object);
+	else
+		skinnedObjects.push_back(object);
 }
 
 void RenderScene::addLight(Light* light) {
@@ -59,9 +67,6 @@ void RenderScene::addLight(Light* light) {
 void RenderScene::render() {
 	//Check whether lighting is enabled
 	if (lighting) {
-		//Use the lighting pipeline
-		pipelineLighting->bind();
-
 		//Ambient light (used for phong shading)
 		shaderLightBatchData.ue_lightAmbient = ambientLight;
 
@@ -76,13 +81,9 @@ void RenderScene::render() {
 			//Calculate the number of lights in this set
 			uniformNumLights = utils_maths::min<unsigned int>(NUM_LIGHTS_IN_BATCH, lights.size() - b);
 
-			if (b == NUM_LIGHTS_IN_BATCH) {
+			if (b == NUM_LIGHTS_IN_BATCH)
 				//Ambient light applied, so should remove it so not applied more than once
 				shaderLightBatchData.ue_lightAmbient = Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
-
-				//Start blending the results of other batches
-				pipelineLightingBlend->bind();
-			}
 
 			//The index of the light in the current batch (as it will appear in the shader)
 			unsigned int lightIndexInBatch;
@@ -102,13 +103,51 @@ void RenderScene::render() {
 			//Update the light batch UBO
 			descriptorSetLightBatches[batchNumber]->getUBO(0)->updateFrame(&shaderLightBatchData, 0, sizeof(ShaderBlock_LightBatch));
 
-			//Bind the descriptor set and render all of the objects
-			descriptorSetLightBatches[batchNumber]->bind();
-
-			for (unsigned int i = 0; i < objects.size(); ++i)
-				objects[i]->render();
-
 			batchNumber++;
+		}
+		if (objects.size() > 0) {
+
+			batchNumber = 0;
+
+			pipelineLighting->bind();
+
+			//Go through the each of the light batches
+			for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
+
+				if (b == NUM_LIGHTS_IN_BATCH)
+					//Start blending the results of other batches
+					pipelineLightingBlend->bind();
+
+				//Bind the descriptor set and render all of the objects
+				descriptorSetLightBatches[batchNumber]->bind();
+
+				for (unsigned int i = 0; i < objects.size(); ++i)
+					objects[i]->render();
+
+				batchNumber++;
+			}
+		}
+
+		if (skinnedObjects.size() > 0) {
+
+			batchNumber = 0;
+
+			pipelineLightingSkinning->bind();
+
+			//Go through the each of the light batches
+			for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
+				if (b == NUM_LIGHTS_IN_BATCH)
+					//Start blending the results of other batches
+					pipelineLightingSkinningBlend->bind();
+
+				//Bind the descriptor set and render all of the objects
+				descriptorSetLightBatches[batchNumber]->bind();
+
+				for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
+					skinnedObjects[i]->render();
+
+				batchNumber++;
+			}
 		}
 	} else {
 		//Use the material pipeline

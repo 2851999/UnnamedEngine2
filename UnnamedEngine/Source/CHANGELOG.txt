@@ -1,11 +1,16 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 8
+
+* Readded skinning support
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 1 | Experimental 7
 
 * Added ColourBlendState structure to RenderPipeline to
   change the blending state
 * Added DepthState structure to RenderPipeline to change
  
- * Readded many light support (forward rendering)
+* Readded many light support (forward rendering)
 
 * Removed GraphicsState
 

@@ -44,7 +44,7 @@ public:
 	virtual void onKeyPressed(int key) override;
 };
 
-bool Test::useVulkan = true;
+bool Test::useVulkan = false;
 
 void Test::initialise() {
 	getSettings().videoVulkan = useVulkan;
@@ -63,6 +63,7 @@ void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("VulkanLightingSkinningShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
@@ -77,14 +78,15 @@ void Test::created() {
 	MeshLoader::loadDiffuseTexturesAsSRGB = false;
 
 	unsigned int shader = Renderer::SHADER_VULKAN_LIGHTING;
+	unsigned int shaderSkinning = Renderer::SHADER_VULKAN_LIGHTING_SKINNING;
 
 	renderScene = new RenderScene();
 	//renderScene->disableLighting();
 
 	utils_random::initialise();
 
-	//for (unsigned int i = 0; i < 20; ++i)
-		//renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-8.0f, 8.0f), utils_random::randomFloat(0.0f, 10.0f), utils_random::randomFloat(-8.0f, 8.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f))));
+	for (unsigned int i = 0; i < 20; ++i)
+		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-8.0f, 8.0f), utils_random::randomFloat(0.0f, 10.0f), utils_random::randomFloat(-8.0f, 8.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f))));
 	light = (new Light(Light::TYPE_POINT, Vector3f(1.5f, 1.2f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	renderScene->addLight(light);
 
@@ -103,8 +105,8 @@ void Test::created() {
 	renderScene->add(model2);
 
 	//mitsuba-sphere.obj
-	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), shader);
-	//mit1->getMesh()->getSkeleton()->startAnimation("");
+	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), shaderSkinning);
+	mit1->getMesh()->getSkeleton()->startAnimation("");
 	mit1->setPosition(10.0f, 1.0f, 0.0f);
 	mit1->update();
 	renderScene->add(mit1);
@@ -126,7 +128,7 @@ void Test::update() {
 		light->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 	light->update();
 
-	//mit1->getMesh()->updateAnimation(getDeltaSeconds());
+	mit1->getMesh()->updateAnimation(getDeltaSeconds());
 }
 
 void Test::render() {

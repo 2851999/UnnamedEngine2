@@ -55,6 +55,7 @@ public:
 	static const unsigned int SHADER_SKY_BOX;
 	static const unsigned int SHADER_FONT;
 	static const unsigned int SHADER_VULKAN_LIGHTING;
+	static const unsigned int SHADER_VULKAN_LIGHTING_SKINNING;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int PIPELINE_MATERIAL;
@@ -62,6 +63,8 @@ public:
 	static const unsigned int PIPELINE_FONT;
 	static const unsigned int PIPELINE_LIGHTING;
 	static const unsigned int PIPELINE_LIGHTING_BLEND;
+	static const unsigned int PIPELINE_LIGHTING_SKINNING;
+	static const unsigned int PIPELINE_LIGHTING_SKINNING_BLEND;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

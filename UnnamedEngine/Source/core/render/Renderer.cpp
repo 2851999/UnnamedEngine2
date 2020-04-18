@@ -43,16 +43,19 @@ Texture* Renderer::blank;
 
 std::vector<unsigned int> Renderer::boundTexturesOldSize;
 
-const unsigned int Renderer::SHADER_MATERIAL          = 1;
-const unsigned int Renderer::SHADER_SKY_BOX           = 2;
-const unsigned int Renderer::SHADER_FONT              = 3;
-const unsigned int Renderer::SHADER_VULKAN_LIGHTING   = 4;
+const unsigned int Renderer::SHADER_MATERIAL                  = 1;
+const unsigned int Renderer::SHADER_SKY_BOX                   = 2;
+const unsigned int Renderer::SHADER_FONT                      = 3;
+const unsigned int Renderer::SHADER_VULKAN_LIGHTING           = 4;
+const unsigned int Renderer::SHADER_VULKAN_LIGHTING_SKINNING  = 5;
 
-const unsigned int Renderer::PIPELINE_MATERIAL        = 1;
-const unsigned int Renderer::PIPELINE_SKY_BOX         = 2;
-const unsigned int Renderer::PIPELINE_FONT            = 3;
-const unsigned int Renderer::PIPELINE_LIGHTING        = 4;
-const unsigned int Renderer::PIPELINE_LIGHTING_BLEND  = 5;
+const unsigned int Renderer::PIPELINE_MATERIAL                = 1;
+const unsigned int Renderer::PIPELINE_SKY_BOX                 = 2;
+const unsigned int Renderer::PIPELINE_FONT                    = 3;
+const unsigned int Renderer::PIPELINE_LIGHTING                = 4;
+const unsigned int Renderer::PIPELINE_LIGHTING_BLEND          = 5;
+const unsigned int Renderer::PIPELINE_LIGHTING_SKINNING       = 6;
+const unsigned int Renderer::PIPELINE_LIGHTING_SKINNING_BLEND = 7;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -113,10 +116,11 @@ void Renderer::initialise() {
 	blank = Texture::loadTexture("resources/textures/blank.png");
 
 	//Setup the shaders
-	addRenderShader(SHADER_MATERIAL,        "MaterialShader");
-	addRenderShader(SHADER_SKY_BOX,         "SkyBoxShader");
-	addRenderShader(SHADER_VULKAN_LIGHTING, "VulkanLightingShader");
-	addRenderShader(SHADER_FONT,            "FontShader");
+	addRenderShader(SHADER_MATERIAL,                 "MaterialShader");
+	addRenderShader(SHADER_SKY_BOX,                  "SkyBoxShader");
+	addRenderShader(SHADER_VULKAN_LIGHTING,          "VulkanLightingShader");
+	addRenderShader(SHADER_FONT,                     "FontShader");
+	addRenderShader(SHADER_VULKAN_LIGHTING_SKINNING, "VulkanLightingSkinningShader");
 
 	//Default colour blend state
 	RenderPipeline::ColourBlendState defaultBlendState;
@@ -150,11 +154,13 @@ void Renderer::initialise() {
 	lightBlendDepthState.depthWriteEnable = false;
 
 	//Setup the default pipelines
-	addPipeline(PIPELINE_MATERIAL,       new RenderPipeline(getRenderShader(SHADER_MATERIAL), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, defaultDepthState));
-	addPipeline(PIPELINE_SKY_BOX,        new RenderPipeline(getRenderShader(SHADER_SKY_BOX), MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, defaultDepthState));
-	addPipeline(PIPELINE_FONT,           new RenderPipeline(getRenderShader(SHADER_FONT), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState));
-	addPipeline(PIPELINE_LIGHTING,       new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState));
-	addPipeline(PIPELINE_LIGHTING_BLEND, new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
+	addPipeline(PIPELINE_MATERIAL,                new RenderPipeline(getRenderShader(SHADER_MATERIAL), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, defaultDepthState));
+	addPipeline(PIPELINE_SKY_BOX,                 new RenderPipeline(getRenderShader(SHADER_SKY_BOX), MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, defaultDepthState));
+	addPipeline(PIPELINE_FONT,                    new RenderPipeline(getRenderShader(SHADER_FONT), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState));
+	addPipeline(PIPELINE_LIGHTING,                new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState));
+	addPipeline(PIPELINE_LIGHTING_BLEND,          new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
+	addPipeline(PIPELINE_LIGHTING_SKINNING,       new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState));
+	addPipeline(PIPELINE_LIGHTING_SKINNING_BLEND, new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
@@ -184,7 +190,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		//Obtain the required UBO's for rendering
 		UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
 		UBO* shaderSkinningUBO = NULL;
-		if (renderData->getDescriptorSet()->getNumUBOs() > 1 && renderData->getDescriptorSet()->getUBO(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING)
+		if (renderData->getDescriptorSet()->getNumUBOs() > 1 && renderData->getDescriptorSet()->getUBO(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
 			shaderSkinningUBO = renderData->getDescriptorSet()->getUBO(1);
 
 		renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
