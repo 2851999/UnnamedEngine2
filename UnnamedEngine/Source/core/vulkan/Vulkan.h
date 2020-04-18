@@ -26,7 +26,7 @@
 #include "../render/UBO.h"
 #include "../render/Texture.h"
 #include "../render/Mesh.h"
-#include "../render/RenderPipeline.h"
+#include "../render/GraphicsPipeline.h"
 
 class DescriptorSet;
 
@@ -62,9 +62,6 @@ private:
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
-
-	/* The current bound graphics pipeline (Used for descriptor set binding) */
-	static RenderPipeline* currentGraphicsPipeline;
 
 	/* Structure for storing info about a requested descriptor set update */
 	struct DescriptorSetUpdateInfo {
@@ -164,9 +161,6 @@ public:
 	/* Method to stop drawing a frame (and recording to the command buffer) */
 	static void stopDraw();
 
-	/* Method to bind a graphics pipeline for rendering */
-	static void bindGraphicsPipeline(RenderPipeline* pipeline);
-
 	/* Method to update a descriptor set */
 	static void updateDescriptorSet(DescriptorSet* set);
 
@@ -211,7 +205,6 @@ public:
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }
 	static inline unsigned int getNextFrame() { return (currentFrame + 1) % swapChain->getImageCount(); }
-	static inline RenderPipeline* getCurrentGraphicsPipeline() { return currentGraphicsPipeline; }
 };
 
 

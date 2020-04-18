@@ -190,7 +190,7 @@ void DescriptorSet::bind() {
 	//Check if using Vulkan or not
 	if (BaseEngine::usingVulkan())
 		//Bind the descriptor set for Vulkan
-		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, Vulkan::getCurrentGraphicsPipeline()->getLayout()->getVkInstance(), layout->getSetNumber(), 1, &vulkanDescriptorSets[Vulkan::getCurrentFrame()], 0, nullptr);
+		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, Renderer::getCurrentGraphicsPipeline()->getLayout()->getVkInstance(), layout->getSetNumber(), 1, &vulkanDescriptorSets[Vulkan::getCurrentFrame()], 0, nullptr);
 	else {
 		//Need to bind the appropriate UBOs and textures for OpenGL
 
@@ -211,7 +211,7 @@ void DescriptorSet::bind() {
 
 void DescriptorSet::unbind() {
 	//Ensure not using Vulkan
-	if (!BaseEngine::usingVulkan()) {
+	if (! BaseEngine::usingVulkan()) {
 		//Unbind the textures
 		for (TextureInfo& info : textures) {
 			if (info.texture != NULL) {

@@ -21,14 +21,14 @@
 #include "DescriptorSet.h"
 #include "RenderShader.h"
 
-class RenderPipelineLayout;
+class GraphicsPipelineLayout;
 
  /*****************************************************************************
-  * The RenderPipeline class responsible for handleing Vulkan pipelines and to
+  * The GraphicsPipeline class responsible for handleing Vulkan pipelines and to
   * produce similar behaviour in OpenGL
   *****************************************************************************/
 
-class RenderPipeline {
+class GraphicsPipeline {
 public:
 	/* Various generalised blend states */
 	enum class BlendFactor {
@@ -59,7 +59,7 @@ public:
 	};
 private:
 	/* The layout of this pipeline */
-	RenderPipelineLayout* layout;
+	GraphicsPipelineLayout* layout;
 
 	/* The shader used with this pipeline */
 	RenderShader* renderShader;
@@ -80,10 +80,10 @@ public:
 	};
 
 	/* Constructor */
-	RenderPipeline(RenderShader* renderShader, VertexInputData vertexInputData, ColourBlendState colourBlendState, DepthState depthState);
+	GraphicsPipeline(RenderShader* renderShader, VertexInputData vertexInputData, ColourBlendState colourBlendState, DepthState depthState);
 
 	/* Destructor */
-	virtual ~RenderPipeline();
+	virtual ~GraphicsPipeline();
 
 	/* Method used to bind this pipeline for rendering */
 	void bind();
@@ -96,25 +96,25 @@ public:
 	VkCompareOp convertToVk(CompareOperation op);
 
 	/* Getters */
-	inline RenderPipelineLayout* getLayout() { return layout; }
+	inline GraphicsPipelineLayout* getLayout() { return layout; }
 	inline VkPipeline& getVkInstance() { return vulkanPipeline; }
 };
 
 /*****************************************************************************
- * The RenderPipelineLayout class responsible for handleing the layout of a
+ * The GraphicsPipelineLayout class responsible for handleing the layout of a
  * RenderPipeline
  *****************************************************************************/
 
-class RenderPipelineLayout {
+class GraphicsPipelineLayout {
 private:
 	/* The pipeline layout instance (For Vulkan) */
 	VkPipelineLayout vulkanPipelineLayout = VK_NULL_HANDLE;
 public:
 	/* Constructor */
-	RenderPipelineLayout();
+	GraphicsPipelineLayout();
 
 	/* Destructor */
-	virtual ~RenderPipelineLayout();
+	virtual ~GraphicsPipelineLayout();
 
 	/* Method used to setup this layout */
 	void setup(RenderShader* renderShader);

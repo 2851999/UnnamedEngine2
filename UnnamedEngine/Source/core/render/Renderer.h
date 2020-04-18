@@ -23,7 +23,7 @@
 #include "FBO.h"
 #include "UBO.h"
 #include "ShaderInterface.h"
-#include "RenderPipeline.h"
+#include "GraphicsPipeline.h"
 
 /*****************************************************************************
  * The Renderer class contains everything need to render a Mesh
@@ -37,18 +37,13 @@ private:
 	static ShaderBlock_Skinning shaderSkinningData;
 
 	static std::vector<Camera*> cameras;
-	static std::vector<Texture*> boundTextures;
 	static std::unordered_map<unsigned int, std::string> renderShaderPaths;
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
-	static std::unordered_map<unsigned int, RenderPipeline*> renderPipelines;
+	static std::unordered_map<unsigned int, GraphicsPipeline*> graphicsPipelines;
 	static Texture* blank;
 
-	/* Stores the sizes of the boundTextures array, at the moment saveTextures() is
-	 * called */
-	static std::vector<unsigned int> boundTexturesOldSize;
-
-	/* Assigns texture uniforms for a material */
-	static void assignMatTexture(Shader* shader, std::string type, Texture* texture);
+	/* The current bound graphics pipeline (Used for descriptor set binding) */
+	static GraphicsPipeline* currentGraphicsPipeline;
 public:
 	/* The names of default shaders loaded into the engine */
 	static const unsigned int SHADER_MATERIAL;
@@ -58,13 +53,13 @@ public:
 	static const unsigned int SHADER_VULKAN_LIGHTING_SKINNING;
 
 	/* The names of default pipelines created for the engine */
-	static const unsigned int PIPELINE_MATERIAL;
-	static const unsigned int PIPELINE_SKY_BOX;
-	static const unsigned int PIPELINE_FONT;
-	static const unsigned int PIPELINE_LIGHTING;
-	static const unsigned int PIPELINE_LIGHTING_BLEND;
-	static const unsigned int PIPELINE_LIGHTING_SKINNING;
-	static const unsigned int PIPELINE_LIGHTING_SKINNING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
+	static const unsigned int GRAPHICS_PIPELINE_SKY_BOX;
+	static const unsigned int GRAPHICS_PIPELINE_FONT;
+	static const unsigned int GRAPHICS_PIPELINE_LIGHTING;
+	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING;
+	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -74,27 +69,6 @@ public:
 	/* Returns the current camera for rendering */
 	static Camera* getCamera();
 
-	/* Methods used to bind/unbind a texture */
-	static GLuint bindTexture(Texture* texture);
-	static void unbindTexture();
-	/* Unbinds all textures */
-	static inline void unbindTextures() {
-		while (boundTextures.size() > 0)
-			unbindTexture();
-	}
-
-	/* Used to store the current number of boundTextures so new textures
-	 * can be released later */
-	static void saveTextures();
-
-	/* Releases extra textures so that the boundTextures size is the same
-	 * as it was when saveTextures() was last called */
-	static void releaseNewTextures();
-
-	static unsigned int getNumBoundTextures() {
-		return boundTextures.size();
-	}
-
 	/* Method used to initialise the rendering system */
 	static void initialise();
 
@@ -103,9 +77,6 @@ public:
 
 	/* Method used to stop applying a material (unbinds required textures) */
 	static void stopUsingMaterial(Material* material);
-
-	/* Method called at the start of the frame (to update per frame data) */
-	static void preRender();
 
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
@@ -120,7 +91,10 @@ public:
 	static void addRenderShader(unsigned int id, std::string forwardShaderPath);
 
 	/* Method used to add a RenderPipeline */
-	static void addPipeline(unsigned int id, RenderPipeline* pipeline);
+	static void addGraphicsPipeline(unsigned int id, GraphicsPipeline* pipeline);
+
+	/* Method to assign the current graphics pipeline */
+	static void setCurrentGraphicsPipeline(GraphicsPipeline* pipeline);
 
 	/* Method used to load a render shader from the list of render shaders and store it ready for use */
 	static void loadRenderShader(unsigned int id);
@@ -134,10 +108,13 @@ public:
 	/* Returns the RenderShader with a specific id */
 	static RenderShader* getRenderShader(unsigned int id);
 
-	/* Returns the RenderPipeline with a specific id */
-	static RenderPipeline* getPipeline(unsigned int id);
+	/* Returns the GraphicsPipeline with a specific id */
+	static GraphicsPipeline* getGraphicsPipeline(unsigned int id);
 
 	/* Returns the blank texture */
 	static inline Texture* getBlankTexture() { return blank; }
+
+	/* Returns the last bound graphics pipeline */
+	static inline GraphicsPipeline* getCurrentGraphicsPipeline() { return currentGraphicsPipeline; }
 };
 

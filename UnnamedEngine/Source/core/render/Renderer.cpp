@@ -35,13 +35,12 @@ ShaderBlock_Material Renderer::shaderMaterialData;
 ShaderBlock_Skinning Renderer::shaderSkinningData;
 
 std::vector<Camera*> Renderer::cameras;
-std::vector<Texture*> Renderer::boundTextures;
 std::unordered_map<unsigned int, std::string> Renderer::renderShaderPaths;
 std::unordered_map<unsigned int, RenderShader*> Renderer::loadedRenderShaders;
-std::unordered_map<unsigned int, RenderPipeline*> Renderer::renderPipelines;
+std::unordered_map<unsigned int, GraphicsPipeline*> Renderer::graphicsPipelines;
 Texture* Renderer::blank;
 
-std::vector<unsigned int> Renderer::boundTexturesOldSize;
+GraphicsPipeline* Renderer::currentGraphicsPipeline = NULL;
 
 const unsigned int Renderer::SHADER_MATERIAL                  = 1;
 const unsigned int Renderer::SHADER_SKY_BOX                   = 2;
@@ -49,13 +48,13 @@ const unsigned int Renderer::SHADER_FONT                      = 3;
 const unsigned int Renderer::SHADER_VULKAN_LIGHTING           = 4;
 const unsigned int Renderer::SHADER_VULKAN_LIGHTING_SKINNING  = 5;
 
-const unsigned int Renderer::PIPELINE_MATERIAL                = 1;
-const unsigned int Renderer::PIPELINE_SKY_BOX                 = 2;
-const unsigned int Renderer::PIPELINE_FONT                    = 3;
-const unsigned int Renderer::PIPELINE_LIGHTING                = 4;
-const unsigned int Renderer::PIPELINE_LIGHTING_BLEND          = 5;
-const unsigned int Renderer::PIPELINE_LIGHTING_SKINNING       = 6;
-const unsigned int Renderer::PIPELINE_LIGHTING_SKINNING_BLEND = 7;
+const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                = 1;
+const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                 = 2;
+const unsigned int Renderer::GRAPHICS_PIPELINE_FONT                    = 3;
+const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING                = 4;
+const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND          = 5;
+const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING       = 6;
+const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND = 7;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -74,41 +73,6 @@ Camera* Renderer::getCamera() {
 	}
 }
 
-GLuint Renderer::bindTexture(Texture* texture) {
-	//Try and locate it if it has already been bound
-	unsigned int loc = std::find(boundTextures.begin(), boundTextures.end(), texture) - boundTextures.begin();
-	//Check whether it has already been bound
-	if (loc < boundTextures.size()) {
-		boundTextures.push_back(texture);
-		//It has so return the correct active texture
-		return loc + 10;
-	} else {
-		glActiveTexture(GL_TEXTURE10 + boundTextures.size());
-		texture->bind();
-		boundTextures.push_back(texture);
-		return boundTextures.size() + 10 - 1;
-	}
-}
-
-void Renderer::unbindTexture() {
-	glActiveTexture(GL_TEXTURE10 + boundTextures.size() - 1);
-	boundTextures[boundTextures.size() - 1]->unbind();
-	boundTextures.pop_back();
-}
-
-void Renderer::saveTextures() {
-	boundTexturesOldSize.push_back(boundTextures.size());
-}
-
-void Renderer::releaseNewTextures() {
-	//Get the previous size
-	unsigned int previousSize = boundTexturesOldSize[boundTexturesOldSize.size() - 1];
-	boundTexturesOldSize.pop_back();
-
-	while (boundTextures.size() > previousSize)
-		unbindTexture();
-}
-
 void Renderer::initialise() {
 	//Create the shader interface
 	shaderInterface = new ShaderInterface();
@@ -123,44 +87,44 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_VULKAN_LIGHTING_SKINNING, "VulkanLightingSkinningShader");
 
 	//Default colour blend state
-	RenderPipeline::ColourBlendState defaultBlendState;
+	GraphicsPipeline::ColourBlendState defaultBlendState;
 
 	//Colour blend state for transparency
-	RenderPipeline::ColourBlendState alphaBlendState;
+	GraphicsPipeline::ColourBlendState alphaBlendState;
 	alphaBlendState.blendEnabled = true;
-	alphaBlendState.srcRGB = RenderPipeline::BlendFactor::SRC_ALPHA;
-	alphaBlendState.dstRGB = RenderPipeline::BlendFactor::ONE_MINUS_SRC_ALPHA;
-	alphaBlendState.srcAlpha = RenderPipeline::BlendFactor::ONE;
-	alphaBlendState.dstAlpha = RenderPipeline::BlendFactor::ZERO;
+	alphaBlendState.srcRGB = GraphicsPipeline::BlendFactor::SRC_ALPHA;
+	alphaBlendState.dstRGB = GraphicsPipeline::BlendFactor::ONE_MINUS_SRC_ALPHA;
+	alphaBlendState.srcAlpha = GraphicsPipeline::BlendFactor::ONE;
+	alphaBlendState.dstAlpha = GraphicsPipeline::BlendFactor::ZERO;
 
 	//Colour blend state for blending lighting
-	RenderPipeline::ColourBlendState alphaLightBlendState;
+	GraphicsPipeline::ColourBlendState alphaLightBlendState;
 	alphaLightBlendState.blendEnabled = true;
-	alphaLightBlendState.srcRGB = RenderPipeline::BlendFactor::ONE;
-	alphaLightBlendState.dstRGB = RenderPipeline::BlendFactor::ONE;
-	alphaLightBlendState.srcAlpha = RenderPipeline::BlendFactor::ONE;
-	alphaLightBlendState.dstAlpha = RenderPipeline::BlendFactor::ZERO;
+	alphaLightBlendState.srcRGB = GraphicsPipeline::BlendFactor::ONE;
+	alphaLightBlendState.dstRGB = GraphicsPipeline::BlendFactor::ONE;
+	alphaLightBlendState.srcAlpha = GraphicsPipeline::BlendFactor::ONE;
+	alphaLightBlendState.dstAlpha = GraphicsPipeline::BlendFactor::ZERO;
 
 	//Depth state for normal depth testing
-	RenderPipeline::DepthState defaultDepthState;
+	GraphicsPipeline::DepthState defaultDepthState;
 
 	//Depth state for lighting
-	RenderPipeline::DepthState lightDepthState;
-	lightDepthState.depthCompareOp = RenderPipeline::CompareOperation::LESS;
+	GraphicsPipeline::DepthState lightDepthState;
+	lightDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
 
 	//Depth state for light blending
-	RenderPipeline::DepthState lightBlendDepthState;
-	lightBlendDepthState.depthCompareOp   = RenderPipeline::CompareOperation::LESS_OR_EQUAL;
+	GraphicsPipeline::DepthState lightBlendDepthState;
+	lightBlendDepthState.depthCompareOp   = GraphicsPipeline::CompareOperation::LESS_OR_EQUAL;
 	lightBlendDepthState.depthWriteEnable = false;
 
 	//Setup the default pipelines
-	addPipeline(PIPELINE_MATERIAL,                new RenderPipeline(getRenderShader(SHADER_MATERIAL), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, defaultDepthState));
-	addPipeline(PIPELINE_SKY_BOX,                 new RenderPipeline(getRenderShader(SHADER_SKY_BOX), MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, defaultDepthState));
-	addPipeline(PIPELINE_FONT,                    new RenderPipeline(getRenderShader(SHADER_FONT), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState));
-	addPipeline(PIPELINE_LIGHTING,                new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState));
-	addPipeline(PIPELINE_LIGHTING_BLEND,          new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
-	addPipeline(PIPELINE_LIGHTING_SKINNING,       new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState));
-	addPipeline(PIPELINE_LIGHTING_SKINNING_BLEND, new RenderPipeline(getRenderShader(SHADER_VULKAN_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
+	addGraphicsPipeline(GRAPHICS_PIPELINE_MATERIAL,                new GraphicsPipeline(getRenderShader(SHADER_MATERIAL), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, defaultDepthState));
+	addGraphicsPipeline(GRAPHICS_PIPELINE_SKY_BOX,                 new GraphicsPipeline(getRenderShader(SHADER_SKY_BOX), MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, defaultDepthState));
+	addGraphicsPipeline(GRAPHICS_PIPELINE_FONT,                    new GraphicsPipeline(getRenderShader(SHADER_FONT), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState));
+	addGraphicsPipeline(GRAPHICS_PIPELINE_LIGHTING,                new GraphicsPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState));
+	addGraphicsPipeline(GRAPHICS_PIPELINE_LIGHTING_BLEND,          new GraphicsPipeline(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
+	addGraphicsPipeline(GRAPHICS_PIPELINE_LIGHTING_SKINNING,       new GraphicsPipeline(getRenderShader(SHADER_VULKAN_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState));
+	addGraphicsPipeline(GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND, new GraphicsPipeline(getRenderShader(SHADER_VULKAN_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
@@ -171,11 +135,6 @@ void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, M
 void Renderer::stopUsingMaterial(Material* material) {
 	//Unbind the textures
 	material->getDescriptorSet()->unbind();
-}
-
-void Renderer::preRender() {
-	//Update required data for this frame
-
 }
 
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
@@ -245,7 +204,7 @@ void Renderer::destroy() {
 	delete shaderInterface;
 	for (auto element : loadedRenderShaders)
 		delete element.second;
-	for (auto element : renderPipelines)
+	for (auto element : graphicsPipelines)
 		delete element.second;
 }
 
@@ -262,8 +221,12 @@ void Renderer::addRenderShader(unsigned int id, std::string forwardShaderPath) {
 	renderShaderPaths.insert(std::pair<unsigned int, std::string>(id, forwardShaderPath));
 }
 
-void Renderer::addPipeline(unsigned int id, RenderPipeline* pipeline) {
-	renderPipelines.insert(std::pair<unsigned int, RenderPipeline*>(id, pipeline));
+void Renderer::addGraphicsPipeline(unsigned int id, GraphicsPipeline* pipeline) {
+	graphicsPipelines.insert(std::pair<unsigned int, GraphicsPipeline*>(id, pipeline));
+}
+
+void Renderer::setCurrentGraphicsPipeline(GraphicsPipeline* pipeline) {
+	currentGraphicsPipeline = pipeline;
 }
 
 void Renderer::loadRenderShader(unsigned int id) {
@@ -304,9 +267,9 @@ RenderShader* Renderer::getRenderShader(unsigned int id) {
 	}
 }
 
-RenderPipeline* Renderer::getPipeline(unsigned int id) {
-	if (renderPipelines.count(id) > 0)
-		return renderPipelines.at(id);
+GraphicsPipeline* Renderer::getGraphicsPipeline(unsigned int id) {
+	if (graphicsPipelines.count(id) > 0)
+		return graphicsPipelines.at(id);
 	else {
 		Logger::log("The RenderPipeline with the id '" + utils_string::str(id) + "' could not be found", "Renderer", LogType::Error);
 		return NULL;

@@ -42,8 +42,8 @@ private:
 	/* The maximum number of characters this instance can render (only relevant for Vulkan) */
 	unsigned int maxCharacters;
 
-	/* The pipeline used to render this text */
-	RenderPipeline* pipeline;
+	/* The graphics pipeline used to render this text */
+	GraphicsPipeline* pipeline;
 public:
 	/* The default maximum number of characters */
 	static unsigned int DEFAULT_MAX_CHARACTERS;

@@ -18,7 +18,7 @@
 
 #include "RenderShader.h"
 
-#include "RenderPipeline.h"
+#include "GraphicsPipeline.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -27,14 +27,14 @@
 
 RenderShader::RenderShader(unsigned int id, Shader* shader) : id(id), shader(shader) {
 	//Create the pipeline layout
-	pipelineLayout = new RenderPipelineLayout();
+	graphicsPipelineLayout = new GraphicsPipelineLayout();
 }
 
 RenderShader::~RenderShader() {
-	delete pipelineLayout;
+	delete graphicsPipelineLayout;
 }
 
 void RenderShader::setup() {
 	//Setup the pipeline layout for this render shader
-	pipelineLayout->setup(this);
+	graphicsPipelineLayout->setup(this);
 }

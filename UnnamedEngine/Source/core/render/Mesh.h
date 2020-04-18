@@ -25,7 +25,7 @@
 #include "Skinning.h"
 #include "VBO.h"
 #include "../Sphere.h"
-#include "RenderPipeline.h"
+#include "GraphicsPipeline.h"
 
 /*****************************************************************************
  * The MeshData class stores information about a mesh
@@ -235,7 +235,7 @@ public:
 
 	/* Static method to construct vertex input bindings and attributes given the
 	   required data and whether they should be separated from vboOthers */
-	static RenderPipeline::VertexInputData computeVertexInputData(unsigned int numDimensions, std::vector<DataType> requiredData, Flag flags);
+	static GraphicsPipeline::VertexInputData computeVertexInputData(unsigned int numDimensions, std::vector<DataType> requiredData, Flag flags);
 private:
 	/* The flags being used */
 	Flag flags = Flag::NONE;

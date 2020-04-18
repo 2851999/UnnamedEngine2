@@ -163,9 +163,9 @@ void MeshData::addBoneData(unsigned int boneID, float boneWeight) {
 	numBones++;
 }
 
-RenderPipeline::VertexInputData MeshData::computeVertexInputData(unsigned int numDimensions, std::vector<DataType> requiredData, Flag flags) {
+GraphicsPipeline::VertexInputData MeshData::computeVertexInputData(unsigned int numDimensions, std::vector<DataType> requiredData, Flag flags) {
 	//The output data
-	RenderPipeline::VertexInputData data;
+	GraphicsPipeline::VertexInputData data;
 
 	unsigned int currentBinding = 0;
 

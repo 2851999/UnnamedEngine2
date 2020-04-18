@@ -114,15 +114,15 @@ private:
 
 	/* The descriptor set layout instance for Vulkan*/
 	VkDescriptorSetLayout vulkanDescriptorSetLayout = VK_NULL_HANDLE;
+
+	/* Method used to create the required structures for Vulkan */
+	void setupVk();
 public:
 	/* Constructor */
 	DescriptorSetLayout(unsigned int setNumber) : setNumber(setNumber) {}
 
 	/* Destructor */
 	virtual ~DescriptorSetLayout();
-
-	/* Method used to create the required structures for Vulkan */
-	void setupVk();
 
 	/* Method used to setup this layout */
 	void setup();

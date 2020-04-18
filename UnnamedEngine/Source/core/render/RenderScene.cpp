@@ -22,11 +22,11 @@
 
 RenderScene::RenderScene() {
 	//Obtain the render pipelines
-	pipelineMaterial              = Renderer::getPipeline(Renderer::PIPELINE_MATERIAL);
-	pipelineLighting              = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING);
-	pipelineLightingBlend         = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING_BLEND);
-	pipelineLightingSkinning      = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING_SKINNING);
-	pipelineLightingSkinningBlend = Renderer::getPipeline(Renderer::PIPELINE_LIGHTING_SKINNING_BLEND);
+	pipelineMaterial              = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_MATERIAL);
+	pipelineLighting              = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING);
+	pipelineLightingBlend         = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND);
+	pipelineLightingSkinning      = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING);
+	pipelineLightingSkinningBlend = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND);
 }
 
 RenderScene::~RenderScene() {

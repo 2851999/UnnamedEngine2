@@ -136,8 +136,6 @@ void BaseEngine::create() {
 				Vulkan::startDraw();
 			}
 
-			Renderer::preRender();
-
 			render();
 
 			if (getSettings().debugShowInformation)

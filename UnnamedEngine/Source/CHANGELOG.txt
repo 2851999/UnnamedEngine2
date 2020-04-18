@@ -1,4 +1,18 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 9
+
+* Renamed RenderPipeline to GraphicsPipeline
+* Renamed RenderPipelineLayout to GraphicsPipelineLayout
+
+* Removed TextureSet
+
+* Removed saving of bound textures in order to release them
+  in Renderer (Now use descriptor sets)
+
+* Fixed bug: Rendering models without texture coordinates
+             would not work in Vulkan
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 1 | Experimental 8
 
 * Readded skinning support

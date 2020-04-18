@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "RenderPipeline.h"
+#include "GraphicsPipeline.h"
 
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
@@ -24,10 +24,10 @@
 #include "../../utils/VulkanUtils.h"
 
  /*****************************************************************************
-  * The RenderPipeline class
+  * The GraphicsPipeline class
   *****************************************************************************/
 
-RenderPipeline::RenderPipeline(RenderShader* renderShader, VertexInputData vertexInputData, ColourBlendState colourBlendState, DepthState depthState) : layout(renderShader->getPipelineLayout()), renderShader(renderShader), colourBlendState(colourBlendState), depthState(depthState) {
+GraphicsPipeline::GraphicsPipeline(RenderShader* renderShader, VertexInputData vertexInputData, ColourBlendState colourBlendState, DepthState depthState) : layout(renderShader->getGraphicsPipelineLayout()), renderShader(renderShader), colourBlendState(colourBlendState), depthState(depthState) {
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
@@ -167,16 +167,17 @@ RenderPipeline::RenderPipeline(RenderShader* renderShader, VertexInputData verte
 	}
 }
 
-RenderPipeline::~RenderPipeline() {
+GraphicsPipeline::~GraphicsPipeline() {
 	//Destroy Vulkan objects
 	if (vulkanPipeline != VK_NULL_HANDLE)
 		vkDestroyPipeline(Vulkan::getDevice()->getLogical(), vulkanPipeline, nullptr);
 }
 
-void RenderPipeline::bind() {
-	if (BaseEngine::usingVulkan())
-		Vulkan::bindGraphicsPipeline(this);
-	else {
+void GraphicsPipeline::bind() {
+	if (BaseEngine::usingVulkan()) {
+		//Bind the pipeline
+		vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
+	} else {
 		//Use the shader
 		renderShader->getShader()->use();
 
@@ -197,9 +198,12 @@ void RenderPipeline::bind() {
 		} else
 			glDisable(GL_BLEND);
 	}
+
+	//Notify Renderer
+	Renderer::setCurrentGraphicsPipeline(this);
 }
 
-GLenum RenderPipeline::convertToGL(BlendFactor factor) {
+GLenum GraphicsPipeline::convertToGL(BlendFactor factor) {
 	switch (factor) {
 		case BlendFactor::ZERO:
 			return GL_ZERO;
@@ -214,7 +218,7 @@ GLenum RenderPipeline::convertToGL(BlendFactor factor) {
 	}
 }
 
-VkBlendFactor RenderPipeline::convertToVk(BlendFactor factor) {
+VkBlendFactor GraphicsPipeline::convertToVk(BlendFactor factor) {
 	switch (factor) {
 		case BlendFactor::ZERO:
 			return VK_BLEND_FACTOR_ZERO;
@@ -229,7 +233,7 @@ VkBlendFactor RenderPipeline::convertToVk(BlendFactor factor) {
 	}
 }
 
-GLenum RenderPipeline::convertToGL(CompareOperation op) {
+GLenum GraphicsPipeline::convertToGL(CompareOperation op) {
 	switch (op) {
 		case CompareOperation::LESS:
 			return GL_LESS;
@@ -246,7 +250,7 @@ GLenum RenderPipeline::convertToGL(CompareOperation op) {
 	}
 }
 
-VkCompareOp RenderPipeline::convertToVk(CompareOperation op) {
+VkCompareOp GraphicsPipeline::convertToVk(CompareOperation op) {
 	switch (op) {
 		case CompareOperation::LESS:
 			return VK_COMPARE_OP_LESS;
@@ -264,20 +268,20 @@ VkCompareOp RenderPipeline::convertToVk(CompareOperation op) {
 }
 
 /*****************************************************************************
- * The RenderPipelineLayout class
+ * The GraphicsPipelineLayout class
  *****************************************************************************/
 
-RenderPipelineLayout::RenderPipelineLayout() {
+GraphicsPipelineLayout::GraphicsPipelineLayout() {
 
 }
 
-RenderPipelineLayout::~RenderPipelineLayout() {
+GraphicsPipelineLayout::~GraphicsPipelineLayout() {
 	//Destroy Vulkan objects
 	if (vulkanPipelineLayout != VK_NULL_HANDLE)
 		vkDestroyPipelineLayout(Vulkan::getDevice()->getLogical(), vulkanPipelineLayout, nullptr);
 }
 
-void RenderPipelineLayout::setup(RenderShader* renderShader) {
+void GraphicsPipelineLayout::setup(RenderShader* renderShader) {
 	//Ensure using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		//Create the pipeline

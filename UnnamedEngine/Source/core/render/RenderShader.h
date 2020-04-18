@@ -21,7 +21,7 @@
 #include "Shader.h"
 #include "DescriptorSet.h"
 
-class RenderPipelineLayout;
+class GraphicsPipelineLayout;
 
  /*****************************************************************************
   * The RenderShader class handles a Shader for rendering
@@ -39,7 +39,7 @@ private:
 	std::unordered_map<unsigned int, DescriptorSetLayout*> descriptorSetLayouts;
 
 	/* The pipeline layout required to use this RenderShader */
-	RenderPipelineLayout* pipelineLayout;
+	GraphicsPipelineLayout* graphicsPipelineLayout;
 public:
 	/* Various constructors */
 	RenderShader(unsigned int id, Shader* shader);
@@ -60,5 +60,5 @@ public:
 	inline unsigned int getID() { return id; }
 	inline Shader* getShader() { return shader; }
 	inline std::unordered_map<unsigned int, DescriptorSetLayout*>& getDescriptorSetLayouts() { return descriptorSetLayouts; }
-	inline RenderPipelineLayout* getPipelineLayout() { return pipelineLayout; }
+	inline GraphicsPipelineLayout* getGraphicsPipelineLayout() { return graphicsPipelineLayout; }
 };

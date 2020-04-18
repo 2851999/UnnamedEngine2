@@ -20,7 +20,6 @@
 
 #include "Colour.h"
 #include "Shader.h"
-#include "TextureSet.h"
 #include "ShaderInterface.h"
 #include "DescriptorSet.h"
 

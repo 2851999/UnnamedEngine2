@@ -33,8 +33,8 @@ SkyBox::SkyBox(Cubemap* cubemap) {
 	//mesh->getMaterial()->update();
 	box = new GameObject3D(mesh, Renderer::getRenderShader(Renderer::SHADER_SKY_BOX));
 
-	//Obtain the skybox render pipeline
-	pipelineSkybox = Renderer::getPipeline(Renderer::PIPELINE_SKY_BOX);
+	//Obtain the skybox graphics pipeline
+	pipelineSkybox = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_SKY_BOX);
 }
 
 void SkyBox::update(Vector3f cameraPosition) {

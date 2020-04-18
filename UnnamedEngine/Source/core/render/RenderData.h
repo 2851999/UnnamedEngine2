@@ -21,7 +21,6 @@
 #include "VBO.h"
 #include "UBO.h"
 #include "Texture.h"
-#include "TextureSet.h"
 #include "ShaderInterface.h"
 
 /*****************************************************************************
