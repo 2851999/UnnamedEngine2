@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_ML_ML_H_
-#define CORE_ML_ML_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -170,4 +169,3 @@ public:
 	MLElement getDocumentRoot();
 };
 
-#endif /* CORE_ML_ML_H_ */

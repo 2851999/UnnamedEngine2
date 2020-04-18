@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RESOURCE_H_
-#define CORE_RESOURCE_H_
+#pragma once
 
 #include <vector>
 
@@ -82,4 +81,3 @@ public:
 	virtual void destroy() {}
 };
 
-#endif /* CORE_RESOURCE_H_ */

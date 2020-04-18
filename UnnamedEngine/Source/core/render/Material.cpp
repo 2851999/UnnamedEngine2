@@ -29,7 +29,7 @@ Material::Material(bool pbr) {
 	setDefault(pbr);
 
 	//Add the textures required for the texture set
-	descriptorSet = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_MATERIAL));
+	descriptorSet = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_MATERIAL));
 }
 
 Material::~Material() {

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANVALIDATIONLAYERS_H_
-#define CORE_VULKAN_VULKANVALIDATIONLAYERS_H_
+#pragma once
 
 #include <vector>
 #include "../Window.h"
@@ -59,4 +58,3 @@ public:
 	static std::vector<const char*>& getLayers() { return validationLayers; }
 };
 
-#endif /* CORE_VULKAN_VULKANVALIDATIONLAYERS_H_ */

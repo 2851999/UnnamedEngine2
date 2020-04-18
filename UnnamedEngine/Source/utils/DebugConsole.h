@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_DEBUGCONSOLE_H_
-#define UTILS_DEBUGCONSOLE_H_
+#pragma once
 
 #include <functional>
 
@@ -65,4 +64,3 @@ public:
 	inline bool isWireframeEnabled() { return wireframeMode; }
 };
 
-#endif /* UTILS_DEBUGCONSOLE_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_UTILS_H_
-#define UTILS_UTILS_H_
+#pragma once
 
 #include <string>
 #include <sstream>
@@ -236,4 +235,3 @@ namespace utils_controller {
 	int findController(int index, std::string name);
 }
 
-#endif /* UTILS_UTILS_H_ */

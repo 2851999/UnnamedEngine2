@@ -41,9 +41,9 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	if (! billboarded)
 		shaderType = Renderer::SHADER_FONT;
 	else {
-		shaderType = Renderer::SHADER_BILLBOARDED_FONT;
+		//shaderType = Renderer::SHADER_BILLBOARDED_FONT;
 		//Get the UBO for the billboard
-		shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);
+		//shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);
 	}
 
 	//Create the Mesh instance and assign the texture
@@ -79,6 +79,9 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	getMesh()->setCullingEnabled(false);
 
 	GameObject3D::update();
+
+	//Obtain the graphics pipeline used for rendering
+	pipeline = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_FONT);
 }
 
 void Text::update(std::string text) {
@@ -125,6 +128,9 @@ void Text::update(Vector3f position) {
 }
 
 void Text::render() {
+	//Bind the pipeline
+	pipeline->bind();
+
 	if (billboarded) {
 		Shader* shader = getShader();
 		shader->use();

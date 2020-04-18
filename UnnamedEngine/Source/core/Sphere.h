@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_SPHERE_H_
-#define CORE_SPHERE_H_
+#pragma once
 
 /*****************************************************************************
  * The Sphere class defines a sphere
@@ -55,4 +54,3 @@ public:
 	}
 };
 
-#endif /* CORE_SPHERE_H_ */

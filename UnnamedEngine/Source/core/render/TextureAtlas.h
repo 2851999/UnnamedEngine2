@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_TEXTUREATLAS_H_
-#define CORE_RENDER_TEXTUREATLAS_H_
+#pragma once
 
 #include "Texture.h"
 
@@ -58,4 +57,3 @@ public:
 	inline float getGridHeight() { return textureHeight; }
 };
 
-#endif /* CORE_RENDER_TEXTUREATLAS_H_ */

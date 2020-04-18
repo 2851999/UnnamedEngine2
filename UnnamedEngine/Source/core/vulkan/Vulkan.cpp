@@ -43,7 +43,6 @@ std::vector<VkSemaphore>                     Vulkan::imageAvailableSemaphores;
 std::vector<VkSemaphore>                     Vulkan::renderFinishedSemaphores;
 std::vector<VkFence>                         Vulkan::inFlightFences;
 unsigned int                                 Vulkan::currentFrame = 0;
-VulkanGraphicsPipeline*                      Vulkan::currentGraphicsPipeline = NULL;
 std::vector<Vulkan::DescriptorSetUpdateInfo> Vulkan::descriptorSetUpdateQueue;
 std::vector<Vulkan::UBOUpdateInfo>			 Vulkan::uboUpdateQueue;
 
@@ -430,6 +429,12 @@ void Vulkan::destroySyncObjects() {
 	}
 }
 
+void Vulkan::update() {
+	//Update descriptor sets and UBOs
+	updateDescriptorSetQueue();
+	updateUBOQueue();
+}
+
 void Vulkan::startDraw() {
 	//Aquire the next swap chain image
 	vkAcquireNextImageKHR(device->getLogical(), swapChain->getInstance(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &currentFrame); //Image index is next in chain
@@ -471,11 +476,6 @@ void Vulkan::startDraw() {
 }
 
 void Vulkan::stopDraw() {
-	//Update descriptor sets and UBOs
-	updateDescriptorSetQueue();
-	updateUBOQueue();
-
-
 	vkCmdEndRenderPass(commandBuffers[currentFrame]);
 
 	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
@@ -519,13 +519,6 @@ void Vulkan::stopDraw() {
 
 	//vkAcquireNextImageKHR semaphore signalled will be the one with this index (so must increase before it is called again)
 	currentFrame = (currentFrame + 1) % swapChain->getImageCount();
-}
-
-void Vulkan::bindGraphicsPipeline(VulkanGraphicsPipeline* pipeline) {
-	currentGraphicsPipeline = pipeline;
-
-	//Bind the pipeline
-	vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getInstance());
 }
 
 bool Vulkan::updateDescriptorSetFrame(DescriptorSetUpdateInfo& info) {

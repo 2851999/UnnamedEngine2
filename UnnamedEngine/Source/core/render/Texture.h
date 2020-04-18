@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_TEXTURE_H_
-#define CORE_RENDER_TEXTURE_H_
+#pragma once
 
 #include "../Window.h"
 #include <string>
@@ -226,4 +225,3 @@ public:
 	static Cubemap* createCubemap(GLsizei size, GLint internalFormat, GLint format, GLenum type, TextureParameters parameters = TextureParameters());
 };
 
-#endif /* CORE_RENDER_TEXTURE_H_ */

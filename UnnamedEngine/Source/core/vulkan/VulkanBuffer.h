@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANBUFFER_H_
-#define CORE_VULKAN_VULKANBUFFER_H_
+#pragma once
 
 #include "VulkanDevice.h"
 
@@ -65,4 +64,3 @@ public:
 };
 
 
-#endif /* CORE_VULKAN_VULKANBUFFER_H_ */

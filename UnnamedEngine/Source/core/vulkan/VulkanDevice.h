@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANDEVICE_H_
-#define CORE_VULKAN_VULKANDEVICE_H_
+#pragma once
 
 #include "../Window.h"
 
@@ -104,4 +103,3 @@ public:
 	static VulkanDeviceSwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 };
 
-#endif /* CORE_VULKAN_VULKANDEVICE_H_ */

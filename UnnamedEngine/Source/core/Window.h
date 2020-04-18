@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_WINDOW_H_
-#define CORE_WINDOW_H_
+#pragma once
 
 #define NOMINMAX
 #include <windows.h>
@@ -109,4 +108,3 @@ public:
 };
 
 
-#endif /* CORE_WINDOW_H_ */

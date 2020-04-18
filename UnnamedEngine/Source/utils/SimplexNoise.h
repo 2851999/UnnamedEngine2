@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_SIMPLEXNOISE_H_
-#define UTILS_SIMPLEXNOISE_H_
+#pragma once
 
 //http://weber.itn.liu.se/~stegu/simplexnoise/SimplexNoise.java
 
@@ -73,4 +72,3 @@ public:
 	double noise(double xin, double yin);
 };
 
-#endif /* UTILS_SIMPLEXNOISE_H_ */

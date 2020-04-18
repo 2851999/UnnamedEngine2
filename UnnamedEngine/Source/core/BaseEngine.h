@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_BASEENGINE_H_
-#define CORE_BASEENGINE_H_
+#pragma once
 
 #include <string>
 
@@ -32,8 +31,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.4.3";
-	const std::string DateCreated = "12/04/2020";
+	const std::string Version     = "V0.4.4";
+	const std::string DateCreated = "18/04/2020";
 	const std::string Build       = "Development";
 }
 
@@ -132,4 +131,3 @@ public:
 };
 
 
-#endif /* CORE_BASEENGINE_H_ */

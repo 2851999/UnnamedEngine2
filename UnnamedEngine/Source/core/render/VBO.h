@@ -16,12 +16,11 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_VBO_H_
-#define CORE_RENDER_VBO_H_
+#pragma once
 
 #include <GL/glew.h>
 
-#include "Shader.h"
+#include "RenderShader.h"
 #include "../vulkan/VulkanBuffer.h"
 
 /*****************************************************************************
@@ -109,4 +108,3 @@ public:
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };
 
-#endif /* CORE_RENDER_VBO_H_ */

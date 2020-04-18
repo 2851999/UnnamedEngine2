@@ -1,4 +1,179 @@
 --------------------------------------------------------------
+Release 2 | Beta 1 | Development 2 (V0.4.4)
+
+* Began major rewrite of rendering system to integrate
+  Vulkan better. This will involve temporary removal of many
+  classes and features, eventually re-adding them later
+
+* Added GraphicsPipeline
+* Added GraphicsPipelineLayout
+* Added utils_vulkan
+
+* Changed Vulkan to perform queued descriptor set and UBOs
+  updates after the update function, rather than at the end
+  of a frame
+
+* Moved RenderShader to a different file
+
+* Replaced include guards with '#pragma once'
+
+* Renamed ShaderBlock_Lighting struct to
+  ShaderBlock_LightBatch in ShaderInterface
+* Renamed ShaderBlock_Core struct to ShaderBlock_Camera in
+  ShaderInterface
+
+* Removed BaseEngineTest2D
+* Removed BaseEngineTest3D
+* Removed BaseTest3D
+* Removed FramebufferTest3D
+* Removed GUITest
+* Removed PBRTest
+* Removed PhysicsTest
+* Removed SurfaceTest
+* Removed TerrainTest
+* Removed PBREnvironment
+* Removed Particles
+* Removed Tilemap
+* Removed PostProcessing
+* Removed CDLODTerrain
+* Removed VulkanGraphicsPipeline
+* Removed GraphicsState
+* Removed TextureSet
+* Removed examples folder
+
+* Fixed bug: Font did not transition the texture it uses to
+             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL when
+             using Vulkan
+* Fixed bug: DescriptorSet did not delete the UBO's it created
+* Fixed bug: ShaderInterface did not delete the
+             DescriptorSetLayout's it created
+* Fixed bug: Fullscreen windows using vsync was capped to
+             60Hz even when a higher refresh rate monitor
+			 was used
+
+* Note: Now require a pipeline to render anything in Vulkan/
+        OpenGL
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 9
+
+* Renamed RenderPipeline to GraphicsPipeline
+* Renamed RenderPipelineLayout to GraphicsPipelineLayout
+
+* Removed TextureSet
+
+* Removed saving of bound textures in order to release them
+  in Renderer (Now use descriptor sets)
+
+* Fixed bug: Rendering models without texture coordinates
+             would not work in Vulkan
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 8
+
+* Readded skinning support
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 7
+
+* Added ColourBlendState structure to RenderPipeline to
+  change the blending state
+* Added DepthState structure to RenderPipeline to change
+ 
+* Readded many light support (forward rendering)
+
+* Removed GraphicsState
+
+* Fixed bug: Fullscreen windows using vsync was capped to
+             60Hz even when a higher refresh rate monitor
+			 was used
+* Fixed bug: Text did not delete the pipeline used to render
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 6
+
+* Readded text rendering support
+* Readded basic lighting support
+
+* Fixed bug: 'computeVertexInputData' in MeshData was
+             incorrect when 'flags' was assignined
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 5
+
+* Added method 'computeVertexInputData' in MeshData
+
+* Readded skybox support
+
+* Note: Now require a pipeline to render anything in Vulkan/
+        OpenGL
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 4
+
+* Added RenderPipeline
+* Added RenderPipelineLayout
+* Added utils_vulkan
+
+* Moved RenderShader to a different file
+
+* Renamed ShaderBlock_Core struct to ShaderBlock_Camera in
+  ShaderInterface
+
+* Removed VulkanGraphicsPipeline
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 3
+
+* Began major rewrite of rendering system to integrate
+  Vulkan better. This will involve temporary removal of many
+  classes and features, eventually re-adding them later
+
+* Replaced RenderScene with RenderSceneV2
+* Replaced VulkanTest with VulkanTestV2
+
+* Removed BaseEngineTest2D
+* Removed BaseEngineTest3D
+* Removed BaseTest3D
+* Removed FramebufferTest3D
+* Removed GUITest
+* Removed PBRTest
+* Removed PhysicsTest
+* Removed SurfaceTest
+* Removed TerrainTest
+* Removed PBREnvironment
+* Removed Particles
+* Removed Tilemap
+* Removed PostProcessing
+* Removed CDLODTerrain
+* Removed examples folder
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 2
+
+* Changed Vulkan to perform queued descriptor set and UBOs
+  updates after the update function, rather than at the end
+  of a frame
+
+* Renamed ShaderBlock_Lighting struct to
+  ShaderBlock_LightBatch in ShaderInterface
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 1 | Experimental 1
+
+* Added VulkanTestV2
+* Added RenderSceneV2 in experimental folder
+
+* Replaced include guards with '#pragma once'
+
+* Fixed bug: Font did not transition the texture it uses to
+             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL when
+             using Vulkan
+* Fixed bug: DescriptorSet did not delete the UBO's it created
+* Fixed bug: ShaderInterface did not delete the
+             DescriptorSetLayout's it created
+
+--------------------------------------------------------------
 Release 2 | Beta 1 | Development 1 (V0.4.3)
 
 * Added DescriptorSet

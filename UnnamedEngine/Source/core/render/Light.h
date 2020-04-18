@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_LIGHT_H_
-#define CORE_RENDER_LIGHT_H_
+#pragma once
 
 #include "FBO.h"
 #include "Renderer.h"
@@ -120,4 +119,3 @@ public:
 	inline Frustum& getFrustum() { return frustum; }
 };
 
-#endif /* CORE_RENDER_LIGHT_H_ */

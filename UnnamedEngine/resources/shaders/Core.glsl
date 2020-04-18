@@ -2,14 +2,14 @@
 //Used for assigning UBO block locations - can remove
 
 /* NOTES:
-* Set 0 - Varies per render
+* Set 0 - Varies per camera
 * Set 1 - Varies per material
 * Set 2 - Varies per model
 * Set 3 - Varies per light batch
 *
 */
 
-layout(std140, set = 0, binding = 1) uniform UECoreData {
+layout(std140, set = 0, binding = 1) uniform UECameraData {
 	mat4 ue_viewMatrix;
 	mat4 ue_projectionMatrix;
 	

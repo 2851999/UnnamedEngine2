@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUIRADIOCHECKBOX_H_
-#define CORE_GUI_GUIRADIOCHECKBOX_H_
+#pragma once
 
 #include "GUICheckBox.h"
 
@@ -42,4 +41,3 @@ public:
 
 
 
-#endif /* CORE_GUI_GUIRADIOCHECKBOX_H_ */

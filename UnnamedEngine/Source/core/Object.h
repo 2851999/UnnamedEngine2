@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_OBJECT_H_
-#define CORE_OBJECT_H_
+#pragma once
 
 #include "Rectangle.h"
 #include "Transform.h"
@@ -199,4 +198,3 @@ public:
 	bool shouldCull();
 };
 
-#endif /* CORE_OBJECT_H_ */

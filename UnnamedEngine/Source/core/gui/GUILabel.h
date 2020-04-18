@@ -17,8 +17,7 @@
  *****************************************************************************/
 
 
-#ifndef CORE_GUI_GUILABEL_H_
-#define CORE_GUI_GUILABEL_H_
+#pragma once
 
 #include "GUIComponent.h"
 
@@ -45,4 +44,3 @@ public:
 	}
 };
 
-#endif /* CORE_GUI_GUILABEL_H_ */

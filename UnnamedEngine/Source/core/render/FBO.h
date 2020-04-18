@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_FBO_H_
-#define CORE_RENDER_FBO_H_
+#pragma once
 
 #include "Texture.h"
 
@@ -152,4 +151,3 @@ public:
 
 
 
-#endif /* CORE_RENDER_FBO_H_ */

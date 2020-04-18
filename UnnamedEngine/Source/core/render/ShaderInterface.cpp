@@ -28,9 +28,18 @@
  * The ShaderInterface class
  *****************************************************************************/
 
+ /* Set numbers used for specific kinds of descriptor sets*/
+const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_CAMERA      = 0;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MATERIAL    = 1;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MODEL       = 2;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH = 3;
+
  /* IDs for descriptor set layouts */
-const unsigned int ShaderInterface::DESCRIPTOR_SET_MATERIAL = 1;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_MODEL    = 2;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA      = 0;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MATERIAL    = 1;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL       = 2;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH = 3;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING = 4;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -42,11 +51,11 @@ const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS      = 5;
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS  = 6;
 
 /* The ids for particular shader blocks */
-const unsigned int ShaderInterface::BLOCK_CORE                   = 1;
+const unsigned int ShaderInterface::BLOCK_CAMERA                 = 1;
 const unsigned int ShaderInterface::BLOCK_MODEL                  = 2;
 const unsigned int ShaderInterface::BLOCK_MATERIAL               = 3;
 const unsigned int ShaderInterface::BLOCK_SKINNING               = 4;
-const unsigned int ShaderInterface::BLOCK_LIGHTING               = 5;
+const unsigned int ShaderInterface::BLOCK_LIGHT_BATCH            = 5;
 const unsigned int ShaderInterface::BLOCK_TERRAIN                = 6;
 const unsigned int ShaderInterface::BLOCK_GAMMA_CORRECTION       = 7;
 const unsigned int ShaderInterface::BLOCK_PBR_ENV_MAP_GEN        = 8;
@@ -56,11 +65,11 @@ const unsigned int ShaderInterface::BLOCK_BILLBOARD              = 11;
 const unsigned int ShaderInterface::BLOCK_SHADOW_CUBEMAP         = 12;
 
 /* Binding locations for shader blocks */
-const unsigned int ShaderInterface::UBO_BINDING_LOCATION_CORE                   = 1;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_CAMERA                 = 1;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_MODEL                  = 2;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_MATERIAL               = 3;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SKINNING               = 4;
-const unsigned int ShaderInterface::UBO_BINDING_LOCATION_LIGHTING               = 5;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_LIGHT_BATCH            = 5;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_TERRAIN                = 6;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_GAMMA_CORRECTION       = 7;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN        = 8;
@@ -72,8 +81,15 @@ const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SHADOW_CUBEMAP         
 ShaderInterface::ShaderInterface() {
 	//Add all of the required descriptor set layouts for the default shaders
 
+	//Core
+	DescriptorSetLayout* cameraLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_CAMERA);
+	cameraLayout->addUBO(sizeof(ShaderBlock_Camera), GL_STATIC_DRAW, UBO_BINDING_LOCATION_CAMERA);
+	cameraLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_CAMERA, cameraLayout);
+
 	//Material
-	DescriptorSetLayout* materialLayout = new DescriptorSetLayout(1);
+	DescriptorSetLayout* materialLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_MATERIAL);
 	materialLayout->addTexture(0);
 	materialLayout->addTexture(1);
 	materialLayout->addTexture(2);
@@ -81,42 +97,40 @@ ShaderInterface::ShaderInterface() {
 	materialLayout->addTexture(4);
 	materialLayout->addTexture(5);
 
-	materialLayout->addUBO(sizeof(ShaderBlock_Material), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_MATERIAL);
+	materialLayout->addUBO(sizeof(ShaderBlock_Material), GL_STATIC_DRAW, UBO_BINDING_LOCATION_MATERIAL);
 
 	materialLayout->setup();
 
-	add(DESCRIPTOR_SET_MATERIAL, materialLayout);
+	add(DESCRIPTOR_SET_DEFAULT_MATERIAL, materialLayout);
 
 	//Model
-	DescriptorSetLayout* modelLayout = new DescriptorSetLayout(2);
-	modelLayout->addUBO(sizeof(ShaderBlock_Model), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_MODEL);
+	DescriptorSetLayout* modelLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_MODEL);
+	modelLayout->addUBO(sizeof(ShaderBlock_Model), GL_STATIC_DRAW, UBO_BINDING_LOCATION_MODEL);
 	modelLayout->setup();
 
-	add(DESCRIPTOR_SET_MODEL, modelLayout);
+	add(DESCRIPTOR_SET_DEFAULT_MODEL, modelLayout);
 
-	//Add all required UBOs for the default shaders
-	add(BLOCK_CORE,                  sizeof(ShaderBlock_Core),               GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_CORE);
-	add(BLOCK_MODEL,                 sizeof(ShaderBlock_Model),              GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_MODEL);
-	add(BLOCK_MATERIAL,              sizeof(ShaderBlock_Material),           GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_MATERIAL);
-	add(BLOCK_SKINNING,              sizeof(ShaderBlock_Skinning),           GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_SKINNING);
-	add(BLOCK_LIGHTING,              sizeof(ShaderBlock_Lighting),           GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_LIGHTING);
-	add(BLOCK_TERRAIN,               sizeof(ShaderBlock_Terrain),            GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_TERRAIN);
-	add(BLOCK_GAMMA_CORRECTION,      sizeof(ShaderBlock_GammaCorrection),    GL_STATIC_DRAW,  UBO_BINDING_LOCATION_GAMMA_CORRECTION);
-	add(BLOCK_PBR_ENV_MAP_GEN,       sizeof(ShaderBlock_PBREnvMapGen),       GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN);
-	add(BLOCK_PBR_PREFILTER_MAP_GEN, sizeof(ShaderBlock_PBRPrefilterMapGen), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN);
-	add(BLOCK_PBR_LIGHTING_CORE,     sizeof(ShaderBlock_PBRLightingCore),    GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_PBR_LIGHTING_CORE);
-	add(BLOCK_BILLBOARD,             sizeof(ShaderBlock_Billboard),          GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_BILLBOARD);
-	add(BLOCK_SHADOW_CUBEMAP,        sizeof(ShaderBlock_ShadowCubemap),      GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_SHADOW_CUBEMAP);
+	//Light batch
+	DescriptorSetLayout* lightBatchLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
+	lightBatchLayout->addUBO(sizeof(ShaderBlock_LightBatch), GL_STATIC_DRAW, UBO_BINDING_LOCATION_LIGHT_BATCH);
+	lightBatchLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH, lightBatchLayout);
+
+	//Lighting model
+	DescriptorSetLayout* modelSkinningLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_MODEL);
+	modelSkinningLayout->addUBO(sizeof(ShaderBlock_Model), GL_STATIC_DRAW, UBO_BINDING_LOCATION_MODEL);
+	modelSkinningLayout->addUBO(sizeof(ShaderBlock_Skinning), GL_STATIC_DRAW, UBO_BINDING_LOCATION_SKINNING);
+	modelSkinningLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING, modelSkinningLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
 	//Go through and delete all UBO's
-	for (auto it : ubos)
+	for (auto it : descriptorSetLayouts)
 		delete it.second;
-	for (UBO* ubo : ubosVk)
-		delete ubo;
-	ubos.clear();
-	ubosVk.clear();
+	descriptorSetLayouts.clear();
 }
 
 void ShaderInterface::add(unsigned int id, DescriptorSetLayout* layout) {
@@ -124,91 +138,30 @@ void ShaderInterface::add(unsigned int id, DescriptorSetLayout* layout) {
 	descriptorSetLayouts.insert(std::pair<unsigned int, DescriptorSetLayout*>(id, layout));
 }
 
-void ShaderInterface::add(unsigned int id, unsigned int size, unsigned int usage, unsigned int binding) {
-	//Add the data to the map
-	ubosInfo.insert(std::pair<unsigned int, UBOInfo>(id, { size, usage, binding }));
-}
-
-void ShaderInterface::setup(RenderData* renderData, unsigned int shaderID) {
-	//Check the shader ID and add the required UBOs/Textures
+void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
+	//Check the shader ID and add the required descriptor set layouts
 	if (shaderID == Renderer::SHADER_MATERIAL) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		//renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));  //Moved to DescriptorSet
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 	} else if (shaderID == Renderer::SHADER_SKY_BOX) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 	} else if (shaderID == Renderer::SHADER_FONT) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-	} else if (shaderID == Renderer::SHADER_BILLBOARD) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_BILLBOARD,         getUBO(BLOCK_BILLBOARD));
-	} else if (shaderID == Renderer::SHADER_PARTICLE) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_BILLBOARD,         getUBO(BLOCK_BILLBOARD));
-	} else if (shaderID == Renderer::SHADER_LIGHTING) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 	} else if (shaderID == Renderer::SHADER_VULKAN_LIGHTING) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		//renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL)); //Moved to DescriptorSet
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
-	} else if (shaderID == Renderer::SHADER_FRAMEBUFFER) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-	} else if (shaderID == Renderer::SHADER_ENVIRONMENT_MAP) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-	} else if (shaderID == Renderer::SHADER_SHADOW_MAP) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-	} else if (shaderID == Renderer::SHADER_SHADOW_CUBEMAP) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_SHADOW_CUBEMAP,    getUBO(BLOCK_SHADOW_CUBEMAP));
-	} else if (shaderID == Renderer::SHADER_BILLBOARDED_FONT) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_BILLBOARD,         getUBO(BLOCK_BILLBOARD));
-	} else if (shaderID == Renderer::SHADER_TERRAIN) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		//renderData->add(BLOCK_SKINNING,        getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
-		renderData->add(BLOCK_TERRAIN,           getUBO(BLOCK_TERRAIN));
-	} else if (shaderID == Renderer::SHADER_PLAIN_TEXTURE) {
-
-	} else if (shaderID == Renderer::SHADER_DEFERRED_LIGHTING) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
-	} else if (shaderID == Renderer::SHADER_TILEMAP) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-	} else if (shaderID == Renderer::SHADER_VULKAN) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-	} else if (shaderID == Renderer::SHADER_PBR_EQUI_TO_CUBE_GEN) {
-		renderData->add(BLOCK_PBR_ENV_MAP_GEN,   getUBO(BLOCK_PBR_ENV_MAP_GEN));
-	} else if (shaderID == Renderer::SHADER_PBR_IRRADIANCE_MAP_GEN) {
-
-	} else if (shaderID == Renderer::SHADER_PBR_PREFILTER_MAP_GEN) {
-		renderData->add(UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN, getUBO(UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN));
-	} else if (shaderID == Renderer::SHADER_PBR_BRDF_INTEGRATION_MAP_GEN) {
-
-	} else if (shaderID == Renderer::SHADER_PBR_LIGHTING) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
-		renderData->add(BLOCK_PBR_LIGHTING_CORE, getUBO(BLOCK_PBR_LIGHTING_CORE));
-	} else if (shaderID == Renderer::SHADER_PBR_DEFERRED_LIGHTING) {
-		renderData->add(BLOCK_CORE,              getUBO(BLOCK_CORE));
-		renderData->add(BLOCK_MATERIAL,          getUBO(BLOCK_MATERIAL));
-		renderData->add(BLOCK_SKINNING,          getUBO(BLOCK_SKINNING));
-		renderData->add(BLOCK_LIGHTING,          getUBO(BLOCK_LIGHTING));
-		renderData->add(BLOCK_PBR_LIGHTING_CORE, getUBO(BLOCK_PBR_LIGHTING_CORE));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+	} else if (shaderID == Renderer::SHADER_VULKAN_LIGHTING_SKINNING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
 	}
 }
 
@@ -217,25 +170,6 @@ DescriptorSetLayout* ShaderInterface::getDescriptorSetLayout(unsigned int id) {
 		return descriptorSetLayouts.at(id);
 	else {
 		Logger::log("The DescriptorSetLayout with the id '" + utils_string::str(id) + "' could not be found", "ShaderInterface", LogType::Error);
-		return NULL;
-	}
-}
-
-UBO* ShaderInterface::getUBO(unsigned int id) {
-	if (ubos.count(id) > 0 && (! BaseEngine::usingVulkan()))
-		return ubos.at(id);
-	else if (ubosInfo.count(id) > 0) {
-		//Create the UBO and then return it after adding it to the created UBO's
-		UBOInfo& info = ubosInfo.at(id);
-		UBO* ubo = new UBO(NULL, info.size, info.usage, info.binding);
-		//Add it to the correct place
-		if (BaseEngine::usingVulkan())
-			ubosVk.push_back(ubo);
-		else
-			ubos.insert(std::pair<unsigned int, UBO*>(id, ubo));
-		return ubo;
-	} else {
-		Logger::log("The UBO with the id '" + utils_string::str(id) + "' could not be found", "ShaderInterface", LogType::Error);
 		return NULL;
 	}
 }

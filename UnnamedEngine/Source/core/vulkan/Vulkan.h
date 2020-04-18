@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKAN_H_
-#define CORE_VULKAN_VULKAN_H_
+#pragma once
 
 #include "../Window.h"
 #include "VulkanDevice.h"
@@ -27,7 +26,7 @@
 #include "../render/UBO.h"
 #include "../render/Texture.h"
 #include "../render/Mesh.h"
-#include "VulkanGraphicsPipeline.h"
+#include "../render/GraphicsPipeline.h"
 
 class DescriptorSet;
 
@@ -63,9 +62,6 @@ private:
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
-
-	/* The current bound graphics pipeline (Used for descriptor set binding) */
-	static VulkanGraphicsPipeline* currentGraphicsPipeline;
 
 	/* Structure for storing info about a requested descriptor set update */
 	struct DescriptorSetUpdateInfo {
@@ -156,14 +152,14 @@ public:
 	/* Method to destroy the synchronisation objects */
 	static void destroySyncObjects();
 
+	/* Method to update for rendering this Vulkan (Should be called after update of game loop, before rendering) */
+	static void update();
+
 	/* Method to start drawing a frame (and recording to the command buffer) */
 	static void startDraw();
 
 	/* Method to stop drawing a frame (and recording to the command buffer) */
 	static void stopDraw();
-
-	/* Method to bind a graphics pipeline for rendering */
-	static void bindGraphicsPipeline(VulkanGraphicsPipeline* pipeline);
 
 	/* Method to update a descriptor set */
 	static void updateDescriptorSet(DescriptorSet* set);
@@ -209,8 +205,6 @@ public:
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }
 	static inline unsigned int getNextFrame() { return (currentFrame + 1) % swapChain->getImageCount(); }
-	static inline VulkanGraphicsPipeline* getCurrentGraphicsPipeline() { return currentGraphicsPipeline; }
 };
 
 
-#endif /* CORE_VULKAN_VULKAN_H_ */

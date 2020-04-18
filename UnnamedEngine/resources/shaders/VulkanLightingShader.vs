@@ -1,7 +1,7 @@
 #version 420
 //Used for assigning UBO block locations - can remove
 
-layout(std140, set = 0, binding = 1) uniform UECoreData {
+layout(std140, set = 0, binding = 1) uniform UECameraData {
 	mat4 ue_viewMatrix;
 	mat4 ue_projectionMatrix;
 	
@@ -77,24 +77,6 @@ layout(set = 1, binding = 3) uniform sampler2D ue_material_shininessTexture;
 layout(set = 1, binding = 4) uniform sampler2D ue_material_normalMap;
 layout(set = 1, binding = 5) uniform sampler2D ue_material_parallaxMap;
 
-const int UE_MAX_BONES = 90;
-
-layout(std140, binding = 4) uniform UESkinningData {
-	mat4 ue_bones[UE_MAX_BONES];
-	bool ue_useSkinning;
-};
-
-layout(location = UE_LOCATION_BONE_IDS) in ivec4 ue_boneIDs;
-layout(location = UE_LOCATION_BONE_WEIGHTS) in vec4 ue_boneWeights;
-
-mat4 ueGetBoneTransform() {
-	mat4 boneTransform = ue_bones[ue_boneIDs[0]] * ue_boneWeights[0];
-	boneTransform += ue_bones[ue_boneIDs[1]] * ue_boneWeights[1];
-	boneTransform += ue_bones[ue_boneIDs[2]] * ue_boneWeights[2];
-	boneTransform += ue_bones[ue_boneIDs[3]] * ue_boneWeights[3];
-	
-	return boneTransform;
-}
 #define MAX_LIGHTS 6
 
 struct UELight {
@@ -115,7 +97,7 @@ struct UELight {
 	bool useShadowMap;
 };
 
-layout(std140, binding = 5) uniform UELightingData {
+layout(std140, set = 3, binding = 5) uniform UELightBatchData {
 	UELight ue_lights[MAX_LIGHTS];
 	mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
 	
@@ -132,18 +114,9 @@ layout(location = 9) out mat3 ue_frag_tbnMatrix;
 layout(location = 13) out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 
 void ueAssignLightingData() {
-	mat4 boneTransform;
 	mat3 normalMatrix = mat3(ue_normalMatrix);
-	if (ue_useSkinning) {
-		boneTransform = ueGetBoneTransform();
-		
-		ue_frag_position = vec3(ue_modelMatrix * boneTransform * vec4(ue_position, 1.0));
-		
-		ue_frag_normal = normalMatrix * vec3(boneTransform * vec4(ue_normal, 0.0));
-	} else {
-		ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
-		ue_frag_normal = normalMatrix * ue_normal;
-	}
+	ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
+	ue_frag_normal = normalMatrix * ue_normal;
 	
 	for (int i = 0; i < ue_numLights; i++)
 		ue_frag_pos_lightspace[i] = ue_lightSpaceMatrix[i] * vec4(ue_frag_position, 1.0);
@@ -152,13 +125,8 @@ void ueAssignLightingData() {
 		vec3 T;
 		vec3 B;
 		
-		if (ue_useSkinning) {
-			T = normalize(normalMatrix * vec3(boneTransform * vec4(ue_tangent, 0.0)));
-			B = normalize(normalMatrix * vec3(boneTransform * vec4(ue_bitangent, 0.0)));
-		} else {
-			T = normalize(normalMatrix * ue_tangent);
-			B = normalize(normalMatrix * ue_bitangent);
-		}
+		T = normalize(normalMatrix * ue_tangent);
+		B = normalize(normalMatrix * ue_bitangent);
 		vec3 N = normalize(ue_frag_normal);
 	
 		ue_frag_tbnMatrix = mat3(-T, B, N);
@@ -170,11 +138,7 @@ void ueAssignLightingData() {
 	}
 	
 	//Assign the vertex position
-	if (ue_useSkinning) {
-		gl_Position = ue_mvpMatrix * boneTransform * vec4(ue_position, 1.0);
-	} else {
-		ueCalculatePosition();
-	}
+	ueCalculatePosition();
 }
 
 void main() {

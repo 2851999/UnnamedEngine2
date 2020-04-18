@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_INPUT_INPUT_H_
-#define CORE_INPUT_INPUT_H_
+#pragma once
 
 #include <vector>
 #include <unordered_map>
@@ -159,4 +158,3 @@ public:
 };
 
 
-#endif /* CORE_INPUT_INPUT_H_ */

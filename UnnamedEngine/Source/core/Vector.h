@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VECTOR_H_
-#define CORE_VECTOR_H_
+#pragma once
 
 #include "../utils/Utils.h"
 
@@ -402,4 +401,3 @@ public:
 };
 
 
-#endif /* CORE_VECTOR_H_ */

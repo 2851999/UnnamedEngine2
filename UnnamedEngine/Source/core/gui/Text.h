@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_TEXT_H_
-#define CORE_GUI_TEXT_H_
+#pragma once
 
 #include "Font.h"
 
@@ -42,6 +41,9 @@ private:
 
 	/* The maximum number of characters this instance can render (only relevant for Vulkan) */
 	unsigned int maxCharacters;
+
+	/* The graphics pipeline used to render this text */
+	GraphicsPipeline* pipeline;
 public:
 	/* The default maximum number of characters */
 	static unsigned int DEFAULT_MAX_CHARACTERS;
@@ -101,4 +103,3 @@ public:
 	inline Colour getColour() { return getMaterial()->getDiffuseColour(); }
 };
 
-#endif /* CORE_GUI_TEXT_H_ */

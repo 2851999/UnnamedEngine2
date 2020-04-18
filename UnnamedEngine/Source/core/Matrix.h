@@ -15,8 +15,7 @@
  *   limitations under the License.
  *
  *****************************************************************************/
-#ifndef CORE_MATRIX_H_
-#define CORE_MATRIX_H_
+#pragma once
 
 #include "Quaternion.h"
 #include "Vector.h"
@@ -563,4 +562,3 @@ public:
 	Matrix4d(const Matrix4<double> &base) : Matrix4<double>(base) {}
 };
 
-#endif /* CORE_MATRIX_H_ */

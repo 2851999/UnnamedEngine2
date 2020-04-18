@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_BINARYFILE_H_
-#define UTILS_BINARYFILE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -88,4 +87,3 @@ private:
 };
 
 
-#endif /* UTILS_BINARYFILE_H_ */

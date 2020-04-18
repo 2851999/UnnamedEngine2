@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_SKYBOX_H_
-#define CORE_RENDER_SKYBOX_H_
+#pragma once
 
 #include "Texture.h"
 #include "../Object.h"
@@ -28,6 +27,9 @@
 
 class SkyBox {
 private:
+	/* The graphics pipeline required to render the skybox */
+	GraphicsPipeline* pipelineSkybox;
+
 	/* The skybox texture */
 	Cubemap* cubemap;
 
@@ -54,4 +56,3 @@ public:
 	inline Cubemap* getCubemap() { return cubemap; }
 };
 
-#endif /* CORE_RENDER_SKYBOX_H_ */

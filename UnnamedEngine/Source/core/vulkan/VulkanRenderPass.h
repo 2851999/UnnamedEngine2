@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANRENDERPASS_H_
-#define CORE_VULKAN_VULKANRENDERPASS_H_
+#pragma once
 
 #include "VulkanSwapChain.h"
 
@@ -47,4 +46,3 @@ public:
 	std::vector<VkFramebuffer>& getSwapChainFramebuffers() { return swapChainFramebuffers; }
 };
 
-#endif /* CORE_VULKAN_VULKANRENDERPASS_H_ */
