@@ -51,6 +51,7 @@ public:
 	static const unsigned int SHADER_FONT;
 	static const unsigned int SHADER_VULKAN_LIGHTING;
 	static const unsigned int SHADER_VULKAN_LIGHTING_SKINNING;
+	static const unsigned int SHADER_FRAMEBUFFER;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;

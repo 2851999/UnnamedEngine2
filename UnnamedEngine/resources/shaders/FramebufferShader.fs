@@ -3,7 +3,7 @@
 #map uniform Texture ue_tex
 
 //The texture to display
-uniform sampler2D ue_tex;
+layout(set = 1, binding = 1) uniform sampler2D ue_tex;
 
 layout(location = 0) out vec4 ue_FragColour;
 

@@ -47,6 +47,7 @@ const unsigned int Renderer::SHADER_SKY_BOX                   = 2;
 const unsigned int Renderer::SHADER_FONT                      = 3;
 const unsigned int Renderer::SHADER_VULKAN_LIGHTING           = 4;
 const unsigned int Renderer::SHADER_VULKAN_LIGHTING_SKINNING  = 5;
+const unsigned int Renderer::SHADER_FRAMEBUFFER               = 6;
 
 const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                = 1;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                 = 2;
@@ -85,6 +86,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_VULKAN_LIGHTING,          "VulkanLightingShader");
 	addRenderShader(SHADER_FONT,                     "FontShader");
 	addRenderShader(SHADER_VULKAN_LIGHTING_SKINNING, "VulkanLightingSkinningShader");
+	addRenderShader(SHADER_FRAMEBUFFER,              "FramebufferShader");
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;

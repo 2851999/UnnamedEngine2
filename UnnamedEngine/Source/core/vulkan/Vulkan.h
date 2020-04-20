@@ -30,6 +30,8 @@
 
 class DescriptorSet;
 
+class RenderPass;
+
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
  *****************************************************************************/
@@ -48,8 +50,11 @@ private:
 	/* The swap chain */
 	static VulkanSwapChain* swapChain;
 
-	/* The render pass */
-	static VulkanRenderPass* renderPass;
+	/* The default render pass */
+	static RenderPass* defaultRenderPass;
+
+	/* The current render pass being used */
+	static VkRenderPass currentRenderPass;
 
 	/* Command pool */
 	static VkCommandPool commandPool;
@@ -195,12 +200,16 @@ public:
 	/* Waits for device to be finished working */
 	static inline void waitDeviceIdle() { vkDeviceWaitIdle(device->getLogical()); }
 
+	/* Setters */
+	static inline void setCurrentRenderPass(VkRenderPass& renderPass) { currentRenderPass = renderPass; }
+
 	/* Getters */
 	static inline VkInstance& getInstance() { return instance; }
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
 	static inline VulkanDevice* getDevice() { return device; }
 	static inline VulkanSwapChain* getSwapChain() { return swapChain; }
-	static inline VulkanRenderPass* getRenderPass() { return renderPass; }
+	static inline RenderPass* getDefaultRenderPass() { return defaultRenderPass; }
+	static inline VkRenderPass getCurrentRenderPass() { return currentRenderPass; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }

@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 2 | Experimental 2
+
+* Implemented basic offscreen rendering
+
+* Fixed bug: Crash when trying to render an object without
+             indices when using Vulkan
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 2 | Experimental 1
 
 * Added RenderPass

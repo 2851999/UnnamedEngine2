@@ -47,4 +47,8 @@ public:
 
 	/* Method to end this render pass */
 	void end();
+
+	/* Getters */
+	VkRenderPass& getVkInstance() { return vulkanInstance; }
+	Texture* getColourTexture() { return colourTexture; }
 };

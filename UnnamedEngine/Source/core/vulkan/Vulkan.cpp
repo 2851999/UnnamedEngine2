@@ -24,6 +24,7 @@
 #include "../render/Mesh.h"
 #include "../../utils/Logging.h"
 #include "../render/DescriptorSet.h"
+#include "../render/RenderPass.h"
 
 #include <limits>
 #include <array>
@@ -36,7 +37,8 @@ VkInstance                                   Vulkan::instance;
 VkSurfaceKHR                                 Vulkan::windowSurface;
 VulkanDevice*                                Vulkan::device;
 VulkanSwapChain*                             Vulkan::swapChain;
-VulkanRenderPass*                            Vulkan::renderPass;
+RenderPass*	        						 Vulkan::defaultRenderPass;
+VkRenderPass                                 Vulkan::currentRenderPass;
 VkCommandPool                                Vulkan::commandPool;
 std::vector<VkCommandBuffer>                 Vulkan::commandBuffers;
 std::vector<VkSemaphore>                     Vulkan::imageAvailableSemaphores;
@@ -91,7 +93,8 @@ bool Vulkan::initialise(Window* window) {
 	swapChain = new VulkanSwapChain(device, window->getSettings());
 
 	//Create the render pass
-	renderPass = new VulkanRenderPass(swapChain);
+	defaultRenderPass = new RenderPass();
+	currentRenderPass = defaultRenderPass->getVkInstance();
 
 	//Create the command buffers
 	createCommandBuffers();
@@ -111,7 +114,7 @@ void Vulkan::destroy() {
 
 	destroyCommandPool();
 
-	delete renderPass;
+	delete defaultRenderPass;
 	delete swapChain;
 	delete device;
 
@@ -186,11 +189,8 @@ void Vulkan::destroyCommandPool() {
 }
 
 void Vulkan::createCommandBuffers() {
-	//Obtain the list of framebuffers in the swap chain
-	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
-
-	//Need to allocate the same number of command buffers as framebuffers
-	commandBuffers.resize(swapChainFramebuffers.size());
+	//Need to allocate the same number of command buffers as swap chain images (and therefore number of framebuffers)
+	commandBuffers.resize(swapChain->getImageCount());
 
 	VkCommandBufferAllocateInfo allocInfo = {};
 	allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -447,9 +447,6 @@ void Vulkan::startDraw() {
 	//------------------------------------------------------------------------------------------------------
 	vkResetCommandBuffer(commandBuffers[currentFrame], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 
-	//Obtain the list of framebuffers in the swap chain
-	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
-
 	VkCommandBufferBeginInfo beginInfo = {};
 	beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags            = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
@@ -457,15 +454,9 @@ void Vulkan::startDraw() {
 
 	if (vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS)
 		Logger::log("Failed to begin recording command buffer", "Vulkan", LogType::Error);
-
-	//Begin the render pass
-	renderPass->begin();
 }
 
 void Vulkan::stopDraw() {
-	//End the render pass
-	renderPass->end();
-
 	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
 		Logger::log("Failed to record command buffer", "Vulkan", LogType::Error);
 	//-------------------------------------------------------------------------------------------

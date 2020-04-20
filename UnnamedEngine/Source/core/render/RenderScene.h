@@ -20,6 +20,7 @@
 
 #include "Light.h"
 #include "GraphicsPipeline.h"
+#include "../vulkan/VulkanRenderPass.h"
 
 class RenderScene {
 private:
@@ -50,6 +51,15 @@ private:
 	GraphicsPipeline* pipelineLightingBlend;
 	GraphicsPipeline* pipelineLightingSkinning;
 	GraphicsPipeline* pipelineLightingSkinningBlend;
+
+	/* Mesh for rendering to the screen */
+	Mesh* screenTextureMesh;
+
+	/* Graphics pipeline for rendering the final quad */
+	GraphicsPipeline* pipelineFinal;
+
+	/* Final render pass */
+	VulkanRenderPass* finalRenderPass;
 public:
 	/* The number of lights that can be rendered at once */
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;

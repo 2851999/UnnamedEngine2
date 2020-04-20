@@ -128,11 +128,13 @@ RenderPass::~RenderPass() {
 		vkDestroyFramebuffer(Vulkan::getDevice()->getLogical(), framebuffer, nullptr);
 		vkDestroyRenderPass(Vulkan::getDevice()->getLogical(), vulkanInstance, nullptr);
 	}
-	delete colourTexture;
-	delete depthTexture;
+	//delete colourTexture;
+	//delete depthTexture;
 }
 
 void RenderPass::begin() {
+	Vulkan::setCurrentRenderPass(vulkanInstance);
+
 	//Begin the render pass
 	VkRenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

@@ -66,10 +66,17 @@ GraphicsPipeline::GraphicsPipeline(RenderShader* renderShader, VertexInputData v
 		inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 		VkViewport viewport = {};
-		viewport.x = 0.0f;
-		viewport.y = (float)Window::getCurrentInstance()->getSettings().windowHeight;
-		viewport.width = (float)Window::getCurrentInstance()->getSettings().windowWidth;
-		viewport.height = -((float)viewport.y); //Flip so that it resembles OpenGL
+		if (renderShader->getID() != Renderer::SHADER_FRAMEBUFFER) {
+			viewport.x = 0.0f;
+			viewport.y = (float) Window::getCurrentInstance()->getSettings().windowHeight;
+			viewport.width = (float) Window::getCurrentInstance()->getSettings().windowWidth;
+			viewport.height = -((float) viewport.y); //Flip so that it resembles OpenGL
+		} else {
+			viewport.x = 0.0f;
+			viewport.y = 0.0f;
+			viewport.width = (float) Window::getCurrentInstance()->getSettings().windowWidth;
+			viewport.height = (float) Window::getCurrentInstance()->getSettings().windowHeight;
+		}
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
@@ -156,7 +163,7 @@ GraphicsPipeline::GraphicsPipeline(RenderShader* renderShader, VertexInputData v
 		pipelineInfo.pColorBlendState = &colorBlending;
 		pipelineInfo.pDynamicState = nullptr; //Optional
 		pipelineInfo.layout = layout->getVkInstance();
-		pipelineInfo.renderPass = Vulkan::getRenderPass()->getInstance();
+		pipelineInfo.renderPass = Vulkan::getCurrentRenderPass();
 		pipelineInfo.subpass = 0;
 
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; //Optional

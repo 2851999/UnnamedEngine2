@@ -18,6 +18,9 @@
 
 #include "RenderScene.h"
 
+#include "../vulkan/Vulkan.h"
+#include "RenderPass.h"
+
 #include "../../utils/Logging.h"
 
 RenderScene::RenderScene() {
@@ -27,9 +30,31 @@ RenderScene::RenderScene() {
 	pipelineLightingBlend         = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND);
 	pipelineLightingSkinning      = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING);
 	pipelineLightingSkinningBlend = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND);
+
+	finalRenderPass = new VulkanRenderPass(Vulkan::getSwapChain());
+	Vulkan::setCurrentRenderPass(finalRenderPass->getInstance());
+	
+	pipelineFinal = new GraphicsPipeline(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), GraphicsPipeline::ColourBlendState(), GraphicsPipeline::DepthState());
+
+	//Setup the screen texture mesh
+	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+	screenTextureMesh = new Mesh(meshData);
+	screenTextureMesh->getMaterial()->setDiffuse(Vulkan::getDefaultRenderPass()->getColourTexture());
+
+	screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 }
 
 RenderScene::~RenderScene() {
+	delete screenTextureMesh;
+	delete pipelineFinal;
+	delete finalRenderPass;
+
 	//Go through and delete all created objects
 	for (DescriptorSet* descriptorSetLightBatch : descriptorSetLightBatches)
 		delete descriptorSetLightBatch;
@@ -65,6 +90,8 @@ void RenderScene::addLight(Light* light) {
 }
 
 void RenderScene::render() {
+	//Start the default render pass
+	Vulkan::getDefaultRenderPass()->begin();
 	//Check whether lighting is enabled
 	if (lighting) {
 		//Ambient light (used for phong shading)
@@ -157,4 +184,15 @@ void RenderScene::render() {
 		for (unsigned int i = 0; i < objects.size(); ++i)
 			objects[i]->render();
 	}
+	//End the default render pass
+	Vulkan::getDefaultRenderPass()->end();
+
+	//Render the final composition
+	finalRenderPass->begin();
+
+	pipelineFinal->bind();
+	Matrix4f matrix = Matrix4f().initIdentity();
+	Renderer::render(screenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+
+	finalRenderPass->end();
 }

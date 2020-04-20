@@ -179,6 +179,8 @@ VulkanRenderPass::~VulkanRenderPass() {
 }
 
 void VulkanRenderPass::begin() {
+	Vulkan::setCurrentRenderPass(instance);
+
 	//Begin the render pass
 	VkRenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
