@@ -45,3 +45,4 @@
 /UnnamedEngine/run_vulkan.bat
 /UnnamedEngine/run_opengl.bat
 /UnnamedEngine/both.bat
+/UnnamedEngine/vk_layer_settings.txt

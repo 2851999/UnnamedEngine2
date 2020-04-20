@@ -35,9 +35,9 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	VulkanDeviceSwapChainSupportDetails swapChainSupportDetails = VulkanDevice::querySwapChainSupport(device->getPhysical());
 
 	//Choose a surface format, present mode and extent
-	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupportDetails.formats);
-	VkPresentModeKHR   presentMode   = chooseSwapPresentMode(swapChainSupportDetails.presentModes);
-	extent                           = chooseSwapExtent(swapChainSupportDetails.capabilities, settings);
+	VkSurfaceFormatKHR swapSurfaceFormat = chooseSwapSurfaceFormat(swapChainSupportDetails.formats);
+	VkPresentModeKHR   presentMode       = chooseSwapPresentMode(swapChainSupportDetails.presentModes);
+	extent                               = chooseSwapExtent(swapChainSupportDetails.capabilities, settings);
 
 	//Assign the VSync setting based on what is being used
 	Window::getCurrentInstance()->getSettings().videoVSync = (presentMode == VK_PRESENT_MODE_FIFO_KHR);
@@ -58,8 +58,8 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	createInfo.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	createInfo.surface          = Vulkan::getWindowSurface();
 	createInfo.minImageCount    = imageCount;
-	createInfo.imageFormat      = surfaceFormat.format;
-	createInfo.imageColorSpace  = surfaceFormat.colorSpace;
+	createInfo.imageFormat      = swapSurfaceFormat.format;
+	createInfo.imageColorSpace  = swapSurfaceFormat.colorSpace;
 	createInfo.imageExtent      = extent;
 	createInfo.imageArrayLayers = 1; //Number of layers each image consists of (always 1 unless VR/stereoscopic 3D)
 	createInfo.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -89,7 +89,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 		Logger::log("Failed to create swap chain", "VulkanSwapchain", LogType::Error);
 
 	//Assign the chosen format and extent
-	this->format = surfaceFormat.format;
+	this->surfaceFormat = swapSurfaceFormat.format;
 	this->extent = extent;
 
 	//Obtain the images in the created swap chain
@@ -102,20 +102,20 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 
 	for (unsigned int i = 0; i < images.size(); ++i)
 		//Create the image view
-		imageViews[i] = Vulkan::createImageView(images[i], VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+		imageViews[i] = Vulkan::createImageView(images[i], VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
 
 	//Obtain the number of samples being used
 	numSamples = settings.videoSamples;
 	//Now setup the colour buffer if necessary
 	if (numSamples > 0) {
-		Vulkan::createImage(extent.width, extent.height, 1, 1, static_cast<VkSampleCountFlagBits>(numSamples), format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colourImage, colourImageMemory);
-		colourImageView = Vulkan::createImageView(colourImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+		Vulkan::createImage(extent.width, extent.height, 1, 1, static_cast<VkSampleCountFlagBits>(numSamples), surfaceFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colourImage, colourImageMemory);
+		colourImageView = Vulkan::createImageView(colourImage, VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
 
-		Vulkan::transitionImageLayout(colourImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1, 1);
+		Vulkan::transitionImageLayout(colourImage, surfaceFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1, 1);
 	}
 
 	//Now setup the depth buffer
-	VkFormat depthFormat = Vulkan::findDepthFormat();
+	depthFormat = Vulkan::findDepthFormat();
 	Vulkan::createImage(extent.width, extent.height, 1, 1, static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples), depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
 	depthImageView = Vulkan::createImageView(depthImage, VK_IMAGE_VIEW_TYPE_2D, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1, 1);
 	Vulkan::transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1, 1);

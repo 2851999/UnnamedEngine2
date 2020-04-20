@@ -41,6 +41,12 @@ public:
 	/* Destructor */
 	virtual ~VulkanRenderPass();
 
+	/* Method to begin this render pass */
+	void begin();
+
+	/* Method to end this render pass */
+	void end();
+
 	/* Setters and getters */
 	VkRenderPass& getInstance() { return instance; }
 	std::vector<VkFramebuffer>& getSwapChainFramebuffers() { return swapChainFramebuffers; }

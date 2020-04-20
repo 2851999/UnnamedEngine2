@@ -234,16 +234,17 @@ void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, ui
 	if (vkAllocateMemory(device->getLogical(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
 		Logger::log("Failed to allocate image memory", "Vulkan", LogType::Error);
 
-	vkBindImageMemory(device->getLogical(), image, imageMemory, 0);
+	if (vkBindImageMemory(device->getLogical(), image, imageMemory, 0) != VK_SUCCESS)
+		Logger::log("Failed to bind device memory to image", "Vulkan", LogType::Error);
 }
 
-VkImageView Vulkan::createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount) {
+VkImageView Vulkan::createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t layerCount) {
 	VkImageViewCreateInfo viewInfo = {};
 	viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image    = image;
 	viewInfo.viewType = viewType;
 	viewInfo.format   = format;
-	viewInfo.subresourceRange.aspectMask     = aspectFlags;
+	viewInfo.subresourceRange.aspectMask     = aspectMask;
 	viewInfo.subresourceRange.baseMipLevel   = 0;
 	viewInfo.subresourceRange.levelCount     = mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -457,26 +458,13 @@ void Vulkan::startDraw() {
 	if (vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS)
 		Logger::log("Failed to begin recording command buffer", "Vulkan", LogType::Error);
 
-	VkRenderPassBeginInfo renderPassInfo = {};
-	renderPassInfo.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass  = renderPass->getInstance();
-	renderPassInfo.framebuffer = swapChainFramebuffers[currentFrame];
-
-	renderPassInfo.renderArea.offset = {0, 0};
-	renderPassInfo.renderArea.extent = swapChain->getExtent();
-
-	std::array<VkClearValue, 2> clearValues = {};
-	clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-	clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
-
-	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-	renderPassInfo.pClearValues = clearValues.data();
-
-	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	//Begin the render pass
+	renderPass->begin();
 }
 
 void Vulkan::stopDraw() {
-	vkCmdEndRenderPass(commandBuffers[currentFrame]);
+	//End the render pass
+	renderPass->end();
 
 	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
 		Logger::log("Failed to record command buffer", "Vulkan", LogType::Error);

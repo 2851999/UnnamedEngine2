@@ -47,8 +47,9 @@ private:
 	VkDeviceMemory depthImageMemory;
 	VkImageView    depthImageView;
 
-	/* The format and extent used for this swap chain */
-	VkFormat   format;
+	/* The formats and extent used for this swap chain */
+	VkFormat   surfaceFormat;
+	VkFormat   depthFormat;
 	VkExtent2D extent;
 
 	/* The device this swap chain is for */
@@ -72,7 +73,8 @@ public:
 	inline unsigned int getNumSamples() { return numSamples; }
 	inline VkImageView& getColourImageView() { return colourImageView; }
 	inline VkImageView& getDepthImageView() { return depthImageView; }
-	inline VkFormat getFormat() { return format; }
+	inline VkFormat getSurfaceFormat() { return surfaceFormat; }
+	inline VkFormat getDepthFormat() { return depthFormat; }
 	inline VkExtent2D& getExtent() { return extent; }
 	inline VulkanDevice* getDevice() { return device; }
 	inline unsigned int getImageCount() { return images.size(); }

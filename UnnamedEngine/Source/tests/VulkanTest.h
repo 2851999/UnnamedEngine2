@@ -23,6 +23,7 @@
 #include "../core/render/RenderScene.h"
 #include "../core/render/MeshLoader.h"
 #include "../utils/GLUtils.h"
+#include "../core/vulkan/Vulkan.h"
 
 class Test : public BaseEngine {
 private:
@@ -59,6 +60,9 @@ void Test::initialise() {
 }
 
 void Test::created() {
+
+	//std::cout << Vulkan::getDevice()->listSupportedExtensions() << std::endl;
+
 	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");

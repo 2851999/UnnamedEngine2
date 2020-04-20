@@ -18,8 +18,9 @@
 
 #include "VulkanRenderPass.h"
 
-#include "Vulkan.h"
+#include <array>
 
+#include "Vulkan.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -33,7 +34,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanSwapChain* swapChain) {
 
 	//Setup the colour attachment info
 	VkAttachmentDescription colourAttachment = {};
-	colourAttachment.format         = swapChain->getFormat();
+	colourAttachment.format         = swapChain->getSurfaceFormat();
 	colourAttachment.samples        = static_cast<VkSampleCountFlagBits>(swapChain->getNumSamples() == 0 ? 1 : swapChain->getNumSamples());
 	colourAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR; //Clear before rendering
 	colourAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE; //After rendering store so can display
@@ -48,7 +49,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanSwapChain* swapChain) {
 
 	//Setup the depth attachment info
 	VkAttachmentDescription depthAttachment = {};
-	depthAttachment.format         = Vulkan::findDepthFormat();
+	depthAttachment.format         = swapChain->getDepthFormat();
 	depthAttachment.samples        = static_cast<VkSampleCountFlagBits>(swapChain->getNumSamples() == 0 ? 1 : swapChain->getNumSamples());
 	depthAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	depthAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -67,13 +68,32 @@ VulkanRenderPass::VulkanRenderPass(VulkanSwapChain* swapChain) {
 	subpass.pColorAttachments       = &colourAttachmentRef;
 	subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-	VkSubpassDependency dependency = {};
-	dependency.srcSubpass    = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass    = 0;
-	dependency.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.srcAccessMask = 0;
-	dependency.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	//VkSubpassDependency dependency = {};
+	//dependency.srcSubpass    = VK_SUBPASS_EXTERNAL;
+	//dependency.dstSubpass    = 0;
+	//dependency.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	//dependency.srcAccessMask = 0;
+	//dependency.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	//dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+	//Subpass dependencies for layout transitions
+	std::array<VkSubpassDependency, 2> dependencies;
+
+	dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[0].dstSubpass = 0;
+	dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+	dependencies[1].srcSubpass = 0;
+	dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+	dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+	dependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
 	std::vector<VkAttachmentDescription> attachments = { colourAttachment, depthAttachment };
 
@@ -84,7 +104,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanSwapChain* swapChain) {
 	//Check for MSAA
 	if (swapChain->getNumSamples() > 0) {
 		//Also need to resolve colour attachment (which should be in VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) before displaying
-		colourAttachmentResolve.format         = swapChain->getFormat();
+		colourAttachmentResolve.format         = swapChain->getSurfaceFormat();
 		colourAttachmentResolve.samples        = VK_SAMPLE_COUNT_1_BIT;
 		colourAttachmentResolve.loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		colourAttachmentResolve.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
@@ -107,8 +127,8 @@ VulkanRenderPass::VulkanRenderPass(VulkanSwapChain* swapChain) {
 	renderPassInfo.pAttachments    = attachments.data();
 	renderPassInfo.subpassCount    = 1;
 	renderPassInfo.pSubpasses      = &subpass;
-	renderPassInfo.dependencyCount = 1;
-	renderPassInfo.pDependencies   = &dependency;
+	renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+	renderPassInfo.pDependencies   = dependencies.data();
 
 	//Attempt to create the render pass
 	if (vkCreateRenderPass(device->getLogical(), &renderPassInfo, nullptr, &instance) != VK_SUCCESS)
@@ -156,4 +176,29 @@ VulkanRenderPass::~VulkanRenderPass() {
 
 	//Destroy the render pass
 	vkDestroyRenderPass(device->getLogical(), instance, nullptr);
+}
+
+void VulkanRenderPass::begin() {
+	//Begin the render pass
+	VkRenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = instance;
+	renderPassInfo.framebuffer = swapChainFramebuffers[Vulkan::getCurrentFrame()];
+
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = Vulkan::getSwapChain()->getExtent();
+
+	std::array<VkClearValue, 2> clearValues = {};
+	clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
+
+	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+	renderPassInfo.pClearValues = clearValues.data();
+
+	vkCmdBeginRenderPass(Vulkan::getCurrentCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void VulkanRenderPass::end() {
+	//End the render pass
+	vkCmdEndRenderPass(Vulkan::getCurrentCommandBuffer());
 }
