@@ -57,7 +57,7 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 }
 
 void Test::created() {
@@ -143,12 +143,12 @@ void Test::renderOffscreen() {
 }
 
 void Test::render() {
-	if (! getSettings().videoVulkan) {
-		glEnable(GL_DEPTH_TEST);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//if (! getSettings().videoVulkan) {
+	//	glEnable(GL_DEPTH_TEST);
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		utils_gl::setupAlphaBlendingMSAA();
-	}
+	//	utils_gl::setupAlphaBlendingMSAA();
+	//}
 
 	renderScene->render();
 

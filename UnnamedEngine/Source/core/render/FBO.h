@@ -29,21 +29,38 @@ class RenderPass;
   *****************************************************************************/
 
 class FramebufferAttachment : public Texture {
+public:
+	enum class Type {
+		COLOUR, DEPTH
+	};
 private:
+	/* Type of attachment this is */
+	Type type;
+
 	/* The format of this store */
-	VkFormat format;
+	VkFormat vulkanFormat;
 
 	/* The final layout required for this attachment */
-	VkImageLayout finalLayout;
+	VkImageLayout vulkanFinalLayout;
+
+	/* Render buffer object (For OpenGL) */
+	GLuint glRBO;
 public:
 	/* Constructor */
-	FramebufferAttachment(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout finalLayout);
+	FramebufferAttachment(uint32_t width, uint32_t height, Type type);
 
 	/* Destructor */
 	virtual ~FramebufferAttachment();
 
-	/* Method to obtain the attachment description of this attachment for Vulkan*/
+	/* Method to setup this attachment for use with an FBO, given the index of the 
+	   current colour attachment in the FBO (used for OpenGL) */
+	void setup(unsigned int indexOfColourAttachment);
+
+	/* Method to obtain the attachment description of this attachment for Vulkan */
 	VkAttachmentDescription getVkAttachmentDescription();
+
+	/* Getters */
+	inline Type getType() { return type; }
 };
 
  /*****************************************************************************
@@ -58,6 +75,9 @@ private:
 
 	/* The framebuffer */
 	Framebuffer* framebuffer = NULL;
+
+	/* The FBO for OpenGL */
+	GLuint glFBO;
 
 	/* The attachments */
 	std::vector<FramebufferAttachment*> attachments;
@@ -76,6 +96,7 @@ public:
 
 	/* Getters */
 	inline Framebuffer* getFramebuffer() { return framebuffer; }
+	inline GLenum getGLFBO() { return glFBO; }
 	inline std::vector<VkAttachmentDescription>& getVkAttachmentDescriptions() { return vulkanAttachmentDescriptions; }
 	inline FramebufferAttachment* getAttachment(unsigned int index) { return attachments[index]; }
 };

@@ -25,12 +25,12 @@
 
 RenderScene::RenderScene() {
 	//Create the FBO for rendering offscreen
-	uint32_t width = Vulkan::getSwapChain()->getExtent().width;
-	uint32_t height = Vulkan::getSwapChain()->getExtent().height;
+	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
+	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
 
 	FBO* fbo = new FBO(width, height, {
-			new FramebufferAttachment(width, height, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL),
-			new FramebufferAttachment(width, height, Vulkan::getSwapChain()->getDepthFormat(), VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, Vulkan::hasStencilComponent(Vulkan::getSwapChain()->getDepthFormat()) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR),
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
 		});
 
 	offscreenRenderPass = new RenderPass(fbo);
@@ -217,7 +217,7 @@ void RenderScene::renderOffscreen() {
 }
 
 void RenderScene::render() {
-	((Camera3D*) Renderer::getCamera())->useView();
+	//((Camera3D*) Renderer::getCamera())->useView();
 
 	pipelineFinal->bind();
 	Matrix4f matrix = Matrix4f().initIdentity();

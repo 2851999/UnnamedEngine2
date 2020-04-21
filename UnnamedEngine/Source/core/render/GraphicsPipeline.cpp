@@ -195,10 +195,11 @@ void GraphicsPipeline::bind() {
 		if (depthState.depthTestEnable) {
 			glEnable(GL_DEPTH_TEST);
 
-			glDepthMask(depthState.depthWriteEnable);
 			glDepthFunc(convertToGL(depthState.depthCompareOp));
 		} else
 			glDisable(GL_DEPTH_TEST);
+
+		glDepthMask(depthState.depthWriteEnable);
 
 		//Assign the blend state
 		if (colourBlendState.blendEnabled) {

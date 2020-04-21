@@ -111,11 +111,17 @@ void Renderer::initialise() {
 	//Depth state for normal depth testing
 	GraphicsPipeline::DepthState defaultDepthState;
 
-	//Depth state for the skybox epth testing
+	//Depth state for skyboxes
 	GraphicsPipeline::DepthState skyboxDepthState;
 	skyboxDepthState.depthTestEnable = false;
 	skyboxDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
 	skyboxDepthState.depthWriteEnable = false;
+
+	//Depth state for font
+	GraphicsPipeline::DepthState fontDepthState;
+	fontDepthState.depthTestEnable = false;
+	fontDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
+	fontDepthState.depthWriteEnable = true;
 
 	//Depth state for lighting
 	GraphicsPipeline::DepthState lightDepthState;
@@ -124,12 +130,12 @@ void Renderer::initialise() {
 	//Depth state for light blending
 	GraphicsPipeline::DepthState lightBlendDepthState;
 	lightBlendDepthState.depthCompareOp   = GraphicsPipeline::CompareOperation::LESS_OR_EQUAL;
-	lightBlendDepthState.depthWriteEnable = false;
+	lightBlendDepthState.depthWriteEnable = true;
 
 	//Setup the default pipelines
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_MATERIAL,                new GraphicsPipelineLayout(getRenderShader(SHADER_MATERIAL), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, defaultDepthState));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SKY_BOX,                 new GraphicsPipelineLayout(getRenderShader(SHADER_SKY_BOX), MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState));
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_FONT,                    new GraphicsPipelineLayout(getRenderShader(SHADER_FONT), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_FONT,                    new GraphicsPipelineLayout(getRenderShader(SHADER_FONT), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, fontDepthState));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING,                new GraphicsPipelineLayout(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_BLEND,          new GraphicsPipelineLayout(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_SKINNING,       new GraphicsPipelineLayout(getRenderShader(SHADER_VULKAN_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState));
@@ -138,8 +144,9 @@ void Renderer::initialise() {
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();
 
-	//Setup swap chain with the default render pass
-	Vulkan::getSwapChain()->setupDefaultFramebuffers(defaultRenderPass);
+	//Setup swap chain with the default render pass if necessary
+	if (BaseEngine::usingVulkan())
+		Vulkan::getSwapChain()->setupDefaultFramebuffers(defaultRenderPass);
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {

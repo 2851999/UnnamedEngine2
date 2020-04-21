@@ -195,8 +195,6 @@ using namespace utils_string;
 
 void BaseEngine::renderDebugInfo() {
 	if (! BaseEngine::usingVulkan()) {
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
 //		glEnable(GL_BLEND);
 //		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -231,7 +229,7 @@ void BaseEngine::renderDebugInfo() {
 			utils_gl::enableWireframe();
 
 //		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_TEXTURE_2D);
 	}
 }
 

@@ -1,4 +1,13 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 2 | Experimental 7
+
+* Added support for OpenGL in RenderPass
+* Readded OpenGL support to FBO
+
+* Fixed bug: 'depthWriteEnable' was incorrectly applied in
+              GraphicsPipeline when using OpenGL
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 2 | Experimental 6
 
 * Fixed bug: MSAA would not work when using Vulkan
