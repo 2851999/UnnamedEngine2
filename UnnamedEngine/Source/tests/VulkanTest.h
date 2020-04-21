@@ -103,8 +103,8 @@ void Test::created() {
 	model->update();
 	renderScene->add(model);
 
-	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
-	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
+	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
+	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
 
 	model2 = new GameObject3D(mesh2, shader);
 	model2->setPosition(4.0f, 1.0f, 0.0f);

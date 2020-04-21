@@ -178,7 +178,6 @@ void FBO::setup(RenderPass* renderPass) {
 
 		//Create the framebuffer
 		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments);
-
 	} else {
 		//Generate and bind the FBO
 		glGenFramebuffers(1, &glFBO);
