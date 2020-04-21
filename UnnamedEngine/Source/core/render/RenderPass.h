@@ -51,4 +51,5 @@ public:
 	/* Getters */
 	VkRenderPass& getVkInstance() { return vulkanInstance; }
 	Texture* getColourTexture() { return colourTexture; }
+	Texture* getDepthTexture() { return depthTexture; }
 };

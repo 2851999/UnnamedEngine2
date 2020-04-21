@@ -25,6 +25,7 @@
 #include "render/Camera.h"
 #include "../utils/DebugConsole.h"
 #include "../utils/FPSUtils.h"
+#include "vulkan/VulkanRenderPass.h"
 
 namespace Engine {
 	/* Various engine values
@@ -62,6 +63,9 @@ private:
 	/* Debug console */
 	DebugConsole* debugConsole = NULL;
 
+	/* The default RenderPass for rendering to the default framebuffer*/
+	VulkanRenderPass* defaultRenderPass;
+
 	/* Method used to initialise the graphics API being used for rendering (Returns whether initialisation was successful) */
 	bool initGraphicsAPI();
 public:
@@ -80,8 +84,11 @@ public:
 	/* Called after the Window is created all objects that need to be
 	 * rendered can be created */
 	virtual void created() {}
-	/* Update and render methods */
+	/* Update method */
 	virtual void update() {}
+	/* Method to render before a render pass is started*/
+	virtual void renderOffscreen() {}
+	/* Method to render after the default framebuffer render pass has been started*/
 	virtual void render() {}
 	/* Called when the Engine is stopping but before the Window has
 	 * closed */

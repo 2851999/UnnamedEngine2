@@ -25,16 +25,28 @@
 
 RenderScene::RenderScene() {
 	//Obtain the render pipelines
-	pipelineMaterial              = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_MATERIAL);
-	pipelineLighting              = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING);
-	pipelineLightingBlend         = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND);
-	pipelineLightingSkinning      = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING);
-	pipelineLightingSkinningBlend = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND);
+	pipelineMaterial              = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL));
+	pipelineLighting              = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING));
+	pipelineLightingBlend         = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND));
+	pipelineLightingSkinning      = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING));
+	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND));
 
-	finalRenderPass = new VulkanRenderPass(Vulkan::getSwapChain());
-	Vulkan::setCurrentRenderPass(finalRenderPass->getInstance());
+	offscreenRenderPass = new RenderPass();
+	Vulkan::setCurrentRenderPass(offscreenRenderPass->getVkInstance());
+
+	GraphicsPipeline::ColourBlendState alphaBlendState;
+	alphaBlendState.blendEnabled = true;
+	alphaBlendState.srcRGB = GraphicsPipeline::BlendFactor::SRC_ALPHA;
+	alphaBlendState.dstRGB = GraphicsPipeline::BlendFactor::ONE_MINUS_SRC_ALPHA;
+	alphaBlendState.srcAlpha = GraphicsPipeline::BlendFactor::ONE;
+	alphaBlendState.dstAlpha = GraphicsPipeline::BlendFactor::ZERO;
+
+	GraphicsPipeline::DepthState depthState;
+	depthState.depthTestEnable = false;
+	depthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
+	depthState.depthWriteEnable = false;
 	
-	pipelineFinal = new GraphicsPipeline(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), GraphicsPipeline::ColourBlendState(), GraphicsPipeline::DepthState());
+	pipelineFinal = new GraphicsPipeline(new GraphicsPipelineLayout(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, depthState));
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
@@ -45,15 +57,23 @@ RenderScene::RenderScene() {
 	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
 	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
 	screenTextureMesh = new Mesh(meshData);
-	screenTextureMesh->getMaterial()->setDiffuse(Vulkan::getDefaultRenderPass()->getColourTexture());
+	screenTextureMesh->getMaterial()->setDiffuse(offscreenRenderPass->getColourTexture());
 
 	screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 }
 
 RenderScene::~RenderScene() {
 	delete screenTextureMesh;
+	delete pipelineFinal->getLayout();
 	delete pipelineFinal;
-	delete finalRenderPass;
+
+	delete pipelineMaterial;
+	delete pipelineLighting;
+	delete pipelineLightingBlend;
+	delete pipelineLightingSkinning;
+	delete pipelineLightingSkinningBlend;
+
+	delete offscreenRenderPass;
 
 	//Go through and delete all created objects
 	for (DescriptorSet* descriptorSetLightBatch : descriptorSetLightBatches)
@@ -89,9 +109,9 @@ void RenderScene::addLight(Light* light) {
 	}
 }
 
-void RenderScene::render() {
-	//Start the default render pass
-	Vulkan::getDefaultRenderPass()->begin();
+void RenderScene::renderOffscreen() {
+	//Use the offscreen render pass
+	offscreenRenderPass->begin();
 	//Check whether lighting is enabled
 	if (lighting) {
 		//Ambient light (used for phong shading)
@@ -184,15 +204,14 @@ void RenderScene::render() {
 		for (unsigned int i = 0; i < objects.size(); ++i)
 			objects[i]->render();
 	}
-	//End the default render pass
-	Vulkan::getDefaultRenderPass()->end();
+	//End the offscreen render pass
+	offscreenRenderPass->end();
+}
 
-	//Render the final composition
-	finalRenderPass->begin();
+void RenderScene::render() {
+	((Camera3D*) Renderer::getCamera())->useView();
 
 	pipelineFinal->bind();
 	Matrix4f matrix = Matrix4f().initIdentity();
 	Renderer::render(screenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
-
-	finalRenderPass->end();
 }

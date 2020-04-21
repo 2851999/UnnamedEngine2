@@ -20,7 +20,7 @@
 
 #include "Light.h"
 #include "GraphicsPipeline.h"
-#include "../vulkan/VulkanRenderPass.h"
+#include "RenderPass.h"
 
 class RenderScene {
 private:
@@ -58,8 +58,8 @@ private:
 	/* Graphics pipeline for rendering the final quad */
 	GraphicsPipeline* pipelineFinal;
 
-	/* Final render pass */
-	VulkanRenderPass* finalRenderPass;
+	/* Offscreen render pass */
+	RenderPass* offscreenRenderPass;
 public:
 	/* The number of lights that can be rendered at once */
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
@@ -75,6 +75,9 @@ public:
 
 	/* Adds a light to the scene */
 	void addLight(Light* light);
+
+	/* Method used to do any rendering without the default render pass */
+	void renderOffscreen();
 
 	/* Method used to render all of the objects */
 	void render();

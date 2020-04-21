@@ -36,7 +36,7 @@ private:
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 public:
 	/* Constructor */
-	VulkanRenderPass(VulkanSwapChain* swapChain);
+	VulkanRenderPass();
 
 	/* Destructor */
 	virtual ~VulkanRenderPass();

@@ -37,9 +37,6 @@ private:
 
 	/* The layouts of the descriptor sets this render shader requires */
 	std::unordered_map<unsigned int, DescriptorSetLayout*> descriptorSetLayouts;
-
-	/* The pipeline layout required to use this RenderShader */
-	GraphicsPipelineLayout* graphicsPipelineLayout;
 public:
 	/* Various constructors */
 	RenderShader(unsigned int id, Shader* shader);
@@ -60,5 +57,4 @@ public:
 	inline unsigned int getID() { return id; }
 	inline Shader* getShader() { return shader; }
 	inline std::unordered_map<unsigned int, DescriptorSetLayout*>& getDescriptorSetLayouts() { return descriptorSetLayouts; }
-	inline GraphicsPipelineLayout* getGraphicsPipelineLayout() { return graphicsPipelineLayout; }
 };

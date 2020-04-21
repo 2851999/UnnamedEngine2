@@ -37,7 +37,6 @@ VkInstance                                   Vulkan::instance;
 VkSurfaceKHR                                 Vulkan::windowSurface;
 VulkanDevice*                                Vulkan::device;
 VulkanSwapChain*                             Vulkan::swapChain;
-RenderPass*	        						 Vulkan::defaultRenderPass;
 VkRenderPass                                 Vulkan::currentRenderPass;
 VkCommandPool                                Vulkan::commandPool;
 std::vector<VkCommandBuffer>                 Vulkan::commandBuffers;
@@ -92,10 +91,6 @@ bool Vulkan::initialise(Window* window) {
 	//Create the swap chain
 	swapChain = new VulkanSwapChain(device, window->getSettings());
 
-	//Create the render pass
-	defaultRenderPass = new RenderPass();
-	currentRenderPass = defaultRenderPass->getVkInstance();
-
 	//Create the command buffers
 	createCommandBuffers();
 
@@ -114,7 +109,6 @@ void Vulkan::destroy() {
 
 	destroyCommandPool();
 
-	delete defaultRenderPass;
 	delete swapChain;
 	delete device;
 

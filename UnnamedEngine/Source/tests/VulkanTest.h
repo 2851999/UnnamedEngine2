@@ -39,6 +39,7 @@ public:
 	void initialise() override;
 	void created() override;
 	void update() override;
+	void renderOffscreen() override;
 	void render() override;
 	void destroy() override;
 
@@ -65,11 +66,11 @@ void Test::created() {
 
 	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("VulkanLightingSkinningShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	Shader::compileEngineShaderToSPIRV("FramebufferShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("FramebufferShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 4.0f, 3.0f);
@@ -135,6 +136,10 @@ void Test::update() {
 	light->update();
 
 	mit1->getMesh()->updateAnimation(getDeltaSeconds());
+}
+
+void Test::renderOffscreen() {
+	renderScene->renderOffscreen();
 }
 
 void Test::render() {

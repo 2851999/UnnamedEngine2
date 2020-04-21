@@ -27,7 +27,7 @@
   * The GraphicsPipeline class
   *****************************************************************************/
 
-GraphicsPipeline::GraphicsPipeline(RenderShader* renderShader, VertexInputData vertexInputData, ColourBlendState colourBlendState, DepthState depthState) : layout(renderShader->getGraphicsPipelineLayout()), renderShader(renderShader), colourBlendState(colourBlendState), depthState(depthState) {
+GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout) : layout(layout), renderShader(layout->getRenderShader()), colourBlendState(layout->getColourBlendState()), depthState(layout->getDepthState()) {
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
@@ -49,6 +49,8 @@ GraphicsPipeline::GraphicsPipeline(RenderShader* renderShader, VertexInputData v
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+		GraphicsPipeline::VertexInputData vertexInputData = layout->getVertexInputData();
 
 		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexInputData.bindings.size());
 		vertexInputInfo.pVertexBindingDescriptions = vertexInputData.bindings.data();
@@ -278,17 +280,7 @@ VkCompareOp GraphicsPipeline::convertToVk(CompareOperation op) {
  * The GraphicsPipelineLayout class
  *****************************************************************************/
 
-GraphicsPipelineLayout::GraphicsPipelineLayout() {
-
-}
-
-GraphicsPipelineLayout::~GraphicsPipelineLayout() {
-	//Destroy Vulkan objects
-	if (vulkanPipelineLayout != VK_NULL_HANDLE)
-		vkDestroyPipelineLayout(Vulkan::getDevice()->getLogical(), vulkanPipelineLayout, nullptr);
-}
-
-void GraphicsPipelineLayout::setup(RenderShader* renderShader) {
+GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState) : renderShader(renderShader), vertexInputData(vertexInputData), colourBlendState(colourBlendState), depthState(depthState) {
 	//Ensure using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		//Create the pipeline
@@ -308,4 +300,10 @@ void GraphicsPipelineLayout::setup(RenderShader* renderShader) {
 		if (vkCreatePipelineLayout(Vulkan::getDevice()->getLogical(), &pipelineLayoutInfo, nullptr, &vulkanPipelineLayout) != VK_SUCCESS)
 			Logger::log("Failed to create pipeline layout", "RenderPipeline", LogType::Error);
 	}
+}
+
+GraphicsPipelineLayout::~GraphicsPipelineLayout() {
+	//Destroy Vulkan objects
+	if (vulkanPipelineLayout != VK_NULL_HANDLE)
+		vkDestroyPipelineLayout(Vulkan::getDevice()->getLogical(), vulkanPipelineLayout, nullptr);
 }

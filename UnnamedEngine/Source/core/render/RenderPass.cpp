@@ -32,7 +32,7 @@ RenderPass::RenderPass() {
 	colourTexture->setupVk(Vulkan::getSwapChain()->getExtent().width, Vulkan::getSwapChain()->getExtent().height, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT);
 
 	depthTexture = new Texture();
-	depthTexture->setupVk(Vulkan::getSwapChain()->getExtent().width, Vulkan::getSwapChain()->getExtent().height, Vulkan::getSwapChain()->getDepthFormat(), VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
+	depthTexture->setupVk(Vulkan::getSwapChain()->getExtent().width, Vulkan::getSwapChain()->getExtent().height, Vulkan::getSwapChain()->getDepthFormat(), VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, Vulkan::hasStencilComponent(Vulkan::getSwapChain()->getDepthFormat()) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT);
 
 	//Setup the colour attachment info
 	VkAttachmentDescription colourAttachment = {};
@@ -106,7 +106,8 @@ RenderPass::RenderPass() {
 		Logger::log("Failed to create render pass", "RenderPass", LogType::Error);
 
 	//The framebuffer attachments
-	std::vector<VkImageView> framebufferAttachments = { colourTexture->getVkImageView(), depthTexture->getVkImageView() };
+	//std::vector<VkImageView> framebufferAttachments = { colourTexture->getVkImageView(), depthTexture->getVkImageView() }; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	std::vector<VkImageView> framebufferAttachments = { colourTexture->getVkImageView(), Vulkan::getSwapChain()->getDepthImageView() };
 
 	//Create the framebuffer
 	VkFramebufferCreateInfo framebufferCreateInfo = {};
@@ -119,7 +120,7 @@ RenderPass::RenderPass() {
 	framebufferCreateInfo.layers = 1;
 
 	if (vkCreateFramebuffer(Vulkan::getDevice()->getLogical(), &framebufferCreateInfo, nullptr, &framebuffer) != VK_SUCCESS)
-		Logger::log("Failed to create framebuffer", "nRenderPass", LogType::Error);
+		Logger::log("Failed to create framebuffer", "RenderPass", LogType::Error);
 }
 
 RenderPass::~RenderPass() {
@@ -145,7 +146,7 @@ void RenderPass::begin() {
 	renderPassInfo.renderArea.extent = Vulkan::getSwapChain()->getExtent();
 
 	std::array<VkClearValue, 2> clearValues = {};
-	clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	clearValues[0].color = { 0.0f, 0.0f, 0.0f, 0.0f };
 	clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
 
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());

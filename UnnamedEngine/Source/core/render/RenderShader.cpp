@@ -26,15 +26,13 @@
  *****************************************************************************/
 
 RenderShader::RenderShader(unsigned int id, Shader* shader) : id(id), shader(shader) {
-	//Create the pipeline layout
-	graphicsPipelineLayout = new GraphicsPipelineLayout();
+
 }
 
 RenderShader::~RenderShader() {
-	delete graphicsPipelineLayout;
+
 }
 
 void RenderShader::setup() {
-	//Setup the pipeline layout for this render shader
-	graphicsPipelineLayout->setup(this);
+
 }

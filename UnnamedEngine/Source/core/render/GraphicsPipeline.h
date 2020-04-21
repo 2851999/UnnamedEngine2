@@ -80,7 +80,7 @@ public:
 	};
 
 	/* Constructor */
-	GraphicsPipeline(RenderShader* renderShader, VertexInputData vertexInputData, ColourBlendState colourBlendState, DepthState depthState);
+	GraphicsPipeline(GraphicsPipelineLayout* layout);
 
 	/* Destructor */
 	virtual ~GraphicsPipeline();
@@ -102,23 +102,34 @@ public:
 
 /*****************************************************************************
  * The GraphicsPipelineLayout class responsible for handleing the layout of a
- * RenderPipeline
+ * GraphicsPipeline
  *****************************************************************************/
 
 class GraphicsPipelineLayout {
 private:
 	/* The pipeline layout instance (For Vulkan) */
 	VkPipelineLayout vulkanPipelineLayout = VK_NULL_HANDLE;
+
+	/* The shader used with this pipeline */
+	RenderShader* renderShader;
+
+	/* The vertex input data for the pipeline */
+	GraphicsPipeline::VertexInputData vertexInputData;
+
+	/* The colour and depth states for the pipeline */
+	GraphicsPipeline::ColourBlendState colourBlendState;
+	GraphicsPipeline::DepthState       depthState;
 public:
 	/* Constructor */
-	GraphicsPipelineLayout();
+	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState);
 
 	/* Destructor */
 	virtual ~GraphicsPipelineLayout();
 
-	/* Method used to setup this layout */
-	void setup(RenderShader* renderShader);
-
 	/* Getters */
 	inline VkPipelineLayout& getVkInstance() { return vulkanPipelineLayout; }
+	inline RenderShader* getRenderShader() { return renderShader; }
+	inline GraphicsPipeline::VertexInputData& getVertexInputData() { return vertexInputData; }
+	inline GraphicsPipeline::ColourBlendState& getColourBlendState() { return colourBlendState; }
+	inline GraphicsPipeline::DepthState& getDepthState() { return depthState; }
 };

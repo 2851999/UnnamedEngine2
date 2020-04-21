@@ -39,7 +39,7 @@ private:
 	static std::vector<Camera*> cameras;
 	static std::unordered_map<unsigned int, std::string> renderShaderPaths;
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
-	static std::unordered_map<unsigned int, GraphicsPipeline*> graphicsPipelines;
+	static std::unordered_map<unsigned int, GraphicsPipelineLayout*> graphicsPipelineLayouts;
 	static Texture* blank;
 
 	/* The current bound graphics pipeline (Used for descriptor set binding) */
@@ -91,8 +91,8 @@ public:
 	/* Method used to add a RenderShader given a the paths to the shaders */
 	static void addRenderShader(unsigned int id, std::string forwardShaderPath);
 
-	/* Method used to add a RenderPipeline */
-	static void addGraphicsPipeline(unsigned int id, GraphicsPipeline* pipeline);
+	/* Method used to add a GraphicsPipelineLayout */
+	static void addGraphicsPipelineLayout(unsigned int id, GraphicsPipelineLayout* pipelineLayout);
 
 	/* Method to assign the current graphics pipeline */
 	static void setCurrentGraphicsPipeline(GraphicsPipeline* pipeline);
@@ -109,8 +109,8 @@ public:
 	/* Returns the RenderShader with a specific id */
 	static RenderShader* getRenderShader(unsigned int id);
 
-	/* Returns the GraphicsPipeline with a specific id */
-	static GraphicsPipeline* getGraphicsPipeline(unsigned int id);
+	/* Returns the GraphicsPipelineLayout with a specific id */
+	static GraphicsPipelineLayout* getGraphicsPipelineLayout(unsigned int id);
 
 	/* Returns the blank texture */
 	static inline Texture* getBlankTexture() { return blank; }
