@@ -32,6 +32,9 @@ private:
 	/* Framebuffer object for rendering this render pass to,
 	   if NULL assumes default framebuffer should be used */
 	FBO* fbo = NULL;
+
+	/* The number of samples this render pass uses */
+	unsigned int numSamples = 0;
 public:
 	/* Constructor with the FBO to use for rendering */
 	RenderPass(FBO* fbo = NULL);
@@ -46,6 +49,7 @@ public:
 	void end();
 
 	/* Getters */
-	VkRenderPass& getVkInstance() { return vulkanInstance; }
-	FBO* getFBO() { return fbo; }
+	inline VkRenderPass& getVkInstance() { return vulkanInstance; }
+	inline FBO* getFBO() { return fbo; }
+	inline unsigned int getNumSamples() { return numSamples; }
 };

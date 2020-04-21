@@ -93,6 +93,9 @@ RenderPass::RenderPass(FBO* fbo) : fbo(fbo) {
 
 		//Check for MSAA
 		if (Vulkan::getSwapChain()->getNumSamples() > 0) {
+			//Assign number of samples
+			numSamples = Vulkan::getSwapChain()->getNumSamples();
+
 			//Need to resolve colour attachment
 			colourAttachmentResolveRef.attachment = 2;
 			colourAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;

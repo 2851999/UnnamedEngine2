@@ -53,7 +53,7 @@ void Test::initialise() {
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
 	getSettings().videoVSync = 0;
-	getSettings().videoSamples = 1;
+	getSettings().videoSamples = 8;
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
