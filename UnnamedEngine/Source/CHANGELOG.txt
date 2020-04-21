@@ -1,4 +1,34 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 1
+
+* Missing shaders?
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 (V0.4.5)
+
+* Added RenderPass
+* Added Framebuffer
+* Added 'renderOffscreen' method in BaseEngine
+
+* Implemented basic offscreen rendering
+
+* Rewrote FBO
+
+* Renamed FramebufferStore to FramebufferAttachment
+
+* Moved 'swapChainFramebuffers' from VulkanRenderPass to
+  VulkanSwapChain
+
+* Removed GeometryBuffer
+* Removed VulkanRenderPass
+
+* Fixed bug: Crash when trying to render an object without
+             indices when using Vulkan
+* Fixed bug: MSAA would not work when using Vulkan
+* Fixed bug: 'depthWriteEnable' was incorrectly applied in
+              GraphicsPipeline when using OpenGL
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 2 | Experimental 8
 
 * Some cleanup
