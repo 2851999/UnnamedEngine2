@@ -20,6 +20,9 @@
 
 #include "VulkanDevice.h"
 
+class Framebuffer;
+class VulkanRenderPass;
+
 /*****************************************************************************
  * The VulkanSwapChain class handles the image swap chain for rendering using
  * Vulkan
@@ -55,6 +58,10 @@ private:
 	/* The device this swap chain is for */
 	VulkanDevice* device;
 
+	/* Default framebuffers for rendering to the swap chain using the
+	   engines default RenderPass (requires one per swap chain image) */
+	std::vector<Framebuffer*> defaultFramebuffers;
+
 	/* Methods used to choose a surface format, present mode and extent based on what is supported */
 	static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	static bool               isPresentModeAvailable (VkPresentModeKHR presentMode, const std::vector<VkPresentModeKHR>&   availablePresentModes);
@@ -67,6 +74,9 @@ public:
 	/* Destructor */
 	virtual ~VulkanSwapChain();
 
+	/* Method to setup the default framebuffers given the default render pass */
+	void setupDefaultFramebuffers(VulkanRenderPass* defaultRenderPass);
+
 	/* Getters */
 	inline VkSwapchainKHR& getInstance() { return instance; }
 	inline VkImageView& getImageView(unsigned int index) { return imageViews[index]; }
@@ -78,5 +88,6 @@ public:
 	inline VkExtent2D& getExtent() { return extent; }
 	inline VulkanDevice* getDevice() { return device; }
 	inline unsigned int getImageCount() { return images.size(); }
+	inline Framebuffer* getDefaultFramebuffer(unsigned int currentFrame) { return defaultFramebuffers[currentFrame]; }
 };
 

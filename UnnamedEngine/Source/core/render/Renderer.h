@@ -20,7 +20,6 @@
 
 #include <unordered_map>
 #include "Camera.h"
-#include "FBO.h"
 #include "UBO.h"
 #include "ShaderInterface.h"
 #include "GraphicsPipeline.h"

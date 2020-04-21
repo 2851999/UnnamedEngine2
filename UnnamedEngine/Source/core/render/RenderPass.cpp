@@ -110,25 +110,14 @@ RenderPass::RenderPass() {
 	std::vector<VkImageView> framebufferAttachments = { colourTexture->getVkImageView(), Vulkan::getSwapChain()->getDepthImageView() };
 
 	//Create the framebuffer
-	VkFramebufferCreateInfo framebufferCreateInfo = {};
-	framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	framebufferCreateInfo.renderPass = vulkanInstance;
-	framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(framebufferAttachments.size());
-	framebufferCreateInfo.pAttachments = framebufferAttachments.data();
-	framebufferCreateInfo.width = Vulkan::getSwapChain()->getExtent().width;
-	framebufferCreateInfo.height = Vulkan::getSwapChain()->getExtent().height;
-	framebufferCreateInfo.layers = 1;
-
-	if (vkCreateFramebuffer(Vulkan::getDevice()->getLogical(), &framebufferCreateInfo, nullptr, &framebuffer) != VK_SUCCESS)
-		Logger::log("Failed to create framebuffer", "RenderPass", LogType::Error);
+	framebuffer = new Framebuffer(vulkanInstance, Vulkan::getSwapChain()->getExtent().width, Vulkan::getSwapChain()->getExtent().height, framebufferAttachments);
 }
 
 RenderPass::~RenderPass() {
-	//Destroy created Vulkan objects
-	if (vulkanInstance != VK_NULL_HANDLE) {
-		vkDestroyFramebuffer(Vulkan::getDevice()->getLogical(), framebuffer, nullptr);
+	//Destroy created objects
+	delete framebuffer;
+	if (vulkanInstance != VK_NULL_HANDLE)
 		vkDestroyRenderPass(Vulkan::getDevice()->getLogical(), vulkanInstance, nullptr);
-	}
 	//delete colourTexture;
 	//delete depthTexture;
 }
@@ -140,7 +129,7 @@ void RenderPass::begin() {
 	VkRenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = vulkanInstance;
-	renderPassInfo.framebuffer = framebuffer;
+	renderPassInfo.framebuffer = framebuffer->getVkInstance();
 
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = Vulkan::getSwapChain()->getExtent();

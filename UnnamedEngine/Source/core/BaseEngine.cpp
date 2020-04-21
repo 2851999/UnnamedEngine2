@@ -60,6 +60,7 @@ void BaseEngine::create() {
 		//Create the default RenderPass
 		defaultRenderPass = new VulkanRenderPass();
 
+		Vulkan::getSwapChain()->setupDefaultFramebuffers(defaultRenderPass);
 		Vulkan::setCurrentRenderPass(defaultRenderPass->getInstance());
 
 		//Assign the default font and text instance

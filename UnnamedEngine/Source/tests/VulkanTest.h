@@ -55,7 +55,7 @@ void Test::initialise() {
 	getSettings().videoVSync = 0;
 	getSettings().videoSamples = 1;
 	getSettings().videoMaxAnisotropicSamples = 16;
-	getSettings().debugShowInformation = false;
+	getSettings().debugShowInformation = true;
 
 	getSettings().debugVkValidationLayersEnabled = true;
 }
@@ -66,7 +66,7 @@ void Test::created() {
 
 	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("VulkanLightingSkinningShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");

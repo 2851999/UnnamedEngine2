@@ -1,4 +1,16 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 2 | Experimental 4
+
+* Added Framebuffer
+
+* Moved 'swapChainFramebuffers' from VulkanRenderPass to
+  VulkanSwapChain
+
+* Started rewriting FBO
+
+* Removed GeometryBuffer
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 2 | Experimental 3
 
 * Added 'renderOffscreen' method in BaseEngine

@@ -21,6 +21,7 @@
 #include <array>
 
 #include "Vulkan.h"
+#include "../render/Framebuffer.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
@@ -135,47 +136,9 @@ VulkanRenderPass::VulkanRenderPass() {
 	//Attempt to create the render pass
 	if (vkCreateRenderPass(device->getLogical(), &renderPassInfo, nullptr, &instance) != VK_SUCCESS)
 		Logger::log("Failed to create render pass", "VulkanRenderPass", LogType::Error);
-
-	//Now need to create framebuffers, one for each swap chain image
-	swapChainFramebuffers.resize(swapChain->getImageCount());
-
-	//Obtain the image extent
-	VkExtent2D& extent = swapChain->getExtent();
-
-	for (unsigned int i = 0; i < swapChain->getImageCount(); ++i) {
-		//Setup the creation info for the framebuffer
-		std::vector<VkImageView> framebufferAttachments;
-
-		//Check for MSAA
-		if (swapChain->getNumSamples() > 0) {
-			framebufferAttachments.push_back(swapChain->getColourImageView());
-			framebufferAttachments.push_back(swapChain->getDepthImageView());
-			framebufferAttachments.push_back(swapChain->getImageView(i));
-		} else {
-			framebufferAttachments.push_back(swapChain->getImageView(i));
-			framebufferAttachments.push_back(swapChain->getDepthImageView());
-		}
-
-		VkFramebufferCreateInfo framebufferCreateInfo = {};
-		framebufferCreateInfo.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferCreateInfo.renderPass      = instance;
-		framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(framebufferAttachments.size());
-		framebufferCreateInfo.pAttachments    = framebufferAttachments.data();
-		framebufferCreateInfo.width           = extent.width;
-		framebufferCreateInfo.height          = extent.height;
-		framebufferCreateInfo.layers          = 1;
-
-		if (vkCreateFramebuffer(device->getLogical(), &framebufferCreateInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS)
-			Logger::log("Failed to create framebuffer", "VulkanRenderPass", LogType::Error);
-
-	}
 }
 
 VulkanRenderPass::~VulkanRenderPass() {
-	//Destroy the framebuffers
-	for (auto framebuffer : swapChainFramebuffers)
-    	vkDestroyFramebuffer(device->getLogical(), framebuffer, nullptr);
-
 	//Destroy the render pass
 	vkDestroyRenderPass(device->getLogical(), instance, nullptr);
 }
@@ -187,7 +150,7 @@ void VulkanRenderPass::begin() {
 	VkRenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = instance;
-	renderPassInfo.framebuffer = swapChainFramebuffers[Vulkan::getCurrentFrame()];
+	renderPassInfo.framebuffer = Vulkan::getSwapChain()->getDefaultFramebuffer(Vulkan::getCurrentFrame())->getVkInstance();
 
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = Vulkan::getSwapChain()->getExtent();

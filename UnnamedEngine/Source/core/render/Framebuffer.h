@@ -16,40 +16,25 @@
  *
  *****************************************************************************/
 
-#include "Framebuffer.h"
-
 #pragma once
 
+#include "../vulkan/Vulkan.h"
+
  /*****************************************************************************
-  * The RenderPass class handles a specific render pass used when rendering
+  * The Framebuffer class handles a framebuffer
   *****************************************************************************/
 
-class RenderPass {
+class Framebuffer {
 private:
-	/* The Vulkan instance */
-	VkRenderPass vulkanInstance = VK_NULL_HANDLE;
-
-	/* Colour and depth textures */
-	Texture* colourTexture;
-	Texture* depthTexture;
-
-	/* Framebuffer to render to */
-	Framebuffer* framebuffer;
+	/* The Vulkan framebuffer instances */
+	VkFramebuffer vulkanInstance;
 public:
 	/* Constructor */
-	RenderPass();
+	Framebuffer(VkRenderPass renderPass, uint32_t width, uint32_t height, std::vector<VkImageView> attachments);
 
 	/* Destructor */
-	virtual ~RenderPass();
-
-	/* Method to begin this render pass */
-	void begin();
-
-	/* Method to end this render pass */
-	void end();
+	virtual ~Framebuffer();
 
 	/* Getters */
-	VkRenderPass& getVkInstance() { return vulkanInstance; }
-	Texture* getColourTexture() { return colourTexture; }
-	Texture* getDepthTexture() { return depthTexture; }
+	VkFramebuffer& getVkInstance() { return vulkanInstance; }
 };

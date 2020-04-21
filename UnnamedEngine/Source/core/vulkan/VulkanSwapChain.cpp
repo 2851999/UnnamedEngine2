@@ -17,8 +17,10 @@
  *****************************************************************************/
 
 #include "VulkanSwapChain.h"
-#include "Vulkan.h"
 
+#include "Vulkan.h"
+#include "VulkanRenderPass.h"
+#include "../render/Framebuffer.h"
 #include "../../utils/Logging.h"
 
 #include <limits>
@@ -122,6 +124,10 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 }
 
 VulkanSwapChain::~VulkanSwapChain() {
+	//Destory default framebuffers
+	for (Framebuffer* framebuffer : defaultFramebuffers)
+		delete framebuffer;
+
 	//Destroy image views and the swap chain
 	for (auto& imageView : imageViews)
 		vkDestroyImageView(device->getLogical(), imageView, nullptr);
@@ -136,6 +142,27 @@ VulkanSwapChain::~VulkanSwapChain() {
 	vkDestroyImageView(device->getLogical(), depthImageView, nullptr);
     vkDestroyImage(Vulkan::getDevice()->getLogical(), depthImage, nullptr);
     vkFreeMemory(Vulkan::getDevice()->getLogical(), depthImageMemory, nullptr);
+}
+
+void VulkanSwapChain::setupDefaultFramebuffers(VulkanRenderPass* defaultRenderPass) {
+	//Create one framebuffer per swap chain image
+	for (unsigned int i = 0; i < images.size(); ++i) {
+		//Required framebuffer attachements
+		std::vector<VkImageView> framebufferAttachments;
+
+		//Check for MSAA
+		if (numSamples > 0) {
+			framebufferAttachments.push_back(getColourImageView());
+			framebufferAttachments.push_back(getDepthImageView());
+			framebufferAttachments.push_back(getImageView(i));
+		} else {
+			framebufferAttachments.push_back(getImageView(i));
+			framebufferAttachments.push_back(getDepthImageView());
+		}
+
+		//Create and add the framebuffer
+		defaultFramebuffers.push_back(new Framebuffer(defaultRenderPass->getInstance(), extent.width, extent.height, framebufferAttachments));
+	}
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {

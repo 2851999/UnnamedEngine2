@@ -31,9 +31,6 @@ private:
 
 	/* The device the render pass is for  */
 	VulkanDevice* device;
-
-	/* Framebuffers for rendering to the swap chain */
-	std::vector<VkFramebuffer> swapChainFramebuffers;
 public:
 	/* Constructor */
 	VulkanRenderPass();
@@ -49,6 +46,5 @@ public:
 
 	/* Setters and getters */
 	VkRenderPass& getInstance() { return instance; }
-	std::vector<VkFramebuffer>& getSwapChainFramebuffers() { return swapChainFramebuffers; }
 };
 
