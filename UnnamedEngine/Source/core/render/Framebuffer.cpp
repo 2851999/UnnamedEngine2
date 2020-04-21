@@ -36,7 +36,7 @@ Framebuffer::Framebuffer(VkRenderPass renderPass, uint32_t width, uint32_t heigh
 	framebufferCreateInfo.layers = 1;
 
 	if (vkCreateFramebuffer(Vulkan::getDevice()->getLogical(), &framebufferCreateInfo, nullptr, &vulkanInstance) != VK_SUCCESS)
-		Logger::log("Failed to create framebuffer", "VulkanRenderPass", LogType::Error);
+		Logger::log("Failed to create framebuffer", "Framebuffer", LogType::Error);
 }
 
 Framebuffer::~Framebuffer() {

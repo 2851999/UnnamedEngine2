@@ -21,7 +21,6 @@
 #include "../Window.h"
 #include "VulkanDevice.h"
 #include "VulkanSwapChain.h"
-#include "VulkanRenderPass.h"
 #include "../render/VBO.h"
 #include "../render/UBO.h"
 #include "../render/Texture.h"
@@ -49,9 +48,6 @@ private:
 
 	/* The swap chain */
 	static VulkanSwapChain* swapChain;
-
-	/* The current render pass being used */
-	static VkRenderPass currentRenderPass;
 
 	/* Command pool */
 	static VkCommandPool commandPool;
@@ -197,15 +193,11 @@ public:
 	/* Waits for device to be finished working */
 	static inline void waitDeviceIdle() { vkDeviceWaitIdle(device->getLogical()); }
 
-	/* Setters */
-	static inline void setCurrentRenderPass(VkRenderPass& renderPass) { currentRenderPass = renderPass; }
-
 	/* Getters */
 	static inline VkInstance& getInstance() { return instance; }
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
 	static inline VulkanDevice* getDevice() { return device; }
 	static inline VulkanSwapChain* getSwapChain() { return swapChain; }
-	static inline VkRenderPass getCurrentRenderPass() { return currentRenderPass; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }

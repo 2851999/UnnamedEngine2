@@ -41,6 +41,7 @@ std::unordered_map<unsigned int, GraphicsPipelineLayout*> Renderer::graphicsPipe
 Texture* Renderer::blank;
 
 GraphicsPipeline* Renderer::currentGraphicsPipeline = NULL;
+RenderPass*       Renderer::defaultRenderPass       = NULL;
 
 const unsigned int Renderer::SHADER_MATERIAL                  = 1;
 const unsigned int Renderer::SHADER_SKY_BOX                   = 2;
@@ -133,6 +134,12 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_BLEND,          new GraphicsPipelineLayout(getRenderShader(SHADER_VULKAN_LIGHTING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_SKINNING,       new GraphicsPipelineLayout(getRenderShader(SHADER_VULKAN_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND, new GraphicsPipelineLayout(getRenderShader(SHADER_VULKAN_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState));
+
+	//Create the default render pass
+	defaultRenderPass = new RenderPass();
+
+	//Setup swap chain with the default render pass
+	Vulkan::getSwapChain()->setupDefaultFramebuffers(defaultRenderPass);
 }
 
 void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, Material* material) {
@@ -209,6 +216,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 }
 
 void Renderer::destroy() {
+	delete defaultRenderPass;
 	delete shaderInterface;
 	for (auto element : loadedRenderShaders)
 		delete element.second;

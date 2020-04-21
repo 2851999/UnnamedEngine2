@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "Framebuffer.h"
+#include "FBO.h"
 
 #pragma once
 
@@ -29,15 +29,12 @@ private:
 	/* The Vulkan instance */
 	VkRenderPass vulkanInstance = VK_NULL_HANDLE;
 
-	/* Colour and depth textures */
-	Texture* colourTexture;
-	Texture* depthTexture;
-
-	/* Framebuffer to render to */
-	Framebuffer* framebuffer;
+	/* Framebuffer object for rendering this render pass to,
+	   if NULL assumes default framebuffer should be used */
+	FBO* fbo = NULL;
 public:
-	/* Constructor */
-	RenderPass();
+	/* Constructor with the FBO to use for rendering */
+	RenderPass(FBO* fbo = NULL);
 
 	/* Destructor */
 	virtual ~RenderPass();
@@ -50,6 +47,5 @@ public:
 
 	/* Getters */
 	VkRenderPass& getVkInstance() { return vulkanInstance; }
-	Texture* getColourTexture() { return colourTexture; }
-	Texture* getDepthTexture() { return depthTexture; }
+	FBO* getFBO() { return fbo; }
 };

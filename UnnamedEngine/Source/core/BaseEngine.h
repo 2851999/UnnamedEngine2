@@ -23,9 +23,9 @@
 #include "Window.h"
 #include "gui/Font.h"
 #include "render/Camera.h"
+#include "render/RenderPass.h"
 #include "../utils/DebugConsole.h"
 #include "../utils/FPSUtils.h"
-#include "vulkan/VulkanRenderPass.h"
 
 namespace Engine {
 	/* Various engine values
@@ -62,9 +62,6 @@ private:
 	Camera2D* debugCamera = NULL;
 	/* Debug console */
 	DebugConsole* debugConsole = NULL;
-
-	/* The default RenderPass for rendering to the default framebuffer*/
-	VulkanRenderPass* defaultRenderPass;
 
 	/* Method used to initialise the graphics API being used for rendering (Returns whether initialisation was successful) */
 	bool initGraphicsAPI();

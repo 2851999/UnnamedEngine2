@@ -43,6 +43,9 @@ private:
 
 	/* The current bound graphics pipeline (Used for descriptor set binding) */
 	static GraphicsPipeline* currentGraphicsPipeline;
+
+	/* The default render pass used to render to the default framebuffers */
+	static RenderPass* defaultRenderPass;
 public:
 	/* The names of default shaders loaded into the engine */
 	static const unsigned int SHADER_MATERIAL;
@@ -116,5 +119,8 @@ public:
 
 	/* Returns the last bound graphics pipeline */
 	static inline GraphicsPipeline* getCurrentGraphicsPipeline() { return currentGraphicsPipeline; }
+
+	/* Returns the default render pass */
+	static inline RenderPass* getDefaultRenderPass() { return defaultRenderPass; }
 };
 

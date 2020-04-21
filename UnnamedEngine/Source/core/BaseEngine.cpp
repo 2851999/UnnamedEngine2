@@ -57,12 +57,6 @@ void BaseEngine::create() {
 		//Initialise the font system
 		Font::initialiseFreeType();
 
-		//Create the default RenderPass
-		defaultRenderPass = new VulkanRenderPass();
-
-		Vulkan::getSwapChain()->setupDefaultFramebuffers(defaultRenderPass);
-		Vulkan::setCurrentRenderPass(defaultRenderPass->getInstance());
-
 		//Assign the default font and text instance
 		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
 		textInstance = new Text(defaultFont, Colour::WHITE, 400);
@@ -145,14 +139,14 @@ void BaseEngine::create() {
 			renderOffscreen();
 
 			//Start the default RenderPass
-			defaultRenderPass->begin();
+			Renderer::getDefaultRenderPass()->begin();
 			render();
 
 			if (getSettings().debugShowInformation)
 				renderDebugInfo();
 
 			//Stop the default RenderPass
-			defaultRenderPass->end();
+			Renderer::getDefaultRenderPass()->end();
 
 			if (! getSettings().videoVulkan) {
 				if (getSettings().debugConsoleEnabled)
@@ -178,7 +172,6 @@ void BaseEngine::create() {
 		delete textInstance;
 		delete defaultFont;
 		delete debugCamera;
-		delete defaultRenderPass;
 
 		AudioManager::destroy();
 

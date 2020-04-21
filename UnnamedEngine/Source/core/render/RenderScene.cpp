@@ -24,15 +24,23 @@
 #include "../../utils/Logging.h"
 
 RenderScene::RenderScene() {
-	//Obtain the render pipelines
-	pipelineMaterial              = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL));
-	pipelineLighting              = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING));
-	pipelineLightingBlend         = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND));
-	pipelineLightingSkinning      = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING));
-	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND));
+	//Create the FBO for rendering offscreen
+	uint32_t width = Vulkan::getSwapChain()->getExtent().width;
+	uint32_t height = Vulkan::getSwapChain()->getExtent().height;
 
-	offscreenRenderPass = new RenderPass();
-	Vulkan::setCurrentRenderPass(offscreenRenderPass->getVkInstance());
+	FBO* fbo = new FBO(width, height, {
+			new FramebufferAttachment(width, height, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL),
+			new FramebufferAttachment(width, height, Vulkan::getSwapChain()->getDepthFormat(), VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, Vulkan::hasStencilComponent(Vulkan::getSwapChain()->getDepthFormat()) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+		});
+
+	offscreenRenderPass = new RenderPass(fbo);
+
+	//Obtain the render pipelines
+	pipelineMaterial = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), offscreenRenderPass);
+	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING), offscreenRenderPass);
+	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), offscreenRenderPass);
+	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), offscreenRenderPass);
+	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), offscreenRenderPass);
 
 	GraphicsPipeline::ColourBlendState alphaBlendState;
 	alphaBlendState.blendEnabled = true;
@@ -46,7 +54,7 @@ RenderScene::RenderScene() {
 	depthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
 	depthState.depthWriteEnable = false;
 	
-	pipelineFinal = new GraphicsPipeline(new GraphicsPipelineLayout(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, depthState));
+	pipelineFinal = new GraphicsPipeline(new GraphicsPipelineLayout(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, depthState), Renderer::getDefaultRenderPass());
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
@@ -57,7 +65,7 @@ RenderScene::RenderScene() {
 	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
 	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
 	screenTextureMesh = new Mesh(meshData);
-	screenTextureMesh->getMaterial()->setDiffuse(offscreenRenderPass->getColourTexture());
+	screenTextureMesh->getMaterial()->setDiffuse(offscreenRenderPass->getFBO()->getAttachment(0));
 
 	screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 }

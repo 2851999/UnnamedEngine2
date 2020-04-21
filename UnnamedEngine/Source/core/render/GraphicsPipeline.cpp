@@ -18,6 +18,7 @@
 
 #include "GraphicsPipeline.h"
 
+#include "RenderPass.h"
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 #include "../BaseEngine.h"
@@ -27,7 +28,7 @@
   * The GraphicsPipeline class
   *****************************************************************************/
 
-GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout) : layout(layout), renderShader(layout->getRenderShader()), colourBlendState(layout->getColourBlendState()), depthState(layout->getDepthState()) {
+GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass) : layout(layout), renderShader(layout->getRenderShader()), colourBlendState(layout->getColourBlendState()), depthState(layout->getDepthState()) {
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
@@ -165,7 +166,7 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout) : layout(layo
 		pipelineInfo.pColorBlendState = &colorBlending;
 		pipelineInfo.pDynamicState = nullptr; //Optional
 		pipelineInfo.layout = layout->getVkInstance();
-		pipelineInfo.renderPass = Vulkan::getCurrentRenderPass();
+		pipelineInfo.renderPass = renderPass->getVkInstance();
 		pipelineInfo.subpass = 0;
 
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; //Optional

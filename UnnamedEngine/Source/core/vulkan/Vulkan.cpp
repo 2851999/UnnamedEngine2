@@ -37,7 +37,6 @@ VkInstance                                   Vulkan::instance;
 VkSurfaceKHR                                 Vulkan::windowSurface;
 VulkanDevice*                                Vulkan::device;
 VulkanSwapChain*                             Vulkan::swapChain;
-VkRenderPass                                 Vulkan::currentRenderPass;
 VkCommandPool                                Vulkan::commandPool;
 std::vector<VkCommandBuffer>                 Vulkan::commandBuffers;
 std::vector<VkSemaphore>                     Vulkan::imageAvailableSemaphores;

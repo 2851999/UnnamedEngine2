@@ -119,7 +119,7 @@ void Texture::create() {
 	glGenTextures(1, &texture);
 }
 
-void Texture::setupVk(int width, int height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask) {
+void Texture::setupVk(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask) {
 	//Create the image
 	Vulkan::createImage(width, height, 1, 1, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, usage, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
 	//Create the image view

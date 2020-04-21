@@ -21,7 +21,7 @@
 #include "VulkanDevice.h"
 
 class Framebuffer;
-class VulkanRenderPass;
+class RenderPass;
 
 /*****************************************************************************
  * The VulkanSwapChain class handles the image swap chain for rendering using
@@ -62,6 +62,9 @@ private:
 	   engines default RenderPass (requires one per swap chain image) */
 	std::vector<Framebuffer*> defaultFramebuffers;
 
+	/* Default attachment descriptions for rendering to the default framebuffer */
+	std::vector<VkAttachmentDescription> defaultAttachmentDescriptions;
+
 	/* Methods used to choose a surface format, present mode and extent based on what is supported */
 	static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	static bool               isPresentModeAvailable (VkPresentModeKHR presentMode, const std::vector<VkPresentModeKHR>&   availablePresentModes);
@@ -75,7 +78,10 @@ public:
 	virtual ~VulkanSwapChain();
 
 	/* Method to setup the default framebuffers given the default render pass */
-	void setupDefaultFramebuffers(VulkanRenderPass* defaultRenderPass);
+	void setupDefaultFramebuffers(RenderPass* defaultRenderPass);
+
+	/* Returns the attachments required for rendering to the default framebuffer */
+	inline std::vector<VkAttachmentDescription>& getDefaultAttachmentDescriptions() { return defaultAttachmentDescriptions; }
 
 	/* Getters */
 	inline VkSwapchainKHR& getInstance() { return instance; }

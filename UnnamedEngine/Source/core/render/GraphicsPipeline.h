@@ -21,6 +21,7 @@
 #include "DescriptorSet.h"
 #include "RenderShader.h"
 
+class RenderPass;
 class GraphicsPipelineLayout;
 
  /*****************************************************************************
@@ -80,7 +81,7 @@ public:
 	};
 
 	/* Constructor */
-	GraphicsPipeline(GraphicsPipelineLayout* layout);
+	GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass);
 
 	/* Destructor */
 	virtual ~GraphicsPipeline();

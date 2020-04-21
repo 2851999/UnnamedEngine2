@@ -18,15 +18,64 @@
 
 #pragma once
 
+#include "Framebuffer.h"
+#include "Texture.h"
+
+class RenderPass;
+
+ /*****************************************************************************
+  * The FramebufferAttachment class is used for storing attachment data for an
+  * FBO
+  *****************************************************************************/
+
+class FramebufferAttachment : public Texture {
+private:
+	/* The format of this store */
+	VkFormat format;
+
+	/* The final layout required for this attachment */
+	VkImageLayout finalLayout;
+public:
+	/* Constructor */
+	FramebufferAttachment(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout finalLayout);
+
+	/* Destructor */
+	virtual ~FramebufferAttachment();
+
+	/* Method to obtain the attachment description of this attachment for Vulkan*/
+	VkAttachmentDescription getVkAttachmentDescription();
+};
+
  /*****************************************************************************
   * The FBO class manages a frambuffer and its attachments for rendering
   *****************************************************************************/
 
 class FBO {
+private:
+	/* The width and height of the framebuffer to be used */
+	uint32_t width;
+	uint32_t height;
+
+	/* The framebuffer */
+	Framebuffer* framebuffer = NULL;
+
+	/* The attachments */
+	std::vector<FramebufferAttachment*> attachments;
+
+	/* Attachment descriptions for this FBO */
+	std::vector<VkAttachmentDescription> vulkanAttachmentDescriptions;
 public:
 	/* Constructor */
-	FBO();
+	FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachment*> attachments);
 
 	/* Destructor */
 	virtual ~FBO();
+
+	/* Method to setup this FBO for use (should be called after attaching all required attachments) */
+	void setup(RenderPass* renderPass);
+
+	/* Getters */
+	inline Framebuffer* getFramebuffer() { return framebuffer; }
+	inline std::vector<VkAttachmentDescription>& getVkAttachmentDescriptions() { return vulkanAttachmentDescriptions; }
+	inline FramebufferAttachment* getAttachment(unsigned int index) { return attachments[index]; }
 };
