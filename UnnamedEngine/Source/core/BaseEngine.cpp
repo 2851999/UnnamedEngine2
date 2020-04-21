@@ -136,10 +136,17 @@ void BaseEngine::create() {
 				Vulkan::startDraw();
 			}
 
+			renderOffscreen();
+
+			//Start the default RenderPass
+			Renderer::getDefaultRenderPass()->begin();
 			render();
 
 			if (getSettings().debugShowInformation)
 				renderDebugInfo();
+
+			//Stop the default RenderPass
+			Renderer::getDefaultRenderPass()->end();
 
 			if (! getSettings().videoVulkan) {
 				if (getSettings().debugConsoleEnabled)
@@ -151,6 +158,7 @@ void BaseEngine::create() {
 
 			fpsLimiter.endFrame();
 		}
+
 		//Wait for a suitable time
 		if (getSettings().videoVulkan)
 			Vulkan::waitDeviceIdle();
@@ -187,8 +195,6 @@ using namespace utils_string;
 
 void BaseEngine::renderDebugInfo() {
 	if (! BaseEngine::usingVulkan()) {
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
 //		glEnable(GL_BLEND);
 //		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -223,7 +229,7 @@ void BaseEngine::renderDebugInfo() {
 			utils_gl::enableWireframe();
 
 //		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_TEXTURE_2D);
 	}
 }
 

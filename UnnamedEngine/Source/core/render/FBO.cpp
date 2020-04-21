@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2020 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -17,138 +17,202 @@
  *****************************************************************************/
 
 #include "FBO.h"
-#include "../Window.h"
+
+#include "RenderPass.h"
+#include "../BaseEngine.h"
 #include "../../utils/Logging.h"
 
-/*****************************************************************************
- * The FramebufferStore class
- *****************************************************************************/
+ /*****************************************************************************
+  * The FramebufferAttachment class
+  *****************************************************************************/
 
-void FramebufferStore::setup(GLuint fboTarget, bool multisample) {
-	//Check for a render buffer object
-	if (getParameters().getTarget() == GL_RENDERBUFFER) {
-		//Setup the render buffer
-		glGenRenderbuffers(1, &rbo);
-		glBindRenderbuffer(getParameters().getTarget(), rbo);
-		if (multisample)
-			glRenderbufferStorageMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight());
-		else
-			glRenderbufferStorage(getParameters().getTarget(), internalFormat, getWidth(), getHeight());
-		glBindRenderbuffer(getParameters().getTarget(), 0);
+FramebufferAttachment::FramebufferAttachment(uint32_t width, uint32_t height, Type type) : Texture(), type(type) {
+	setWidth(width);
+	setHeight(height);
+}
 
-		//Attach to framebuffer
-		glFramebufferRenderbuffer(fboTarget, attachment, getParameters().getTarget(), rbo);
+FramebufferAttachment::~FramebufferAttachment() {
+	if (! BaseEngine::usingVulkan()) {
+		if (getParameters().getTarget() == GL_RENDERBUFFER)
+			glDeleteRenderbuffers(1, &glRBO);
+	}
+}
+
+void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
+	//Check whether using Vulkan
+	if (BaseEngine::usingVulkan()) {
+		//Setup the texture for Vulkan
+
+		VkImageUsageFlags usage;
+		VkImageAspectFlags aspectMask;
+
+		if (type == Type::COLOUR) {
+			vulkanFormat = Vulkan::getSwapChain()->getSurfaceFormat();
+			usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		} else if (type == Type::DEPTH) {
+			vulkanFormat = Vulkan::getSwapChain()->getDepthFormat();
+			usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+			aspectMask = Vulkan::hasStencilComponent(Vulkan::getSwapChain()->getDepthFormat()) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT;
+			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		}
+
+		setupVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask);
 	} else {
-		//Setup the texture
-		create();
-		bind();
-		if (multisample)
-			glTexImage2DMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
-		else
-			glTexImage2D(getParameters().getTarget(), 0, internalFormat, getWidth(), getHeight(), 0, format, type, NULL);
+		GLint internalFormat;
+		GLenum format;
+		GLenum glType;
+		GLenum attachment;
 
-		applyParameters(false);
+		if (type == Type::COLOUR) {
+			getParameters().setTarget(GL_TEXTURE_2D);
+			internalFormat = GL_RGBA16F;
+			format = GL_RGBA;
+			glType = GL_FLOAT;
+			attachment = GL_COLOR_ATTACHMENT0 + indexOfColourAttachment;
 
-		//Attach to framebuffer
-		glFramebufferTexture2D(fboTarget, attachment, getParameters().getTarget(), getHandle(), 0);
-		unbind();
+			getParameters().setFilter(GL_NEAREST);
+			getParameters().setClamp(GL_CLAMP_TO_EDGE);
+		} else if (type == Type::DEPTH) {
+			getParameters().setTarget(GL_RENDERBUFFER);
+			internalFormat = GL_DEPTH_COMPONENT32;
+			format = GL_DEPTH_COMPONENT;
+			glType = GL_UNSIGNED_INT;
+			attachment = GL_DEPTH_ATTACHMENT;
+
+			getParameters().setFilter(GL_NEAREST);
+			getParameters().setClamp(GL_CLAMP_TO_EDGE);
+		}
+
+		//Check for render buffer object
+		if (getParameters().getTarget() == GL_RENDERBUFFER) {
+			//Setup the render buffer
+			glGenRenderbuffers(1, &glRBO);
+			glBindRenderbuffer(getParameters().getTarget(), glRBO);
+			//if (multisample)
+			//	glRenderbufferStorageMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight());
+			//else
+			glRenderbufferStorage(getParameters().getTarget(), internalFormat, getWidth(), getHeight());
+			glBindRenderbuffer(getParameters().getTarget(), 0);
+
+			//Attach to framebuffer
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), glRBO);
+		} else {
+			//Setup the texture
+			create();
+			bind();
+			//if (multisample)
+			//	glTexImage2DMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
+			//else
+			glTexImage2D(getParameters().getTarget(), 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
+
+			applyParameters(false);
+
+			//Attach to framebuffer
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), getHandle(), 0);
+			unbind();
+		}
 	}
 }
 
-/*****************************************************************************
- * The FramebufferStoreCubemap class
- *****************************************************************************/
+VkAttachmentDescription FramebufferAttachment::getVkAttachmentDescription() {
+	//Create and return the structure
+	VkAttachmentDescription description = {};
+	description.format = vulkanFormat;
+	description.samples = VK_SAMPLE_COUNT_1_BIT;
+	description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	description.storeOp = VK_ATTACHMENT_STORE_OP_STORE; //Might want to allow this to change to VK_ATTACHMENT_STORE_OP_DONT_CARE when not needed e.g. depth
+	description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	description.finalLayout = vulkanFinalLayout;
 
-void FramebufferStoreCubemap::setup(GLuint fboTarget, bool multisample) {
-	//Assume want to use framebuffer - target should be GL_TEXTURE_CUBE_MAP for applyParameters to work
+	return description;
+}
 
-	//Setup the texture
-	create();
-	bind();
+ /*****************************************************************************
+  * The FBO class
+  *****************************************************************************/
 
-	for (unsigned int i = 0; i < 6; ++i) {
-		if (multisample)
-			glTexImage2DMultisample(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
-		else
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, getWidth(), getHeight(), 0, format, type, NULL);
+FBO::FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachment*> attachments) : width(width), height(height), attachments(attachments) {
+	//Setup each attachment
+	unsigned int index = 0;
+	for (unsigned int i = 0; i < attachments.size(); ++i) {
+		//Setup the current attachment
+		attachments[i]->setup(index);
+
+		if (attachments[i]->getType() == FramebufferAttachment::Type::COLOUR)
+			index++;
 	}
 
-	applyParameters(false, false);
-
-	//Attach to framebuffer
-	glFramebufferTexture(fboTarget, attachment, getHandle(), 0);
-	unbind();
-}
-
-/*****************************************************************************
- * The FBO class
- *****************************************************************************/
-
-void FBO::setup() {
-	//Generate and bind the FBO
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(target, framebuffer);
-
-	//List of all of the colour attachments being used
-	std::vector<unsigned int> colourAttachments;
-
-	//Go though each attached FramebufferTexture
-	for (unsigned int i = 0; i < stores.size(); i++) {
-		//Setup the current texture
-		stores[i]->setup(target, multisample);
-
-		//Assume that if it is not a depth attachment then it is a colour attachment
-		if (stores[i]->getAttachment() != GL_DEPTH_ATTACHMENT)
-			colourAttachments.push_back(stores[i]->getAttachment());
+	//Check if using Vulkan
+	if (BaseEngine::usingVulkan()) {
+		//Go through each attachment and add its description
+		for (unsigned int i = 0; i < attachments.size(); ++i)
+			vulkanAttachmentDescriptions.push_back(attachments[i]->getVkAttachmentDescription());
 	}
-
-	if (colourAttachments.size() == 0) {
-		//No colour attachment
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
-	} else
-		glDrawBuffers(colourAttachments.size(), colourAttachments.data());
-
-	//Check to see whether the setup was successful
-	int status = glCheckFramebufferStatus(target);
-	if (status != GL_FRAMEBUFFER_COMPLETE)
-		Logger::log("Framebuffer is not complete, current status: " + utils_string::str(status), "FramebufferObject", LogType::Error);
-
-	//Bind the default FBO
-	glBindFramebuffer(target, 0);
 }
 
-void FBO::copyTo(unsigned int fboHandle, GLenum sourceMode, GLenum destMode, int sourceWidth, int sourceHeight, int destX, int destY, int destWidth, int destHeight, GLbitfield mask) {
-	//Copy the data from this FBO to the other one
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fboHandle);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-	glReadBuffer(sourceMode);
-	glDrawBuffer(destMode);
-	glBlitFramebuffer(0, 0, sourceWidth, sourceHeight, destX, destY, destX + destWidth, destY + destHeight, mask, GL_NEAREST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+FBO::~FBO() {
+	//Delete the framebuffer
+	if (framebuffer)
+		delete framebuffer;
+	if (! BaseEngine::usingVulkan())
+		glDeleteFramebuffers(1, &glFBO);
+	//Delete all of the attachments
+	for (FramebufferAttachment* attachment : attachments)
+		delete attachment;
 }
 
-void FBO::copyTo(FBO* fbo, unsigned int sourceStoreIndex, unsigned int destStoreIndex) {
-	//Get the source store
-	FramebufferStore* source = getFramebufferStore(sourceStoreIndex);
-	//Get the destination store
-	FramebufferStore* dest = fbo->getFramebufferStore(destStoreIndex);
+void FBO::setup(RenderPass* renderPass) {
+	//Check if using Vulkan
+	if (BaseEngine::usingVulkan()) {
+		//The framebuffer attachments' image views
+		std::vector<VkImageView> framebufferAttachments;
 
-	//Get the mask (assume if it isn't copying depth then it is copying colour)
-	GLenum mask;
-	if (source->getAttachment() == GL_DEPTH_ATTACHMENT)
-		mask = GL_DEPTH_BUFFER_BIT;
-	else
-		mask = GL_COLOR_BUFFER_BIT;
+		//Go through each attachment
+		for (unsigned int i = 0; i < attachments.size(); ++i)
+			//Add the attachment and its description to the lists
+			framebufferAttachments.push_back(attachments[i]->getVkImageView());
 
-	//Copy the data
-	copyTo(fbo->getHandle(), source->getAttachment(), dest->getAttachment(), source->getWidth(), source->getHeight(), 0, 0, dest->getWidth(), dest->getHeight(), mask);
-}
+		//Create the framebuffer
+		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments);
+	} else {
+		//Generate and bind the FBO
+		glGenFramebuffers(1, &glFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, glFBO);
 
-void FBO::copyToScreen(unsigned int sourceStoreIndex, int x, int y, int width, int height) {
-	//Get the source store
-	FramebufferStore* source = getFramebufferStore(sourceStoreIndex);
+		//List of all of the colour attachments being used
+		std::vector<unsigned int> colourAttachments;
 
-	//Copy the data
-	copyTo(0, source->getAttachment(), GL_BACK, source->getWidth(), source->getHeight(), x, y, width, height, GL_COLOR_BUFFER_BIT);
+		unsigned int index = 0;
+
+		//Go though each attached FramebufferAttachment
+		for (unsigned int i = 0; i < attachments.size(); i++) {
+			//Setup the current attachment
+			attachments[i]->setup(index);
+
+			//Assume that if it is not a depth attachment then it is a colour attachment
+			if (attachments[i]->getType() == FramebufferAttachment::Type::COLOUR) {
+				colourAttachments.push_back(GL_COLOR_ATTACHMENT0 + i);
+				index++;
+			}
+		}
+
+		if (colourAttachments.size() == 0) {
+			//No colour attachment
+			glDrawBuffer(GL_NONE);
+			glReadBuffer(GL_NONE);
+		} else
+			glDrawBuffers(colourAttachments.size(), colourAttachments.data());
+
+		//Check to see whether the setup was successful
+		int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+			Logger::log("Framebuffer is not complete, current status: " + utils_string::str(status), "FramebufferObject", LogType::Error);
+
+		//Bind the default FBO
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 }

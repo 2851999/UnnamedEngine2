@@ -20,6 +20,7 @@
 
 #include "Light.h"
 #include "GraphicsPipeline.h"
+#include "RenderPass.h"
 
 class RenderScene {
 private:
@@ -50,6 +51,15 @@ private:
 	GraphicsPipeline* pipelineLightingBlend;
 	GraphicsPipeline* pipelineLightingSkinning;
 	GraphicsPipeline* pipelineLightingSkinningBlend;
+
+	/* Mesh for rendering to the screen */
+	Mesh* screenTextureMesh;
+
+	/* Graphics pipeline for rendering the final quad */
+	GraphicsPipeline* pipelineFinal;
+
+	/* Offscreen render pass */
+	RenderPass* offscreenRenderPass;
 public:
 	/* The number of lights that can be rendered at once */
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
@@ -65,6 +75,9 @@ public:
 
 	/* Adds a light to the scene */
 	void addLight(Light* light);
+
+	/* Method used to do any rendering without the default render pass */
+	void renderOffscreen();
 
 	/* Method used to render all of the objects */
 	void render();

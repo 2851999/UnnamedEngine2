@@ -52,7 +52,7 @@ public:
 	Text(Font* font, Colour colour = Colour::WHITE, unsigned int maxCharacters = 0, bool billboarded = false); //0 in maxCharacters indicates the default number should be used
 
 	/* The destructor */
-	virtual ~Text() {}
+	virtual ~Text();
 
 	/* Methods used to update this text instance ready to render some text */
 	void update(std::string text);

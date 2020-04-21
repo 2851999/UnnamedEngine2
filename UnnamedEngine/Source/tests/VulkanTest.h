@@ -23,6 +23,7 @@
 #include "../core/render/RenderScene.h"
 #include "../core/render/MeshLoader.h"
 #include "../utils/GLUtils.h"
+#include "../core/vulkan/Vulkan.h"
 
 class Test : public BaseEngine {
 private:
@@ -38,6 +39,7 @@ public:
 	void initialise() override;
 	void created() override;
 	void update() override;
+	void renderOffscreen() override;
 	void render() override;
 	void destroy() override;
 
@@ -55,16 +57,20 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 }
 
 void Test::created() {
+
+	//std::cout << Vulkan::getDevice()->listSupportedExtensions() << std::endl;
+
 	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("VulkanLightingSkinningShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("FramebufferShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 4.0f, 3.0f);
@@ -97,8 +103,8 @@ void Test::created() {
 	model->update();
 	renderScene->add(model);
 
-	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
-	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
+	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
+	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
 
 	model2 = new GameObject3D(mesh2, shader);
 	model2->setPosition(4.0f, 1.0f, 0.0f);
@@ -132,17 +138,21 @@ void Test::update() {
 	mit1->getMesh()->updateAnimation(getDeltaSeconds());
 }
 
-void Test::render() {
-	if (! getSettings().videoVulkan) {
-		glEnable(GL_DEPTH_TEST);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void Test::renderOffscreen() {
+	renderScene->renderOffscreen();
+}
 
-		utils_gl::setupAlphaBlendingMSAA();
-	}
+void Test::render() {
+	//if (! getSettings().videoVulkan) {
+	//	glEnable(GL_DEPTH_TEST);
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//	utils_gl::setupAlphaBlendingMSAA();
+	//}
 
 	renderScene->render();
 
-	camera->useView();
+	//camera->useView();
 }
 
 void Test::destroy() {

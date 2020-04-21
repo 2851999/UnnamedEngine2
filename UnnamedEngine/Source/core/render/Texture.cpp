@@ -115,6 +115,29 @@ Texture::Texture(TextureParameters parameters) : parameters(parameters) {
 		create();
 }
 
+void Texture::create() {
+	glGenTextures(1, &texture);
+}
+
+void Texture::setupVk(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask) {
+	//Create the image
+	Vulkan::createImage(width, height, 1, 1, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, usage, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
+	//Create the image view
+	textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, aspectMask, 1, 1);
+	//Create the sampler
+	VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
+	samplerInfo.maxLod = 1.0f;
+	samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE; //For depth
+
+	if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
+		Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
+
+	//Setup the descriptor info
+	imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	imageInfo.imageView = textureVkImageView;
+	imageInfo.sampler = textureVkSampler;
+}
+
 Texture::Texture(void* imageData, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters, bool shouldApplyParameters) : width(width), height(height), numComponents(numComponents), parameters(parameters) {
 	//Check whether using OpenGL or Vulkan
 	if (! BaseEngine::usingVulkan()) {

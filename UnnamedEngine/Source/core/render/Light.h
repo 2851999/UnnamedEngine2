@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "FBO.h"
 #include "Renderer.h"
 #include "../Object.h"
 #include "../Frustum.h"
@@ -48,9 +47,6 @@ private:
 	float innerCutoff = 0;
 	float outerCutoff = 0;
 
-	/* The FBO if assigned for shadow mapping */
-	FBO* depthBuffer = NULL;
-
 	/* The size of the shadow map (width and height) */
 	unsigned int shadowMapSize = 1024;
 
@@ -76,7 +72,7 @@ public:
 	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false);
 
 	/* The destructor */
-	virtual ~Light() { delete depthBuffer; }
+	virtual ~Light() {}
 
 	/* The method used to update the view matrix for this light - should be
 	 * called when the light moves/after assigning the initial values */
@@ -109,8 +105,6 @@ public:
 	inline float getInnerCutoff() { return innerCutoff; }
 	inline float getOuterCutoff() { return outerCutoff; }
 
-	inline FBO* getDepthBuffer() { return depthBuffer; }
-	inline bool hasDepthBuffer() { return depthBuffer; }
 	inline unsigned int getShadowMapSize() { return shadowMapSize; }
 	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
 	inline Matrix4f& getLightShadowTransform(unsigned int index) { return lightShadowTransforms[index]; }

@@ -18,18 +18,71 @@
 
 #include "RenderScene.h"
 
+#include "../vulkan/Vulkan.h"
+#include "RenderPass.h"
+
 #include "../../utils/Logging.h"
 
 RenderScene::RenderScene() {
+	//Create the FBO for rendering offscreen
+	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
+	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
+
+	FBO* fbo = new FBO(width, height, {
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR),
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
+		});
+
+	offscreenRenderPass = new RenderPass(fbo);
+
 	//Obtain the render pipelines
-	pipelineMaterial              = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_MATERIAL);
-	pipelineLighting              = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING);
-	pipelineLightingBlend         = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND);
-	pipelineLightingSkinning      = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING);
-	pipelineLightingSkinningBlend = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND);
+	pipelineMaterial = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), offscreenRenderPass);
+	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING), offscreenRenderPass);
+	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), offscreenRenderPass);
+	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), offscreenRenderPass);
+	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), offscreenRenderPass);
+
+	GraphicsPipeline::ColourBlendState alphaBlendState;
+	alphaBlendState.blendEnabled = true;
+	alphaBlendState.srcRGB = GraphicsPipeline::BlendFactor::SRC_ALPHA;
+	alphaBlendState.dstRGB = GraphicsPipeline::BlendFactor::ONE_MINUS_SRC_ALPHA;
+	alphaBlendState.srcAlpha = GraphicsPipeline::BlendFactor::ONE;
+	alphaBlendState.dstAlpha = GraphicsPipeline::BlendFactor::ZERO;
+
+	GraphicsPipeline::DepthState depthState;
+	depthState.depthTestEnable = false;
+	depthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
+	depthState.depthWriteEnable = false;
+	
+	pipelineFinal = new GraphicsPipeline(new GraphicsPipelineLayout(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, depthState), Renderer::getDefaultRenderPass());
+
+	//Setup the screen texture mesh
+	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+	screenTextureMesh = new Mesh(meshData);
+	screenTextureMesh->getMaterial()->setDiffuse(offscreenRenderPass->getFBO()->getAttachment(0));
+
+	screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 }
 
 RenderScene::~RenderScene() {
+	delete screenTextureMesh;
+	delete pipelineFinal->getLayout();
+	delete pipelineFinal;
+
+	delete pipelineMaterial;
+	delete pipelineLighting;
+	delete pipelineLightingBlend;
+	delete pipelineLightingSkinning;
+	delete pipelineLightingSkinningBlend;
+
+	delete offscreenRenderPass;
+
 	//Go through and delete all created objects
 	for (DescriptorSet* descriptorSetLightBatch : descriptorSetLightBatches)
 		delete descriptorSetLightBatch;
@@ -64,7 +117,9 @@ void RenderScene::addLight(Light* light) {
 	}
 }
 
-void RenderScene::render() {
+void RenderScene::renderOffscreen() {
+	//Use the offscreen render pass
+	offscreenRenderPass->begin();
 	//Check whether lighting is enabled
 	if (lighting) {
 		//Ambient light (used for phong shading)
@@ -157,4 +212,14 @@ void RenderScene::render() {
 		for (unsigned int i = 0; i < objects.size(); ++i)
 			objects[i]->render();
 	}
+	//End the offscreen render pass
+	offscreenRenderPass->end();
+}
+
+void RenderScene::render() {
+	//((Camera3D*) Renderer::getCamera())->useView();
+
+	pipelineFinal->bind();
+	Matrix4f matrix = Matrix4f().initIdentity();
+	Renderer::render(screenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 }

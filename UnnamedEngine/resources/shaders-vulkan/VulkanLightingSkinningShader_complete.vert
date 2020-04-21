@@ -131,6 +131,8 @@ layout(location = 8) out vec3 ue_tangentFragPos;
 layout(location = 9) out mat3 ue_frag_tbnMatrix;
 layout(location = 13) out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 
+//#extension GL_EXT_debug_printf : enable ------- VK_KHR_shader_non_semantic_info  not supported yet unless using beta NVIDIA drivers
+
 void ueAssignLightingData() {
 	mat4 boneTransform;
 	mat3 normalMatrix = mat3(ue_normalMatrix);
@@ -168,6 +170,8 @@ void ueAssignLightingData() {
 			ue_tangentFragPos = transpose(ue_frag_tbnMatrix) * ue_frag_position;
 		}
 	}
+
+	//debugPrintfEXT("diffuse: %v4f", ue_position);
 	
 	//Assign the vertex position
 	if (ue_useSkinning) {

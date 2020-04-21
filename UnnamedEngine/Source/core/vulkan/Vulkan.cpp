@@ -24,6 +24,7 @@
 #include "../render/Mesh.h"
 #include "../../utils/Logging.h"
 #include "../render/DescriptorSet.h"
+#include "../render/RenderPass.h"
 
 #include <limits>
 #include <array>
@@ -36,7 +37,6 @@ VkInstance                                   Vulkan::instance;
 VkSurfaceKHR                                 Vulkan::windowSurface;
 VulkanDevice*                                Vulkan::device;
 VulkanSwapChain*                             Vulkan::swapChain;
-VulkanRenderPass*                            Vulkan::renderPass;
 VkCommandPool                                Vulkan::commandPool;
 std::vector<VkCommandBuffer>                 Vulkan::commandBuffers;
 std::vector<VkSemaphore>                     Vulkan::imageAvailableSemaphores;
@@ -90,9 +90,6 @@ bool Vulkan::initialise(Window* window) {
 	//Create the swap chain
 	swapChain = new VulkanSwapChain(device, window->getSettings());
 
-	//Create the render pass
-	renderPass = new VulkanRenderPass(swapChain);
-
 	//Create the command buffers
 	createCommandBuffers();
 
@@ -111,7 +108,6 @@ void Vulkan::destroy() {
 
 	destroyCommandPool();
 
-	delete renderPass;
 	delete swapChain;
 	delete device;
 
@@ -186,11 +182,8 @@ void Vulkan::destroyCommandPool() {
 }
 
 void Vulkan::createCommandBuffers() {
-	//Obtain the list of framebuffers in the swap chain
-	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
-
-	//Need to allocate the same number of command buffers as framebuffers
-	commandBuffers.resize(swapChainFramebuffers.size());
+	//Need to allocate the same number of command buffers as swap chain images (and therefore number of framebuffers)
+	commandBuffers.resize(swapChain->getImageCount());
 
 	VkCommandBufferAllocateInfo allocInfo = {};
 	allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -234,16 +227,17 @@ void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, ui
 	if (vkAllocateMemory(device->getLogical(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
 		Logger::log("Failed to allocate image memory", "Vulkan", LogType::Error);
 
-	vkBindImageMemory(device->getLogical(), image, imageMemory, 0);
+	if (vkBindImageMemory(device->getLogical(), image, imageMemory, 0) != VK_SUCCESS)
+		Logger::log("Failed to bind device memory to image", "Vulkan", LogType::Error);
 }
 
-VkImageView Vulkan::createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount) {
+VkImageView Vulkan::createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t layerCount) {
 	VkImageViewCreateInfo viewInfo = {};
 	viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image    = image;
 	viewInfo.viewType = viewType;
 	viewInfo.format   = format;
-	viewInfo.subresourceRange.aspectMask     = aspectFlags;
+	viewInfo.subresourceRange.aspectMask     = aspectMask;
 	viewInfo.subresourceRange.baseMipLevel   = 0;
 	viewInfo.subresourceRange.levelCount     = mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -446,9 +440,6 @@ void Vulkan::startDraw() {
 	//------------------------------------------------------------------------------------------------------
 	vkResetCommandBuffer(commandBuffers[currentFrame], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 
-	//Obtain the list of framebuffers in the swap chain
-	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
-
 	VkCommandBufferBeginInfo beginInfo = {};
 	beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags            = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
@@ -456,28 +447,9 @@ void Vulkan::startDraw() {
 
 	if (vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS)
 		Logger::log("Failed to begin recording command buffer", "Vulkan", LogType::Error);
-
-	VkRenderPassBeginInfo renderPassInfo = {};
-	renderPassInfo.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass  = renderPass->getInstance();
-	renderPassInfo.framebuffer = swapChainFramebuffers[currentFrame];
-
-	renderPassInfo.renderArea.offset = {0, 0};
-	renderPassInfo.renderArea.extent = swapChain->getExtent();
-
-	std::array<VkClearValue, 2> clearValues = {};
-	clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-	clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
-
-	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-	renderPassInfo.pClearValues = clearValues.data();
-
-	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void Vulkan::stopDraw() {
-	vkCmdEndRenderPass(commandBuffers[currentFrame]);
-
 	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
 		Logger::log("Failed to record command buffer", "Vulkan", LogType::Error);
 	//-------------------------------------------------------------------------------------------

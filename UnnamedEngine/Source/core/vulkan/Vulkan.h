@@ -21,7 +21,6 @@
 #include "../Window.h"
 #include "VulkanDevice.h"
 #include "VulkanSwapChain.h"
-#include "VulkanRenderPass.h"
 #include "../render/VBO.h"
 #include "../render/UBO.h"
 #include "../render/Texture.h"
@@ -29,6 +28,8 @@
 #include "../render/GraphicsPipeline.h"
 
 class DescriptorSet;
+
+class RenderPass;
 
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
@@ -47,9 +48,6 @@ private:
 
 	/* The swap chain */
 	static VulkanSwapChain* swapChain;
-
-	/* The render pass */
-	static VulkanRenderPass* renderPass;
 
 	/* Command pool */
 	static VkCommandPool commandPool;
@@ -140,7 +138,7 @@ public:
 	static void createCommandBuffers(); //(Destroyed with command pool)
 
 	static void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount);
+	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t layerCount);
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels, uint32_t layerCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE); //Pass VK_NULL_HANDLE for command buffer to let this method create one
 	static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	static VkCommandBuffer beginSingleTimeCommands();
@@ -200,7 +198,6 @@ public:
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
 	static inline VulkanDevice* getDevice() { return device; }
 	static inline VulkanSwapChain* getSwapChain() { return swapChain; }
-	static inline VulkanRenderPass* getRenderPass() { return renderPass; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }

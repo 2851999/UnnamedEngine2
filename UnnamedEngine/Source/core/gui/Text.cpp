@@ -81,7 +81,11 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	GameObject3D::update();
 
 	//Obtain the graphics pipeline used for rendering
-	pipeline = Renderer::getGraphicsPipeline(Renderer::GRAPHICS_PIPELINE_FONT);
+	pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
+}
+
+Text::~Text() {
+	delete pipeline;
 }
 
 void Text::update(std::string text) {
