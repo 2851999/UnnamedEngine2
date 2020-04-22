@@ -388,7 +388,7 @@ void Shader::loadShaderSource(std::string path, std::vector<std::string> &fileTe
 	}
 }
 
-Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int uboBindingOffset) {
+Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int uboBindingOffset, std::string preSource) {
 	//The ShaderSource
 	Shader::ShaderSource source;
 
@@ -397,7 +397,7 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int ubo
 	loadShaderSource(path, fileText, source, uboBindingOffset);
 
 	//Assign the source
-	source.source = "";
+	source.source = preSource + "\n";
 
 	//Go through each line of file text
 	for (std::string line : fileText)
@@ -412,14 +412,20 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int ubo
 	return source;
 }
 
-Shader* Shader::loadShader(std::string path) {
+Shader* Shader::loadShader(std::string path, std::vector<std::string> defines) {
+	//The extra code to add on at the start
+	std::string preSource = "";
+
+	for (std::string& define : defines)
+		preSource += "#define " + define + "\n";
+
 	//Check whether using Vulkan
 	if (! BaseEngine::usingVulkan()) {
 		//Check for geometry shader
 		if (utils_file::isFile(path + ".gs"))
-			return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".gs"), loadShaderSource(path + ".fs"));
+			return createShader(loadShaderSource(path + ".vs", 0, preSource), loadShaderSource(path + ".gs"), loadShaderSource(path + ".fs", 0, preSource));
 		else
-			return createShader(loadShaderSource(path + ".vs"), loadShaderSource(path + ".fs"));
+			return createShader(loadShaderSource(path + ".vs", 0, preSource), loadShaderSource(path + ".fs", 0, preSource));
 	} else
 		//Load the shader
 		return new Shader(createVkShaderModule(readFile(path + "_vert.spv")), createVkShaderModule(readFile(path + "_frag.spv")));
@@ -427,9 +433,8 @@ Shader* Shader::loadShader(std::string path) {
 
 void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset, std::string preSource) {
 	//Load the source
-	ShaderSource shaderSource = loadShaderSource(inputPath, uboBindingOffset);
-	//Append the additional source
-	shaderSource.source = preSource + "\n" + shaderSource.source;
+	ShaderSource shaderSource = loadShaderSource(inputPath, uboBindingOffset, preSource);
+
 	//Write the shader source
 	utils_file::writeFile(outputPath, shaderSource.source);
 }
@@ -447,9 +452,15 @@ void Shader::outputCompleteShaderFiles(std::string inputPath, std::string output
 		outputCompleteShaderFile(inputPath + ".fs", outputPath + "_complete.frag", uboBindingOffset, preSource);
 }
 
-void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath) {
+void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath, std::vector<std::string> defines) {
+	//The extra code to add on at the start
+	std::string preSource = "";
+
+	for (std::string& define : defines)
+		preSource += "#define " + define + "\n";
+
 	//Output the complete shader file
-	outputCompleteShaderFiles(inputPath, outputPath, UBO::VULKAN_BINDING_OFFSET);
+	outputCompleteShaderFiles(inputPath, outputPath, UBO::VULKAN_BINDING_OFFSET, preSource);
 
 	//Now compile each shader (if they exist)
 	if (utils_file::isFile(outputPath + "_complete.vert"))
@@ -460,7 +471,7 @@ void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::
 		std::system((glslangValidatorPath + " -V " + outputPath + "_complete.frag -o " + outputPath + "_frag.spv").c_str());
 }
 
-void Shader::compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath) {
+void Shader::compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath, std::vector<std::string> defines) {
 	//Add the prefix's to get the input and output paths
-	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path, glslangValidatorPath);
+	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path, glslangValidatorPath, defines);
 }

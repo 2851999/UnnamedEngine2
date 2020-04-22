@@ -1,5 +1,15 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 8
+
+* Some cleanup
+* Added parameters in Shader methods to append "#define NAME"
+  to the beginning of shaders before compilation when using
+  Vulkan or OpenGL
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 3 | Experimental 7
+
+* Added support for arrays of textures in Vulkan
 
 * Readded support for multiple shadow maps
 
