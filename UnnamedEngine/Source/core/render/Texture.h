@@ -179,7 +179,7 @@ public:
 	inline std::string getPath() { return path; }
 	inline bool hasPath() { return path.length() > 0; }
 	VkImageView& getVkImageView() { return textureVkImageView; }
-	const VkDescriptorImageInfo* getVkImageInfo() { return &imageInfo; }
+	const VkDescriptorImageInfo getVkImageInfo() { return imageInfo; }
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */

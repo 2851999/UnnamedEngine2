@@ -36,6 +36,24 @@ public:
 		unsigned int binding;
 		/* The texture to be bound here */
 		Texture* texture = NULL;
+
+		/* The index of this binding in the textureBindings list */
+		unsigned int bindingInfoIndex;
+
+		/* Location within the binding (for Vulkan) */
+		unsigned int locationInBinding;
+	};
+
+	/* Structure for storing information about a texture binding */
+	struct TextureBindingInfo {
+		/* The binding location */
+		unsigned int binding;
+
+		/* The number of textures in this binding */
+		unsigned int numTextures;
+
+		/* The actual textures within this binding */
+		std::vector<VkDescriptorImageInfo> textures;
 	};
 private:
 	/* The layout of this descriptor set */
@@ -46,6 +64,9 @@ private:
 
 	/* The textures within this descriptor set */
 	std::vector<TextureInfo> textures;
+
+	/* The texture bindings within this descriptor set */
+	std::vector<TextureBindingInfo> textureBindings;
 
 	/* The descriptor pool for the allocation of descriptors in Vulkan */
 	VkDescriptorPool vulkanDescriptorPool = VK_NULL_HANDLE;
@@ -109,8 +130,8 @@ private:
 	/* UBOs required in this layout*/
 	std::vector<UBOInfo> ubos;
 
-	/* Textures required in this layout, specified using their binding number */
-	std::vector<unsigned int> textureBindings;
+	/* Texture bindings required in this layout, specified using their binding number */
+	std::vector<DescriptorSet::TextureBindingInfo> textureBindings;
 
 	/* The descriptor set layout instance for Vulkan*/
 	VkDescriptorSetLayout vulkanDescriptorSetLayout = VK_NULL_HANDLE;
@@ -127,14 +148,17 @@ public:
 	/* Method used to setup this layout */
 	void setup();
 
+	/* Method to add a texture binding */
+	inline void addTextureBinding(unsigned int binding, unsigned int numTextures) { textureBindings.push_back({ binding, numTextures }); }
+
 	/* Methods to add UBOs and Textures to this layout */
-	inline void addTexture(unsigned int binding) { textureBindings.push_back(binding); }
+	inline void addTexture(unsigned int binding) { addTextureBinding(binding, 1); }
 	inline void addUBO(unsigned int size, GLenum usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
 
 	/* Getters */
 	inline unsigned int getSetNumber() { return setNumber; }
 	inline std::vector<UBOInfo>& getUBOs() { return ubos; }
-	inline std::vector<unsigned int>& getTextureBindings() { return textureBindings; }
+	inline std::vector<DescriptorSet::TextureBindingInfo>& getTextureBindings() { return textureBindings; }
 	inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout; }
 };
 

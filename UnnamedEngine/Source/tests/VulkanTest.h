@@ -47,7 +47,7 @@ public:
 	virtual void onKeyPressed(int key) override;
 };
 
-bool Test::useVulkan = false;
+bool Test::useVulkan = true;
 
 void Test::initialise() {
 	getSettings().videoVulkan = useVulkan;
@@ -100,7 +100,9 @@ void Test::created() {
 	//renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 
 	//lightDir = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f);
+	light = (new Light(Light::TYPE_SPOT, Vector3f(3.0f, 6.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	lightDir = (new Light(Light::TYPE_SPOT, Vector3f(0.0f, 5.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	renderScene->addLight(light);
 	renderScene->addLight(lightDir);
 
 	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
@@ -142,15 +144,16 @@ void Test::update() {
 	//model2->getMesh()->getMaterial(1)->setDiffuse(Renderer::getBlankTexture());
 	//model2->getMesh()->getMaterial(1)->update();
 
-	//if (Keyboard::isPressed(GLFW_KEY_UP))
-	//	light->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
-	//else if (Keyboard::isPressed(GLFW_KEY_DOWN))
-	//	light->getTransform()->translate(0.0f, 0.0f, 0.008f * getDelta());
-	//if (Keyboard::isPressed(GLFW_KEY_LEFT))
-	//	light->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
-	//else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
-	//	light->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
+	if (Keyboard::isPressed(GLFW_KEY_UP))
+		light->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
+	else if (Keyboard::isPressed(GLFW_KEY_DOWN))
+		light->getTransform()->translate(0.0f, 0.0f, 0.008f * getDelta());
+	if (Keyboard::isPressed(GLFW_KEY_LEFT))
+		light->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
+	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
+		light->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 
+	light->update();
 	lightDir->update();
 
 	//mit1->getMesh()->updateAnimation(getDeltaSeconds());

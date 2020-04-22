@@ -114,8 +114,9 @@ ShaderInterface::ShaderInterface() {
 	DescriptorSetLayout* lightBatchLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
 	//Add shadow map textures
 	//for (unsigned int i = 7; i < 13; ++i)
-	//	lightBatchLayout->addTexture(i);
-	lightBatchLayout->addTexture(7); //In Vulkan need texture array to access instead :(
+		//lightBatchLayout->addTexture(i);
+	//lightBatchLayout->addTexture(7); //In Vulkan need texture array to access instead :(
+	lightBatchLayout->addTextureBinding(7, 6);
 	lightBatchLayout->addUBO(sizeof(ShaderBlock_LightBatch), GL_STATIC_DRAW, UBO_BINDING_LOCATION_LIGHT_BATCH);
 	lightBatchLayout->setup();
 

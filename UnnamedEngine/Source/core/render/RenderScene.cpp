@@ -113,12 +113,19 @@ void RenderScene::addLight(Light* light) {
 		//Add a descriptor set for the new batch
 		DescriptorSet* descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
 
-		//Add the shadow map if needed
-		if (light->hasShadowMap())
-			descriptorSetLightBatch->setTexture(0, light->getShadowMapRenderPass()->getFBO()->getAttachment(0));
-
 		descriptorSetLightBatch->setup();
 		descriptorSetLightBatches.push_back(descriptorSetLightBatch);
+	}
+	//Check if the light added has a shadow map
+	if (light->hasShadowMap()) {
+		//Obtain the light index within the current batch
+		unsigned int indexInBatch = (lights.size() % NUM_LIGHTS_IN_BATCH) - 1;
+
+		//Assign the shadow map
+		descriptorSetLightBatches[descriptorSetLightBatches.size() - 1]->setTexture(indexInBatch, light->getShadowMapRenderPass()->getFBO()->getAttachment(0));
+
+		//Update the descriptor set
+		descriptorSetLightBatches[descriptorSetLightBatches.size() - 1]->update();
 	}
 }
 

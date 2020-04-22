@@ -158,7 +158,7 @@ layout(location = 8) in vec3 ue_tangentFragPos;
 layout(location = 9) in mat3 ue_frag_tbnMatrix;
 layout(location = 13) in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 
-layout(set = 3, binding = 7) uniform sampler2D ue_lightTexturesShadowMap;
+layout(set = 3, binding = 7) uniform sampler2D ue_lightTexturesShadowMap[MAX_LIGHTS];
 
 //Returns the sum of the specular and diffuse strengths */
 vec3 ueCalculateLight(UELight light, vec3 lightDirection, vec3 diffuseColour, vec3 specularColour, vec3 normal, vec3 fragPos, float matShininess) {
@@ -304,7 +304,7 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 		//Check the light type
 		if (light.type == 1) {
 			if (light.useShadowMap)
-				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap, fragPosLightSpace[i], normal));
+				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap[i], fragPosLightSpace[i], normal));
 			else
 				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
 		} else if (light.type == 2) {
@@ -314,7 +314,7 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
 		} else if (light.type == 3) {
 			if (light.useShadowMap)
-				otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap, fragPosLightSpace[i], normal));
+				otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap[i], fragPosLightSpace[i], normal));
 			else
 				otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
 		}
