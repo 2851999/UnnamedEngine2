@@ -158,6 +158,8 @@ layout(location = 8) in vec3 ue_tangentFragPos;
 layout(location = 9) in mat3 ue_frag_tbnMatrix;
 layout(location = 13) in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 
+layout(set = 3, binding = 7) uniform sampler2D ue_lightTexturesShadowMap;
+
 //Returns the sum of the specular and diffuse strengths */
 vec3 ueCalculateLight(UELight light, vec3 lightDirection, vec3 diffuseColour, vec3 specularColour, vec3 normal, vec3 fragPos, float matShininess) {
 	float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
@@ -285,11 +287,21 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 		UELight light = ue_lights[i];
 		//Check the light type
 		if (light.type == 1) {
-			otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+			if (light.useShadowMap)
+				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap, fragPosLightSpace[i], normal));
+			else
+				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
 		} else if (light.type == 2) {
-			otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
-		} else if (light.type == 3)
-			otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+			if (light.useShadowMap)
+				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+			else
+				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+		} else if (light.type == 3) {
+			if (light.useShadowMap)
+				otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap, fragPosLightSpace[i], normal));
+			else
+				otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+		}
 	}
 
 	return ambientLight + otherLight;

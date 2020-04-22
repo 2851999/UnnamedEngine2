@@ -64,16 +64,16 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 		inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 		VkViewport viewport = {};
-		if (renderShader->getID() != Renderer::SHADER_FRAMEBUFFER) {
+		if (layout->getViewportFlippedVk()) {
 			viewport.x      = 0.0f;
-			viewport.y      = (float) Window::getCurrentInstance()->getSettings().windowHeight;
-			viewport.width  = (float) Window::getCurrentInstance()->getSettings().windowWidth;
+			viewport.y      = (float) layout->getViewportHeight();
+			viewport.width  = (float) layout->getViewportWidth();
 			viewport.height = -((float) viewport.y); //Flip so that it resembles OpenGL
 		} else {
 			viewport.x      = 0.0f;
 			viewport.y      = 0.0f;
-			viewport.width  = (float) Window::getCurrentInstance()->getSettings().windowWidth;
-			viewport.height = (float) Window::getCurrentInstance()->getSettings().windowHeight;
+			viewport.width  = (float) layout->getViewportWidth();
+			viewport.height = (float) layout->getViewportHeight();
 		}
 		viewport.minDepth   = 0.0f;
 		viewport.maxDepth   = 1.0f;
@@ -183,6 +183,9 @@ void GraphicsPipeline::bind() {
 		//Bind the pipeline
 		vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
 	} else {
+		//Assign the viewport
+		glViewport(0, 0, layout->getViewportWidth(), layout->getViewportHeight());
+
 		//Use the shader
 		renderShader->getShader()->use();
 
@@ -277,7 +280,9 @@ VkCompareOp GraphicsPipeline::convertToVk(CompareOperation op) {
  * The GraphicsPipelineLayout class
  *****************************************************************************/
 
-GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState) : renderShader(renderShader), vertexInputData(vertexInputData), colourBlendState(colourBlendState), depthState(depthState) {
+GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk) :
+	renderShader(renderShader), vertexInputData(vertexInputData), colourBlendState(colourBlendState), depthState(depthState), viewportWidth(viewportWidth), viewportHeight(viewportHeight), viewportFlippedVk(viewportFlippedVk) {
+
 	//Ensure using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		//Create the pipeline

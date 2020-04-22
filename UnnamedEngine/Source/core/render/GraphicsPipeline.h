@@ -120,9 +120,16 @@ private:
 	/* The colour and depth states for the pipeline */
 	GraphicsPipeline::ColourBlendState colourBlendState;
 	GraphicsPipeline::DepthState       depthState;
+
+	/* The width and height of the view port */
+	uint32_t viewportWidth;
+	uint32_t viewportHeight;
+
+	/* States whether the viewport should be flipped (Vulkan is flipped compared to OpenGL) */
+	bool viewportFlippedVk;
 public:
 	/* Constructor */
-	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState);
+	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk);
 
 	/* Destructor */
 	virtual ~GraphicsPipelineLayout();
@@ -133,4 +140,7 @@ public:
 	inline GraphicsPipeline::VertexInputData& getVertexInputData() { return vertexInputData; }
 	inline GraphicsPipeline::ColourBlendState& getColourBlendState() { return colourBlendState; }
 	inline GraphicsPipeline::DepthState& getDepthState() { return depthState; }
+	inline uint32_t getViewportWidth() { return viewportWidth; }
+	inline uint32_t getViewportHeight() { return viewportHeight; }
+	inline bool getViewportFlippedVk() { return viewportFlippedVk; }
 };

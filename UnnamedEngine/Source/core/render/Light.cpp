@@ -18,6 +18,9 @@
 
 #include "Light.h"
 
+#include "FBO.h"
+#include "RenderPass.h"
+
 /*****************************************************************************
  * The Light class
  *****************************************************************************/
@@ -28,6 +31,18 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 	if (castShadows) {
 		if (type == TYPE_DIRECTIONAL) {
 			//Create FBO
+			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
+					//new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::COLOUR_TEXTURE),
+					new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_TEXTURE)
+				});
+
+			//Create the shadow map render pass
+			shadowMapRenderPass = new RenderPass(fbo, true);
+
+			fbo->setup(shadowMapRenderPass);
+
+			//Create the graphics pipeline
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
 
 			lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
 		} else if (type == TYPE_POINT) {
@@ -38,12 +53,12 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 				lightShadowTransforms.push_back(Matrix4f());
 
 			//Setup the projection matrix for the shadow map rendering
-			lightProjection.initPerspective(90.0f, (float) shadowMapSize / (float) shadowMapSize, 1.0f, 25.0f);
+			lightProjection.initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f);
 		} else if (type == TYPE_SPOT) {
 			//Create FBO
 
 			//Setup the projection matrix for the shadow map rendering
-			lightProjection.initPerspective(90.0f, (float)shadowMapSize / (float)shadowMapSize, 1.0f, 25.0f);
+			lightProjection.initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f);
 		}
 		//Update this light (in case it is static)
 		update();
@@ -99,5 +114,6 @@ void Light::setUniforms(ShaderStruct_Light& lightData) {
 	lightData.quadratic = quadratic;
 	lightData.innerCutoff = innerCutoff;
 	lightData.outerCutoff = outerCutoff;
+	lightData.useShadowMap = hasShadowMap();
 }
 

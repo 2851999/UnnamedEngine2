@@ -37,7 +37,7 @@ private:
 	unsigned int numSamples = 0;
 public:
 	/* Constructor with the FBO to use for rendering */
-	RenderPass(FBO* fbo = NULL);
+	RenderPass(FBO* fbo = NULL, bool renderToDepth = false);
 
 	/* Destructor */
 	virtual ~RenderPass();

@@ -29,7 +29,7 @@ RenderScene::RenderScene() {
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
 
 	FBO* fbo = new FBO(width, height, {
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR),
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
 			new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
 		});
 
@@ -54,7 +54,7 @@ RenderScene::RenderScene() {
 	depthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
 	depthState.depthWriteEnable = false;
 	
-	pipelineFinal = new GraphicsPipeline(new GraphicsPipelineLayout(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, depthState), Renderer::getDefaultRenderPass());
+	pipelineFinal = new GraphicsPipeline(new GraphicsPipelineLayout(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, depthState, width, height, false), Renderer::getDefaultRenderPass());
 
 	//Setup the screen texture mesh
 	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
@@ -118,8 +118,33 @@ void RenderScene::addLight(Light* light) {
 }
 
 void RenderScene::renderOffscreen() {
-	//Use the offscreen render pass
-	offscreenRenderPass->begin();
+	//Check for lighting
+	if (lighting) {
+		//Go through and render any shadow maps needed
+		for (unsigned int i = 0; i < lights.size(); ++i) {
+			if (lights[i]->hasShadowMap()) {
+				//Obtain the render pass
+				RenderPass* shadowMapRenderPass = lights[i]->getShadowMapRenderPass();
+
+				shadowMapRenderPass->begin();
+
+				lights[i]->getShadowMapGraphicsPipeline()->bind();
+
+				//SKETCHY BUT SHOULD WORK FOR NOW
+				descriptorSetLightBatches[0]->setTexture(0, shadowMapRenderPass->getFBO()->getAttachment(0));
+
+				for (unsigned int i = 0; i < objects.size(); ++i)
+					objects[i]->render();
+
+				shadowMapRenderPass->end();
+			}
+		}
+	}
+}
+
+void RenderScene::render() {
+	((Camera3D*) Renderer::getCamera())->useView();
+
 	//Check whether lighting is enabled
 	if (lighting) {
 		//Ambient light (used for phong shading)
@@ -150,6 +175,11 @@ void RenderScene::renderOffscreen() {
 
 				//Assign the data for the current light
 				lights[l]->setUniforms(shaderLightBatchData.ue_lights[lightIndexInBatch]);
+
+				if (lights[l]->hasShadowMap())
+					//Assign the light space matrix as well
+					shaderLightBatchData.ue_lightSpaceMatrix[lightIndexInBatch] = lights[l]->getLightSpaceMatrix();
+				std::cout << lights[l]->getLightSpaceMatrix().toString() << std::endl;
 			}
 
 			//Assign the number of lights in the current batch
@@ -212,14 +242,8 @@ void RenderScene::renderOffscreen() {
 		for (unsigned int i = 0; i < objects.size(); ++i)
 			objects[i]->render();
 	}
-	//End the offscreen render pass
-	offscreenRenderPass->end();
-}
 
-void RenderScene::render() {
-	//((Camera3D*) Renderer::getCamera())->useView();
-
-	pipelineFinal->bind();
-	Matrix4f matrix = Matrix4f().initIdentity();
-	Renderer::render(screenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+	//pipelineFinal->bind();
+	//Matrix4f matrix = Matrix4f().initIdentity();
+	//Renderer::render(screenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 }

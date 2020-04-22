@@ -46,11 +46,16 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 		VkImageUsageFlags usage;
 		VkImageAspectFlags aspectMask;
 
-		if (type == Type::COLOUR) {
+		if (type == Type::COLOUR_TEXTURE) {
 			vulkanFormat = Vulkan::getSwapChain()->getSurfaceFormat();
 			usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		} else if (type == Type::DEPTH_TEXTURE) {
+			vulkanFormat = Vulkan::getSwapChain()->getDepthFormat();
+			usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		} else if (type == Type::DEPTH) {
 			vulkanFormat = Vulkan::getSwapChain()->getDepthFormat();
 			usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -65,7 +70,7 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 		GLenum glType;
 		GLenum attachment;
 
-		if (type == Type::COLOUR) {
+		if (type == Type::COLOUR_TEXTURE) {
 			getParameters().setTarget(GL_TEXTURE_2D);
 			internalFormat = GL_RGBA16F;
 			format = GL_RGBA;
@@ -74,6 +79,15 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 
 			getParameters().setFilter(GL_NEAREST);
 			getParameters().setClamp(GL_CLAMP_TO_EDGE);
+		} else if (type == Type::DEPTH_TEXTURE) {
+			getParameters().setTarget(GL_TEXTURE_2D);
+			internalFormat = GL_DEPTH_COMPONENT24;
+			format = GL_DEPTH_COMPONENT;
+			glType = GL_FLOAT;
+			attachment = GL_DEPTH_ATTACHMENT;
+
+			getParameters().setFilter(GL_LINEAR);
+			getParameters().setClamp(GL_CLAMP_TO_BORDER);
 		} else if (type == Type::DEPTH) {
 			getParameters().setTarget(GL_RENDERBUFFER);
 			internalFormat = GL_DEPTH_COMPONENT32;
@@ -142,7 +156,7 @@ FBO::FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachment*> at
 		//Setup the current attachment
 		attachments[i]->setup(index);
 
-		if (attachments[i]->getType() == FramebufferAttachment::Type::COLOUR)
+		if (attachments[i]->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE)
 			index++;
 	}
 
@@ -194,7 +208,7 @@ void FBO::setup(RenderPass* renderPass) {
 			attachments[i]->setup(index);
 
 			//Assume that if it is not a depth attachment then it is a colour attachment
-			if (attachments[i]->getType() == FramebufferAttachment::Type::COLOUR) {
+			if (attachments[i]->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE) {
 				colourAttachments.push_back(GL_COLOR_ATTACHMENT0 + i);
 				index++;
 			}
