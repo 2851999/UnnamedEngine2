@@ -47,7 +47,7 @@ public:
 	virtual void onKeyPressed(int key) override;
 };
 
-bool Test::useVulkan = true;
+bool Test::useVulkan = false;
 
 void Test::initialise() {
 	getSettings().videoVulkan = useVulkan;
@@ -99,15 +99,16 @@ void Test::created() {
 	//renderScene->addLight(light);
 	//renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 
-	lightDir = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f);
+	//lightDir = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f);
+	lightDir = (new Light(Light::TYPE_SPOT, Vector3f(0.0f, 5.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	renderScene->addLight(lightDir);
 
-	//Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
+	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
 	//mesh->setCullingEnabled(false);
-	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
+	//Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
 
 	model = new GameObject3D(mesh, shader);
-	//model->setScale(0.15f, 0.15f, 0.15f);
+	model->setScale(0.15f, 0.15f, 0.15f);
 	model->update();
 	renderScene->add(model);
 
@@ -118,7 +119,7 @@ void Test::created() {
 	//mesh2->getMaterial(1)->update();
 
 	model2 = new GameObject3D(mesh2, shader);
-	model2->setPosition(0.0f, -1.5f, 0.0f);
+	model2->setPosition(0.0f, 1.5f, 0.0f);
 	model2->update();
 	renderScene->add(model2);
 

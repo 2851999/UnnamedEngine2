@@ -361,7 +361,5 @@ void main() {
 	
 	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour.xyz, specularColour, shininess, ue_frag_pos_lightspace);
 
-	//ue_FragColour = vec4(vec3(texture(ue_lightTexturesShadowMap, ue_frag_textureCoord).r), diffuseColour.a);
 	ue_FragColour = vec4(light, diffuseColour.a);
-	//ue_FragColour = vec4(vec3((1.0 - ueCalculateShadow(ue_lights[0], ue_lightTexturesShadowMap, ue_frag_pos_lightspace[0], normal))), diffuseColour.a);
 }

@@ -39,12 +39,8 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 			//Create the shadow map render pass
 			shadowMapRenderPass = new RenderPass(fbo);
 
-			//fbo->setup(shadowMapRenderPass); ALREADY DONE BY RENDER PASS
-
 			//Create the graphics pipeline
 			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
-
-			//lightProjection.initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f);
 
 			setProjectionMatrix(Matrix4f().initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f));
 		} else if (type == TYPE_POINT) {
@@ -58,6 +54,16 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
 		} else if (type == TYPE_SPOT) {
 			//Create FBO
+			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
+					//new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::COLOUR_TEXTURE),
+					new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_TEXTURE)
+				});
+
+			//Create the shadow map render pass
+			shadowMapRenderPass = new RenderPass(fbo);
+
+			//Create the graphics pipeline
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
 
 			//Setup the projection matrix for the shadow map rendering
 			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
@@ -114,6 +120,8 @@ void Light::update() {
 
 		//Update the frustum
 		frustum.update(lightProjectionView);
+
+		setViewMatrix(lightProjectionView); //Shortcut
 
 		//Update the UBO
 		updateUBO();
