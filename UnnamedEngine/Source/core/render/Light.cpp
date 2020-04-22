@@ -37,7 +37,7 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 				});
 
 			//Create the shadow map render pass
-			shadowMapRenderPass = new RenderPass(fbo, true);
+			shadowMapRenderPass = new RenderPass(fbo);
 
 			//fbo->setup(shadowMapRenderPass); ALREADY DONE BY RENDER PASS
 
@@ -46,7 +46,7 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 
 			//lightProjection.initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f);
 
-			lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
+			setProjectionMatrix(Matrix4f().initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f));
 		} else if (type == TYPE_POINT) {
 			//Create FBO
 
@@ -55,12 +55,12 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 				lightShadowTransforms.push_back(Matrix4f());
 
 			//Setup the projection matrix for the shadow map rendering
-			lightProjection.initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f);
+			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
 		} else if (type == TYPE_SPOT) {
 			//Create FBO
 
 			//Setup the projection matrix for the shadow map rendering
-			lightProjection.initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f);
+			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
 		}
 		//Update this light (in case it is static)
 		update();
@@ -80,12 +80,17 @@ void Light::update() {
 		Vector3f right = direction.cross(Vector3f(0.0f, 1.0f, 0.0f)).normalise();
 		Vector3f up = right.cross(direction).normalise();
 
-		lightView.initLookAt(direction * -5, (direction * 5) + direction, up);
+		getViewMatrix().initLookAt(direction * -5, (direction * 5) + direction, up);
 
-		lightProjectionView = lightProjection * lightView;
+		lightProjectionView = getProjectionMatrix() * getViewMatrix();
 
 		//Update the frustum
 		frustum.update(lightProjectionView);
+
+		setViewMatrix(lightProjectionView); //Shortcut
+
+		//Update the UBO
+		updateUBO();
 	} else if (type == TYPE_POINT) { //SHOULD ONLY DO IF HAVE DEPTH BUFFER
 		//The position of the point light
 		Vector3f pos = getPosition();
@@ -103,12 +108,15 @@ void Light::update() {
 		Vector3f right = direction.cross(Vector3f(0.0f, 1.0f, 0.0f)).normalise();
 		Vector3f up = right.cross(direction).normalise();
 
-		lightView.initLookAt(pos, pos + direction, up);
+		getViewMatrix().initLookAt(pos, pos + direction, up);
 
-		lightProjectionView = lightProjection * lightView;
+		lightProjectionView = getProjectionMatrix() * getViewMatrix();
 
 		//Update the frustum
 		frustum.update(lightProjectionView);
+
+		//Update the UBO
+		updateUBO();
 	}
 }
 

@@ -34,7 +34,7 @@ protected:
 	/* The camera information for shaders */
 	ShaderBlock_Camera shaderData;
 
-	/* Method to update the camera data UBO */
+	/* Method to update the camera data UBO for the current frame */
 	void updateUBO();
 public:
 	Camera();
@@ -44,6 +44,9 @@ public:
 
 	/* Used to update the matrices */
 	virtual void update() {}
+
+	/* Used to use the view from this camera for subsequent rendering */
+	virtual void useView();
 
 	/* Setters and getters */
 	void setProjectionMatrix(Matrix4f projectionMatrix) { shaderData.ue_projectionMatrix = projectionMatrix; }
@@ -123,7 +126,8 @@ public:
 
 	void update() override;
 
-	inline void useView() {
+	void useView() override {
+		Camera::useView();
 		if (skyBox)
 			skyBox->render();
 	}

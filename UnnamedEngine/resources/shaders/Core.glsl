@@ -6,7 +6,6 @@
 * Set 1 - Varies per material
 * Set 2 - Varies per model
 * Set 3 - Varies per light batch
-*
 */
 
 layout(std140, set = 0, binding = 1) uniform UECameraData {

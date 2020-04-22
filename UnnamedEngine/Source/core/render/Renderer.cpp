@@ -173,9 +173,6 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		//Get the render data for rendering
 		RenderData* renderData = mesh->getRenderData()->getRenderData();
 
-		//Bind the camera descriptor set
-		getCamera()->getDescriptorSet()->bind();
-
 		//Obtain the required UBO's for rendering
 		UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
 		UBO* shaderSkinningUBO = NULL;

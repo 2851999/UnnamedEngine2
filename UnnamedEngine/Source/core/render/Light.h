@@ -26,7 +26,7 @@
  * The Light class contains the information required to create a light
  *****************************************************************************/
 
-class Light : public GameObject3D {
+class Light : public Camera3D {
 private:
 	/* This light's type */
 	unsigned int type;
@@ -53,10 +53,6 @@ private:
 	/* The shadow map graphics pipeline if assigned for shadow mapping */
 	GraphicsPipeline* shadowMapGraphicsPipeline = NULL;
 
-	/* The light projection and view matrices */
-	Matrix4f lightProjection;
-	Matrix4f lightView;
-
 	/* Shadow transforms for point lights */
 	std::vector<Matrix4f> lightShadowTransforms;
 
@@ -82,7 +78,7 @@ public:
 
 	/* The method used to update the view matrix for this light - should be
 	 * called when the light moves/after assigning the initial values */
-	void update();
+	void update() override;
 
 	/* The method called to assign the uniforms in a shader for this light */
 	virtual void setUniforms(ShaderStruct_Light& lightData);
@@ -111,9 +107,7 @@ public:
 	inline float getInnerCutoff() { return innerCutoff; }
 	inline float getOuterCutoff() { return outerCutoff; }
 
-	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
 	inline Matrix4f& getLightShadowTransform(unsigned int index) { return lightShadowTransforms[index]; }
-	inline Matrix4f getLightViewMatrix() { return lightView; }
 	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }
 	inline Frustum& getFrustum() { return frustum; }
 	inline bool hasShadowMap() { return shadowMapRenderPass; }

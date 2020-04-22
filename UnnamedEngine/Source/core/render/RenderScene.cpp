@@ -141,6 +141,9 @@ void RenderScene::renderOffscreen() {
 
 				lights[i]->getShadowMapGraphicsPipeline()->bind();
 
+				//Use the light's view
+				lights[i]->useView();
+
 				for (unsigned int i = 0; i < objects.size(); ++i)
 					objects[i]->render();
 

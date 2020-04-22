@@ -27,7 +27,7 @@
   * The RenderPass class
   *****************************************************************************/
 
-RenderPass::RenderPass(FBO* fbo, bool renderToDepth) : fbo(fbo), renderToDepth(renderToDepth) {
+RenderPass::RenderPass(FBO* fbo) : fbo(fbo) {
 	//Check using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		VkAttachmentReference colourAttachmentRef = {};
@@ -41,7 +41,7 @@ RenderPass::RenderPass(FBO* fbo, bool renderToDepth) : fbo(fbo), renderToDepth(r
 		std::array<VkSubpassDependency, 2> dependencies;
 
 		if (fbo) {
-			if (renderToDepth) {
+			if (fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_TEXTURE) {
 				//Use specified framebuffer
 				dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 				dependencies[0].dstSubpass = 0;
@@ -195,7 +195,7 @@ void RenderPass::begin() {
 
 		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! THESE ARE ALSO FOR ATTACHMENTS
 		std::vector<VkClearValue> clearValues = {};
-		if (renderToDepth) {
+		if (fbo && fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_TEXTURE) {
 			clearValues.resize(1);
 			clearValues[0].depthStencil = { 1.0f, 0 };
 		} else {
