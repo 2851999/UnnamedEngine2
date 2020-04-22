@@ -80,7 +80,7 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 
 		VkRect2D scissor = {};
 		scissor.offset = { 0, 0 };
-		scissor.extent = Vulkan::getSwapChain()->getExtent();
+		scissor.extent = { layout->getViewportWidth(), layout->getViewportHeight() };
 
 		VkPipelineViewportStateCreateInfo viewportState = {};
 		viewportState.sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

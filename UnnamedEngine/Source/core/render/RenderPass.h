@@ -35,6 +35,8 @@ private:
 
 	/* The number of samples this render pass uses */
 	unsigned int numSamples = 0;
+
+	bool renderToDepth;
 public:
 	/* Constructor with the FBO to use for rendering */
 	RenderPass(FBO* fbo = NULL, bool renderToDepth = false);

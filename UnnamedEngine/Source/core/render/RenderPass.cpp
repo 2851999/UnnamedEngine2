@@ -27,22 +27,15 @@
   * The RenderPass class
   *****************************************************************************/
 
-RenderPass::RenderPass(FBO* fbo, bool renderToDepth) : fbo(fbo) {
+RenderPass::RenderPass(FBO* fbo, bool renderToDepth) : fbo(fbo), renderToDepth(renderToDepth) {
 	//Check using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		VkAttachmentReference colourAttachmentRef = {};
-		colourAttachmentRef.attachment = 0;
-		colourAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 		VkAttachmentReference depthAttachmentRef = {};
-		depthAttachmentRef.attachment = 1;
-		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		VkSubpassDescription subpass = {};
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-		subpass.colorAttachmentCount = 1;
-		subpass.pColorAttachments = &colourAttachmentRef;
-		subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
 		//Use subpass dependencies for layout transitions
 		std::array<VkSubpassDependency, 2> dependencies;
@@ -64,7 +57,13 @@ RenderPass::RenderPass(FBO* fbo, bool renderToDepth) : fbo(fbo) {
 				dependencies[1].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 				dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 				dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-				dependencies[1].dependencyFlags = VK_ACCESS_SHADER_READ_BIT;
+				dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+				depthAttachmentRef.attachment = 0;
+				depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+				subpass.colorAttachmentCount = 0;
+				subpass.pDepthStencilAttachment = &depthAttachmentRef;
 			} else {
 				//Use specified framebuffer
 				dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -82,6 +81,16 @@ RenderPass::RenderPass(FBO* fbo, bool renderToDepth) : fbo(fbo) {
 				dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 				dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 				dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+				colourAttachmentRef.attachment = 0;
+				colourAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+				depthAttachmentRef.attachment = 1;
+				depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+				subpass.colorAttachmentCount = 1;
+				subpass.pColorAttachments = &colourAttachmentRef;
+				subpass.pDepthStencilAttachment = &depthAttachmentRef;
 			}
 		} else {
 			//Using default framebuffer directly
@@ -100,6 +109,16 @@ RenderPass::RenderPass(FBO* fbo, bool renderToDepth) : fbo(fbo) {
 			dependencies[1].dstStageMask    = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 			dependencies[1].dstAccessMask   = VK_ACCESS_MEMORY_READ_BIT;
 			dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+			colourAttachmentRef.attachment = 0;
+			colourAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+			depthAttachmentRef.attachment = 1;
+			depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+			subpass.colorAttachmentCount = 1;
+			subpass.pColorAttachments = &colourAttachmentRef;
+			subpass.pDepthStencilAttachment = &depthAttachmentRef;
 		}
 
 		//The attachment descriptions
@@ -164,17 +183,26 @@ void RenderPass::begin() {
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = vulkanInstance;
 
-		if (fbo)
-			renderPassInfo.framebuffer = fbo->getFramebuffer()->getVkInstance();
-		else
-			renderPassInfo.framebuffer = Vulkan::getSwapChain()->getDefaultFramebuffer(Vulkan::getCurrentFrame())->getVkInstance(); //Default framebuffer
-
 		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = Vulkan::getSwapChain()->getExtent();
 
-		std::array<VkClearValue, 2> clearValues = {};
-		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 0.0f };
-		clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
+		if (fbo) {
+			renderPassInfo.framebuffer = fbo->getFramebuffer()->getVkInstance();
+			renderPassInfo.renderArea.extent = { fbo->getWidth(), fbo->getHeight() };
+		} else {
+			renderPassInfo.framebuffer = Vulkan::getSwapChain()->getDefaultFramebuffer(Vulkan::getCurrentFrame())->getVkInstance(); //Default framebuffer
+			renderPassInfo.renderArea.extent = Vulkan::getSwapChain()->getExtent();
+		}
+
+		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! THESE ARE ALSO FOR ATTACHMENTS
+		std::vector<VkClearValue> clearValues = {};
+		if (renderToDepth) {
+			clearValues.resize(1);
+			clearValues[0].depthStencil = { 1.0f, 0 };
+		} else {
+			clearValues.resize(2);
+			clearValues[0].color = { 0.0f, 0.0f, 0.0f, 0.0f };
+			clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
+		}
 
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 		renderPassInfo.pClearValues = clearValues.data();

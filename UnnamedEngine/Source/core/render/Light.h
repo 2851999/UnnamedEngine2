@@ -78,7 +78,7 @@ public:
 	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false);
 
 	/* The destructor */
-	virtual ~Light() {}
+	virtual ~Light();
 
 	/* The method used to update the view matrix for this light - should be
 	 * called when the light moves/after assigning the initial values */

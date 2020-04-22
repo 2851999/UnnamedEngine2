@@ -95,6 +95,8 @@ public:
 	void setup(RenderPass* renderPass);
 
 	/* Getters */
+	inline uint32_t getWidth() { return width; }
+	inline uint32_t getHeight() { return height; }
 	inline Framebuffer* getFramebuffer() { return framebuffer; }
 	inline GLenum getGLFBO() { return glFBO; }
 	inline std::vector<VkAttachmentDescription>& getVkAttachmentDescriptions() { return vulkanAttachmentDescriptions; }

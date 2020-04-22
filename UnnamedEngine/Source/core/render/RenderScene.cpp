@@ -28,52 +28,52 @@ RenderScene::RenderScene() {
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
 
-	FBO* fbo = new FBO(width, height, {
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
-		});
+	//FBO* fbo = new FBO(width, height, {
+	//		new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+	//		new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
+	//	});
 
-	offscreenRenderPass = new RenderPass(fbo);
+	//offscreenRenderPass = new RenderPass(fbo);
 
 	//Obtain the render pipelines
-	pipelineMaterial = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), offscreenRenderPass);
-	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING), offscreenRenderPass);
-	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), offscreenRenderPass);
-	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), offscreenRenderPass);
-	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), offscreenRenderPass);
+	pipelineMaterial = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), Renderer::getDefaultRenderPass());
+	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING), Renderer::getDefaultRenderPass());
+	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), Renderer::getDefaultRenderPass());
+	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), Renderer::getDefaultRenderPass());
+	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), Renderer::getDefaultRenderPass());
 
-	GraphicsPipeline::ColourBlendState alphaBlendState;
-	alphaBlendState.blendEnabled = true;
-	alphaBlendState.srcRGB = GraphicsPipeline::BlendFactor::SRC_ALPHA;
-	alphaBlendState.dstRGB = GraphicsPipeline::BlendFactor::ONE_MINUS_SRC_ALPHA;
-	alphaBlendState.srcAlpha = GraphicsPipeline::BlendFactor::ONE;
-	alphaBlendState.dstAlpha = GraphicsPipeline::BlendFactor::ZERO;
+	//GraphicsPipeline::ColourBlendState alphaBlendState;
+	//alphaBlendState.blendEnabled = true;
+	//alphaBlendState.srcRGB = GraphicsPipeline::BlendFactor::SRC_ALPHA;
+	//alphaBlendState.dstRGB = GraphicsPipeline::BlendFactor::ONE_MINUS_SRC_ALPHA;
+	//alphaBlendState.srcAlpha = GraphicsPipeline::BlendFactor::ONE;
+	//alphaBlendState.dstAlpha = GraphicsPipeline::BlendFactor::ZERO;
 
-	GraphicsPipeline::DepthState depthState;
-	depthState.depthTestEnable = false;
-	depthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
-	depthState.depthWriteEnable = false;
-	
-	pipelineFinal = new GraphicsPipeline(new GraphicsPipelineLayout(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, depthState, width, height, false), Renderer::getDefaultRenderPass());
+	//GraphicsPipeline::DepthState depthState;
+	//depthState.depthTestEnable = false;
+	//depthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
+	//depthState.depthWriteEnable = false;
+	//
+	//pipelineFinal = new GraphicsPipeline(new GraphicsPipelineLayout(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, depthState, width, height, false), Renderer::getDefaultRenderPass());
 
-	//Setup the screen texture mesh
-	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
-	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-	meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
-	screenTextureMesh = new Mesh(meshData);
-	screenTextureMesh->getMaterial()->setDiffuse(offscreenRenderPass->getFBO()->getAttachment(0));
+	////Setup the screen texture mesh
+	//MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+	//meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	//meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+	//meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	//meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	//meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	//meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+	//screenTextureMesh = new Mesh(meshData);
+	//screenTextureMesh->getMaterial()->setDiffuse(offscreenRenderPass->getFBO()->getAttachment(0));
 
-	screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+	//screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 }
 
 RenderScene::~RenderScene() {
-	delete screenTextureMesh;
-	delete pipelineFinal->getLayout();
-	delete pipelineFinal;
+	//delete screenTextureMesh;
+	//delete pipelineFinal->getLayout();
+	//delete pipelineFinal;
 
 	delete pipelineMaterial;
 	delete pipelineLighting;
@@ -81,7 +81,7 @@ RenderScene::~RenderScene() {
 	delete pipelineLightingSkinning;
 	delete pipelineLightingSkinningBlend;
 
-	delete offscreenRenderPass;
+	//delete offscreenRenderPass;
 
 	//Go through and delete all created objects
 	for (DescriptorSet* descriptorSetLightBatch : descriptorSetLightBatches)
@@ -112,6 +112,11 @@ void RenderScene::addLight(Light* light) {
 	if (lights.size() % NUM_LIGHTS_IN_BATCH == 1) {
 		//Add a descriptor set for the new batch
 		DescriptorSet* descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+
+		//Add the shadow map if needed
+		if (light->hasShadowMap())
+			descriptorSetLightBatch->setTexture(0, light->getShadowMapRenderPass()->getFBO()->getAttachment(0));
+
 		descriptorSetLightBatch->setup();
 		descriptorSetLightBatches.push_back(descriptorSetLightBatch);
 	}
@@ -128,10 +133,13 @@ void RenderScene::renderOffscreen() {
 
 				shadowMapRenderPass->begin();
 
-				lights[i]->getShadowMapGraphicsPipeline()->bind();
+				//vkCmdSetDepthBias(
+				//	Vulkan::getCurrentCommandBuffer(),
+				//	1.25f,
+				//	0.0f,
+				//	1.75f);
 
-				//SKETCHY BUT SHOULD WORK FOR NOW
-				descriptorSetLightBatches[0]->setTexture(0, shadowMapRenderPass->getFBO()->getAttachment(0));
+				lights[i]->getShadowMapGraphicsPipeline()->bind();
 
 				for (unsigned int i = 0; i < objects.size(); ++i)
 					objects[i]->render();

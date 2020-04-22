@@ -115,6 +115,9 @@ void Test::created() {
 	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
 	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
 
+	//mesh2->getMaterial(1)->setDiffuse(lightDir->getShadowMapRenderPass()->getFBO()->getAttachment(0));
+	//mesh2->getMaterial(1)->update();
+
 	model2 = new GameObject3D(mesh2, shader);
 	model2->setPosition(0.0f, -1.5f, 0.0f);
 	model2->update();

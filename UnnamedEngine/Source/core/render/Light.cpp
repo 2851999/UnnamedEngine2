@@ -32,19 +32,21 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 		if (type == TYPE_DIRECTIONAL) {
 			//Create FBO
 			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
-					//new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::COLOUR_TEXTURE),
+					//new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::COLOUR_TEXTURE),
 					new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_TEXTURE)
 				});
 
 			//Create the shadow map render pass
 			shadowMapRenderPass = new RenderPass(fbo, true);
 
-			fbo->setup(shadowMapRenderPass);
+			//fbo->setup(shadowMapRenderPass); ALREADY DONE BY RENDER PASS
 
 			//Create the graphics pipeline
 			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
 
-			lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
+			lightProjection.initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f);
+
+			//lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
 		} else if (type == TYPE_POINT) {
 			//Create FBO
 
@@ -62,6 +64,13 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 		}
 		//Update this light (in case it is static)
 		update();
+	}
+}
+
+Light::~Light() {
+	if (hasShadowMap()) {
+		delete shadowMapRenderPass;
+		delete shadowMapGraphicsPipeline;
 	}
 }
 

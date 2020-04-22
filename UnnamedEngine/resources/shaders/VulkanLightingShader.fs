@@ -235,8 +235,9 @@ float ueCalculateShadow(UELight light, sampler2D shadowMap, vec4 fragPosLightSpa
 	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 	for(int x = -1; x <= 1; ++x) {
 		for(int y = -1; y <= 1; ++y) {
-			float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r; 
-			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+			float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r * 0.5 + 0.5; //VULKAN
+			//float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r; //OPENGL
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}    
 	}
 	shadow /= 9.0;
@@ -345,5 +346,7 @@ void main() {
 	
 	vec3 light = ueGetLighting(normal, ue_frag_position, ambientColour, diffuseColour.xyz, specularColour, shininess, ue_frag_pos_lightspace);
 
+	//ue_FragColour = vec4(vec3(texture(ue_lightTexturesShadowMap, ue_frag_textureCoord).r), diffuseColour.a);
 	ue_FragColour = vec4(light, diffuseColour.a);
+	//ue_FragColour = vec4(vec3((1.0 - ueCalculateShadow(ue_lights[0], ue_lightTexturesShadowMap, ue_frag_pos_lightspace[0], normal))), diffuseColour.a);
 }

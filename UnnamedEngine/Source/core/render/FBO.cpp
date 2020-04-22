@@ -45,25 +45,29 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 
 		VkImageUsageFlags usage;
 		VkImageAspectFlags aspectMask;
+		VkImageLayout imageLayout;
 
 		if (type == Type::COLOUR_TEXTURE) {
 			vulkanFormat = Vulkan::getSwapChain()->getSurfaceFormat();
 			usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else if (type == Type::DEPTH_TEXTURE) {
 			vulkanFormat = Vulkan::getSwapChain()->getDepthFormat();
 			usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		} else if (type == Type::DEPTH) {
 			vulkanFormat = Vulkan::getSwapChain()->getDepthFormat();
 			usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 			aspectMask = Vulkan::hasStencilComponent(Vulkan::getSwapChain()->getDepthFormat()) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
 
-		setupVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask);
+		setupVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask, imageLayout);
 	} else {
 		GLint internalFormat;
 		GLenum format;
