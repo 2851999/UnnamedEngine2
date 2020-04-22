@@ -33,6 +33,7 @@ private:
 	GameObject3D* model2;
 	GameObject3D* mit1;
 	Light* light;
+	Light* lightDir;
 public:
 	static bool useVulkan;
 
@@ -57,7 +58,7 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
 }
 
 void Test::created() {
@@ -67,10 +68,11 @@ void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("VulkanLightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("VulkanLightingSkinningShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("FramebufferShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShaderTest", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 
 	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 4.0f, 3.0f);
@@ -91,12 +93,21 @@ void Test::created() {
 
 	utils_random::initialise();
 
-	for (unsigned int i = 0; i < 20; ++i)
-		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-8.0f, 8.0f), utils_random::randomFloat(0.0f, 10.0f), utils_random::randomFloat(-8.0f, 8.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f))));
-	light = (new Light(Light::TYPE_POINT, Vector3f(1.5f, 1.2f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	//for (unsigned int i = 0; i < 20; ++i)
+	//	renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-8.0f, 8.0f), utils_random::randomFloat(0.0f, 10.0f), utils_random::randomFloat(-8.0f, 8.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f))));
+	//light = (new Light(Light::TYPE_POINT, Vector3f(1.5f, 1.2f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	//renderScene->addLight(light);
+	//renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
+
+	//lightDir = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f);
+	light = (new Light(Light::TYPE_SPOT, Vector3f(3.0f, 6.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	lightDir = (new Light(Light::TYPE_SPOT, Vector3f(0.0f, 5.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	renderScene->addLight(light);
+	renderScene->addLight(lightDir);
 
 	Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj");
+	//mesh->setCullingEnabled(false);
+	//Mesh* mesh = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
 
 	model = new GameObject3D(mesh, shader);
 	model->setScale(0.15f, 0.15f, 0.15f);
@@ -106,22 +117,30 @@ void Test::created() {
 	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
 	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
 
+	//mesh2->getMaterial(1)->setDiffuse(lightDir->getShadowMapRenderPass()->getFBO()->getAttachment(0));
+	//mesh2->getMaterial(1)->update();
+
 	model2 = new GameObject3D(mesh2, shader);
-	model2->setPosition(4.0f, 1.0f, 0.0f);
+	model2->setPosition(0.0f, 1.5f, 0.0f);
 	model2->update();
 	renderScene->add(model2);
 
 	//mitsuba-sphere.obj
-	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), shaderSkinning);
-	mit1->getMesh()->getSkeleton()->startAnimation("");
-	mit1->setPosition(10.0f, 1.0f, 0.0f);
-	mit1->update();
-	renderScene->add(mit1);
+	//mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), shaderSkinning);
+	//mit1->getMesh()->getSkeleton()->startAnimation("");
+	//mit1->setPosition(10.0f, 1.0f, 0.0f);
+	//mit1->update();
+	//renderScene->add(mit1);
+
+	//Make OpenGL's depth values behave like Vulkan
+	//https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_clip_control.txt
+	//glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 }
 
 void Test::update() {
 	camera->update(getDeltaSeconds());
 
+	//model2->getMesh()->getMaterial(1)->setDiffuse(lightDir->getShadowMapRenderPass()->getFBO()->getAttachment(0));
 	//model2->getMesh()->getMaterial(1)->setDiffuse(Renderer::getBlankTexture());
 	//model2->getMesh()->getMaterial(1)->update();
 
@@ -133,9 +152,11 @@ void Test::update() {
 		light->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		light->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
-	light->update();
 
-	mit1->getMesh()->updateAnimation(getDeltaSeconds());
+	light->update();
+	lightDir->update();
+
+	//mit1->getMesh()->updateAnimation(getDeltaSeconds());
 }
 
 void Test::renderOffscreen() {

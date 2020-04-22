@@ -1,4 +1,73 @@
 --------------------------------------------------------------
+Release 2 | Beta 1 | Development 4 (V0.4.6)
+
+* Added 'useView' method for Camera which should be used
+  when things should be rendered according to that camera's
+  point of view
+* Added support for arrays of textures in Vulkan
+* Added parameters in Shader methods to append "#define NAME"
+  to the beginning of shaders before compilation when using
+  Vulkan or OpenGL
+
+* Readded shadow mapping for directional and spot lights
+
+* Changed shadow mapping so 'lightSpaceMatrix' can be passed
+  to the shader
+* Changed Light to extend Camera3D instead of GameObject3D
+
+* Some cleanup
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 8
+
+* Some cleanup
+* Added parameters in Shader methods to append "#define NAME"
+  to the beginning of shaders before compilation when using
+  Vulkan or OpenGL
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 7
+
+* Added support for arrays of textures in Vulkan
+
+* Readded support for multiple shadow maps
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 6
+
+* Readded spot light shadows
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 5
+
+* Added 'useView' method for Camera which should be used
+  when things should be rendered according to that camera's
+  point of view
+* Changed shadow mapping so 'lightSpaceMatrix' can be passed
+  to the shader
+* Changed Light to extend Camera3D instead of GameObject3D
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 4
+
+* Fixed shadow mapping for OpenGL
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 3
+
+* Added shadow mapping for Vulkan (OpenGL broken)
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 2
+
+* Readded shadow mapping for OpenGL
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 3 | Experimental 1
+
+* Missing shaders?
+
+--------------------------------------------------------------
 Release 2 | Beta 1 | Development 3 (V0.4.5)
 
 * Added RenderPass

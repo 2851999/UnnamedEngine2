@@ -108,17 +108,19 @@ public:
 
 	/* Methods used to load a shader */
 	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source, unsigned int uboBindingOffset = 0);
-	static ShaderSource loadShaderSource(std::string path, unsigned int uboBindingOffset = 0);
-	static Shader* loadShader(std::string path);
+	static ShaderSource loadShaderSource(std::string path, unsigned int uboBindingOffset = 0, std::string preSource = "");
+	static Shader* loadShader(std::string path, std::vector<std::string> defines = {});
 
 	/* Methods to read a shader and output all of the complete files for that shader (with all includes replaced as requested) - these
 	 * will not include mapped uniforms since they are intended for compilation to SPIR-V */
-	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
-	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
+	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0, std::string preSource = "");
+	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0, std::string preSource = "");
 
-	/* Utility method to use given glslValidator.exe path to compile a shader from the engine to SPIR-V */
-	static void compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath);
+	/* Utility method to use given glslValidator.exe path to compile a shader from the engine to SPIR-V 
+	   Also takes a list of things to define in the shader before compiling e.g. "SKINNING" would place
+	   "#define SKINNING" in the shader before compiling */
+	static void compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath, std::vector<std::string> defines = {});
 
 	/* Utility method to use the above method to compile an engine shader and place it in the appropriate location */
-	static void compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath);
+	static void compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath, std::vector<std::string> defines = {});
 };

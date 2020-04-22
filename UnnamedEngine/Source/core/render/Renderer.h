@@ -54,6 +54,7 @@ public:
 	static const unsigned int SHADER_VULKAN_LIGHTING;
 	static const unsigned int SHADER_VULKAN_LIGHTING_SKINNING;
 	static const unsigned int SHADER_FRAMEBUFFER;
+	static const unsigned int SHADER_SHADOW_MAP;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -63,6 +64,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_BLEND;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_SHADOW_MAP;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

@@ -31,7 +31,7 @@ class RenderPass;
 class FramebufferAttachment : public Texture {
 public:
 	enum class Type {
-		COLOUR, DEPTH
+		COLOUR_TEXTURE, DEPTH_TEXTURE, DEPTH
 	};
 private:
 	/* Type of attachment this is */
@@ -95,6 +95,8 @@ public:
 	void setup(RenderPass* renderPass);
 
 	/* Getters */
+	inline uint32_t getWidth() { return width; }
+	inline uint32_t getHeight() { return height; }
 	inline Framebuffer* getFramebuffer() { return framebuffer; }
 	inline GLenum getGLFBO() { return glFBO; }
 	inline std::vector<VkAttachmentDescription>& getVkAttachmentDescriptions() { return vulkanAttachmentDescriptions; }

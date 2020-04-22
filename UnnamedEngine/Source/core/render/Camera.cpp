@@ -41,6 +41,11 @@ void Camera::updateUBO() {
 	descriptorSet->getUBO(0)->updateFrame(&shaderData, 0, sizeof(ShaderBlock_Camera));
 }
 
+void Camera::useView() {
+	//Bind the descriptor set
+	descriptorSet->bind();
+}
+
 /*****************************************************************************
  * The Camera2D class
  *****************************************************************************/

@@ -158,6 +158,8 @@ layout(location = 8) in vec3 ue_tangentFragPos;
 layout(location = 9) in mat3 ue_frag_tbnMatrix;
 layout(location = 13) in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 
+layout(set = 3, binding = 7) uniform sampler2D ue_lightTexturesShadowMap[MAX_LIGHTS];
+
 //Returns the sum of the specular and diffuse strengths */
 vec3 ueCalculateLight(UELight light, vec3 lightDirection, vec3 diffuseColour, vec3 specularColour, vec3 normal, vec3 fragPos, float matShininess) {
 	float diffuseStrength = max(dot(lightDirection, normal), 0.0); //When angle > 90 dot product gives negative value
@@ -221,9 +223,25 @@ vec3 ueCalculateSpotLight(UELight light, vec3 diffuseColour, vec3 specularColour
 float ueCalculateShadow(UELight light, sampler2D shadowMap, vec4 fragPosLightSpace, vec3 normal) {
 	//Perspective divide
 	vec3 projectedCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-	projectedCoords = projectedCoords * 0.5 + 0.5;
+	//Now in range -1 to 1
+	projectedCoords.xy = projectedCoords.xy * 0.5 + 0.5;
 	//float closestDepth = texture(shadowMap, projectedCoords.xy).r;
-	float currentDepth = projectedCoords.z;
+
+	/*
+	In Vulkan, depth from shadow map will be between 0 and 1, where as OpenGL will also give between 0 and 1
+	Here looking up texture, find depth values between 0 and 1, however projectedCoords.z will have been converted
+	so that in OpenGL they will be between -1 and 1 => Need conversion
+	But Vulkan will be in range 0 to 1 => Nothing needs to be done
+
+		float currentDepth = projectedCoords.z; //VULKAN
+		float currentDepth = projectedCoords.z * 0.5 + 0.5; //OPENGL
+	*/
+
+	#ifdef VULKAN
+		float currentDepth = projectedCoords.z; //VULKAN
+	#else
+		float currentDepth = projectedCoords.z * 0.5 + 0.5; //OPENGL
+	#endif
 	
 	float bias = max(0.01 * (1.0 - dot(normal, light.direction.xyz)), 0.005);
 	
@@ -233,8 +251,8 @@ float ueCalculateShadow(UELight light, sampler2D shadowMap, vec4 fragPosLightSpa
 	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 	for(int x = -1; x <= 1; ++x) {
 		for(int y = -1; y <= 1; ++y) {
-			float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r; 
-			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+			float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}    
 	}
 	shadow /= 9.0;
@@ -285,11 +303,21 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 		UELight light = ue_lights[i];
 		//Check the light type
 		if (light.type == 1) {
-			otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+			if (light.useShadowMap)
+				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap[i], fragPosLightSpace[i], normal));
+			else
+				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
 		} else if (light.type == 2) {
-			otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
-		} else if (light.type == 3)
-			otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+			if (light.useShadowMap)
+				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+			else
+				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+		} else if (light.type == 3) {
+			if (light.useShadowMap)
+				otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculateShadow(light, ue_lightTexturesShadowMap[i], fragPosLightSpace[i], normal));
+			else
+				otherLight += ueCalculateSpotLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
+		}
 	}
 
 	return ambientLight + otherLight;

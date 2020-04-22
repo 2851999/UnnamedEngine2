@@ -18,6 +18,9 @@
 
 #include "Light.h"
 
+#include "FBO.h"
+#include "RenderPass.h"
+
 /*****************************************************************************
  * The Light class
  *****************************************************************************/
@@ -28,8 +31,18 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 	if (castShadows) {
 		if (type == TYPE_DIRECTIONAL) {
 			//Create FBO
+			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
+					//new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::COLOUR_TEXTURE),
+					new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_TEXTURE)
+				});
 
-			lightProjection.initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f);
+			//Create the shadow map render pass
+			shadowMapRenderPass = new RenderPass(fbo);
+
+			//Create the graphics pipeline
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
+
+			setProjectionMatrix(Matrix4f().initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f));
 		} else if (type == TYPE_POINT) {
 			//Create FBO
 
@@ -38,15 +51,32 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 				lightShadowTransforms.push_back(Matrix4f());
 
 			//Setup the projection matrix for the shadow map rendering
-			lightProjection.initPerspective(90.0f, (float) shadowMapSize / (float) shadowMapSize, 1.0f, 25.0f);
+			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
 		} else if (type == TYPE_SPOT) {
 			//Create FBO
+			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
+					//new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::COLOUR_TEXTURE),
+					new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_TEXTURE)
+				});
+
+			//Create the shadow map render pass
+			shadowMapRenderPass = new RenderPass(fbo);
+
+			//Create the graphics pipeline
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
 
 			//Setup the projection matrix for the shadow map rendering
-			lightProjection.initPerspective(90.0f, (float)shadowMapSize / (float)shadowMapSize, 1.0f, 25.0f);
+			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
 		}
 		//Update this light (in case it is static)
 		update();
+	}
+}
+
+Light::~Light() {
+	if (hasShadowMap()) {
+		delete shadowMapRenderPass;
+		delete shadowMapGraphicsPipeline;
 	}
 }
 
@@ -56,12 +86,17 @@ void Light::update() {
 		Vector3f right = direction.cross(Vector3f(0.0f, 1.0f, 0.0f)).normalise();
 		Vector3f up = right.cross(direction).normalise();
 
-		lightView.initLookAt(direction * -5, (direction * 5) + direction, up);
+		getViewMatrix().initLookAt(direction * -5, (direction * 5) + direction, up);
 
-		lightProjectionView = lightProjection * lightView;
+		lightProjectionView = getProjectionMatrix() * getViewMatrix();
 
 		//Update the frustum
 		frustum.update(lightProjectionView);
+
+		setViewMatrix(lightProjectionView); //Shortcut
+
+		//Update the UBO
+		updateUBO();
 	} else if (type == TYPE_POINT) { //SHOULD ONLY DO IF HAVE DEPTH BUFFER
 		//The position of the point light
 		Vector3f pos = getPosition();
@@ -79,12 +114,17 @@ void Light::update() {
 		Vector3f right = direction.cross(Vector3f(0.0f, 1.0f, 0.0f)).normalise();
 		Vector3f up = right.cross(direction).normalise();
 
-		lightView.initLookAt(pos, pos + direction, up);
+		getViewMatrix().initLookAt(pos, pos + direction, up);
 
-		lightProjectionView = lightProjection * lightView;
+		lightProjectionView = getProjectionMatrix() * getViewMatrix();
 
 		//Update the frustum
 		frustum.update(lightProjectionView);
+
+		setViewMatrix(lightProjectionView); //Shortcut
+
+		//Update the UBO
+		updateUBO();
 	}
 }
 
@@ -99,5 +139,6 @@ void Light::setUniforms(ShaderStruct_Light& lightData) {
 	lightData.quadratic = quadratic;
 	lightData.innerCutoff = innerCutoff;
 	lightData.outerCutoff = outerCutoff;
+	lightData.useShadowMap = hasShadowMap();
 }
 

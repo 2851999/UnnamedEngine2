@@ -138,7 +138,7 @@ public:
 	void create();
 
 	/* Method to setup this texture for Vulkan (used to create image for RenderPass) */
-	void setupVk(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask);
+	void setupVk(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	/* Various methods to apply the texture parameters, but will only do so if the
 	 * texture has been assigned */
@@ -179,7 +179,7 @@ public:
 	inline std::string getPath() { return path; }
 	inline bool hasPath() { return path.length() > 0; }
 	VkImageView& getVkImageView() { return textureVkImageView; }
-	const VkDescriptorImageInfo* getVkImageInfo() { return &imageInfo; }
+	const VkDescriptorImageInfo getVkImageInfo() { return imageInfo; }
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */

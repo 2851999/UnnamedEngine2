@@ -26,7 +26,7 @@
  * The Light class contains the information required to create a light
  *****************************************************************************/
 
-class Light : public GameObject3D {
+class Light : public Camera3D {
 private:
 	/* This light's type */
 	unsigned int type;
@@ -47,12 +47,11 @@ private:
 	float innerCutoff = 0;
 	float outerCutoff = 0;
 
-	/* The size of the shadow map (width and height) */
-	unsigned int shadowMapSize = 1024;
+	/* The shadow map render pass if assigned for shadow mapping */
+	RenderPass* shadowMapRenderPass = NULL;
 
-	/* The light projection and view matrices */
-	Matrix4f lightProjection;
-	Matrix4f lightView;
+	/* The shadow map graphics pipeline if assigned for shadow mapping */
+	GraphicsPipeline* shadowMapGraphicsPipeline = NULL;
 
 	/* Shadow transforms for point lights */
 	std::vector<Matrix4f> lightShadowTransforms;
@@ -68,15 +67,18 @@ public:
 	static const unsigned int TYPE_POINT       = 2;
 	static const unsigned int TYPE_SPOT        = 3;
 
+	/* The size of the shadow map (width and height) */
+	static const unsigned int SHADOW_MAP_SIZE = 1024;
+
 	/* The constructor */
 	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false);
 
 	/* The destructor */
-	virtual ~Light() {}
+	virtual ~Light();
 
 	/* The method used to update the view matrix for this light - should be
 	 * called when the light moves/after assigning the initial values */
-	void update();
+	void update() override;
 
 	/* The method called to assign the uniforms in a shader for this light */
 	virtual void setUniforms(ShaderStruct_Light& lightData);
@@ -105,11 +107,11 @@ public:
 	inline float getInnerCutoff() { return innerCutoff; }
 	inline float getOuterCutoff() { return outerCutoff; }
 
-	inline unsigned int getShadowMapSize() { return shadowMapSize; }
-	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
 	inline Matrix4f& getLightShadowTransform(unsigned int index) { return lightShadowTransforms[index]; }
-	inline Matrix4f getLightViewMatrix() { return lightView; }
 	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }
 	inline Frustum& getFrustum() { return frustum; }
+	inline bool hasShadowMap() { return shadowMapRenderPass; }
+	inline RenderPass* getShadowMapRenderPass() { return shadowMapRenderPass; }
+	inline GraphicsPipeline* getShadowMapGraphicsPipeline() { return shadowMapGraphicsPipeline; }
 };
 
