@@ -113,8 +113,8 @@ public:
 
 	/* Methods to read a shader and output all of the complete files for that shader (with all includes replaced as requested) - these
 	 * will not include mapped uniforms since they are intended for compilation to SPIR-V */
-	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
-	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
+	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0, std::string preSource = "");
+	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0, std::string preSource = "");
 
 	/* Utility method to use given glslValidator.exe path to compile a shader from the engine to SPIR-V */
 	static void compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath);

@@ -425,24 +425,26 @@ Shader* Shader::loadShader(std::string path) {
 		return new Shader(createVkShaderModule(readFile(path + "_vert.spv")), createVkShaderModule(readFile(path + "_frag.spv")));
 }
 
-void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset) {
+void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset, std::string preSource) {
 	//Load the source
 	ShaderSource shaderSource = loadShaderSource(inputPath, uboBindingOffset);
+	//Append the additional source
+	shaderSource.source = preSource + "\n" + shaderSource.source;
 	//Write the shader source
 	utils_file::writeFile(outputPath, shaderSource.source);
 }
 
-void Shader::outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset) {
+void Shader::outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset, std::string preSource) {
 	//Load each individual shader if found
 	if (utils_file::isFile(inputPath + ".vs"))
 		//Output the vertex shader
-		outputCompleteShaderFile(inputPath + ".vs", outputPath + "_complete.vert", uboBindingOffset);
+		outputCompleteShaderFile(inputPath + ".vs", outputPath + "_complete.vert", uboBindingOffset, preSource);
 	if (utils_file::isFile(inputPath + ".gs"))
 		//Output the geometry shader
-		outputCompleteShaderFile(inputPath + "gs", outputPath + "_complete.geom", uboBindingOffset);
+		outputCompleteShaderFile(inputPath + "gs", outputPath + "_complete.geom", uboBindingOffset, preSource);
 	if (utils_file::isFile(inputPath + ".fs"))
 		//Output the fragment shader
-		outputCompleteShaderFile(inputPath + ".fs", outputPath + "_complete.frag", uboBindingOffset);
+		outputCompleteShaderFile(inputPath + ".fs", outputPath + "_complete.frag", uboBindingOffset, preSource);
 }
 
 void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath) {

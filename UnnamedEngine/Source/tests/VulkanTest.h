@@ -129,6 +129,10 @@ void Test::created() {
 	//mit1->setPosition(10.0f, 1.0f, 0.0f);
 	//mit1->update();
 	//renderScene->add(mit1);
+
+	//Make OpenGL's depth values behave like Vulkan
+	//https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_clip_control.txt
+	//glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 }
 
 void Test::update() {

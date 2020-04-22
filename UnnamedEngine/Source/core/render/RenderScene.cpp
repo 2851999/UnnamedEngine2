@@ -187,7 +187,7 @@ void RenderScene::render() {
 				if (lights[l]->hasShadowMap())
 					//Assign the light space matrix as well
 					shaderLightBatchData.ue_lightSpaceMatrix[lightIndexInBatch] = lights[l]->getLightSpaceMatrix();
-				std::cout << lights[l]->getLightSpaceMatrix().toString() << std::endl;
+				//std::cout << lights[l]->getLightSpaceMatrix().toString() << std::endl;
 			}
 
 			//Assign the number of lights in the current batch

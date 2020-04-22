@@ -223,9 +223,25 @@ vec3 ueCalculateSpotLight(UELight light, vec3 diffuseColour, vec3 specularColour
 float ueCalculateShadow(UELight light, sampler2D shadowMap, vec4 fragPosLightSpace, vec3 normal) {
 	//Perspective divide
 	vec3 projectedCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-	projectedCoords = projectedCoords * 0.5 + 0.5;
+	//Now in range -1 to 1
+	projectedCoords.xy = projectedCoords.xy * 0.5 + 0.5;
 	//float closestDepth = texture(shadowMap, projectedCoords.xy).r;
-	float currentDepth = projectedCoords.z;
+
+	/*
+	In Vulkan, depth from shadow map will be between 0 and 1, where as OpenGL will also give between 0 and 1
+	Here looking up texture, find depth values between 0 and 1, however projectedCoords.z will have been converted
+	so that in OpenGL they will be between -1 and 1 => Need conversion
+	But Vulkan will be in range 0 to 1 => Nothing needs to be done
+
+		float currentDepth = projectedCoords.z; //VULKAN
+		float currentDepth = projectedCoords.z * 0.5 + 0.5; //OPENGL
+	*/
+
+	#ifdef VULKAN
+		float currentDepth = projectedCoords.z; //VULKAN
+	#else
+		float currentDepth = projectedCoords.z * 0.5 + 0.5; //OPENGL
+	#endif
 	
 	float bias = max(0.01 * (1.0 - dot(normal, light.direction.xyz)), 0.005);
 	
@@ -235,8 +251,7 @@ float ueCalculateShadow(UELight light, sampler2D shadowMap, vec4 fragPosLightSpa
 	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 	for(int x = -1; x <= 1; ++x) {
 		for(int y = -1; y <= 1; ++y) {
-			float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r * 0.5 + 0.5; //VULKAN
-			//float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r; //OPENGL
+			float pcfDepth = texture(shadowMap, projectedCoords.xy + vec2(x, y) * texelSize).r;
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}    
 	}
