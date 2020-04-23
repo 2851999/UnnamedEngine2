@@ -1,7 +1,5 @@
 #include "Core.fs"
 
-#map uniform Texture ue_tex
-
 //The texture to display
 layout(set = 1, binding = 1) uniform sampler2D ue_tex;
 

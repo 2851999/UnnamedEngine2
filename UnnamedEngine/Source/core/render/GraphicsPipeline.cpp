@@ -46,7 +46,18 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 		fragShaderStageInfo.module = renderShader->getShader()->getVkFragmentShaderModule();
 		fragShaderStageInfo.pName  = "main";
 
-		VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+
+		if (renderShader->getShader()->getVkGeometryShaderModule() != VK_NULL_HANDLE) {
+			VkPipelineShaderStageCreateInfo geomShaderStageInfo = {};
+			geomShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			geomShaderStageInfo.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
+			geomShaderStageInfo.module = renderShader->getShader()->getVkGeometryShaderModule();
+			geomShaderStageInfo.pName = "main";
+
+			shaderStages = { vertShaderStageInfo, geomShaderStageInfo, fragShaderStageInfo };
+		} else
+			shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -150,8 +161,8 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.stageCount          = 2;
-		pipelineInfo.pStages             = shaderStages;
+		pipelineInfo.stageCount          = static_cast<uint32_t>(shaderStages.size());
+		pipelineInfo.pStages             = shaderStages.data();
 		pipelineInfo.pVertexInputState   = &vertexInputInfo;
 		pipelineInfo.pInputAssemblyState = &inputAssembly;
 		pipelineInfo.pViewportState      = &viewportState;

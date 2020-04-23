@@ -126,11 +126,7 @@ public:
 
 	void update() override;
 
-	void useView() override {
-		Camera::useView();
-		if (skyBox)
-			skyBox->render();
-	}
+	void useView() override;
 
 	/* Moves the camera forward in the direction it is facing */
 	inline void moveForward(float amount) {

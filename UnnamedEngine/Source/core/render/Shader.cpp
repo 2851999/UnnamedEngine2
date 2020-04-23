@@ -35,13 +35,14 @@ Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 	this->program = glCreateProgram();
 
 	attach(vertexShader);
-	if (geometryShader)
+	if (geometryShader > 0)
 		attach(geometryShader);
 	attach(fragmentShader);
 }
 
-Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule fragmentShaderModule) {
+Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShader, VkShaderModule fragmentShaderModule) {
 	this->vertexShaderModule = vertexShaderModule;
+	this->geometryShaderModule = geometryShaderModule;
 	this->fragmentShaderModule = fragmentShaderModule;
 }
 
@@ -105,6 +106,8 @@ void Shader::destroy() {
 		//Destroy the shader modules
 		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
 		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
+		if (geometryShaderModule != VK_NULL_HANDLE)
+			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), geometryShaderModule, nullptr);
 	}
 }
 
@@ -442,9 +445,13 @@ Shader* Shader::loadShader(std::string path, std::vector<std::string> defines) {
 			return createShader(loadShaderSource(path + ".vs", 0, preSource), loadShaderSource(path + ".gs"), loadShaderSource(path + ".fs", 0, preSource));
 		else
 			return createShader(loadShaderSource(path + ".vs", 0, preSource), loadShaderSource(path + ".fs", 0, preSource));
-	} else
-		//Load the shader
-		return new Shader(createVkShaderModule(readFile(path + extraName + "_vert.spv")), createVkShaderModule(readFile(path + extraName + "_frag.spv")));
+	} else {
+		//Check for geometry shader
+		if (utils_file::isFile(path + "_geom.spv"))
+			return new Shader(createVkShaderModule(readFile(path + extraName + "_vert.spv")), createVkShaderModule(readFile(path + extraName + "_geom.spv")), createVkShaderModule(readFile(path + extraName + "_frag.spv")));
+		else
+			return new Shader(createVkShaderModule(readFile(path + extraName + "_vert.spv")), createVkShaderModule(readFile(path + extraName + "_frag.spv")));
+	}
 }
 
 void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset, std::string preSource) {

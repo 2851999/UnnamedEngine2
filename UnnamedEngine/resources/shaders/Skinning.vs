@@ -1,6 +1,3 @@
-#map attribute BoneIDs ue_boneIDs
-#map attribute BoneWeights ue_boneWeights
-
 const int UE_MAX_BONES = 90;
 
 layout(std140, set = 2, binding = 4) uniform UESkinningData {

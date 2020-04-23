@@ -47,12 +47,13 @@ public:
 	/* Method to update this skybox's position */
 	void update(Vector3f cameraPosition);
 	/* Method to render this skybox */
-	void render();
+	void render(bool bindPipeline);
 
 	/* Method to free up all resources used by this skybox */
 	void destroy();
 
 	/* Getters */
+	inline GraphicsPipeline* getGraphicsPipeline() { return pipelineSkybox; }
 	inline Cubemap* getCubemap() { return cubemap; }
 };
 

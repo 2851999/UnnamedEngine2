@@ -1,10 +1,3 @@
-#map uniform Material_AmbientTexture ue_material_ambientTexture
-#map uniform Material_DiffuseTexture ue_material_diffuseTexture
-#map uniform Material_SpecularTexture ue_material_specularTexture
-#map uniform Material_ShininessTexture ue_material_shininessTexture
-#map uniform Material_NormalMap ue_material_normalMap
-#map uniform Material_ParallaxMap ue_material_parallaxMap
-
 /* The material structure */
 struct UEMaterial {
 	vec4 ambientColour;

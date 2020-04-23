@@ -1,4 +1,14 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 4 | Experimental 2
+
+* Added basic geometry shader support
+
+* Some cleanup
+
+* Fixed bug: Camera's 'useView' method would fail in Vulkan
+             unless a graphics pipeline was bound
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 4 | Experimental 1
 
 * Replaced SHADER_VULKAN_LIGHTING with SHADER_LIGHTING

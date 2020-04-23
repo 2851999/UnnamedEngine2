@@ -1,11 +1,5 @@
 #include "Core.glsl"
 
-#map attribute Position ue_position
-#map attribute TextureCoordinate ue_textureCoord
-#map attribute Normal ue_normal
-#map attribute Tangent ue_tangent
-#map attribute Bitangent ue_bitangent
-
 #define UE_LOCATION_POSITION 0
 #define UE_LOCATION_TEXTURE_COORD 1
 #define UE_LOCATION_NORMAL 2
