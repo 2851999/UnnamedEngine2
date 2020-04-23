@@ -30,13 +30,19 @@
 
 class Renderer {
 private:
+	/* Structure for storing info about unloaded shaders */
+	struct UnloadedShaderInfo {
+		std::string path;
+		std::vector<std::string> defines;
+	};
+
 	static ShaderInterface* shaderInterface;
 
 	static ShaderBlock_Material shaderMaterialData;
 	static ShaderBlock_Skinning shaderSkinningData;
 
 	static std::vector<Camera*> cameras;
-	static std::unordered_map<unsigned int, std::string> renderShaderPaths;
+	static std::unordered_map<unsigned int, UnloadedShaderInfo> unloadedShaders;
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
 	static std::unordered_map<unsigned int, GraphicsPipelineLayout*> graphicsPipelineLayouts;
 	static Texture* blank;
@@ -51,10 +57,11 @@ public:
 	static const unsigned int SHADER_MATERIAL;
 	static const unsigned int SHADER_SKY_BOX;
 	static const unsigned int SHADER_FONT;
-	static const unsigned int SHADER_VULKAN_LIGHTING;
-	static const unsigned int SHADER_VULKAN_LIGHTING_SKINNING;
+	static const unsigned int SHADER_LIGHTING;
+	static const unsigned int SHADER_LIGHTING_SKINNING;
 	static const unsigned int SHADER_FRAMEBUFFER;
 	static const unsigned int SHADER_SHADOW_MAP;
+	static const unsigned int SHADER_SHADOW_MAP_SKINNING;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -65,6 +72,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND;
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_MAP;
+	static const unsigned int GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -90,10 +98,10 @@ public:
 	static void destroy();
 
 	/* Loads and returns an engine shader from the resources */
-	static Shader* loadEngineShader(std::string path);
+	static Shader* loadEngineShader(UnloadedShaderInfo& shaderInfo);
 
 	/* Method used to add a RenderShader given a the paths to the shaders */
-	static void addRenderShader(unsigned int id, std::string forwardShaderPath);
+	static void addRenderShader(unsigned int id, std::string forwardShaderPath, std::vector<std::string> defines = {});
 
 	/* Method used to add a GraphicsPipelineLayout */
 	static void addGraphicsPipelineLayout(unsigned int id, GraphicsPipelineLayout* pipelineLayout);

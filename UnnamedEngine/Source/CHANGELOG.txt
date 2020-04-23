@@ -1,4 +1,32 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 4 | Experimental 1
+
+* Replaced SHADER_VULKAN_LIGHTING with SHADER_LIGHTING
+* Replaced SHADER_VULKAN_LIGHTING_SKINNING with
+  SHADER_LIGHTING_SKINNING
+
+* Fixed bug: Defines added to shaders were added many times
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 4 (V0.4.6)
+
+* Added 'useView' method for Camera which should be used
+  when things should be rendered according to that camera's
+  point of view
+* Added support for arrays of textures in Vulkan
+* Added parameters in Shader methods to append "#define NAME"
+  to the beginning of shaders before compilation when using
+  Vulkan or OpenGL
+
+* Readded shadow mapping for directional and spot lights
+
+* Changed shadow mapping so 'lightSpaceMatrix' can be passed
+  to the shader
+* Changed Light to extend Camera3D instead of GameObject3D
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 3 | Experimental 8
 
 * Some cleanup

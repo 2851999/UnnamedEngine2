@@ -3,7 +3,7 @@
 
 const int UE_MAX_BONES = 90;
 
-layout(std140, binding = 4) uniform UESkinningData {
+layout(std140, set = 2, binding = 4) uniform UESkinningData {
 	mat4 ue_bones[UE_MAX_BONES];
 	bool ue_useSkinning;
 };

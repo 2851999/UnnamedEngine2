@@ -146,13 +146,24 @@ void RenderScene::renderOffscreen() {
 				//	0.0f,
 				//	1.75f);
 
-				lights[i]->getShadowMapGraphicsPipeline()->bind();
+				if (objects.size() > 0) {
+					lights[i]->getShadowMapGraphicsPipeline()->bind();
 
-				//Use the light's view
-				lights[i]->useView();
+					//Use the light's view
+					lights[i]->useView();
 
-				for (unsigned int i = 0; i < objects.size(); ++i)
-					objects[i]->render();
+					for (unsigned int i = 0; i < objects.size(); ++i)
+						objects[i]->render();
+				}
+				if (skinnedObjects.size() > 0) {
+					lights[i]->getShadowMapSkinningGraphicsPipeline()->bind();
+
+					//Use the light's view
+					lights[i]->useView();
+
+					for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
+						skinnedObjects[i]->render();
+				}
 
 				shadowMapRenderPass->end();
 			}

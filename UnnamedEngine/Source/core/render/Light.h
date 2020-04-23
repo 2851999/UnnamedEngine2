@@ -50,8 +50,9 @@ private:
 	/* The shadow map render pass if assigned for shadow mapping */
 	RenderPass* shadowMapRenderPass = NULL;
 
-	/* The shadow map graphics pipeline if assigned for shadow mapping */
+	/* The shadow map graphics pipelines if assigned for shadow mapping */
 	GraphicsPipeline* shadowMapGraphicsPipeline = NULL;
+	GraphicsPipeline* shadowMapSkinningGraphicsPipeline = NULL;
 
 	/* Shadow transforms for point lights */
 	std::vector<Matrix4f> lightShadowTransforms;
@@ -113,5 +114,6 @@ public:
 	inline bool hasShadowMap() { return shadowMapRenderPass; }
 	inline RenderPass* getShadowMapRenderPass() { return shadowMapRenderPass; }
 	inline GraphicsPipeline* getShadowMapGraphicsPipeline() { return shadowMapGraphicsPipeline; }
+	inline GraphicsPipeline* getShadowMapSkinningGraphicsPipeline() { return shadowMapSkinningGraphicsPipeline; }
 };
 

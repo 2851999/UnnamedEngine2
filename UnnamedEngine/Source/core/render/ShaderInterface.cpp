@@ -35,10 +35,10 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MODEL       = 2;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH = 3;
 
  /* IDs for descriptor set layouts */
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA      = 0;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MATERIAL    = 1;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL       = 2;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH = 3;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA         = 0;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MATERIAL       = 1;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL          = 2;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH    = 3;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING = 4;
 
 /* The locations for attributes in the shaders */
@@ -157,12 +157,12 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
-	} else if (shaderID == Renderer::SHADER_VULKAN_LIGHTING) {
+	} else if (shaderID == Renderer::SHADER_LIGHTING) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
-	} else if (shaderID == Renderer::SHADER_VULKAN_LIGHTING_SKINNING) {
+	} else if (shaderID == Renderer::SHADER_LIGHTING_SKINNING) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
@@ -175,6 +175,10 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_SHADOW_MAP_SKINNING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
 	}
 }
 

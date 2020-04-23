@@ -39,8 +39,9 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 			//Create the shadow map render pass
 			shadowMapRenderPass = new RenderPass(fbo);
 
-			//Create the graphics pipeline
+			//Create the graphics pipelines
 			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
+			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass);
 
 			setProjectionMatrix(Matrix4f().initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f));
 		} else if (type == TYPE_POINT) {
@@ -64,6 +65,7 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 
 			//Create the graphics pipeline
 			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
+			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass);
 
 			//Setup the projection matrix for the shadow map rendering
 			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
@@ -77,6 +79,7 @@ Light::~Light() {
 	if (hasShadowMap()) {
 		delete shadowMapRenderPass;
 		delete shadowMapGraphicsPipeline;
+		delete shadowMapSkinningGraphicsPipeline;
 	}
 }
 

@@ -397,12 +397,23 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int ubo
 	loadShaderSource(path, fileText, source, uboBindingOffset);
 
 	//Assign the source
-	source.source = preSource + "\n";
+	source.source = "";
+
+	bool hasVersion = false;
+	bool added = false;
 
 	//Go through each line of file text
-	for (std::string line : fileText)
+	for (std::string line : fileText) {
+		if (hasVersion && ! added) {
+			source.source += preSource + "\n";
+			added = true;
+		}  else if ((!hasVersion) && utils_string::strStartsWith(line, "#version"))
+			hasVersion = true;
+		else if (line != "")
+			hasVersion = true; //Assume has no version
 		//Append the line onto the source
 		source.source += line + "\n";
+	}
 
 //	std::cout << "----------------------------------------------" << std::endl;
 //	std::cout << source.source << std::endl;
@@ -419,6 +430,11 @@ Shader* Shader::loadShader(std::string path, std::vector<std::string> defines) {
 	for (std::string& define : defines)
 		preSource += "#define " + define + "\n";
 
+	//Extra part of file name (for Vulkan)
+	std::string extraName = "";
+	if (defines.size() > 0)
+		extraName += "_" + utils_string::strJoin(defines, "");
+
 	//Check whether using Vulkan
 	if (! BaseEngine::usingVulkan()) {
 		//Check for geometry shader
@@ -428,7 +444,7 @@ Shader* Shader::loadShader(std::string path, std::vector<std::string> defines) {
 			return createShader(loadShaderSource(path + ".vs", 0, preSource), loadShaderSource(path + ".fs", 0, preSource));
 	} else
 		//Load the shader
-		return new Shader(createVkShaderModule(readFile(path + "_vert.spv")), createVkShaderModule(readFile(path + "_frag.spv")));
+		return new Shader(createVkShaderModule(readFile(path + extraName + "_vert.spv")), createVkShaderModule(readFile(path + extraName + "_frag.spv")));
 }
 
 void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset, std::string preSource) {
@@ -472,6 +488,11 @@ void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::
 }
 
 void Shader::compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath, std::vector<std::string> defines) {
+	//Extra part of file name (for Vulkan)
+	std::string extraName = "";
+	if (defines.size() > 0)
+		extraName += "_" + utils_string::strJoin(defines, "");
+
 	//Add the prefix's to get the input and output paths
-	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path, glslangValidatorPath, defines);
+	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path + extraName, glslangValidatorPath, defines);
 }
