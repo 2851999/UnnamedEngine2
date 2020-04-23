@@ -91,12 +91,12 @@ ShaderInterface::ShaderInterface() {
 
 	//Material
 	DescriptorSetLayout* materialLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_MATERIAL);
-	materialLayout->addTexture(0);
-	materialLayout->addTexture(1);
-	materialLayout->addTexture(2);
-	materialLayout->addTexture(3);
-	materialLayout->addTexture(4);
-	materialLayout->addTexture(5);
+	materialLayout->addTexture2D(0);
+	materialLayout->addTexture2D(1);
+	materialLayout->addTexture2D(2);
+	materialLayout->addTexture2D(3);
+	materialLayout->addTexture2D(4);
+	materialLayout->addTexture2D(5);
 
 	materialLayout->addUBO(sizeof(ShaderBlock_Material), GL_STATIC_DRAW, UBO_BINDING_LOCATION_MATERIAL);
 
@@ -114,11 +114,8 @@ ShaderInterface::ShaderInterface() {
 	//Light batch
 	DescriptorSetLayout* lightBatchLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
 	//Add shadow map textures
-	//for (unsigned int i = 7; i < 13; ++i)
-		//lightBatchLayout->addTexture(i);
-	//lightBatchLayout->addTexture(7); //In Vulkan need texture array to access instead :(
-	lightBatchLayout->addTextureBinding(7, 6);
-	lightBatchLayout->addTextureBinding(13, 6);
+	lightBatchLayout->addTextureBinding(DescriptorSet::TEXTURE_2D, 7, 6);
+	lightBatchLayout->addTextureBinding(DescriptorSet::TEXTURE_CUBE, 13, 6);
 	lightBatchLayout->addUBO(sizeof(ShaderBlock_LightBatch), GL_STATIC_DRAW, UBO_BINDING_LOCATION_LIGHT_BATCH);
 	lightBatchLayout->setup();
 

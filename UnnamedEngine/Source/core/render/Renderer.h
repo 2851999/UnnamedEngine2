@@ -46,6 +46,7 @@ private:
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
 	static std::unordered_map<unsigned int, GraphicsPipelineLayout*> graphicsPipelineLayouts;
 	static Texture* blank;
+	static Cubemap* blankCubemap;
 
 	/* The current bound graphics pipeline (Used for descriptor set binding) */
 	static GraphicsPipeline* currentGraphicsPipeline;
@@ -128,8 +129,9 @@ public:
 	/* Returns the GraphicsPipelineLayout with a specific id */
 	static GraphicsPipelineLayout* getGraphicsPipelineLayout(unsigned int id);
 
-	/* Returns the blank texture */
+	/* Returns the blank texture/cubemap */
 	static inline Texture* getBlankTexture() { return blank; }
+	static inline Cubemap* getBlankCubemap() { return blankCubemap; }
 
 	/* Returns the last bound graphics pipeline */
 	static inline GraphicsPipeline* getCurrentGraphicsPipeline() { return currentGraphicsPipeline; }

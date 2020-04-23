@@ -1,4 +1,5 @@
 #include "../Core.vs"
+
 #ifdef UE_SKINNING
 #include "../Skinning.vs"
 #endif

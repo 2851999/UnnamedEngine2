@@ -39,6 +39,7 @@ std::unordered_map<unsigned int, Renderer::UnloadedShaderInfo> Renderer::unloade
 std::unordered_map<unsigned int, RenderShader*> Renderer::loadedRenderShaders;
 std::unordered_map<unsigned int, GraphicsPipelineLayout*> Renderer::graphicsPipelineLayouts;
 Texture* Renderer::blank;
+Cubemap* Renderer::blankCubemap;
 
 GraphicsPipeline* Renderer::currentGraphicsPipeline = NULL;
 RenderPass*       Renderer::defaultRenderPass       = NULL;
@@ -88,6 +89,7 @@ void Renderer::initialise() {
 	shaderInterface = new ShaderInterface();
 
 	blank = Texture::loadTexture("resources/textures/blank.png");
+	blankCubemap = new Cubemap("resources/textures/", { "blank.png", "blank.png", "blank.png", "blank.png", "blank.png", "blank.png" });
 
 	//Setup the shaders
 	addRenderShader(SHADER_MATERIAL,                 "MaterialShader");
@@ -183,7 +185,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 	//Ensure there is a Shader and Camera instance for rendering
 	if (renderShader && getCamera()) {
 		//Only use materials if necessary
-		bool shouldUseMaterial = (renderShader->getID() != SHADER_SHADOW_MAP) && (renderShader->getID() != SHADER_SHADOW_MAP_SKINNING);
+		bool shouldUseMaterial = (renderShader->getID() != SHADER_SHADOW_MAP) && (renderShader->getID() != SHADER_SHADOW_MAP_SKINNING) && (renderShader->getID() != SHADER_SHADOW_CUBEMAP) && (renderShader->getID() != SHADER_SHADOW_CUBEMAP_SKINNING);
 
 		//Get the render data for rendering
 		RenderData* renderData = mesh->getRenderData()->getRenderData();

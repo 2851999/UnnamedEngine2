@@ -127,7 +127,7 @@ void DescriptorSet::setup() {
 void DescriptorSet::updateAllVk() {
 	//Go through and update the image infos
 	for (unsigned int i = 0; i < textures.size(); ++i)
-		textureBindings[textures[i].bindingInfoIndex].textures[textures[i].locationInBinding] = (textures[i].texture == NULL) ? Renderer::getBlankTexture()->getVkImageInfo() : textures[i].texture->getVkImageInfo();
+		textureBindings[textures[i].bindingInfoIndex].textures[textures[i].locationInBinding] = (textures[i].texture == NULL) ? (textureBindings[textures[i].bindingInfoIndex].type == TEXTURE_2D ? Renderer::getBlankTexture()->getVkImageInfo() : Renderer::getBlankCubemap()->getVkImageInfo()) : textures[i].texture->getVkImageInfo();
 
 	//Go through each descriptor set (One per swap chain image)
 	for (unsigned int i = 0; i < vulkanDescriptorSets.size(); ++i) {
@@ -163,7 +163,7 @@ void DescriptorSet::updateAllVk() {
 void DescriptorSet::updateVk(unsigned int frame) {
 	//Go through and update the image infos
 	for (unsigned int i = 0; i < textures.size(); ++i)
-		textureBindings[textures[i].bindingInfoIndex].textures[textures[i].locationInBinding] = (textures[i].texture == NULL) ? Renderer::getBlankTexture()->getVkImageInfo() : textures[i].texture->getVkImageInfo();
+		textureBindings[textures[i].bindingInfoIndex].textures[textures[i].locationInBinding] = (textures[i].texture == NULL) ? (textureBindings[textures[i].bindingInfoIndex].type == TEXTURE_2D ? Renderer::getBlankTexture()->getVkImageInfo() : Renderer::getBlankCubemap()->getVkImageInfo()) : textures[i].texture->getVkImageInfo();
 
 	//Contains parameters for the write operations of the descriptor set
 	std::vector<VkWriteDescriptorSet> descriptorWrites = {};

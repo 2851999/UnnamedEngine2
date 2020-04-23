@@ -30,10 +30,16 @@ class DescriptorSetLayout;
 
 class DescriptorSet {
 public:
+	/* The type of a texture binding */
+	enum TextureType {
+		TEXTURE_2D, TEXTURE_CUBE
+	};
+	
 	/* Structure for storing information about a texture */
 	struct TextureInfo {
 		/* The binding location of this texture */
 		unsigned int binding;
+
 		/* The texture to be bound here */
 		Texture* texture = NULL;
 
@@ -46,6 +52,9 @@ public:
 
 	/* Structure for storing information about a texture binding */
 	struct TextureBindingInfo {
+		/* The type of this binding*/
+		TextureType type;
+
 		/* The binding location */
 		unsigned int binding;
 
@@ -149,10 +158,17 @@ public:
 	void setup();
 
 	/* Method to add a texture binding */
-	inline void addTextureBinding(unsigned int binding, unsigned int numTextures) { textureBindings.push_back({ binding, numTextures }); }
+	inline void addTextureBinding(DescriptorSet::TextureType type, unsigned int binding, unsigned int numTextures) {
+		DescriptorSet::TextureBindingInfo bindingInfo;
+		bindingInfo.type = type;
+		bindingInfo.binding = binding;
+		bindingInfo.numTextures = numTextures;
+		textureBindings.push_back(bindingInfo);
+	}
 
 	/* Methods to add UBOs and Textures to this layout */
-	inline void addTexture(unsigned int binding) { addTextureBinding(binding, 1); }
+	inline void addTexture2D(unsigned int binding) { addTextureBinding(DescriptorSet::TEXTURE_2D, binding, 1); }
+	inline void addTextureCube(unsigned int binding) { addTextureBinding(DescriptorSet::TEXTURE_CUBE, binding, 1); }
 	inline void addUBO(unsigned int size, GLenum usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
 
 	/* Getters */

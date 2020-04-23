@@ -1,4 +1,9 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 4 | Experimental 4
+
+* Started adding cubemap shadows to Vulkan (not working yet)
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 4 | Experimental 3
 
 * Readded cubemap shadows for OpenGL
