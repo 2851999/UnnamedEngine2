@@ -101,34 +101,62 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 
 			getParameters().setFilter(GL_NEAREST);
 			getParameters().setClamp(GL_CLAMP_TO_EDGE);
+		} else if (type == Type::DEPTH_CUBEMAP) {
+			getParameters().setTarget(GL_TEXTURE_CUBE_MAP);
+			internalFormat = GL_DEPTH_COMPONENT24;
+			format = GL_DEPTH_COMPONENT;
+			glType = GL_FLOAT;
+			attachment = GL_DEPTH_ATTACHMENT;
+
+			getParameters().setFilter(GL_NEAREST);
+			getParameters().setClamp(GL_CLAMP_TO_EDGE);
 		}
 
-		//Check for render buffer object
-		if (getParameters().getTarget() == GL_RENDERBUFFER) {
-			//Setup the render buffer
-			glGenRenderbuffers(1, &glRBO);
-			glBindRenderbuffer(getParameters().getTarget(), glRBO);
-			//if (multisample)
-			//	glRenderbufferStorageMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight());
-			//else
-			glRenderbufferStorage(getParameters().getTarget(), internalFormat, getWidth(), getHeight());
-			glBindRenderbuffer(getParameters().getTarget(), 0);
+		if (type != Type::DEPTH_CUBEMAP) {
+			//Check for render buffer object
+			if (getParameters().getTarget() == GL_RENDERBUFFER) {
+				//Setup the render buffer
+				glGenRenderbuffers(1, &glRBO);
+				glBindRenderbuffer(getParameters().getTarget(), glRBO);
+				//if (multisample)
+				//	glRenderbufferStorageMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight());
+				//else
+				glRenderbufferStorage(getParameters().getTarget(), internalFormat, getWidth(), getHeight());
+				glBindRenderbuffer(getParameters().getTarget(), 0);
 
-			//Attach to framebuffer
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), glRBO);
+				//Attach to framebuffer
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), glRBO);
+			} else {
+				//Setup the texture
+				create();
+				bind();
+				//if (multisample)
+				//	glTexImage2DMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
+				//else
+				glTexImage2D(getParameters().getTarget(), 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
+
+				applyParameters(false);
+
+				//Attach to framebuffer
+				glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), getHandle(), 0);
+				unbind();
+			}
 		} else {
 			//Setup the texture
 			create();
 			bind();
-			//if (multisample)
-			//	glTexImage2DMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
-			//else
-			glTexImage2D(getParameters().getTarget(), 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
 
-			applyParameters(false);
+			for (unsigned int i = 0; i < 6; ++i) {
+				//if (multisample)
+				//	glTexImage2DMultisample(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
+				//else
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
+			}
+
+			applyParameters(false, false);
 
 			//Attach to framebuffer
-			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), getHandle(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, attachment, getHandle(), 0);
 			unbind();
 		}
 	}

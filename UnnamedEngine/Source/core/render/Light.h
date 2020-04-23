@@ -62,6 +62,12 @@ private:
 
 	/* Combination of the above matrices, assigned in the update method */
 	Matrix4f lightProjectionView;
+
+	/* The shadow cubemap descriptor set (for point light shadows) */
+	DescriptorSet* shadowCubemapDescriptorSet = NULL;
+
+	/* The cubemap shadow data */
+	ShaderBlock_ShadowCubemap shadowCubemapData;
 public:
 	/* Various light types */
 	static const unsigned int TYPE_DIRECTIONAL = 1;
@@ -80,6 +86,10 @@ public:
 	/* The method used to update the view matrix for this light - should be
 	 * called when the light moves/after assigning the initial values */
 	void update() override;
+
+	/* Called to use this light's view, also binds shadow cubemap descriptor set if
+	   assigned */
+	void useView() override;
 
 	/* The method called to assign the uniforms in a shader for this light */
 	virtual void setUniforms(ShaderStruct_Light& lightData);

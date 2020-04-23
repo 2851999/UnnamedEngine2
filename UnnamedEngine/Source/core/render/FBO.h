@@ -31,7 +31,7 @@ class RenderPass;
 class FramebufferAttachment : public Texture {
 public:
 	enum class Type {
-		COLOUR_TEXTURE, DEPTH_TEXTURE, DEPTH
+		COLOUR_TEXTURE, DEPTH_TEXTURE, DEPTH, DEPTH_CUBEMAP
 	};
 private:
 	/* Type of attachment this is */

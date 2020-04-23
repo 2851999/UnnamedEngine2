@@ -170,6 +170,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;

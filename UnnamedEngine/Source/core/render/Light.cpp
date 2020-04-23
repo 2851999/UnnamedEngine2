@@ -46,6 +46,17 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 			setProjectionMatrix(Matrix4f().initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f));
 		} else if (type == TYPE_POINT) {
 			//Create FBO
+			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
+				//new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::COLOUR_TEXTURE),
+				new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP)
+			});
+
+			//Create the shadow map render pass
+			shadowMapRenderPass = new RenderPass(fbo);
+
+			//Create the graphics pipelines
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP), shadowMapRenderPass);
+			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING), shadowMapRenderPass);
 
 			//Setup the shadow transforms for each face of the cubemap
 			for (unsigned int i = 0; i < 6; ++i)
@@ -53,6 +64,10 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 
 			//Setup the projection matrix for the shadow map rendering
 			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
+
+			//Create the shadow cubemap descriptor set
+			shadowCubemapDescriptorSet = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP));
+			shadowCubemapDescriptorSet->setup();
 		} else if (type == TYPE_SPOT) {
 			//Create FBO
 			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
@@ -80,12 +95,14 @@ Light::~Light() {
 		delete shadowMapRenderPass;
 		delete shadowMapGraphicsPipeline;
 		delete shadowMapSkinningGraphicsPipeline;
+		if (shadowCubemapDescriptorSet)
+			delete shadowCubemapDescriptorSet;
 	}
 }
 
 void Light::update() {
 	//Check the type of light this is
-	if (type == TYPE_DIRECTIONAL) {
+	if (type == TYPE_DIRECTIONAL && shadowMapRenderPass) {
 		Vector3f right = direction.cross(Vector3f(0.0f, 1.0f, 0.0f)).normalise();
 		Vector3f up = right.cross(direction).normalise();
 
@@ -100,17 +117,23 @@ void Light::update() {
 
 		//Update the UBO
 		updateUBO();
-	} else if (type == TYPE_POINT) { //SHOULD ONLY DO IF HAVE DEPTH BUFFER
+	} else if (type == TYPE_POINT && shadowCubemapDescriptorSet) { //SHOULD ONLY DO IF HAVE DEPTH BUFFER
 		//The position of the point light
 		Vector3f pos = getPosition();
+
+		shadowCubemapData.lightPos = Vector4f(pos, 0.0f);
+
 		//Assign each of the transform matrices
-		//lightShadowTransforms[0] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, -1.0f, 0.0f));
-		//lightShadowTransforms[1] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f(-1.0f, 0.0f, 0.0f), Vector3f(0.0f, -1.0f, 0.0f));
-		//lightShadowTransforms[2] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 1.0f, 0.0f), Vector3f(0.0f, 0.0f, 1.0f));
-		//lightShadowTransforms[3] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, -1.0f, 0.0f), Vector3f(0.0f, 0.0f, -1.0f));
-		//lightShadowTransforms[4] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, 1.0f), Vector3f(0.0f, -1.0f, 0.0f));
-		//lightShadowTransforms[5] = lightProjection * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, -1.0f), Vector3f(0.0f, -1.0f, 0.0f));
-	} else if (type == TYPE_SPOT) {
+		shadowCubemapData.shadowMatrices[0] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, -1.0f, 0.0f));
+		shadowCubemapData.shadowMatrices[1] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(-1.0f, 0.0f, 0.0f), Vector3f(0.0f, -1.0f, 0.0f));
+		shadowCubemapData.shadowMatrices[2] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 1.0f, 0.0f), Vector3f(0.0f, 0.0f, 1.0f));
+		shadowCubemapData.shadowMatrices[3] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, -1.0f, 0.0f), Vector3f(0.0f, 0.0f, -1.0f));
+		shadowCubemapData.shadowMatrices[4] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, 1.0f), Vector3f(0.0f, -1.0f, 0.0f));
+		shadowCubemapData.shadowMatrices[5] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, -1.0f), Vector3f(0.0f, -1.0f, 0.0f));
+
+		//Update the descriptor set
+		shadowCubemapDescriptorSet->getUBO(0)->updateFrame(&shadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
+	} else if (type == TYPE_SPOT && shadowMapRenderPass) {
 		//The position of the spot light
 		Vector3f pos = getPosition();
 
@@ -129,6 +152,14 @@ void Light::update() {
 		//Update the UBO
 		updateUBO();
 	}
+}
+
+void Light::useView() {
+	//Bind the shadow cubemap if needed
+	if (shadowCubemapDescriptorSet)
+		shadowCubemapDescriptorSet->bind();
+	else
+		Camera::useView();
 }
 
 void Light::setUniforms(ShaderStruct_Light& lightData) {

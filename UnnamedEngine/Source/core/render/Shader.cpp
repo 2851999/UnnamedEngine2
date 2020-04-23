@@ -469,7 +469,7 @@ void Shader::outputCompleteShaderFiles(std::string inputPath, std::string output
 		outputCompleteShaderFile(inputPath + ".vs", outputPath + "_complete.vert", uboBindingOffset, preSource);
 	if (utils_file::isFile(inputPath + ".gs"))
 		//Output the geometry shader
-		outputCompleteShaderFile(inputPath + "gs", outputPath + "_complete.geom", uboBindingOffset, preSource);
+		outputCompleteShaderFile(inputPath + ".gs", outputPath + "_complete.geom", uboBindingOffset, preSource);
 	if (utils_file::isFile(inputPath + ".fs"))
 		//Output the fragment shader
 		outputCompleteShaderFile(inputPath + ".fs", outputPath + "_complete.frag", uboBindingOffset, preSource);

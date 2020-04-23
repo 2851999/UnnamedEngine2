@@ -51,6 +51,8 @@ const unsigned int Renderer::SHADER_LIGHTING_SKINNING         = 5;
 const unsigned int Renderer::SHADER_FRAMEBUFFER               = 6;
 const unsigned int Renderer::SHADER_SHADOW_MAP                = 7;
 const unsigned int Renderer::SHADER_SHADOW_MAP_SKINNING       = 8;
+const unsigned int Renderer::SHADER_SHADOW_CUBEMAP            = 9;
+const unsigned int Renderer::SHADER_SHADOW_CUBEMAP_SKINNING  = 10;
 
 const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                = 1;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                 = 2;
@@ -61,6 +63,8 @@ const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING       = 6;
 const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND = 7;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP              = 8;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING     = 9;
+const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP          = 10;
+const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING = 11;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -94,6 +98,8 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_FRAMEBUFFER,              "FramebufferShader");
 	addRenderShader(SHADER_SHADOW_MAP,               "lighting/ShadowMapShader");
 	addRenderShader(SHADER_SHADOW_MAP_SKINNING,      "lighting/ShadowMapShader", { "UE_SKINNING" });
+	addRenderShader(SHADER_SHADOW_CUBEMAP,           "lighting/ShadowCubemapShader");
+	addRenderShader(SHADER_SHADOW_CUBEMAP_SKINNING,  "lighting/ShadowCubemapShader", { "UE_SKINNING" });
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -152,6 +158,8 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND, new GraphicsPipelineLayout(getRenderShader(SHADER_LIGHTING_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, windowWidth, windowHeight, true));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_MAP,              new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_MAP), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING,     new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_MAP_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP,          new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_CUBEMAP), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING, new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_CUBEMAP_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();
@@ -174,6 +182,9 @@ void Renderer::stopUsingMaterial(Material* material) {
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
 	//Ensure there is a Shader and Camera instance for rendering
 	if (renderShader && getCamera()) {
+		//Only use materials if necessary
+		bool shouldUseMaterial = (renderShader->getID() != SHADER_SHADOW_MAP) && (renderShader->getID() != SHADER_SHADOW_MAP_SKINNING);
+
 		//Get the render data for rendering
 		RenderData* renderData = mesh->getRenderData()->getRenderData();
 
@@ -191,7 +202,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 
 		renderData->getDescriptorSet()->bind();
 
-		if (mesh->hasData() && mesh->hasRenderData()) {
+		if (mesh->hasData() && mesh->hasRenderData() && shouldUseMaterial) {
 			MeshData* data = mesh->getData();
 			MeshRenderData* meshRenderData = mesh->getRenderData();
 
@@ -207,7 +218,7 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 				}
 			}
 
-			if (data->hasSubData() && renderShader->getID() != SHADER_SHADOW_MAP && renderShader->getID() != SHADER_SHADOW_MAP_SKINNING) { //Render in one if only being used for shadows
+			if (data->hasSubData()) { //Render in one if only being used for shadows
 				renderData->bindBuffers();
 
 				//Go through each sub data instance
@@ -220,13 +231,14 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 				}
 
 				renderData->unbindBuffers();
-			} else {
+			} else if (shouldUseMaterial) {
 				if (mesh->hasMaterial())
 					useMaterial(renderData, 0, mesh->getMaterial());
 				meshRenderData->render();
 				if (mesh->hasMaterial())
 					stopUsingMaterial(mesh->getMaterial());
-			}
+			} else
+				meshRenderData->render();
 		}
 	}
 }

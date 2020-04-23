@@ -11,7 +11,7 @@ layout(location = 13) in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
 //layout(binding = 6) uniform samplerCube ue_environmentMap;
 
 layout(set = 3, binding = 7) uniform sampler2D ue_lightTexturesShadowMap[MAX_LIGHTS];
-//layout(binding = 13) uniform samplerCube ue_lightTexturesShadowCubemap[MAX_LIGHTS];
+layout(set = 3, binding = 13) uniform samplerCube ue_lightTexturesShadowCubemap[MAX_LIGHTS];
 
 //Returns the sum of the specular and diffuse strengths */
 vec3 ueCalculateLight(UELight light, vec3 lightDirection, vec3 diffuseColour, vec3 specularColour, vec3 normal, vec3 fragPos, float matShininess) {
@@ -171,7 +171,7 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 				otherLight += ueCalculateDirectionalLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
 		} else if (light.type == 2) {
 			if (light.useShadowMap)
-				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess); //* (1.0 - ueCalculatePointShadow(light, ue_lightTexturesShadowCubemap[i], fragPos, ue_cameraPosition.xyz));
+				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess) * (1.0 - ueCalculatePointShadow(light, ue_lightTexturesShadowCubemap[i], fragPos, ue_cameraPosition.xyz));
 			else
 				otherLight += ueCalculatePointLight(light, diffuseColour, specularColour, normal, fragPos, matShininess);
 		} else if (light.type == 3) {

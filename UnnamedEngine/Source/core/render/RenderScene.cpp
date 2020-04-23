@@ -121,6 +121,9 @@ void RenderScene::addLight(Light* light) {
 		//Obtain the light index within the current batch
 		unsigned int indexInBatch = (lights.size() % NUM_LIGHTS_IN_BATCH) - 1;
 
+		if (light->getType() == Light::TYPE_POINT)
+			indexInBatch += 6;
+
 		//Assign the shadow map
 		descriptorSetLightBatches[descriptorSetLightBatches.size() - 1]->setTexture(indexInBatch, light->getShadowMapRenderPass()->getFBO()->getAttachment(0));
 
