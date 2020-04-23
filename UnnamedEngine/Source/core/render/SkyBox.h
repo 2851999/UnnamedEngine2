@@ -55,5 +55,6 @@ public:
 	/* Getters */
 	inline GraphicsPipeline* getGraphicsPipeline() { return pipelineSkybox; }
 	inline Cubemap* getCubemap() { return cubemap; }
+	inline GameObject3D* getBox() { return box; }
 };
 

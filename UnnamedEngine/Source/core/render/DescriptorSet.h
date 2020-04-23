@@ -31,7 +31,7 @@ class DescriptorSetLayout;
 class DescriptorSet {
 public:
 	/* The type of a texture binding */
-	enum TextureType {
+	enum class TextureType {
 		TEXTURE_2D, TEXTURE_CUBE
 	};
 	
@@ -167,8 +167,8 @@ public:
 	}
 
 	/* Methods to add UBOs and Textures to this layout */
-	inline void addTexture2D(unsigned int binding) { addTextureBinding(DescriptorSet::TEXTURE_2D, binding, 1); }
-	inline void addTextureCube(unsigned int binding) { addTextureBinding(DescriptorSet::TEXTURE_CUBE, binding, 1); }
+	inline void addTexture2D(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, binding, 1); }
+	inline void addTextureCube(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_CUBE, binding, 1); }
 	inline void addUBO(unsigned int size, GLenum usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
 
 	/* Getters */

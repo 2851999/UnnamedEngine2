@@ -40,7 +40,7 @@ Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 	attach(fragmentShader);
 }
 
-Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShader, VkShaderModule fragmentShaderModule) {
+Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShaderModule, VkShaderModule fragmentShaderModule) {
 	this->vertexShaderModule = vertexShaderModule;
 	this->geometryShaderModule = geometryShaderModule;
 	this->fragmentShaderModule = fragmentShaderModule;

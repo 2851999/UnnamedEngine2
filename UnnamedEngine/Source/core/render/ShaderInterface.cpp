@@ -114,8 +114,8 @@ ShaderInterface::ShaderInterface() {
 	//Light batch
 	DescriptorSetLayout* lightBatchLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
 	//Add shadow map textures
-	lightBatchLayout->addTextureBinding(DescriptorSet::TEXTURE_2D, 7, 6);
-	lightBatchLayout->addTextureBinding(DescriptorSet::TEXTURE_CUBE, 13, 6);
+	lightBatchLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 7, 6);
+	lightBatchLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_CUBE, 13, 6);
 	lightBatchLayout->addUBO(sizeof(ShaderBlock_LightBatch), GL_STATIC_DRAW, UBO_BINDING_LOCATION_LIGHT_BATCH);
 	lightBatchLayout->setup();
 

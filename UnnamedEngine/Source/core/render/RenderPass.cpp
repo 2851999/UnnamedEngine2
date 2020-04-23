@@ -218,7 +218,7 @@ void RenderPass::begin() {
 
 		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! THESE ARE ALSO FOR ATTACHMENTS
 		std::vector<VkClearValue> clearValues = {};
-		if (fbo && fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_TEXTURE) {
+		if (fbo && (fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_TEXTURE || fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP)) {
 			clearValues.resize(1);
 			clearValues[0].depthStencil = { 1.0f, 0 };
 		} else {

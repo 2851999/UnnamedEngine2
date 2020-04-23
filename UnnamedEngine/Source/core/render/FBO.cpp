@@ -232,7 +232,7 @@ void FBO::setup(RenderPass* renderPass) {
 			framebufferAttachments.push_back(attachments[i]->getVkImageView());
 
 		//Create the framebuffer
-		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments);
+		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments, attachments.size() == 1 && (attachments[0]->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP));
 	} else {
 		//Generate and bind the FBO
 		glGenFramebuffers(1, &glFBO);
