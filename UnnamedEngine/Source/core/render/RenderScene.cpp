@@ -23,7 +23,7 @@
 
 #include "../../utils/Logging.h"
 
-RenderScene::RenderScene() {
+RenderScene::RenderScene(bool pbr) {
 	//Create the FBO for rendering offscreen
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
@@ -37,10 +37,10 @@ RenderScene::RenderScene() {
 
 	//Obtain the render pipelines
 	pipelineMaterial = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), Renderer::getDefaultRenderPass());
-	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING), Renderer::getDefaultRenderPass());
-	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), Renderer::getDefaultRenderPass());
-	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), Renderer::getDefaultRenderPass());
-	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), Renderer::getDefaultRenderPass());
+	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING : Renderer::GRAPHICS_PIPELINE_LIGHTING), Renderer::getDefaultRenderPass());
+	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), Renderer::getDefaultRenderPass());
+	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), Renderer::getDefaultRenderPass());
+	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), Renderer::getDefaultRenderPass());
 
 	//GraphicsPipeline::ColourBlendState alphaBlendState;
 	//alphaBlendState.blendEnabled = true;

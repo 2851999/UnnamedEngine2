@@ -61,6 +61,8 @@ public:
 	static const unsigned int SHADER_FONT_SDF;
 	static const unsigned int SHADER_LIGHTING;
 	static const unsigned int SHADER_LIGHTING_SKINNING;
+	static const unsigned int SHADER_BASIC_PBR_LIGHTING;
+	static const unsigned int SHADER_BASIC_PBR_LIGHTING_SKINNING;
 	static const unsigned int SHADER_FRAMEBUFFER;
 	static const unsigned int SHADER_SHADOW_MAP;
 	static const unsigned int SHADER_SHADOW_MAP_SKINNING;
@@ -76,6 +78,10 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_BLEND;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND;
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_MAP;
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING;
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_CUBEMAP;
