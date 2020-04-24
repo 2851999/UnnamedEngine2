@@ -30,8 +30,8 @@
 class Font : public Resource {
 private:
 	/* The starting/ending ASCII codes used when creating a font */
-	static const unsigned int ASCII_START = 32;
-	static const unsigned int ASCII_END   = 126;
+	static const unsigned int ASCII_START = 0;
+	static const unsigned int ASCII_END   = 255;
 
 	/* A spacing value (in pixels) to separate glyphs in the bitmap image */
 	static const unsigned int GLYPH_SPACING = 1;
@@ -48,19 +48,36 @@ private:
 		float glyphLeft;
 		float glyphTop;
 		float xOffset;
+		float yOffset;
+		uint32_t page; //SDF
 	} glyphs[(ASCII_END - ASCII_START) + 1];
 
-	/* The texture this font */
+	/* States whether this font is a signed distance field */
+	bool sdf;
+
+	/* The size this font should be */
+	float size;
+
+	/* The rendered size of the font */
+	float renderedSize;
+
+	/* The texture of this font */
 	Texture* texture;
 
 	/* The method used to setup this Font instance given the font name and size */
 	void setup(std::string path, unsigned int size, TextureParameters parameters);
+
+	/* Method to setup this Font instance for an SDF font - uses files exported from https://github.com/libgdx/libgdx/wiki/Hiero */
+	void setupSDF(std::string path, unsigned int size, TextureParameters parameters);
+
+	/* Method used for reading FNT file */
+	int32_t nextValuePair(std::stringstream* stream);
 public:
 	/* Render scale used to render font at a higher size and then down scale later */
 	static const float RENDER_SCALE;
 
 	/* The constructors */
-	Font(std::string path, unsigned int size = 18, TextureParameters parameters = TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST)) { setup(path, size, parameters); }
+	Font(std::string path, unsigned int size = 18, TextureParameters parameters = TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST));
 	/* The destructors */
 	virtual ~Font() {} //Destroy should be called when resource is released
 
@@ -81,5 +98,11 @@ public:
 
 	/* Setters and getters */
 	inline Texture* getTexture() { return texture; }
+
+	/* Returns the scale this font should be rendered with */
+	inline float getScale() { return size / renderedSize; }
+
+	/* Returns whether this font uses signed distance fields */
+	inline bool usesSDF() { return sdf; }
 };
 

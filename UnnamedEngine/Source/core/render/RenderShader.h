@@ -53,6 +53,9 @@ public:
 	/* Method used to get a descriptor set given it's set number */
 	inline DescriptorSetLayout* getDescriptorSetLayout(unsigned int setNumber) { return descriptorSetLayouts.at(setNumber); }
 
+	/* Returns whether there is a descriptor set with a given set number */
+	inline bool hasDescriptorSetLayout(unsigned int setNumber) { return descriptorSetLayouts.find(setNumber) != descriptorSetLayouts.end(); }
+
 	/* Setters and getters */
 	inline unsigned int getID() { return id; }
 	inline Shader* getShader() { return shader; }

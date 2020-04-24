@@ -35,13 +35,14 @@ Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 	this->program = glCreateProgram();
 
 	attach(vertexShader);
-	if (geometryShader)
+	if (geometryShader > 0)
 		attach(geometryShader);
 	attach(fragmentShader);
 }
 
-Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule fragmentShaderModule) {
+Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShaderModule, VkShaderModule fragmentShaderModule) {
 	this->vertexShaderModule = vertexShaderModule;
+	this->geometryShaderModule = geometryShaderModule;
 	this->fragmentShaderModule = fragmentShaderModule;
 }
 
@@ -105,6 +106,8 @@ void Shader::destroy() {
 		//Destroy the shader modules
 		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
 		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
+		if (geometryShaderModule != VK_NULL_HANDLE)
+			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), geometryShaderModule, nullptr);
 	}
 }
 
@@ -397,12 +400,23 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int ubo
 	loadShaderSource(path, fileText, source, uboBindingOffset);
 
 	//Assign the source
-	source.source = preSource + "\n";
+	source.source = "";
+
+	bool hasVersion = false;
+	bool added = false;
 
 	//Go through each line of file text
-	for (std::string line : fileText)
+	for (std::string line : fileText) {
+		if (hasVersion && ! added) {
+			source.source += preSource + "\n";
+			added = true;
+		}  else if ((!hasVersion) && utils_string::strStartsWith(line, "#version"))
+			hasVersion = true;
+		else if (line != "")
+			hasVersion = true; //Assume has no version
 		//Append the line onto the source
 		source.source += line + "\n";
+	}
 
 //	std::cout << "----------------------------------------------" << std::endl;
 //	std::cout << source.source << std::endl;
@@ -419,6 +433,11 @@ Shader* Shader::loadShader(std::string path, std::vector<std::string> defines) {
 	for (std::string& define : defines)
 		preSource += "#define " + define + "\n";
 
+	//Extra part of file name (for Vulkan)
+	std::string extraName = "";
+	if (defines.size() > 0)
+		extraName += "_" + utils_string::strJoin(defines, "");
+
 	//Check whether using Vulkan
 	if (! BaseEngine::usingVulkan()) {
 		//Check for geometry shader
@@ -426,9 +445,13 @@ Shader* Shader::loadShader(std::string path, std::vector<std::string> defines) {
 			return createShader(loadShaderSource(path + ".vs", 0, preSource), loadShaderSource(path + ".gs"), loadShaderSource(path + ".fs", 0, preSource));
 		else
 			return createShader(loadShaderSource(path + ".vs", 0, preSource), loadShaderSource(path + ".fs", 0, preSource));
-	} else
-		//Load the shader
-		return new Shader(createVkShaderModule(readFile(path + "_vert.spv")), createVkShaderModule(readFile(path + "_frag.spv")));
+	} else {
+		//Check for geometry shader
+		if (utils_file::isFile(path + "_geom.spv"))
+			return new Shader(createVkShaderModule(readFile(path + extraName + "_vert.spv")), createVkShaderModule(readFile(path + extraName + "_geom.spv")), createVkShaderModule(readFile(path + extraName + "_frag.spv")));
+		else
+			return new Shader(createVkShaderModule(readFile(path + extraName + "_vert.spv")), createVkShaderModule(readFile(path + extraName + "_frag.spv")));
+	}
 }
 
 void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset, std::string preSource) {
@@ -446,7 +469,7 @@ void Shader::outputCompleteShaderFiles(std::string inputPath, std::string output
 		outputCompleteShaderFile(inputPath + ".vs", outputPath + "_complete.vert", uboBindingOffset, preSource);
 	if (utils_file::isFile(inputPath + ".gs"))
 		//Output the geometry shader
-		outputCompleteShaderFile(inputPath + "gs", outputPath + "_complete.geom", uboBindingOffset, preSource);
+		outputCompleteShaderFile(inputPath + ".gs", outputPath + "_complete.geom", uboBindingOffset, preSource);
 	if (utils_file::isFile(inputPath + ".fs"))
 		//Output the fragment shader
 		outputCompleteShaderFile(inputPath + ".fs", outputPath + "_complete.frag", uboBindingOffset, preSource);
@@ -472,6 +495,11 @@ void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::
 }
 
 void Shader::compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath, std::vector<std::string> defines) {
+	//Extra part of file name (for Vulkan)
+	std::string extraName = "";
+	if (defines.size() > 0)
+		extraName += "_" + utils_string::strJoin(defines, "");
+
 	//Add the prefix's to get the input and output paths
-	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path, glslangValidatorPath, defines);
+	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path + extraName, glslangValidatorPath, defines);
 }

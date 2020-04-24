@@ -59,6 +59,7 @@ void BaseEngine::create() {
 
 		//Assign the default font and text instance
 		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
+		//defaultFont = new Font("resources/fonts/testFont.fnt", 24);
 		textInstance = new Text(defaultFont, Colour::WHITE, 400);
 		//Create the debug camera
 		debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
@@ -69,14 +70,14 @@ void BaseEngine::create() {
 		//Initialise the Audio system
 		AudioManager::initialise();
 
-		if (! getSettings().videoVulkan) {
+		//Create the debug console if needed
+		if (getSettings().debugConsoleEnabled) {
+			debugConsole = new DebugConsole(this);
+			debugConsole->enable();
+			debugConsole->hide();
+		}
 
-			//Create the debug console
-			if (getSettings().debugConsoleEnabled) {
-				debugConsole = new DebugConsole(this);
-				debugConsole->enable();
-				debugConsole->hide();
-			}
+		if (! getSettings().videoVulkan) {
 
 		//	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 		//	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
@@ -145,13 +146,13 @@ void BaseEngine::create() {
 			if (getSettings().debugShowInformation)
 				renderDebugInfo();
 
+			if (getSettings().debugConsoleEnabled)
+				renderDebugConsole();
+
 			//Stop the default RenderPass
 			Renderer::getDefaultRenderPass()->end();
 
-			if (! getSettings().videoVulkan) {
-				if (getSettings().debugConsoleEnabled)
-					renderDebugConsole();
-			} else
+			if (getSettings().videoVulkan)
 				Vulkan::stopDraw();
 
 			window->update();
@@ -175,10 +176,8 @@ void BaseEngine::create() {
 
 		AudioManager::destroy();
 
-		if (! getSettings().videoVulkan) {
-			if (debugConsole)
-				delete debugConsole;
-		}
+		if (debugConsole)
+			delete debugConsole;
 		ResourceManager::destroyAllManagers();
 	} else
 		//Failed to initialise the graphics API
@@ -236,10 +235,10 @@ void BaseEngine::renderDebugInfo() {
 void BaseEngine::renderDebugConsole() {
 	//Render the debug console if needed
 	if (debugConsole->isVisible()) {
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_TEXTURE_2D);
+		//glDisable(GL_DEPTH_TEST);
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		Renderer::addCamera(debugCamera);
 
@@ -254,8 +253,8 @@ void BaseEngine::renderDebugConsole() {
 
 		Renderer::removeCamera();
 
-		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_BLEND);
+		//glDisable(GL_TEXTURE_2D);
 	}
 }
 

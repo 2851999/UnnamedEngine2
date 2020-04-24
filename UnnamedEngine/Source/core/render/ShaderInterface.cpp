@@ -35,11 +35,12 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MODEL       = 2;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH = 3;
 
  /* IDs for descriptor set layouts */
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA      = 0;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MATERIAL    = 1;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL       = 2;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH = 3;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA         = 0;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MATERIAL       = 1;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL          = 2;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH    = 3;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING = 4;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP = 5;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -90,12 +91,12 @@ ShaderInterface::ShaderInterface() {
 
 	//Material
 	DescriptorSetLayout* materialLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_MATERIAL);
-	materialLayout->addTexture(0);
-	materialLayout->addTexture(1);
-	materialLayout->addTexture(2);
-	materialLayout->addTexture(3);
-	materialLayout->addTexture(4);
-	materialLayout->addTexture(5);
+	materialLayout->addTexture2D(0);
+	materialLayout->addTexture2D(1);
+	materialLayout->addTexture2D(2);
+	materialLayout->addTexture2D(3);
+	materialLayout->addTexture2D(4);
+	materialLayout->addTexture2D(5);
 
 	materialLayout->addUBO(sizeof(ShaderBlock_Material), GL_STATIC_DRAW, UBO_BINDING_LOCATION_MATERIAL);
 
@@ -113,22 +114,27 @@ ShaderInterface::ShaderInterface() {
 	//Light batch
 	DescriptorSetLayout* lightBatchLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
 	//Add shadow map textures
-	//for (unsigned int i = 7; i < 13; ++i)
-		//lightBatchLayout->addTexture(i);
-	//lightBatchLayout->addTexture(7); //In Vulkan need texture array to access instead :(
-	lightBatchLayout->addTextureBinding(7, 6);
+	lightBatchLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 7, 6);
+	lightBatchLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_CUBE, 13, 6);
 	lightBatchLayout->addUBO(sizeof(ShaderBlock_LightBatch), GL_STATIC_DRAW, UBO_BINDING_LOCATION_LIGHT_BATCH);
 	lightBatchLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH, lightBatchLayout);
 
-	//Lighting model
+	//Model skinning
 	DescriptorSetLayout* modelSkinningLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_MODEL);
 	modelSkinningLayout->addUBO(sizeof(ShaderBlock_Model), GL_STATIC_DRAW, UBO_BINDING_LOCATION_MODEL);
 	modelSkinningLayout->addUBO(sizeof(ShaderBlock_Skinning), GL_STATIC_DRAW, UBO_BINDING_LOCATION_SKINNING);
 	modelSkinningLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING, modelSkinningLayout);
+
+	//Shadow cubemap
+	DescriptorSetLayout* shadowCubemapLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
+	shadowCubemapLayout->addUBO(sizeof(ShaderBlock_ShadowCubemap), GL_STATIC_DRAW, UBO_BINDING_LOCATION_SHADOW_CUBEMAP);
+	shadowCubemapLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP, shadowCubemapLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -157,12 +163,26 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
-	} else if (shaderID == Renderer::SHADER_VULKAN_LIGHTING) {
+	} else if (shaderID == Renderer::SHADER_FONT_SDF) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_LIGHTING) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
-	} else if (shaderID == Renderer::SHADER_VULKAN_LIGHTING_SKINNING) {
+	} else if (shaderID == Renderer::SHADER_LIGHTING_SKINNING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+	} else if (shaderID == Renderer::SHADER_BASIC_PBR_LIGHTING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+	} else if (shaderID == Renderer::SHADER_BASIC_PBR_LIGHTING_SKINNING) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
@@ -175,6 +195,20 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_SHADOW_MAP_SKINNING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
+	} else if (shaderID == Renderer::SHADER_SHADOW_CUBEMAP) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP));
+	} else if (shaderID == Renderer::SHADER_SHADOW_CUBEMAP_SKINNING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP));
 	}
 }
 

@@ -45,6 +45,9 @@ private:
 	/* The text instance used to render text */
 	Text* textInstance = NULL;
 
+	/* The pipeline used to render */
+	GraphicsPipeline* graphicsPipeline = NULL;
+
 	/* Method used to setup the renderer when it is created */
 	void setup();
 protected:
@@ -66,10 +69,13 @@ public:
 		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)), Renderer::SHADER_MATERIAL, width, height), colours(colours), textures(textures) { setup(); }
 
 	/* Destructor */
-	virtual ~GUIComponentRenderer() { delete textInstance; }
+	virtual ~GUIComponentRenderer();
 
 	/* The method used to update this component ready for rendering */
 	virtual void update() override;
+
+	/* Method used to render (Needs to bind a GraphicsPipeline) */
+	virtual void render() override;
 
 	/* Methods to render text at a location relative to the component */
 	void renderText(std::string text, Vector2f relPos);

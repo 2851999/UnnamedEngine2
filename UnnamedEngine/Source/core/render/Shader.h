@@ -47,6 +47,7 @@ private:
 
 	/* The shader modules for Vulkan */
 	VkShaderModule vertexShaderModule   = VK_NULL_HANDLE;
+	VkShaderModule geometryShaderModule = VK_NULL_HANDLE;
 	VkShaderModule fragmentShaderModule = VK_NULL_HANDLE;
 
 	/* Loads and returns an included file */
@@ -66,7 +67,8 @@ public:
 	Shader() {}
 	Shader(GLint vertexShader, GLint fragmentShader) : Shader(vertexShader, -1, fragmentShader) {}
 	Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader);
-	Shader(VkShaderModule vertexShaderModule, VkShaderModule fragmentShaderModule);
+	Shader(VkShaderModule vertexShaderModule, VkShaderModule fragmentShaderModule) : Shader(vertexShaderModule, VK_NULL_HANDLE, fragmentShaderModule) {}
+	Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShader, VkShaderModule fragmentShaderModule);
 	virtual ~Shader();
 
 	/* Various shader functions */
@@ -83,6 +85,7 @@ public:
 	GLint getAttributeLocation(std::string id);
 
 	VkShaderModule& getVkVertexShaderModule() { return vertexShaderModule; }
+	VkShaderModule& getVkGeometryShaderModule() { return geometryShaderModule; }
 	VkShaderModule& getVkFragmentShaderModule() { return fragmentShaderModule; }
 
 	/* Various methods to assign values */

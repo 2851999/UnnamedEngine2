@@ -24,7 +24,7 @@
   * The Framebuffer class
   *****************************************************************************/
 
-Framebuffer::Framebuffer(VkRenderPass renderPass, uint32_t width, uint32_t height, std::vector<VkImageView> attachments) {
+Framebuffer::Framebuffer(VkRenderPass renderPass, uint32_t width, uint32_t height, std::vector<VkImageView> attachments, bool cubemap) {
 	//Create the framebuffer
 	VkFramebufferCreateInfo framebufferCreateInfo = {};
 	framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -33,7 +33,7 @@ Framebuffer::Framebuffer(VkRenderPass renderPass, uint32_t width, uint32_t heigh
 	framebufferCreateInfo.pAttachments = attachments.data();
 	framebufferCreateInfo.width = width;
 	framebufferCreateInfo.height = height;
-	framebufferCreateInfo.layers = 1;
+	framebufferCreateInfo.layers = cubemap ? 6 : 1;
 
 	if (vkCreateFramebuffer(Vulkan::getDevice()->getLogical(), &framebufferCreateInfo, nullptr, &vulkanInstance) != VK_SUCCESS)
 		Logger::log("Failed to create framebuffer", "Framebuffer", LogType::Error);

@@ -23,7 +23,7 @@
 
 #include "../../utils/Logging.h"
 
-RenderScene::RenderScene() {
+RenderScene::RenderScene(bool pbr) {
 	//Create the FBO for rendering offscreen
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
@@ -37,10 +37,10 @@ RenderScene::RenderScene() {
 
 	//Obtain the render pipelines
 	pipelineMaterial = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), Renderer::getDefaultRenderPass());
-	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING), Renderer::getDefaultRenderPass());
-	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), Renderer::getDefaultRenderPass());
-	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), Renderer::getDefaultRenderPass());
-	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), Renderer::getDefaultRenderPass());
+	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING : Renderer::GRAPHICS_PIPELINE_LIGHTING), Renderer::getDefaultRenderPass());
+	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), Renderer::getDefaultRenderPass());
+	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), Renderer::getDefaultRenderPass());
+	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), Renderer::getDefaultRenderPass());
 
 	//GraphicsPipeline::ColourBlendState alphaBlendState;
 	//alphaBlendState.blendEnabled = true;
@@ -121,9 +121,11 @@ void RenderScene::addLight(Light* light) {
 		//Obtain the light index within the current batch
 		unsigned int indexInBatch = (lights.size() % NUM_LIGHTS_IN_BATCH) - 1;
 
+		if (light->getType() == Light::TYPE_POINT)
+			indexInBatch += 6;
+
 		//Assign the shadow map
 		descriptorSetLightBatches[descriptorSetLightBatches.size() - 1]->setTexture(indexInBatch, light->getShadowMapRenderPass()->getFBO()->getAttachment(0));
-
 		//Update the descriptor set
 		descriptorSetLightBatches[descriptorSetLightBatches.size() - 1]->update();
 	}
@@ -146,13 +148,24 @@ void RenderScene::renderOffscreen() {
 				//	0.0f,
 				//	1.75f);
 
-				lights[i]->getShadowMapGraphicsPipeline()->bind();
+				if (objects.size() > 0) {
+					lights[i]->getShadowMapGraphicsPipeline()->bind();
 
-				//Use the light's view
-				lights[i]->useView();
+					//Use the light's view
+					lights[i]->useView();
 
-				for (unsigned int i = 0; i < objects.size(); ++i)
-					objects[i]->render();
+					for (unsigned int i = 0; i < objects.size(); ++i)
+						objects[i]->render();
+				}
+				if (skinnedObjects.size() > 0) {
+					lights[i]->getShadowMapSkinningGraphicsPipeline()->bind();
+
+					//Use the light's view
+					lights[i]->useView();
+
+					for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
+						skinnedObjects[i]->render();
+				}
 
 				shadowMapRenderPass->end();
 			}

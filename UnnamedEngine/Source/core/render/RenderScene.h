@@ -65,7 +65,7 @@ public:
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
 	/* Constructor */
-	RenderScene();
+	RenderScene(bool pbr);
 
 	/* Destructor */
 	virtual ~RenderScene();

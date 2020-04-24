@@ -49,25 +49,34 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 
 		if (type == Type::COLOUR_TEXTURE) {
 			vulkanFormat = Vulkan::getSwapChain()->getSurfaceFormat();
-			usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			usage             = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			aspectMask        = VK_IMAGE_ASPECT_COLOR_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else if (type == Type::DEPTH_TEXTURE) {
 			vulkanFormat = Vulkan::getSwapChain()->getDepthFormat();
-			usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-			imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			imageLayout       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		} else if (type == Type::DEPTH) {
 			vulkanFormat = Vulkan::getSwapChain()->getDepthFormat();
-			usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-			aspectMask = Vulkan::hasStencilComponent(Vulkan::getSwapChain()->getDepthFormat()) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT;
+			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+			aspectMask        = Vulkan::hasStencilComponent(Vulkan::getSwapChain()->getDepthFormat()) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		} else if (type == Type::DEPTH_CUBEMAP) {
+			vulkanFormat      = Vulkan::getSwapChain()->getDepthFormat();
+			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
+			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			imageLayout       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		}
 
-		setupVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask, imageLayout);
+		if (type != Type::DEPTH_CUBEMAP)
+			setupVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask, imageLayout);
+		else
+			setupCubemapVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask, imageLayout);
 	} else {
 		GLint internalFormat;
 		GLenum format;
@@ -101,34 +110,62 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 
 			getParameters().setFilter(GL_NEAREST);
 			getParameters().setClamp(GL_CLAMP_TO_EDGE);
+		} else if (type == Type::DEPTH_CUBEMAP) {
+			getParameters().setTarget(GL_TEXTURE_CUBE_MAP);
+			internalFormat = GL_DEPTH_COMPONENT24;
+			format = GL_DEPTH_COMPONENT;
+			glType = GL_FLOAT;
+			attachment = GL_DEPTH_ATTACHMENT;
+
+			getParameters().setFilter(GL_NEAREST);
+			getParameters().setClamp(GL_CLAMP_TO_EDGE);
 		}
 
-		//Check for render buffer object
-		if (getParameters().getTarget() == GL_RENDERBUFFER) {
-			//Setup the render buffer
-			glGenRenderbuffers(1, &glRBO);
-			glBindRenderbuffer(getParameters().getTarget(), glRBO);
-			//if (multisample)
-			//	glRenderbufferStorageMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight());
-			//else
-			glRenderbufferStorage(getParameters().getTarget(), internalFormat, getWidth(), getHeight());
-			glBindRenderbuffer(getParameters().getTarget(), 0);
+		if (type != Type::DEPTH_CUBEMAP) {
+			//Check for render buffer object
+			if (getParameters().getTarget() == GL_RENDERBUFFER) {
+				//Setup the render buffer
+				glGenRenderbuffers(1, &glRBO);
+				glBindRenderbuffer(getParameters().getTarget(), glRBO);
+				//if (multisample)
+				//	glRenderbufferStorageMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight());
+				//else
+				glRenderbufferStorage(getParameters().getTarget(), internalFormat, getWidth(), getHeight());
+				glBindRenderbuffer(getParameters().getTarget(), 0);
 
-			//Attach to framebuffer
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), glRBO);
+				//Attach to framebuffer
+				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), glRBO);
+			} else {
+				//Setup the texture
+				create();
+				bind();
+				//if (multisample)
+				//	glTexImage2DMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
+				//else
+				glTexImage2D(getParameters().getTarget(), 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
+
+				applyParameters(false);
+
+				//Attach to framebuffer
+				glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), getHandle(), 0);
+				unbind();
+			}
 		} else {
 			//Setup the texture
 			create();
 			bind();
-			//if (multisample)
-			//	glTexImage2DMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
-			//else
-			glTexImage2D(getParameters().getTarget(), 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
 
-			applyParameters(false);
+			for (unsigned int i = 0; i < 6; ++i) {
+				//if (multisample)
+				//	glTexImage2DMultisample(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
+				//else
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
+			}
+
+			applyParameters(false, false);
 
 			//Attach to framebuffer
-			glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), getHandle(), 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, attachment, getHandle(), 0);
 			unbind();
 		}
 	}
@@ -195,7 +232,7 @@ void FBO::setup(RenderPass* renderPass) {
 			framebufferAttachments.push_back(attachments[i]->getVkImageView());
 
 		//Create the framebuffer
-		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments);
+		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments, attachments.size() == 1 && (attachments[0]->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP));
 	} else {
 		//Generate and bind the FBO
 		glGenFramebuffers(1, &glFBO);

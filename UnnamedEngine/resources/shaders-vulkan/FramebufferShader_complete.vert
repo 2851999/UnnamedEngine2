@@ -1,4 +1,5 @@
 #version 420
+
 //Used for assigning UBO block locations - can remove
 
 /* NOTES:
@@ -6,7 +7,6 @@
 * Set 1 - Varies per material
 * Set 2 - Varies per model
 * Set 3 - Varies per light batch
-*
 */
 
 layout(std140, set = 0, binding = 21) uniform UECameraData {
@@ -21,7 +21,6 @@ layout(std140, set = 2, binding = 22) uniform UEModelData {
 	mat4 ue_modelMatrix;
 	mat4 ue_normalMatrix;
 };
-
 
 #define UE_LOCATION_POSITION 0
 #define UE_LOCATION_TEXTURE_COORD 1

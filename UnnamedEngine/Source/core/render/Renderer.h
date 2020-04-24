@@ -30,16 +30,23 @@
 
 class Renderer {
 private:
+	/* Structure for storing info about unloaded shaders */
+	struct UnloadedShaderInfo {
+		std::string path;
+		std::vector<std::string> defines;
+	};
+
 	static ShaderInterface* shaderInterface;
 
 	static ShaderBlock_Material shaderMaterialData;
 	static ShaderBlock_Skinning shaderSkinningData;
 
 	static std::vector<Camera*> cameras;
-	static std::unordered_map<unsigned int, std::string> renderShaderPaths;
+	static std::unordered_map<unsigned int, UnloadedShaderInfo> unloadedShaders;
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
 	static std::unordered_map<unsigned int, GraphicsPipelineLayout*> graphicsPipelineLayouts;
 	static Texture* blank;
+	static Cubemap* blankCubemap;
 
 	/* The current bound graphics pipeline (Used for descriptor set binding) */
 	static GraphicsPipeline* currentGraphicsPipeline;
@@ -51,20 +58,35 @@ public:
 	static const unsigned int SHADER_MATERIAL;
 	static const unsigned int SHADER_SKY_BOX;
 	static const unsigned int SHADER_FONT;
-	static const unsigned int SHADER_VULKAN_LIGHTING;
-	static const unsigned int SHADER_VULKAN_LIGHTING_SKINNING;
+	static const unsigned int SHADER_FONT_SDF;
+	static const unsigned int SHADER_LIGHTING;
+	static const unsigned int SHADER_LIGHTING_SKINNING;
+	static const unsigned int SHADER_BASIC_PBR_LIGHTING;
+	static const unsigned int SHADER_BASIC_PBR_LIGHTING_SKINNING;
 	static const unsigned int SHADER_FRAMEBUFFER;
 	static const unsigned int SHADER_SHADOW_MAP;
+	static const unsigned int SHADER_SHADOW_MAP_SKINNING;
+	static const unsigned int SHADER_SHADOW_CUBEMAP;
+	static const unsigned int SHADER_SHADOW_CUBEMAP_SKINNING;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
 	static const unsigned int GRAPHICS_PIPELINE_SKY_BOX;
 	static const unsigned int GRAPHICS_PIPELINE_FONT;
+	static const unsigned int GRAPHICS_PIPELINE_FONT_SDF;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_BLEND;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND;
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_MAP;
+	static const unsigned int GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING;
+	static const unsigned int GRAPHICS_PIPELINE_SHADOW_CUBEMAP;
+	static const unsigned int GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING;
+	static const unsigned int GRAPHICS_PIPELINE_GUI;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -90,10 +112,10 @@ public:
 	static void destroy();
 
 	/* Loads and returns an engine shader from the resources */
-	static Shader* loadEngineShader(std::string path);
+	static Shader* loadEngineShader(UnloadedShaderInfo& shaderInfo);
 
 	/* Method used to add a RenderShader given a the paths to the shaders */
-	static void addRenderShader(unsigned int id, std::string forwardShaderPath);
+	static void addRenderShader(unsigned int id, std::string forwardShaderPath, std::vector<std::string> defines = {});
 
 	/* Method used to add a GraphicsPipelineLayout */
 	static void addGraphicsPipelineLayout(unsigned int id, GraphicsPipelineLayout* pipelineLayout);
@@ -116,8 +138,9 @@ public:
 	/* Returns the GraphicsPipelineLayout with a specific id */
 	static GraphicsPipelineLayout* getGraphicsPipelineLayout(unsigned int id);
 
-	/* Returns the blank texture */
+	/* Returns the blank texture/cubemap */
 	static inline Texture* getBlankTexture() { return blank; }
+	static inline Cubemap* getBlankCubemap() { return blankCubemap; }
 
 	/* Returns the last bound graphics pipeline */
 	static inline GraphicsPipeline* getCurrentGraphicsPipeline() { return currentGraphicsPipeline; }

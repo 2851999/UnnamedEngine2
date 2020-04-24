@@ -43,24 +43,15 @@ void SkyBox::update(Vector3f cameraPosition) {
 	box->update();
 }
 
-void SkyBox::render() {
-	Shader* shader = NULL;
-	if (! BaseEngine::usingVulkan()) {
-		glDepthFunc(GL_LEQUAL);
-		//glDepthMask(false); //Should be applied by GraphicsState
+void SkyBox::render(bool bindPipeline) {
+	if (! BaseEngine::usingVulkan())
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-	}
 
 	//Bind the pipeline
-	pipelineSkybox->bind();
-
-	//Renderer::getShaderBlock_Core().ue_viewMatrix = Renderer::getCamera()->getViewMatrix();
-	//Renderer::getShaderBlock_Core().ue_projectionMatrix =  Renderer::getCamera()->getProjectionMatrix();
+	if (bindPipeline)
+		pipelineSkybox->bind();
 
 	box->render();
-
-	if (! BaseEngine::usingVulkan())
-		shader->stopUsing();
 }
 
 void SkyBox::destroy() {

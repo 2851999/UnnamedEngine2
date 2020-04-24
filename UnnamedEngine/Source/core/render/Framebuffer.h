@@ -30,7 +30,7 @@ private:
 	VkFramebuffer vulkanInstance;
 public:
 	/* Constructor */
-	Framebuffer(VkRenderPass renderPass, uint32_t width, uint32_t height, std::vector<VkImageView> attachments);
+	Framebuffer(VkRenderPass renderPass, uint32_t width, uint32_t height, std::vector<VkImageView> attachments, bool cubemap);
 
 	/* Destructor */
 	virtual ~Framebuffer();

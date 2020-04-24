@@ -50,8 +50,9 @@ private:
 	/* The shadow map render pass if assigned for shadow mapping */
 	RenderPass* shadowMapRenderPass = NULL;
 
-	/* The shadow map graphics pipeline if assigned for shadow mapping */
+	/* The shadow map graphics pipelines if assigned for shadow mapping */
 	GraphicsPipeline* shadowMapGraphicsPipeline = NULL;
+	GraphicsPipeline* shadowMapSkinningGraphicsPipeline = NULL;
 
 	/* Shadow transforms for point lights */
 	std::vector<Matrix4f> lightShadowTransforms;
@@ -61,6 +62,12 @@ private:
 
 	/* Combination of the above matrices, assigned in the update method */
 	Matrix4f lightProjectionView;
+
+	/* The shadow cubemap descriptor set (for point light shadows) */
+	DescriptorSet* shadowCubemapDescriptorSet = NULL;
+
+	/* The cubemap shadow data */
+	ShaderBlock_ShadowCubemap shadowCubemapData;
 public:
 	/* Various light types */
 	static const unsigned int TYPE_DIRECTIONAL = 1;
@@ -79,6 +86,10 @@ public:
 	/* The method used to update the view matrix for this light - should be
 	 * called when the light moves/after assigning the initial values */
 	void update() override;
+
+	/* Called to use this light's view, also binds shadow cubemap descriptor set if
+	   assigned */
+	void useView() override;
 
 	/* The method called to assign the uniforms in a shader for this light */
 	virtual void setUniforms(ShaderStruct_Light& lightData);
@@ -113,5 +124,6 @@ public:
 	inline bool hasShadowMap() { return shadowMapRenderPass; }
 	inline RenderPass* getShadowMapRenderPass() { return shadowMapRenderPass; }
 	inline GraphicsPipeline* getShadowMapGraphicsPipeline() { return shadowMapGraphicsPipeline; }
+	inline GraphicsPipeline* getShadowMapSkinningGraphicsPipeline() { return shadowMapSkinningGraphicsPipeline; }
 };
 

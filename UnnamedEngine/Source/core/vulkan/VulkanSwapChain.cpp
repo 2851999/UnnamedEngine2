@@ -204,7 +204,7 @@ void VulkanSwapChain::setupDefaultFramebuffers(RenderPass* defaultRenderPass) {
 		}
 
 		//Create and add the framebuffer
-		defaultFramebuffers.push_back(new Framebuffer(defaultRenderPass->getVkInstance(), extent.width, extent.height, framebufferAttachments));
+		defaultFramebuffers.push_back(new Framebuffer(defaultRenderPass->getVkInstance(), extent.width, extent.height, framebufferAttachments, false));
 	}
 }
 

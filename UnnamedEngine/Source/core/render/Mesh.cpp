@@ -567,6 +567,7 @@ MeshData* MeshBuilder::createTriangle(Vector2f v1, Vector2f v2, Vector2f v3, Mes
 MeshData* MeshBuilder::createQuad(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags) {
 	MeshData* data = new MeshData(2, flags);
 	addQuadData(data, v1, v2, v3, v4);
+	data->addTextureCoord(Vector2f(0, 0)); 	data->addTextureCoord(Vector2f(0, 0)); 	data->addTextureCoord(Vector2f(0, 0)); 	data->addTextureCoord(Vector2f(0, 0)); //Vulkan expects all GUI to have texture coord data
 	addQuadI(data);
 	return data;
 }
@@ -581,6 +582,7 @@ MeshData* MeshBuilder::createQuad(Vector2f v1, Vector2f v2, Vector2f v3, Vector2
 MeshData* MeshBuilder::createQuad(float width, float height, MeshData::Flag flags) {
 	MeshData* data = new MeshData(2, flags);
 	addQuadData(data, Vector2f(0, 0), Vector2f(width, 0), Vector2f(width, height), Vector2f(0, height));
+	data->addTextureCoord(Vector2f(0, 0)); 	data->addTextureCoord(Vector2f(0, 0)); 	data->addTextureCoord(Vector2f(0, 0)); 	data->addTextureCoord(Vector2f(0, 0)); //Vulkan expects all GUI to have texture coord data
 	addQuadI(data);
 	return data;
 }
