@@ -126,7 +126,6 @@ void RenderScene::addLight(Light* light) {
 
 		//Assign the shadow map
 		descriptorSetLightBatches[descriptorSetLightBatches.size() - 1]->setTexture(indexInBatch, light->getShadowMapRenderPass()->getFBO()->getAttachment(0));
-
 		//Update the descriptor set
 		descriptorSetLightBatches[descriptorSetLightBatches.size() - 1]->update();
 	}

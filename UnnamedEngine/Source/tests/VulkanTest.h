@@ -47,7 +47,7 @@ public:
 	virtual void onKeyPressed(int key) override;
 };
 
-bool Test::useVulkan = true;
+bool Test::useVulkan = false;
 
 void Test::initialise() {
 	getSettings().videoVulkan = useVulkan;
@@ -58,7 +58,7 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
 }
 
 void Test::created() {
@@ -66,6 +66,7 @@ void Test::created() {
 	//std::cout << Vulkan::getDevice()->listSupportedExtensions() << std::endl;
 
 	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("FontSDFShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
@@ -104,9 +105,9 @@ void Test::created() {
 	//lightDir = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f);
 	//light = (new Light(Light::TYPE_SPOT, Vector3f(10.0f, 8.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	light = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
-	//lightDir = (new Light(Light::TYPE_SPOT, Vector3f(0.0f, 5.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	lightDir = (new Light(Light::TYPE_SPOT, Vector3f(0.0f, 5.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	renderScene->addLight(light);
-	//renderScene->addLight(lightDir);
+	renderScene->addLight(lightDir);
 
 	//camera->getSkyBox()->getBox()->getMaterial()->setDiffuse(light->getShadowMapRenderPass()->getFBO()->getAttachment(0));
 	//camera->getSkyBox()->getBox()->getMaterial()->update();
@@ -151,16 +152,16 @@ void Test::update() {
 	//model2->getMesh()->getMaterial(1)->update();
 
 	if (Keyboard::isPressed(GLFW_KEY_UP))
-		light->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
+		lightDir->getTransform()->translate(0.0f, 0.0f, -0.008f * getDelta());
 	else if (Keyboard::isPressed(GLFW_KEY_DOWN))
-		light->getTransform()->translate(0.0f, 0.0f, 0.008f * getDelta());
+		lightDir->getTransform()->translate(0.0f, 0.0f, 0.008f * getDelta());
 	if (Keyboard::isPressed(GLFW_KEY_LEFT))
-		light->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
+		lightDir->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
-		light->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
+		lightDir->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 
 	light->update();
-	//lightDir->update();
+	lightDir->update();
 
 	mit1->getMesh()->updateAnimation(getDeltaSeconds());
 }

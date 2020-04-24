@@ -75,13 +75,14 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 
 	//Assign the colour and other properties
 	setColour(colour);
-	setScale(1.0f / (float) Font::RENDER_SCALE, 1.0f / (float) Font::RENDER_SCALE, 1.0f);
+	//setScale(1.0f / (float) Font::RENDER_SCALE, 1.0f / (float) Font::RENDER_SCALE, 1.0f);
+	setScale(font->getScale(), font->getScale(), 1.0f);
 	getMesh()->setCullingEnabled(false);
 
 	GameObject3D::update();
 
 	//Obtain the graphics pipeline used for rendering
-	pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
+	pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
 }
 
 Text::~Text() {

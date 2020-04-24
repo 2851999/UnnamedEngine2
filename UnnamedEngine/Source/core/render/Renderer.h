@@ -58,6 +58,7 @@ public:
 	static const unsigned int SHADER_MATERIAL;
 	static const unsigned int SHADER_SKY_BOX;
 	static const unsigned int SHADER_FONT;
+	static const unsigned int SHADER_FONT_SDF;
 	static const unsigned int SHADER_LIGHTING;
 	static const unsigned int SHADER_LIGHTING_SKINNING;
 	static const unsigned int SHADER_FRAMEBUFFER;
@@ -70,6 +71,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
 	static const unsigned int GRAPHICS_PIPELINE_SKY_BOX;
 	static const unsigned int GRAPHICS_PIPELINE_FONT;
+	static const unsigned int GRAPHICS_PIPELINE_FONT_SDF;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_BLEND;
 	static const unsigned int GRAPHICS_PIPELINE_LIGHTING_SKINNING;
