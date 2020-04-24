@@ -29,12 +29,21 @@
 
 Font* GUIComponentRenderer::DEFAULT_FONT = NULL;
 
+GUIComponentRenderer::~GUIComponentRenderer() {
+	delete textInstance;
+	if (graphicsPipeline)
+		delete graphicsPipeline;
+}
+
 void GUIComponentRenderer::setup() {
+	//Assign the graphics pipeline
+	graphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GUI), Renderer::getDefaultRenderPass());
 	//Assign the font
 	setFont(DEFAULT_FONT);
 	//Set the default colour and texture
 	getMaterial()->setDiffuse(Colour::WHITE);
 	getMaterial()->setDiffuse(Renderer::getBlankTexture());
+	getMaterial()->update();
 }
 
 void GUIComponentRenderer::update() {
@@ -42,13 +51,25 @@ void GUIComponentRenderer::update() {
 	GameObject2D::update();
 
 	//Check that there are colours and the render index is within its bounds
-	if (colours.size() > renderIndex)
+	if (renderIndex < colours.size()) {
 		//Assign the colour
 		getMaterial()->setDiffuse(colours[renderIndex]);
+		getMaterial()->update();
+	}
 
 	//Now to do the same for the textures
-	if (textures.size() > renderIndex)
+	if (renderIndex < textures.size()) {
 		getMaterial()->setDiffuse(textures[renderIndex]);
+		getMaterial()->update();
+	}
+}
+
+void GUIComponentRenderer::render() {
+	//Bind the graphics pipeline if there is one
+	if (graphicsPipeline)
+		graphicsPipeline->bind();
+	//Render
+	GameObject::render();
 }
 
 void GUIComponentRenderer::renderText(std::string text, Vector2f relPos) {

@@ -16,18 +16,19 @@
  *
  *****************************************************************************/
 
-#include "tests/VulkanTest.h"
+#include "tests/GUITest.h"
+
 #include "utils/Utils.h"
 //#include "examples/basic/BasicRendering3D.h"
 //#include "examples/asteroids/AsteroidsGame.h"
 
 int main(int argc, char** argv) {
-	if (argc == 2) {
+	/*if (argc == 2) {
 		if (utils_string::str(argv[1]) == "-opengl")
 			Test::useVulkan = false;
 		else if (utils_string::str(argv[1]) == "-vulkan")
 			Test::useVulkan = true;
-	}
+	}*/
 
 	Test test;
 	test.create();

@@ -86,6 +86,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING;
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_CUBEMAP;
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING;
+	static const unsigned int GRAPHICS_PIPELINE_GUI;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

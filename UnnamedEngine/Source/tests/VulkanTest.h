@@ -62,7 +62,6 @@ void Test::initialise() {
 }
 
 void Test::created() {
-
 	//std::cout << Vulkan::getDevice()->listSupportedExtensions() << std::endl;
 
 	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
@@ -93,7 +92,7 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(true);
+	renderScene = new RenderScene(false);
 	//renderScene->disableLighting();
 
 	utils_random::initialise();

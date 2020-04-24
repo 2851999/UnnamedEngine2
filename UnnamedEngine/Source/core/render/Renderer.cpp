@@ -74,6 +74,7 @@ const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP                       
 const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING               = 14;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP                    = 15;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING           = 16;
+const unsigned int Renderer::GRAPHICS_PIPELINE_GUI                               = 17;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -178,6 +179,7 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING,               new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_MAP_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP,                    new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_CUBEMAP), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING,           new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_CUBEMAP_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GUI,                               new GraphicsPipelineLayout(getRenderShader(SHADER_MATERIAL), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, windowWidth, windowHeight, true));
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();

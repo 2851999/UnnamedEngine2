@@ -1,4 +1,9 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 4 | Experimental 8
+
+* Readded GUI support
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 4 | Experimental 7
 
 * Added basic PBR without IBL
