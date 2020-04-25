@@ -29,7 +29,7 @@
   * The GraphicsPipeline class
   *****************************************************************************/
 
-GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass) : layout(layout), renderShader(layout->getRenderShader()), colourBlendState(layout->getColourBlendState()), depthState(layout->getDepthState()), cullState(layout->getCullState()) {
+GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass) : layout(layout), renderShader(layout->getRenderShader()), colourBlendState(layout->getColourBlendState()), depthState(layout->getDepthState()), useCulling(layout->getCulling()) {
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
@@ -107,8 +107,8 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 		rasterizer.rasterizerDiscardEnable = VK_FALSE; //If true discards everything, wouldn't render to frame buffer
 		rasterizer.polygonMode             = VK_POLYGON_MODE_FILL; //Anything else requires GPU feature
 		rasterizer.lineWidth               = 1.0f;
-		rasterizer.cullMode                = convertToVk(cullState.mode); //VK_CULL_MODE_BACK_BIT
-		rasterizer.frontFace               = convertToVk(cullState.frontFace);
+		rasterizer.cullMode                = useCulling ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE; //VK_CULL_MODE_BACK_BIT
+		rasterizer.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizer.depthBiasEnable         = VK_FALSE;
 		rasterizer.depthBiasConstantFactor = 0.0f; //Optional
 		rasterizer.depthBiasClamp          = 0.0f; //Optional
@@ -139,7 +139,7 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 		VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
 		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 		colorBlendAttachment.blendEnable = colourBlendState.blendEnabled ? VK_TRUE : VK_FALSE;
-		
+
 		if (colourBlendState.blendEnabled) {
 			colorBlendAttachment.srcColorBlendFactor = convertToVk(colourBlendState.srcRGB);
 			colorBlendAttachment.dstColorBlendFactor = convertToVk(colourBlendState.dstRGB);
@@ -211,11 +211,10 @@ void GraphicsPipeline::bind() {
 
 		glDepthMask(depthState.depthWriteEnable);
 
-		//Assign the cull state
-		if (cullState.mode != CullMode::NONE) {
+		if (useCulling) {
 			glEnable(GL_CULL_FACE);
-			glFrontFace(convertToGL(cullState.frontFace));
-			glCullFace(convertToGL(cullState.mode));
+			glFrontFace(GL_CCW);
+			glCullFace(GL_BACK);
 		} else
 			glDisable(GL_CULL_FACE);
 
@@ -364,8 +363,8 @@ VkFrontFace GraphicsPipeline::convertToVk(FrontFace face) {
  * The GraphicsPipelineLayout class
  *****************************************************************************/
 
-GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk) :
-	renderShader(renderShader), vertexInputData(vertexInputData), colourBlendState(colourBlendState), depthState(depthState), cullState(cullState), viewportWidth(viewportWidth), viewportHeight(viewportHeight), viewportFlippedVk(viewportFlippedVk) {
+GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, bool useCulling, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk) :
+	renderShader(renderShader), vertexInputData(vertexInputData), colourBlendState(colourBlendState), depthState(depthState), useCulling(useCulling), viewportWidth(viewportWidth), viewportHeight(viewportHeight), viewportFlippedVk(viewportFlippedVk) {
 
 	//Ensure using Vulkan
 	if (BaseEngine::usingVulkan()) {

@@ -47,7 +47,7 @@ public:
 	virtual void onKeyPressed(int key) override;
 };
 
-bool Test::useVulkan = false;
+bool Test::useVulkan = true;
 
 void Test::initialise() {
 	getSettings().videoVulkan = useVulkan;
@@ -58,7 +58,7 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 }
 
 void Test::created() {
@@ -78,11 +78,11 @@ void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
 
-	//InputBindings* bindings = new InputBindings();
-	//bindings->load("C:/UnnamedEngine/config/Controller.xml", getWindow()->getInputManager());
-	//camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
+	InputBindings* bindings = new InputBindings();
+	bindings->load("C:/UnnamedEngine/config/Controller.xml", getWindow()->getInputManager());
+	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
 
-	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
+	//camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f);
 	camera->setPosition(0.0f, 4.0f, 3.0f);
 	camera->setRotation(Vector3f(-20.0f, -45.0f, 0.0f));
 	camera->setFlying(true);
