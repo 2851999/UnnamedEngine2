@@ -72,7 +72,7 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	this->font = font;
 	mesh->getMaterial()->setDiffuse(fontTexture);
 	mesh->getMaterial()->update();
-	setMesh(mesh, Renderer::getRenderShader(shaderType));
+	setMesh(mesh, Renderer::getRenderShader(shaderType), VBOUsage::DYNAMIC);
 
 	//Assign the colour and other properties
 	setColour(colour);

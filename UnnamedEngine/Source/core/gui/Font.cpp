@@ -269,9 +269,9 @@ void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
 					info.glyphWidth = renderedSize;
 
 				float charw = ((float) (info.glyphWidth) / renderedSize) * size;
-				float dimx = 1.0f * charw;
+				float dimx  = 1.0f * charw;
 				float charh = ((float) (info.glyphHeight) / renderedSize) * size;
-				float dimy = 1.0f * charh;
+				float dimy  = 1.0f * charh;
 
 				float us = info.glyphLeft / w;
 				float ue = (info.glyphLeft + info.glyphWidth) / w;

@@ -1,4 +1,11 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 5 | Experimental 2
+
+* Added VBOUsage enum class to specify the usage of VBO's
+
+* Massively improved text updating speed for Vulkan
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 5 | Experimental 1
 
 * Added queued graphics pipeline system to speed up GUI
