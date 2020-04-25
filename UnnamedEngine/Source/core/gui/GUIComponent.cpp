@@ -31,13 +31,9 @@ Font* GUIComponentRenderer::DEFAULT_FONT = NULL;
 
 GUIComponentRenderer::~GUIComponentRenderer() {
 	delete textInstance;
-	if (graphicsPipeline)
-		delete graphicsPipeline;
 }
 
 void GUIComponentRenderer::setup() {
-	//Assign the graphics pipeline
-	graphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GUI), Renderer::getDefaultRenderPass());
 	//Assign the font
 	setFont(DEFAULT_FONT);
 	//Set the default colour and texture
@@ -65,10 +61,11 @@ void GUIComponentRenderer::update() {
 }
 
 void GUIComponentRenderer::render() {
-	//Bind the graphics pipeline if there is one
-	if (graphicsPipeline)
-		graphicsPipeline->bind();
-	//Render
+	//Queue the rendering
+	Renderer::getGraphicsPipelineQueue(Renderer::GRAPHICS_PIPELINE_GUI)->queueRender(this);
+}
+
+void GUIComponentRenderer::queuedRender() {
 	GameObject::render();
 }
 
@@ -111,7 +108,7 @@ void GUIComponentRenderer::setTexture(Texture* texture) {
 void GUIComponentRenderer::setFont(Font* font) {
 	this->font = font;
 	if (! textInstance)
-		textInstance = new Text(DEFAULT_FONT, Colour::WHITE, 100);
+		textInstance = new Text(DEFAULT_FONT, Colour::WHITE, 100, false, true);
 	textInstance->setFont(font);
 }
 

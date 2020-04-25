@@ -22,6 +22,7 @@
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 #include "../BaseEngine.h"
+#include "../Object.h"
 #include "../../utils/VulkanUtils.h"
 
  /*****************************************************************************
@@ -221,6 +222,18 @@ void GraphicsPipeline::bind() {
 
 	//Notify Renderer
 	Renderer::setCurrentGraphicsPipeline(this);
+}
+
+void GraphicsPipeline::renderAllQueued() {
+	if (queuedObjects.size() > 0) {
+		//Bind this pipeline
+		bind();
+		//Go through and render all of the queued objects
+		for (GameObject* object : queuedObjects)
+			object->queuedRender();
+		//Clear the queue
+		queuedObjects.clear();
+	}
 }
 
 GLenum GraphicsPipeline::convertToGL(BlendFactor factor) {

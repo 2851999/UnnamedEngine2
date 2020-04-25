@@ -85,6 +85,7 @@ void Test::initialise() {
 	getSettings().videoVSync = 0;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoVulkan = true;
+	getSettings().debugShowInformation = true;
 	getSettings().debugVkValidationLayersEnabled = false;
 
 //	Settings& settings = getSettings();

@@ -27,19 +27,27 @@
 
 class GUIPanel : public GUIGroup, public GUIComponentListener {
 private:
+	/* The graphics pipelines used to render this panel */
+	GraphicsPipeline* pipelineGUI;
+	GraphicsPipeline* pipelineFont;
+	GraphicsPipeline* pipelineFontSDF;
+
 	/* Method used to get the top most component that contains a certain
 	 * point */
 	GUIComponent* getTop(double x, double y);
 public:
 	/* The constructor */
-	GUIPanel(float width = 0, float height = 0) : GUIGroup(width, height) {}
-	GUIPanel(std::vector<GUIComponent*>& components, float width = 0, float height = 0) : GUIGroup(components, width, height) {}
+	GUIPanel(float width = 0, float height = 0);
+	GUIPanel(std::vector<GUIComponent*>& components, float width = 0, float height = 0);
 
 	/* The destructor */
-	virtual ~GUIPanel() {}
+	virtual ~GUIPanel();
 
 	/* Method used to add a component to this panel */
 	virtual void add(GUIComponent* component) override;
+
+	/* Method used to render this panel */
+	virtual void render() override;
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override {}

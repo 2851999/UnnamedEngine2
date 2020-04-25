@@ -26,6 +26,26 @@
  * The GUIPanel class
  *****************************************************************************/
 
+GUIPanel::GUIPanel(float width, float height) : GUIGroup(width, height) {
+	//Create the graphics pipelines
+	pipelineGUI = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GUI), Renderer::getDefaultRenderPass());
+	pipelineFont = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
+	pipelineFontSDF = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_FONT_SDF), Renderer::getDefaultRenderPass());
+}
+
+GUIPanel::GUIPanel(std::vector<GUIComponent*>& components, float width, float height) : GUIGroup(components, width, height) {
+	//Create the graphics pipelines
+	pipelineGUI = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GUI), Renderer::getDefaultRenderPass());
+	pipelineFont = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
+	pipelineFontSDF = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_FONT_SDF), Renderer::getDefaultRenderPass());
+}
+
+GUIPanel::~GUIPanel() {
+	delete pipelineGUI;
+	delete pipelineFont;
+	delete pipelineFontSDF;
+}
+
 GUIComponent* GUIPanel::getTop(double x, double y) {
 	//The current top-most component
 	GUIComponent* top = NULL;
@@ -46,6 +66,25 @@ GUIComponent* GUIPanel::getTop(double x, double y) {
 void GUIPanel::add(GUIComponent* component) {
 	GUIGroup::add(component);
 	component->addListener(this);
+}
+
+void GUIPanel::render() {
+	//Use the pipelines for rendering the components
+	Renderer::addGraphicsPipelineQueue(Renderer::GRAPHICS_PIPELINE_GUI, pipelineGUI);
+	Renderer::addGraphicsPipelineQueue(Renderer::GRAPHICS_PIPELINE_FONT, pipelineFont);
+	Renderer::addGraphicsPipelineQueue(Renderer::GRAPHICS_PIPELINE_FONT_SDF, pipelineFontSDF);
+
+	//Render the componenents
+	GUIGroup::render();
+
+	Renderer::removeGraphicsPipelineQueue(Renderer::GRAPHICS_PIPELINE_GUI);
+	Renderer::removeGraphicsPipelineQueue(Renderer::GRAPHICS_PIPELINE_FONT);
+	Renderer::removeGraphicsPipelineQueue(Renderer::GRAPHICS_PIPELINE_FONT_SDF);
+
+	//Render the queued objects
+	pipelineGUI->renderAllQueued();
+	pipelineFont->renderAllQueued();
+	pipelineFontSDF->renderAllQueued();
 }
 
 void GUIPanel::onMouseMoved(double x, double y, double dx, double dy) {

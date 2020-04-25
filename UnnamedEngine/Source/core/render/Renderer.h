@@ -38,13 +38,13 @@ private:
 
 	static ShaderInterface* shaderInterface;
 
-	static ShaderBlock_Material shaderMaterialData;
 	static ShaderBlock_Skinning shaderSkinningData;
 
 	static std::vector<Camera*> cameras;
 	static std::unordered_map<unsigned int, UnloadedShaderInfo> unloadedShaders;
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
 	static std::unordered_map<unsigned int, GraphicsPipelineLayout*> graphicsPipelineLayouts;
+	static std::unordered_map<unsigned int, std::vector<GraphicsPipeline*>> queuePipelines;
 	static Texture* blank;
 	static Cubemap* blankCubemap;
 
@@ -128,6 +128,15 @@ public:
 
 	/* Method used to add a RenderShader */
 	static void addRenderShader(RenderShader* renderShader);
+
+	/* Method used to add a GraphicsPipeline to the list of queued pipelines */
+	static void addGraphicsPipelineQueue(unsigned int id, GraphicsPipeline* pipeline);
+
+	/* Method used to remove the last GraphicsPipeline from the list of queued pipelines */
+	static void removeGraphicsPipelineQueue(unsigned int id);
+
+	/* Method used to get the current graphics pipeline for queued rendering (last added will be used) */
+	static GraphicsPipeline* getGraphicsPipelineQueue(unsigned int id);
 
 	/* Returns the ShaderInterface instance */
 	static inline ShaderInterface* getShaderInterface() { return shaderInterface; }

@@ -31,13 +31,13 @@
 
 ShaderInterface* Renderer::shaderInterface;
 
-ShaderBlock_Material Renderer::shaderMaterialData;
 ShaderBlock_Skinning Renderer::shaderSkinningData;
 
 std::vector<Camera*> Renderer::cameras;
 std::unordered_map<unsigned int, Renderer::UnloadedShaderInfo> Renderer::unloadedShaders;
 std::unordered_map<unsigned int, RenderShader*> Renderer::loadedRenderShaders;
 std::unordered_map<unsigned int, GraphicsPipelineLayout*> Renderer::graphicsPipelineLayouts;
+std::unordered_map<unsigned int, std::vector<GraphicsPipeline*>> Renderer::queuePipelines;
 Texture* Renderer::blank;
 Cubemap* Renderer::blankCubemap;
 
@@ -316,6 +316,22 @@ void Renderer::loadRenderShader(unsigned int id) {
 
 void Renderer::addRenderShader(RenderShader* renderShader) {
 	loadedRenderShaders.insert(std::pair<unsigned int, RenderShader*>(renderShader->getID(), renderShader));
+}
+
+void Renderer::addGraphicsPipelineQueue(unsigned int id, GraphicsPipeline* pipeline) {
+	if (queuePipelines.count(id) == 0)
+		queuePipelines.insert(std::pair<unsigned int, std::vector<GraphicsPipeline*>>(id, { pipeline }));
+	else
+		queuePipelines.at(id).push_back(pipeline);
+}
+
+void Renderer::removeGraphicsPipelineQueue(unsigned int id) {
+	queuePipelines.at(id).pop_back();
+}
+
+GraphicsPipeline* Renderer::getGraphicsPipelineQueue(unsigned int id) {
+	std::vector<GraphicsPipeline*>& pipelines = queuePipelines.at(id);
+	return pipelines.at(pipelines.size() - 1);
 }
 
 RenderShader* Renderer::getRenderShader(unsigned int id) {

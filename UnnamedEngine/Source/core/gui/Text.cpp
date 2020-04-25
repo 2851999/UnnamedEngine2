@@ -28,9 +28,10 @@
 
 unsigned int Text::DEFAULT_MAX_CHARACTERS = 1000;
 
-Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboarded) {
+Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboarded, bool queuedPipeline) {
 	this->billboarded = billboarded;
 	this->maxCharacters = maxCharacters;
+	this->queuedPipeline = queuedPipeline;
 
 	if (maxCharacters == 0)
 		//Use the default number
@@ -82,11 +83,13 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	GameObject3D::update();
 
 	//Obtain the graphics pipeline used for rendering
-	pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
+	if (! queuedPipeline)
+		pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
 }
 
 Text::~Text() {
-	delete pipeline;
+	if (pipeline)
+		delete pipeline;
 }
 
 void Text::update(std::string text) {
@@ -133,9 +136,16 @@ void Text::update(Vector3f position) {
 }
 
 void Text::render() {
-	//Bind the pipeline
-	pipeline->bind();
+	if (! queuedPipeline) {
+		//Bind the pipeline
+		pipeline->bind();
 
+		queuedRender();
+	} else
+		Renderer::getGraphicsPipelineQueue(font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT)->queueRender(this);
+}
+
+void Text::queuedRender() {
 	if (billboarded) {
 		Shader* shader = getShader();
 		shader->use();

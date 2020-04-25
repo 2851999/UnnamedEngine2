@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "tests/GUITest.h"
+#include "tests/VulkanTest.h"
 
 #include "utils/Utils.h"
 //#include "examples/basic/BasicRendering3D.h"

@@ -50,6 +50,9 @@ public:
 	virtual void update() {}
 	virtual void render();
 
+	/* Method used to render when asked by a graphics pipeline */
+	virtual void queuedRender() {}
+
 	/* Method used to set the parent of this object */
 	inline void setParent(GameObject* parent) { transform->setParent(parent->getTransform()); }
 	/* method used to remove a child object */

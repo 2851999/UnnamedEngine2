@@ -23,6 +23,7 @@
 
 class RenderPass;
 class GraphicsPipelineLayout;
+class GameObject;
 
  /*****************************************************************************
   * The GraphicsPipeline class responsible for handleing Vulkan pipelines and to
@@ -73,6 +74,9 @@ private:
 
 	/* The depth state to use with this pipeline */
 	DepthState depthState;
+
+	/* List of game objects queued to be renered with this pipeline */
+	std::vector<GameObject*> queuedObjects;
 public:
 	/* Structure used to store data required for creating a render pipeline */
 	struct VertexInputData {
@@ -88,6 +92,12 @@ public:
 
 	/* Method used to bind this pipeline for rendering */
 	void bind();
+
+	/* Method used to render all queued objects with this pipeline (Clears afterwards) */
+	void renderAllQueued();
+
+	/* Method used to queue an object for rendering with this pipeline */
+	inline void queueRender(GameObject* object) { queuedObjects.push_back(object); }
 
 	/* Methods used to convert the a generalised states to the one required by
 	   OpenGL/Vulkan */

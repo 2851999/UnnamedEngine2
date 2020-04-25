@@ -1,6 +1,33 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 5 | Experimental 1
+
+* Added queued graphics pipeline system to speed up GUI
+  rendering and reduce the number of pipelines created
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 5 (V0.4.7)
+
+* Added geometry shader support for Vulkan
+* Added cubemap shadows for Vulkan
+* Added basic SDF font support
+* Added basic PBR without IBL
+* Readded cubemap shadows for OpenGL
+* Readded GUITest
+* Readded GUI support
+* Replaced SHADER_VULKAN_LIGHTING with SHADER_LIGHTING
+* Replaced SHADER_VULKAN_LIGHTING_SKINNING with
+  SHADER_LIGHTING_SKINNING
+
+* Fixed bug: Defines added to shaders were added many times
+* Fixed bug: Camera's 'useView' method would fail in Vulkan
+             unless a graphics pipeline was bound
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 4 | Experimental 8
 
+* Readded GUITest
 * Readded GUI support
 
 -------------------------------------------------------------
@@ -11,12 +38,12 @@ Release 2 | Beta 1 | Development 4 | Experimental 7
 -------------------------------------------------------------
 Release 2 | Beta 1 | Development 4 | Experimental 6
 
-* Addded basic SDF font support
+* Added basic SDF font support
 
 -------------------------------------------------------------
 Release 2 | Beta 1 | Development 4 | Experimental 5
 
-* Added cubemap shadows to Vulkan
+* Added cubemap shadows for Vulkan
 
 * Fixed bug: Geometry shaders were not loaded when using
              Vulkan
@@ -37,7 +64,7 @@ Release 2 | Beta 1 | Development 4 | Experimental 3
 -------------------------------------------------------------
 Release 2 | Beta 1 | Development 4 | Experimental 2
 
-* Added basic geometry shader support
+* Added basic geometry shader support for Vulkan
 
 * Some cleanup
 
