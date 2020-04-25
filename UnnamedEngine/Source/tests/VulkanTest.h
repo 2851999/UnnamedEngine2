@@ -47,12 +47,13 @@ public:
 	virtual void onKeyPressed(int key) override;
 };
 
-bool Test::useVulkan = true;
+bool Test::useVulkan = false;
 
 void Test::initialise() {
 	getSettings().videoVulkan = useVulkan;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
+	getSettings().windowFullscreen = false;
 	getSettings().videoVSync = 0;
 	getSettings().videoSamples = 8;
 	getSettings().videoMaxAnisotropicSamples = 16;

@@ -119,7 +119,7 @@ void RenderScene::addLight(Light* light) {
 	//Check if the light added has a shadow map
 	if (light->hasShadowMap()) {
 		//Obtain the light index within the current batch
-		unsigned int indexInBatch = (lights.size() % NUM_LIGHTS_IN_BATCH) - 1;
+		unsigned int indexInBatch = (lights.size() - 1) % NUM_LIGHTS_IN_BATCH;
 
 		if (light->getType() == Light::TYPE_POINT)
 			indexInBatch += 6;
