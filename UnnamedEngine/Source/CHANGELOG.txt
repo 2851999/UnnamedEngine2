@@ -1,4 +1,10 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 5 | Experimental 6
+
+* Managed to readd code from Experimental 3 without crash
+  from Assimp by updating Assimp
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 5 | Experimental 5
 
 * Fixed bug: Crash when a multiple of 6 lights in

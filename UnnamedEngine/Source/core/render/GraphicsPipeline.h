@@ -71,10 +71,10 @@ public:
 	};
 
 	/* Structure containing information about the culling state to be used */
-	//struct CullState {
-	//	CullMode  mode;      //= CullMode::NONE; //WHY DOES THIS CAUSE ASSIMP TO CRASH???!?!?!?!?!?!?
-	//	FrontFace frontFace; //= FrontFace::COUNTER_CLOCKWISE; //WHY DOES THIS CAUSE ASSIMP TO CRASH???!?!?!?!?!?!?
-	//};
+	struct CullState {
+		CullMode  mode      = CullMode::NONE; //WHY DOES THIS CAUSE ASSIMP TO CRASH???!?!?!?!?!?!?
+		FrontFace frontFace = FrontFace::COUNTER_CLOCKWISE; //WHY DOES THIS CAUSE ASSIMP TO CRASH???!?!?!?!?!?!?
+	};
 private:
 	/* The layout of this pipeline */
 	GraphicsPipelineLayout* layout;
@@ -92,10 +92,7 @@ private:
 	DepthState depthState;
 
 	/* The cull state to use with this pipeline */
-	//CullState cullState; //WHY DOES THIS CAUSE ASSIMP TO CRASH???!?!?!?!?!?!?
-
-	/* States whether culling should be used */
-	bool useCulling;
+	CullState cullState;
 
 	/* List of game objects queued to be renered with this pipeline */
 	std::vector<GameObject*> queuedObjects;
@@ -156,10 +153,7 @@ private:
 	/* The colour, depth and cull states for the pipeline */
 	GraphicsPipeline::ColourBlendState colourBlendState;
 	GraphicsPipeline::DepthState       depthState;
-	//GraphicsPipeline::CullState        cullState;
-
-	/* States whether culling should be used */
-	bool useCulling;
+	GraphicsPipeline::CullState        cullState;
 
 	/* The width and height of the view port */
 	uint32_t viewportWidth;
@@ -169,7 +163,7 @@ private:
 	bool viewportFlippedVk;
 public:
 	/* Constructor */
-	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, bool useCulling, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk);
+	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk);
 
 	/* Destructor */
 	virtual ~GraphicsPipelineLayout();
@@ -180,8 +174,7 @@ public:
 	inline GraphicsPipeline::VertexInputData& getVertexInputData() { return vertexInputData; }
 	inline GraphicsPipeline::ColourBlendState& getColourBlendState() { return colourBlendState; }
 	inline GraphicsPipeline::DepthState& getDepthState() { return depthState; }
-	//inline GraphicsPipeline::CullState& getCullState() { return cullState; }
-	inline bool getCulling() { return useCulling; }
+	inline GraphicsPipeline::CullState& getCullState() { return cullState; }
 	inline uint32_t getViewportWidth() { return viewportWidth; }
 	inline uint32_t getViewportHeight() { return viewportHeight; }
 	inline bool getViewportFlippedVk() { return viewportFlippedVk; }

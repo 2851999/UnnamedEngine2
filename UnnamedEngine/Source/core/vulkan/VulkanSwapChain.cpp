@@ -216,7 +216,7 @@ VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<Vk
 	else {
 		//Need to find the preferred format that is available
 		for (const auto& availableFormat : availableFormats) {
-			if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+			if (availableFormat.format == VK_FORMAT_R16G16B16A16_SFLOAT && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
 				return availableFormat;
 		}
 	}

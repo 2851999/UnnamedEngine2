@@ -47,7 +47,7 @@ public:
 	virtual void onKeyPressed(int key) override;
 };
 
-bool Test::useVulkan = false;
+bool Test::useVulkan = true;
 
 void Test::initialise() {
 	getSettings().videoVulkan = useVulkan;

@@ -48,7 +48,7 @@ VulkanBuffer::VulkanBuffer(void* data, VkDeviceSize size, VulkanDevice* device, 
 	copyData(data, 0, size);
 }
 
-void VulkanBuffer::copyData(void* dataToCopy, unsigned int offset, VkDeviceSize size) {
+void VulkanBuffer::copyData(const void* dataToCopy, unsigned int offset, VkDeviceSize size) {
 	//Check if supposed to use staging
 	if (useStaging) {
 		//Create the staging buffer
@@ -69,13 +69,13 @@ void VulkanBuffer::copyData(void* dataToCopy, unsigned int offset, VkDeviceSize 
 		copyData(dataToCopy, offset, size, bufferMemory);
 }
 
-void VulkanBuffer::copyData(void* dataToCopy, unsigned int offset, VkDeviceSize& size, VkDeviceMemory& dest) {
+void VulkanBuffer::copyData(const void* dataToCopy, unsigned int offset, VkDeviceSize size, VkDeviceMemory dest) {
 	//Ensure the data can fit
 	if (size <= this->size) {
 		//Map buffer memory into CPU accessible memory
 		void* data;
 		vkMapMemory(device->getLogical(), dest, offset, size, 0, &data); //Data is now mapped
-		memcpy(data, dataToCopy, (size_t) size);
+		memcpy(data, dataToCopy, (size_t) size); //+ odd number to size seems to fix Vulkan issues
 		vkUnmapMemory(device->getLogical(), dest); //Driver not necessarily copied yet, can either use heap that is host coherent,
 		//or use vkFlushMappedMemoryRanges/vkInvalidateMappedMemoryRanges
 		//First option ensures mapped memory always matches the contents of allocated memory (may lead to worse performance than explicit flushing - but doesn't matter?)
