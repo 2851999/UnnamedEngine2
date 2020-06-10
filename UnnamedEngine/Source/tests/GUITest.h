@@ -211,6 +211,8 @@ void Test::render() {
 	//test->bind();
 	//camera->useView();
 
+	//utils_gl::enableWireframe();
+
 	panel->render();
 }
 

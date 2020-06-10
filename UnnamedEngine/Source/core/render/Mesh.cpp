@@ -403,6 +403,8 @@ void MeshRenderData::updatePositions(MeshData* data) {
 			glBindVertexArray(0);
 		} else
 			vboPositions->update();
+
+		renderData->setCount(numVertices);
 	} else
 		Logger::log("Cannot update positions as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }

@@ -1,4 +1,9 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 5 | Experimental 7
+
+* Fixed bug: Font would sometimes render incorrectly
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 5 | Experimental 6
 
 * Managed to readd code from Experimental 3 without crash

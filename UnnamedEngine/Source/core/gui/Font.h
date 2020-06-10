@@ -53,7 +53,7 @@ private:
 	} glyphs[(ASCII_END - ASCII_START) + 1];
 
 	/* States whether this font is a signed distance field */
-	bool sdf;
+	bool sdf = false;
 
 	/* The size this font should be */
 	float size;
