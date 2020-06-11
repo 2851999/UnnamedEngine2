@@ -1,7 +1,14 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 5 | Experimental 9
+
+* Fixed bug: 'updateDescriptorSet' in Vulkan was incorrect
+             causing descriptor sets to be updated while
+			 being used
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 5 | Experimental 8
 
-* Re-added gamma correction, FXAA and exposure mapping
+* Readded gamma correction, FXAA and exposure mapping
   post processing in RenderScene (unfinished)
 
 -------------------------------------------------------------

@@ -189,7 +189,7 @@ void RenderScene::renderOffscreen() {
 }
 
 void RenderScene::renderScene() {
-	((Camera3D*)Renderer::getCamera())->useView();
+	((Camera3D*) Renderer::getCamera())->useView();
 
 	//Check whether lighting is enabled
 	if (lighting) {
