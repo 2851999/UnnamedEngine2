@@ -84,15 +84,15 @@ private:
 	unsigned int numDimensions = 0;
 
 	/* Keeps track of the number of each value stored */
-	unsigned int numPositions  = 0;
-	unsigned int numColours    = 0;
+	unsigned int numPositions     = 0;
+	unsigned int numColours       = 0;
 	unsigned int numTextureCoords = 0;
-	unsigned int numNormals    = 0;
-	unsigned int numTangents   = 0;
-	unsigned int numBitangents = 0;
-	unsigned int numIndices    = 0;
+	unsigned int numNormals       = 0;
+	unsigned int numTangents      = 0;
+	unsigned int numBitangents    = 0;
+	unsigned int numIndices       = 0;
 
-	unsigned int numBones      = 0;
+	unsigned int numBones         = 0;
 
 	/* The sub data instances */
 	std::vector<SubData> subData;
@@ -270,16 +270,6 @@ private:
 	VBO<unsigned int>* vboBoneIDs = NULL;
 	VBO<GLfloat>*  vboBoneWeights = NULL;
 
-	/* Usage of each VBO, the default is GL_STATIC_DRAW */
-	GLenum usagePositions     = GL_STATIC_DRAW;
-	GLenum usageColours       = GL_STATIC_DRAW;
-	GLenum usageTextureCoords = GL_STATIC_DRAW;
-	GLenum usageNormals       = GL_STATIC_DRAW;
-	GLenum usageTangents      = GL_STATIC_DRAW;
-	GLenum usageBitangents    = GL_STATIC_DRAW;
-	GLenum usageOthers        = GL_STATIC_DRAW;
-	GLenum usageIndices       = GL_STATIC_DRAW;
-
 	/* The number of vertices that this class stores data about */
 	int numVertices = 0;
 
@@ -291,7 +281,7 @@ public:
 	virtual ~MeshRenderData() { destroy(); }
 
 	/* Sets up for rendering */
-	void setup(MeshData* data, std::vector<Material*>& materials);
+	void setup(MeshData* data, std::vector<Material*>& materials, VBOUsage vboUsage = VBOUsage::STATIC);
 
 	/* Method to render using the data */
 	void render();
@@ -346,7 +336,7 @@ public:
 	virtual ~Mesh();
 
 	/* Method called to setup this mesh for rendering */
-	void setup(RenderShader* renderShader);
+	void setup(RenderShader* renderShader, VBOUsage vboUsage = VBOUsage::STATIC);
 
 	/* Method called to update the animation of this mesh */
 	void updateAnimation(float deltaSeconds);

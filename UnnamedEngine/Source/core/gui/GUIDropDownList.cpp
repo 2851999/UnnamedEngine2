@@ -25,17 +25,19 @@
  *****************************************************************************/
 
 GUIDropDownList::GUIDropDownList(GUIButton* menuButton, Texture* overlayClosedTexture, Texture* overlayOpenedTexture) : GUIDropDownMenu(menuButton) {
-	overlay = new GameObject2D({ new Mesh(MeshBuilder::createQuad(menuButton->getWidth(), menuButton->getHeight(), overlayClosedTexture)) }, Renderer::SHADER_MATERIAL);
-	overlay->setParent(this);
-	overlay->setSize(menuButton->getSize());
-
 	this->overlayClosedTexture = overlayClosedTexture;
 	if (overlayOpenedTexture)
 		this->overlayOpenedTexture = overlayOpenedTexture;
 	else
 		this->overlayOpenedTexture = overlayClosedTexture;
 
-	overlay->getMaterial()->setDiffuse(overlayClosedTexture);
+	overlay = new GUIComponentRenderer(menuButton->getWidth(), menuButton->getHeight(), std::vector<Texture*>{ this->overlayClosedTexture, this->overlayOpenedTexture });
+	overlay->setParent(this);
+	overlay->setSize(menuButton->getSize());
+}
+
+GUIDropDownList::~GUIDropDownList() {
+	delete overlay;
 }
 
 void GUIDropDownList::onComponentClicked(GUIComponent* component) {
@@ -48,9 +50,9 @@ void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 
 		if (overlayClosedTexture) {
 			if (menuOpen)
-				overlay->getMaterial()->setDiffuse(overlayOpenedTexture);
+				overlay->setRenderIndex(1);
 			else
-				overlay->getMaterial()->setDiffuse(overlayClosedTexture);
+				overlay->setRenderIndex(0);
 		}
 	} else if (menuOpen && component != this) {
 		//Assign the text of the menu button
@@ -60,8 +62,10 @@ void GUIDropDownList::onComponentClicked(GUIComponent* component) {
 		//Setup the menu
 		setupMenu();
 
-		if (overlayClosedTexture)
-			overlay->getMaterial()->setDiffuse(overlayClosedTexture);
+		if (overlayClosedTexture) {
+			overlay->setRenderIndex(0);
+			overlay->getMaterial()->update();
+		}
 	}
 }
 
@@ -88,7 +92,7 @@ void GUIDropDownList::onMousePressed(int button) {
 		if (! contains(data.lastX, data.lastY)) {
 			menuOpen = false;
 			if (overlayClosedTexture)
-				overlay->getMaterial()->setDiffuse(overlayClosedTexture);
+				overlay->setRenderIndex(0);
 			setupMenu();
 		}
 	}

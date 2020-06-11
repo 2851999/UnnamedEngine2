@@ -43,12 +43,12 @@ void GameObject::render() {
 	}
 }
 
-void GameObject::setMesh(Mesh* mesh, RenderShader* shader) {
+void GameObject::setMesh(Mesh* mesh, RenderShader* shader, VBOUsage vboUsage) {
 	if (this->mesh != NULL)
 		delete this->mesh;
 	this->mesh = mesh;
 	if (shader) {
-		mesh->setup(shader);
+		mesh->setup(shader, vboUsage);
 		this->renderShader = shader;
 	}
 }

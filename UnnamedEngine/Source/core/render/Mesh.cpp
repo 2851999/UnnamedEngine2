@@ -281,48 +281,48 @@ MeshRenderData::MeshRenderData(MeshData* data, RenderShader* renderShader) {
 	renderData = new RenderData(data->getRenderMode(), numVertices);
 }
 
-void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
+void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, VBOUsage vboUsage) {
 	//The shader used for the setup
 	Shader* shader = setupShader->getShader();
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
-		vboPositions = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getPositions().size() * sizeof(data->getPositions()[0]), data->getPositions(), usagePositions);
+		vboPositions = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getPositions().size() * sizeof(data->getPositions()[0]), data->getPositions(), vboUsage);
 		vboPositions->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, data->getNumDimensions());
 		renderData->addVBO(vboPositions);
 	}
 
 	//Setup colours
 	if (data->hasColours() && data->separateColours()) {
-		vboColours = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getColours().size() * sizeof(data->getColours()[0]), data->getColours(), usageColours);
+		vboColours = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getColours().size() * sizeof(data->getColours()[0]), data->getColours(), vboUsage);
 		vboColours->addAttribute(shader->getAttributeLocation("Colour"), 4); //Won't work for Vulkan
 		renderData->addVBO(vboColours);
 	}
 
 	//Setup texture coordinates
 	if (data->hasTextureCoords() && data->separateTextureCoords()) {
-		vboTextureCoords = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getTextureCoords().size() * sizeof(data->getTextureCoords()[0]), data->getTextureCoords(), usageTextureCoords);
+		vboTextureCoords = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getTextureCoords().size() * sizeof(data->getTextureCoords()[0]), data->getTextureCoords(), vboUsage);
 		vboTextureCoords->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, 2);
 		renderData->addVBO(vboTextureCoords);
 	}
 
 	//Setup normals
 	if (data->hasNormals() && data->separateNormals()) {
-		vboNormals = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getNormals().size() * sizeof(data->getNormals()[0]), data->getNormals(), usageNormals);
+		vboNormals = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getNormals().size() * sizeof(data->getNormals()[0]), data->getNormals(), vboUsage);
 		vboNormals->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, 3);
 		renderData->addVBO(vboNormals);
 	}
 
 	//Setup tangents
 	if (data->hasTangents() && data->separateTangents()) {
-		vboTangents = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getTangents().size() * sizeof(data->getTangents()[0]), data->getTangents(), usageTangents);
+		vboTangents = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getTangents().size() * sizeof(data->getTangents()[0]), data->getTangents(), vboUsage);
 		vboTangents->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, 3);
 		renderData->addVBO(vboTangents);
 	}
 
 	//Setup bitangents
 	if (data->hasBitangents() && data->separateBitangents()) {
-		vboBitangents = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBitangents().size() * sizeof(data->getBitangents()[0]), data->getBitangents(), usageBitangents);
+		vboBitangents = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBitangents().size() * sizeof(data->getBitangents()[0]), data->getBitangents(), vboUsage);
 		vboBitangents->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, 3);
 		renderData->addVBO(vboBitangents);
 	}
@@ -330,7 +330,7 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 	//Check to see whether the 'other' VBO is required
 	if (data->hasOthers()) {
 
-		vboOthers = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getOthers().size() * sizeof(data->getOthers()[0]), data->getOthers(), usageOthers);
+		vboOthers = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getOthers().size() * sizeof(data->getOthers()[0]), data->getOthers(), vboUsage);
 
 		if (data->hasPositions() && ! data->separatePositions())
 			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, data->getNumDimensions());
@@ -355,18 +355,18 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials) {
 
 	//Setup bones
 	if (data->hasBones()) {
-		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), GL_STATIC_DRAW);
+		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), VBOUsage::STATIC);
 		vboBoneIDs->addAttributeWithType(GL_INT, ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
 		renderData->addVBO(vboBoneIDs);
 
-		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), GL_STATIC_DRAW);
+		vboBoneWeights = new VBO<GLfloat>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), VBOUsage::STATIC);
 		vboBoneWeights->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, 4);
 		renderData->addVBO(vboBoneWeights);
 	}
 
 	//Check to see whether indices are needed
 	if (data->hasIndices()) {
-		vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, data->getNumIndices() * sizeof(data->getIndices()[0]), data->getIndices(), usageIndices);
+		vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, data->getNumIndices() * sizeof(data->getIndices()[0]), data->getIndices(), vboUsage);
 		renderData->setIndicesVBO(vboIndices);
 	}
 
@@ -403,6 +403,8 @@ void MeshRenderData::updatePositions(MeshData* data) {
 			glBindVertexArray(0);
 		} else
 			vboPositions->update();
+
+		renderData->setCount(numVertices);
 	} else
 		Logger::log("Cannot update positions as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
@@ -534,9 +536,9 @@ Mesh::~Mesh() {
 	delete data;
 }
 
-void Mesh::setup(RenderShader* renderShader) {
+void Mesh::setup(RenderShader* renderShader, VBOUsage vboUsage) {
 	this->renderData = new MeshRenderData(this->data, renderShader);
-	this->renderData->setup(data, materials);
+	this->renderData->setup(data, materials, vboUsage);
 }
 
 void Mesh::updateAnimation(float deltaSeconds) {

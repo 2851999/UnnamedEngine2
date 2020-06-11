@@ -23,11 +23,12 @@
 
 class RenderPass;
 class GraphicsPipelineLayout;
+class GameObject;
 
- /*****************************************************************************
-  * The GraphicsPipeline class responsible for handleing Vulkan pipelines and to
-  * produce similar behaviour in OpenGL
-  *****************************************************************************/
+/*****************************************************************************
+ * The GraphicsPipeline class responsible for handleing Vulkan pipelines and to
+ * produce similar behaviour in OpenGL
+ *****************************************************************************/
 
 class GraphicsPipeline {
 public:
@@ -39,6 +40,16 @@ public:
 	/* Varuous generalised compare operations */
 	enum class CompareOperation {
 		LESS, EQUAL, LESS_OR_EQUAL, GREATER, GREATER_OR_EQUAL
+	};
+
+	/* Various generalised culling modes */
+	enum class CullMode {
+		NONE, FRONT, BACK, FRONT_AND_BACK
+	};
+
+	/* Various generalised faces for culling modes */
+	enum class FrontFace {
+		COUNTER_CLOCKWISE, CLOCKWISE
 	};
 
 	/* Structure containing information about the depth state to be used */
@@ -53,10 +64,16 @@ public:
 	struct ColourBlendState {
 		bool blendEnabled = false;
 
-		BlendFactor srcRGB = BlendFactor::ONE;
-		BlendFactor dstRGB = BlendFactor::ZERO;
+		BlendFactor srcRGB   = BlendFactor::ONE;
+		BlendFactor dstRGB   = BlendFactor::ZERO;
 		BlendFactor srcAlpha = BlendFactor::ONE;
 		BlendFactor dstAlpha = BlendFactor::ZERO;
+	};
+
+	/* Structure containing information about the culling state to be used */
+	struct CullState {
+		CullMode  mode      = CullMode::NONE; //WHY DOES THIS CAUSE ASSIMP TO CRASH???!?!?!?!?!?!?
+		FrontFace frontFace = FrontFace::COUNTER_CLOCKWISE; //WHY DOES THIS CAUSE ASSIMP TO CRASH???!?!?!?!?!?!?
 	};
 private:
 	/* The layout of this pipeline */
@@ -73,6 +90,12 @@ private:
 
 	/* The depth state to use with this pipeline */
 	DepthState depthState;
+
+	/* The cull state to use with this pipeline */
+	CullState cullState;
+
+	/* List of game objects queued to be renered with this pipeline */
+	std::vector<GameObject*> queuedObjects;
 public:
 	/* Structure used to store data required for creating a render pipeline */
 	struct VertexInputData {
@@ -89,12 +112,22 @@ public:
 	/* Method used to bind this pipeline for rendering */
 	void bind();
 
+	/* Method used to render all queued objects with this pipeline (Clears afterwards) */
+	void renderAllQueued();
+
+	/* Method used to queue an object for rendering with this pipeline */
+	inline void queueRender(GameObject* object) { queuedObjects.push_back(object); }
+
 	/* Methods used to convert the a generalised states to the one required by
 	   OpenGL/Vulkan */
 	GLenum convertToGL(BlendFactor factor);
 	VkBlendFactor convertToVk(BlendFactor factor);
 	GLenum convertToGL(CompareOperation op);
 	VkCompareOp convertToVk(CompareOperation op);
+	GLenum convertToGL(CullMode mode);
+	VkCullModeFlagBits convertToVk(CullMode mode);
+	GLenum convertToGL(FrontFace face);
+	VkFrontFace convertToVk(FrontFace face);
 
 	/* Getters */
 	inline GraphicsPipelineLayout* getLayout() { return layout; }
@@ -117,9 +150,10 @@ private:
 	/* The vertex input data for the pipeline */
 	GraphicsPipeline::VertexInputData vertexInputData;
 
-	/* The colour and depth states for the pipeline */
+	/* The colour, depth and cull states for the pipeline */
 	GraphicsPipeline::ColourBlendState colourBlendState;
 	GraphicsPipeline::DepthState       depthState;
+	GraphicsPipeline::CullState        cullState;
 
 	/* The width and height of the view port */
 	uint32_t viewportWidth;
@@ -129,7 +163,7 @@ private:
 	bool viewportFlippedVk;
 public:
 	/* Constructor */
-	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk);
+	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk);
 
 	/* Destructor */
 	virtual ~GraphicsPipelineLayout();
@@ -140,6 +174,7 @@ public:
 	inline GraphicsPipeline::VertexInputData& getVertexInputData() { return vertexInputData; }
 	inline GraphicsPipeline::ColourBlendState& getColourBlendState() { return colourBlendState; }
 	inline GraphicsPipeline::DepthState& getDepthState() { return depthState; }
+	inline GraphicsPipeline::CullState& getCullState() { return cullState; }
 	inline uint32_t getViewportWidth() { return viewportWidth; }
 	inline uint32_t getViewportHeight() { return viewportHeight; }
 	inline bool getViewportFlippedVk() { return viewportFlippedVk; }

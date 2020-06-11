@@ -27,6 +27,11 @@
  * The VBO class is used to manage a vertex buffer object
  *****************************************************************************/
 
+ /* Types of usage for a VBO */
+enum class VBOUsage {
+	STATIC, DYNAMIC
+};
+
 template <typename T>
 class VBO {
 public:
@@ -49,7 +54,7 @@ private:
 	GLenum                target;
 	GLsizeiptr            size;
 	std::vector<T>&       data;
-	GLenum                usage;
+	VBOUsage              usage;
 
 	/* The stride for data in this VBO */
 	unsigned int          stride = 0;
@@ -65,9 +70,12 @@ private:
 	/* The binding/attribute descriptions for Vulkan */
 	VkVertexInputBindingDescription vulkanVertexInputBindingDescription;
 	std::vector<VkVertexInputAttributeDescription> vulkanAttributeDescriptions;
+
+	/* Methods used to convert 'Usage' into the OpenGL equivalent */
+	GLenum convertToGL(VBOUsage usage);
 public:
 	/* The constructors */
-	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, GLenum usage, bool instanced = false) :
+	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, VBOUsage usage, bool instanced = false) :
 		buffer(0), target(target), size(size), data(data), usage(usage), instanced(instanced) {}
 
 	/* The destructor */

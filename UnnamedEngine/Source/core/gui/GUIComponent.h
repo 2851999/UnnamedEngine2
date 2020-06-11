@@ -45,9 +45,6 @@ private:
 	/* The text instance used to render text */
 	Text* textInstance = NULL;
 
-	/* The pipeline used to render */
-	GraphicsPipeline* graphicsPipeline = NULL;
-
 	/* Method used to setup the renderer when it is created */
 	void setup();
 protected:
@@ -74,8 +71,11 @@ public:
 	/* The method used to update this component ready for rendering */
 	virtual void update() override;
 
-	/* Method used to render (Needs to bind a GraphicsPipeline) */
+	/* Method used to render */
 	virtual void render() override;
+
+	/* Method used to render when asked by a graphics pipeline */
+	virtual void queuedRender() override;
 
 	/* Methods to render text at a location relative to the component */
 	void renderText(std::string text, Vector2f relPos);
@@ -83,6 +83,9 @@ public:
 
 	/* Method used to get the max render index */
 	unsigned int getMaxRenderIndex();
+
+	/* Method to set the current render index */
+	inline void setRenderIndex(unsigned int renderIndex) { this->renderIndex = renderIndex; }
 
 	/* Methods used to set the colours/textures */
 	void setColour(Colour colour);

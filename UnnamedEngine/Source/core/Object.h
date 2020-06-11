@@ -50,6 +50,9 @@ public:
 	virtual void update() {}
 	virtual void render();
 
+	/* Method used to render when asked by a graphics pipeline */
+	virtual void queuedRender() {}
+
 	/* Method used to set the parent of this object */
 	inline void setParent(GameObject* parent) { transform->setParent(parent->getTransform()); }
 	/* method used to remove a child object */
@@ -64,7 +67,7 @@ public:
 	/* Used to set the internal mesh, previous will be deleted if there was one,
 	 * if a shader is supplied, then setup will be called on it otherwise it is assumed
 	 * it has already been setup */
-	void setMesh(Mesh* mesh, RenderShader* shader = NULL);
+	void setMesh(Mesh* mesh, RenderShader* shader = NULL, VBOUsage vboUsage = VBOUsage::STATIC);
 
 	inline bool hasMesh() { return mesh; }
 	inline Mesh* getMesh() { return mesh; }

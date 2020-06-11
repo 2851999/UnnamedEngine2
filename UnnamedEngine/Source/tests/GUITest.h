@@ -52,7 +52,7 @@ private:
 	GUITextBox* textBox;
 	GUIGroup* radioCheckBoxGroup;
 
-	GraphicsPipeline* test;
+	//GraphicsPipeline* test;
 public:
 	virtual ~Test() {}
 
@@ -85,6 +85,7 @@ void Test::initialise() {
 	getSettings().videoVSync = 0;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoVulkan = true;
+	getSettings().debugShowInformation = true;
 	getSettings().debugVkValidationLayersEnabled = false;
 
 //	Settings& settings = getSettings();
@@ -196,7 +197,7 @@ void Test::created() {
 	//document.save("C:/Users/Joel/Desktop/Test.xml");
 
 	//For now need some pipeline to use camera's view
-	test = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GUI), Renderer::getDefaultRenderPass());
+	//test = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GUI), Renderer::getDefaultRenderPass());
 }
 //#include <iostream>
 void Test::update() {
@@ -207,8 +208,10 @@ void Test::update() {
 
 void Test::render() {
 	//utils_gl::setupAlphaBlendingMSAA();
-	test->bind();
-	camera->useView();
+	//test->bind();
+	//camera->useView();
+
+	//utils_gl::enableWireframe();
 
 	panel->render();
 }
@@ -216,6 +219,6 @@ void Test::render() {
 void Test::destroy() {
 	delete camera;
 	delete panel;
-	delete test;
+	//delete test;
 }
 

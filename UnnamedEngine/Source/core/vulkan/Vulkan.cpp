@@ -508,7 +508,7 @@ void Vulkan::updateDescriptorSet(DescriptorSet* set) {
 	//Setup the structure for the queue
 	DescriptorSetUpdateInfo info;
 	info.set             = set;
-	info.nextUpdateFrame = getNextFrame();
+	info.nextUpdateFrame = getCurrentFrame();
 	info.updatesLeft     = getSwapChain()->getImageCount();
 
 	//Add the set to the update queue

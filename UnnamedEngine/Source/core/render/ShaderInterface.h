@@ -106,7 +106,7 @@ struct ShaderBlock_Terrain {
 	float ue_size;
 };
 
-struct ShaderBlock_GammaCorrection {
+struct ShaderBlock_GammaCorrectionFXAA {
 	Vector2f inverseTextureSize;
 	int gammaCorrect;
 	float exposureIn;
@@ -171,6 +171,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
@@ -188,7 +189,7 @@ public:
 	static const unsigned int BLOCK_SKINNING;
 	static const unsigned int BLOCK_LIGHT_BATCH;
 	static const unsigned int BLOCK_TERRAIN;
-	static const unsigned int BLOCK_GAMMA_CORRECTION;
+	static const unsigned int BLOCK_GAMMA_CORRECTION_FXAA;
 	static const unsigned int BLOCK_PBR_ENV_MAP_GEN;
 	static const unsigned int BLOCK_PBR_PREFILTER_MAP_GEN;
 	static const unsigned int BLOCK_PBR_LIGHTING_CORE;
@@ -202,7 +203,7 @@ public:
 	static const unsigned int UBO_BINDING_LOCATION_SKINNING;
 	static const unsigned int UBO_BINDING_LOCATION_LIGHT_BATCH;
 	static const unsigned int UBO_BINDING_LOCATION_TERRAIN;
-	static const unsigned int UBO_BINDING_LOCATION_GAMMA_CORRECTION;
+	static const unsigned int UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA;
 	static const unsigned int UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN;
 	static const unsigned int UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN;
 	static const unsigned int UBO_BINDING_LOCATION_PBR_LIGHTING_CORE;

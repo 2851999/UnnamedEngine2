@@ -22,13 +22,14 @@
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 #include "../BaseEngine.h"
+#include "../Object.h"
 #include "../../utils/VulkanUtils.h"
 
  /*****************************************************************************
   * The GraphicsPipeline class
   *****************************************************************************/
 
-GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass) : layout(layout), renderShader(layout->getRenderShader()), colourBlendState(layout->getColourBlendState()), depthState(layout->getDepthState()) {
+GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass) : layout(layout), renderShader(layout->getRenderShader()), colourBlendState(layout->getColourBlendState()), depthState(layout->getDepthState()), cullState(layout->getCullState()) {
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
@@ -106,8 +107,8 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 		rasterizer.rasterizerDiscardEnable = VK_FALSE; //If true discards everything, wouldn't render to frame buffer
 		rasterizer.polygonMode             = VK_POLYGON_MODE_FILL; //Anything else requires GPU feature
 		rasterizer.lineWidth               = 1.0f;
-		rasterizer.cullMode                = VK_CULL_MODE_NONE; //VK_CULL_MODE_BACK_BIT
-		rasterizer.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		rasterizer.cullMode                = convertToVk(cullState.mode); //VK_CULL_MODE_BACK_BIT
+		rasterizer.frontFace               = convertToVk(cullState.frontFace);
 		rasterizer.depthBiasEnable         = VK_FALSE;
 		rasterizer.depthBiasConstantFactor = 0.0f; //Optional
 		rasterizer.depthBiasClamp          = 0.0f; //Optional
@@ -210,6 +211,14 @@ void GraphicsPipeline::bind() {
 
 		glDepthMask(depthState.depthWriteEnable);
 
+		//Assign the cull state
+		if (cullState.mode != CullMode::NONE) {
+			glEnable(GL_CULL_FACE);
+			glFrontFace(convertToGL(cullState.frontFace));
+			glCullFace(convertToGL(cullState.mode));
+		} else
+			glDisable(GL_CULL_FACE);
+
 		//Assign the blend state
 		if (colourBlendState.blendEnabled) {
 			glEnable(GL_BLEND);
@@ -221,6 +230,18 @@ void GraphicsPipeline::bind() {
 
 	//Notify Renderer
 	Renderer::setCurrentGraphicsPipeline(this);
+}
+
+void GraphicsPipeline::renderAllQueued() {
+	if (queuedObjects.size() > 0) {
+		//Bind this pipeline
+		bind();
+		//Go through and render all of the queued objects
+		for (GameObject* object : queuedObjects)
+			object->queuedRender();
+		//Clear the queue
+		queuedObjects.clear();
+	}
 }
 
 GLenum GraphicsPipeline::convertToGL(BlendFactor factor) {
@@ -287,12 +308,64 @@ VkCompareOp GraphicsPipeline::convertToVk(CompareOperation op) {
 	}
 }
 
+GLenum GraphicsPipeline::convertToGL(CullMode mode) {
+	switch (mode) {
+		case CullMode::NONE:
+			return GL_NONE;
+		case CullMode::FRONT:
+			return GL_FRONT;
+		case CullMode::BACK:
+			return GL_BACK;
+		case CullMode::FRONT_AND_BACK:
+			return GL_FRONT_AND_BACK;
+		default:
+			return GL_NONE;
+	}
+}
+
+VkCullModeFlagBits GraphicsPipeline::convertToVk(CullMode mode) {
+	switch (mode) {
+		case CullMode::NONE:
+			return VK_CULL_MODE_NONE;
+		case CullMode::FRONT:
+			return VK_CULL_MODE_FRONT_BIT;
+		case CullMode::BACK:
+			return VK_CULL_MODE_BACK_BIT;
+		case CullMode::FRONT_AND_BACK:
+			return VK_CULL_MODE_FRONT_AND_BACK;
+		default:
+			return VK_CULL_MODE_NONE;
+	}
+}
+
+GLenum GraphicsPipeline::convertToGL(FrontFace face) {
+	switch (face) {
+		case FrontFace::COUNTER_CLOCKWISE:
+			return GL_CCW;
+		case FrontFace::CLOCKWISE:
+			return GL_CW;
+		default:
+			return GL_CCW;
+	}
+}
+
+VkFrontFace GraphicsPipeline::convertToVk(FrontFace face) {
+	switch (face) {
+		case FrontFace::COUNTER_CLOCKWISE:
+			return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		case FrontFace::CLOCKWISE:
+			return VK_FRONT_FACE_CLOCKWISE;
+		default:
+			return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	}
+}
+
 /*****************************************************************************
  * The GraphicsPipelineLayout class
  *****************************************************************************/
 
-GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk) :
-	renderShader(renderShader), vertexInputData(vertexInputData), colourBlendState(colourBlendState), depthState(depthState), viewportWidth(viewportWidth), viewportHeight(viewportHeight), viewportFlippedVk(viewportFlippedVk) {
+GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk) :
+	renderShader(renderShader), vertexInputData(vertexInputData), colourBlendState(colourBlendState), depthState(depthState), cullState(cullState), viewportWidth(viewportWidth), viewportHeight(viewportHeight), viewportFlippedVk(viewportFlippedVk) {
 
 	//Ensure using Vulkan
 	if (BaseEngine::usingVulkan()) {
