@@ -100,6 +100,7 @@ public:
 	inline void enableLighting() { this->lighting = true; }
 	inline void disableLighting() { this->lighting = false; }
 	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
+	void setPostProcessingParameters(bool gammaCorrection, bool fxaa, float exposureIn = -1.0f);
 
 	inline Colour getAmbientLight() { return ambientLight; }
 };

@@ -109,6 +109,15 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 		rasterizer.lineWidth               = 1.0f;
 		rasterizer.cullMode                = convertToVk(cullState.mode); //VK_CULL_MODE_BACK_BIT
 		rasterizer.frontFace               = convertToVk(cullState.frontFace);
+
+		//If viewport is not flipped then, front face must be flipped to match OpenGL (Found with shadow mapping)
+		if (!layout->getViewportFlippedVk()) {
+			if (rasterizer.frontFace == VK_FRONT_FACE_COUNTER_CLOCKWISE)
+				rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+			else
+				rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		}
+
 		rasterizer.depthBiasEnable         = VK_FALSE;
 		rasterizer.depthBiasConstantFactor = 0.0f; //Optional
 		rasterizer.depthBiasClamp          = 0.0f; //Optional

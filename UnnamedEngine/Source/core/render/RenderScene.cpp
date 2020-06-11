@@ -35,9 +35,9 @@ RenderScene::RenderScene(bool pbr, bool postProcessing) : postProcessing(postPro
 
 		//Assign the default values
 		shaderGammaCorrectionFXAAData.inverseTextureSize = Vector2f(1.0f / Window::getCurrentInstance()->getSettings().windowWidth, 1.0f / Window::getCurrentInstance()->getSettings().windowHeight);
-		shaderGammaCorrectionFXAAData.gammaCorrect = false;
-		shaderGammaCorrectionFXAAData.exposureIn = -1;
-		shaderGammaCorrectionFXAAData.fxaa = true;
+		shaderGammaCorrectionFXAAData.gammaCorrect       = false;
+		shaderGammaCorrectionFXAAData.exposureIn         = -1;
+		shaderGammaCorrectionFXAAData.fxaa               = false;
 
 		descriptorSetGammaCorrectionFXAA->getUBO(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
 
@@ -298,4 +298,13 @@ void RenderScene::render() {
 		Renderer::render(screenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 	} else
 		renderScene();
+}
+
+void RenderScene::setPostProcessingParameters(bool gammaCorrection, bool fxaa, float exposureIn) {
+	//Assign the parameters and update the UBO
+	shaderGammaCorrectionFXAAData.gammaCorrect = gammaCorrection;
+	shaderGammaCorrectionFXAAData.fxaa         = fxaa;
+	shaderGammaCorrectionFXAAData.exposureIn   = exposureIn;
+
+	descriptorSetGammaCorrectionFXAA->getUBO(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
 }

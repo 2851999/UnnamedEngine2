@@ -72,8 +72,8 @@ public:
 
 	/* Structure containing information about the culling state to be used */
 	struct CullState {
-		CullMode  mode      = CullMode::NONE; //WHY DOES THIS CAUSE ASSIMP TO CRASH???!?!?!?!?!?!?
-		FrontFace frontFace = FrontFace::COUNTER_CLOCKWISE; //WHY DOES THIS CAUSE ASSIMP TO CRASH???!?!?!?!?!?!?
+		CullMode  mode      = CullMode::NONE;
+		FrontFace frontFace = FrontFace::COUNTER_CLOCKWISE;
 	};
 private:
 	/* The layout of this pipeline */
