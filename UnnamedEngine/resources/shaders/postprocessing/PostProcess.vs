@@ -1,8 +1,5 @@
 #version 420
 
-#map attribute Position ue_position
-#map attribute TextureCoordinate ue_textureCoord
-
 layout(location = 0) in vec3 ue_position;
 layout(location = 1) in vec2 ue_textureCoord;
 

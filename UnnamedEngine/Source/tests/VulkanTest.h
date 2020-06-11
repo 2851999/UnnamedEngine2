@@ -55,29 +55,30 @@ void Test::initialise() {
 	getSettings().videoResolution = VideoResolution::RES_1080p;
 	getSettings().windowFullscreen = false;
 	getSettings().videoVSync = 0;
-	getSettings().videoSamples = 8;
+	getSettings().videoSamples = 0;
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
 }
 
 void Test::created() {
 	//std::cout << Vulkan::getDevice()->listSupportedExtensions() << std::endl;
 
-	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("FontSDFShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("FramebufferShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.135.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("FontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("FramebufferShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
+	Shader::compileEngineShaderToSPIRV("postprocessing/GammaCorrectionFXAAShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	InputBindings* bindings = new InputBindings();
 	bindings->load("C:/UnnamedEngine/config/Controller.xml", getWindow()->getInputManager());
@@ -97,7 +98,7 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(false);
+	renderScene = new RenderScene(false, true);
 	//renderScene->disableLighting();
 
 	utils_random::initialise();

@@ -57,6 +57,7 @@ const unsigned int Renderer::SHADER_SHADOW_MAP                  = 10;
 const unsigned int Renderer::SHADER_SHADOW_MAP_SKINNING         = 11;
 const unsigned int Renderer::SHADER_SHADOW_CUBEMAP              = 12;
 const unsigned int Renderer::SHADER_SHADOW_CUBEMAP_SKINNING     = 13;
+const unsigned int Renderer::SHADER_GAMMA_CORRECTION_FXAA       = 14;
 
 const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                          = 1;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                           = 2;
@@ -75,6 +76,7 @@ const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING              
 const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP                    = 15;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING           = 16;
 const unsigned int Renderer::GRAPHICS_PIPELINE_GUI                               = 17;
+const unsigned int Renderer::GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA             = 18;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -114,6 +116,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_SHADOW_MAP_SKINNING, "lighting/ShadowMapShader", { "UE_SKINNING" });
 	addRenderShader(SHADER_SHADOW_CUBEMAP, "lighting/ShadowCubemapShader");
 	addRenderShader(SHADER_SHADOW_CUBEMAP_SKINNING, "lighting/ShadowCubemapShader", { "UE_SKINNING" });
+	addRenderShader(SHADER_GAMMA_CORRECTION_FXAA, "postprocessing/GammaCorrectionFXAAShader");
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -188,6 +191,7 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP, new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_CUBEMAP), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING, new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_CUBEMAP_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GUI, new GraphicsPipelineLayout(getRenderShader(SHADER_MATERIAL), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA, new GraphicsPipelineLayout(getRenderShader(SHADER_GAMMA_CORRECTION_FXAA), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, false));
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();

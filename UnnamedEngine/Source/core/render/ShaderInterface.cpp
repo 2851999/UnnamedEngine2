@@ -35,12 +35,13 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MODEL       = 2;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH = 3;
 
  /* IDs for descriptor set layouts */
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA         = 0;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MATERIAL       = 1;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL          = 2;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH    = 3;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING = 4;
-const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP = 5;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA                = 0;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MATERIAL              = 1;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL                 = 2;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH           = 3;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING        = 4;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP        = 5;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA = 6;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -58,7 +59,7 @@ const unsigned int ShaderInterface::BLOCK_MATERIAL               = 3;
 const unsigned int ShaderInterface::BLOCK_SKINNING               = 4;
 const unsigned int ShaderInterface::BLOCK_LIGHT_BATCH            = 5;
 const unsigned int ShaderInterface::BLOCK_TERRAIN                = 6;
-const unsigned int ShaderInterface::BLOCK_GAMMA_CORRECTION       = 7;
+const unsigned int ShaderInterface::BLOCK_GAMMA_CORRECTION_FXAA  = 7;
 const unsigned int ShaderInterface::BLOCK_PBR_ENV_MAP_GEN        = 8;
 const unsigned int ShaderInterface::BLOCK_PBR_PREFILTER_MAP_GEN  = 9;
 const unsigned int ShaderInterface::BLOCK_PBR_LIGHTING_CORE      = 10;
@@ -72,7 +73,7 @@ const unsigned int ShaderInterface::UBO_BINDING_LOCATION_MATERIAL               
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SKINNING               = 4;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_LIGHT_BATCH            = 5;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_TERRAIN                = 6;
-const unsigned int ShaderInterface::UBO_BINDING_LOCATION_GAMMA_CORRECTION       = 7;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA  = 7;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN        = 8;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN  = 9;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_LIGHTING_CORE      = 10;
@@ -135,6 +136,13 @@ ShaderInterface::ShaderInterface() {
 	shadowCubemapLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP, shadowCubemapLayout);
+
+	//Gamma correction FXAA
+	DescriptorSetLayout* gammaCorrectionFXAALayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
+	gammaCorrectionFXAALayout->addUBO(sizeof(ShaderBlock_GammaCorrectionFXAA), GL_STATIC_DRAW, UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA);
+	gammaCorrectionFXAALayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA, gammaCorrectionFXAALayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -209,6 +217,11 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP));
+	} else if (shaderID == Renderer::SHADER_GAMMA_CORRECTION_FXAA) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA));
 	}
 }
 

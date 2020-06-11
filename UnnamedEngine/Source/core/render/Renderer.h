@@ -68,6 +68,7 @@ public:
 	static const unsigned int SHADER_SHADOW_MAP_SKINNING;
 	static const unsigned int SHADER_SHADOW_CUBEMAP;
 	static const unsigned int SHADER_SHADOW_CUBEMAP_SKINNING;
+	static const unsigned int SHADER_GAMMA_CORRECTION_FXAA;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -87,6 +88,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_CUBEMAP;
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING;
 	static const unsigned int GRAPHICS_PIPELINE_GUI;
+	static const unsigned int GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

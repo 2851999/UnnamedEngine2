@@ -36,6 +36,9 @@ private:
 	/* Boolean that states whether lighting should be used or not */
 	bool lighting = true;
 
+	/* Boolean that states whether post processing should be used or not */
+	bool postProcessing;
+
 	/* The ambient light used in phong shading */
 	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
 
@@ -45,12 +48,20 @@ private:
 	/* The data to be sent to the shader about a light batch when doing lighting */
 	ShaderBlock_LightBatch shaderLightBatchData;
 
+	/* The data to be sent to the gama correction/FXAA shader */
+	ShaderBlock_GammaCorrectionFXAA shaderGammaCorrectionFXAAData;
+
+	/* Desriptor set for gamma correction/FXAA data*/
+	DescriptorSet* descriptorSetGammaCorrectionFXAA;
+
 	/* The graphics pipelines required for rendering */
 	GraphicsPipeline* pipelineMaterial;
 	GraphicsPipeline* pipelineLighting;
 	GraphicsPipeline* pipelineLightingBlend;
 	GraphicsPipeline* pipelineLightingSkinning;
 	GraphicsPipeline* pipelineLightingSkinningBlend;
+
+	GraphicsPipeline* pipelineGammaCorrectionFXAA;
 
 	/* Mesh for rendering to the screen */
 	Mesh* screenTextureMesh;
@@ -59,13 +70,16 @@ private:
 	GraphicsPipeline* pipelineFinal;
 
 	/* Offscreen render pass */
-	RenderPass* offscreenRenderPass;
+	RenderPass* offscreenRenderPass = NULL;
+
+	/* Method used to render this scene (Ignoring any post processing) */
+	void renderScene();
 public:
 	/* The number of lights that can be rendered at once */
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
 	/* Constructor */
-	RenderScene(bool pbr);
+	RenderScene(bool pbr, bool postProcessing);
 
 	/* Destructor */
 	virtual ~RenderScene();

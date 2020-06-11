@@ -1,4 +1,10 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 5 | Experimental 8
+
+* Re-added gamma correction, FXAA and exposure mapping
+  post processing in RenderScene (unfinished)
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 5 | Experimental 7
 
 * Fixed bug: Font would sometimes render incorrectly
