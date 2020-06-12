@@ -66,6 +66,7 @@ private:
 
 	GraphicsPipeline* pipelineGammaCorrectionFXAA;
 	GraphicsPipeline* pipelineDeferredLightingGeometry;
+	GraphicsPipeline* pipelineDeferredLightingSkinningGeometry;
 	GraphicsPipeline* pipelineDeferredLighting;
 	GraphicsPipeline* pipelineDeferredLightingBlend;
 

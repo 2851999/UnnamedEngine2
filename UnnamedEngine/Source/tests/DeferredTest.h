@@ -59,7 +59,7 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
 }
 
 void Test::created() {
@@ -77,8 +77,12 @@ void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
 	//Shader::compileEngineShaderToSPIRV("postprocessing/GammaCorrectionFXAAShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	Shader::compileEngineShaderToSPIRV("lighting/LightingDeferredGeom", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
-	Shader::compileEngineShaderToSPIRV("lighting/DeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLightingGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
+	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLightingGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	InputBindings* bindings = new InputBindings();
 	bindings->load("C:/UnnamedEngine/config/Controller.xml", getWindow()->getInputManager());
@@ -98,7 +102,7 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(true, false, false);
+	renderScene = new RenderScene(true, true, false);
 	//renderScene->setPostProcessingParameters(false, true, 1.0f);
 
 	//renderScene->disableLighting();
@@ -139,7 +143,9 @@ void Test::created() {
 	renderScene->add(model2);
 
 	//mitsuba-sphere.obj
-	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/mitsuba/", "mitsuba-sphere.obj"), shader);
+	//mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/mitsuba/", "mitsuba-sphere.obj"), shader);
+	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), shaderSkinning);
+	mit1->getMesh()->getSkeleton()->startAnimation("");
 	mit1->setPosition(10.0f, 1.0f, 0.0f);
 	mit1->update();
 	renderScene->add(mit1);
@@ -160,6 +166,8 @@ void Test::update() {
 		lightDir->getTransform()->translate(-0.008f * getDelta(), 0.0f, 0.0f);
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		lightDir->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
+
+	mit1->getMesh()->updateAnimation(getDeltaSeconds());
 
 	light->update();
 	lightDir->update();

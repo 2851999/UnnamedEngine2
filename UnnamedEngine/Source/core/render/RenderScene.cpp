@@ -30,21 +30,34 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferre
 
 	//Setup for deferred rendering if needed
 	if (deferred) {
-		descriptorSetGeometryBuffer = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING));
+		descriptorSetGeometryBuffer = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(pbr ? ShaderInterface::DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING : ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING));
 
 		//Setup the geometry render pass
-		FBO* fbo = new FBO(width, height, {
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
-		});
+		FBO* fbo;
+		if (pbr) {
+			fbo = new FBO(width, height, {
+				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+				new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
+			});
+		} else {
+			fbo = new FBO(width, height, {
+				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+				new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
+			});
+		}
 
 		deferredGeometryRenderPass = new RenderPass(fbo);
 
 		descriptorSetGeometryBuffer->setTexture(0, deferredGeometryRenderPass->getFBO()->getAttachment(0));
 		descriptorSetGeometryBuffer->setTexture(1, deferredGeometryRenderPass->getFBO()->getAttachment(1));
 		descriptorSetGeometryBuffer->setTexture(2, deferredGeometryRenderPass->getFBO()->getAttachment(2));
+		if (pbr)
+			descriptorSetGeometryBuffer->setTexture(3, deferredGeometryRenderPass->getFBO()->getAttachment(3));
 		descriptorSetGeometryBuffer->setup();
 
 		//Setup the screen texture mesh
@@ -58,9 +71,10 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferre
 		deferredRenderingScreenTextureMesh = new Mesh(meshData);
 		deferredRenderingScreenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 
-		pipelineDeferredLightingGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY), deferredGeometryRenderPass);
-		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), Renderer::getDefaultRenderPass());
-		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), Renderer::getDefaultRenderPass());
+		pipelineDeferredLightingGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY), deferredGeometryRenderPass);
+		pipelineDeferredLightingSkinningGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY), deferredGeometryRenderPass);
+		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), Renderer::getDefaultRenderPass());
+		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), Renderer::getDefaultRenderPass());
 	}
 
 	//Setup for post processing if needed
@@ -118,6 +132,7 @@ RenderScene::~RenderScene() {
 
 	if (deferred) {
 		delete pipelineDeferredLightingGeometry;
+		delete pipelineDeferredLightingSkinningGeometry;
 		delete pipelineDeferredLighting;
 		delete pipelineDeferredLightingBlend;
 
@@ -227,13 +242,23 @@ void RenderScene::renderOffscreen() {
 		//Render to the geometry buffer
 		deferredGeometryRenderPass->begin();
 
-		pipelineDeferredLightingGeometry->bind();
-
 		((Camera3D*) Renderer::getCamera())->useView();
 
-		//Go through and render all the objects
-		for (unsigned int i = 0; i < objects.size(); ++i)
-			objects[i]->render();
+		pipelineDeferredLightingGeometry->bind();
+
+		if (objects.size() > 0) {
+
+			//Go through and render all the objects
+			for (unsigned int i = 0; i < objects.size(); ++i)
+				objects[i]->render();
+		}
+
+		if (skinnedObjects.size() > 0) {
+			pipelineDeferredLightingSkinningGeometry->bind();
+
+			for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
+				skinnedObjects[i]->render();
+		}
 
 		deferredGeometryRenderPass->end();
 	}

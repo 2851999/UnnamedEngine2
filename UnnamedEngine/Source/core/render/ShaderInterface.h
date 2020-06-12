@@ -174,6 +174,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;

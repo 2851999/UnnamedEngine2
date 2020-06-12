@@ -1,4 +1,13 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 6 | Experimental 3
+
+* Added skinning support for deferred lighting
+* Added basic pbr support for deferred lighting
+
+* Renamed shader LightingDeferredGeom to
+  DeferredLightingGeometry
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 6 | Experimental 2
 
 * Started readding deferred lighting
