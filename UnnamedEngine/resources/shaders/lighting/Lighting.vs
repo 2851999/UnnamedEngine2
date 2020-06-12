@@ -5,13 +5,17 @@
 #include "../Skinning.vs"
 #endif
 
+#ifndef UE_GEOMETRY_ONLY
 #include "Lighting.glsl"
+#endif
 
 layout(location = 7) out vec3 ue_tangentViewPos;
 layout(location = 8) out vec3 ue_tangentFragPos;
 
 layout(location = 9) out mat3 ue_frag_tbnMatrix;
+#ifndef UE_GEOMETRY_ONLY
 layout(location = 13) out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
+#endif
 
 #ifdef UE_SKINNING
 void ueAssignLightingData() {
@@ -27,9 +31,10 @@ void ueAssignLightingData() {
 		ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
 		ue_frag_normal = normalMatrix * ue_normal;
 	}
-	
+#ifndef UE_GEOMETRY_ONLY
 	for (int i = 0; i < ue_numLights; i++)
 		ue_frag_pos_lightspace[i] = ue_lightSpaceMatrix[i] * vec4(ue_frag_position, 1.0);
+#endif
 	
 	if (ue_material.hasNormalMap) {
 		vec3 T;
@@ -65,8 +70,10 @@ void ueAssignLightingData() {
 	ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
 	ue_frag_normal = normalMatrix * ue_normal;
 	
+#ifndef UE_GEOMETRY_ONLY
 	for (int i = 0; i < ue_numLights; i++)
 		ue_frag_pos_lightspace[i] = ue_lightSpaceMatrix[i] * vec4(ue_frag_position, 1.0);
+#endif
 	
 	if (ue_material.hasNormalMap) {
 		vec3 T = normalize(normalMatrix * ue_tangent);

@@ -1,4 +1,9 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 6 | Experimental 2
+
+* Started readding deferred lighting
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 6 | Experimental 1
 
 * Added 'setPostProcessingParameters' method in RenderScene

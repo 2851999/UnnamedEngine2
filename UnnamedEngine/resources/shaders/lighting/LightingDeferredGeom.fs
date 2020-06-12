@@ -4,9 +4,9 @@
 #define UE_LOCATION_GEOMETRY_NORMAL 1
 #define UE_LOCATION_GEOMETRY_ALBEDO 2
 
-layout (location = UE_LOCATION_GEOMETRY_POSITION) out vec3 ue_gPosition;
-layout (location = UE_LOCATION_GEOMETRY_NORMAL) out vec4 ue_gNormal;
-layout (location = UE_LOCATION_GEOMETRY_ALBEDO) out vec4 ue_gAlbedo;
+layout(location = UE_LOCATION_GEOMETRY_POSITION) out vec4 ue_gPosition;
+layout(location = UE_LOCATION_GEOMETRY_NORMAL) out vec4 ue_gNormal;
+layout(location = UE_LOCATION_GEOMETRY_ALBEDO) out vec4 ue_gAlbedo;
 
 void main() {
 	vec2 textureCoord = ueCalculateTextureCoord();
@@ -22,7 +22,7 @@ void main() {
 
 	//ue_FragColour = vec4(light, diffuseColour.a);
 
-	ue_gPosition = ue_frag_position;
+	ue_gPosition = vec4(ue_frag_position, 1.0); //Current FramebufferAttachment class assumes 4 components
 	ue_gNormal = vec4(normal, shininess);
 	ue_gAlbedo = diffuseColour;
 }

@@ -98,7 +98,7 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(false, true);
+	renderScene = new RenderScene(false, false, true);
 	renderScene->setPostProcessingParameters(false, true, 1.0f);
 
 	//renderScene->disableLighting();

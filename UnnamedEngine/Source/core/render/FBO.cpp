@@ -48,13 +48,13 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 		VkImageLayout imageLayout;
 
 		if (type == Type::COLOUR_TEXTURE) {
-			vulkanFormat = Vulkan::getSwapChain()->getSurfaceFormat();
+			vulkanFormat      = VK_FORMAT_R16G16B16A16_SFLOAT; //Equivalent to OpenGL below - Should really check if supported first
 			usage             = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			aspectMask        = VK_IMAGE_ASPECT_COLOR_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else if (type == Type::DEPTH_TEXTURE) {
-			vulkanFormat = Vulkan::getSwapChain()->getDepthFormat();
+			vulkanFormat      = Vulkan::getSwapChain()->getDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
@@ -248,7 +248,7 @@ void FBO::setup(RenderPass* renderPass) {
 			//Setup the current attachment
 			attachments[i]->setup(index);
 
-			//Assume that if it is not a depth attachment then it is a colour attachment
+			//Add the colour attachments
 			if (attachments[i]->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE) {
 				colourAttachments.push_back(GL_COLOR_ATTACHMENT0 + i);
 				index++;

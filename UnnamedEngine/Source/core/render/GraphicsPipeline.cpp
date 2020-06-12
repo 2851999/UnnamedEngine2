@@ -144,26 +144,31 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 		depthStencil.front                 = {}; //Optional
 		depthStencil.back                  = {}; //Optional
 
-		//Per framebuffer (only have one here)
-		VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
-		colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		colorBlendAttachment.blendEnable = colourBlendState.blendEnabled ? VK_TRUE : VK_FALSE;
+		//Per framebuffer (use same one for all)
+		VkPipelineColorBlendAttachmentState colourBlendAttachment = {};
+		colourBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		colourBlendAttachment.blendEnable = colourBlendState.blendEnabled ? VK_TRUE : VK_FALSE;
 
 		if (colourBlendState.blendEnabled) {
-			colorBlendAttachment.srcColorBlendFactor = convertToVk(colourBlendState.srcRGB);
-			colorBlendAttachment.dstColorBlendFactor = convertToVk(colourBlendState.dstRGB);
-			colorBlendAttachment.colorBlendOp        = VK_BLEND_OP_ADD;
-			colorBlendAttachment.srcAlphaBlendFactor = convertToVk(colourBlendState.srcAlpha);
-			colorBlendAttachment.dstAlphaBlendFactor = convertToVk(colourBlendState.srcAlpha);
-			colorBlendAttachment.alphaBlendOp        = VK_BLEND_OP_ADD;
+			colourBlendAttachment.srcColorBlendFactor = convertToVk(colourBlendState.srcRGB);
+			colourBlendAttachment.dstColorBlendFactor = convertToVk(colourBlendState.dstRGB);
+			colourBlendAttachment.colorBlendOp        = VK_BLEND_OP_ADD;
+			colourBlendAttachment.srcAlphaBlendFactor = convertToVk(colourBlendState.srcAlpha);
+			colourBlendAttachment.dstAlphaBlendFactor = convertToVk(colourBlendState.srcAlpha);
+			colourBlendAttachment.alphaBlendOp        = VK_BLEND_OP_ADD;
 		}
+
+		//Colour attachments
+		std::vector<VkPipelineColorBlendAttachmentState> colourBlendAttachments((renderPass->getFBO() && renderPass->getFBO()->getAttachmentCount() > 2) ? (renderPass->getFBO()->getAttachmentCount() - 1) : 1);
+		for (unsigned int i = 0; i < colourBlendAttachments.size(); ++i)
+			colourBlendAttachments[i] = colourBlendAttachment;
 
 		VkPipelineColorBlendStateCreateInfo colorBlending = {};
 		colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 		colorBlending.logicOpEnable     = VK_FALSE;
 		colorBlending.logicOp           = VK_LOGIC_OP_COPY; //Optional
-		colorBlending.attachmentCount   = 1;
-		colorBlending.pAttachments      = &colorBlendAttachment;
+		colorBlending.attachmentCount   = static_cast<uint32_t>(colourBlendAttachments.size());
+		colorBlending.pAttachments      = colourBlendAttachments.data();
 		colorBlending.blendConstants[0] = 0.0f; //Optional
 		colorBlending.blendConstants[1] = 0.0f; //Optional
 		colorBlending.blendConstants[2] = 0.0f; //Optional

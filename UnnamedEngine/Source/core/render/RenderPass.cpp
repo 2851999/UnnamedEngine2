@@ -40,6 +40,9 @@ RenderPass::RenderPass(FBO* fbo) : fbo(fbo) {
 		//Use subpass dependencies for layout transitions
 		std::array<VkSubpassDependency, 2> dependencies;
 
+		//Colour attachment references
+		std::vector<VkAttachmentReference> colourAttachmentReferences;
+
 		if (fbo) {
 			if (fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP) {
 				//Use specified framebuffer
@@ -64,7 +67,7 @@ RenderPass::RenderPass(FBO* fbo) : fbo(fbo) {
 
 				subpass.colorAttachmentCount = 0;
 				subpass.pDepthStencilAttachment = &depthAttachmentRef;
-			}  else if (fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_TEXTURE) {
+			} else if (fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_TEXTURE) {
 				//Use specified framebuffer
 				dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 				dependencies[0].dstSubpass = 0;
@@ -86,6 +89,39 @@ RenderPass::RenderPass(FBO* fbo) : fbo(fbo) {
 				depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 				subpass.colorAttachmentCount = 0;
+				subpass.pDepthStencilAttachment = &depthAttachmentRef;
+			} else if (fbo->getAttachmentCount() > 2) {
+				//Assume deferred rendering
+
+				//Use specified framebuffer
+				dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+				dependencies[0].dstSubpass = 0;
+				dependencies[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+				dependencies[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+				dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+				dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+				dependencies[1].srcSubpass = 0;
+				dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+				dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+				dependencies[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+				dependencies[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+				dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+				for (unsigned int i = 0; i < fbo->getAttachmentCount() - 1; ++i) {
+					VkAttachmentReference colourAttachmentReference;
+					colourAttachmentReference.attachment = i;
+					colourAttachmentReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					colourAttachmentReferences.push_back(colourAttachmentReference);
+				}
+
+				depthAttachmentRef.attachment = fbo->getAttachmentCount() - 1; //Assume depth attachment last
+				depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+				subpass.colorAttachmentCount = static_cast<uint32_t>(colourAttachmentReferences.size());
+				subpass.pColorAttachments = colourAttachmentReferences.data();
 				subpass.pDepthStencilAttachment = &depthAttachmentRef;
 			} else {
 				//Use specified framebuffer
@@ -220,7 +256,12 @@ void RenderPass::begin() {
 		std::vector<VkClearValue> clearValues = {};
 		if (fbo && (fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_TEXTURE || fbo->getAttachment(0)->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP)) {
 			clearValues.resize(1);
-			clearValues[0].depthStencil = { 1.0f, 0 };
+			clearValues[0].depthStencil ={ 1.0f, 0 };
+		} else if (fbo && fbo->getAttachmentCount() > 2) {
+			clearValues.resize(fbo->getAttachmentCount());
+			for (unsigned int i = 0; i < clearValues.size(); ++i)
+				clearValues[i].color = { 0.0f, 0.0f, 0.0f, 0.0f };
+			clearValues[clearValues.size() - 1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
 		} else {
 			clearValues.resize(2);
 			clearValues[0].color = { 0.0f, 0.0f, 0.0f, 0.0f };

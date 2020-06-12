@@ -163,6 +163,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_MATERIAL;
 	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_MODEL;
 	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_SCENE;
 
 	/* IDs for descriptor set layouts */
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_CAMERA;
@@ -172,6 +173,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;

@@ -101,4 +101,5 @@ public:
 	inline GLenum getGLFBO() { return glFBO; }
 	inline std::vector<VkAttachmentDescription>& getVkAttachmentDescriptions() { return vulkanAttachmentDescriptions; }
 	inline FramebufferAttachment* getAttachment(unsigned int index) { return attachments[index]; }
+	inline unsigned int getAttachmentCount() { return attachments.size(); }
 };

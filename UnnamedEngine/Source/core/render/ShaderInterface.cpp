@@ -33,6 +33,7 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_CAMERA      = 0;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MATERIAL    = 1;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MODEL       = 2;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH = 3;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_SCENE       = 4;
 
  /* IDs for descriptor set layouts */
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA                = 0;
@@ -42,6 +43,7 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH          
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING        = 4;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP        = 5;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA = 6;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING     = 7;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -143,6 +145,16 @@ ShaderInterface::ShaderInterface() {
 	gammaCorrectionFXAALayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA, gammaCorrectionFXAALayout);
+
+	//Deferred lighting
+	DescriptorSetLayout* deferredLightingLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_SCENE);
+	deferredLightingLayout->addTexture2D(0);
+	deferredLightingLayout->addTexture2D(1);
+	deferredLightingLayout->addTexture2D(2);
+
+	deferredLightingLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING, deferredLightingLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -222,6 +234,16 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA));
+	} else if (shaderID == Renderer::SHADER_DEFERRED_LIGHTING_GEOMETRY) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_DEFERRED_LIGHTING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING));
 	}
 }
 

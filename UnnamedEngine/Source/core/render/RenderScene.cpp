@@ -23,12 +23,47 @@
 
 #include "../../utils/Logging.h"
 
-RenderScene::RenderScene(bool pbr, bool postProcessing) : postProcessing(postProcessing) {
+RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferred(deferred), postProcessing(postProcessing) {
 	//Create the FBO for rendering offscreen
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
 
-	//Setup for offscreen rendering if needed
+	//Setup for deferred rendering if needed
+	if (deferred) {
+		descriptorSetGeometryBuffer = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING));
+
+		//Setup the geometry render pass
+		FBO* fbo = new FBO(width, height, {
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
+		});
+
+		deferredGeometryRenderPass = new RenderPass(fbo);
+
+		descriptorSetGeometryBuffer->setTexture(0, deferredGeometryRenderPass->getFBO()->getAttachment(0));
+		descriptorSetGeometryBuffer->setTexture(1, deferredGeometryRenderPass->getFBO()->getAttachment(1));
+		descriptorSetGeometryBuffer->setTexture(2, deferredGeometryRenderPass->getFBO()->getAttachment(2));
+		descriptorSetGeometryBuffer->setup();
+
+		//Setup the screen texture mesh
+		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+		deferredRenderingScreenTextureMesh = new Mesh(meshData);
+		deferredRenderingScreenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+
+		pipelineDeferredLightingGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY), deferredGeometryRenderPass);
+		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), Renderer::getDefaultRenderPass());
+		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), Renderer::getDefaultRenderPass());
+	}
+
+	//Setup for post processing if needed
 	if (postProcessing) {
 		descriptorSetGammaCorrectionFXAA = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA));
 		descriptorSetGammaCorrectionFXAA->setup();
@@ -80,6 +115,16 @@ RenderScene::~RenderScene() {
 	delete pipelineLightingBlend;
 	delete pipelineLightingSkinning;
 	delete pipelineLightingSkinningBlend;
+
+	if (deferred) {
+		delete pipelineDeferredLightingGeometry;
+		delete pipelineDeferredLighting;
+		delete pipelineDeferredLightingBlend;
+
+		delete descriptorSetGeometryBuffer;
+		delete deferredGeometryRenderPass;
+		delete deferredRenderingScreenTextureMesh;
+	}
 
 	if (postProcessing) {
 		delete descriptorSetGammaCorrectionFXAA;
@@ -177,6 +222,22 @@ void RenderScene::renderOffscreen() {
 		}
 	}
 
+	//Check if deferred rendering
+	if (deferred) {
+		//Render to the geometry buffer
+		deferredGeometryRenderPass->begin();
+
+		pipelineDeferredLightingGeometry->bind();
+
+		((Camera3D*) Renderer::getCamera())->useView();
+
+		//Go through and render all the objects
+		for (unsigned int i = 0; i < objects.size(); ++i)
+			objects[i]->render();
+
+		deferredGeometryRenderPass->end();
+	}
+
 	//Check if post processing
 	if (postProcessing) {
 		//Render the scene offscreen ready for post processing
@@ -235,48 +296,73 @@ void RenderScene::renderScene() {
 
 			batchNumber++;
 		}
-		if (objects.size() > 0) {
-
+		if (deferred) {
 			batchNumber = 0;
 
-			pipelineLighting->bind();
+			pipelineDeferredLighting->bind();
+
+			descriptorSetGeometryBuffer->bind();
 
 			//Go through the each of the light batches
 			for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
 
 				if (b == NUM_LIGHTS_IN_BATCH)
 					//Start blending the results of other batches
-					pipelineLightingBlend->bind();
+					pipelineDeferredLightingBlend->bind();
 
 				//Bind the descriptor set and render all of the objects
 				descriptorSetLightBatches[batchNumber]->bind();
 
-				for (unsigned int i = 0; i < objects.size(); ++i)
-					objects[i]->render();
+				//Render to the screen
+				Matrix4f matrix = Matrix4f().initIdentity();
+				Renderer::render(deferredRenderingScreenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 
 				batchNumber++;
 			}
-		}
+		} else {
+			if (objects.size() > 0) {
 
-		if (skinnedObjects.size() > 0) {
+				batchNumber = 0;
 
-			batchNumber = 0;
+				pipelineLighting->bind();
 
-			pipelineLightingSkinning->bind();
+				//Go through the each of the light batches
+				for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
 
-			//Go through the each of the light batches
-			for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
-				if (b == NUM_LIGHTS_IN_BATCH)
-					//Start blending the results of other batches
-					pipelineLightingSkinningBlend->bind();
+					if (b == NUM_LIGHTS_IN_BATCH)
+						//Start blending the results of other batches
+						pipelineLightingBlend->bind();
 
-				//Bind the descriptor set and render all of the objects
-				descriptorSetLightBatches[batchNumber]->bind();
+					//Bind the descriptor set and render all of the objects
+					descriptorSetLightBatches[batchNumber]->bind();
 
-				for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
-					skinnedObjects[i]->render();
+					for (unsigned int i = 0; i < objects.size(); ++i)
+						objects[i]->render();
 
-				batchNumber++;
+					batchNumber++;
+				}
+			}
+
+			if (skinnedObjects.size() > 0) {
+
+				batchNumber = 0;
+
+				pipelineLightingSkinning->bind();
+
+				//Go through the each of the light batches
+				for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
+					if (b == NUM_LIGHTS_IN_BATCH)
+						//Start blending the results of other batches
+						pipelineLightingSkinningBlend->bind();
+
+					//Bind the descriptor set and render all of the objects
+					descriptorSetLightBatches[batchNumber]->bind();
+
+					for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
+						skinnedObjects[i]->render();
+
+					batchNumber++;
+				}
 			}
 		}
 	}
