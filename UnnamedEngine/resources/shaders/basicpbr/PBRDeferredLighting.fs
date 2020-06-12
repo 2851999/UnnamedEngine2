@@ -9,7 +9,7 @@ layout(location = 0) out vec4 ue_FragColour;
 
 void main() {
 	vec3 fragPosition = texture(ue_gPosition, ue_frag_textureCoord).rgb;
-	vec3 albedo = texture(ue_gAlbedo, ue_frag_textureCoord).rgb;
+	vec4 albedo = texture(ue_gAlbedo, ue_frag_textureCoord);
 	
 	vec4 normalRough = texture(ue_gNormal, ue_frag_textureCoord);
 	vec3 normal = normalRough.rgb;
@@ -26,7 +26,7 @@ void main() {
 			fragPosLightSpace[i] = ue_lightSpaceMatrix[i] * vec4(fragPosition, 1.0);
 	}
 	
-    vec3 colour = ueGetLightingPBR(normal, fragPosition, albedo, metalness, roughness, ao, fragPosLightSpace);
+    vec3 colour = ueGetLightingPBR(normal, fragPosition, albedo.rgb, metalness, roughness, ao, fragPosLightSpace);
 	
-	ue_FragColour = vec4(colour, 1.0);
+	ue_FragColour = vec4(colour, albedo.a);
 }

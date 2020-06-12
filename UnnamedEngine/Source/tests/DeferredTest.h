@@ -59,7 +59,7 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 }
 
 void Test::created() {
@@ -92,7 +92,7 @@ void Test::created() {
 	camera->setPosition(0.0f, 4.0f, 3.0f);
 	camera->setRotation(Vector3f(-20.0f, -45.0f, 0.0f));
 	camera->setFlying(true);
-	//camera->setSkyBox(new SkyBox("C:/UnnamedEngine/textures/skybox2/", ".jpg"));
+	camera->setSkyBox(new SkyBox("C:/UnnamedEngine/textures/skybox2/", ".jpg"));
 	Renderer::addCamera(camera);
 	getWindow()->disableCursor();
 
@@ -102,8 +102,8 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(true, true, false);
-	//renderScene->setPostProcessingParameters(false, true, 1.0f);
+	renderScene = new RenderScene(true, true, true);
+	renderScene->setPostProcessingParameters(true, true, 0.5f);
 
 	//renderScene->disableLighting();
 
@@ -181,6 +181,7 @@ void Test::render() {
 	renderScene->render();
 
 	//camera->useView();
+	camera->render();
 }
 
 void Test::destroy() {

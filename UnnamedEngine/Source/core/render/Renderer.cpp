@@ -162,8 +162,8 @@ void Renderer::initialise() {
 
 	//Depth state for skyboxes
 	GraphicsPipeline::DepthState skyboxDepthState;
-	skyboxDepthState.depthTestEnable = false;
-	skyboxDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
+	skyboxDepthState.depthTestEnable = true;
+	skyboxDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS_OR_EQUAL;
 	skyboxDepthState.depthWriteEnable = false;
 
 	//Depth state for font

@@ -23,10 +23,50 @@
 
 #include "../../utils/Logging.h"
 
+#include "../BaseEngine.h"
+
 RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferred(deferred), postProcessing(postProcessing) {
 	//Create the FBO for rendering offscreen
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
+
+	//Setup for post processing if needed
+	if (postProcessing) {
+		descriptorSetGammaCorrectionFXAA = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA));
+		descriptorSetGammaCorrectionFXAA->setup();
+
+		//Assign the default values
+		shaderGammaCorrectionFXAAData.inverseTextureSize = Vector2f(1.0f / Window::getCurrentInstance()->getSettings().windowWidth, 1.0f / Window::getCurrentInstance()->getSettings().windowHeight);
+		shaderGammaCorrectionFXAAData.gammaCorrect       = false;
+		shaderGammaCorrectionFXAAData.exposureIn         = -1;
+		shaderGammaCorrectionFXAAData.fxaa               = false;
+
+		descriptorSetGammaCorrectionFXAA->getUBO(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
+
+		//Setup the offscreen render pass
+		FBO* fbo = new FBO(width, height, {
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
+			new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
+		});
+
+		postProcessingRenderPass = new RenderPass(fbo);
+
+		//Obtain the pipeline
+		pipelineGammaCorrectionFXAA = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA), Renderer::getDefaultRenderPass());
+
+		//Setup the screen texture mesh
+		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+		screenTextureMesh = new Mesh(meshData);
+		screenTextureMesh->getMaterial()->setDiffuse(postProcessingRenderPass->getFBO()->getAttachment(0));
+
+		screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+	}
 
 	//Setup for deferred rendering if needed
 	if (deferred) {
@@ -73,54 +113,16 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferre
 
 		pipelineDeferredLightingGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY), deferredGeometryRenderPass);
 		pipelineDeferredLightingSkinningGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY), deferredGeometryRenderPass);
-		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), Renderer::getDefaultRenderPass());
-		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), Renderer::getDefaultRenderPass());
-	}
-
-	//Setup for post processing if needed
-	if (postProcessing) {
-		descriptorSetGammaCorrectionFXAA = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA));
-		descriptorSetGammaCorrectionFXAA->setup();
-
-		//Assign the default values
-		shaderGammaCorrectionFXAAData.inverseTextureSize = Vector2f(1.0f / Window::getCurrentInstance()->getSettings().windowWidth, 1.0f / Window::getCurrentInstance()->getSettings().windowHeight);
-		shaderGammaCorrectionFXAAData.gammaCorrect       = false;
-		shaderGammaCorrectionFXAAData.exposureIn         = -1;
-		shaderGammaCorrectionFXAAData.fxaa               = false;
-
-		descriptorSetGammaCorrectionFXAA->getUBO(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
-
-		//Setup the offscreen render pass
-		FBO* fbo = new FBO(width, height, {
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
-		});
-
-		offscreenRenderPass = new RenderPass(fbo);
-
-		//Obtain the pipeline
-		pipelineGammaCorrectionFXAA = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA), Renderer::getDefaultRenderPass());
-
-		//Setup the screen texture mesh
-		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
-		screenTextureMesh = new Mesh(meshData);
-		screenTextureMesh->getMaterial()->setDiffuse(offscreenRenderPass->getFBO()->getAttachment(0));
-
-		screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
+		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
 	}
 
 	//Obtain the render pipelines
-	pipelineMaterial = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), postProcessing ? offscreenRenderPass : Renderer::getDefaultRenderPass());
-	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING : Renderer::GRAPHICS_PIPELINE_LIGHTING), postProcessing ? offscreenRenderPass : Renderer::getDefaultRenderPass());
-	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), postProcessing ? offscreenRenderPass : Renderer::getDefaultRenderPass());
-	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), postProcessing ? offscreenRenderPass : Renderer::getDefaultRenderPass());
-	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), postProcessing ? offscreenRenderPass : Renderer::getDefaultRenderPass());
+	pipelineMaterial = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
+	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING : Renderer::GRAPHICS_PIPELINE_LIGHTING), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
+	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
+	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
+	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
 }
 
 RenderScene::~RenderScene() {
@@ -129,6 +131,13 @@ RenderScene::~RenderScene() {
 	delete pipelineLightingBlend;
 	delete pipelineLightingSkinning;
 	delete pipelineLightingSkinningBlend;
+
+	if (postProcessing) {
+		delete descriptorSetGammaCorrectionFXAA;
+		delete postProcessingRenderPass;
+		delete pipelineGammaCorrectionFXAA;
+		delete screenTextureMesh;
+	}
 
 	if (deferred) {
 		delete pipelineDeferredLightingGeometry;
@@ -139,13 +148,6 @@ RenderScene::~RenderScene() {
 		delete descriptorSetGeometryBuffer;
 		delete deferredGeometryRenderPass;
 		delete deferredRenderingScreenTextureMesh;
-	}
-
-	if (postProcessing) {
-		delete descriptorSetGammaCorrectionFXAA;
-		delete offscreenRenderPass;
-		delete pipelineGammaCorrectionFXAA;
-		delete screenTextureMesh;
 	}
 
 	//Go through and delete all created objects
@@ -266,11 +268,11 @@ void RenderScene::renderOffscreen() {
 	//Check if post processing
 	if (postProcessing) {
 		//Render the scene offscreen ready for post processing
-		offscreenRenderPass->begin();
+		postProcessingRenderPass->begin();
 
 		renderScene();
 
-		offscreenRenderPass->end();
+		postProcessingRenderPass->end();
 	}
 }
 
@@ -407,6 +409,16 @@ void RenderScene::render() {
 		descriptorSetGammaCorrectionFXAA->bind();
 		Matrix4f matrix = Matrix4f().initIdentity();
 		Renderer::render(screenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+
+		//if (! BaseEngine::usingVulkan()) {
+		//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		//	glBindFramebuffer(GL_READ_FRAMEBUFFER, postProcessingRenderPass->getFBO()->getGLFBO());
+		//	glDrawBuffer(GL_BACK);
+		//	glBlitFramebuffer(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//} else {
+
+		//}
 	} else
 		renderScene();
 }

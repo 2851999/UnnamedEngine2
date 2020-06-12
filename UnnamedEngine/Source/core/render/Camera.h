@@ -128,6 +128,9 @@ public:
 
 	void useView() override;
 
+	/* Used to render the associated skybox (if there is one) */
+	void render() override;
+
 	/* Moves the camera forward in the direction it is facing */
 	inline void moveForward(float amount) {
 		if (! flying) {

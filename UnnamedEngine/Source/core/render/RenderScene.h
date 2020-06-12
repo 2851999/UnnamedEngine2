@@ -80,8 +80,8 @@ private:
 	/* Deferred geometry render pass */
 	RenderPass* deferredGeometryRenderPass = NULL;
 
-	/* Offscreen render pass */
-	RenderPass* offscreenRenderPass = NULL;
+	/* Post processing render pass */
+	RenderPass* postProcessingRenderPass = NULL;
 
 	/* Descriptor set for the geometry buffer */
 	DescriptorSet* descriptorSetGeometryBuffer;
