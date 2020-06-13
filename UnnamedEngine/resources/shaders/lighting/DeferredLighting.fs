@@ -1,12 +1,8 @@
 #include "Lighting.fs"
 
-#map uniform PositionBuffer ue_gPosition
-#map uniform NormalBuffer ue_gNormal
-#map uniform AlbedoBuffer ue_gAlbedo
-
-uniform sampler2D ue_gPosition;
-uniform sampler2D ue_gNormal;
-uniform sampler2D ue_gAlbedo;
+layout(set = 4, binding = 0) uniform sampler2D ue_gPosition;
+layout(set = 4, binding = 1) uniform sampler2D ue_gNormal;
+layout(set = 4, binding = 2) uniform sampler2D ue_gAlbedo;
 
 layout(location = 0) out vec4 ue_FragColour;
 

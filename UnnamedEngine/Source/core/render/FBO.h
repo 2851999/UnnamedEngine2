@@ -37,6 +37,9 @@ private:
 	/* Type of attachment this is */
 	Type type;
 
+	/* The number of samples of this store */
+	unsigned int samples;
+
 	/* The format of this store */
 	VkFormat vulkanFormat;
 
@@ -45,9 +48,12 @@ private:
 
 	/* Render buffer object (For OpenGL) */
 	GLuint glRBO;
+
+	/* States whether this attachment has been setup */
+	bool beenSetup = false;
 public:
 	/* Constructor */
-	FramebufferAttachment(uint32_t width, uint32_t height, Type type);
+	FramebufferAttachment(uint32_t width, uint32_t height, Type type, unsigned int samples = 0);
 
 	/* Destructor */
 	virtual ~FramebufferAttachment();
@@ -57,10 +63,21 @@ public:
 	void setup(unsigned int indexOfColourAttachment);
 
 	/* Method to obtain the attachment description of this attachment for Vulkan */
-	VkAttachmentDescription getVkAttachmentDescription();
+	VkAttachmentDescription getVkAttachmentDescription(bool clearOnLoad);
 
 	/* Getters */
 	inline Type getType() { return type; }
+	inline bool hasBeenSetup() { return beenSetup; }
+};
+
+/*****************************************************************************
+ * The FramebufferAttachmentInfo structure is used for storing
+ * information about an attachment and how it should be used
+ *****************************************************************************/
+struct FramebufferAttachmentInfo {
+	FramebufferAttachment* attachment;
+	bool                   clearOnLoad;
+	bool                   shouldDelete = true; //Used to ensure if a new attachment is supplied to FBO, then it will delete it when destroyed, otherwise assumes it could be used elsewhere
 };
 
  /*****************************************************************************
@@ -80,13 +97,13 @@ private:
 	GLuint glFBO;
 
 	/* The attachments */
-	std::vector<FramebufferAttachment*> attachments;
+	std::vector<FramebufferAttachmentInfo> attachments;
 
 	/* Attachment descriptions for this FBO */
 	std::vector<VkAttachmentDescription> vulkanAttachmentDescriptions;
 public:
 	/* Constructor */
-	FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachment*> attachments);
+	FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachmentInfo> attachments);
 
 	/* Destructor */
 	virtual ~FBO();
@@ -100,5 +117,6 @@ public:
 	inline Framebuffer* getFramebuffer() { return framebuffer; }
 	inline GLenum getGLFBO() { return glFBO; }
 	inline std::vector<VkAttachmentDescription>& getVkAttachmentDescriptions() { return vulkanAttachmentDescriptions; }
-	inline FramebufferAttachment* getAttachment(unsigned int index) { return attachments[index]; }
+	inline FramebufferAttachment* getAttachment(unsigned int index) { return attachments[index].attachment; }
+	inline unsigned int getAttachmentCount() { return attachments.size(); }
 };

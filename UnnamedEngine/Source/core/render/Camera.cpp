@@ -93,13 +93,9 @@ void Camera3D::update() {
 	updateUBO();
 }
 
-void Camera3D::useView() {
-	if (skyBox)
+void Camera3D::render() {
+	if (skyBox) {
 		skyBox->getGraphicsPipeline()->bind();
-
-	//Do this after so that a graphics pipeline is bound when updating (for Vulkan)
-	Camera::useView();
-
-	if (skyBox)
 		skyBox->render(false);
+	}
 }

@@ -78,7 +78,7 @@ void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
 	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
-	Shader::compileEngineShaderToSPIRV("postprocessing/GammaCorrectionFXAAShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("postprocessing/GammaCorrectionFXAAShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	InputBindings* bindings = new InputBindings();
 	bindings->load("C:/UnnamedEngine/config/Controller.xml", getWindow()->getInputManager());
@@ -93,12 +93,14 @@ void Test::created() {
 	getWindow()->disableCursor();
 
 	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
-	MeshLoader::loadDiffuseTexturesAsSRGB = false;
+	MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(false, true);
+	renderScene = new RenderScene(false, false, true);
+	renderScene->setPostProcessingParameters(false, true, 1.0f);
+
 	//renderScene->disableLighting();
 
 	utils_random::initialise();

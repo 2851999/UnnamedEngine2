@@ -22,6 +22,7 @@
 
 class Framebuffer;
 class RenderPass;
+class FramebufferAttachment;
 
 /*****************************************************************************
  * The VulkanSwapChain class handles the image swap chain for rendering using
@@ -46,9 +47,10 @@ private:
 	VkImageView    colourImageView;
 
 	/* Resources for the depth buffer */
-	VkImage        depthImage;
-	VkDeviceMemory depthImageMemory;
-	VkImageView    depthImageView;
+	//VkImage                depthImage;
+	//VkDeviceMemory         depthImageMemory;
+	//VkImageView            depthImageView;
+	FramebufferAttachment* depthAttachment;
 
 	/* The formats and extent used for this swap chain */
 	VkFormat   surfaceFormat;
@@ -71,6 +73,10 @@ private:
 	static VkPresentModeKHR   chooseSwapPresentMode  (const std::vector<VkPresentModeKHR>&   availablePresentModes);
 	static VkExtent2D         chooseSwapExtent       (const VkSurfaceCapabilitiesKHR&        capabilities, Settings& settings);
 public:
+	/* Variable used to indicate whether the default depth buffer should be loaded or cleared each frame
+   (Useful for offscreen rendering) */
+	static bool clearDefaultDepthBufferOnLoad;
+
 	/* Constructor */
 	VulkanSwapChain(VulkanDevice* device, Settings& settings);
 
@@ -88,12 +94,13 @@ public:
 	inline VkImageView& getImageView(unsigned int index) { return imageViews[index]; }
 	inline unsigned int getNumSamples() { return numSamples; }
 	inline VkImageView& getColourImageView() { return colourImageView; }
-	inline VkImageView& getDepthImageView() { return depthImageView; }
+	VkImageView& getDepthImageView();
 	inline VkFormat getSurfaceFormat() { return surfaceFormat; }
 	inline VkFormat getDepthFormat() { return depthFormat; }
 	inline VkExtent2D& getExtent() { return extent; }
 	inline VulkanDevice* getDevice() { return device; }
 	inline unsigned int getImageCount() { return images.size(); }
 	inline Framebuffer* getDefaultFramebuffer(unsigned int currentFrame) { return defaultFramebuffers[currentFrame]; }
+	inline FramebufferAttachment* getDepthAttachment() { return depthAttachment; }
 };
 

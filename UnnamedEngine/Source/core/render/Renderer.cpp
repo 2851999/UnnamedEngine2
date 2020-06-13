@@ -44,39 +44,53 @@ Cubemap* Renderer::blankCubemap;
 GraphicsPipeline* Renderer::currentGraphicsPipeline = NULL;
 RenderPass*       Renderer::defaultRenderPass       = NULL;
 
-const unsigned int Renderer::SHADER_MATERIAL                    = 1;
-const unsigned int Renderer::SHADER_SKY_BOX                     = 2;
-const unsigned int Renderer::SHADER_FONT                        = 3;
-const unsigned int Renderer::SHADER_FONT_SDF                    = 4;
-const unsigned int Renderer::SHADER_LIGHTING                    = 5;
-const unsigned int Renderer::SHADER_LIGHTING_SKINNING           = 6;
-const unsigned int Renderer::SHADER_BASIC_PBR_LIGHTING          = 7;
-const unsigned int Renderer::SHADER_BASIC_PBR_LIGHTING_SKINNING = 8;
-const unsigned int Renderer::SHADER_FRAMEBUFFER                 = 9;
-const unsigned int Renderer::SHADER_SHADOW_MAP                  = 10;
-const unsigned int Renderer::SHADER_SHADOW_MAP_SKINNING         = 11;
-const unsigned int Renderer::SHADER_SHADOW_CUBEMAP              = 12;
-const unsigned int Renderer::SHADER_SHADOW_CUBEMAP_SKINNING     = 13;
-const unsigned int Renderer::SHADER_GAMMA_CORRECTION_FXAA       = 14;
+const unsigned int Renderer::SHADER_MATERIAL                                       = 1;
+const unsigned int Renderer::SHADER_SKY_BOX                                        = 2;
+const unsigned int Renderer::SHADER_FONT                                           = 3;
+const unsigned int Renderer::SHADER_FONT_SDF                                       = 4;
+const unsigned int Renderer::SHADER_LIGHTING                                       = 5;
+const unsigned int Renderer::SHADER_LIGHTING_SKINNING                              = 6;
+const unsigned int Renderer::SHADER_BASIC_PBR_LIGHTING                             = 7;
+const unsigned int Renderer::SHADER_BASIC_PBR_LIGHTING_SKINNING                    = 8;
+const unsigned int Renderer::SHADER_FRAMEBUFFER                                    = 9;
+const unsigned int Renderer::SHADER_SHADOW_MAP                                     = 10;
+const unsigned int Renderer::SHADER_SHADOW_MAP_SKINNING                            = 11;
+const unsigned int Renderer::SHADER_SHADOW_CUBEMAP                                 = 12;
+const unsigned int Renderer::SHADER_SHADOW_CUBEMAP_SKINNING                        = 13;
+const unsigned int Renderer::SHADER_GAMMA_CORRECTION_FXAA                          = 14;
+const unsigned int Renderer::SHADER_DEFERRED_LIGHTING_GEOMETRY                     = 15;
+const unsigned int Renderer::SHADER_DEFERRED_LIGHTING_SKINNING_GEOMETRY            = 16;
+const unsigned int Renderer::SHADER_DEFERRED_LIGHTING                              = 17;
+const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY           = 18;
+const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY  = 19;
+const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING                    = 20;
 
-const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                          = 1;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                           = 2;
-const unsigned int Renderer::GRAPHICS_PIPELINE_FONT                              = 3;
-const unsigned int Renderer::GRAPHICS_PIPELINE_FONT_SDF                          = 4;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING                          = 5;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND                    = 6;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING                 = 7;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND           = 8;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING                = 9;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND          = 10;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING       = 11;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND = 12;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP                        = 13;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING               = 14;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP                    = 15;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING           = 16;
-const unsigned int Renderer::GRAPHICS_PIPELINE_GUI                               = 17;
-const unsigned int Renderer::GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA             = 18;
+const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                                      = 1;
+const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                                       = 2;
+const unsigned int Renderer::GRAPHICS_PIPELINE_FONT                                          = 3;
+const unsigned int Renderer::GRAPHICS_PIPELINE_FONT_SDF                                      = 4;
+const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING                                      = 5;
+const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND                                = 6;
+const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING                             = 7;
+const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND                       = 8;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING                            = 9;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND                      = 10;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING                   = 11;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND             = 12;
+const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP                                    = 13;
+const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING                           = 14;
+const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP                                = 15;
+const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING                       = 16;
+const unsigned int Renderer::GRAPHICS_PIPELINE_GUI                                           = 17;
+const unsigned int Renderer::GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA                         = 18;
+const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY                    = 19;
+const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY           = 20;
+const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING                             = 21;
+const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND                       = 22;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY          = 23;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY = 24;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING                   = 25;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND             = 26;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -117,6 +131,12 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_SHADOW_CUBEMAP, "lighting/ShadowCubemapShader");
 	addRenderShader(SHADER_SHADOW_CUBEMAP_SKINNING, "lighting/ShadowCubemapShader", { "UE_SKINNING" });
 	addRenderShader(SHADER_GAMMA_CORRECTION_FXAA, "postprocessing/GammaCorrectionFXAAShader");
+	addRenderShader(SHADER_DEFERRED_LIGHTING_GEOMETRY, "lighting/DeferredLightingGeometry", { "UE_GEOMETRY_ONLY" });
+	addRenderShader(SHADER_DEFERRED_LIGHTING_SKINNING_GEOMETRY, "lighting/DeferredLightingGeometry", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	addRenderShader(SHADER_DEFERRED_LIGHTING, "lighting/DeferredLighting");
+	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY, "basicpbr/PBRDeferredGeometry", { "UE_GEOMETRY_ONLY" });
+	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, "basicpbr/PBRDeferredGeometry", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING, "basicpbr/PBRDeferredLighting");
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -142,8 +162,8 @@ void Renderer::initialise() {
 
 	//Depth state for skyboxes
 	GraphicsPipeline::DepthState skyboxDepthState;
-	skyboxDepthState.depthTestEnable = false;
-	skyboxDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
+	skyboxDepthState.depthTestEnable = true;
+	skyboxDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS_OR_EQUAL;
 	skyboxDepthState.depthWriteEnable = false;
 
 	//Depth state for font
@@ -164,10 +184,16 @@ void Renderer::initialise() {
 	//Default cull state
 	GraphicsPipeline::CullState defaultCullState;
 
-	//Lighting cull satte
+	//Lighting cull state
 	GraphicsPipeline::CullState lightingCullState;
 	lightingCullState.mode      = GraphicsPipeline::CullMode::BACK;
 	lightingCullState.frontFace = GraphicsPipeline::FrontFace::COUNTER_CLOCKWISE;
+
+	//Post processing depth state
+	GraphicsPipeline::DepthState postProcessDepthState;
+	postProcessDepthState.depthTestEnable = false;
+	postProcessDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS_OR_EQUAL;
+	postProcessDepthState.depthWriteEnable = false;
 
 	//Obtain the window width and height
 	uint32_t windowWidth = Window::getCurrentInstance()->getSettings().windowWidth;
@@ -191,7 +217,15 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP, new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_CUBEMAP), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING, new GraphicsPipelineLayout(getRenderShader(SHADER_SHADOW_CUBEMAP_SKINNING), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false));
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GUI, new GraphicsPipelineLayout(getRenderShader(SHADER_MATERIAL), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true));
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA, new GraphicsPipelineLayout(getRenderShader(SHADER_GAMMA_CORRECTION_FXAA), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, false));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA, new GraphicsPipelineLayout(getRenderShader(SHADER_GAMMA_CORRECTION_FXAA), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, skyboxDepthState, defaultCullState, windowWidth, windowHeight, false));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY, new GraphicsPipelineLayout(getRenderShader(SHADER_DEFERRED_LIGHTING_GEOMETRY), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY, new GraphicsPipelineLayout(getRenderShader(SHADER_DEFERRED_LIGHTING_SKINNING_GEOMETRY), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING, new GraphicsPipelineLayout(getRenderShader(SHADER_DEFERRED_LIGHTING), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND, new GraphicsPipelineLayout(getRenderShader(SHADER_DEFERRED_LIGHTING), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY, new GraphicsPipelineLayout(getRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, new GraphicsPipelineLayout(getRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY), MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING, new GraphicsPipelineLayout(getRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false));
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND, new GraphicsPipelineLayout(getRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING), MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false));
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();

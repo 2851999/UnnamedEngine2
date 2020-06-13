@@ -36,6 +36,9 @@ private:
 	/* Boolean that states whether lighting should be used or not */
 	bool lighting = true;
 
+	/* Boolean that states whether deferred rendering should be used or not */
+	bool deferred;
+
 	/* Boolean that states whether post processing should be used or not */
 	bool postProcessing;
 
@@ -62,15 +65,26 @@ private:
 	GraphicsPipeline* pipelineLightingSkinningBlend;
 
 	GraphicsPipeline* pipelineGammaCorrectionFXAA;
+	GraphicsPipeline* pipelineDeferredLightingGeometry;
+	GraphicsPipeline* pipelineDeferredLightingSkinningGeometry;
+	GraphicsPipeline* pipelineDeferredLighting;
+	GraphicsPipeline* pipelineDeferredLightingBlend;
 
-	/* Mesh for rendering to the screen */
+	/* Meshes for rendering to the screen */
 	Mesh* screenTextureMesh;
+	Mesh* deferredRenderingScreenTextureMesh;
 
 	/* Graphics pipeline for rendering the final quad */
 	GraphicsPipeline* pipelineFinal;
 
-	/* Offscreen render pass */
-	RenderPass* offscreenRenderPass = NULL;
+	/* Deferred geometry render pass */
+	RenderPass* deferredGeometryRenderPass = NULL;
+
+	/* Post processing render pass */
+	RenderPass* postProcessingRenderPass = NULL;
+
+	/* Descriptor set for the geometry buffer */
+	DescriptorSet* descriptorSetGeometryBuffer;
 
 	/* Method used to render this scene (Ignoring any post processing) */
 	void renderScene();
@@ -79,7 +93,7 @@ public:
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
 	/* Constructor */
-	RenderScene(bool pbr, bool postProcessing);
+	RenderScene(bool deferred, bool pbr, bool postProcessing);
 
 	/* Destructor */
 	virtual ~RenderScene();
@@ -100,6 +114,7 @@ public:
 	inline void enableLighting() { this->lighting = true; }
 	inline void disableLighting() { this->lighting = false; }
 	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
+	void setPostProcessingParameters(bool gammaCorrection, bool fxaa, float exposureIn = -1.0f);
 
 	inline Colour getAmbientLight() { return ambientLight; }
 };

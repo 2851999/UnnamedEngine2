@@ -130,11 +130,14 @@ void BaseEngine::create() {
 			//Ensure the debug console isn't open
 			if (! debugConsole || ! debugConsole->isVisible())
 				update();
+			else
+				debugConsole->update();
 
 			if (getSettings().videoVulkan) {
 				//Update Vulkan and begin drawing
-				Vulkan::update();
+				//Start draw first to perform synchronisation necessary to perform updates
 				Vulkan::startDraw();
+				Vulkan::update();
 			}
 
 			renderOffscreen();
@@ -156,6 +159,8 @@ void BaseEngine::create() {
 				Vulkan::stopDraw();
 
 			window->update();
+
+			//vkDeviceWaitIdle(Vulkan::getDevice()->getLogical());
 
 			fpsLimiter.endFrame();
 		}
@@ -245,7 +250,6 @@ void BaseEngine::renderDebugConsole() {
 		if (debugConsole->isWireframeEnabled())
 			utils_gl::disableWireframe();
 
-		debugConsole->update();
 		debugConsole->render();
 
 		if (debugConsole->isWireframeEnabled())

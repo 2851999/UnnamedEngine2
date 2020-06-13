@@ -69,6 +69,12 @@ public:
 	static const unsigned int SHADER_SHADOW_CUBEMAP;
 	static const unsigned int SHADER_SHADOW_CUBEMAP_SKINNING;
 	static const unsigned int SHADER_GAMMA_CORRECTION_FXAA;
+	static const unsigned int SHADER_DEFERRED_LIGHTING_GEOMETRY;
+	static const unsigned int SHADER_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
+	static const unsigned int SHADER_DEFERRED_LIGHTING;
+	static const unsigned int SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY;
+	static const unsigned int SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
+	static const unsigned int SHADER_BASIC_PBR_DEFERRED_LIGHTING;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -89,6 +95,14 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING;
 	static const unsigned int GRAPHICS_PIPELINE_GUI;
 	static const unsigned int GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA;
+	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY;
+	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
+	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_LIGHTING;
+	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING;
+	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
