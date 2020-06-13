@@ -1,7 +1,25 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 6 | Experimental 5
+
+* Added 'clearDefaultDepthBufferOnLoad' in VulkanSwapChain
+  to allow depth information to be loaded when rendering to
+  the default depth buffer instead of cleared
+* Added 'samples' parameter in FramebufferAttachment
+* Added FramebufferAttachmentInfo struct that is taken in
+  FBO constructor instead of FramebufferAttachment*
+* Readded skybox support for RenderScene when post
+  processing only
+
+* Changed VulkanSwapChain to use FramebufferAttachment to
+  handle the depth buffer
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 6 | Experimental 4
 
 * Added post processing support for deferred lighting
+
+* Changed Camera3D to only render it's skybox when 'render'
+  is called instead of 'useView'
 
 -------------------------------------------------------------
 Release 2 | Beta 1 | Development 6 | Experimental 3

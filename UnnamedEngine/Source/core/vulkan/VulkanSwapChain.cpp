@@ -24,11 +24,14 @@
 #include "Vulkan.h"
 #include "../render/RenderPass.h"
 #include "../render/Framebuffer.h"
+#include "../render/FBO.h"
 #include "../../utils/Logging.h"
 
 /*****************************************************************************
  * The VulkanSwapChain class
  *****************************************************************************/
+
+bool VulkanSwapChain::clearDefaultDepthBufferOnLoad = true;
 
 VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	this->device = device;
@@ -117,50 +120,53 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	}
 
 	//Now setup the depth buffer
-	depthFormat = Vulkan::findDepthFormat();
-	Vulkan::createImage(extent.width, extent.height, 1, 1, static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples), depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
-	depthImageView = Vulkan::createImageView(depthImage, VK_IMAGE_VIEW_TYPE_2D, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1, 1);
-	Vulkan::transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1, 1);
+	//depthFormat = Vulkan::findDepthFormat();
+	//Vulkan::createImage(extent.width, extent.height, 1, 1, static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples), depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
+	//depthImageView = Vulkan::createImageView(depthImage, VK_IMAGE_VIEW_TYPE_2D, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1, 1);
+	//Vulkan::transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1, 1);
 
 	//Assign the default attachment descriptions
 
 	//Setup the colour attachment info
 	VkAttachmentDescription colourAttachment = {};
-	colourAttachment.format = surfaceFormat;
-	colourAttachment.samples = static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples);
-	colourAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR; //Clear before rendering
-	colourAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE; //After rendering store so can display
-	colourAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	colourAttachment.format         = surfaceFormat;
+	colourAttachment.samples        = static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples);
+	colourAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR; //Clear before rendering
+	colourAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE; //After rendering store so can display
+	colourAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	colourAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colourAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colourAttachment.finalLayout = numSamples > 0 ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	colourAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+	colourAttachment.finalLayout    = numSamples > 0 ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-	//Setup the depth attachment info
-	VkAttachmentDescription depthAttachment = {};
-	depthAttachment.format = depthFormat;
-	depthAttachment.samples = static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples);
-	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	depthAttachment = new FramebufferAttachment(extent.width, extent.height, FramebufferAttachment::Type::DEPTH, numSamples);
+	depthAttachment->setup(0);
+
+	////Setup the depth attachment info
+	//VkAttachmentDescription depthAttachment = {};
+	//depthAttachment.format         = depthFormat;
+	//depthAttachment.samples        = static_cast<VkSampleCountFlagBits>(numSamples == 0 ? 1 : numSamples);
+	//depthAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	//depthAttachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
+	//depthAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	//depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	//depthAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+	//depthAttachment.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 	//Assign the attachments
-	defaultAttachmentDescriptions = { colourAttachment, depthAttachment };
+	defaultAttachmentDescriptions = { colourAttachment, depthAttachment->getVkAttachmentDescription(clearDefaultDepthBufferOnLoad) };
 
 	//Check whether using MSAA
 	if (numSamples > 0) {
 		//Also need to resolve colour attachment (which should be in VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) before displaying
 		VkAttachmentDescription colourAttachmentResolve = {};
-		colourAttachmentResolve.format = surfaceFormat;
-		colourAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
-		colourAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-		colourAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-		colourAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colourAttachmentResolve.format         = surfaceFormat;
+		colourAttachmentResolve.samples        = VK_SAMPLE_COUNT_1_BIT;
+		colourAttachmentResolve.loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colourAttachmentResolve.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
+		colourAttachmentResolve.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		colourAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colourAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		colourAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		colourAttachmentResolve.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+		colourAttachmentResolve.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		defaultAttachmentDescriptions.push_back(colourAttachmentResolve);
 	}
@@ -182,9 +188,11 @@ VulkanSwapChain::~VulkanSwapChain() {
 		vkFreeMemory(Vulkan::getDevice()->getLogical(), colourImageMemory, nullptr);
 	}
 
-	vkDestroyImageView(device->getLogical(), depthImageView, nullptr);
-    vkDestroyImage(Vulkan::getDevice()->getLogical(), depthImage, nullptr);
-    vkFreeMemory(Vulkan::getDevice()->getLogical(), depthImageMemory, nullptr);
+	//delete depthAttachment; //Don't need to do this as ResourceManager will handle it
+
+	//vkDestroyImageView(device->getLogical(), depthImageView, nullptr);
+    //vkDestroyImage(Vulkan::getDevice()->getLogical(), depthImage, nullptr);
+    //vkFreeMemory(Vulkan::getDevice()->getLogical(), depthImageMemory, nullptr);
 }
 
 void VulkanSwapChain::setupDefaultFramebuffers(RenderPass* defaultRenderPass) {
@@ -206,6 +214,10 @@ void VulkanSwapChain::setupDefaultFramebuffers(RenderPass* defaultRenderPass) {
 		//Create and add the framebuffer
 		defaultFramebuffers.push_back(new Framebuffer(defaultRenderPass->getVkInstance(), extent.width, extent.height, framebufferAttachments, false));
 	}
+}
+
+VkImageView& VulkanSwapChain::getDepthImageView() {
+	return depthAttachment->getVkImageView();
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {

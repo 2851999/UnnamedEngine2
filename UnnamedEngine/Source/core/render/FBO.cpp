@@ -26,7 +26,7 @@
   * The FramebufferAttachment class
   *****************************************************************************/
 
-FramebufferAttachment::FramebufferAttachment(uint32_t width, uint32_t height, Type type) : Texture(), type(type) {
+FramebufferAttachment::FramebufferAttachment(uint32_t width, uint32_t height, Type type, unsigned int samples) : Texture(), type(type), samples(samples) {
 	setWidth(width);
 	setHeight(height);
 }
@@ -39,6 +39,8 @@ FramebufferAttachment::~FramebufferAttachment() {
 }
 
 void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
+	beenSetup = true;
+
 	//Check whether using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		//Setup the texture for Vulkan
@@ -54,19 +56,19 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else if (type == Type::DEPTH_TEXTURE) {
-			vulkanFormat      = Vulkan::getSwapChain()->getDepthFormat();
+			vulkanFormat      = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 		} else if (type == Type::DEPTH) {
-			vulkanFormat = Vulkan::getSwapChain()->getDepthFormat();
+			vulkanFormat	  = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-			aspectMask        = Vulkan::hasStencilComponent(Vulkan::getSwapChain()->getDepthFormat()) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT;
+			aspectMask        = Vulkan::hasStencilComponent(vulkanFormat) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		} else if (type == Type::DEPTH_CUBEMAP) {
-			vulkanFormat      = Vulkan::getSwapChain()->getDepthFormat();
+			vulkanFormat      = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
@@ -74,7 +76,7 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 		}
 
 		if (type != Type::DEPTH_CUBEMAP)
-			setupVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask, imageLayout);
+			setupVk(getWidth(), getHeight(), static_cast<VkSampleCountFlagBits>(samples == 0 ? 1 : samples), vulkanFormat, usage, aspectMask, imageLayout);
 		else
 			setupCubemapVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask, imageLayout);
 	} else {
@@ -171,17 +173,23 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 	}
 }
 
-VkAttachmentDescription FramebufferAttachment::getVkAttachmentDescription() {
+VkAttachmentDescription FramebufferAttachment::getVkAttachmentDescription(bool clearOnLoad) {
 	//Create and return the structure
 	VkAttachmentDescription description = {};
-	description.format = vulkanFormat;
-	description.samples = VK_SAMPLE_COUNT_1_BIT;
-	description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	description.storeOp = VK_ATTACHMENT_STORE_OP_STORE; //Might want to allow this to change to VK_ATTACHMENT_STORE_OP_DONT_CARE when not needed e.g. depth
-	description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	description.format         = vulkanFormat;
+	description.samples        = static_cast<VkSampleCountFlagBits>(samples == 0 ? 1 : samples);
+	if (clearOnLoad)
+		description.loadOp     = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	else
+		description.loadOp     = VK_ATTACHMENT_LOAD_OP_LOAD;
+	description.storeOp        = VK_ATTACHMENT_STORE_OP_STORE; //Might want to allow this to change to VK_ATTACHMENT_STORE_OP_DONT_CARE when not needed e.g. depth
+	description.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 	description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	description.finalLayout = vulkanFinalLayout;
+	if (clearOnLoad)
+		description.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+	else
+		description.initialLayout = vulkanFinalLayout;
+	description.finalLayout    = vulkanFinalLayout;
 
 	return description;
 }
@@ -190,14 +198,15 @@ VkAttachmentDescription FramebufferAttachment::getVkAttachmentDescription() {
   * The FBO class
   *****************************************************************************/
 
-FBO::FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachment*> attachments) : width(width), height(height), attachments(attachments) {
+FBO::FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachmentInfo> attachments) : width(width), height(height), attachments(attachments) {
 	//Setup each attachment
 	unsigned int index = 0;
 	for (unsigned int i = 0; i < attachments.size(); ++i) {
 		//Setup the current attachment
-		attachments[i]->setup(index);
+		if (! attachments[i].attachment->hasBeenSetup())
+			attachments[i].attachment->setup(index);
 
-		if (attachments[i]->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE)
+		if (attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE)
 			index++;
 	}
 
@@ -205,7 +214,7 @@ FBO::FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachment*> at
 	if (BaseEngine::usingVulkan()) {
 		//Go through each attachment and add its description
 		for (unsigned int i = 0; i < attachments.size(); ++i)
-			vulkanAttachmentDescriptions.push_back(attachments[i]->getVkAttachmentDescription());
+			vulkanAttachmentDescriptions.push_back(attachments[i].attachment->getVkAttachmentDescription(attachments[i].clearOnLoad));
 	}
 }
 
@@ -216,8 +225,8 @@ FBO::~FBO() {
 	if (! BaseEngine::usingVulkan())
 		glDeleteFramebuffers(1, &glFBO);
 	//Delete all of the attachments
-	for (FramebufferAttachment* attachment : attachments)
-		delete attachment;
+	for (FramebufferAttachmentInfo& attachment : attachments)
+		delete attachment.attachment;
 }
 
 void FBO::setup(RenderPass* renderPass) {
@@ -229,10 +238,10 @@ void FBO::setup(RenderPass* renderPass) {
 		//Go through each attachment
 		for (unsigned int i = 0; i < attachments.size(); ++i)
 			//Add the attachment and its description to the lists
-			framebufferAttachments.push_back(attachments[i]->getVkImageView());
+			framebufferAttachments.push_back(attachments[i].attachment->getVkImageView());
 
 		//Create the framebuffer
-		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments, attachments.size() == 1 && (attachments[0]->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP));
+		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments, attachments.size() == 1 && (attachments[0].attachment->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP));
 	} else {
 		//Generate and bind the FBO
 		glGenFramebuffers(1, &glFBO);
@@ -246,10 +255,10 @@ void FBO::setup(RenderPass* renderPass) {
 		//Go though each attached FramebufferAttachment
 		for (unsigned int i = 0; i < attachments.size(); i++) {
 			//Setup the current attachment
-			attachments[i]->setup(index);
+			attachments[i].attachment->setup(index);
 
 			//Add the colour attachments
-			if (attachments[i]->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE) {
+			if (attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE) {
 				colourAttachments.push_back(GL_COLOR_ATTACHMENT0 + i);
 				index++;
 			}

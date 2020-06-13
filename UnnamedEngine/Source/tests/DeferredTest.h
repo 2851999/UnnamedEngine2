@@ -60,6 +60,8 @@ void Test::initialise() {
 	getSettings().debugShowInformation = true;
 
 	getSettings().debugVkValidationLayersEnabled = false;
+
+	VulkanSwapChain::clearDefaultDepthBufferOnLoad = false;
 }
 
 void Test::created() {
@@ -102,7 +104,7 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(true, true, true);
+	renderScene = new RenderScene(false, false, true);
 	renderScene->setPostProcessingParameters(true, true, 0.5f);
 
 	//renderScene->disableLighting();
@@ -180,8 +182,9 @@ void Test::renderOffscreen() {
 void Test::render() {
 	renderScene->render();
 
-	//camera->useView();
 	camera->render();
+
+	//camera->useView();
 }
 
 void Test::destroy() {

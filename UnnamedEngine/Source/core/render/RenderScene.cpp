@@ -45,8 +45,8 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferre
 
 		//Setup the offscreen render pass
 		FBO* fbo = new FBO(width, height, {
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-			new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
+			FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+			FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), true }
 		});
 
 		postProcessingRenderPass = new RenderPass(fbo);
@@ -76,18 +76,18 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferre
 		FBO* fbo;
 		if (pbr) {
 			fbo = new FBO(width, height, {
-				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-				new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+				FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), true }
 			});
 		} else {
 			fbo = new FBO(width, height, {
-				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-				new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE),
-				new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH)
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+				FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), true }
 			});
 		}
 
@@ -410,15 +410,15 @@ void RenderScene::render() {
 		Matrix4f matrix = Matrix4f().initIdentity();
 		Renderer::render(screenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 
-		//if (! BaseEngine::usingVulkan()) {
-		//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		//	glBindFramebuffer(GL_READ_FRAMEBUFFER, postProcessingRenderPass->getFBO()->getGLFBO());
-		//	glDrawBuffer(GL_BACK);
-		//	glBlitFramebuffer(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		//	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//} else {
+		if (! BaseEngine::usingVulkan()) {
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, postProcessingRenderPass->getFBO()->getGLFBO());
+			glDrawBuffer(GL_BACK);
+			glBlitFramebuffer(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		} else {
 
-		//}
+		}
 	} else
 		renderScene();
 }

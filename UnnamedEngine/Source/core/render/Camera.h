@@ -126,8 +126,6 @@ public:
 
 	void update() override;
 
-	void useView() override;
-
 	/* Used to render the associated skybox (if there is one) */
 	void render() override;
 
