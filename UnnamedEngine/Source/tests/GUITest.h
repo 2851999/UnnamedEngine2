@@ -86,7 +86,7 @@ void Test::initialise() {
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoVulkan = true;
 	getSettings().debugShowInformation = true;
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
 
 //	Settings& settings = getSettings();
 //	settings.windowTitle = "Test";
@@ -149,10 +149,8 @@ void Test::created() {
 	textBox = new GUITextBox(Colour::WHITE, 200, 20);
 	textBox->setFont(new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(GL_NEAREST)));
 	textBox->setTextColour(Colour::BLACK);
-	textBox->setDefaultTextFont(new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(GL_NEAREST)));
-	textBox->setDefaultTextColour(Colour::GREY);
 	textBox->setPosition(20, 300);
-	textBox->setDefaultText("Enter something");
+	textBox->setDefaultText("Enter something", Colour::GREY, new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(GL_NEAREST)));
 	textBox->setBorder(new GUIBorder(textBox, 1.0f, Colour::LIGHT_BLUE));
 	textBox->selection->setColour(Colour(Colour::LIGHT_BLUE, 0.2f));
 

@@ -47,16 +47,18 @@ void GUIComponentRenderer::update() {
 	GameObject2D::update();
 
 	//Check that there are colours and the render index is within its bounds
-	if (renderIndex < colours.size()) {
+	if (renderIndex < colours.size())
 		//Assign the colour
 		getMaterial()->setDiffuse(colours[renderIndex]);
-		getMaterial()->update();
-	}
 
 	//Now to do the same for the textures
-	if (renderIndex < textures.size()) {
+	if (renderIndex < textures.size())
 		getMaterial()->setDiffuse(textures[renderIndex]);
+
+	//Avoid repeated unnecessary updates
+	if (getMesh() && (lastRenderIndex < 0 || lastRenderIndex != renderIndex)) {
 		getMaterial()->update();
+		lastRenderIndex = renderIndex;
 	}
 }
 
@@ -94,6 +96,8 @@ void GUIComponentRenderer::setColour(Colour colour) {
 		for (unsigned int i = 0; i < colours.size(); i++)
 			colours[i] = colour;
 	}
+	//Ensure an update is performed
+	lastRenderIndex = -1;
 }
 
 void GUIComponentRenderer::setTexture(Texture* texture) {
@@ -103,6 +107,8 @@ void GUIComponentRenderer::setTexture(Texture* texture) {
 		for (unsigned int i = 0; i < textures.size(); i++)
 			textures[i] = texture;
 	}
+		//Ensure an update is performed
+	lastRenderIndex = -1;
 }
 
 void GUIComponentRenderer::setFont(Font* font) {

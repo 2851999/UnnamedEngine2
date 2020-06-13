@@ -45,6 +45,9 @@ private:
 	/* The text instance used to render text */
 	Text* textInstance = NULL;
 
+	/* The last render index */
+	int lastRenderIndex = -1;
+
 	/* Method used to setup the renderer when it is created */
 	void setup();
 protected:

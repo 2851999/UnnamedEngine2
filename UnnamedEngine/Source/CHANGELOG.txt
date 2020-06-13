@@ -1,4 +1,18 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 6 | Experimental 7
+
+* Changed GUITextBox to improve default text rendering
+  performance
+* Changed GUIComponentRenderer to improve rendering
+  performance
+
+* Fixed bug: 'updateDescriptorSet' was called at the
+             incorrect time in BaseEngine causing descriptor
+			 sets to be updated while being used
+* Fixed bug: GUITextBoxCursor would cause descriptor sets
+             to be updated while being used
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 6 | Experimental 6
 
 * Changed render scene to output all depth information to

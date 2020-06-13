@@ -66,12 +66,12 @@ bool GUITextBoxCursor::hasTexture() {
 	return hasTextures();
 }
 
-void GUITextBoxCursor::render() {
+void GUITextBoxCursor::update() {
 	//Check whether the required time has passed for the cursor to change
 	//state
 	if (timer->hasTimePassed(timeBetweenBlink)) {
 		//Change the cursor's current state
-		cursorShown = ! cursorShown;
+		cursorShown = !cursorShown;
 		//Restart the timer
 		timer->restart();
 	}
@@ -87,8 +87,14 @@ void GUITextBoxCursor::render() {
 
 		//Update and render the cursor
 		GUIComponentRenderer::update();
-		GUIComponentRenderer::render();
 	}
+}
+
+void GUITextBoxCursor::render() {
+	//Check whether the cursor is currently shown
+	if (cursorShown)
+		//Update and render the cursor
+		GUIComponentRenderer::render();
 }
 
 void GUITextBoxCursor::showCursor() {
@@ -181,6 +187,8 @@ GUITextBox::~GUITextBox() {
 	delete cursor;
 	delete selection;
 	delete shortcuts;
+	if (defaultTextInstance)
+		delete defaultTextInstance;
 }
 
 void GUITextBox::setup() {
@@ -220,28 +228,25 @@ void GUITextBox::setup() {
 	shortcuts->add(new KeyboardShortcut("Paste", std::vector<int> { GLFW_KEY_RIGHT_CONTROL, GLFW_KEY_V }));
 }
 
-void GUITextBox::onComponentUpdate() {}
+void GUITextBox::onComponentUpdate() {
+	//Update the cursor
+	if (selected)
+		cursor->update();
+}
 
 void GUITextBox::onComponentRender() {
 	//Get the current text instance
 	Text* f = getTextInstance();
-	Font* font = f->getFont();
-	Colour textColour = getTextColour();
 	bool useDefaultText = shouldUseDefaultText();
 	//Determine whether default text has been assigned
-	if (useDefaultText) {
-		//If so, assign the render text to it
-		renderText = defaultText;
-		//Also assign the font to the one for the default text (if assigned)
-		if (defaultTextFont != NULL)
-			f->setFont(defaultTextFont);
-		//Assign the text colour
-		f->setColour(defaultTextColour);
-	} else {
+	if (! useDefaultText) {
 		//Otherwise the render text should updated and clipped within the boundaries
 		//of the text box
 		updateRenderText();
 		clipRenderText();
+	} else {
+		renderText = defaultText;
+		f = defaultTextInstance;
 	}
 
 	//Get the text box position - used to calculate the text position
@@ -253,14 +258,6 @@ void GUITextBox::onComponentRender() {
 
 	//Render the text within the text box
 	f->render(renderText, textX, textY);
-
-	//Assign the font back if it was changed
-	if (useDefaultText) {
-		if (f->getFont() != font)
-			f->setFont(font);
-		//Ensure the text colour is restored
-		f->setColour(textColour);
-	}
 
 	//Render the cursor if the text box is selected
 	if (selected)
@@ -745,4 +742,17 @@ bool GUITextBox::shouldUseDefaultText() {
 void GUITextBox::setText(std::string text) {
 	this->text = text;
 	viewIndexEnd = text.length();
+}
+
+void GUITextBox::setDefaultText(std::string defaultText, Colour colour, Font* font) {
+	this->defaultText       = defaultText;
+	this->defaultTextColour = colour;
+	this->defaultTextFont   = font;
+
+	if (!defaultTextInstance)
+		defaultTextInstance = new Text(font ? font : DEFAULT_FONT, colour, 100, false, true);
+	else {
+		defaultTextInstance->setFont(font ? font : DEFAULT_FONT);
+		defaultTextInstance->setColour(colour);
+	}
 }

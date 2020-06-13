@@ -60,8 +60,11 @@ public:
 	bool hasColour();
 	bool hasTexture();
 
+	/* Method used to update this cursor */
+	void update() override;
+
 	/* Method used to render this cursor */
-	void render();
+	void render() override;
 
 	/* Method called to show the cursor */
 	void showCursor();
@@ -131,6 +134,9 @@ public:
 
 	/* The font used when rendering the default text */
 	Font* defaultTextFont = NULL;
+
+	/* Text instance for rendering the default text */
+	Text* defaultTextInstance = NULL;
 
 	/* The colour the default text should be rendered using */
 	Colour defaultTextColour;
@@ -236,9 +242,7 @@ public:
 	inline void setSelected(bool selected) { this->selected = selected; }
 	inline void setMasked(bool masked) { this->masked = masked; }
 	inline void setMask(std::string mask) { this->mask = mask; }
-	inline void setDefaultText(std::string defaultText) { this->defaultText = defaultText; }
-	inline void setDefaultTextFont(Font* defaultTextFont) { this->defaultTextFont = defaultTextFont; }
-	inline void setDefaultTextColour(Colour defaultTextColour) { this->defaultTextColour = defaultTextColour; }
+	void setDefaultText(std::string defaultText, Colour colour = Colour::GREY, Font* font = NULL);
 	inline void setCursorIndex(int cursorIndex) { this->cursorIndex = cursorIndex; }
 	inline std::string getText() { return text; }
 	inline std::string getRenderText() { return renderText; }

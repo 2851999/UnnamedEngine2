@@ -47,7 +47,7 @@ public:
 	virtual void onKeyPressed(int key) override;
 };
 
-bool Test::useVulkan = false;
+bool Test::useVulkan = true;
 
 void Test::initialise() {
 	getSettings().videoVulkan = useVulkan;
@@ -151,6 +151,9 @@ void Test::created() {
 	mit1->setPosition(10.0f, 1.0f, 0.0f);
 	mit1->update();
 	renderScene->add(mit1);
+
+	//model2->getMesh()->getMaterial(1)->setDiffuse(Renderer::getBlankTexture());
+	//model2->getMesh()->getMaterial(1)->update();
 }
 
 void Test::update() {

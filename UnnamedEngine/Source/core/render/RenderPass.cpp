@@ -286,10 +286,7 @@ void RenderPass::begin() {
 
 void RenderPass::end() {
 	//Check if using Vulkan
-	if (BaseEngine::usingVulkan()) {
+	if (BaseEngine::usingVulkan())
 		//End the render pass
 		vkCmdEndRenderPass(Vulkan::getCurrentCommandBuffer());
-	} else {
-		
-	}
 }
