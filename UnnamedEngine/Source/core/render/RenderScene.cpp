@@ -46,7 +46,7 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferre
 		//Setup the offscreen render pass
 		FBO* fbo = new FBO(width, height, {
 			FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
-			FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), true }
+			FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), ! deferred } //When deferred, geometry pass must clear depth buffer, not post process
 		});
 
 		postProcessingRenderPass = new RenderPass(fbo);
@@ -412,12 +412,10 @@ void RenderScene::render() {
 
 		if (! BaseEngine::usingVulkan()) {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, postProcessingRenderPass->getFBO()->getGLFBO());
-			glDrawBuffer(GL_BACK);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, deferred ? deferredGeometryRenderPass->getFBO()->getGLFBO() : postProcessingRenderPass->getFBO()->getGLFBO());
+			//glDrawBuffer(GL_BACK);
 			glBlitFramebuffer(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		} else {
-
 		}
 	} else
 		renderScene();

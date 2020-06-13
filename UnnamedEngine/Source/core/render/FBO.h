@@ -77,6 +77,7 @@ public:
 struct FramebufferAttachmentInfo {
 	FramebufferAttachment* attachment;
 	bool                   clearOnLoad;
+	bool                   shouldDelete = true; //Used to ensure if a new attachment is supplied to FBO, then it will delete it when destroyed, otherwise assumes it could be used elsewhere
 };
 
  /*****************************************************************************

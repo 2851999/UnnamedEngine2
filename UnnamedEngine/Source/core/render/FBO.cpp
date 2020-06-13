@@ -203,18 +203,20 @@ FBO::FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachmentInfo>
 	unsigned int index = 0;
 	for (unsigned int i = 0; i < attachments.size(); ++i) {
 		//Setup the current attachment
-		if (! attachments[i].attachment->hasBeenSetup())
-			attachments[i].attachment->setup(index);
+		if (! this->attachments[i].attachment->hasBeenSetup())
+			this->attachments[i].attachment->setup(index);
+		else
+			this->attachments[i].shouldDelete = false;
 
-		if (attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE)
+		if (this->attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE)
 			index++;
 	}
 
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		//Go through each attachment and add its description
-		for (unsigned int i = 0; i < attachments.size(); ++i)
-			vulkanAttachmentDescriptions.push_back(attachments[i].attachment->getVkAttachmentDescription(attachments[i].clearOnLoad));
+		for (unsigned int i = 0; i < this->attachments.size(); ++i)
+			vulkanAttachmentDescriptions.push_back(this->attachments[i].attachment->getVkAttachmentDescription(this->attachments[i].clearOnLoad));
 	}
 }
 
@@ -225,8 +227,10 @@ FBO::~FBO() {
 	if (! BaseEngine::usingVulkan())
 		glDeleteFramebuffers(1, &glFBO);
 	//Delete all of the attachments
-	for (FramebufferAttachmentInfo& attachment : attachments)
-		delete attachment.attachment;
+	for (FramebufferAttachmentInfo& attachment : attachments) {
+		if (attachment.shouldDelete)
+			delete attachment.attachment;
+	}
 }
 
 void FBO::setup(RenderPass* renderPass) {

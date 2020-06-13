@@ -1,4 +1,11 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 6 | Experimental 6
+
+* Changed render scene to output all depth information to
+  the default depth buffer in the case of using post
+  processing/deferred rendering
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 6 | Experimental 5
 
 * Added 'clearDefaultDepthBufferOnLoad' in VulkanSwapChain
