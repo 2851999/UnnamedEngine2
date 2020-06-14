@@ -45,6 +45,7 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP       
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA       = 6;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING           = 7;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING = 8;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR            = 9;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -167,6 +168,17 @@ ShaderInterface::ShaderInterface() {
 	pbrDeferredLightingLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING, pbrDeferredLightingLayout);
+
+	//Deferred PBR SSR lighting
+	DescriptorSetLayout* pbrDeferredLightingSSRLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH); //Don't use light batches, so need to change set number
+	pbrDeferredLightingSSRLayout->addTexture2D(0);
+	pbrDeferredLightingSSRLayout->addTexture2D(1);
+	pbrDeferredLightingSSRLayout->addTexture2D(2);
+	pbrDeferredLightingSSRLayout->addTexture2D(3);
+
+	pbrDeferredLightingSSRLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR, pbrDeferredLightingSSRLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -274,6 +286,11 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING));
+	} else if (shaderID == Renderer::SHADER_DEFERRED_PBR_SSR) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR));
 	}
 }
 

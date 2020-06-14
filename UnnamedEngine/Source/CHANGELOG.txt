@@ -1,4 +1,49 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 1
+
+* Readded SSR (Vulkan not working)
+
+* Changed Renderer to only create GraphicsPipelineLayout
+  instances if needed
+
+* Fixed bug: Depth information was not copied to the default
+             buffer when using deferred rendering with
+			 post processsing off (OpenGL)
+* Fixed bug: Updating a camera once would cause issues when
+             using Vulkan
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 (V0.4.9)
+
+* Added 'setPostProcessingParameters' method in RenderScene
+* Added 'clearDefaultDepthBufferOnLoad' in VulkanSwapChain
+  to allow depth information to be loaded when rendering to
+  the default depth buffer instead of cleared
+* Added 'samples' parameter in FramebufferAttachment
+* Added FramebufferAttachmentInfo struct that is taken in
+  FBO constructor instead of FramebufferAttachment*
+
+* Readded deferred lighting
+* Readded post processing
+
+* Changed GUITextBox to improve default text rendering
+  performance
+* Changed GUIComponentRenderer to improve rendering
+  performance
+
+* Renamed shader LightingDeferredGeom to
+  DeferredLightingGeometry
+
+* Fixed bug: RenderPass did not adjust front face when the
+             viewport was not flipped, causing shadow mapping
+			 to be incorrect when using Vulkan
+* Fixed bug: 'updateDescriptorSet' was called at the
+             incorrect time in BaseEngine causing descriptor
+			 sets to be updated while being used
+* Fixed bug: GUITextBoxCursor would cause descriptor sets
+             to be updated while being used
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 6 | Experimental 7
 
 * Changed GUITextBox to improve default text rendering

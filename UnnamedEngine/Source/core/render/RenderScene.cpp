@@ -25,7 +25,7 @@
 
 #include "../BaseEngine.h"
 
-RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferred(deferred), postProcessing(postProcessing) {
+RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing) : deferred(deferred), ssr(ssr), postProcessing(postProcessing) {
 	//Create the FBO for rendering offscreen
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
@@ -111,10 +111,29 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferre
 		deferredRenderingScreenTextureMesh = new Mesh(meshData);
 		deferredRenderingScreenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 
+		if (ssr) {
+
+			FBO* ssrFBO = new FBO(width, height, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+				FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), false }
+			});
+
+			deferredPBRSSRRenderPass = new RenderPass(ssrFBO);
+
+			descriptorSetGeometryBufferSSR = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR));
+			descriptorSetGeometryBufferSSR->setTexture(0, deferredGeometryRenderPass->getFBO()->getAttachment(0));
+			descriptorSetGeometryBufferSSR->setTexture(1, deferredGeometryRenderPass->getFBO()->getAttachment(1));
+			descriptorSetGeometryBufferSSR->setTexture(2, deferredPBRSSRRenderPass->getFBO()->getAttachment(0)); //Albedo
+			descriptorSetGeometryBufferSSR->setTexture(3, deferredGeometryRenderPass->getFBO()->getAttachment(3));
+			descriptorSetGeometryBufferSSR->setup();
+
+			pipelineDeferredSSR = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_PBR_SSR), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
+		}
+
 		pipelineDeferredLightingGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY), deferredGeometryRenderPass);
 		pipelineDeferredLightingSkinningGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY), deferredGeometryRenderPass);
-		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
-		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
+		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
 	}
 
 	//Obtain the render pipelines
@@ -148,6 +167,12 @@ RenderScene::~RenderScene() {
 		delete descriptorSetGeometryBuffer;
 		delete deferredGeometryRenderPass;
 		delete deferredRenderingScreenTextureMesh;
+
+		if (ssr) {
+			delete deferredPBRSSRRenderPass;
+			delete descriptorSetGeometryBufferSSR;
+			delete pipelineDeferredSSR;
+		}
 	}
 
 	//Go through and delete all created objects
@@ -263,6 +288,15 @@ void RenderScene::renderOffscreen() {
 		}
 
 		deferredGeometryRenderPass->end();
+
+		if (ssr) {
+			//Render the lighting
+			deferredPBRSSRRenderPass->begin();
+
+			renderScene();
+
+			deferredPBRSSRRenderPass->end();
+		}
 	}
 
 	//Check if post processing
@@ -270,7 +304,14 @@ void RenderScene::renderOffscreen() {
 		//Render the scene offscreen ready for post processing
 		postProcessingRenderPass->begin();
 
-		renderScene();
+		if (ssr) {
+			pipelineDeferredSSR->bind();
+			descriptorSetGeometryBufferSSR->bind();
+			Matrix4f matrix = Matrix4f().initIdentity();
+			Renderer::render(deferredRenderingScreenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+		} else {
+			renderScene();
+		}
 
 		postProcessingRenderPass->end();
 	}
@@ -417,8 +458,23 @@ void RenderScene::render() {
 			glBlitFramebuffer(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
-	} else
-		renderScene();
+	} else {
+		if (deferred && (! BaseEngine::usingVulkan())) {
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, deferred ? deferredGeometryRenderPass->getFBO()->getGLFBO() : postProcessingRenderPass->getFBO()->getGLFBO());
+			//glDrawBuffer(GL_BACK);
+			glBlitFramebuffer(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
+		if (ssr) {
+			pipelineDeferredSSR->bind();
+			descriptorSetGeometryBufferSSR->bind();
+			Matrix4f matrix = Matrix4f().initIdentity();
+			Renderer::render(deferredRenderingScreenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+		} else
+			renderScene();
+	}
 }
 
 void RenderScene::setPostProcessingParameters(bool gammaCorrection, bool fxaa, float exposureIn) {

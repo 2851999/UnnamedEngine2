@@ -38,7 +38,7 @@ Camera::~Camera() {
 
 void Camera::updateUBO() {
 	//Update the UBO
-	descriptorSet->getUBO(0)->updateFrame(&shaderData, 0, sizeof(ShaderBlock_Camera));
+	descriptorSet->getUBO(0)->update(&shaderData, 0, sizeof(ShaderBlock_Camera));
 }
 
 void Camera::useView() {

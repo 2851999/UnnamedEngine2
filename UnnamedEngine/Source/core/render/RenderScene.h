@@ -39,6 +39,9 @@ private:
 	/* Boolean that states whether deferred rendering should be used or not */
 	bool deferred;
 
+	/* Boolean that states whether SSR should be used or not */
+	bool ssr;
+
 	/* Boolean that states whether post processing should be used or not */
 	bool postProcessing;
 
@@ -69,6 +72,7 @@ private:
 	GraphicsPipeline* pipelineDeferredLightingSkinningGeometry;
 	GraphicsPipeline* pipelineDeferredLighting;
 	GraphicsPipeline* pipelineDeferredLightingBlend;
+	GraphicsPipeline* pipelineDeferredSSR;
 
 	/* Meshes for rendering to the screen */
 	Mesh* screenTextureMesh;
@@ -80,11 +84,17 @@ private:
 	/* Deferred geometry render pass */
 	RenderPass* deferredGeometryRenderPass = NULL;
 
+	/* SSR render pass */
+	RenderPass* deferredPBRSSRRenderPass = NULL;
+
 	/* Post processing render pass */
 	RenderPass* postProcessingRenderPass = NULL;
 
 	/* Descriptor set for the geometry buffer */
 	DescriptorSet* descriptorSetGeometryBuffer;
+
+	/* Descriptor set for the geometry buffer SSR */
+	DescriptorSet* descriptorSetGeometryBufferSSR;
 
 	/* Method used to render this scene (Ignoring any post processing) */
 	void renderScene();
@@ -93,7 +103,7 @@ public:
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
 	/* Constructor */
-	RenderScene(bool deferred, bool pbr, bool postProcessing);
+	RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing);
 
 	/* Destructor */
 	virtual ~RenderScene();
