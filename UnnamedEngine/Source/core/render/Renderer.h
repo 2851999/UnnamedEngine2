@@ -89,6 +89,7 @@ public:
 	static const unsigned int SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
 	static const unsigned int SHADER_BASIC_PBR_DEFERRED_LIGHTING;
 	static const unsigned int SHADER_DEFERRED_PBR_SSR;
+	static const unsigned int SHADER_TILEMAP;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -119,6 +120,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND;
 	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_PBR_SSR;
 	static const unsigned int GRAPHICS_PIPELINE_SPRITE;
+	static const unsigned int GRAPHICS_PIPELINE_TILEMAP;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -136,6 +138,8 @@ public:
 
 	/* Method used to stop applying a material (unbinds required textures) */
 	static void stopUsingMaterial(Material* material);
+
+	static void render(RenderData* renderData, Matrix4f& modelMatrix, Material* material);
 
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);

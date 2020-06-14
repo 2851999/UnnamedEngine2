@@ -196,6 +196,11 @@ void VBO<T>::updateStream(GLsizeiptr size) {
 		//Buffer orphaning
 		glBufferData(target, this->size, NULL, convertToGL(usage));
 		glBufferSubData(target, 0, size, &data.front());
+	} else {
+		//MAY BE BETTER WAY
+
+		//Copy the data into the buffer
+		vulkanBuffer->copyData(data.data(), 0, data.size() * sizeof(T));
 	}
 }
 

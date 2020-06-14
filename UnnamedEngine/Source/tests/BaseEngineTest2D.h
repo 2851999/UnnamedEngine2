@@ -23,7 +23,7 @@
 #include "../core/render/Renderer.h"
 #include "../core/gui/Font.h"
 #include "../core/Sprite.h"
-//#include "../core/render/Tilemap.h"
+#include "../core/render/Tilemap.h"
 #include "../utils/GLUtils.h"
 #include "../core/ml/ML.h"
 #include "../core/audio/SoundSystem.h"
@@ -34,7 +34,7 @@ private:
 	GameObject2D* object;
 	Font* font;
 	Sprite* sprite;
-	//Tilemap* tilemap;
+	Tilemap* tilemap;
 	SoundSystem* soundSystem;
 	GraphicsPipeline* graphicsPipeline;
 public:
@@ -75,6 +75,8 @@ void Test::initialise() {
 }
 
 void Test::created() {
+	Shader::compileEngineShaderToSPIRV("TilemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+
 	graphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SPRITE), Renderer::getDefaultRenderPass());
 
 	TextureParameters::DEFAULT_CLAMP = GL_CLAMP_TO_EDGE;
@@ -101,7 +103,7 @@ void Test::created() {
 
 	Renderer::addCamera(camera);
 
-	//tilemap = Tilemap::loadTilemap("C:/UnnamedEngine/maps/", "Map3.tmx", true);
+	tilemap = Tilemap::loadTilemap("C:/UnnamedEngine/maps/", "Map3.tmx", true);
 
 	soundSystem = new SoundSystem();
 	soundSystem->createListener();
@@ -133,7 +135,7 @@ void Test::onMousePressed(int button) {
 	float worldX = (float) mousePos.getX() + cameraPos.getX();
 	float worldY = (float) mousePos.getY() + cameraPos.getY();
 	//	std::cout << tilemap->getLayers()[0]->getTileID(worldX, worldY) << std::endl;
-	//tilemap->getLayers()[0]->setTileID(worldX, worldY, 1);
+	tilemap->getLayers()[0]->setTileID(worldX, worldY, 1);
 }
 
 void Test::render() {
@@ -143,7 +145,7 @@ void Test::render() {
 
 	sprite->render();
 
-	//tilemap->render();
+	tilemap->render();
 }
 
 void Test::destroy() {
@@ -152,4 +154,5 @@ void Test::destroy() {
 	delete sprite;
 	delete camera;
 	delete graphicsPipeline;
+	delete tilemap;
 }

@@ -21,9 +21,11 @@
 #include <algorithm>
 
 #include "../BaseEngine.h"
-#include "../../utils/Logging.h"
 #include "RenderScene.h"
+#include "Tilemap.h"
 #include "../vulkan/Vulkan.h"
+#include "../../utils/Logging.h"
+#include "../../utils/VulkanUtils.h"
 
  /*****************************************************************************
   * The Renderer class
@@ -66,6 +68,7 @@ const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY        
 const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY  = 19;
 const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING                    = 20;
 const unsigned int Renderer::SHADER_DEFERRED_PBR_SSR                               = 21;
+const unsigned int Renderer::SHADER_TILEMAP                                        = 22;
 
 const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                                      = 1;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                                       = 2;
@@ -95,6 +98,7 @@ const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING      
 const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND             = 26;
 const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_PBR_SSR                              = 27;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SPRITE                                        = 28;
+const unsigned int Renderer::GRAPHICS_PIPELINE_TILEMAP                                       = 29;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -142,6 +146,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, "basicpbr/PBRDeferredGeometry", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
 	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING, "basicpbr/PBRDeferredLighting");
 	addRenderShader(SHADER_DEFERRED_PBR_SSR, "postprocessing/SSRShader");
+	addRenderShader(SHADER_TILEMAP, "TilemapShader");
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -233,6 +238,17 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND, SHADER_BASIC_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_PBR_SSR, SHADER_DEFERRED_PBR_SSR, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SPRITE, SHADER_MATERIAL, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true);
+	
+	GraphicsPipeline::VertexInputData tilemapVertexInputData;
+	tilemapVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, 0, VK_FORMAT_R32G32_SFLOAT, 0));
+	tilemapVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(0, 2 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+	tilemapVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, 1, VK_FORMAT_R32G32_SFLOAT, 0));
+	tilemapVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(1, 2 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+	tilemapVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(TilemapLayer::ATTRIBUTE_LOCATION_VISIBILITY, 2, VK_FORMAT_R32_SFLOAT, 0));
+	tilemapVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(2, 1 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TILEMAP, SHADER_TILEMAP, tilemapVertexInputData, alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true);
+
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();
@@ -250,6 +266,28 @@ void Renderer::useMaterial(RenderData* renderData, unsigned int materialIndex, M
 void Renderer::stopUsingMaterial(Material* material) {
 	//Unbind the textures
 	material->getDescriptorSet()->unbind();
+}
+
+void Renderer::render(RenderData* renderData, Matrix4f& modelMatrix, Material* material) {
+	//Obtain the required UBO's for rendering
+	UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
+	UBO* shaderSkinningUBO = NULL;
+	if (renderData->getDescriptorSet()->getNumUBOs() > 1 && renderData->getDescriptorSet()->getUBO(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
+		shaderSkinningUBO = renderData->getDescriptorSet()->getUBO(1);
+
+	renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
+	renderData->getShaderBlock_Model().ue_modelMatrix = modelMatrix;
+	renderData->getShaderBlock_Model().ue_normalMatrix = Matrix4f(modelMatrix.to3x3().inverse().transpose());
+
+	shaderModelUBO->updateFrame(&renderData->getShaderBlock_Model(), 0, sizeof(ShaderBlock_Model));
+
+	renderData->getDescriptorSet()->bind();
+
+	if (material)
+		useMaterial(renderData, 0, material);
+	renderData->render();
+	if (material)
+		stopUsingMaterial(material);
 }
 
 void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderShader) {
@@ -307,11 +345,11 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 			} else if (shouldUseMaterial) {
 				if (mesh->hasMaterial())
 					useMaterial(renderData, 0, mesh->getMaterial());
-				meshRenderData->render();
+				renderData->render();
 				if (mesh->hasMaterial())
 					stopUsingMaterial(mesh->getMaterial());
 			} else
-				meshRenderData->render();
+				renderData->render();
 		}
 	}
 }
