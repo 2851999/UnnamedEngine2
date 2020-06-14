@@ -127,4 +127,5 @@ public:
 	void setPostProcessingParameters(bool gammaCorrection, bool fxaa, float exposureIn = -1.0f);
 
 	inline Colour getAmbientLight() { return ambientLight; }
+	inline bool hasObjects() { return objects.size() > 0 || skinnedObjects.size() > 0; }
 };

@@ -433,11 +433,7 @@ void RenderScene::renderScene() {
 				}
 			}
 		}
-	}
-	else {
-		//Use the material pipeline
-		pipelineMaterial->bind();
-
+	} else {
 		//Go through and render all of the objects
 		for (unsigned int i = 0; i < objects.size(); ++i)
 			objects[i]->render();
@@ -472,8 +468,12 @@ void RenderScene::render() {
 			descriptorSetGeometryBufferSSR->bind();
 			Matrix4f matrix = Matrix4f().initIdentity();
 			Renderer::render(deferredRenderingScreenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
-		} else
+		} else {
+			//Use the material pipeline
+			pipelineMaterial->bind();
+
 			renderScene();
+		}
 	}
 }
 
