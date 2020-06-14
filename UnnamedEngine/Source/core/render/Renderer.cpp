@@ -94,6 +94,7 @@ const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINN
 const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING                   = 25;
 const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND             = 26;
 const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_PBR_SSR                              = 27;
+const unsigned int Renderer::GRAPHICS_PIPELINE_SPRITE                                        = 28;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -231,6 +232,7 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING, SHADER_BASIC_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND, SHADER_BASIC_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_PBR_SSR, SHADER_DEFERRED_PBR_SSR, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SPRITE, SHADER_MATERIAL, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true);
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();

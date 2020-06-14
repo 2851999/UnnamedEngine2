@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 3
+
+* Readded BaseEngineTest2D
+
+* Fixed bug: Sprite did not update material's so no textures
+             would render
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 7 | Experimental 2
 
 * Readded BaseTest3D

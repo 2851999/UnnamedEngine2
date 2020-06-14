@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "tests/DeferredTest.h"
+#include "tests/BaseEngineTest2D.h"
 
 #include "utils/Utils.h"
 //#include "examples/basic/BasicRendering3D.h"
