@@ -2,23 +2,18 @@
 
 layout(location = 0) in vec2 ue_frag_textureCoord;
 
-#map uniform PositionBuffer ue_gPosition
-#map uniform NormalBuffer ue_gNormal
-#map uniform AlbedoBuffer ue_gAlbedo
-#map uniform MetalnessAOBuffer ue_gMetalnessAO
-
 /* Input data for the SSR */
-uniform sampler2D ue_gPosition;
-uniform sampler2D ue_gNormal;
-uniform sampler2D ue_gAlbedo;
-uniform sampler2D ue_gMetalnessAO;
+layout(set = 3, binding = 0) uniform sampler2D ue_gPosition;
+layout(set = 3, binding = 1) uniform sampler2D ue_gNormal;
+layout(set = 3, binding = 2) uniform sampler2D ue_gAlbedo;
+layout(set = 3, binding = 3) uniform sampler2D ue_gMetalnessAO;
 
 /* Various constants for the SSR */
 const float stepValue = 0.1;
 const float minRayStep = 0.1;
 const float maxSteps = 30;
 const int numBinarySearchSteps = 10;
-const float reflectionSpecularFalloffExponent = 3;
+const float reflectionSpecularFalloffExponent = 3.0;
 
 const vec3 scale = vec3(0.8, 0.8, 0.8);
 const float K = 19.19;
@@ -129,6 +124,7 @@ void main() {
 	vec3 hitPos = viewPos;
 	float dDepth;
 	vec3 wp = fragPosition;
+	//vec3 jitt = vec3(0.0);
 	vec3 jitt = mix(vec3(0.0), vec3(hash(wp)), roughness); //If model has shininess > 1, this will cause alot of noise
 	vec4 coords = rayMarch((vec3(jitt) + reflected * max(minRayStep, -viewPos.z)), hitPos, dDepth); //NOT VIEW POS
 	

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PHYSICS_PHYSICSSCENE_H_
-#define CORE_PHYSICS_PHYSICSSCENE_H_
+#pragma once
 
 #include <functional>
 
@@ -61,4 +60,3 @@ public:
 	inline void remove(unsigned int index) { objects.erase(objects.begin() + index); }
 };
 
-#endif /* CORE_PHYSICS_PHYSICSSCENE_H_ */

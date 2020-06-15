@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PARTICLES_PARTICLEEFFECT_H_
-#define CORE_PARTICLES_PARTICLEEFFECT_H_
+#pragma once
 
 #include "ParticleSystem.h"
 #include "ParticleEmitter.h"
@@ -50,7 +49,6 @@ private:
 	Colour colourStart;
 	Colour colourEnd;
 public:
-
 	/* The constructor */
 	ParticleEffectColourChange(Colour colourStart, Colour colourEnd) : colourStart(colourStart), colourEnd(colourEnd) {}
 
@@ -66,6 +64,3 @@ public:
 	inline Colour& getColourStart() { return colourStart; }
 	inline Colour& getColourEnd() { return colourEnd; }
 };
-
-
-#endif /* CORE_PARTICLES_PARTICLEEFFECT_H_ */

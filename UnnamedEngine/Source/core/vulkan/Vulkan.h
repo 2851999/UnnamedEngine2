@@ -16,18 +16,20 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKAN_H_
-#define CORE_VULKAN_VULKAN_H_
+#pragma once
 
 #include "../Window.h"
 #include "VulkanDevice.h"
 #include "VulkanSwapChain.h"
-#include "VulkanRenderPass.h"
 #include "../render/VBO.h"
 #include "../render/UBO.h"
 #include "../render/Texture.h"
 #include "../render/Mesh.h"
-#include "VulkanGraphicsPipeline.h"
+#include "../render/GraphicsPipeline.h"
+
+class DescriptorSet;
+
+class RenderPass;
 
 /*****************************************************************************
  * The Vulkan class manages resources required for Vulkan
@@ -47,9 +49,6 @@ private:
 	/* The swap chain */
 	static VulkanSwapChain* swapChain;
 
-	/* The render pass */
-	static VulkanRenderPass* renderPass;
-
 	/* Command pool */
 	static VkCommandPool commandPool;
 
@@ -61,6 +60,55 @@ private:
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
 	static std::vector<VkFence> inFlightFences;
 	static unsigned int currentFrame;
+
+	/* Structure for storing info about a requested descriptor set update */
+	struct DescriptorSetUpdateInfo {
+		//The descriptor set instance to be updated
+		DescriptorSet* set;
+
+		//The next frame to update (different to the current to avoid synchronisation problems)
+		unsigned int nextUpdateFrame;
+
+		//Number of updates left to perform
+		unsigned int updatesLeft;
+	};
+
+	/* List of descriptor set updates to perform, will work on assumption
+	   all descriptor sets require same number of updates based on the number
+	   of swap chain images */
+	static std::vector<DescriptorSetUpdateInfo> descriptorSetUpdateQueue;
+
+	/* Method to update a descriptor set for the current frame (Returns whether the set has been fully updated) */
+	static bool updateDescriptorSetFrame(DescriptorSetUpdateInfo& info);
+
+	/* Method to update the descriptor sets in the update queue */
+	static void updateDescriptorSetQueue();
+
+	/* Structure for storing info about a requested UBO update */
+	struct UBOUpdateInfo {
+		//The UBO instance to be updated
+		UBO* ubo;
+
+		//The information needed to perform the update each frame
+		void*        data;
+		unsigned int offset;
+		unsigned int size;
+
+		//The next frame to update (different to the current to avoid synchronisation problems)
+		unsigned int nextUpdateFrame;
+
+		//Number of updates left to perform
+		unsigned int updatesLeft;
+	};
+
+	/* List of UBO updates to perform */
+	static std::vector<UBOUpdateInfo> uboUpdateQueue;
+
+	/* Method to update a UBO for the current frame (Returns whether the set has been fully updated) */
+	static bool updateUBOFrame(UBOUpdateInfo& info);
+
+	/* Method to update UBOs in the update queue*/
+	static void updateUBOQueue();
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -90,7 +138,7 @@ public:
 	static void createCommandBuffers(); //(Destroyed with command pool)
 
 	static void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount);
+	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t layerCount);
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels, uint32_t layerCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE); //Pass VK_NULL_HANDLE for command buffer to let this method create one
 	static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	static VkCommandBuffer beginSingleTimeCommands();
@@ -102,17 +150,20 @@ public:
 	/* Method to destroy the synchronisation objects */
 	static void destroySyncObjects();
 
-	/* Method to destroy the uniform buffers */
-	static void destroyUniformBuffers();
-
-	/* Method to update the uniform buffer */
-	static void updateUniformBuffer();
+	/* Method to update for rendering this Vulkan (Should be called after update of game loop, before rendering) */
+	static void update();
 
 	/* Method to start drawing a frame (and recording to the command buffer) */
 	static void startDraw();
 
 	/* Method to stop drawing a frame (and recording to the command buffer) */
 	static void stopDraw();
+
+	/* Method to update a descriptor set */
+	static void updateDescriptorSet(DescriptorSet* set);
+
+	/* Method to update a UBO */
+	static void updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size);
 
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);
@@ -147,11 +198,10 @@ public:
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
 	static inline VulkanDevice* getDevice() { return device; }
 	static inline VulkanSwapChain* getSwapChain() { return swapChain; }
-	static inline VulkanRenderPass* getRenderPass() { return renderPass; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
 	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }
+	static inline unsigned int getNextFrame() { return (currentFrame + 1) % swapChain->getImageCount(); }
 };
 
 
-#endif /* CORE_VULKAN_VULKAN_H_ */

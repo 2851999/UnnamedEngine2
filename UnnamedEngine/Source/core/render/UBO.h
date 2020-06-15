@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_UBO_H_
-#define CORE_RENDER_UBO_H_
+#pragma once
 
 #include <GL/glew.h>
 
@@ -53,6 +52,12 @@ public:
 	/* Destructor */
 	virtual ~UBO();
 
+	/* Method to bind this buffer for use with OpenGL (binding done by descriptor set in Vulkan) */
+	void bindGL();
+
+	/* Method to update the contents of this buffer for a frame */
+	void updateFrame(void* data, unsigned int offset, unsigned int size);
+
 	/* Method to update the contents of this buffer */
 	void update(void* data, unsigned int offset, unsigned int size);
 
@@ -67,4 +72,3 @@ public:
 };
 
 
-#endif /* CORE_RENDER_UBO_H_ */

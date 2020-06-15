@@ -16,14 +16,15 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PARTICLES_PARTICLESYSTEM_H_
-#define CORE_PARTICLES_PARTICLESYSTEM_H_
+#pragma once
 
 #include "../render/Colour.h"
 #include "../render/RenderData.h"
 #include "../render/TextureAtlas.h"
 #include "../render/VBO.h"
 #include "../render/ShaderInterface.h"
+#include "../render/Material.h"
+#include "../render/GraphicsPipeline.h"
 
 /*****************************************************************************
  * The ParticleSystem class is used to manage, update and render a set of
@@ -63,24 +64,27 @@ class ParticleEffect;
 class ParticleSystem {
 private:
 	/* The vertex data required by each particle */
-	static const GLfloat vertexBufferData[];
+	static const float vertexBufferData[];
 
 	/* The data passed to OpenGL about the particles */
-	std::vector<GLfloat> particlePositionSizeData; //This stores the position's and size of the particles one after the other
-	std::vector<GLfloat> particleColourData;       //This stores the colours of the particles
-	std::vector<GLfloat> particleTextureData;      //This stores the data for the texture coordinates for the particles
+	std::vector<float> particlePositionSizeData; //This stores the position's and size of the particles one after the other
+	std::vector<float> particleColourData;       //This stores the colours of the particles
+	std::vector<float> particleTextureData;      //This stores the data for the texture coordinates for the particles
 
 	/* The render data used for rendering */
 	RenderData* renderData;
 
+	/* The material for the system */
+	Material* material;
+
 	/* The VBO's for OpenGL */
-	VBO<GLfloat>* vboVertices;
-	VBO<GLfloat>* vboPositionSizeData;
-	VBO<GLfloat>* vboColours;
-	VBO<GLfloat>* vboTextureData;
+	VBO<float>* vboVertices;
+	VBO<float>* vboPositionSizeData;
+	VBO<float>* vboColours;
+	VBO<float>* vboTextureData;
 
 	/* The shader used for rendering */
-	Shader* shader;
+	RenderShader* shader;
 
 	/* A list of the particle structures used to store the data */
 	std::vector<Particle> particles;
@@ -97,15 +101,25 @@ private:
 	/* The maximum number of particles for this system */
 	unsigned int maxParticles = 1800;
 
-	/* UBO and data structure for billboarding */
-	UBO* shaderBillboardUBO;
+	/* Descriptor set for billboarding */
+	DescriptorSet* descriptorSetBillboard;
+
+	/* Data structure for billboarding */
 	ShaderBlock_Billboard shaderBillboardData;
-public:
-	/* The particle effect (Can be NULL) */
-	ParticleEffect* effect = NULL;
+
+	/* Graphics pipeline for rendering */
+	GraphicsPipeline* graphicsPipeline;
 
 	/* The texture atlas (Can be NULL) */
 	TextureAtlas* textureAtlas = NULL;
+public:
+	/* Locations for the attributes in the shader */
+	static const unsigned int ATTRIBUTE_LOCATION_POSITION_DATA;
+	static const unsigned int ATTRIBUTE_LOCATION_COLOUR;
+	static const unsigned int ATTRIBUTE_LOCATION_TEXTURE_DATA;
+
+	/* The particle effect (Can be NULL) */
+	ParticleEffect* effect = NULL;
 
 	/* The acceleration of particles in this system */
 	Vector3f acceleration;
@@ -131,6 +145,7 @@ public:
 
 	/* Returns a reference to a particle at a given index */
 	Particle& getParticle(unsigned int index);
-};
 
-#endif /* CORE_PARTICLES_PARTICLESYSTEM_H_ */
+	/* Assigns the texture atlas for this particle system */
+	void setTextureAtlas(TextureAtlas* textureAtlas);
+};

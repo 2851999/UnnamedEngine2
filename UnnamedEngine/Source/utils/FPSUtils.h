@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_FPSUTILS_H_
-#define UTILS_FPSUTILS_H_
+#pragma once
 
 /*****************************************************************************
  * The FPSCalculator class is used to keep track of the current frame rate
@@ -107,4 +106,3 @@ public:
 	void endFrame();
 };
 
-#endif /* UTILS_FPSUTILS_H_ */

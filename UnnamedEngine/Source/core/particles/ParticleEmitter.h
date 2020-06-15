@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PARTICLES_PARTICLEEMITTER_H_
-#define CORE_PARTICLES_PARTICLEEMITTER_H_
+#pragma once
 
 #include "ParticleSystem.h"
 #include "../Object.h"
@@ -93,6 +92,3 @@ public:
 	/* The constructor */
 	SphericalParticleEmitter(float particleMaxSpeed = 2.0f) : particleMaxSpeed(particleMaxSpeed) {}
 };
-
-
-#endif /* CORE_PARTICLES_PARTICLEEMITTER_H_ */

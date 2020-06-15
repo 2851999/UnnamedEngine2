@@ -5,8 +5,7 @@
  *      Author: Joel
  */
 
-#ifndef CORE_GUI_GUIDROPDOWNMENU_H_
-#define CORE_GUI_GUIDROPDOWNMENU_H_
+#pragma once
 
 #include "GUIButton.h"
 
@@ -66,4 +65,3 @@ public:
 	inline std::vector<GUIButton*>& getButtons() { return buttons; }
 };
 
-#endif /* CORE_GUI_GUIDROPDOWNMENU_H_ */

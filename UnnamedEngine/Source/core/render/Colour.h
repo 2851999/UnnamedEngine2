@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_COLOUR_H_
-#define CORE_RENDER_COLOUR_H_
+#pragma once
 
 #include "../Vector.h"
 
@@ -73,4 +72,3 @@ public:
 	float getA() { return getW(); }
 };
 
-#endif /* CORE_RENDER_COLOUR_H_ */

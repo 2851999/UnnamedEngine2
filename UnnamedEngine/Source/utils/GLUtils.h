@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_GLUTILS_H_
-#define UTILS_GLUTILS_H_
+#pragma once
 
 #include <windows.h>
 #include <GL/glew.h>
@@ -65,4 +64,3 @@ namespace utils_gl {
 
 
 
-#endif /* UTILS_GLUTILS_H_ */

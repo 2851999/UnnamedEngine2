@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANBUFFER_H_
-#define CORE_VULKAN_VULKANBUFFER_H_
+#pragma once
 
 #include "VulkanDevice.h"
 
@@ -46,7 +45,7 @@ private:
 	VkDeviceSize size;
 
 	/* Method to copy memory to a buffer (that is accessible to CPU) */
-	void copyData(void* data, unsigned int offset, VkDeviceSize& size, VkDeviceMemory& dest);
+	void copyData(const void* dataToCopy, unsigned int offset, VkDeviceSize size, VkDeviceMemory dest);
 public:
 	/* Constructor */
 	VulkanBuffer(VkDeviceSize bufferSize, VulkanDevice* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, bool useStaging = true);
@@ -56,7 +55,7 @@ public:
 	virtual ~VulkanBuffer();
 
 	/* Method used to copy data to this buffer */
-	void copyData(void* data, unsigned int offset, VkDeviceSize size);
+	void copyData(const void* dataToCopy, unsigned int offset, VkDeviceSize size);
 
 	/* Setters and getters */
 	VkBuffer& getInstance() { return instance; }
@@ -65,4 +64,3 @@ public:
 };
 
 
-#endif /* CORE_VULKAN_VULKANBUFFER_H_ */

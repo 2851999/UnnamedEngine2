@@ -16,14 +16,14 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_BASEENGINE_H_
-#define CORE_BASEENGINE_H_
+#pragma once
 
 #include <string>
 
 #include "Window.h"
 #include "gui/Font.h"
 #include "render/Camera.h"
+#include "render/RenderPass.h"
 #include "../utils/DebugConsole.h"
 #include "../utils/FPSUtils.h"
 
@@ -32,8 +32,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.4.2";
-	const std::string DateCreated = "08/04/2020";
+	const std::string Version     = "V0.5.0";
+	const std::string DateCreated = "15/06/2020";
 	const std::string Build       = "Beta";
 }
 
@@ -81,8 +81,11 @@ public:
 	/* Called after the Window is created all objects that need to be
 	 * rendered can be created */
 	virtual void created() {}
-	/* Update and render methods */
+	/* Update method */
 	virtual void update() {}
+	/* Method to render before a render pass is started*/
+	virtual void renderOffscreen() {}
+	/* Method to render after the default framebuffer render pass has been started*/
 	virtual void render() {}
 	/* Called when the Engine is stopping but before the Window has
 	 * closed */
@@ -132,4 +135,3 @@ public:
 };
 
 
-#endif /* CORE_BASEENGINE_H_ */

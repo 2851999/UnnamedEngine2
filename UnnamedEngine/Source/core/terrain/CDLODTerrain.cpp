@@ -53,7 +53,7 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap, int lodDepth, float meshSi
 //	std::cout << rootNodeSize << std::endl;
 
 	//Create the quad-tree
-	root = new CDLODQuadTreeNode(heightMap, rootNodeSize, lodDepth - 1, 0.0f, 0.0f);
+	root = new CDLODQuadTreeNode(heightMap, meshSize, rootNodeSize, lodDepth - 1, 0.0f, 0.0f);
 
 	//Create and assign the mesh
 	Mesh* terrainMesh = new Mesh(createMeshData(meshSize, meshSize));
@@ -62,11 +62,6 @@ CDLODTerrain::CDLODTerrain(CDLODHeightMap* heightMap, int lodDepth, float meshSi
 //	texture1 = Texture::loadTexture("C:/UnnamedEngine/textures/grass.png");
 //	texture2 = Texture::loadTexture("C:/UnnamedEngine/textures/snow.jpg");
 //	texture3 = Texture::loadTexture("C:/UnnamedEngine/textures/stone.jpg");
-
-	//Assign the UBO data
-	shaderTerrainUBO =  Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_TERRAIN);
-	shaderTerrainData.ue_heightScale = heightMap->getHeightScale();
-	shaderTerrainData.ue_size = heightMap->getSize();
 }
 
 CDLODTerrain::~CDLODTerrain() {
@@ -74,38 +69,30 @@ CDLODTerrain::~CDLODTerrain() {
 	delete root;
 }
 
-void CDLODTerrain::render() {
+void CDLODTerrain::update() {
+	GameObject3D::update();
+
 	//Get the camera to use
-	Camera3D* camera = (Camera3D*) Renderer::getCamera();
+	Camera3D* camera = (Camera3D*)Renderer::getCamera();
 
 	//Select the nodes to render
-	std::vector<CDLODQuadTreeNode*> selectionList;
 	root->LODSelect(ranges, lodDepth - 1, camera, selectionList);
+
+	//Go through an update all selected nodes
+	for (unsigned int i = 0; i < selectionList.size(); ++i)
+		selectionList[i]->update();
+}
+
+void CDLODTerrain::render() {
 
 //	utils_gl::enableWireframe();
 //	for (CDLODQuadTreeNode* node : selectionList)
 //		node->debug();
 //	utils_gl::disableWireframe();
 
-	//Use the terrain shader
-	Shader* shader = getShader();
-	shader->use();
-
-	shader->setUniformi("HeightMap", Renderer::bindTexture(heightMap->getTexture()));
-
-//	shader->setUniformi("NumLights", 1);
-//	shader->setUniformColourRGB("Light_Ambient", Colour(0.1f, 0.1f, 0.1f));
-	Renderer::getShaderBlock_Core().ue_cameraPosition = Vector4f(((Camera3D*) Renderer::getCamera())->getPosition(), 0.0f); //Required unless added to RenderScene3D?
-//	shader->setUniformi("UseEnvironmentMap", 0);
-//	shader->setUniformi("UseShadowMap", 0);
-//
 //	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(0, -1.0f, 0.0001f);
 //	light0->setUniforms(shader, "[0]");
 //	delete light0;
-
-//	shader->setUniformi("GrassTexture", Renderer::bindTexture(texture1));
-//	shader->setUniformi("SnowTexture", Renderer::bindTexture(texture2));
-//	shader->setUniformi("StoneTexture", Renderer::bindTexture(texture3));
 
 //	long numPolygons = (selectionList.size() * mesh->getData()->getNumIndices()) / 3;
 //	std::cout << numPolygons << std::endl;
@@ -116,27 +103,13 @@ void CDLODTerrain::render() {
 		CDLODQuadTreeNode* currentNode = selectionList[selectionList.size() - 1];
 		selectionList.pop_back();
 
-		shaderTerrainData.ue_translation = Vector4f(currentNode->getX(), 0.0f, currentNode->getZ(), 0.0f);
-		shaderTerrainData.ue_scale = currentNode->getSize();
-		shaderTerrainData.ue_range = currentNode->getRange();
-		shaderTerrainData.ue_gridSize = Vector2f(meshSize, meshSize);
-
-		shaderTerrainUBO->update(&shaderTerrainData, 0, sizeof(ShaderBlock_Terrain));
+		currentNode->getDescriptorSet()->bind();
 
 //		std::cout << currentNode->getSize() << std::endl;
 //		std::cout << currentNode->getRange() << std::endl;
 
-		//mesh->getRenderData()->render();
 		Renderer::render(getMesh(), getModelMatrix(), getRenderShader());
 	}
-
-//	Renderer::unbindTexture();
-//	Renderer::unbindTexture();
-//	Renderer::unbindTexture();
-	Renderer::unbindTexture();
-
-	//Stop using the shader
-	shader->stopUsing();
 }
 
 MeshData* CDLODTerrain::createMeshData(int width, int height) {

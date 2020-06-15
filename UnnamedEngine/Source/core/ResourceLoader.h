@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RESOURCELOADER_H_
-#define CORE_RESOURCELOADER_H_
+#pragma once
 
 #include "audio/Audio.h"
 #include "render/MeshLoader.h"
@@ -103,4 +102,3 @@ public:
 };
 
 
-#endif /* CORE_RESOURCELOADER_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RECTANGLE_H_
-#define CORE_RECTANGLE_H_
+#pragma once
 
 #include "Vector.h"
 
@@ -70,4 +69,3 @@ public:
 	Vector2f getVertex4() { return Vector2f(x + width, y + height); }
 };
 
-#endif /* CORE_RECTANGLE_H_ */

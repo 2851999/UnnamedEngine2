@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_INPUT_INPUTBINDINGS_H_
-#define CORE_INPUT_INPUTBINDINGS_H_
+#pragma once
 
 #include <map>
 
@@ -319,4 +318,3 @@ public:
 	}
 };
 
-#endif /* CORE_INPUT_INPUTBINDINGS_H_ */

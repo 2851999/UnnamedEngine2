@@ -1,16 +1,26 @@
 #version 420
+
 //Used for assigning UBO block locations - can remove
 
-layout(std140, binding = 21) uniform UECoreData {
-	mat4 ue_mvpMatrix;
-	mat4 ue_modelMatrix;
+/* NOTES:
+* Set 0 - Varies per camera
+* Set 1 - Varies per material
+* Set 2 - Varies per model
+* Set 3 - Varies per light batch
+*/
+
+layout(std140, set = 0, binding = 21) uniform UECameraData {
 	mat4 ue_viewMatrix;
 	mat4 ue_projectionMatrix;
-	mat4 ue_normalMatrix;
 	
 	vec4 ue_cameraPosition;
 };
 
+layout(std140, set = 2, binding = 22) uniform UEModelData {
+	mat4 ue_mvpMatrix;
+	mat4 ue_modelMatrix;
+	mat4 ue_normalMatrix;
+};
 
 #define UE_LOCATION_POSITION 0
 #define UE_LOCATION_TEXTURE_COORD 1
@@ -42,7 +52,6 @@ void ueAssignTextureCoord() {
 void ueCalculatePosition() {
 	gl_Position = ue_mvpMatrix * vec4(ue_position, 1.0);
 }
-
 /* The material structure */
 struct UEMaterial {
 	vec4 ambientColour;
@@ -62,21 +71,22 @@ struct UEMaterial {
 };
 
 /* The material data */
-layout(std140, binding = 22) uniform UEMaterialData {
+layout(std140, set = 1, binding = 23) uniform UEMaterialData {
 	UEMaterial ue_material;
 };
 
 /* The texture data */
-layout(binding = 0) uniform sampler2D ue_material_ambientTexture;
-layout(binding = 1) uniform sampler2D ue_material_diffuseTexture;
-layout(binding = 2) uniform sampler2D ue_material_specularTexture;
-layout(binding = 3) uniform sampler2D ue_material_shininessTexture;
-layout(binding = 4) uniform sampler2D ue_material_normalMap;
-layout(binding = 5) uniform sampler2D ue_material_parallaxMap;
+layout(set = 1, binding = 0) uniform sampler2D ue_material_ambientTexture;
+layout(set = 1, binding = 1) uniform sampler2D ue_material_diffuseTexture;
+layout(set = 1, binding = 2) uniform sampler2D ue_material_specularTexture;
+layout(set = 1, binding = 3) uniform sampler2D ue_material_shininessTexture;
+layout(set = 1, binding = 4) uniform sampler2D ue_material_normalMap;
+layout(set = 1, binding = 5) uniform sampler2D ue_material_parallaxMap;
 
+#ifdef UE_SKINNING
 const int UE_MAX_BONES = 90;
 
-layout(std140, binding = 23) uniform UESkinningData {
+layout(std140, set = 2, binding = 24) uniform UESkinningData {
 	mat4 ue_bones[UE_MAX_BONES];
 	bool ue_useSkinning;
 };
@@ -92,6 +102,9 @@ mat4 ueGetBoneTransform() {
 	
 	return boneTransform;
 }
+#endif
+
+#ifndef UE_GEOMETRY_ONLY
 #define MAX_LIGHTS 6
 
 struct UELight {
@@ -112,7 +125,7 @@ struct UELight {
 	bool useShadowMap;
 };
 
-layout(std140, binding = 24) uniform UELightingData {
+layout(std140, set = 3, binding = 25) uniform UELightBatchData {
 	UELight ue_lights[MAX_LIGHTS];
 	mat4 ue_lightSpaceMatrix[MAX_LIGHTS];
 	
@@ -121,13 +134,17 @@ layout(std140, binding = 24) uniform UELightingData {
 	
 	bool ue_useEnvironmentMap;
 };
+#endif
 
 layout(location = 7) out vec3 ue_tangentViewPos;
 layout(location = 8) out vec3 ue_tangentFragPos;
 
 layout(location = 9) out mat3 ue_frag_tbnMatrix;
+#ifndef UE_GEOMETRY_ONLY
 layout(location = 13) out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
+#endif
 
+#ifdef UE_SKINNING
 void ueAssignLightingData() {
 	mat4 boneTransform;
 	mat3 normalMatrix = mat3(ue_normalMatrix);
@@ -141,9 +158,10 @@ void ueAssignLightingData() {
 		ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
 		ue_frag_normal = normalMatrix * ue_normal;
 	}
-	
+#ifndef UE_GEOMETRY_ONLY
 	for (int i = 0; i < ue_numLights; i++)
 		ue_frag_pos_lightspace[i] = ue_lightSpaceMatrix[i] * vec4(ue_frag_position, 1.0);
+#endif
 	
 	if (ue_material.hasNormalMap) {
 		vec3 T;
@@ -173,23 +191,50 @@ void ueAssignLightingData() {
 		ueCalculatePosition();
 	}
 }
+#else
+void ueAssignLightingData() {
+	mat3 normalMatrix = mat3(ue_normalMatrix);
+	ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
+	ue_frag_normal = normalMatrix * ue_normal;
+	
+#ifndef UE_GEOMETRY_ONLY
+	for (int i = 0; i < ue_numLights; i++)
+		ue_frag_pos_lightspace[i] = ue_lightSpaceMatrix[i] * vec4(ue_frag_position, 1.0);
+#endif
+	
+	if (ue_material.hasNormalMap) {
+		vec3 T = normalize(normalMatrix * ue_tangent);
+		vec3 B = normalize(normalMatrix * ue_bitangent);
+		vec3 N = normalize(ue_frag_normal);
+	
+		ue_frag_tbnMatrix = mat3(-T, B, N);
+		
+		if (ue_material.hasParallaxMap) {
+			ue_tangentViewPos = transpose(ue_frag_tbnMatrix) * ue_cameraPosition.xyz;
+			ue_tangentFragPos = transpose(ue_frag_tbnMatrix) * ue_frag_position;
+		}
+	}
+	
+	//Assign the vertex position
+	ueCalculatePosition();
+}
+#endif
 
 //Assign these as constants for now
 #define UE_TERRAIN_NORMAL_LOOK_UP_OFFSET 1.0
 #define UE_TERRAIN_VERTEX_MORPH_START 0.0
 #define UE_TERRAIN_VERTEX_MORPH_END 0.40
 
-
-layout(binding = 6) uniform sampler2D ue_heightMap;
+layout(set = 4, binding = 6) uniform sampler2D ue_heightMap;
 
 /* The terrain data */
-layout(std140, binding = 25) uniform UETerrainData {
-	uniform vec4 ue_translation;
-	uniform vec2 ue_gridSize;
-	uniform float ue_scale;
-	uniform float ue_range;
-	uniform float ue_heightScale;
-	uniform float ue_size;
+layout(std140, set = 4, binding = 26) uniform UETerrainData {
+	vec4 ue_translation;
+	vec2 ue_gridSize;
+	float ue_scale;
+	float ue_range;
+	float ue_heightScale;
+	float ue_size;
 };
 
 layout(location = 3) out float ue_frag_height;

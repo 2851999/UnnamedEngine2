@@ -47,9 +47,9 @@ void VBO<T>::setup(unsigned int binding) {
 		bind();
 		//Pass the data to OpenGL
 		if (data.size() > 0)
-			glBufferData(target, size, &data.front(), usage);
+			glBufferData(target, size, &data.front(), convertToGL(usage));
 		else
-			glBufferData(target, size, NULL, usage);
+			glBufferData(target, size, NULL, convertToGL(usage));
 	} else
 		vulkanAttributeDescriptions.resize(attributes.size());
 
@@ -102,7 +102,7 @@ void VBO<T>::setup(unsigned int binding) {
 			stride = sizeof(T) *  attributes[0].size;
 
 		//Create the Vulkan buffer
-		vulkanBuffer = new VulkanBuffer(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan);
+		vulkanBuffer = new VulkanBuffer(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan, usage == VBOUsage::STATIC);
 
 		//Assign the vertex input binding description
 		vulkanVertexInputBindingDescription.binding   = binding; //like glVertexAttrib binding
@@ -183,7 +183,7 @@ template <typename T>
 void VBO<T>::update() {
 	if (! BaseEngine::usingVulkan()) {
 		bind();
-		glBufferData(target, data.size() * sizeof(data[0]), &data.front(), usage);
+		glBufferData(target, data.size() * sizeof(data[0]), data.data(), convertToGL(usage));
 	} else
 		//Copy the data into the buffer
 		vulkanBuffer->copyData(data.data(), 0, data.size() * sizeof(T));
@@ -194,8 +194,27 @@ void VBO<T>::updateStream(GLsizeiptr size) {
 	if (! BaseEngine::usingVulkan()) {
 		bind();
 		//Buffer orphaning
-		glBufferData(target, this->size, NULL, usage);
+		glBufferData(target, this->size, NULL, convertToGL(usage));
 		glBufferSubData(target, 0, size, &data.front());
+	} else {
+		//MAY BE BETTER WAY
+
+		//Copy the data into the buffer
+		vulkanBuffer->copyData(data.data(), 0, size);
+	}
+}
+
+template <typename T>
+GLenum VBO<T>::convertToGL(VBOUsage usage) {
+	switch (usage) {
+		case VBOUsage::STATIC:
+			return GL_STATIC_DRAW;
+		case VBOUsage::DYNAMIC:
+			return GL_DYNAMIC_DRAW;
+		case VBOUsage::STREAM:
+			return GL_STREAM_DRAW;
+		default:
+			return GL_STATIC_DRAW;
 	}
 }
 

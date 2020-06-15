@@ -1,16 +1,26 @@
 #version 420
+
 //Used for assigning UBO block locations - can remove
 
-layout(std140, binding = 21) uniform UECoreData {
-	mat4 ue_mvpMatrix;
-	mat4 ue_modelMatrix;
+/* NOTES:
+* Set 0 - Varies per camera
+* Set 1 - Varies per material
+* Set 2 - Varies per model
+* Set 3 - Varies per light batch
+*/
+
+layout(std140, set = 0, binding = 21) uniform UECameraData {
 	mat4 ue_viewMatrix;
 	mat4 ue_projectionMatrix;
-	mat4 ue_normalMatrix;
 	
 	vec4 ue_cameraPosition;
 };
 
+layout(std140, set = 2, binding = 22) uniform UEModelData {
+	mat4 ue_mvpMatrix;
+	mat4 ue_modelMatrix;
+	mat4 ue_normalMatrix;
+};
 
 #define UE_LOCATION_POSITION 0
 #define UE_LOCATION_TEXTURE_COORD 1

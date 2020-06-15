@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_TIMER_H_
-#define UTILS_TIMER_H_
+#pragma once
 
 /*****************************************************************************
  * The Timer class
@@ -84,5 +83,3 @@ public:
 	inline bool isPaused()  { return state == State::PAUSED; }
 	inline bool isStopped() { return state == State::STOPPED; } //Note: Will return false if timer was never started (since last reset)
 };
-
-#endif /* UTILS_TIME_H_ */

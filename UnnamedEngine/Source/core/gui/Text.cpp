@@ -28,9 +28,10 @@
 
 unsigned int Text::DEFAULT_MAX_CHARACTERS = 1000;
 
-Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboarded) {
+Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboarded, bool queuedPipeline) {
 	this->billboarded = billboarded;
 	this->maxCharacters = maxCharacters;
+	this->queuedPipeline = queuedPipeline;
 
 	if (maxCharacters == 0)
 		//Use the default number
@@ -41,9 +42,9 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	if (! billboarded)
 		shaderType = Renderer::SHADER_FONT;
 	else {
-		shaderType = Renderer::SHADER_BILLBOARDED_FONT;
+		//shaderType = Renderer::SHADER_BILLBOARDED_FONT;
 		//Get the UBO for the billboard
-		shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);
+		//shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);
 	}
 
 	//Create the Mesh instance and assign the texture
@@ -70,14 +71,25 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	//Assign the font
 	this->font = font;
 	mesh->getMaterial()->setDiffuse(fontTexture);
-	setMesh(mesh, Renderer::getRenderShader(shaderType));
+	mesh->getMaterial()->update();
+	setMesh(mesh, Renderer::getRenderShader(shaderType), VBOUsage::DYNAMIC);
 
 	//Assign the colour and other properties
 	setColour(colour);
-	setScale(1.0f / (float) Font::RENDER_SCALE, 1.0f / (float) Font::RENDER_SCALE, 1.0f);
+	//setScale(1.0f / (float) Font::RENDER_SCALE, 1.0f / (float) Font::RENDER_SCALE, 1.0f);
+	setScale(font->getScale(), font->getScale(), 1.0f);
 	getMesh()->setCullingEnabled(false);
 
 	GameObject3D::update();
+
+	//Obtain the graphics pipeline used for rendering
+	if (! queuedPipeline)
+		pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
+}
+
+Text::~Text() {
+	if (pipeline)
+		delete pipeline;
 }
 
 void Text::update(std::string text) {
@@ -124,6 +136,16 @@ void Text::update(Vector3f position) {
 }
 
 void Text::render() {
+	if (! queuedPipeline) {
+		//Bind the pipeline
+		pipeline->bind();
+
+		queuedRender();
+	} else
+		Renderer::getGraphicsPipelineQueue(font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT)->queueRender(this);
+}
+
+void Text::queuedRender() {
 	if (billboarded) {
 		Shader* shader = getShader();
 		shader->use();
@@ -149,8 +171,10 @@ void Text::render() {
 void Text::setFont(Font* font) {
 	this->font = font;
 	getMaterial()->setDiffuse(font->getTexture());
+	getMaterial()->update();
 }
 
 void Text::setColour(Colour colour) {
 	getMaterial()->setDiffuse(colour);
+	getMaterial()->update();
 }

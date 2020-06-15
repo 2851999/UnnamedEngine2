@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_INPUT_KEYBOARDSHORTCUTS_H_
-#define CORE_INPUT_KEYBOARDSHORTCUTS_H_
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -121,4 +120,3 @@ public:
 	void onKeyReleased(int code) override;
 };
 
-#endif /* CORE_INPUT_KEYBOARDSHORTCUTS_H_ */

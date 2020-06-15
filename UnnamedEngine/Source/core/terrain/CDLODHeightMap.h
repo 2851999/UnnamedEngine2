@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_TERRAIN_CDLODHEIGHTMAP_H_
-#define CORE_TERRAIN_CDLODHEIGHTMAP_H_
+#pragma once
 
 #include "../Vector.h"
 #include "../render/Texture.h"
@@ -81,4 +80,3 @@ public:
 	inline Texture* getTexture() { return texture; }
 };
 
-#endif /* CORE_TERRAIN_CDLODHEIGHTMAP_H_ */

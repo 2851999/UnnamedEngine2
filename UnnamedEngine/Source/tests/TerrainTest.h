@@ -31,7 +31,7 @@
 
 class Test : public BaseTest3D {
 private:
-	RenderScene3D* scene;
+	RenderScene* scene;
 	CDLODTerrain* terrain;
 	CDLODHeightMap* heightMap;
 
@@ -40,18 +40,25 @@ public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
 	virtual void onUpdate() override;
+	virtual void onRenderOffscreen() override;
 	virtual void onRender() override;
 	virtual void onDestroy() override;
 };
 
 void Test::onInitialise() {
-	getSettings().videoVSync = false;
+	getSettings().videoVSync = true;
 	getSettings().videoMaxFPS = 0;
+	getSettings().videoSamples = 0;
+	getSettings().videoVulkan = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 	//getSettings().windowFullscreen = true;
 	//getSettings().videoResolution = VideoResolution::RES_1920x1080;
 }
 
 void Test::onCreated() {
+	Shader::compileEngineShaderToSPIRV("terrain/Terrain", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("terrain/DeferredTerrainGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
+
 	camera->setProjectionMatrix(Matrix4f().initPerspective(80.0f, getSettings().windowAspectRatio, 0.01f, 1000.0f));
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
@@ -66,7 +73,7 @@ void Test::onCreated() {
 	terrain->getMaterial()->setShininess(1.0f);
 	terrain->update();
 
-	scene = new RenderScene3D();
+	scene = new RenderScene(false, false, false, false);
 	scene->add(terrain);
 
 	Light* light0 = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), false))->setDirection(1.0f, -1.0f, 0.0001f);
@@ -98,22 +105,22 @@ void Test::onUpdate() {
 	} else {
 		camera->setMovementSpeed(5.0f);
 	}
-	Vector3f pos = camera->getPosition();
-	camera->setY(heightMap->getHeight(pos.getX(), pos.getZ()) + 1.5f);
+	//Vector3f pos = camera->getPosition();
+	//camera->setY(heightMap->getHeight(pos.getX(), pos.getZ()) + 1.5f);
 
 	//std::cout << heightMap->getSteepness(pos.getX(), pos.getZ(), camera->getTransform()->getRotation().getForward()) << std::endl;
 
 	//terrain->getTransform()->rotate(terrain->getTransform()->getRotation().getUp(), 0.1f * getDelta());
 	//terrain->setScale(10.0f, 10.0f, 10.0f);
-	//terrain->update();
+	terrain->update();
+}
+
+void Test::onRenderOffscreen() {
+	scene->renderOffscreen();
 }
 
 void Test::onRender() {
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
-	glCullFace(GL_BACK);
 	scene->render();
-	glDisable(GL_CULL_FACE);
 }
 
 void Test::onDestroy() {

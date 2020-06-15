@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUICOMPONENT_H_
-#define CORE_GUI_GUICOMPONENT_H_
+#pragma once
 
 #include "Text.h"
 
@@ -46,6 +45,9 @@ private:
 	/* The text instance used to render text */
 	Text* textInstance = NULL;
 
+	/* The last render index */
+	int lastRenderIndex = -1;
+
 	/* Method used to setup the renderer when it is created */
 	void setup();
 protected:
@@ -67,10 +69,16 @@ public:
 		GameObject2D(new Mesh(MeshBuilder::createQuad(width, height, textures.at(0), MESH_DATA_FLAGS)), Renderer::SHADER_MATERIAL, width, height), colours(colours), textures(textures) { setup(); }
 
 	/* Destructor */
-	virtual ~GUIComponentRenderer() { delete textInstance; }
+	virtual ~GUIComponentRenderer();
 
 	/* The method used to update this component ready for rendering */
 	virtual void update() override;
+
+	/* Method used to render */
+	virtual void render() override;
+
+	/* Method used to render when asked by a graphics pipeline */
+	virtual void queuedRender() override;
 
 	/* Methods to render text at a location relative to the component */
 	void renderText(std::string text, Vector2f relPos);
@@ -78,6 +86,9 @@ public:
 
 	/* Method used to get the max render index */
 	unsigned int getMaxRenderIndex();
+
+	/* Method to set the current render index */
+	inline void setRenderIndex(unsigned int renderIndex) { this->renderIndex = renderIndex; }
 
 	/* Methods used to set the colours/textures */
 	void setColour(Colour colour);
@@ -286,4 +297,3 @@ public:
 	inline bool isClicked() { return mouseClicked; }
 };
 
-#endif /* CORE_GUI_GUICOMPONENT_H_ */

@@ -1,5 +1,5 @@
 
-layout (std140, binding = 10) uniform UEBillboardData {
+layout(std140, set = 3, binding = 11) uniform UEBillboardData {
 	mat4 ue_projectionViewMatrix;
 	vec4 ue_cameraRight;
 	vec4 ue_cameraUp;

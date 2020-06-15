@@ -59,6 +59,7 @@ void BaseEngine::create() {
 
 		//Assign the default font and text instance
 		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
+		//defaultFont = new Font("resources/fonts/testFont.fnt", 22);
 		textInstance = new Text(defaultFont, Colour::WHITE, 400);
 		//Create the debug camera
 		debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
@@ -69,14 +70,14 @@ void BaseEngine::create() {
 		//Initialise the Audio system
 		AudioManager::initialise();
 
-		if (! getSettings().videoVulkan) {
+		//Create the debug console if needed
+		if (getSettings().debugConsoleEnabled) {
+			debugConsole = new DebugConsole(this);
+			debugConsole->enable();
+			debugConsole->hide();
+		}
 
-			//Create the debug console
-			if (getSettings().debugConsoleEnabled) {
-				debugConsole = new DebugConsole(this);
-				debugConsole->enable();
-				debugConsole->hide();
-			}
+		if (! getSettings().videoVulkan) {
 
 		//	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 		//	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
@@ -92,8 +93,8 @@ void BaseEngine::create() {
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-				Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST));
-				Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST));
+				Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, TextureParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE).setFilter(TextureParameters::Filter::NEAREST));
+				Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, TextureParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE).setFilter(TextureParameters::Filter::NEAREST));
 				textInstance->setFont(font);
 				textInstance->setColour(Colour::BLACK);
 				textInstance->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);
@@ -129,24 +130,41 @@ void BaseEngine::create() {
 			//Ensure the debug console isn't open
 			if (! debugConsole || ! debugConsole->isVisible())
 				update();
+			else
+				debugConsole->update();
 
-			if (getSettings().videoVulkan)
+			if (getSettings().videoVulkan) {
+				//Update Vulkan and begin drawing
+				//Start draw first to perform synchronisation necessary to perform updates
 				Vulkan::startDraw();
+				Vulkan::update();
+			}
+
+			renderOffscreen();
+
+			//Start the default RenderPass
+			Renderer::getDefaultRenderPass()->begin();
 			render();
 
 			if (getSettings().debugShowInformation)
 				renderDebugInfo();
 
-			if (! getSettings().videoVulkan) {
-				if (getSettings().debugConsoleEnabled)
-					renderDebugConsole();
-			} else
+			if (getSettings().debugConsoleEnabled)
+				renderDebugConsole();
+
+			//Stop the default RenderPass
+			Renderer::getDefaultRenderPass()->end();
+
+			if (getSettings().videoVulkan)
 				Vulkan::stopDraw();
 
 			window->update();
 
+			//vkDeviceWaitIdle(Vulkan::getDevice()->getLogical());
+
 			fpsLimiter.endFrame();
 		}
+
 		//Wait for a suitable time
 		if (getSettings().videoVulkan)
 			Vulkan::waitDeviceIdle();
@@ -158,14 +176,13 @@ void BaseEngine::create() {
 		Renderer::destroy();
 		Font::destroyFreeType();
 		delete textInstance;
+		delete defaultFont;
 		delete debugCamera;
 
 		AudioManager::destroy();
 
-		if (! getSettings().videoVulkan) {
-			if (debugConsole)
-				delete debugConsole;
-		}
+		if (debugConsole)
+			delete debugConsole;
 		ResourceManager::destroyAllManagers();
 	} else
 		//Failed to initialise the graphics API
@@ -182,8 +199,6 @@ using namespace utils_string;
 
 void BaseEngine::renderDebugInfo() {
 	if (! BaseEngine::usingVulkan()) {
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
 //		glEnable(GL_BLEND);
 //		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -218,24 +233,23 @@ void BaseEngine::renderDebugInfo() {
 			utils_gl::enableWireframe();
 
 //		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_TEXTURE_2D);
 	}
 }
 
 void BaseEngine::renderDebugConsole() {
 	//Render the debug console if needed
 	if (debugConsole->isVisible()) {
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_TEXTURE_2D);
+		//glDisable(GL_DEPTH_TEST);
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		Renderer::addCamera(debugCamera);
 
 		if (debugConsole->isWireframeEnabled())
 			utils_gl::disableWireframe();
 
-		debugConsole->update();
 		debugConsole->render();
 
 		if (debugConsole->isWireframeEnabled())
@@ -243,8 +257,8 @@ void BaseEngine::renderDebugConsole() {
 
 		Renderer::removeCamera();
 
-		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_BLEND);
+		//glDisable(GL_TEXTURE_2D);
 	}
 }
 

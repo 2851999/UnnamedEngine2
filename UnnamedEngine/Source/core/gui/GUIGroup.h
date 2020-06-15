@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUIGROUP_H_
-#define CORE_GUI_GUIGROUP_H_
+#pragma once
 
 #include "GUIComponent.h"
 
@@ -59,4 +58,3 @@ public:
 
 
 
-#endif /* CORE_GUI_GUIGROUP_H_ */

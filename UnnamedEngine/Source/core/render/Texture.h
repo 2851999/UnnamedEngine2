@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_TEXTURE_H_
-#define CORE_RENDER_TEXTURE_H_
+#pragma once
 
 #include "../Window.h"
 #include <string>
@@ -30,28 +29,38 @@
  *****************************************************************************/
 
 class TextureParameters {
+public:
+	/* Various generalised filters */
+	enum class Filter {
+		NEAREST, LINEAR, NEAREST_MIPMAP_NEAREST, NEAREST_MIPMAP_LINEAR, LINEAR_MIPMAP_NEAREST, LINEAR_MIPMAP_LINEAR
+	};
+
+	/* Various generalised address modes/wrap parameters */
+	enum class AddressMode {
+		REPEAT, MIRRORED_REPEAT, CLAMP_TO_EDGE, CLAMP_TO_BORDER, MIRROR_CLAMP_TO_EDGE
+	};
+
+	/* The default values which are assigned unless otherwise specified */
+	static GLuint      DEFAULT_TARGET;
+	static Filter      DEFAULT_FILTER;
+	static AddressMode DEFAULT_ADDRESS_MODE;
+	static bool        DEFAULT_SRGB;
 private:
 	/* The texture parameters with their default values */
-	GLuint target    = DEFAULT_TARGET;
-	GLuint minFilter = DEFAULT_FILTER;
-	GLuint magFilter = DEFAULT_FILTER;
-	GLuint clamp     = DEFAULT_CLAMP;
+	GLuint target           = DEFAULT_TARGET;
+	Filter minFilter        = DEFAULT_FILTER;
+	Filter magFilter        = DEFAULT_FILTER;
+	AddressMode addressMode = DEFAULT_ADDRESS_MODE;
 
 	bool srgb = DEFAULT_SRGB;
 	bool generateMipMapsIfAvailable = true;
 public:
-	/* The default values which are assigned unless otherwise specified */
-	static GLuint DEFAULT_TARGET;
-	static GLuint DEFAULT_FILTER;
-	static GLuint DEFAULT_CLAMP;
-	static bool   DEFAULT_SRGB;
-
 	/* Various constructors */
 	TextureParameters() {}
 	TextureParameters(GLuint target) : target(target) {}
-	TextureParameters(GLuint target, GLuint filter) : target(target), minFilter(filter), magFilter(filter) {}
-	TextureParameters(GLuint target, GLuint filter, GLuint clamp) : target(target), minFilter(filter), magFilter(filter), clamp(clamp) {}
-	TextureParameters(GLuint target, GLuint filter, GLuint clamp, bool srgb = DEFAULT_SRGB) : target(target), minFilter(filter), magFilter(filter), clamp(clamp), srgb(srgb) {}
+	TextureParameters(GLuint target, Filter filter) : target(target), minFilter(filter), magFilter(filter) {}
+	TextureParameters(GLuint target, Filter filter, AddressMode addressMode) : target(target), minFilter(filter), magFilter(filter), addressMode(addressMode) {}
+	TextureParameters(GLuint target, Filter filter, AddressMode addressMode, bool srgb = DEFAULT_SRGB) : target(target), minFilter(filter), magFilter(filter), addressMode(addressMode), srgb(srgb) {}
 
 	/* Methods used to apply the texture parameters to a texture */
 	void apply(GLuint texture, bool bind, bool unbind);
@@ -63,26 +72,31 @@ public:
 
 	/* Setters and getters */
 	inline TextureParameters setTarget(GLuint target) { this->target = target; return (*this); }
-	inline TextureParameters setFilter(GLuint filter) { this->minFilter = filter; this->magFilter = filter; return (*this); }
-	inline TextureParameters setMinFilter(GLuint minFilter) { this->minFilter = minFilter; return (*this); }
-	inline TextureParameters setMagFilter(GLuint magFilter) { this->magFilter = magFilter; return (*this); }
-	inline TextureParameters setClamp(GLuint clamp)   { this->clamp  = clamp;  return (*this); }
+	inline TextureParameters setFilter(Filter filter) { this->minFilter = filter; this->magFilter = filter; return (*this); }
+	inline TextureParameters setMinFilter(Filter minFilter) { this->minFilter = minFilter; return (*this); }
+	inline TextureParameters setMagFilter(Filter magFilter) { this->magFilter = magFilter; return (*this); }
+	inline TextureParameters setAddressMode(AddressMode addressMode) { this->addressMode  = addressMode;  return (*this); }
 	inline TextureParameters setSRGB(bool srgb) { this->srgb = srgb; return (*this); }
 
 	inline void preventGenerateMipMaps() { generateMipMapsIfAvailable = false; }
 
 	inline GLuint getTarget() { return target; }
-	inline GLuint getMinFilter() { return minFilter; }
-	inline GLuint getMagFilter() { return magFilter; }
-	inline GLuint getClamp()  { return clamp;  }
+	inline Filter getMinFilter() { return minFilter; }
+	inline Filter getMagFilter() { return magFilter; }
+	inline AddressMode getAddressMode()  { return addressMode; }
 	inline bool getSRGB() { return srgb; }
 
 	/* Returns whether a mipmap should be generated */
 	inline bool mipMapRequested() {
 		return generateMipMapsIfAvailable &&
-			   ((minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_LINEAR_MIPMAP_LINEAR) ||
-			    (magFilter == GL_NEAREST_MIPMAP_NEAREST || magFilter == GL_NEAREST_MIPMAP_LINEAR || magFilter == GL_LINEAR_MIPMAP_NEAREST || magFilter == GL_LINEAR_MIPMAP_LINEAR));
+			((minFilter == Filter::NEAREST_MIPMAP_NEAREST || minFilter == Filter::NEAREST_MIPMAP_LINEAR || minFilter == Filter::LINEAR_MIPMAP_NEAREST || minFilter == Filter::LINEAR_MIPMAP_LINEAR));
 	}
+
+	/* Methods used to convert the a generalised parameters to the one required by
+       OpenGL/Vulkan */
+	static GLenum convertToGL(Filter filter);
+	static GLenum convertToGL(AddressMode addressMode);
+	static VkSamplerAddressMode convertToVk(AddressMode addressMode);
 };
 
 /*****************************************************************************
@@ -136,9 +150,13 @@ public:
 	virtual ~Texture() { destroy(); }
 
 	/* The create method simply obtains a handle for the texture from OpenGL */
-	inline void create() {
-		glGenTextures(1, &texture);
-	}
+	void create();
+
+	/* Method to setup this texture for Vulkan (used to create image for RenderPass) */
+	void setupVk(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	/* Method to setup this texture for Vulkan for a cubemap (used to create image for RenderPass) */
+	void setupCubemapVk(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	/* Various methods to apply the texture parameters, but will only do so if the
 	 * texture has been assigned */
@@ -179,7 +197,7 @@ public:
 	inline std::string getPath() { return path; }
 	inline bool hasPath() { return path.length() > 0; }
 	VkImageView& getVkImageView() { return textureVkImageView; }
-	const VkDescriptorImageInfo* getVkImageInfo() { return &imageInfo; }
+	const VkDescriptorImageInfo getVkImageInfo() { return imageInfo; }
 
 	/* Returns the data necessary to load a texture - note freeTexture/stbi_image_free should
 	 * be called once the image data is no longer needed */
@@ -226,4 +244,3 @@ public:
 	static Cubemap* createCubemap(GLsizei size, GLint internalFormat, GLint format, GLenum type, TextureParameters parameters = TextureParameters());
 };
 
-#endif /* CORE_RENDER_TEXTURE_H_ */

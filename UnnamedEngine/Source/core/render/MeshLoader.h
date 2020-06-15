@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_MESHLOADER_H_
-#define CORE_RENDER_MESHLOADER_H_
+#pragma once
 
 #include <unordered_map>
 
@@ -85,4 +84,3 @@ public:
 	static void convertToEngineModel(std::string path, std::string fileName, bool pbr, bool genNormals = true);
 };
 
-#endif /* CORE_RENDER_MESHLOADER_H_ */

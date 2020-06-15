@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_AUDIO_SOUNDSYSTEM_H_
-#define CORE_AUDIO_SOUNDSYSTEM_H_
+#pragma once
 
 #include "Audio.h"
 
@@ -174,4 +173,3 @@ public:
 	void destroy();
 };
 
-#endif /* CORE_AUDIO_SOUNDSYSTEM_H_ */

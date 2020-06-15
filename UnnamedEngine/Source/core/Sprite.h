@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_SPRITE_H_
-#define CORE_SPRITE_H_
+#pragma once
 
 #include "Object.h"
 #include "render/TextureAtlas.h"
@@ -221,4 +220,3 @@ public:
 	inline Rect getCollisionBounds() { return Rect(getCollisionX(), getCollisionY(), getCollisionWidth(), getCollisionHeight()); }
 };
 
-#endif /* CORE_SPRITE_H_ */

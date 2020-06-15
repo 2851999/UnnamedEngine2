@@ -16,17 +16,21 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_VBO_H_
-#define CORE_RENDER_VBO_H_
+#pragma once
 
 #include <GL/glew.h>
 
-#include "Shader.h"
+#include "RenderShader.h"
 #include "../vulkan/VulkanBuffer.h"
 
 /*****************************************************************************
  * The VBO class is used to manage a vertex buffer object
  *****************************************************************************/
+
+ /* Types of usage for a VBO */
+enum class VBOUsage {
+	STATIC, DYNAMIC, STREAM
+};
 
 template <typename T>
 class VBO {
@@ -50,7 +54,7 @@ private:
 	GLenum                target;
 	GLsizeiptr            size;
 	std::vector<T>&       data;
-	GLenum                usage;
+	VBOUsage              usage;
 
 	/* The stride for data in this VBO */
 	unsigned int          stride = 0;
@@ -66,9 +70,12 @@ private:
 	/* The binding/attribute descriptions for Vulkan */
 	VkVertexInputBindingDescription vulkanVertexInputBindingDescription;
 	std::vector<VkVertexInputAttributeDescription> vulkanAttributeDescriptions;
+
+	/* Methods used to convert 'Usage' into the OpenGL equivalent */
+	GLenum convertToGL(VBOUsage usage);
 public:
 	/* The constructors */
-	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, GLenum usage, bool instanced = false) :
+	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, VBOUsage usage, bool instanced = false) :
 		buffer(0), target(target), size(size), data(data), usage(usage), instanced(instanced) {}
 
 	/* The destructor */
@@ -109,4 +116,3 @@ public:
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };
 
-#endif /* CORE_RENDER_VBO_H_ */

@@ -16,10 +16,13 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANSWAPCHAIN_H_
-#define CORE_VULKAN_VULKANSWAPCHAIN_H_
+#pragma once
 
 #include "VulkanDevice.h"
+
+class Framebuffer;
+class RenderPass;
+class FramebufferAttachment;
 
 /*****************************************************************************
  * The VulkanSwapChain class handles the image swap chain for rendering using
@@ -44,16 +47,25 @@ private:
 	VkImageView    colourImageView;
 
 	/* Resources for the depth buffer */
-	VkImage        depthImage;
-	VkDeviceMemory depthImageMemory;
-	VkImageView    depthImageView;
+	//VkImage                depthImage;
+	//VkDeviceMemory         depthImageMemory;
+	//VkImageView            depthImageView;
+	FramebufferAttachment* depthAttachment;
 
-	/* The format and extent used for this swap chain */
-	VkFormat   format;
+	/* The formats and extent used for this swap chain */
+	VkFormat   surfaceFormat;
+	VkFormat   depthFormat;
 	VkExtent2D extent;
 
 	/* The device this swap chain is for */
 	VulkanDevice* device;
+
+	/* Default framebuffers for rendering to the swap chain using the
+	   engines default RenderPass (requires one per swap chain image) */
+	std::vector<Framebuffer*> defaultFramebuffers;
+
+	/* Default attachment descriptions for rendering to the default framebuffer */
+	std::vector<VkAttachmentDescription> defaultAttachmentDescriptions;
 
 	/* Methods used to choose a surface format, present mode and extent based on what is supported */
 	static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -61,22 +73,34 @@ private:
 	static VkPresentModeKHR   chooseSwapPresentMode  (const std::vector<VkPresentModeKHR>&   availablePresentModes);
 	static VkExtent2D         chooseSwapExtent       (const VkSurfaceCapabilitiesKHR&        capabilities, Settings& settings);
 public:
+	/* Variable used to indicate whether the default depth buffer should be loaded or cleared each frame
+   (Useful for offscreen rendering) */
+	static bool clearDefaultDepthBufferOnLoad;
+
 	/* Constructor */
 	VulkanSwapChain(VulkanDevice* device, Settings& settings);
 
 	/* Destructor */
 	virtual ~VulkanSwapChain();
 
+	/* Method to setup the default framebuffers given the default render pass */
+	void setupDefaultFramebuffers(RenderPass* defaultRenderPass);
+
+	/* Returns the attachments required for rendering to the default framebuffer */
+	inline std::vector<VkAttachmentDescription>& getDefaultAttachmentDescriptions() { return defaultAttachmentDescriptions; }
+
 	/* Getters */
 	inline VkSwapchainKHR& getInstance() { return instance; }
 	inline VkImageView& getImageView(unsigned int index) { return imageViews[index]; }
 	inline unsigned int getNumSamples() { return numSamples; }
 	inline VkImageView& getColourImageView() { return colourImageView; }
-	inline VkImageView& getDepthImageView() { return depthImageView; }
-	inline VkFormat getFormat() { return format; }
+	VkImageView& getDepthImageView();
+	inline VkFormat getSurfaceFormat() { return surfaceFormat; }
+	inline VkFormat getDepthFormat() { return depthFormat; }
 	inline VkExtent2D& getExtent() { return extent; }
 	inline VulkanDevice* getDevice() { return device; }
 	inline unsigned int getImageCount() { return images.size(); }
+	inline Framebuffer* getDefaultFramebuffer(unsigned int currentFrame) { return defaultFramebuffers[currentFrame]; }
+	inline FramebufferAttachment* getDepthAttachment() { return depthAttachment; }
 };
 
-#endif /* CORE_VULKAN_VULKANSWAPCHAIN_H_ */

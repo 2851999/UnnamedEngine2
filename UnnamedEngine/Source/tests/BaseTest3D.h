@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef TESTS_BASETEST3D_H_
-#define TESTS_BASETEST3D_H_
+#pragma once
 
 #include "../core/BaseEngine.h"
 #include "../core/ResourceLoader.h"
@@ -30,7 +29,7 @@
 class BaseTest3D : public BaseEngine {
 protected:
 	DebugCamera* camera;
-	RenderScene3D* renderScene;
+	RenderScene* renderScene;
 	PhysicsScene3D* physicsScene;
 	SoundSystem* soundSystem;
 	DebugProfiler profiler;
@@ -40,12 +39,14 @@ public:
 	void initialise() override;
 	void created() override;
 	void update() override;
+	void renderOffscreen() override;
 	void render() override;
 	void destroy() override;
 
 	virtual void onInitialise() {}
 	virtual void onCreated() {}
 	virtual void onUpdate() {}
+	virtual void onRenderOffscreen() {}
 	virtual void onRender() {}
 	virtual void onDestroy() {}
 
@@ -73,5 +74,3 @@ public:
 	virtual void onControllerButtonPressed(Controller* controller, int index) override {}
 	virtual void onControllerButtonReleased(Controller* controller, int index) override {}
 };
-
-#endif /* TESTS_BASETEST3D_H_ */
