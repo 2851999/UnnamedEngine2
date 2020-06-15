@@ -38,7 +38,7 @@ void BaseTest3D::initialise() {
 }
 
 void BaseTest3D::created() {
-	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
+	TextureParameters::DEFAULT_FILTER = TextureParameters::Filter::LINEAR_MIPMAP_LINEAR;
 
 	InputBindings* bindings = new InputBindings();
 	bindings->load(resourceLoader.getPath() + "config/Controller.xml", getWindow()->getInputManager());
@@ -71,6 +71,7 @@ void BaseTest3D::update() {
 void BaseTest3D::renderOffscreen() {
 	if (renderScene->hasObjects())
 		renderScene->renderOffscreen();
+	onRenderOffscreen();
 }
 
 void BaseTest3D::render() {

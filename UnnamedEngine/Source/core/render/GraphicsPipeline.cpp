@@ -282,6 +282,8 @@ GLenum GraphicsPipeline::convertToGL(PrimitiveTopology primitiveTopology) {
 			return GL_TRIANGLE_STRIP_ADJACENCY;
 		case PrimitiveTopology::PATCH_LIST:
 			return GL_PATCHES;
+		default:
+			return GL_TRIANGLES;
 	}
 }
 
@@ -309,6 +311,8 @@ VkPrimitiveTopology GraphicsPipeline::convertToVk(PrimitiveTopology primitiveTop
 			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY;
 		case PrimitiveTopology::PATCH_LIST:
 			return VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
+		default:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	}
 }
 

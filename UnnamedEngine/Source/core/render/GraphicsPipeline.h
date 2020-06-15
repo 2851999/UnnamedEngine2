@@ -127,16 +127,16 @@ public:
 
 	/* Methods used to convert the a generalised states to the one required by
 	   OpenGL/Vulkan */
-	GLenum convertToGL(PrimitiveTopology primativeTopology);
-	VkPrimitiveTopology convertToVk(PrimitiveTopology primativeTopology);
-	GLenum convertToGL(BlendFactor factor);
-	VkBlendFactor convertToVk(BlendFactor factor);
-	GLenum convertToGL(CompareOperation op);
-	VkCompareOp convertToVk(CompareOperation op);
-	GLenum convertToGL(CullMode mode);
-	VkCullModeFlagBits convertToVk(CullMode mode);
-	GLenum convertToGL(FrontFace face);
-	VkFrontFace convertToVk(FrontFace face);
+	static GLenum convertToGL(PrimitiveTopology primativeTopology);
+	static VkPrimitiveTopology convertToVk(PrimitiveTopology primativeTopology);
+	static GLenum convertToGL(BlendFactor factor);
+	static VkBlendFactor convertToVk(BlendFactor factor);
+	static GLenum convertToGL(CompareOperation op);
+	static VkCompareOp convertToVk(CompareOperation op);
+	static GLenum convertToGL(CullMode mode);
+	static VkCullModeFlagBits convertToVk(CullMode mode);
+	static GLenum convertToGL(FrontFace face);
+	static VkFrontFace convertToVk(FrontFace face);
 
 	/* Getters */
 	inline GraphicsPipelineLayout* getLayout() { return layout; }

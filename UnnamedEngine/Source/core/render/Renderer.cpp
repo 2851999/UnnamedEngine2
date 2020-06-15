@@ -72,6 +72,7 @@ const unsigned int Renderer::SHADER_DEFERRED_PBR_SSR                            
 const unsigned int Renderer::SHADER_TILEMAP                                        = 22;
 const unsigned int Renderer::SHADER_PARTICLE_SYSTEM                                = 23;
 const unsigned int Renderer::SHADER_TERRAIN                                        = 24;
+const unsigned int Renderer::SHADER_DEFERRED_TERRAIN_GEOMETRY                      = 25;
 
 const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                                      = 1;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                                       = 2;
@@ -105,6 +106,7 @@ const unsigned int Renderer::GRAPHICS_PIPELINE_TILEMAP                          
 const unsigned int Renderer::GRAPHICS_PIPELINE_PARTICLE_SYSTEM                               = 30;
 const unsigned int Renderer::GRAPHICS_PIPELINE_TERRAIN                                       = 31;
 const unsigned int Renderer::GRAPHICS_PIPELINE_TERRAIN_BLEND                                 = 32;
+const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY                     = 33;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -155,6 +157,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_TILEMAP, "TilemapShader");
 	addRenderShader(SHADER_PARTICLE_SYSTEM, "ParticleShader");
 	addRenderShader(SHADER_TERRAIN, "terrain/Terrain");
+	addRenderShader(SHADER_DEFERRED_TERRAIN_GEOMETRY, "terrain/DeferredTerrainGeometry", { "UE_GEOMETRY_ONLY" });
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -279,6 +282,7 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TERRAIN, SHADER_TERRAIN, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::SEPARATE_POSITIONS), alphaBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TERRAIN_BLEND, SHADER_TERRAIN, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::SEPARATE_POSITIONS), alphaLightBlendState, lightBlendDepthState, lightingCullState, windowWidth, windowHeight, true);
 
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY, SHADER_DEFERRED_TERRAIN_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::SEPARATE_POSITIONS), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();

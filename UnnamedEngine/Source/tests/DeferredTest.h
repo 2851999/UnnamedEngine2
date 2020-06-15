@@ -99,7 +99,7 @@ void Test::created() {
 	Renderer::addCamera(camera);
 	getWindow()->disableCursor();
 
-	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
+	TextureParameters::DEFAULT_FILTER = TextureParameters::Filter::LINEAR_MIPMAP_LINEAR;
 	MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 	unsigned int shader = Renderer::SHADER_LIGHTING;

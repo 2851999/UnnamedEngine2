@@ -181,8 +181,12 @@ void RenderScene::add(GameObject3D* object) {
 	bool skinning = object->getMesh()->hasSkeleton();
 
 	if (object->getRenderShader()->getID() == Renderer::SHADER_TERRAIN) {
-		graphicsPipelineID = Renderer::GRAPHICS_PIPELINE_TERRAIN;
-		graphicsPipelineBlendID = Renderer::GRAPHICS_PIPELINE_TERRAIN_BLEND;
+		if (deferred)
+			graphicsPipelineID = Renderer::GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY;
+		else {
+			graphicsPipelineID = Renderer::GRAPHICS_PIPELINE_TERRAIN;
+			graphicsPipelineBlendID = Renderer::GRAPHICS_PIPELINE_TERRAIN_BLEND;
+		}
 	} else {
 		if (lighting) {
 			if (pbr) {
@@ -271,8 +275,10 @@ void RenderScene::renderOffscreen() {
 					//Use the light's view
 					lights[i]->useView();
 
-					for (unsigned int j = 0; j < batch.second.objects.size(); ++j)
+					for (unsigned int j = 0; j < batch.second.objects.size(); ++j) {
+						//if (batch.second.objects[j]->getRenderShader()->getID() != Renderer::SHADER_TERRAIN)
 						batch.second.objects[j]->render();
+					}
 				}
 
 				shadowMapRenderPass->end();
@@ -285,10 +291,10 @@ void RenderScene::renderOffscreen() {
 		//Render to the geometry buffer
 		deferredGeometryRenderPass->begin();
 
-		((Camera3D*) Renderer::getCamera())->useView();
-
 		for (auto& batch : objectBatches) {
 			batch.second.graphicsPipeline->bind();
+
+			((Camera3D*) Renderer::getCamera())->useView();
 
 			for (unsigned int i = 0; i < batch.second.objects.size(); ++i)
 				batch.second.objects[i]->render();

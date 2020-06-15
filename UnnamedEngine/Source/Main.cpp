@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "tests/TerrainTest.h"
+#include "tests/DeferredTest.h"
 
 #include "utils/Utils.h"
 //#include "examples/basic/BasicRendering3D.h"

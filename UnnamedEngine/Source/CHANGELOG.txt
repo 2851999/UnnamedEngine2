@@ -1,4 +1,17 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 8
+
+* Added deferred terrain rendering support to RenderScene
+* Added generalised enums for various TextureParameters
+
+* Changed FBO to assign the same TextureParameters when
+  using Vulkan as when using OpenGL
+
+* Renamed shader TerrainDeferredGeom to
+  DeferredTerrainGeometry
+* Renamed clamp to address mode in TextureParameters
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 7 | Experimental 7
 
 * Added Terrain support to RenderScene

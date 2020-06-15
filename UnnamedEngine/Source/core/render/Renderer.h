@@ -92,6 +92,7 @@ public:
 	static const unsigned int SHADER_TILEMAP;
 	static const unsigned int SHADER_PARTICLE_SYSTEM;
 	static const unsigned int SHADER_TERRAIN;
+	static const unsigned int SHADER_DEFERRED_TERRAIN_GEOMETRY;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -126,6 +127,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_PARTICLE_SYSTEM;
 	static const unsigned int GRAPHICS_PIPELINE_TERRAIN;
 	static const unsigned int GRAPHICS_PIPELINE_TERRAIN_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

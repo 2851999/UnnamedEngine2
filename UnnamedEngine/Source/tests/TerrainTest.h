@@ -40,6 +40,7 @@ public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
 	virtual void onUpdate() override;
+	virtual void onRenderOffscreen() override;
 	virtual void onRender() override;
 	virtual void onDestroy() override;
 };
@@ -47,6 +48,7 @@ public:
 void Test::onInitialise() {
 	getSettings().videoVSync = true;
 	getSettings().videoMaxFPS = 0;
+	getSettings().videoSamples = 0;
 	getSettings().videoVulkan = true;
 	getSettings().debugVkValidationLayersEnabled = false;
 	//getSettings().windowFullscreen = true;
@@ -55,6 +57,7 @@ void Test::onInitialise() {
 
 void Test::onCreated() {
 	Shader::compileEngineShaderToSPIRV("terrain/Terrain", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("terrain/DeferredTerrainGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
 
 	camera->setProjectionMatrix(Matrix4f().initPerspective(80.0f, getSettings().windowAspectRatio, 0.01f, 1000.0f));
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
@@ -110,6 +113,10 @@ void Test::onUpdate() {
 	//terrain->getTransform()->rotate(terrain->getTransform()->getRotation().getUp(), 0.1f * getDelta());
 	//terrain->setScale(10.0f, 10.0f, 10.0f);
 	terrain->update();
+}
+
+void Test::onRenderOffscreen() {
+	scene->renderOffscreen();
 }
 
 void Test::onRender() {
