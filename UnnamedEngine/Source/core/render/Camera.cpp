@@ -96,6 +96,7 @@ void Camera3D::update() {
 void Camera3D::render() {
 	if (skyBox) {
 		skyBox->getGraphicsPipeline()->bind();
+		useView();
 		skyBox->render(false);
 	}
 }

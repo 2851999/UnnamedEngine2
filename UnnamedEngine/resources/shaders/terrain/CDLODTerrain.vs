@@ -5,16 +5,16 @@
 #define UE_TERRAIN_VERTEX_MORPH_START 0.0
 #define UE_TERRAIN_VERTEX_MORPH_END 0.40
 
-layout(set = 5, binding = 6) uniform sampler2D ue_heightMap;
+layout(set = 4, binding = 6) uniform sampler2D ue_heightMap;
 
 /* The terrain data */
-layout(std140, set = 5, binding = 6) uniform UETerrainData {
-	uniform vec4 ue_translation;
-	uniform vec2 ue_gridSize;
-	uniform float ue_scale;
-	uniform float ue_range;
-	uniform float ue_heightScale;
-	uniform float ue_size;
+layout(std140, set = 4, binding = 6) uniform UETerrainData {
+	vec4 ue_translation;
+	vec2 ue_gridSize;
+	float ue_scale;
+	float ue_range;
+	float ue_heightScale;
+	float ue_size;
 };
 
 layout(location = 3) out float ue_frag_height;

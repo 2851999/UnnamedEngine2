@@ -180,24 +180,29 @@ void RenderScene::add(GameObject3D* object) {
 
 	bool skinning = object->getMesh()->hasSkeleton();
 
-	if (lighting) {
-		if (pbr) {
-			if (deferred)
-				graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY;
-			else {
-				graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING;
-				graphicsPipelineBlendID = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND;
+	if (object->getRenderShader()->getID() == Renderer::SHADER_TERRAIN) {
+		graphicsPipelineID = Renderer::GRAPHICS_PIPELINE_TERRAIN;
+		graphicsPipelineBlendID = Renderer::GRAPHICS_PIPELINE_TERRAIN_BLEND;
+	} else {
+		if (lighting) {
+			if (pbr) {
+				if (deferred)
+					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY;
+				else {
+					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING;
+					graphicsPipelineBlendID = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND;
+				}
+			} else {
+				if (deferred)
+					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY;
+				else {
+					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_LIGHTING;
+					graphicsPipelineBlendID = skinning ? Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND;
+				}
 			}
-		} else {
-			if (deferred)
-				graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY;
-			else {
-				graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_LIGHTING;
-				graphicsPipelineBlendID = skinning ? Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND;
-			}
-		}
-	} else
-		graphicsPipelineID = Renderer::GRAPHICS_PIPELINE_MATERIAL;
+		} else
+			graphicsPipelineID = Renderer::GRAPHICS_PIPELINE_MATERIAL;
+	}
 
 	//Check if a batch already exists for it
 	if (objectBatches.find(graphicsPipelineID) != objectBatches.end()) {

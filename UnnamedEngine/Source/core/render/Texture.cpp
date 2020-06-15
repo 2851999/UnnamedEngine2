@@ -184,9 +184,15 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 			mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
 		//---------------------------------------------------LOAD AND CREATE THE TEXTURE---------------------------------------------------
-		VkDeviceSize imageSize = width * height * STBI_rgb_alpha;
+
+		//When using Vulkan all textures are loaded with 4 components, but in the case this is one it is assigned elsewhere so the requested value should be used
+		//e.g. for height map generation
+		if (numComponents != 1)
+			numComponents = 4;
+
+		VkDeviceSize imageSize = width * height * numComponents;
 		VkFormat format;
-		Texture::getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), format);
+		Texture::getTextureFormatVk(numComponents, parameters.getSRGB(), format);
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
@@ -343,6 +349,10 @@ unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& w
 	//Load the data using stb_image
 	unsigned char* image = stbi_load(path.c_str(), &width, &height, &numComponents, BaseEngine::usingVulkan() ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
 
+	//Ignore the returned value as is wrong for somereason when assigned manually
+	if (BaseEngine::usingVulkan())
+		numComponents = STBI_rgb_alpha;
+
 	//Check that the data was loaded
 	if (image == nullptr) {
 		//Log an error if not
@@ -356,6 +366,10 @@ unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& w
 float* Texture::loadTexturef(std::string path, int& numComponents, int& width, int& height, bool srgb) {
 	//Load the data using stb_image
 	float* image = stbi_loadf(path.c_str(), &width, &height, &numComponents, BaseEngine::usingVulkan() ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
+
+	//Ignore the returned value as is wrong for somereason when assigned manually
+	if (BaseEngine::usingVulkan())
+		numComponents = STBI_rgb_alpha;
 
 	//Check that the data was loaded
 	if (image == nullptr) {

@@ -47,6 +47,7 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING    
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING = 8;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR            = 9;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD                   = 10;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_TERRAIN                     = 11;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -187,6 +188,16 @@ ShaderInterface::ShaderInterface() {
 	billboardLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_BILLBOARD, billboardLayout);
+
+	//CDLOD terrain
+	DescriptorSetLayout* cdlodTerrainLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_SCENE);
+
+	cdlodTerrainLayout->addTexture2D(6); //Height map
+
+	cdlodTerrainLayout->addUBO(sizeof(ShaderBlock_Terrain), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_TERRAIN);
+	cdlodTerrainLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_TERRAIN, cdlodTerrainLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -308,6 +319,12 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BILLBOARD));
+	} else if (shaderID == Renderer::SHADER_TERRAIN) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_TERRAIN));
 	}
 }
 
