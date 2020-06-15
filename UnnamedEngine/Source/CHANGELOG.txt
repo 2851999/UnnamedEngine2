@@ -1,4 +1,17 @@
 -------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 5
+
+* Added instancing support to RenderData
+
+* Readded BaseEngineTest3D
+* Readded ParticleEffect
+* Readded ParticleEmitter
+* Readded ParticleSystem
+
+* Fixed bug: Loading a '.model' file caused the creation of
+             a Material that was never deleted
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 7 | Experimental 4
 
 * Readded Tilemap

@@ -46,6 +46,7 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING           = 7;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING = 8;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR            = 9;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD                   = 10;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -179,6 +180,13 @@ ShaderInterface::ShaderInterface() {
 	pbrDeferredLightingSSRLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR, pbrDeferredLightingSSRLayout);
+
+	//Billboard
+	DescriptorSetLayout* billboardLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
+	billboardLayout->addUBO(sizeof(ShaderBlock_Billboard), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_BILLBOARD);
+	billboardLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_BILLBOARD, billboardLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -295,6 +303,11 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_PARTICLE_SYSTEM) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BILLBOARD));
 	}
 }
 

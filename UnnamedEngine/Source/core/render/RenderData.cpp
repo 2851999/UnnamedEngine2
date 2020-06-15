@@ -109,7 +109,7 @@ void RenderData::renderWithoutBinding() {
 				glDrawElementsInstanced(mode, count, GL_UNSIGNED_INT, (void*) NULL, primcount);
 			else
 				glDrawArraysInstanced(mode, 0, count, primcount);
-		} else if (primcount == -1) {
+		} else {
 			//Check for indices
 			if (vboIndices)
 				glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) NULL);
@@ -117,7 +117,13 @@ void RenderData::renderWithoutBinding() {
 				glDrawArrays(mode, 0, count);
 		}
 	} else {
-		if (primcount == -1) {
+		if (primcount > 0) {
+			//Check for indices
+			if (vboIndices)
+				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, primcount, 0, 0, 0);
+			else
+				vkCmdDraw(Vulkan::getCurrentCommandBuffer(), count, primcount, 0, 0);
+		} else if (primcount == -1) {
 			//Check for indices
 			if (vboIndices)
 				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, 1, 0, 0, 0);

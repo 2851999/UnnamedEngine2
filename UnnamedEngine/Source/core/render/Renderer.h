@@ -90,6 +90,7 @@ public:
 	static const unsigned int SHADER_BASIC_PBR_DEFERRED_LIGHTING;
 	static const unsigned int SHADER_DEFERRED_PBR_SSR;
 	static const unsigned int SHADER_TILEMAP;
+	static const unsigned int SHADER_PARTICLE_SYSTEM;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -121,6 +122,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_PBR_SSR;
 	static const unsigned int GRAPHICS_PIPELINE_SPRITE;
 	static const unsigned int GRAPHICS_PIPELINE_TILEMAP;
+	static const unsigned int GRAPHICS_PIPELINE_PARTICLE_SYSTEM;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

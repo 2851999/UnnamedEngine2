@@ -26,7 +26,7 @@
   * The TilemapLayer class
   *****************************************************************************/
 
- /* Locations for the visibiliy attribute in the shader */
+ /* Location for the visibiliy attribute in the shader */
 const unsigned int TilemapLayer::ATTRIBUTE_LOCATION_VISIBILITY = 7;
 
 TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int>& data, bool visible, bool editable, VBOUsage usage) : name(name), tileset(tileset), layerColumns(columns), layerRows(rows), tileWidth(tileWidth), tileHeight(tileHeight), data(data), visible(visible), editable(editable) {

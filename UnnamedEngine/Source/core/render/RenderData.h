@@ -32,8 +32,8 @@ private:
 	/* The VAO */
 	GLuint vao = 0;
 	/* The VBO's used for rendering */
-	std::vector<VBO<GLfloat>*> vbosFloat;
-	std::vector<VBO<GLuint>*>  vbosUInteger;
+	std::vector<VBO<float>*> vbosFloat;
+	std::vector<VBO<unsigned int>*>  vbosUInteger;
 	VBO<unsigned int>*         vboIndices = NULL;
 
 	/* The render mode */
@@ -91,8 +91,8 @@ public:
 	void renderBaseVertex(unsigned int count, unsigned int indicesOffset, unsigned int baseVertex);
 
 	/* The setters and getters */
-	inline void addVBO(VBO<GLfloat>* vbo) { vbosFloat.push_back(vbo); }
-	inline void addVBO(VBO<GLuint>* vbo) { vbosUInteger.push_back(vbo); }
+	inline void addVBO(VBO<float>* vbo) { vbosFloat.push_back(vbo); }
+	inline void addVBO(VBO<unsigned int>* vbo) { vbosUInteger.push_back(vbo); }
 	inline void setIndicesVBO(VBO<unsigned int>* vboIndices) { this->vboIndices = vboIndices; }
 	inline void setMode(GLenum mode) { this->mode = mode; }
 	inline void setCount(GLsizei count) { this->count = count; }

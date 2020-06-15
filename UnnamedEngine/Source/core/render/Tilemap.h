@@ -36,9 +36,6 @@ private:
 	/* The tileset used in rendering this map */
 	TextureAtlas* tileset;
 
-	/* The material of this layer */
-	Material* material;
-
 	/* Model matrix for rendering */
 	Matrix4f modelMatrix;
 
@@ -65,6 +62,9 @@ private:
 	/* The render data used for rendering */
 	RenderData* renderData = NULL;
 
+	/* The material of this layer used for rendering */
+	Material* material;
+
 	/* The VBO's for OpenGL */
 	VBO<unsigned int>* vboIndices = NULL;
 	VBO<float>* vboVertices = NULL;
@@ -77,7 +77,7 @@ private:
 	/* States whether this layer is editable */
 	bool editable;
 public:
-	/* Locations for the visibiliy attribute in the shader */
+	/* Location for the visibiliy attribute in the shader */
 	static const unsigned int ATTRIBUTE_LOCATION_VISIBILITY;
 
 	/* The constructor */

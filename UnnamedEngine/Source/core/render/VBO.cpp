@@ -200,7 +200,7 @@ void VBO<T>::updateStream(GLsizeiptr size) {
 		//MAY BE BETTER WAY
 
 		//Copy the data into the buffer
-		vulkanBuffer->copyData(data.data(), 0, data.size() * sizeof(T));
+		vulkanBuffer->copyData(data.data(), 0, size);
 	}
 }
 
@@ -211,6 +211,8 @@ GLenum VBO<T>::convertToGL(VBOUsage usage) {
 			return GL_STATIC_DRAW;
 		case VBOUsage::DYNAMIC:
 			return GL_DYNAMIC_DRAW;
+		case VBOUsage::STREAM:
+			return GL_STREAM_DRAW;
 		default:
 			return GL_STATIC_DRAW;
 	}

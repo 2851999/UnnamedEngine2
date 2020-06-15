@@ -77,9 +77,9 @@ void BaseTest3D::render() {
 	if (renderScene->hasObjects())
 		renderScene->render();
 
-	onRender();
-
 	camera->render(); //In case of deferred rendering forward rendered objects should be rendered after the deferred
+
+	onRender();
 }
 
 void BaseTest3D::destroy() {

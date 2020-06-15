@@ -23,6 +23,7 @@
 #include "../BaseEngine.h"
 #include "RenderScene.h"
 #include "Tilemap.h"
+#include "../particles/ParticleSystem.h"
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
 #include "../../utils/VulkanUtils.h"
@@ -69,6 +70,7 @@ const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETR
 const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING                    = 20;
 const unsigned int Renderer::SHADER_DEFERRED_PBR_SSR                               = 21;
 const unsigned int Renderer::SHADER_TILEMAP                                        = 22;
+const unsigned int Renderer::SHADER_PARTICLE_SYSTEM                                = 23;
 
 const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                                      = 1;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                                       = 2;
@@ -99,6 +101,7 @@ const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND
 const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_PBR_SSR                              = 27;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SPRITE                                        = 28;
 const unsigned int Renderer::GRAPHICS_PIPELINE_TILEMAP                                       = 29;
+const unsigned int Renderer::GRAPHICS_PIPELINE_PARTICLE_SYSTEM                               = 30;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -147,6 +150,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING, "basicpbr/PBRDeferredLighting");
 	addRenderShader(SHADER_DEFERRED_PBR_SSR, "postprocessing/SSRShader");
 	addRenderShader(SHADER_TILEMAP, "TilemapShader");
+	addRenderShader(SHADER_PARTICLE_SYSTEM, "ParticleShader");
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -205,6 +209,12 @@ void Renderer::initialise() {
 	postProcessDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS_OR_EQUAL;
 	postProcessDepthState.depthWriteEnable = false;
 
+	//Depth state for particle systems
+	GraphicsPipeline::DepthState particleSystemDepthState;
+	particleSystemDepthState.depthTestEnable = true;
+	particleSystemDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
+	particleSystemDepthState.depthWriteEnable = false;
+
 	//Obtain the window width and height
 	uint32_t windowWidth = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t windowHeight = Window::getCurrentInstance()->getSettings().windowHeight;
@@ -248,6 +258,19 @@ void Renderer::initialise() {
 	tilemapVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(2, 1 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
 
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TILEMAP, SHADER_TILEMAP, tilemapVertexInputData, alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true);
+
+	GraphicsPipeline::VertexInputData particleSystemVertexInputData;
+	particleSystemVertexInputData.primitiveTopology = GraphicsPipeline::PrimitiveTopology::TRIANGLE_STRIP;
+	particleSystemVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, 0, VK_FORMAT_R32G32B32_SFLOAT, 0));
+	particleSystemVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(0, 3 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
+	particleSystemVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ParticleSystem::ATTRIBUTE_LOCATION_POSITION_DATA, 1, VK_FORMAT_R32G32B32A32_SFLOAT, 0));
+	particleSystemVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(1, 4 * sizeof(float), VK_VERTEX_INPUT_RATE_INSTANCE));
+	particleSystemVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ParticleSystem::ATTRIBUTE_LOCATION_COLOUR, 2, VK_FORMAT_R32G32B32A32_SFLOAT, 0));
+	particleSystemVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(2, 4 * sizeof(float), VK_VERTEX_INPUT_RATE_INSTANCE));
+	particleSystemVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ParticleSystem::ATTRIBUTE_LOCATION_TEXTURE_DATA, 3, VK_FORMAT_R32G32B32A32_SFLOAT, 0));
+	particleSystemVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(3, 4 * sizeof(float), VK_VERTEX_INPUT_RATE_INSTANCE));
+
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PARTICLE_SYSTEM, SHADER_PARTICLE_SYSTEM, particleSystemVertexInputData, alphaBlendState, particleSystemDepthState, defaultCullState, windowWidth, windowHeight, true);
 
 
 	//Create the default render pass

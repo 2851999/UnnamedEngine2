@@ -32,6 +32,11 @@ class GameObject;
 
 class GraphicsPipeline {
 public:
+	/* Various generalised primitive topologies */
+	enum class PrimitiveTopology {
+		TRIANGLE_LIST, TRIANGLE_STRIP, TRIANGLE_FAN, POINT_LIST, LINE_LIST, LINE_STRIP, LINE_LIST_WITH_ADJACENCY, LINE_STRIP_WITH_ADJACENCY, TRIANGLE_LIST_WITH_ADJACENCY, TRIANGLE_STRIP_WITH_ADJACENCY, PATCH_LIST
+	};
+
 	/* Various generalised blend states */
 	enum class BlendFactor {
 		ZERO, ONE, SRC_ALPHA, ONE_MINUS_SRC_ALPHA
@@ -99,6 +104,8 @@ private:
 public:
 	/* Structure used to store data required for creating a render pipeline */
 	struct VertexInputData {
+		GraphicsPipeline::PrimitiveTopology primitiveTopology = PrimitiveTopology::TRIANGLE_LIST;
+
 		std::vector<VkVertexInputBindingDescription>   bindings;
 		std::vector<VkVertexInputAttributeDescription> attributes;
 	};
@@ -120,6 +127,8 @@ public:
 
 	/* Methods used to convert the a generalised states to the one required by
 	   OpenGL/Vulkan */
+	GLenum convertToGL(PrimitiveTopology primativeTopology);
+	VkPrimitiveTopology convertToVk(PrimitiveTopology primativeTopology);
 	GLenum convertToGL(BlendFactor factor);
 	VkBlendFactor convertToVk(BlendFactor factor);
 	GLenum convertToGL(CompareOperation op);
