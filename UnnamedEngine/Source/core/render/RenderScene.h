@@ -24,11 +24,21 @@
 
 class RenderScene {
 private:
-	/* Objects within this scene */
-	std::vector<GameObject3D*> objects;
+	/* Structure containing a batch of objects that need to be rendered, along with the GraphicsPipeline required to do it */
+	struct ObjectBatch {
+		/* States whether this batch uses skinning */
+		bool skinning;
 
-	/* Skinned objects within this scene */
-	std::vector<GameObject3D*> skinnedObjects;
+		/* Pipelines for rendering */
+		GraphicsPipeline* graphicsPipeline = NULL;
+		GraphicsPipeline* graphicsPipelineBlend = NULL; //May be NULL if deferred geometry
+
+		/* The objects to be rendered with the above pipeline */
+		std::vector<GameObject3D*> objects;
+	};
+
+	/* The object batches containing all of the scene objects to be rendered */
+	std::unordered_map<unsigned int, ObjectBatch> objectBatches;
 
 	/* Lights in this scene */
 	std::vector<Light*> lights;
@@ -38,6 +48,9 @@ private:
 
 	/* Boolean that states whether deferred rendering should be used or not */
 	bool deferred;
+
+	/* Boolean that states whether PBR should be used or not */
+	bool pbr;
 
 	/* Boolean that states whether SSR should be used or not */
 	bool ssr;
@@ -61,15 +74,7 @@ private:
 	DescriptorSet* descriptorSetGammaCorrectionFXAA;
 
 	/* The graphics pipelines required for rendering */
-	GraphicsPipeline* pipelineMaterial;
-	GraphicsPipeline* pipelineLighting;
-	GraphicsPipeline* pipelineLightingBlend;
-	GraphicsPipeline* pipelineLightingSkinning;
-	GraphicsPipeline* pipelineLightingSkinningBlend;
-
 	GraphicsPipeline* pipelineGammaCorrectionFXAA;
-	GraphicsPipeline* pipelineDeferredLightingGeometry;
-	GraphicsPipeline* pipelineDeferredLightingSkinningGeometry;
 	GraphicsPipeline* pipelineDeferredLighting;
 	GraphicsPipeline* pipelineDeferredLightingBlend;
 	GraphicsPipeline* pipelineDeferredSSR;
@@ -127,5 +132,5 @@ public:
 	void setPostProcessingParameters(bool gammaCorrection, bool fxaa, float exposureIn = -1.0f);
 
 	inline Colour getAmbientLight() { return ambientLight; }
-	inline bool hasObjects() { return objects.size() > 0 || skinnedObjects.size() > 0; }
+	inline bool hasObjects() { return objectBatches.size() > 0; }
 };
