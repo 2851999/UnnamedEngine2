@@ -1,4 +1,134 @@
 --------------------------------------------------------------
+Release 2 | Beta 1 | Development 8 (V0.5.0)
+
+* Added instancing support to RenderData
+* Added ability to render different primitive topologies
+  in Vulkan
+* Added Terrain support to RenderScene
+* Added deferred terrain rendering support to RenderScene
+* Added generalised enums for various TextureParameters
+
+* Readded SSR (Vulkan not working)
+* Readded BaseTest3D
+* Readded PhysicsTest3D
+* Readded BaseEngineTest2D
+* Readded Tilemap
+* Readded BaseEngineTest3D
+* Readded ParticleEffect
+* Readded ParticleEmitter
+* Readded ParticleSystem
+* Readded TerrainTest
+* Readded CDLODTerrain
+
+* Changed Renderer to only create GraphicsPipelineLayout
+  instances if needed
+* Changed RenderScene to organise like objects into
+  'ObjectBatches' to organise pipeline binding
+* Changed FBO to assign the same TextureParameters when
+  using Vulkan as when using OpenGL
+
+* Renamed shader TerrainDeferredGeom to
+  DeferredTerrainGeometry
+* Renamed 'clamp' to 'addressMode' in TextureParameters
+
+* Fixed bug: Depth information was not copied to the default
+             buffer when using deferred rendering with
+			 post processsing off (OpenGL)
+* Fixed bug: Updating a camera once would cause issues when
+             using Vulkan
+* Fixed bug: RenderScene with lighting disabled caused a
+             crash
+* Fixed bug: Sprite did not update material's so no textures
+             would render
+* Fixed bug: Loading a '.model' file caused the creation of
+             a Material that was never deleted
+* Fixed bug: Camera did not bind its descriptor set when
+             rendering causing problems if rendering a
+			 skybox independently
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 8
+
+* Added deferred terrain rendering support to RenderScene
+* Added generalised enums for various TextureParameters
+
+* Changed FBO to assign the same TextureParameters when
+  using Vulkan as when using OpenGL
+
+* Renamed shader TerrainDeferredGeom to
+  DeferredTerrainGeometry
+* Renamed 'clamp' to 'addressMode' in TextureParameters
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 7
+
+* Added Terrain support to RenderScene
+
+* Readded TerrainTest
+* Readded CDLODTerrain
+
+* Fixed bug: Camera did not bind its descriptor set when
+             rendering causing problems if rendering a
+			 skybox independently
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 6
+
+* Changed RenderScene to organise like objects into
+  'ObjectBatches' to organise pipeline binding
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 5
+
+* Added instancing support to RenderData
+* Added ability to render different primitive topologies
+  in Vulkan
+
+* Readded BaseEngineTest3D
+* Readded ParticleEffect
+* Readded ParticleEmitter
+* Readded ParticleSystem
+
+* Fixed bug: Loading a '.model' file caused the creation of
+             a Material that was never deleted
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 4
+
+* Readded Tilemap
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 3
+
+* Readded BaseEngineTest2D
+
+* Fixed bug: Sprite did not update material's so no textures
+             would render
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 2
+
+* Readded BaseTest3D
+* Readded PhysicsTest3D
+
+* Fixed bug: RenderScene with lighting disabled caused a
+             crash
+
+-------------------------------------------------------------
+Release 2 | Beta 1 | Development 7 | Experimental 1
+
+* Readded SSR (Vulkan not working)
+
+* Changed Renderer to only create GraphicsPipelineLayout
+  instances if needed
+
+* Fixed bug: Depth information was not copied to the default
+             buffer when using deferred rendering with
+			 post processsing off (OpenGL)
+* Fixed bug: Updating a camera once would cause issues when
+             using Vulkan
+
+--------------------------------------------------------------
 Release 2 | Beta 1 | Development 7 (V0.4.9)
 
 * Added 'setPostProcessingParameters' method in RenderScene

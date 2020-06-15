@@ -29,7 +29,7 @@
 
  /* Types of usage for a VBO */
 enum class VBOUsage {
-	STATIC, DYNAMIC
+	STATIC, DYNAMIC, STREAM
 };
 
 template <typename T>

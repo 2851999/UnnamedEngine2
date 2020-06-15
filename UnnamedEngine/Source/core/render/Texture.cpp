@@ -30,24 +30,29 @@
  *****************************************************************************/
 
 /* Define the default parameters */
-GLuint TextureParameters::DEFAULT_TARGET = GL_TEXTURE_2D;
-GLuint TextureParameters::DEFAULT_FILTER = GL_NEAREST;
-GLuint TextureParameters::DEFAULT_CLAMP  = GL_REPEAT;
-bool   TextureParameters::DEFAULT_SRGB   = false;
+GLuint                         TextureParameters::DEFAULT_TARGET       = GL_TEXTURE_2D;
+TextureParameters::Filter      TextureParameters::DEFAULT_FILTER       = Filter::NEAREST;
+TextureParameters::AddressMode TextureParameters::DEFAULT_ADDRESS_MODE = AddressMode::REPEAT;
+bool                           TextureParameters::DEFAULT_SRGB         = false;
 
 void TextureParameters::apply(GLuint texture, bool bind, bool unbind) {
 	//Bind the texture if necessary
 	if (bind)
 		glBindTexture(target, texture);
 	//Setup the filter
-	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minFilter);
-	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, magFilter);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, convertToGL(minFilter));
+	GLenum magFilterGL = convertToGL(magFilter);
+	if (magFilterGL == GL_NEAREST_MIPMAP_NEAREST || magFilterGL == GL_NEAREST_MIPMAP_LINEAR)
+		magFilterGL = GL_NEAREST;
+	else if (magFilterGL == GL_LINEAR_MIPMAP_NEAREST || magFilterGL == GL_LINEAR_MIPMAP_LINEAR)
+		magFilterGL = GL_LINEAR;
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, magFilterGL);
 	//Setup texture clamping
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, clamp);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, convertToGL(addressMode));
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, convertToGL(addressMode));
 	//One more value for cube maps
 	if (target == GL_TEXTURE_CUBE_MAP)
-		glTexParameteri(target, GL_TEXTURE_WRAP_R, clamp);
+		glTexParameteri(target, GL_TEXTURE_WRAP_R, convertToGL(addressMode));
 	//Sets up mip-mapping if requested
 	if (mipMapRequested()) {
 		glGenerateMipmap(target);
@@ -62,25 +67,19 @@ VkSamplerCreateInfo TextureParameters::getVkSamplerCreateInfo() {
 	VkSamplerCreateInfo samplerInfo = {};
 	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 
-	if (minFilter == GL_NEAREST || minFilter == GL_NEAREST_MIPMAP_NEAREST || minFilter == GL_NEAREST_MIPMAP_LINEAR)
+	if (minFilter == Filter::NEAREST || minFilter == Filter::NEAREST_MIPMAP_NEAREST || minFilter == Filter::NEAREST_MIPMAP_LINEAR)
 		samplerInfo.minFilter = VK_FILTER_NEAREST;
-	else if (minFilter == GL_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST || minFilter == GL_LINEAR_MIPMAP_LINEAR)
+	else if (minFilter == Filter::LINEAR || minFilter == Filter::LINEAR_MIPMAP_NEAREST || minFilter == Filter::LINEAR_MIPMAP_LINEAR)
 		samplerInfo.minFilter = VK_FILTER_LINEAR;
 
-	if (magFilter == GL_NEAREST || magFilter == GL_NEAREST_MIPMAP_NEAREST || magFilter == GL_NEAREST_MIPMAP_LINEAR)
+	if (magFilter == Filter::NEAREST || magFilter == Filter::NEAREST_MIPMAP_NEAREST || magFilter == Filter::NEAREST_MIPMAP_LINEAR)
 		samplerInfo.magFilter = VK_FILTER_NEAREST;
-	else if (magFilter == GL_LINEAR || magFilter == GL_LINEAR_MIPMAP_NEAREST || magFilter == GL_LINEAR_MIPMAP_LINEAR)
+	else if (magFilter == Filter::LINEAR || magFilter == Filter::LINEAR_MIPMAP_NEAREST || magFilter == Filter::LINEAR_MIPMAP_LINEAR)
 		samplerInfo.magFilter = VK_FILTER_LINEAR;
 
-	if (clamp == GL_CLAMP_TO_EDGE) {
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-	} else if (clamp == GL_REPEAT) {
-		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-	}
+	samplerInfo.addressModeU = convertToVk(addressMode);
+	samplerInfo.addressModeV = convertToVk(addressMode);
+	samplerInfo.addressModeW = convertToVk(addressMode);
 
 	unsigned int anisotropicSamples = Window::getCurrentInstance()->getSettings().videoMaxAnisotropicSamples;
 	samplerInfo.anisotropyEnable = anisotropicSamples > 0 ? VK_TRUE : VK_FALSE;
@@ -93,17 +92,71 @@ VkSamplerCreateInfo TextureParameters::getVkSamplerCreateInfo() {
 	samplerInfo.compareEnable = VK_FALSE; //Useful for PCF shadows
 	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
 
-	if (minFilter == GL_LINEAR_MIPMAP_NEAREST)
+	if (minFilter == Filter::NEAREST_MIPMAP_NEAREST || minFilter == Filter::LINEAR_MIPMAP_NEAREST)
 		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-	else if (minFilter == GL_LINEAR_MIPMAP_LINEAR)
+	else if (minFilter == Filter::NEAREST_MIPMAP_LINEAR || minFilter == Filter::LINEAR_MIPMAP_LINEAR)
 		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 	else
-		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+
 	samplerInfo.mipLodBias = 0.0f;
 	samplerInfo.minLod     = 0.0f;
 	samplerInfo.maxLod     = 0.0f; //SHOULD BE ASSIGNED IF MIPMAP USED (see Texture constructor)
 
 	return samplerInfo;
+}
+
+GLenum TextureParameters::convertToGL(Filter filter) {
+	switch (filter) {
+		case Filter::NEAREST:
+			return GL_NEAREST;
+		case Filter::LINEAR:
+			return GL_LINEAR;
+		case Filter::NEAREST_MIPMAP_NEAREST:
+			return GL_NEAREST_MIPMAP_NEAREST;
+		case Filter::NEAREST_MIPMAP_LINEAR:
+			return GL_NEAREST_MIPMAP_LINEAR;
+		case Filter::LINEAR_MIPMAP_NEAREST:
+			return GL_LINEAR_MIPMAP_NEAREST;
+		case Filter::LINEAR_MIPMAP_LINEAR:
+			return GL_LINEAR_MIPMAP_LINEAR;
+		default:
+			return GL_NEAREST;
+	}
+}
+
+GLenum TextureParameters::convertToGL(AddressMode addressMode) {
+	switch (addressMode) {
+		case AddressMode::REPEAT:
+			return GL_REPEAT;
+		case AddressMode::MIRRORED_REPEAT:
+			return GL_MIRRORED_REPEAT;
+		case AddressMode::CLAMP_TO_EDGE:
+			return GL_CLAMP_TO_EDGE;
+		case AddressMode::CLAMP_TO_BORDER:
+			return GL_CLAMP_TO_BORDER;
+		case AddressMode::MIRROR_CLAMP_TO_EDGE:
+			return GL_MIRROR_CLAMP_TO_EDGE;
+		default:
+			return GL_REPEAT;
+	}
+}
+
+VkSamplerAddressMode TextureParameters::convertToVk(AddressMode addressMode) {
+	switch (addressMode) {
+		case AddressMode::REPEAT:
+			return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		case AddressMode::MIRRORED_REPEAT:
+			return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+		case AddressMode::CLAMP_TO_EDGE:
+			return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		case AddressMode::CLAMP_TO_BORDER:
+			return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		case AddressMode::MIRROR_CLAMP_TO_EDGE:
+			return VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
+		default:
+			return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+	}
 }
 
 /*****************************************************************************
@@ -184,9 +237,15 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 			mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
 
 		//---------------------------------------------------LOAD AND CREATE THE TEXTURE---------------------------------------------------
-		VkDeviceSize imageSize = width * height * STBI_rgb_alpha;
+
+		//When using Vulkan all textures are loaded with 4 components, but in the case this is one it is assigned elsewhere so the requested value should be used
+		//e.g. for height map generation
+		if (numComponents != 1)
+			numComponents = 4;
+
+		VkDeviceSize imageSize = width * height * numComponents;
 		VkFormat format;
-		Texture::getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), format);
+		Texture::getTextureFormatVk(numComponents, parameters.getSRGB(), format);
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
@@ -343,6 +402,10 @@ unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& w
 	//Load the data using stb_image
 	unsigned char* image = stbi_load(path.c_str(), &width, &height, &numComponents, BaseEngine::usingVulkan() ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
 
+	//Ignore the returned value as is wrong for somereason when assigned manually
+	if (BaseEngine::usingVulkan())
+		numComponents = STBI_rgb_alpha;
+
 	//Check that the data was loaded
 	if (image == nullptr) {
 		//Log an error if not
@@ -356,6 +419,10 @@ unsigned char* Texture::loadTexture(std::string path, int& numComponents, int& w
 float* Texture::loadTexturef(std::string path, int& numComponents, int& width, int& height, bool srgb) {
 	//Load the data using stb_image
 	float* image = stbi_loadf(path.c_str(), &width, &height, &numComponents, BaseEngine::usingVulkan() ? STBI_rgb_alpha : 0); //For Vulkan found other modes are not supported (Should really check for supported ones) - so force number of components
+
+	//Ignore the returned value as is wrong for somereason when assigned manually
+	if (BaseEngine::usingVulkan())
+		numComponents = STBI_rgb_alpha;
 
 	//Check that the data was loaded
 	if (image == nullptr) {
@@ -475,8 +542,8 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 	if (faces.size() == 6) {
 		//Assign the texture parameters
 		parameters.setTarget(GL_TEXTURE_CUBE_MAP);
-		parameters.setFilter(GL_LINEAR);
-		parameters.setClamp(GL_CLAMP_TO_EDGE);
+		parameters.setFilter(TextureParameters::Filter::LINEAR);
+		parameters.setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 
 		if (! BaseEngine::usingVulkan()) {
 			//Bind this cubemap

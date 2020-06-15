@@ -45,6 +45,9 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP       
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA       = 6;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING           = 7;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING = 8;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR            = 9;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD                   = 10;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_TERRAIN                     = 11;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -167,6 +170,34 @@ ShaderInterface::ShaderInterface() {
 	pbrDeferredLightingLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING, pbrDeferredLightingLayout);
+
+	//Deferred PBR SSR lighting
+	DescriptorSetLayout* pbrDeferredLightingSSRLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH); //Don't use light batches, so need to change set number
+	pbrDeferredLightingSSRLayout->addTexture2D(0);
+	pbrDeferredLightingSSRLayout->addTexture2D(1);
+	pbrDeferredLightingSSRLayout->addTexture2D(2);
+	pbrDeferredLightingSSRLayout->addTexture2D(3);
+
+	pbrDeferredLightingSSRLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR, pbrDeferredLightingSSRLayout);
+
+	//Billboard
+	DescriptorSetLayout* billboardLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
+	billboardLayout->addUBO(sizeof(ShaderBlock_Billboard), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_BILLBOARD);
+	billboardLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_BILLBOARD, billboardLayout);
+
+	//CDLOD terrain
+	DescriptorSetLayout* cdlodTerrainLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_SCENE);
+
+	cdlodTerrainLayout->addTexture2D(6); //Height map
+
+	cdlodTerrainLayout->addUBO(sizeof(ShaderBlock_Terrain), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_TERRAIN);
+	cdlodTerrainLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_TERRAIN, cdlodTerrainLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -274,6 +305,32 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING));
+	} else if (shaderID == Renderer::SHADER_DEFERRED_PBR_SSR) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR));
+	} else if (shaderID == Renderer::SHADER_TILEMAP) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_PARTICLE_SYSTEM) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BILLBOARD));
+	} else if (shaderID == Renderer::SHADER_TERRAIN) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_TERRAIN));
+	} else if (shaderID == Renderer::SHADER_DEFERRED_TERRAIN_GEOMETRY) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH)); //Shouldn't really be here but Vulkan won't complain if it is
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_TERRAIN));
 	}
 }
 

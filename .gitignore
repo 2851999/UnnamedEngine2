@@ -87,3 +87,11 @@
 /UnnamedEngine/resources/shaders-vulkan/lighting/DeferredLightingGeometry_UE_GEOMETRY_ONLYUE_SKINNING_complete.frag
 /UnnamedEngine/resources/shaders-vulkan/lighting/DeferredLighting_complete.vert
 /UnnamedEngine/resources/shaders-vulkan/lighting/DeferredLighting_complete.frag
+/UnnamedEngine/resources/shaders-vulkan/terrain/DeferredTerrainGeometry_UE_GEOMETRY_ONLY_complete.vert
+/UnnamedEngine/resources/shaders-vulkan/terrain/DeferredTerrainGeometry_UE_GEOMETRY_ONLY_complete.frag
+/UnnamedEngine/resources/shaders-vulkan/postprocessing/SSRShader_complete.vert
+/UnnamedEngine/resources/shaders-vulkan/postprocessing/SSRShader_complete.frag
+/UnnamedEngine/resources/shaders-vulkan/TilemapShader_complete.vert
+/UnnamedEngine/resources/shaders-vulkan/TilemapShader_complete.frag
+/UnnamedEngine/resources/shaders-vulkan/ParticleShader_complete.vert
+/UnnamedEngine/resources/shaders-vulkan/ParticleShader_complete.frag

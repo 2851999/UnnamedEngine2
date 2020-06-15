@@ -25,7 +25,7 @@
 
 #include "../BaseEngine.h"
 
-RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferred(deferred), postProcessing(postProcessing) {
+RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing) : deferred(deferred), pbr(pbr), ssr(ssr), postProcessing(postProcessing) {
 	//Create the FBO for rendering offscreen
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
@@ -111,27 +111,31 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool postProcessing) : deferre
 		deferredRenderingScreenTextureMesh = new Mesh(meshData);
 		deferredRenderingScreenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 
-		pipelineDeferredLightingGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY), deferredGeometryRenderPass);
-		pipelineDeferredLightingSkinningGeometry = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY), deferredGeometryRenderPass);
-		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
-		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
-	}
+		if (ssr) {
 
-	//Obtain the render pipelines
-	pipelineMaterial = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
-	pipelineLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING : Renderer::GRAPHICS_PIPELINE_LIGHTING), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
-	pipelineLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
-	pipelineLightingSkinning = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
-	pipelineLightingSkinningBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
+			FBO* ssrFBO = new FBO(width, height, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+				FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), false }
+			});
+
+			deferredPBRSSRRenderPass = new RenderPass(ssrFBO);
+
+			descriptorSetGeometryBufferSSR = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR));
+			descriptorSetGeometryBufferSSR->setTexture(0, deferredGeometryRenderPass->getFBO()->getAttachment(0));
+			descriptorSetGeometryBufferSSR->setTexture(1, deferredGeometryRenderPass->getFBO()->getAttachment(1));
+			descriptorSetGeometryBufferSSR->setTexture(2, deferredPBRSSRRenderPass->getFBO()->getAttachment(0)); //Albedo
+			descriptorSetGeometryBufferSSR->setTexture(3, deferredGeometryRenderPass->getFBO()->getAttachment(3));
+			descriptorSetGeometryBufferSSR->setup();
+
+			pipelineDeferredSSR = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_PBR_SSR), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
+		}
+
+		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+	}
 }
 
 RenderScene::~RenderScene() {
-	delete pipelineMaterial;
-	delete pipelineLighting;
-	delete pipelineLightingBlend;
-	delete pipelineLightingSkinning;
-	delete pipelineLightingSkinningBlend;
-
 	if (postProcessing) {
 		delete descriptorSetGammaCorrectionFXAA;
 		delete postProcessingRenderPass;
@@ -140,36 +144,83 @@ RenderScene::~RenderScene() {
 	}
 
 	if (deferred) {
-		delete pipelineDeferredLightingGeometry;
-		delete pipelineDeferredLightingSkinningGeometry;
 		delete pipelineDeferredLighting;
 		delete pipelineDeferredLightingBlend;
 
 		delete descriptorSetGeometryBuffer;
 		delete deferredGeometryRenderPass;
 		delete deferredRenderingScreenTextureMesh;
+
+		if (ssr) {
+			delete deferredPBRSSRRenderPass;
+			delete descriptorSetGeometryBufferSSR;
+			delete pipelineDeferredSSR;
+		}
 	}
 
 	//Go through and delete all created objects
 	for (DescriptorSet* descriptorSetLightBatch : descriptorSetLightBatches)
 		delete descriptorSetLightBatch;
-	for (unsigned int i = 0; i < objects.size(); ++i)
-		delete objects[i];
-	objects.clear();
-	for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
-		delete skinnedObjects[i];
-	skinnedObjects.clear();
+	for (auto& element : objectBatches) {
+		for (unsigned int i = 0; i < element.second.objects.size(); ++i)
+			delete element.second.objects[i];
+		delete element.second.graphicsPipeline;
+		if (element.second.graphicsPipelineBlend)
+			delete element.second.graphicsPipelineBlend;
+	}
 	for (unsigned int i = 0; i < lights.size(); ++i)
 		delete lights[i];
 	lights.clear();
 }
 
 void RenderScene::add(GameObject3D* object) {
-	//Add the object to the scene
-	if (! object->getMesh()->hasSkeleton())
-		objects.push_back(object);
-	else
-		skinnedObjects.push_back(object);
+	//Determine the pipeline needed for rendering
+	unsigned int graphicsPipelineID      = 0;
+	unsigned int graphicsPipelineBlendID = 0;
+
+	bool skinning = object->getMesh()->hasSkeleton();
+
+	if (object->getRenderShader()->getID() == Renderer::SHADER_TERRAIN) {
+		if (deferred)
+			graphicsPipelineID = Renderer::GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY;
+		else {
+			graphicsPipelineID = Renderer::GRAPHICS_PIPELINE_TERRAIN;
+			graphicsPipelineBlendID = Renderer::GRAPHICS_PIPELINE_TERRAIN_BLEND;
+		}
+	} else {
+		if (lighting) {
+			if (pbr) {
+				if (deferred)
+					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY;
+				else {
+					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING;
+					graphicsPipelineBlendID = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND;
+				}
+			} else {
+				if (deferred)
+					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY;
+				else {
+					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_LIGHTING;
+					graphicsPipelineBlendID = skinning ? Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND;
+				}
+			}
+		} else
+			graphicsPipelineID = Renderer::GRAPHICS_PIPELINE_MATERIAL;
+	}
+
+	//Check if a batch already exists for it
+	if (objectBatches.find(graphicsPipelineID) != objectBatches.end()) {
+		objectBatches[graphicsPipelineID].objects.push_back(object);
+	} else {
+		ObjectBatch batch;
+		batch.skinning = skinning;
+		batch.graphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(graphicsPipelineID), deferred ? deferredGeometryRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+		if (graphicsPipelineBlendID != 0)
+			batch.graphicsPipelineBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(graphicsPipelineBlendID), deferred ? deferredGeometryRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+		batch.objects.push_back(object);
+
+		objectBatches.insert(std::pair<unsigned int, ObjectBatch>(graphicsPipelineID, batch));
+	}
 }
 
 void RenderScene::addLight(Light* light) {
@@ -215,23 +266,19 @@ void RenderScene::renderOffscreen() {
 				//	0.0f,
 				//	1.75f);
 
-				if (objects.size() > 0) {
-					lights[i]->getShadowMapGraphicsPipeline()->bind();
+				for (auto& batch : objectBatches) {
+					if (batch.second.skinning)
+						lights[i]->getShadowMapSkinningGraphicsPipeline()->bind();
+					else
+						lights[i]->getShadowMapGraphicsPipeline()->bind();
 
 					//Use the light's view
 					lights[i]->useView();
 
-					for (unsigned int i = 0; i < objects.size(); ++i)
-						objects[i]->render();
-				}
-				if (skinnedObjects.size() > 0) {
-					lights[i]->getShadowMapSkinningGraphicsPipeline()->bind();
-
-					//Use the light's view
-					lights[i]->useView();
-
-					for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
-						skinnedObjects[i]->render();
+					for (unsigned int j = 0; j < batch.second.objects.size(); ++j) {
+						//if (batch.second.objects[j]->getRenderShader()->getID() != Renderer::SHADER_TERRAIN)
+						batch.second.objects[j]->render();
+					}
 				}
 
 				shadowMapRenderPass->end();
@@ -244,25 +291,25 @@ void RenderScene::renderOffscreen() {
 		//Render to the geometry buffer
 		deferredGeometryRenderPass->begin();
 
-		((Camera3D*) Renderer::getCamera())->useView();
+		for (auto& batch : objectBatches) {
+			batch.second.graphicsPipeline->bind();
 
-		pipelineDeferredLightingGeometry->bind();
+			((Camera3D*) Renderer::getCamera())->useView();
 
-		if (objects.size() > 0) {
-
-			//Go through and render all the objects
-			for (unsigned int i = 0; i < objects.size(); ++i)
-				objects[i]->render();
-		}
-
-		if (skinnedObjects.size() > 0) {
-			pipelineDeferredLightingSkinningGeometry->bind();
-
-			for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
-				skinnedObjects[i]->render();
+			for (unsigned int i = 0; i < batch.second.objects.size(); ++i)
+				batch.second.objects[i]->render();
 		}
 
 		deferredGeometryRenderPass->end();
+
+		if (ssr) {
+			//Render the lighting
+			deferredPBRSSRRenderPass->begin();
+
+			renderScene();
+
+			deferredPBRSSRRenderPass->end();
+		}
 	}
 
 	//Check if post processing
@@ -270,7 +317,14 @@ void RenderScene::renderOffscreen() {
 		//Render the scene offscreen ready for post processing
 		postProcessingRenderPass->begin();
 
-		renderScene();
+		if (ssr) {
+			pipelineDeferredSSR->bind();
+			descriptorSetGeometryBufferSSR->bind();
+			Matrix4f matrix = Matrix4f().initIdentity();
+			Renderer::render(deferredRenderingScreenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+		} else {
+			renderScene();
+		}
 
 		postProcessingRenderPass->end();
 	}
@@ -347,59 +401,37 @@ void RenderScene::renderScene() {
 				batchNumber++;
 			}
 		} else {
-			if (objects.size() > 0) {
+			for (auto& batch : objectBatches) {
 
 				batchNumber = 0;
 
-				pipelineLighting->bind();
+				batch.second.graphicsPipeline->bind();
 
 				//Go through the each of the light batches
 				for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
 
 					if (b == NUM_LIGHTS_IN_BATCH)
 						//Start blending the results of other batches
-						pipelineLightingBlend->bind();
+						batch.second.graphicsPipelineBlend->bind();
 
 					//Bind the descriptor set and render all of the objects
 					descriptorSetLightBatches[batchNumber]->bind();
 
-					for (unsigned int i = 0; i < objects.size(); ++i)
-						objects[i]->render();
-
-					batchNumber++;
-				}
-			}
-
-			if (skinnedObjects.size() > 0) {
-
-				batchNumber = 0;
-
-				pipelineLightingSkinning->bind();
-
-				//Go through the each of the light batches
-				for (unsigned int b = 0; b < lights.size(); b += NUM_LIGHTS_IN_BATCH) {
-					if (b == NUM_LIGHTS_IN_BATCH)
-						//Start blending the results of other batches
-						pipelineLightingSkinningBlend->bind();
-
-					//Bind the descriptor set and render all of the objects
-					descriptorSetLightBatches[batchNumber]->bind();
-
-					for (unsigned int i = 0; i < skinnedObjects.size(); ++i)
-						skinnedObjects[i]->render();
+					for (unsigned int i = 0; i < batch.second.objects.size(); ++i)
+						batch.second.objects[i]->render();
 
 					batchNumber++;
 				}
 			}
 		}
-	}
-	else {
-		//Use the material pipeline
-		pipelineMaterial->bind();
-
+	} else {
 		//Go through and render all of the objects
-		for (unsigned int i = 0; i < objects.size(); ++i)
-			objects[i]->render();
+		for (auto& batch : objectBatches) {
+			batch.second.graphicsPipeline->bind();
+
+			for (unsigned int i = 0; i < batch.second.objects.size(); ++i)
+				batch.second.objects[i]->render();
+		}
 	}
 }
 
@@ -417,8 +449,24 @@ void RenderScene::render() {
 			glBlitFramebuffer(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
-	} else
-		renderScene();
+	} else {
+		if (deferred && (! BaseEngine::usingVulkan())) {
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, deferred ? deferredGeometryRenderPass->getFBO()->getGLFBO() : postProcessingRenderPass->getFBO()->getGLFBO());
+			//glDrawBuffer(GL_BACK);
+			glBlitFramebuffer(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
+		if (ssr) {
+			pipelineDeferredSSR->bind();
+			descriptorSetGeometryBufferSSR->bind();
+			Matrix4f matrix = Matrix4f().initIdentity();
+			Renderer::render(deferredRenderingScreenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+		} else {
+			renderScene();
+		}
+	}
 }
 
 void RenderScene::setPostProcessingParameters(bool gammaCorrection, bool fxaa, float exposureIn) {

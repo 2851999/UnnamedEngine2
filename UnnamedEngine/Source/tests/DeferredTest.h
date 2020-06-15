@@ -85,6 +85,7 @@ void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
 	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
 	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	InputBindings* bindings = new InputBindings();
 	bindings->load("C:/UnnamedEngine/config/Controller.xml", getWindow()->getInputManager());
@@ -98,13 +99,13 @@ void Test::created() {
 	Renderer::addCamera(camera);
 	getWindow()->disableCursor();
 
-	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
+	TextureParameters::DEFAULT_FILTER = TextureParameters::Filter::LINEAR_MIPMAP_LINEAR;
 	MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(true, true, true);
+	renderScene = new RenderScene(true, true, false, true);
 	renderScene->setPostProcessingParameters(true, true, 0.5f);
 
 	//renderScene->disableLighting();

@@ -751,6 +751,8 @@ Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 
 	//Create the mesh
 	Mesh* mesh = new Mesh(data);
+	//Delete the default material created in the mesh
+	delete mesh->getMaterial();
 	mesh->setSkeleton(skeleton);
 	mesh->setMaterials(materials);
 	mesh->setCullingEnabled(true);

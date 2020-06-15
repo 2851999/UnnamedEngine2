@@ -55,24 +55,36 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			aspectMask        = VK_IMAGE_ASPECT_COLOR_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			getParameters().setFilter(TextureParameters::Filter::NEAREST);
+			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		} else if (type == Type::DEPTH_TEXTURE) {
 			vulkanFormat      = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+
+			getParameters().setFilter(TextureParameters::Filter::LINEAR);
+			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_BORDER);
 		} else if (type == Type::DEPTH) {
 			vulkanFormat	  = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 			aspectMask        = Vulkan::hasStencilComponent(vulkanFormat) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			getParameters().setFilter(TextureParameters::Filter::NEAREST);
+			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		} else if (type == Type::DEPTH_CUBEMAP) {
 			vulkanFormat      = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+
+			getParameters().setFilter(TextureParameters::Filter::NEAREST);
+			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		}
 
 		if (type != Type::DEPTH_CUBEMAP)
@@ -92,8 +104,8 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			glType = GL_FLOAT;
 			attachment = GL_COLOR_ATTACHMENT0 + indexOfColourAttachment;
 
-			getParameters().setFilter(GL_NEAREST);
-			getParameters().setClamp(GL_CLAMP_TO_EDGE);
+			getParameters().setFilter(TextureParameters::Filter::NEAREST);
+			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		} else if (type == Type::DEPTH_TEXTURE) {
 			getParameters().setTarget(GL_TEXTURE_2D);
 			internalFormat = GL_DEPTH_COMPONENT24;
@@ -101,8 +113,8 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			glType = GL_FLOAT;
 			attachment = GL_DEPTH_ATTACHMENT;
 
-			getParameters().setFilter(GL_LINEAR);
-			getParameters().setClamp(GL_CLAMP_TO_BORDER);
+			getParameters().setFilter(TextureParameters::Filter::LINEAR);
+			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_BORDER);
 		} else if (type == Type::DEPTH) {
 			getParameters().setTarget(GL_RENDERBUFFER);
 			internalFormat = GL_DEPTH_COMPONENT32;
@@ -110,8 +122,8 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			glType = GL_UNSIGNED_INT;
 			attachment = GL_DEPTH_ATTACHMENT;
 
-			getParameters().setFilter(GL_NEAREST);
-			getParameters().setClamp(GL_CLAMP_TO_EDGE);
+			getParameters().setFilter(TextureParameters::Filter::NEAREST);
+			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		} else if (type == Type::DEPTH_CUBEMAP) {
 			getParameters().setTarget(GL_TEXTURE_CUBE_MAP);
 			internalFormat = GL_DEPTH_COMPONENT24;
@@ -119,8 +131,8 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			glType = GL_FLOAT;
 			attachment = GL_DEPTH_ATTACHMENT;
 
-			getParameters().setFilter(GL_NEAREST);
-			getParameters().setClamp(GL_CLAMP_TO_EDGE);
+			getParameters().setFilter(TextureParameters::Filter::NEAREST);
+			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		}
 
 		if (type != Type::DEPTH_CUBEMAP) {

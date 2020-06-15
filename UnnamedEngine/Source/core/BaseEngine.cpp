@@ -93,8 +93,8 @@ void BaseEngine::create() {
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-				Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST));
-				Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST));
+				Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, TextureParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE).setFilter(TextureParameters::Filter::NEAREST));
+				Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, TextureParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE).setFilter(TextureParameters::Filter::NEAREST));
 				textInstance->setFont(font);
 				textInstance->setColour(Colour::BLACK);
 				textInstance->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);

@@ -59,12 +59,12 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
+
+	VulkanSwapChain::clearDefaultDepthBufferOnLoad = false;
 }
 
 void Test::created() {
-	//std::cout << Vulkan::getDevice()->listSupportedExtensions() << std::endl;
-
 	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("FontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
@@ -79,6 +79,13 @@ void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
 	//Shader::compileEngineShaderToSPIRV("postprocessing/GammaCorrectionFXAAShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLightingGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
+	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLightingGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	InputBindings* bindings = new InputBindings();
 	bindings->load("C:/UnnamedEngine/config/Controller.xml", getWindow()->getInputManager());
@@ -92,14 +99,14 @@ void Test::created() {
 	Renderer::addCamera(camera);
 	getWindow()->disableCursor();
 
-	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
+	TextureParameters::DEFAULT_FILTER = TextureParameters::Filter::LINEAR_MIPMAP_LINEAR;
 	MeshLoader::loadDiffuseTexturesAsSRGB = true;
 
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(false, false, true);
-	renderScene->setPostProcessingParameters(false, true, 1.0f);
+	renderScene = new RenderScene(true, true, false, true);
+	renderScene->setPostProcessingParameters(true, true, 0.5f);
 
 	//renderScene->disableLighting();
 
@@ -108,9 +115,9 @@ void Test::created() {
 	//renderScene->addLight((new Light(Light::TYPE_DIRECTIONAL))->setDirection(0.0f, -1.0f, 0.4f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 	for (unsigned int i = 0; i < 20; ++i)
 		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-8.0f, 8.0f), utils_random::randomFloat(0.0f, 10.0f), utils_random::randomFloat(-8.0f, 8.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f))));
-	light = (new Light(Light::TYPE_POINT, Vector3f(1.5f, 1.2f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
-	renderScene->addLight(light);
-	renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
+	//light = (new Light(Light::TYPE_POINT, Vector3f(1.5f, 1.2f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	//renderScene->addLight(light);
+	//renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 
 	//lightDir = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f);
 	//light = (new Light(Light::TYPE_SPOT, Vector3f(10.0f, 8.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
@@ -132,10 +139,6 @@ void Test::created() {
 	renderScene->add(model);
 
 	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
-	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/", "teapot.obj");
-
-	//mesh2->getMaterial(1)->setDiffuse(lightDir->getShadowMapRenderPass()->getFBO()->getAttachment(0));
-	//mesh2->getMaterial(1)->update();
 
 	model2 = new GameObject3D(mesh2, shader);
 	model2->setPosition(0.0f, 1.5f, 0.0f);
@@ -143,15 +146,15 @@ void Test::created() {
 	renderScene->add(model2);
 
 	//mitsuba-sphere.obj
+	//mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/mitsuba/", "mitsuba-sphere.obj"), shader);
 	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), shaderSkinning);
 	mit1->getMesh()->getSkeleton()->startAnimation("");
 	mit1->setPosition(10.0f, 1.0f, 0.0f);
 	mit1->update();
 	renderScene->add(mit1);
 
-	//Make OpenGL's depth values behave like Vulkan
-	//https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_clip_control.txt
-	//glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+	//model2->getMesh()->getMaterial(1)->setDiffuse(Renderer::getBlankTexture());
+	//model2->getMesh()->getMaterial(1)->update();
 }
 
 void Test::update() {
@@ -170,10 +173,10 @@ void Test::update() {
 	else if (Keyboard::isPressed(GLFW_KEY_RIGHT))
 		lightDir->getTransform()->translate(0.008f * getDelta(), 0.0f, 0.0f);
 
+	mit1->getMesh()->updateAnimation(getDeltaSeconds());
+
 	light->update();
 	lightDir->update();
-
-	mit1->getMesh()->updateAnimation(getDeltaSeconds());
 }
 
 void Test::renderOffscreen() {
@@ -190,7 +193,7 @@ void Test::render() {
 
 	renderScene->render();
 
-	//camera->useView();
+	camera->render();
 }
 
 void Test::destroy() {

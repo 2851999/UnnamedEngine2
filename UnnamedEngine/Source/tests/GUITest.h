@@ -100,7 +100,7 @@ void Test::created() {
 	camera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
 	camera->update();
 
-	GUIComponentRenderer::DEFAULT_FONT = new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(GL_NEAREST));
+	GUIComponentRenderer::DEFAULT_FONT = new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(TextureParameters::Filter::NEAREST));
 
 	panel = new GUIPanel();
 
@@ -147,10 +147,10 @@ void Test::created() {
 	horizontalSlider->setPosition(100, 400);
 
 	textBox = new GUITextBox(Colour::WHITE, 200, 20);
-	textBox->setFont(new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(GL_NEAREST)));
+	textBox->setFont(new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(TextureParameters::Filter::NEAREST)));
 	textBox->setTextColour(Colour::BLACK);
 	textBox->setPosition(20, 300);
-	textBox->setDefaultText("Enter something", Colour::GREY, new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(GL_NEAREST)));
+	textBox->setDefaultText("Enter something", Colour::GREY, new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(TextureParameters::Filter::NEAREST)));
 	textBox->setBorder(new GUIBorder(textBox, 1.0f, Colour::LIGHT_BLUE));
 	textBox->selection->setColour(Colour(Colour::LIGHT_BLUE, 0.2f));
 

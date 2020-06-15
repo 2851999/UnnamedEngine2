@@ -164,20 +164,19 @@ void Sprite::setupMesh(Texture* texture) {
 	//Add a sub data
 	getMesh()->getData()->addSubData(0, 0, 6, 0);
 	getMaterial()->setDiffuse(texture);
+	getMaterial()->update();
 }
 
 void Sprite::setup(Texture* texture) {
 	setWidth(texture->getWidth());
 	setHeight(texture->getHeight());
 	setupMesh(texture);
-	getMaterial()->setDiffuse(texture);
 }
 
 void Sprite::setup(Texture* texture, float width, float height) {
 	setWidth(width);
 	setHeight(height);
 	setupMesh(texture);
-	getMaterial()->setDiffuse(texture);
 }
 
 void Sprite::setup(TextureAtlas* textureAtlas) {
@@ -203,6 +202,7 @@ void Sprite::addMaxLayers(unsigned int maxLayers) {
 void Sprite::setLayer(unsigned int layer, Texture* texture) {
 	//Assign the required texture
 	getMesh()->getMaterial(layer)->setDiffuse(texture);
+	getMesh()->getMaterial(layer)->update();
 }
 
 void Sprite::setVisibleLayers(unsigned int count) {

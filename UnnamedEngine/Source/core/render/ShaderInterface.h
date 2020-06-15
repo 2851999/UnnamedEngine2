@@ -175,6 +175,9 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_TERRAIN;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;

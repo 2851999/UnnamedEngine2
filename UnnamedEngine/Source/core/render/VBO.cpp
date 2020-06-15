@@ -196,6 +196,11 @@ void VBO<T>::updateStream(GLsizeiptr size) {
 		//Buffer orphaning
 		glBufferData(target, this->size, NULL, convertToGL(usage));
 		glBufferSubData(target, 0, size, &data.front());
+	} else {
+		//MAY BE BETTER WAY
+
+		//Copy the data into the buffer
+		vulkanBuffer->copyData(data.data(), 0, size);
 	}
 }
 
@@ -206,6 +211,8 @@ GLenum VBO<T>::convertToGL(VBOUsage usage) {
 			return GL_STATIC_DRAW;
 		case VBOUsage::DYNAMIC:
 			return GL_DYNAMIC_DRAW;
+		case VBOUsage::STREAM:
+			return GL_STREAM_DRAW;
 		default:
 			return GL_STATIC_DRAW;
 	}

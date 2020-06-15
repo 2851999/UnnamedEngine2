@@ -72,7 +72,7 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
 		inputAssembly.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-		inputAssembly.topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		inputAssembly.topology               = convertToVk(vertexInputData.primitiveTopology);
 		inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 		VkViewport viewport = {};
@@ -255,6 +255,64 @@ void GraphicsPipeline::renderAllQueued() {
 			object->queuedRender();
 		//Clear the queue
 		queuedObjects.clear();
+	}
+}
+
+GLenum GraphicsPipeline::convertToGL(PrimitiveTopology primitiveTopology) {
+	switch (primitiveTopology) {
+		case PrimitiveTopology::TRIANGLE_LIST:
+			return GL_TRIANGLES;
+		case PrimitiveTopology::TRIANGLE_STRIP:
+			return GL_TRIANGLE_STRIP;
+		case PrimitiveTopology::TRIANGLE_FAN:
+			return GL_TRIANGLE_FAN;
+		case PrimitiveTopology::POINT_LIST:
+			return GL_POINTS;
+		case PrimitiveTopology::LINE_LIST:
+			return GL_LINES;
+		case PrimitiveTopology::LINE_STRIP:
+			return GL_LINE_STRIP;
+		case PrimitiveTopology::LINE_LIST_WITH_ADJACENCY:
+			return GL_LINES_ADJACENCY;
+		case PrimitiveTopology::LINE_STRIP_WITH_ADJACENCY:
+			return GL_LINE_STRIP_ADJACENCY;
+		case PrimitiveTopology::TRIANGLE_LIST_WITH_ADJACENCY:
+			return GL_TRIANGLES_ADJACENCY;
+		case PrimitiveTopology::TRIANGLE_STRIP_WITH_ADJACENCY:
+			return GL_TRIANGLE_STRIP_ADJACENCY;
+		case PrimitiveTopology::PATCH_LIST:
+			return GL_PATCHES;
+		default:
+			return GL_TRIANGLES;
+	}
+}
+
+VkPrimitiveTopology GraphicsPipeline::convertToVk(PrimitiveTopology primitiveTopology) {
+	switch (primitiveTopology) {
+		case PrimitiveTopology::TRIANGLE_LIST:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		case PrimitiveTopology::TRIANGLE_STRIP:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+		case PrimitiveTopology::TRIANGLE_FAN:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+		case PrimitiveTopology::POINT_LIST:
+			return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+		case PrimitiveTopology::LINE_LIST:
+			return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+		case PrimitiveTopology::LINE_STRIP:
+			return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+		case PrimitiveTopology::LINE_LIST_WITH_ADJACENCY:
+			return VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY;
+		case PrimitiveTopology::LINE_STRIP_WITH_ADJACENCY:
+			return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY;
+		case PrimitiveTopology::TRIANGLE_LIST_WITH_ADJACENCY:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY;
+		case PrimitiveTopology::TRIANGLE_STRIP_WITH_ADJACENCY:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY;
+		case PrimitiveTopology::PATCH_LIST:
+			return VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
+		default:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	}
 }
 

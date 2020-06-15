@@ -36,6 +36,18 @@ private:
 		std::vector<std::string> defines;
 	};
 
+	/* Structure for storing info about unloaded graphics pipelines */
+	struct UnloadedGraphicsPipelineLayoutInfo {
+		unsigned int                       renderShader;
+		GraphicsPipeline::VertexInputData  vertexInputData;
+		GraphicsPipeline::ColourBlendState colourBlendState;
+		GraphicsPipeline::DepthState       depthState;
+		GraphicsPipeline::CullState        cullState;
+		uint32_t                           viewportWidth;
+		uint32_t                           viewportHeight;
+		bool                               viewportFlippedVk;
+	};
+
 	static ShaderInterface* shaderInterface;
 
 	static ShaderBlock_Skinning shaderSkinningData;
@@ -43,7 +55,8 @@ private:
 	static std::vector<Camera*> cameras;
 	static std::unordered_map<unsigned int, UnloadedShaderInfo> unloadedShaders;
 	static std::unordered_map<unsigned int, RenderShader*> loadedRenderShaders;
-	static std::unordered_map<unsigned int, GraphicsPipelineLayout*> graphicsPipelineLayouts;
+	static std::unordered_map<unsigned int, UnloadedGraphicsPipelineLayoutInfo> unloadedGraphicsPipelineLayouts;
+	static std::unordered_map<unsigned int, GraphicsPipelineLayout*> loadedGraphicsPipelineLayouts;
 	static std::unordered_map<unsigned int, std::vector<GraphicsPipeline*>> queuePipelines;
 	static Texture* blank;
 	static Cubemap* blankCubemap;
@@ -75,6 +88,11 @@ public:
 	static const unsigned int SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY;
 	static const unsigned int SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
 	static const unsigned int SHADER_BASIC_PBR_DEFERRED_LIGHTING;
+	static const unsigned int SHADER_DEFERRED_PBR_SSR;
+	static const unsigned int SHADER_TILEMAP;
+	static const unsigned int SHADER_PARTICLE_SYSTEM;
+	static const unsigned int SHADER_TERRAIN;
+	static const unsigned int SHADER_DEFERRED_TERRAIN_GEOMETRY;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -103,6 +121,13 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
 	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING;
 	static const unsigned int GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_PBR_SSR;
+	static const unsigned int GRAPHICS_PIPELINE_SPRITE;
+	static const unsigned int GRAPHICS_PIPELINE_TILEMAP;
+	static const unsigned int GRAPHICS_PIPELINE_PARTICLE_SYSTEM;
+	static const unsigned int GRAPHICS_PIPELINE_TERRAIN;
+	static const unsigned int GRAPHICS_PIPELINE_TERRAIN_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -121,6 +146,8 @@ public:
 	/* Method used to stop applying a material (unbinds required textures) */
 	static void stopUsingMaterial(Material* material);
 
+	static void render(RenderData* renderData, Matrix4f& modelMatrix, Material* material);
+
 	/* Method used to render a Mesh */
 	static void render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* shader);
 
@@ -134,7 +161,7 @@ public:
 	static void addRenderShader(unsigned int id, std::string forwardShaderPath, std::vector<std::string> defines = {});
 
 	/* Method used to add a GraphicsPipelineLayout */
-	static void addGraphicsPipelineLayout(unsigned int id, GraphicsPipelineLayout* pipelineLayout);
+	static void addGraphicsPipelineLayout(unsigned int id, unsigned int renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk);
 
 	/* Method to assign the current graphics pipeline */
 	static void setCurrentGraphicsPipeline(GraphicsPipeline* pipeline);

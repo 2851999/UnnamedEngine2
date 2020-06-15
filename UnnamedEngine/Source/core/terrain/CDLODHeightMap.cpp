@@ -54,8 +54,8 @@ void CDLODHeightMap::setup(unsigned char* data, int numComponents, int width, in
 		this->numComponentsPerPixel = numComponents;
 		//Create the texture instance
 		TextureParameters p;
-		p.setFilter(GL_LINEAR);
-		p.setClamp(GL_REPEAT);
+		p.setFilter(TextureParameters::Filter::LINEAR);
+		p.setAddressMode(TextureParameters::AddressMode::REPEAT);
 		this->texture = Texture::createTexture("", data, numComponents, width, width, GL_UNSIGNED_BYTE);
 	} else {
 		//Output an error message

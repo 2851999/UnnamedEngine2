@@ -274,7 +274,7 @@ void DescriptorSetLayout::setupVk() {
 		samplerLayoutBinding.descriptorCount    = textureBindings[i].numTextures;
 		samplerLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		samplerLayoutBinding.pImmutableSamplers = nullptr;
-		samplerLayoutBinding.stageFlags         = VK_SHADER_STAGE_FRAGMENT_BIT;
+		samplerLayoutBinding.stageFlags         = VK_SHADER_STAGE_ALL_GRAPHICS; //Should only use whats necessary, but for terrain need access in vertex shader as well
 
 		bindings.push_back(samplerLayoutBinding);
 	}
