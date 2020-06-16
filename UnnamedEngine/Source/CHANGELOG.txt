@@ -1,4 +1,168 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 0 | Experimental 1
+
+* Readded PBREnvironment
+* Readded PBRTest
+* Readded IBL in RenderScene (OpenGL only)
+
+* Renamed shader EquiToCubeGen to GenEquiToCube
+* Renamed shader BRDFIntegrationMapGen to
+  GenBRDFIntegrationMap
+* Renamed shader IrradianceMapGen to GenIrradianceMap 
+* Renamed shader PrefilterMapGen to GenPrefilterMap
+
+--------------------------------------------------------------
+Release 2 | Beta 2 (V0.5.0)
+
+* Began major rewrite of rendering system to integrate
+  Vulkan better. This will involve temporary removal of many
+  classes and features, eventually re-adding them later
+
+* Added DescriptorSet
+* Added DescriptorSetLayout
+* Added GraphicsPipeline
+* Added GraphicsPipelineLayout
+* Added utils_vulkan
+* Added RenderPass
+* Added Framebuffer
+* Added basic support for layout(set) for Vulkan in shaders
+  (Removed when using OpenGL)
+* Added 'renderOffscreen' method in BaseEngine
+* Added 'useView' method for Camera which should be used
+  when things should be rendered according to that camera's
+  point of view
+* Added support for arrays of textures in Vulkan
+* Added parameters in Shader methods to append "#define NAME"
+  to the beginning of shaders before compilation when using
+  Vulkan or OpenGL
+* Added Vulkan support to most things
+* Added basic SDF font support
+* Added VBOUsage enum class to specify the usage of VBO's
+* Added 'clearDefaultDepthBufferOnLoad' in VulkanSwapChain
+  to allow depth information to be loaded when rendering to
+  the default depth buffer instead of cleared
+* Added 'samples' parameter in FramebufferAttachment
+* Added FramebufferAttachmentInfo struct that is taken in
+  FBO constructor instead of FramebufferAttachment*
+* Added generalised enums for various TextureParameters
+
+* Changed shaders to use separate UBO for per-model data and
+  added a descriptor set for this
+* Changed Light to extend Camera3D instead of GameObject3D
+* Changed GUITextBox to improve default text rendering
+  performance
+* Changed GUIComponentRenderer to improve rendering
+  performance
+
+* Moved RenderShader to a different file
+* Moved 'swapChainFramebuffers' from VulkanRenderPass to
+  VulkanSwapChain
+
+* Renamed ShaderBlock_Lighting struct to
+  ShaderBlock_LightBatch in ShaderInterface
+* Renamed ShaderBlock_Core struct to ShaderBlock_Camera in
+  ShaderInterface
+* Renamed FramebufferStore to FramebufferAttachment
+* Renamed shader LightingDeferredGeom to
+  DeferredLightingGeometry
+* Renamed shader TerrainDeferredGeom to
+  DeferredTerrainGeometry
+* Renamed 'clamp' to 'addressMode' in TextureParameters
+
+* Replaced TextureSet with DescriptorSet in Material
+* Replaced include guards with '#pragma once'
+
+* Replaced SHADER_VULKAN_LIGHTING with SHADER_LIGHTING
+* Replaced SHADER_VULKAN_LIGHTING_SKINNING with
+  SHADER_LIGHTING_SKINNING
+
+* Rewrote FBO
+
+* Removed FramebufferTest3D
+* Removed PBRTest
+* Removed SurfaceTest
+* Removed PBREnvironment
+* Removed PostProcessing
+* Removed VulkanGraphicsPipeline
+* Removed GraphicsState
+* Removed TextureSet
+* Removed GeometryBuffer
+* Removed VulkanRenderPass
+* Removed examples folder
+* Removed IBL and Bloom for the time being
+
+* Fixed bug: Font did not transition the texture it uses to
+             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL when
+             using Vulkan
+* Fixed bug: Fullscreen windows using vsync was capped to
+             60Hz even when a higher refresh rate monitor
+			 was used
+* Fixed bug: Crash when trying to render an object without
+             indices when using Vulkan
+* Fixed bug: MSAA would not work when using Vulkan
+* Fixed bug: Defines added to shaders were added many times
+* Fixed bug: Camera's 'useView' method would fail in Vulkan
+             unless a graphics pipeline was bound
+* Fixed bug: Loading a '.model' file caused the creation of
+             a Material that was never deleted
+
+* Some cleanup
+
+* Note: Now require a pipeline to render anything in Vulkan/
+        OpenGL
+* Note: SSR is incorrect when using Vulkan
+
+* Some cleanup
+
+--------------------------------------------------------------
+Release 2 | Beta 1 | Development 8 (V0.5.0)
+
+* Added instancing support to RenderData (Vulkan)
+* Added ability to render different primitive topologies
+  in Vulkan
+* Added Terrain support to RenderScene
+* Added deferred terrain rendering support to RenderScene
+* Added generalised enums for various TextureParameters
+
+* Readded SSR (Vulkan not working)
+* Readded BaseTest3D
+* Readded PhysicsTest3D
+* Readded BaseEngineTest2D
+* Readded Tilemap
+* Readded BaseEngineTest3D
+* Readded ParticleEffect
+* Readded ParticleEmitter
+* Readded ParticleSystem
+* Readded TerrainTest
+* Readded CDLODTerrain
+
+* Changed Renderer to only create GraphicsPipelineLayout
+  instances if needed
+* Changed RenderScene to organise like objects into
+  'ObjectBatches' to organise pipeline binding
+* Changed FBO to assign the same TextureParameters when
+  using Vulkan as when using OpenGL
+
+* Renamed shader TerrainDeferredGeom to
+  DeferredTerrainGeometry
+* Renamed 'clamp' to 'addressMode' in TextureParameters
+
+* Fixed bug: Depth information was not copied to the default
+             buffer when using deferred rendering with
+			 post processsing off (OpenGL)
+* Fixed bug: Updating a camera once would cause issues when
+             using Vulkan
+* Fixed bug: RenderScene with lighting disabled caused a
+             crash
+* Fixed bug: Sprite did not update material's so no textures
+             would render
+* Fixed bug: Loading a '.model' file caused the creation of
+             a Material that was never deleted
+* Fixed bug: Camera did not bind its descriptor set when
+             rendering causing problems if rendering a
+			 skybox independently
+
+-------------------------------------------------------------
 Release 2 | Beta 1 | Development 7 | Experimental 8
 
 * Added deferred terrain rendering support to RenderScene
@@ -9,7 +173,7 @@ Release 2 | Beta 1 | Development 7 | Experimental 8
 
 * Renamed shader TerrainDeferredGeom to
   DeferredTerrainGeometry
-* Renamed clamp to address mode in TextureParameters
+* Renamed 'clamp' to 'addressMode' in TextureParameters
 
 -------------------------------------------------------------
 Release 2 | Beta 1 | Development 7 | Experimental 7

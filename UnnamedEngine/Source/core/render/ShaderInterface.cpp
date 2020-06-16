@@ -48,6 +48,7 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LI
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR            = 9;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD                   = 10;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_TERRAIN                     = 11;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT             = 12;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -80,8 +81,8 @@ const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SKINNING               
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_LIGHT_BATCH            = 5;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_TERRAIN                = 6;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA  = 7;
-const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN        = 8;
-const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN  = 9;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_GEN_PBR_ENV_MAP        = 8;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_GEN_PBR_PREFILTER_MAP  = 9;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_LIGHTING_CORE      = 10;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_BILLBOARD              = 11;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SHADOW_CUBEMAP         = 12;
@@ -198,6 +199,16 @@ ShaderInterface::ShaderInterface() {
 	cdlodTerrainLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_TERRAIN, cdlodTerrainLayout);
+
+	//PBR environment
+	DescriptorSetLayout* pbrEnvironmentLayout = new DescriptorSetLayout(5);
+	pbrEnvironmentLayout->addTextureCube(20);
+	pbrEnvironmentLayout->addTextureCube(21);
+	pbrEnvironmentLayout->addTexture2D(22);
+
+	pbrEnvironmentLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT, pbrEnvironmentLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -331,6 +342,51 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH)); //Shouldn't really be here but Vulkan won't complain if it is
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_TERRAIN));
+	} else if (shaderID == Renderer::SHADER_PBR_GEN_EQUI_TO_CUBE_MAP) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_PBR_GEN_IRRADIANCE_MAP) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_PBR_GEN_PREFILTER_MAP) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_PBR_GEN_BRDF_INTEGRATION_MAP) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_PBR_LIGHTING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT));
+	} else if (shaderID == Renderer::SHADER_PBR_LIGHTING_SKINNING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT));
+	} else if (shaderID == Renderer::SHADER_PBR_DEFERRED_LIGHTING_GEOMETRY) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING));
+	} else if (shaderID == Renderer::SHADER_PBR_DEFERRED_LIGHTING) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT));
 	}
 }
 

@@ -113,12 +113,12 @@ struct ShaderBlock_GammaCorrectionFXAA {
 	int fxaa;
 };
 
-struct ShaderBlock_PBREnvMapGen {
+struct ShaderBlock_GenPBREnvMap {
 	Matrix4f projection;
 	Matrix4f view;
 };
 
-struct ShaderBlock_PBRPrefilterMapGen {
+struct ShaderBlock_GenPBRPrefilterMap {
 	float envMapSize;
 	float roughness;
 };
@@ -178,6 +178,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_TERRAIN;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
@@ -210,8 +211,8 @@ public:
 	static const unsigned int UBO_BINDING_LOCATION_LIGHT_BATCH;
 	static const unsigned int UBO_BINDING_LOCATION_TERRAIN;
 	static const unsigned int UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA;
-	static const unsigned int UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN;
-	static const unsigned int UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN;
+	static const unsigned int UBO_BINDING_LOCATION_GEN_PBR_ENV_MAP;
+	static const unsigned int UBO_BINDING_LOCATION_GEN_PBR_PREFILTER_MAP;
 	static const unsigned int UBO_BINDING_LOCATION_PBR_LIGHTING_CORE;
 	static const unsigned int UBO_BINDING_LOCATION_BILLBOARD;
 	static const unsigned int UBO_BINDING_LOCATION_SHADOW_CUBEMAP;

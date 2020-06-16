@@ -21,6 +21,7 @@
 #include "Light.h"
 #include "GraphicsPipeline.h"
 #include "RenderPass.h"
+#include "pbr/PBREnvironment.h"
 
 class RenderScene {
 private:
@@ -57,6 +58,12 @@ private:
 
 	/* Boolean that states whether post processing should be used or not */
 	bool postProcessing;
+
+	/* PBREnvironment instance (For IBL) */
+	PBREnvironment* pbrEnvironment = NULL;
+
+	/* Descriptor set passing the environment to the shader */
+	DescriptorSet* descriptorSetPBREnvironment = NULL;
 
 	/* The ambient light used in phong shading */
 	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
@@ -108,7 +115,7 @@ public:
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
 	/* Constructor */
-	RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing);
+	RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing, PBREnvironment* pbrEnvironment = NULL);
 
 	/* Destructor */
 	virtual ~RenderScene();

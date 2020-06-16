@@ -93,6 +93,15 @@ public:
 	static const unsigned int SHADER_PARTICLE_SYSTEM;
 	static const unsigned int SHADER_TERRAIN;
 	static const unsigned int SHADER_DEFERRED_TERRAIN_GEOMETRY;
+	static const unsigned int SHADER_PBR_GEN_EQUI_TO_CUBE_MAP;
+	static const unsigned int SHADER_PBR_GEN_IRRADIANCE_MAP;
+	static const unsigned int SHADER_PBR_GEN_PREFILTER_MAP;
+	static const unsigned int SHADER_PBR_GEN_BRDF_INTEGRATION_MAP;
+	static const unsigned int SHADER_PBR_LIGHTING;
+	static const unsigned int SHADER_PBR_LIGHTING_SKINNING;
+	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING_GEOMETRY;
+	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
+	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -128,6 +137,14 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_TERRAIN;
 	static const unsigned int GRAPHICS_PIPELINE_TERRAIN_BLEND;
 	static const unsigned int GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_LIGHTING;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_LIGHTING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_LIGHTING_SKINNING;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_LIGHTING_SKINNING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_GEOMETRY;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

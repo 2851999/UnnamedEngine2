@@ -59,7 +59,7 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 
 	VulkanSwapChain::clearDefaultDepthBufferOnLoad = false;
 }
@@ -105,7 +105,7 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(true, true, false, true);
+	renderScene = new RenderScene(true, true, true, true);
 	renderScene->setPostProcessingParameters(true, true, 0.5f);
 
 	//renderScene->disableLighting();
