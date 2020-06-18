@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 0 | Experimental 2
+
+* Fixed bug: SSR was calculated incorrectly compared to
+             OpenGL
+* Fixed bug: GRAPHICS_PIPELINE_DEFERRED_PBR_SSR had the wrong
+             colour blend state
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 0 | Experimental 1
 
 * Readded PBREnvironment

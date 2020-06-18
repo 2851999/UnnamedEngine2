@@ -28,6 +28,11 @@ vec3 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth) {
 		projectedCoord = ue_projectionMatrix * vec4(hitCoord, 1.0);
 		projectedCoord.xy /= projectedCoord.w;
 		projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
+//If texture being looked was rendered with flipped viewport in Vulkan, then corrdinates calculated
+//will be the wrong way round for the y axis
+#ifdef VULKAN
+		projectedCoord.y = 1.0 - projectedCoord.y;
+#endif
 		
 		vec4 depthValue = texture(ue_gPosition, projectedCoord.xy).xyzw;
 		//Value is initially in world space, so convert to view space
@@ -48,6 +53,11 @@ vec3 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth) {
 	projectedCoord = ue_projectionMatrix * vec4(hitCoord, 1.0);
 	projectedCoord.xy /= projectedCoord.w;
 	projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
+//If texture being looked was rendered with flipped viewport in Vulkan, then corrdinates calculated
+//will be the wrong way round for the y axis
+#ifdef VULKAN
+		projectedCoord.y = 1.0 - projectedCoord.y;
+#endif
 	
 	return vec3(projectedCoord.xy, depth);
 }
@@ -65,6 +75,11 @@ vec4 rayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth) {
 		projectedCoord = ue_projectionMatrix * vec4(hitCoord, 1.0);
 		projectedCoord.xy /= projectedCoord.w;
 		projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
+//If texture being looked was rendered with flipped viewport in Vulkan, then corrdinates calculated
+//will be the wrong way round for the y axis
+#ifdef VULKAN
+		projectedCoord.y = 1.0 - projectedCoord.y;
+#endif
 		
 		vec4 depthValue = texture(ue_gPosition, projectedCoord.xy).xyzw;
 		//Value is initially in world space, so convert to view space
