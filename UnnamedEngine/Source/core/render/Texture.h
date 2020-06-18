@@ -140,9 +140,9 @@ protected:
 public:
 	/* The constructors */
 	Texture(TextureParameters parameters = TextureParameters());
-	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : texture(texture), parameters(parameters) {}
-	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : width(width), height(height), parameters(parameters) { create(); }
-	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : texture(texture), width(width), height(height), parameters(parameters) {}
+	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : Resource(), texture(texture), parameters(parameters) {}
+	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : Resource(), width(width), height(height), parameters(parameters) { create(); }
+	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : Resource(), texture(texture), width(width), height(height), parameters(parameters) {}
 	Texture(void* data, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool shouldApplyParameters = true);
 	Texture(unsigned int width, unsigned int height, VkImage textureVkImage, VkDeviceMemory textureVkImageMemory, VkImageView textureVkImageView, TextureParameters parameters = TextureParameters());
 

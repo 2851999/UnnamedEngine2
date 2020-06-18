@@ -49,6 +49,7 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR     
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD                   = 10;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_TERRAIN                     = 11;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT             = 12;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_SDF_TEXT                    = 13;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -60,18 +61,9 @@ const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS      = 5;
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS  = 6;
 
 /* The ids for particular shader blocks */
-const unsigned int ShaderInterface::BLOCK_CAMERA                 = 1;
-const unsigned int ShaderInterface::BLOCK_MODEL                  = 2;
-const unsigned int ShaderInterface::BLOCK_MATERIAL               = 3;
-const unsigned int ShaderInterface::BLOCK_SKINNING               = 4;
-const unsigned int ShaderInterface::BLOCK_LIGHT_BATCH            = 5;
-const unsigned int ShaderInterface::BLOCK_TERRAIN                = 6;
-const unsigned int ShaderInterface::BLOCK_GAMMA_CORRECTION_FXAA  = 7;
 const unsigned int ShaderInterface::BLOCK_PBR_ENV_MAP_GEN        = 8;
 const unsigned int ShaderInterface::BLOCK_PBR_PREFILTER_MAP_GEN  = 9;
 const unsigned int ShaderInterface::BLOCK_PBR_LIGHTING_CORE      = 10;
-const unsigned int ShaderInterface::BLOCK_BILLBOARD              = 11;
-const unsigned int ShaderInterface::BLOCK_SHADOW_CUBEMAP         = 12;
 
 /* Binding locations for shader blocks */
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_CAMERA                 = 1;
@@ -86,6 +78,7 @@ const unsigned int ShaderInterface::UBO_BINDING_LOCATION_GEN_PBR_PREFILTER_MAP  
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_PBR_LIGHTING_CORE      = 10;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_BILLBOARD              = 11;
 const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SHADOW_CUBEMAP         = 12;
+const unsigned int ShaderInterface::UBO_BINDING_LOCATION_SDF_TEXT               = 4;
 
 ShaderInterface::ShaderInterface() {
 	//Add all of the required descriptor set layouts for the default shaders
@@ -209,6 +202,13 @@ ShaderInterface::ShaderInterface() {
 	pbrEnvironmentLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT, pbrEnvironmentLayout);
+
+	//SDF Text
+	DescriptorSetLayout* sdfTextLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
+	sdfTextLayout->addUBO(sizeof(ShaderBlock_SDFText), GL_STATIC_DRAW, UBO_BINDING_LOCATION_SDF_TEXT);
+	sdfTextLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_SDF_TEXT, sdfTextLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -241,6 +241,7 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_SDF_TEXT));
 	} else if (shaderID == Renderer::SHADER_LIGHTING) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));

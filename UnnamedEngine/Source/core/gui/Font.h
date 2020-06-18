@@ -64,6 +64,12 @@ private:
 	/* The texture of this font */
 	Texture* texture;
 
+	/* Descriptor set for SDF text rendering */
+	DescriptorSet* descriptorSetSDFText = NULL;
+
+	/* Stores various SDF text rendering parameters */
+	ShaderBlock_SDFText sdfTextParameters;
+
 	/* The method used to setup this Font instance given the font name and size */
 	void setup(std::string path, unsigned int size, TextureParameters parameters);
 
@@ -79,13 +85,16 @@ public:
 	/* The constructors */
 	Font(std::string path, unsigned int size = 18, TextureParameters parameters = TextureParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE).setFilter(TextureParameters::Filter::NEAREST));
 	/* The destructors */
-	virtual ~Font() {} //Destroy should be called when resource is released
+	virtual ~Font() { destroy(); }
+
+	/* Binds the necessary descriptor sets for rendering with this font */
+	void bindDescriptorSets();
 
 	/* Method to assign a MeshData instance to render some text */
 	void assignMeshData(MeshData* data, std::string text, bool billboarded);
 
 	/* Method used to release all of the resources this font holds */
-	void destroy() override;
+	virtual void destroy() override;
 
 	/* Methods used to get the width/height of text rendered with this font */
 	float getWidth(std::string text);
@@ -104,5 +113,26 @@ public:
 
 	/* Returns whether this font uses signed distance fields */
 	inline bool usesSDF() { return sdf; }
+
+	/* Method used to update the SDF descriptor set (Should be called after changing one of the SDF rendering parameters) */
+	void updateSDFParameters();
+
+	/* Setters and getters for SDF font parameters */
+	inline void setSDFOutlineColour(Colour colour) { sdfTextParameters.outlineColour = colour; }
+	inline void setSDFShadowColour(Colour colour) { sdfTextParameters.shadowColour = colour; }
+	inline void setSDFSmoothing(float smoothing) { sdfTextParameters.smoothing = smoothing; }
+	inline void setSDFOutline(float outline) { sdfTextParameters.outline = outline; }
+	inline void setSDFShadow(bool shadow) { sdfTextParameters.shadow = shadow ? 1.0f : 0.0f; }
+	inline void setSDFShadowSmoothing(float shadowSmoothing) { sdfTextParameters.shadowSmoothing = shadowSmoothing; }
+	//'shadowOffset' here is in pixels in relation to the supplied font texture
+	inline void setSDFShadowOffset(Vector2f shadowOffset) { sdfTextParameters.shadowOffset = Vector2f(shadowOffset.getX() / texture->getWidth(), shadowOffset.getY() / texture->getHeight()); }
+
+	inline Colour getSDFOutlineColour() { return sdfTextParameters.outlineColour; }
+	inline Colour getSDFShadowColour() { return sdfTextParameters.shadowColour; }
+	inline float getSDFSmoothing() { return sdfTextParameters.smoothing; }
+	inline float getSDFOutline() { return sdfTextParameters.outline; }
+	inline bool getSDFShadow() { return sdfTextParameters.shadow > 0.0f; }
+	inline float getSDFShadowSmoothing() { return sdfTextParameters.shadowSmoothing; }
+	inline Vector2f getSDFShadowOffset() { return Vector2f(sdfTextParameters.shadowOffset.getX() * texture->getWidth(), sdfTextParameters.shadowOffset.getY() * texture->getHeight()); }
 };
 

@@ -75,7 +75,7 @@ public:
 	Resource() { manager = ResourceManager::getCurrent(); manager->add(this); }
 
 	/* The destructor */
-	virtual ~Resource() { manager->remove(this); }
+	virtual ~Resource() { manager->remove(this); destroy(); }
 
 	/* The method called when all resources being used should be released */
 	virtual void destroy() {}

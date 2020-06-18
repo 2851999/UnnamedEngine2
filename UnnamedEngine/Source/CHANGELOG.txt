@@ -1,4 +1,14 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 0 | Experimental 3
+
+* Added parameters that an be changed to customise SDF text
+  rendering using a Font instance
+
+* Removed ShaderInterface::BLOCK_ constants
+
+* Fixed bug: 'Font::destroy' was never called
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 0 | Experimental 2
 
 * Fixed bug: SSR was calculated incorrectly compared to

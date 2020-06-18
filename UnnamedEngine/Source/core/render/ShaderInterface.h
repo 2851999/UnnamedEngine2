@@ -140,6 +140,16 @@ struct ShaderBlock_ShadowCubemap {
 	Vector4f lightPos;
 };
 
+struct ShaderBlock_SDFText {
+	Vector4f outlineColour;
+	Vector4f shadowColour;
+	float smoothing;
+	float outline;
+	float shadow;
+	float shadowSmoothing;
+	Vector2f shadowOffset;
+};
+
 /*****************************************************************************
  * The ShaderInterface class handles data transfer to shaders via UBO's
  *****************************************************************************/
@@ -179,6 +189,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_TERRAIN;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_SDF_TEXT;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
@@ -190,18 +201,9 @@ public:
 	static const unsigned int ATTRIBUTE_LOCATION_BONE_WEIGHTS;
 
 	/* The ids for particular shader blocks */
-	static const unsigned int BLOCK_CAMERA;
-	static const unsigned int BLOCK_MODEL;
-	static const unsigned int BLOCK_MATERIAL;
-	static const unsigned int BLOCK_SKINNING;
-	static const unsigned int BLOCK_LIGHT_BATCH;
-	static const unsigned int BLOCK_TERRAIN;
-	static const unsigned int BLOCK_GAMMA_CORRECTION_FXAA;
 	static const unsigned int BLOCK_PBR_ENV_MAP_GEN;
 	static const unsigned int BLOCK_PBR_PREFILTER_MAP_GEN;
 	static const unsigned int BLOCK_PBR_LIGHTING_CORE;
-	static const unsigned int BLOCK_BILLBOARD;
-	static const unsigned int BLOCK_SHADOW_CUBEMAP;
 
 	/* Binding locations for shader blocks */
 	static const unsigned int UBO_BINDING_LOCATION_CAMERA;
@@ -216,6 +218,7 @@ public:
 	static const unsigned int UBO_BINDING_LOCATION_PBR_LIGHTING_CORE;
 	static const unsigned int UBO_BINDING_LOCATION_BILLBOARD;
 	static const unsigned int UBO_BINDING_LOCATION_SHADOW_CUBEMAP;
+	static const unsigned int UBO_BINDING_LOCATION_SDF_TEXT;
 
 	/* Constructor */
 	ShaderInterface();

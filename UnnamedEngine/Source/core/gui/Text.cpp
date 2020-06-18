@@ -164,8 +164,12 @@ void Text::queuedRender() {
 		GameObject3D::render();
 
 		shader->stopUsing();
-	} else
+	} else {
+		//Bind the descriptor sets needed
+		font->bindDescriptorSets();
+
 		GameObject3D::render();
+	}
 }
 
 void Text::setFont(Font* font) {
