@@ -19,6 +19,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 
 class Resource;
 
@@ -64,7 +65,6 @@ public:
 /*****************************************************************************
  * The Resource class is inherited from to allow data to be managed
  *****************************************************************************/
-#include <iostream>
 
 class Resource {
 private:
@@ -75,9 +75,6 @@ public:
 	Resource() { manager = ResourceManager::getCurrent(); manager->add(this); }
 
 	/* The destructor */
-	virtual ~Resource() { manager->remove(this); destroy(); }
-
-	/* The method called when all resources being used should be released */
-	virtual void destroy() {}
+	virtual ~Resource() { manager->remove(this); }
 };
 

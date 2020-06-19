@@ -47,7 +47,19 @@ Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShaderM
 }
 
 Shader::~Shader() {
-	destroy();
+	if (!BaseEngine::usingVulkan()) {
+		glDeleteProgram(program);
+		//Go through each attached shader and delete them
+		for (unsigned int i = 0; i < attachedShaders.size(); i++)
+			glDeleteShader(attachedShaders[i]);
+		attachedShaders.clear();
+	} else {
+		//Destroy the shader modules
+		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
+		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
+		if (geometryShaderModule != VK_NULL_HANDLE)
+			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), geometryShaderModule, nullptr);
+	}
 }
 
 void Shader::attach(GLuint shader) {
@@ -93,22 +105,6 @@ void Shader::use() {
 void Shader::stopUsing() {
 	glUseProgram(0);
 	currentShader = NULL;
-}
-
-void Shader::destroy() {
-	if (! BaseEngine::usingVulkan()) {
-		glDeleteProgram(program);
-		//Go through each attached shader and delete them
-		for (unsigned int i = 0; i < attachedShaders.size(); i++)
-			glDeleteShader(attachedShaders[i]);
-		attachedShaders.clear();
-	} else {
-		//Destroy the shader modules
-		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
-		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
-		if (geometryShaderModule != VK_NULL_HANDLE)
-			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), geometryShaderModule, nullptr);
-	}
 }
 
 void Shader::addUniform(std::string id, std::string name) {

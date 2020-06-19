@@ -43,6 +43,12 @@ Font::Font(std::string path, unsigned int size, TextureParameters parameters) {
 	}
 }
 
+Font::~Font() {
+	delete texture;
+	if (descriptorSetSDFText)
+		delete descriptorSetSDFText;
+}
+
 void Font::setup(std::string path, unsigned int size, TextureParameters parameters) {
 	this->size = size;
 	FT_Face face;
@@ -379,12 +385,6 @@ void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
 			}
 		}
 	}
-}
-
-void Font::destroy() {
-	delete texture;
-	if (descriptorSetSDFText)
-		delete descriptorSetSDFText;
 }
 
 float Font::getWidth(std::string text) {

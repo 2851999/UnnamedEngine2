@@ -147,7 +147,7 @@ public:
 	Texture(unsigned int width, unsigned int height, VkImage textureVkImage, VkDeviceMemory textureVkImageMemory, VkImageView textureVkImageView, TextureParameters parameters = TextureParameters());
 
 	/* The destructor */
-	virtual ~Texture() { destroy(); }
+	virtual ~Texture();
 
 	/* The create method simply obtains a handle for the texture from OpenGL */
 	void create();
@@ -176,9 +176,6 @@ public:
 	/* Basic bind and unbind methods for OpenGL */
 	inline void bind()   { glBindTexture(parameters.getTarget(), texture); }
 	inline void unbind() { glBindTexture(parameters.getTarget(), 0); }
-
-	/* Called to delete this texture */
-	virtual void destroy() override;
 
 	/* The setters and getters */
 	inline void setParameters(TextureParameters& parameters) { this->parameters = parameters; }

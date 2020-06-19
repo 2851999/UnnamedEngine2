@@ -76,7 +76,6 @@ public:
 	void detach(GLuint shader);
 	void use();
 	void stopUsing();
-	virtual void destroy() override;
 	void addUniform(std::string id, std::string name);
 	void addAttribute(std::string id, std::string name);
 

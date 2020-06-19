@@ -42,9 +42,11 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	if (! billboarded)
 		shaderType = Renderer::SHADER_FONT;
 	else {
-		//shaderType = Renderer::SHADER_BILLBOARDED_FONT;
-		//Get the UBO for the billboard
-		//shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);
+		shaderType = Renderer::SHADER_BILLBOARDED_FONT;
+
+		//Setup the billboard descriptor set
+		descriptorSetBillboard = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(font->usesSDF() ? ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT : ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD));
+		descriptorSetBillboard->setup();
 	}
 
 	//Create the Mesh instance and assign the texture
@@ -83,13 +85,22 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	GameObject3D::update();
 
 	//Obtain the graphics pipeline used for rendering
-	if (! queuedPipeline)
-		pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
+	if (! queuedPipeline) {
+		unsigned int pipelineID = Renderer::GRAPHICS_PIPELINE_FONT;
+		if (billboarded)
+			pipelineID = font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF : Renderer::GRAPHICS_PIPELINE_BILLBOARDED_FONT;
+		else
+			pipelineID = font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT;
+
+		pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pipelineID), Renderer::getDefaultRenderPass());
+	}
 }
 
 Text::~Text() {
 	if (pipeline)
 		delete pipeline;
+	if (descriptorSetBillboard)
+		delete descriptorSetBillboard;
 }
 
 void Text::update(std::string text) {
@@ -146,12 +157,10 @@ void Text::render() {
 }
 
 void Text::queuedRender() {
+	//Check if billboarding in which case the UBO for it needs to be updated
 	if (billboarded) {
-		Shader* shader = getShader();
-		shader->use();
-
+		//Assign the shader uniforms for the billboarding
 		Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
-
 		shaderBillboardData.ue_cameraRight = Vector4f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2), 0.0f);
 		shaderBillboardData.ue_cameraUp = Vector4f(-matrix.get(1, 0), -matrix.get(1, 1), -matrix.get(1, 2), 0.0f);
 		shaderBillboardData.ue_billboardSize = Vector2f(0.005f, 0.005f);
@@ -159,17 +168,15 @@ void Text::queuedRender() {
 
 		shaderBillboardData.ue_projectionViewMatrix = (Renderer::getCamera()->getProjectionViewMatrix());
 
-		shaderBillboardUBO->update(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
-
-		GameObject3D::render();
-
-		shader->stopUsing();
-	} else {
-		//Bind the descriptor sets needed
-		font->bindDescriptorSets();
-
-		GameObject3D::render();
+		//Update the UBO
+		descriptorSetBillboard->getUBO(0)->updateFrame(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
+		descriptorSetBillboard->bind();
 	}
+
+	//Bind the descriptor sets needed
+	font->bindDescriptorSets();
+
+	GameObject3D::render();
 }
 
 void Text::setFont(Font* font) {

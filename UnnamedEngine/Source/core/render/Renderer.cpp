@@ -82,6 +82,8 @@ const unsigned int Renderer::SHADER_PBR_LIGHTING_SKINNING                       
 const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING_GEOMETRY                 = 32;
 const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY        = 33;
 const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING                          = 34;
+const unsigned int Renderer::SHADER_BILLBOARDED_FONT                               = 35;
+const unsigned int Renderer::SHADER_BILLBOARDED_FONT_SDF                           = 36;
 
 const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                                      = 1;
 const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                                       = 2;
@@ -124,6 +126,8 @@ const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_GEOMETRY   
 const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY       = 39;
 const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING                         = 40;
 const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND                   = 41;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BILLBOARDED_FONT                              = 42;
+const unsigned int Renderer::GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF                          = 43;
 
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
@@ -184,6 +188,8 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING_GEOMETRY, "pbr/PBRDeferredGeometry", { "UE_GEOMETRY_ONLY" });
 	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, "pbr/PBRDeferredGeometry", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
 	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING, "pbr/PBRDeferredLighting");
+	addRenderShader(SHADER_BILLBOARDED_FONT, "billboard/BillboardedFontShader");
+	addRenderShader(SHADER_BILLBOARDED_FONT_SDF, "billboard/BillboardedFontSDFShader");
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -247,6 +253,12 @@ void Renderer::initialise() {
 	particleSystemDepthState.depthTestEnable = true;
 	particleSystemDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
 	particleSystemDepthState.depthWriteEnable = false;
+
+	//Depth state for billboarded font
+	GraphicsPipeline::DepthState billboardedFontDepthState;
+	billboardedFontDepthState.depthTestEnable = true;
+	billboardedFontDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS_OR_EQUAL;
+	billboardedFontDepthState.depthWriteEnable = false;
 
 	//Obtain the window width and height
 	uint32_t windowWidth = Window::getCurrentInstance()->getSettings().windowWidth;
@@ -318,7 +330,8 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING, SHADER_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND, SHADER_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
-
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BILLBOARDED_FONT, SHADER_BILLBOARDED_FONT, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, billboardedFontDepthState, defaultCullState, windowWidth, windowHeight, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF, SHADER_BILLBOARDED_FONT_SDF, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, billboardedFontDepthState, defaultCullState, windowWidth, windowHeight, true);
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();

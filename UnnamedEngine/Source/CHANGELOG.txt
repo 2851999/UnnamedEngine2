@@ -1,7 +1,20 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 0 | Experimental 4
+
+* Added billboarded SDF text rendering in Font/Text
+
+* Readded billboarded text rendering in Font/Text
+
+* Removed 'destroy' method in Resource's
+
+* Fixed bug: VulkanSwapChain incorrectly assigned the VSync
+             setting after supported modes are checked in
+			 the case of tripple buffering
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 0 | Experimental 3
 
-* Added parameters that an be changed to customise SDF text
+* Added parameters that can be changed to customise SDF text
   rendering using a Font instance
 
 * Removed ShaderInterface::BLOCK_ constants

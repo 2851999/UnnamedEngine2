@@ -102,6 +102,8 @@ public:
 	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING_GEOMETRY;
 	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
 	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING;
+	static const unsigned int SHADER_BILLBOARDED_FONT;
+	static const unsigned int SHADER_BILLBOARDED_FONT_SDF;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL;
@@ -145,6 +147,8 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY;
 	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING;
 	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND;
+	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT;
+	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

@@ -82,19 +82,17 @@ public:
 	/* Render scale used to render font at a higher size and then down scale later */
 	static const float RENDER_SCALE;
 
-	/* The constructors */
+	/* Constructor */
 	Font(std::string path, unsigned int size = 18, TextureParameters parameters = TextureParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE).setFilter(TextureParameters::Filter::NEAREST));
-	/* The destructors */
-	virtual ~Font() { destroy(); }
+
+	/* Destructor */
+	virtual ~Font();
 
 	/* Binds the necessary descriptor sets for rendering with this font */
 	void bindDescriptorSets();
 
 	/* Method to assign a MeshData instance to render some text */
 	void assignMeshData(MeshData* data, std::string text, bool billboarded);
-
-	/* Method used to release all of the resources this font holds */
-	virtual void destroy() override;
 
 	/* Methods used to get the width/height of text rendered with this font */
 	float getWidth(std::string text);

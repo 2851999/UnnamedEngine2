@@ -50,6 +50,7 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD            
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_TERRAIN                     = 11;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT             = 12;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_SDF_TEXT                    = 13;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT          = 14;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -209,6 +210,13 @@ ShaderInterface::ShaderInterface() {
 	sdfTextLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_SDF_TEXT, sdfTextLayout);
+
+	//Billboarded SDF Text
+	DescriptorSetLayout* billboardSDFTextLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_SCENE);
+	billboardSDFTextLayout->addUBO(sizeof(ShaderBlock_Billboard), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_BILLBOARD);
+	billboardSDFTextLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT, billboardSDFTextLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -388,6 +396,17 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT));
+	} else if (shaderID == Renderer::SHADER_BILLBOARDED_FONT) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BILLBOARD));
+	} else if (shaderID == Renderer::SHADER_BILLBOARDED_FONT_SDF) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_SDF_TEXT));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT));
 	}
 }
 

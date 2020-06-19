@@ -190,6 +190,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_TERRAIN;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_SDF_TEXT;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
