@@ -310,6 +310,19 @@ Texture::Texture(unsigned int width, unsigned int height, VkImage textureVkImage
     imageInfo.sampler     = textureVkSampler;
 }
 
+Texture::~Texture() {
+	if (texture > 0)
+		glDeleteTextures(1, &texture);
+	else if (textureVkImage != VK_NULL_HANDLE) {
+		vkDestroyImageView(Vulkan::getDevice()->getLogical(), textureVkImageView, nullptr);
+
+		vkDestroyImage(Vulkan::getDevice()->getLogical(), textureVkImage, nullptr);
+		vkFreeMemory(Vulkan::getDevice()->getLogical(), textureVkImageMemory, nullptr);
+
+		vkDestroySampler(Vulkan::getDevice()->getLogical(), textureVkSampler, nullptr);
+	}
+}
+
 void Texture::generateMipmapsVk() {
 	//Obtain the format used for this image
 	VkFormat format;
@@ -382,19 +395,6 @@ void Texture::generateMipmapsVk() {
 		vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
 		Vulkan::endSingleTimeCommands(commandBuffer);
-	}
-}
-
-void Texture::destroy() {
-	if (texture > 0)
-		glDeleteTextures(1, &texture);
-	else if (textureVkImage != VK_NULL_HANDLE) {
-		vkDestroyImageView(Vulkan::getDevice()->getLogical(), textureVkImageView, nullptr);
-
-	    vkDestroyImage(Vulkan::getDevice()->getLogical(), textureVkImage, nullptr);
-	    vkFreeMemory(Vulkan::getDevice()->getLogical(), textureVkImageMemory, nullptr);
-
-		vkDestroySampler(Vulkan::getDevice()->getLogical(), textureVkSampler, nullptr);
 	}
 }
 

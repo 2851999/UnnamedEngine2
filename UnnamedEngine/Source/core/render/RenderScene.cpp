@@ -25,7 +25,7 @@
 
 #include "../BaseEngine.h"
 
-RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing) : deferred(deferred), pbr(pbr), ssr(ssr), postProcessing(postProcessing) {
+RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing, PBREnvironment* pbrEnvironment) : deferred(deferred), pbr(pbr), ssr(ssr), postProcessing(postProcessing), pbrEnvironment(pbrEnvironment) {
 	//Create the FBO for rendering offscreen
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
@@ -130,8 +130,16 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing)
 			pipelineDeferredSSR = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_PBR_SSR), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
 		}
 
-		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
-		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? (pbrEnvironment ? Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING) : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? (pbrEnvironment ? Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND) : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+	}
+
+	if (pbrEnvironment) {
+		descriptorSetPBREnvironment = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT));
+		descriptorSetPBREnvironment->setTexture(0, pbrEnvironment->getIrradianceCubemap());
+		descriptorSetPBREnvironment->setTexture(1, pbrEnvironment->getPrefilterCubemap());
+		descriptorSetPBREnvironment->setTexture(2, pbrEnvironment->getBRDFLUTTexture());
+		descriptorSetPBREnvironment->setup();
 	}
 }
 
@@ -157,6 +165,9 @@ RenderScene::~RenderScene() {
 			delete pipelineDeferredSSR;
 		}
 	}
+
+	if (pbrEnvironment)
+		delete descriptorSetPBREnvironment;
 
 	//Go through and delete all created objects
 	for (DescriptorSet* descriptorSetLightBatch : descriptorSetLightBatches)
@@ -190,11 +201,20 @@ void RenderScene::add(GameObject3D* object) {
 	} else {
 		if (lighting) {
 			if (pbr) {
-				if (deferred)
-					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY;
-				else {
-					graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING;
-					graphicsPipelineBlendID = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND;
+				if (pbrEnvironment) { //IBL
+					if (deferred)
+						graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_GEOMETRY;
+					else {
+						graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_PBR_LIGHTING;
+						graphicsPipelineBlendID = skinning ? Renderer::GRAPHICS_PIPELINE_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_PBR_LIGHTING_BLEND;
+					}
+				} else { //No IBL
+					if (deferred)
+						graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY;
+					else {
+						graphicsPipelineID      = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING;
+						graphicsPipelineBlendID = skinning ? Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND;
+					}
 				}
 			} else {
 				if (deferred)
@@ -377,6 +397,9 @@ void RenderScene::renderScene() {
 
 			batchNumber++;
 		}
+		//Bind the PBREnvironment textures if needed
+		if (pbrEnvironment)
+			descriptorSetPBREnvironment->bind();
 		if (deferred) {
 			batchNumber = 0;
 

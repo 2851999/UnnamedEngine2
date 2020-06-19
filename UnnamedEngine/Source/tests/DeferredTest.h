@@ -66,7 +66,7 @@ void Test::initialise() {
 
 void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("FontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	Shader::compileEngineShaderToSPIRV("FontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
@@ -105,7 +105,7 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(true, true, false, true);
+	renderScene = new RenderScene(true, true, true, true);
 	renderScene->setPostProcessingParameters(true, true, 0.5f);
 
 	//renderScene->disableLighting();

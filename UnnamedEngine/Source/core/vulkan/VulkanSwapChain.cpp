@@ -45,7 +45,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	extent                               = chooseSwapExtent(swapChainSupportDetails.capabilities, settings);
 
 	//Assign the VSync setting based on what is being used
-	Window::getCurrentInstance()->getSettings().videoVSync = (presentMode == VK_PRESENT_MODE_FIFO_KHR);
+	Window::getCurrentInstance()->getSettings().videoVSync = (presentMode == VK_PRESENT_MODE_FIFO_KHR) ? 1 : ((presentMode == VK_PRESENT_MODE_MAILBOX_KHR) ? 2 : 0);
 
 	//Obtain the queue family indices
 	VulkanDeviceQueueFamilies queueFamilies = device->getQueueFamilies();

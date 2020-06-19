@@ -1,17 +1,12 @@
 #include "PBRLightingCore.fs"
 
-#map uniform PositionBuffer ue_gPosition
-#map uniform NormalBuffer ue_gNormal
-#map uniform AlbedoBuffer ue_gAlbedo
-#map uniform MetalnessAOBuffer ue_gMetalnessAO
-
-uniform sampler2D ue_gPosition;
-uniform sampler2D ue_gNormal;
-uniform sampler2D ue_gAlbedo;
-uniform sampler2D ue_gMetalnessAO;
+layout(set = 4, binding = 0) uniform sampler2D ue_gPosition;
+layout(set = 4, binding = 1) uniform sampler2D ue_gNormal;
+layout(set = 4, binding = 2) uniform sampler2D ue_gAlbedo;
+layout(set = 4, binding = 3) uniform sampler2D ue_gMetalnessAO;
 
 layout(location = 0) out vec4 ue_FragColour;
-layout(location = 1) out vec4 ue_FragColourBright;
+//layout(location = 1) out vec4 ue_FragColourBright;
 
 void main() {
 	vec3 fragPosition = texture(ue_gPosition, ue_frag_textureCoord).rgb;
@@ -47,10 +42,12 @@ void main() {
 	//ue_FragColour = vec4(vec3(ueCalculatePointShadow(ue_lights[0], fragPosition, ue_cameraPosition)), 1.0);
 
 	//Bloom
+	/*
 	float brightness = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
 	if (brightness > 1.0) {
 		ue_FragColourBright = vec4(albedo.rgb, 1.0);
 		ue_FragColour = ue_FragColourBright;
 	} else
 		ue_FragColourBright = vec4(0.0, 0.0, 0.0, 1.0);
+	*/
 }

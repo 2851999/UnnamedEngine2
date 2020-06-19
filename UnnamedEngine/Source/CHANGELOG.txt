@@ -1,7 +1,180 @@
 --------------------------------------------------------------
+Release 2 | Beta 2 | Development 1 (V0.5.1)
+
+* Added billboarded SDF text rendering in Font/Text
+* Added parameters that can be changed to customise SDF text
+  rendering using a Font instance
+
+* Readded PBREnvironment
+* Readded PBRTest
+* Readded IBL in RenderScene (OpenGL only)
+* Readded billboarded text rendering in Font/Text
+
+* Renamed shader EquiToCubeGen to GenEquiToCube
+* Renamed shader BRDFIntegrationMapGen to
+  GenBRDFIntegrationMap
+* Renamed shader IrradianceMapGen to GenIrradianceMap 
+* Renamed shader PrefilterMapGen to GenPrefilterMap
+
+* Removed ShaderInterface::BLOCK_ constants
+
+* Fixed bug: SSR was calculated incorrectly compared to
+             OpenGL
+* Fixed bug: GRAPHICS_PIPELINE_DEFERRED_PBR_SSR had the wrong
+             colour blend state
+* Fixed bug: 'Font::destroy' was never called
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 0 | Experimental 4
+
+* Added billboarded SDF text rendering in Font/Text
+
+* Readded billboarded text rendering in Font/Text
+
+* Removed 'destroy' method in Resource's
+
+* Fixed bug: VulkanSwapChain incorrectly assigned the VSync
+             setting after supported modes are checked in
+			 the case of tripple buffering
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 0 | Experimental 3
+
+* Added parameters that can be changed to customise SDF text
+  rendering using a Font instance
+
+* Removed ShaderInterface::BLOCK_ constants
+
+* Fixed bug: 'Font::destroy' was never called
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 0 | Experimental 2
+
+* Fixed bug: SSR was calculated incorrectly compared to
+             OpenGL
+* Fixed bug: GRAPHICS_PIPELINE_DEFERRED_PBR_SSR had the wrong
+             colour blend state
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 0 | Experimental 1
+
+* Readded PBREnvironment
+* Readded PBRTest
+* Readded IBL in RenderScene (OpenGL only)
+
+* Renamed shader EquiToCubeGen to GenEquiToCube
+* Renamed shader BRDFIntegrationMapGen to
+  GenBRDFIntegrationMap
+* Renamed shader IrradianceMapGen to GenIrradianceMap 
+* Renamed shader PrefilterMapGen to GenPrefilterMap
+
+--------------------------------------------------------------
+Release 2 | Beta 2 (V0.5.0)
+
+* Began major rewrite of rendering system to integrate
+  Vulkan better. This will involve temporary removal of many
+  classes and features, eventually re-adding them later
+
+* Added DescriptorSet
+* Added DescriptorSetLayout
+* Added GraphicsPipeline
+* Added GraphicsPipelineLayout
+* Added utils_vulkan
+* Added RenderPass
+* Added Framebuffer
+* Added basic support for layout(set) for Vulkan in shaders
+  (Removed when using OpenGL)
+* Added 'renderOffscreen' method in BaseEngine
+* Added 'useView' method for Camera which should be used
+  when things should be rendered according to that camera's
+  point of view
+* Added support for arrays of textures in Vulkan
+* Added parameters in Shader methods to append "#define NAME"
+  to the beginning of shaders before compilation when using
+  Vulkan or OpenGL
+* Added Vulkan support to most things
+* Added basic SDF font support
+* Added VBOUsage enum class to specify the usage of VBO's
+* Added 'clearDefaultDepthBufferOnLoad' in VulkanSwapChain
+  to allow depth information to be loaded when rendering to
+  the default depth buffer instead of cleared
+* Added 'samples' parameter in FramebufferAttachment
+* Added FramebufferAttachmentInfo struct that is taken in
+  FBO constructor instead of FramebufferAttachment*
+* Added generalised enums for various TextureParameters
+
+* Changed shaders to use separate UBO for per-model data and
+  added a descriptor set for this
+* Changed Light to extend Camera3D instead of GameObject3D
+* Changed GUITextBox to improve default text rendering
+  performance
+* Changed GUIComponentRenderer to improve rendering
+  performance
+
+* Moved RenderShader to a different file
+* Moved 'swapChainFramebuffers' from VulkanRenderPass to
+  VulkanSwapChain
+
+* Renamed ShaderBlock_Lighting struct to
+  ShaderBlock_LightBatch in ShaderInterface
+* Renamed ShaderBlock_Core struct to ShaderBlock_Camera in
+  ShaderInterface
+* Renamed FramebufferStore to FramebufferAttachment
+* Renamed shader LightingDeferredGeom to
+  DeferredLightingGeometry
+* Renamed shader TerrainDeferredGeom to
+  DeferredTerrainGeometry
+* Renamed 'clamp' to 'addressMode' in TextureParameters
+
+* Replaced TextureSet with DescriptorSet in Material
+* Replaced include guards with '#pragma once'
+
+* Replaced SHADER_VULKAN_LIGHTING with SHADER_LIGHTING
+* Replaced SHADER_VULKAN_LIGHTING_SKINNING with
+  SHADER_LIGHTING_SKINNING
+
+* Rewrote FBO
+
+* Removed FramebufferTest3D
+* Removed PBRTest
+* Removed SurfaceTest
+* Removed PBREnvironment
+* Removed PostProcessing
+* Removed VulkanGraphicsPipeline
+* Removed GraphicsState
+* Removed TextureSet
+* Removed GeometryBuffer
+* Removed VulkanRenderPass
+* Removed examples folder
+* Removed IBL and Bloom for the time being
+
+* Fixed bug: Font did not transition the texture it uses to
+             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL when
+             using Vulkan
+* Fixed bug: Fullscreen windows using vsync was capped to
+             60Hz even when a higher refresh rate monitor
+			 was used
+* Fixed bug: Crash when trying to render an object without
+             indices when using Vulkan
+* Fixed bug: MSAA would not work when using Vulkan
+* Fixed bug: Defines added to shaders were added many times
+* Fixed bug: Camera's 'useView' method would fail in Vulkan
+             unless a graphics pipeline was bound
+* Fixed bug: Loading a '.model' file caused the creation of
+             a Material that was never deleted
+
+* Some cleanup
+
+* Note: Now require a pipeline to render anything in Vulkan/
+        OpenGL
+* Note: SSR is incorrect when using Vulkan
+
+* Some cleanup
+
+--------------------------------------------------------------
 Release 2 | Beta 1 | Development 8 (V0.5.0)
 
-* Added instancing support to RenderData
+* Added instancing support to RenderData (Vulkan)
 * Added ability to render different primitive topologies
   in Vulkan
 * Added Terrain support to RenderScene
