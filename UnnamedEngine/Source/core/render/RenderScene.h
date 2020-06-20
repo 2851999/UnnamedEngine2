@@ -65,7 +65,8 @@ private:
 	/* Descriptor set passing the environment to the shader */
 	DescriptorSet* descriptorSetPBREnvironment = NULL;
 
-	/* The ambient light used in phong shading */
+	/* The ambient light used in phong shading/when using pbr this can control the
+	   contribution ambient lighting has */
 	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
 
 	/* The light batch descriptor sets */

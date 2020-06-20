@@ -25,7 +25,9 @@
  * The Light class
  *****************************************************************************/
 
-Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type) {
+float Light::DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE = 10.0f;
+
+Light::Light(unsigned int type, Vector3f position, bool castShadows, float directionalLightShadowRange) : type(type) {
 	setPosition(position);
 
 	if (castShadows) {
@@ -42,7 +44,7 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
 			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass);
 
-			setProjectionMatrix(Matrix4f().initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f));
+			setProjectionMatrix(Matrix4f().initOrthographic(-directionalLightShadowRange, directionalLightShadowRange, -directionalLightShadowRange, directionalLightShadowRange, -directionalLightShadowRange, directionalLightShadowRange));
 		} else if (type == TYPE_POINT) {
 			//Create FBO
 			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {

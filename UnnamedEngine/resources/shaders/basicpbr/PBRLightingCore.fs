@@ -106,9 +106,9 @@ vec3 ueGetLightingPBR(vec3 normal, vec3 fragPos, vec3 albedo, float metalness, f
 				Lo += ueCalculateSpotLightPBR(ue_lights[i], normal, V, fragPos, albedo, metalness, roughness, F0);
     }
 
-    vec3 ambient = vec3(0.03) * albedo * ao;
-    if (ue_lightAmbient.r == 0.0)
-        ambient *= 0.0;
+    vec3 ambient = vec3(0.0);
+    if (ue_lightAmbient.r > 0.0)
+        ambient = vec3(ue_lightAmbient) * albedo * ao; //Used to use vec3(0.03) * albedo * ao
 
     return ambient + Lo;
 }

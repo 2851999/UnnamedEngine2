@@ -68,6 +68,10 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing,
 		screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 	}
 
+	if (pbr)
+		//Default ambient light parameter for PBR
+		ambientLight = Colour(0.03f, 0.03f, 0.03f);
+
 	//Setup for deferred rendering if needed
 	if (deferred) {
 		descriptorSetGeometryBuffer = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(pbr ? ShaderInterface::DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING : ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING));

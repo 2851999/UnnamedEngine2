@@ -1,4 +1,44 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 1 | Experimental 1
+
+* Added parameters in the constructor of Light to allow the
+  shadow map range for directional lights to be configured
+
+* Changed basic PBR lighting so that the amount of ambient
+  lighting can be controlled by RenderScene
+
+* Fixed bug: 'initOrthographic' in Matrix4f was incorrect for
+              use with Vulkan
+
+* Some cleanup of Renderer
+
+--------------------------------------------------------------
+Release 2 | Beta 2 | Development 1 (V0.5.1)
+
+* Added billboarded SDF text rendering in Font/Text
+* Added parameters that can be changed to customise SDF text
+  rendering using a Font instance
+
+* Readded PBREnvironment
+* Readded PBRTest
+* Readded IBL in RenderScene (OpenGL only)
+* Readded billboarded text rendering in Font/Text
+
+* Renamed shader EquiToCubeGen to GenEquiToCube
+* Renamed shader BRDFIntegrationMapGen to
+  GenBRDFIntegrationMap
+* Renamed shader IrradianceMapGen to GenIrradianceMap 
+* Renamed shader PrefilterMapGen to GenPrefilterMap
+
+* Removed ShaderInterface::BLOCK_ constants
+
+* Fixed bug: SSR was calculated incorrectly compared to
+             OpenGL
+* Fixed bug: GRAPHICS_PIPELINE_DEFERRED_PBR_SSR had the wrong
+             colour blend state
+* Fixed bug: 'Font::destroy' was never called
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 0 | Experimental 4
 
 * Added billboarded SDF text rendering in Font/Text
