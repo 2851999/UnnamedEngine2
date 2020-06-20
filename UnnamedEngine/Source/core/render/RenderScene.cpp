@@ -251,7 +251,7 @@ void RenderScene::addLight(Light* light) {
 	lights.push_back(light);
 
 	//Check if require new descriptor set for this
-	if (lights.size() % NUM_LIGHTS_IN_BATCH == 1) {
+	if ((lights.size() % NUM_LIGHTS_IN_BATCH) == 1) {
 		//Add a descriptor set for the new batch
 		DescriptorSet* descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
 

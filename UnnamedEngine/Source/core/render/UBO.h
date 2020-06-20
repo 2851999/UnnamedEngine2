@@ -55,10 +55,10 @@ public:
 	/* Method to bind this buffer for use with OpenGL (binding done by descriptor set in Vulkan) */
 	void bindGL();
 
-	/* Method to update the contents of this buffer for a frame */
+	/* Method to update the contents of this buffer for a frame - Should be done when rendering (For Vulkan synchronisation) */
 	void updateFrame(void* data, unsigned int offset, unsigned int size);
 
-	/* Method to update the contents of this buffer */
+	/* Method to update the contents of this buffer - Should be done when updating (For Vulkan synchronisation) */
 	void update(void* data, unsigned int offset, unsigned int size);
 
 	/* Method that returns the descriptor for a particular buffer for Vulkan */

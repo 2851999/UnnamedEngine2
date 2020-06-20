@@ -35,6 +35,10 @@ private:
 	Light* light;
 	Light* lightDir;
 	std::vector<Light*> manyLights;
+	float currentExposure;
+	float exposureChangeDir;
+	float minExposure = 0.1f;
+	float maxExposure = 2.0f;
 public:
 	static bool useVulkan;
 
@@ -106,15 +110,17 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(true, true, true, true);
-	renderScene->setPostProcessingParameters(true, true, 0.5f);
+	currentExposure = 0.5f;
+	exposureChangeDir = 1.0f;
+	renderScene = new RenderScene(true, true, false, true);
+	renderScene->setPostProcessingParameters(true, true, currentExposure);
 
 	//renderScene->disableLighting();
 
 	utils_random::initialise();
 
 	//renderScene->addLight((new Light(Light::TYPE_DIRECTIONAL))->setDirection(0.0f, -1.0f, 0.4f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
-	for (unsigned int i = 0; i < 20; ++i) {
+	for (unsigned int i = 0; i < 10; ++i) {
 		Light* light = (new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-30.0f, 30.0f), utils_random::randomFloat(0.0f, 18.0f), utils_random::randomFloat(-12.0f, 12.0f)), true))->setDiffuseColour(Colour(utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f)));
 		renderScene->addLight(light);
 		manyLights.push_back(light);
@@ -190,9 +196,27 @@ void Test::update() {
 	light->update();
 	lightDir->update();
 
-	for (Light* light : manyLights) {
-		light->getTransform()->translate(Vector3f(sin(utils_time::getSeconds()), 0.0f, cos(utils_time::getSeconds())) * 0.04f);
-		light->update();
+	//for (Light* light : manyLights) {
+	//	light->getTransform()->translate(Vector3f(sin(utils_time::getSeconds()), 0.0f, cos(utils_time::getSeconds())) * 0.04f);
+	//	light->update();
+	//}
+
+	//currentExposure += exposureChangeDir * (1.0f * getDeltaSeconds());
+	//if (currentExposure <= minExposure) {
+	//	currentExposure = minExposure;
+	//	exposureChangeDir *= -1;
+	//} else if (currentExposure >= maxExposure) {
+	//	currentExposure = maxExposure;
+	//	exposureChangeDir *= -1;
+	//}
+	//renderScene->setPostProcessingParameters(true, true, currentExposure);
+
+	if (Keyboard::isPressed(GLFW_KEY_HOME)) {
+		currentExposure += (10.0f * getDeltaSeconds());
+		renderScene->setPostProcessingParameters(true, true, currentExposure);
+	} else if (Keyboard::isPressed(GLFW_KEY_END)) {
+		currentExposure -= (10.0f * getDeltaSeconds());
+		renderScene->setPostProcessingParameters(true, true, currentExposure);
 	}
 }
 

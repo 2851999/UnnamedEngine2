@@ -75,11 +75,26 @@ void VulkanBuffer::copyData(const void* dataToCopy, unsigned int offset, VkDevic
 		//Map buffer memory into CPU accessible memory
 		void* data;
 		vkMapMemory(device->getLogical(), dest, offset, size, 0, &data); //Data is now mapped
-		memcpy(data, dataToCopy, (size_t) size); //+ odd number to size seems to fix Vulkan issues
+		memcpy(data, dataToCopy, (size_t) size);
 		vkUnmapMemory(device->getLogical(), dest); //Driver not necessarily copied yet, can either use heap that is host coherent,
 		//or use vkFlushMappedMemoryRanges/vkInvalidateMappedMemoryRanges
 		//First option ensures mapped memory always matches the contents of allocated memory (may lead to worse performance than explicit flushing - but doesn't matter?)
 		//Guaranteed to be complete as of next vkQueueSubmit
+
+		//vkDeviceWaitIdle(Vulkan::getDevice()->getLogical());
+
+		//void* data;
+		//vkMapMemory(device->getLogical(), dest, offset, size, 0, &data); //Data is now mapped
+		//memcpy(data, dataToCopy, (size_t)size);
+		//VkMappedMemoryRange mappedRange ={};
+
+		//mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+		//mappedRange.memory = dest;
+		//mappedRange.offset = offset;
+		//mappedRange.size = size;
+		//vkFlushMappedMemoryRanges(device->getLogical(), 1, &mappedRange);
+
+		//vkUnmapMemory(device->getLogical(), dest);
 	} else
 		Logger::log("Buffer is too small to copy the given data into", "VulkanBuffer", LogType::Warning);
 }

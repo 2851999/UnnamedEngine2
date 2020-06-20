@@ -129,9 +129,6 @@ void Light::update() {
 		shadowCubemapData.shadowMatrices[3] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, -1.0f, 0.0f), Vector3f(0.0f, 0.0f, -1.0f));
 		shadowCubemapData.shadowMatrices[4] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, 1.0f), Vector3f(0.0f, -1.0f, 0.0f));
 		shadowCubemapData.shadowMatrices[5] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, -1.0f), Vector3f(0.0f, -1.0f, 0.0f));
-
-		//Update the descriptor set
-		shadowCubemapDescriptorSet->getUBO(0)->updateFrame(&shadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
 	} else if (type == TYPE_SPOT && shadowMapRenderPass) {
 		//The position of the spot light
 		Vector3f pos = getPosition();
@@ -155,9 +152,12 @@ void Light::update() {
 
 void Light::useView() {
 	//Bind the shadow cubemap if needed
-	if (shadowCubemapDescriptorSet)
+	if (shadowCubemapDescriptorSet) {
+		//Update the descriptor set
+		shadowCubemapDescriptorSet->getUBO(0)->updateFrame(&shadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
+
 		shadowCubemapDescriptorSet->bind();
-	else
+	} else
 		Camera::useView();
 }
 

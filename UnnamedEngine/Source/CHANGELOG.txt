@@ -1,4 +1,10 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 1 | Experimental 2
+
+* Fixed bug: Multiple point light shadows would cause
+             flickering when using Vulkan
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 1 | Experimental 1
 
 * Added parameters in the constructor of Light to allow the

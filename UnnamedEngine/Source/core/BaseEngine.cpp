@@ -58,7 +58,8 @@ void BaseEngine::create() {
 		Font::initialiseFreeType();
 
 		//Assign the default font and text instance
-		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
+		//defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
+		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 30);
 		//defaultFont = new Font("resources/fonts/testFont.fnt", 22);
 		//defaultFont = new Font("resources/fonts/testFont.fnt", 40);
 		textInstance = new Text(defaultFont, Colour::WHITE, 400);
