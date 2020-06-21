@@ -65,8 +65,8 @@ private:
 	/* States whether this VBO needs to be updated (For Vulkan synchronisation) */
 	bool                  updatable;
 
-	/* The Vulkan buffers for use with Vulkan */
-	std::vector<VulkanBuffer*> vulkanBuffers;
+	/* The Vulkan buffer for this VBO */
+	VulkanBufferObject* vulkanBuffer = NULL;
 
 	/* The attributes this VBO supplies */
 	std::vector<Attribute> attributes;
@@ -86,9 +86,8 @@ public:
 	virtual ~VBO() {
 		if (buffer > 0)
 			glDeleteBuffers(1, &buffer);
-		for (VulkanBuffer* buffer : vulkanBuffers)
-			delete buffer;
-		vulkanBuffers.clear();
+		if (vulkanBuffer)
+			delete vulkanBuffer;
 	}
 
 	/* Various OpenGL methods */
@@ -115,7 +114,7 @@ public:
 
 	/* Setters and getters */
 	inline std::vector<T>& getData() { return data; }
-	inline VulkanBuffer* getVkBuffer() { return vulkanBuffers[updatable ? Vulkan::getCurrentFrame() : 0]; }
+	inline VulkanBuffer* getVkBuffer() { return vulkanBuffer->getBuffer(); }
 	inline VkVertexInputBindingDescription getVkBindingDescription() { return vulkanVertexInputBindingDescription; }
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };

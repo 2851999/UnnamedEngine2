@@ -1,4 +1,14 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 1 | Experimental 4
+
+* Added VulkanBufferObject
+
+* Fixed bug: Updating a VBO could cause problems in Vulkan
+             with multiple fames in flight
+
+* Some cleanup of previous commit
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 1 | Experimental 3
 
 * Fixing bug: Updating a VBO could cause problems in Vulkan

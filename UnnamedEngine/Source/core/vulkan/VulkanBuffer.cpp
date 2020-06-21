@@ -104,4 +104,53 @@ VulkanBuffer::~VulkanBuffer() {
 	vkFreeMemory(device->getLogical(), bufferMemory, nullptr);
 }
 
+/*****************************************************************************
+ * The VulkanBufferObject class
+ *****************************************************************************/
 
+VulkanBufferObject::VulkanBufferObject(VkDeviceSize bufferSize, VulkanDevice* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, bool useStaging, bool updatable) {
+	this->updatable = updatable;
+
+	//Create the necessary instances
+	if (updatable)
+		buffers.resize(Vulkan::getSwapChain()->getImageCount());
+	else
+		buffers.resize(1);
+
+	for (unsigned int i = 0; i < buffers.size(); ++i)
+		buffers[i] = new VulkanBuffer(bufferSize, device, usage, properties, useStaging);
+}
+
+VulkanBufferObject::VulkanBufferObject(void* data, VkDeviceSize size, VulkanDevice* device, VkBufferUsageFlags usage, bool useStaging, bool updatable) {
+	this->updatable = updatable;
+
+	//Create the necessary instances
+	if (updatable)
+		buffers.resize(Vulkan::getSwapChain()->getImageCount());
+	else
+		buffers.resize(1);
+
+	for (unsigned int i = 0; i < buffers.size(); ++i)
+		buffers[i] = new VulkanBuffer(data, size, device, usage, useStaging);
+
+}
+
+VulkanBufferObject::~VulkanBufferObject() {
+	for (VulkanBuffer* buffer : buffers)
+		delete buffer;
+}
+
+void VulkanBufferObject::updateFrame(const void* data, unsigned int offset, VkDeviceSize size) {
+	buffers[updatable ? Vulkan::getCurrentFrame() : 0]->copyData(data, offset, size);
+}
+
+void VulkanBufferObject::update(void* data, unsigned int offset, unsigned int size) {
+	if (updatable)
+		Vulkan::updateVulkanBufferObject(this, data, offset, size);
+	else
+		updateFrame(data, offset, size);
+}
+
+VulkanBuffer* VulkanBufferObject::getBuffer() {
+	return buffers[updatable ? Vulkan::getCurrentFrame() : 0];
+}

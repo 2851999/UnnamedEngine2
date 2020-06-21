@@ -90,7 +90,7 @@ void RenderData::bindBuffers() {
 	if (! BaseEngine::usingVulkan())
 		glBindVertexArray(vao);
 	else {
-		//Go through each VBO and set it up
+		//Ensure correct VBO's are used for the current frame
 		for (unsigned int i = 0; i < vbosFloat.size(); ++i)
 			vboVkInstances[i] = vbosFloat[i]->getVkBuffer()->getInstance();
 

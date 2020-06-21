@@ -109,6 +109,32 @@ private:
 
 	/* Method to update UBOs in the update queue*/
 	static void updateUBOQueue();
+
+	/* Structure for storing info about a requested VulkanBufferObject update */
+	struct VulkanBufferObjectUpdateInfo {
+		//The VulkanBufferObject instance to be updated
+		VulkanBufferObject* instance;
+
+		//The information needed to perform the update each frame
+		void* data;
+		unsigned int offset;
+		unsigned int size;
+
+		//The next frame to update (different to the current to avoid synchronisation problems)
+		unsigned int nextUpdateFrame;
+
+		//Number of updates left to perform
+		unsigned int updatesLeft;
+	};
+
+	/* List of VulkanBufferObject updates to perform */
+	static std::vector<VulkanBufferObjectUpdateInfo> vulkanBufferObjectUpdateQueue;
+
+	/* Method to update a VulkanBufferObject for the current frame (Returns whether the set has been fully updated) */
+	static bool updateVulkanBufferObjectFrame(VulkanBufferObjectUpdateInfo& info);
+
+	/* Method to update VulkanBufferObject in the update queue*/
+	static void updateVulkanBufferObjectQueue();
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -164,6 +190,9 @@ public:
 
 	/* Method to update a UBO */
 	static void updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size);
+
+	/* Method to update a VulkanBufferObject */
+	static void updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size);
 
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);

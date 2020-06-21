@@ -64,7 +64,7 @@ void Test::initialise() {
 	getSettings().videoMaxAnisotropicSamples = 16;
 	getSettings().debugShowInformation = true;
 
-	getSettings().debugVkValidationLayersEnabled = false;
+	getSettings().debugVkValidationLayersEnabled = true;
 
 	VulkanSwapChain::clearDefaultDepthBufferOnLoad = false;
 }

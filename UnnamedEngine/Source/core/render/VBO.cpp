@@ -101,12 +101,8 @@ void VBO<T>::setup(unsigned int binding) {
 		if (attributes.size() == 1)
 			stride = sizeof(T) *  attributes[0].size;
 
-		//Create the Vulkan buffers
-		if (updatable) {
-			for (unsigned int i = 0; i < Vulkan::getSwapChain()->getImageCount(); ++i)
-				vulkanBuffers.push_back(new VulkanBuffer(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan, usage == VBOUsage::STATIC));
-		} else
-			vulkanBuffers.push_back(new VulkanBuffer(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan, usage == VBOUsage::STATIC));
+		//Create the Vulkan buffer
+		vulkanBuffer = new VulkanBufferObject(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan, usage == VBOUsage::STATIC, updatable);
 
 		//Assign the vertex input binding description
 		vulkanVertexInputBindingDescription.binding   = binding; //like glVertexAttrib binding
@@ -185,14 +181,11 @@ void VBO<T>::stopRendering() {
 
 template <typename T>
 void VBO<T>::updateFrame() {
-	if (!BaseEngine::usingVulkan()) {
+	if (! BaseEngine::usingVulkan()) {
 		bind();
 		glBufferData(target, data.size() * sizeof(data[0]), data.data(), convertToGL(usage));
-	} else {
-		unsigned int index = updatable ? Vulkan::getCurrentFrame() : 0;
-		//Copy the data into the buffer
-		vulkanBuffers[index]->copyData(data.data(), 0, data.size() * sizeof(T));
-	}
+	} else
+		vulkanBuffer->updateFrame(data.data(), 0, data.size() * sizeof(T));
 }
 
 template <typename T>
@@ -200,12 +193,8 @@ void VBO<T>::update() {
 	if (! BaseEngine::usingVulkan()) {
 		bind();
 		glBufferData(target, data.size() * sizeof(data[0]), data.data(), convertToGL(usage));
-	} else {
-		unsigned int index = updatable ? Vulkan::getCurrentFrame() : 0;
-		std::cout << index << std::endl;
-		//Copy the data into the buffer
-		vulkanBuffers[index]->copyData(data.data(), 0, data.size() * sizeof(T));
-	}
+	} else
+		vulkanBuffer->update(data.data(), 0, data.size() * sizeof(T));
 }
 
 template <typename T>
@@ -218,9 +207,7 @@ void VBO<T>::updateStream(GLsizeiptr size) {
 	} else {
 		//MAY BE BETTER WAY
 
-		//Copy the data into the buffer
-		unsigned int index = updatable ? Vulkan::getCurrentFrame() : 0;
-		vulkanBuffers[index]->copyData(data.data(), 0, size);
+		vulkanBuffer->updateFrame(data.data(), 0, size);
 	}
 }
 

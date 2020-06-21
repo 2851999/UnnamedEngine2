@@ -21,7 +21,7 @@
 #include "VulkanDevice.h"
 
 /*****************************************************************************
- * The VulkanBuffer class manages a Vulkan buffer (For vertex data)
+ * The VulkanBuffer class manages a Vulkan buffer
  *****************************************************************************/
 
 class VulkanBuffer {
@@ -47,7 +47,7 @@ private:
 	/* Method to copy memory to a buffer (that is accessible to CPU) */
 	void copyData(const void* dataToCopy, unsigned int offset, VkDeviceSize size, VkDeviceMemory dest);
 public:
-	/* Constructor */
+	/* Constructors */
 	VulkanBuffer(VkDeviceSize bufferSize, VulkanDevice* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, bool useStaging = true);
 	VulkanBuffer(void* data, VkDeviceSize size, VulkanDevice* device, VkBufferUsageFlags usage, bool useStaging = true);
 
@@ -63,4 +63,33 @@ public:
 	VkDeviceSize& getSize() { return size; }
 };
 
+/*****************************************************************************
+ * The VulkanBufferObject class manages either one or multiple VulkanBuffer
+ * instances to allow a buffer to be updated with synchronisation when
+ * multiple frames are in flight
+ *****************************************************************************/
 
+class VulkanBufferObject {
+private:
+	/* Instances of Vulkan buffers */
+	std::vector<VulkanBuffer*> buffers;
+
+	/* States whether this object should allow for updating */
+	bool updatable;
+public:
+	/* Constructors */
+	VulkanBufferObject(VkDeviceSize bufferSize, VulkanDevice* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, bool useStaging = true, bool updatable = false);
+	VulkanBufferObject(void* data, VkDeviceSize size, VulkanDevice* device, VkBufferUsageFlags usage, bool useStaging = true, bool updatable = false);
+
+	/* Destructor */
+	virtual ~VulkanBufferObject();
+
+	/* Method to update the contents of this buffer object for a frame - Should be done when rendering (For Vulkan synchronisation) */
+	void updateFrame(const void* data, unsigned int offset, VkDeviceSize size);
+
+	/* Method to update the contents of this buffer object - Should be done when updating (For Vulkan synchronisation) */
+	void update(void* data, unsigned int offset, unsigned int size);
+
+	/* Returns the current buffer that should be used */
+	VulkanBuffer* getBuffer();
+};
