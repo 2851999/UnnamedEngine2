@@ -29,7 +29,7 @@
  /* Location for the visibiliy attribute in the shader */
 const unsigned int TilemapLayer::ATTRIBUTE_LOCATION_VISIBILITY = 7;
 
-TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int>& data, bool visible, bool editable, VBOUsage usage) : name(name), tileset(tileset), layerColumns(columns), layerRows(rows), tileWidth(tileWidth), tileHeight(tileHeight), data(data), visible(visible), editable(editable) {
+TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int>& data, bool visible, bool editable, DataUsage usage) : name(name), tileset(tileset), layerColumns(columns), layerRows(rows), tileWidth(tileWidth), tileHeight(tileHeight), data(data), visible(visible), editable(editable) {
 	if (visible) {
 		//Assign the data
 
@@ -416,7 +416,7 @@ TextureAtlas* Tilemap::loadTileset(std::string path, std::string name) {
 	return new TextureAtlas(texture, columns, rows, tileCount);
 }
 
-Tilemap* Tilemap::loadTilemap(std::string path, std::string name, bool editable, VBOUsage usage) {
+Tilemap* Tilemap::loadTilemap(std::string path, std::string name, bool editable, DataUsage usage) {
 	//Load the file
 	MLDocument document;
 	document.load(path + name);

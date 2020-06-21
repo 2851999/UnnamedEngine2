@@ -23,6 +23,7 @@
 #include "UBO.h"
 #include "ShaderInterface.h"
 #include "GraphicsPipeline.h"
+#include "DataUsage.h"
 
 /*****************************************************************************
  * The Renderer class contains everything need to render a Mesh
@@ -220,4 +221,7 @@ public:
 
 	/* Returns the default render pass */
 	static inline RenderPass* getDefaultRenderPass() { return defaultRenderPass; }
+
+	/* Method used to convert 'DataUsage' into the OpenGL equivalent */
+	static GLenum convertToGL(DataUsage usage);
 };

@@ -142,6 +142,9 @@ VulkanBufferObject::~VulkanBufferObject() {
 
 void VulkanBufferObject::updateFrame(const void* data, unsigned int offset, VkDeviceSize size) {
 	buffers[updatable ? Vulkan::getCurrentFrame() : 0]->copyData(data, offset, size);
+
+	if (! updatable)
+		Logger::log("Attempting to update VulkanBufferObject without being updatable can cause synchronisation issues", "VulkanBufferObject", LogType::Warning);
 }
 
 void VulkanBufferObject::update(void* data, unsigned int offset, unsigned int size) {

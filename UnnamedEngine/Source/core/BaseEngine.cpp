@@ -141,27 +141,6 @@ void BaseEngine::create() {
 				//Update Vulkan and begin drawing
 				//Start draw first to perform synchronisation necessary to perform updates
 				Vulkan::startDraw();
-
-				if (getSettings().debugShowInformation) {
-					textInstance->update(str("----------- DEBUG -----------\n") +
-						"Engine Version : " + str(Engine::Version) + "\n" +
-						"Engine Date    : " + str(Engine::DateCreated) + "\n" +
-						"Engine Build   : " + str(Engine::Build) + "\n" +
-						"Current Delta  : " + str((int)getDelta()) + "\n" +
-						"Current FPS    : " + str(getFPS()) + "\n" +
-						"----------- VIDEO -----------\n" +
-						"Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
-						"VSync          : " + str(getSettings().videoVSync) + "\n" +
-						"MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
-						"Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
-						"Vulkan         : " + str(getSettings().videoVulkan) + "\n" +
-						"----------- AUDIO -----------\n" +
-						"Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
-						"SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
-						"-----------------------------"
-						, 2, 16);
-				}
-
 				Vulkan::update();
 			}
 
@@ -273,7 +252,25 @@ void BaseEngine::renderDebugInfo() {
 	//		, 2, 16);
 	//}
 
-	textInstance->render();
+	if (getSettings().debugShowInformation) {
+		textInstance->render(str("----------- DEBUG -----------\n") +
+			"Engine Version : " + str(Engine::Version) + "\n" +
+			"Engine Date    : " + str(Engine::DateCreated) + "\n" +
+			"Engine Build   : " + str(Engine::Build) + "\n" +
+			"Current Delta  : " + str((int)getDelta()) + "\n" +
+			"Current FPS    : " + str(getFPS()) + "\n" +
+			"----------- VIDEO -----------\n" +
+			"Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
+			"VSync          : " + str(getSettings().videoVSync) + "\n" +
+			"MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
+			"Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
+			"Vulkan         : " + str(getSettings().videoVulkan) + "\n" +
+			"----------- AUDIO -----------\n" +
+			"Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
+			"SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
+			"-----------------------------"
+			, 2, 16);
+	}
 
 	Renderer::removeCamera();
 

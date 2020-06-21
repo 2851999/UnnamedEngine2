@@ -22,15 +22,13 @@
 
 #include "RenderShader.h"
 #include "../vulkan/VulkanBuffer.h"
+#include "DataUsage.h"
 
 /*****************************************************************************
  * The VBO class is used to manage a vertex buffer object
  *****************************************************************************/
 
- /* Types of usage for a VBO */
-enum class VBOUsage {
-	STATIC, DYNAMIC, STREAM
-};
+enum class DataUsage;
 
 template <typename T>
 class VBO {
@@ -50,20 +48,17 @@ public:
 	};
 private:
 	/* Various pieces of data for OpenGL */
-	GLuint                buffer;
-	GLenum                target;
-	GLsizeiptr            size;
-	std::vector<T>&       data;
-	VBOUsage              usage;
+	GLuint           buffer;
+	GLenum           target;
+	GLsizeiptr       size;
+	std::vector<T>&  data;
+	DataUsage        usage;
 
 	/* The stride for data in this VBO */
 	unsigned int          stride = 0;
 
 	/* States whether this VBO will be used in instanced rendering */
 	bool                  instanced;
-
-	/* States whether this VBO needs to be updated (For Vulkan synchronisation) */
-	bool                  updatable;
 
 	/* The Vulkan buffer for this VBO */
 	VulkanBufferObject* vulkanBuffer = NULL;
@@ -74,13 +69,10 @@ private:
 	/* The binding/attribute descriptions for Vulkan */
 	VkVertexInputBindingDescription vulkanVertexInputBindingDescription;
 	std::vector<VkVertexInputAttributeDescription> vulkanAttributeDescriptions;
-
-	/* Methods used to convert 'Usage' into the OpenGL equivalent */
-	GLenum convertToGL(VBOUsage usage);
 public:
 	/* The constructors */
-	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, VBOUsage usage, bool instanced = false, bool updatable = false) :
-		buffer(0), target(target), size(size), data(data), usage(usage), instanced(instanced), updatable(updatable) {}
+	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, DataUsage usage, bool instanced = false) :
+		buffer(0), target(target), size(size), data(data), usage(usage), instanced(instanced) {}
 
 	/* The destructor */
 	virtual ~VBO() {

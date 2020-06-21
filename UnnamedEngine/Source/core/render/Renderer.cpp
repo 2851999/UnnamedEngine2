@@ -454,3 +454,16 @@ GraphicsPipelineLayout* Renderer::getGraphicsPipelineLayout(unsigned int id) {
 		return NULL;
 	}
 }
+
+GLenum Renderer::convertToGL(DataUsage usage) {
+	switch (usage) {
+		case DataUsage::STATIC:
+			return GL_STATIC_DRAW;
+		case DataUsage::DYNAMIC:
+			return GL_DYNAMIC_DRAW;
+		case DataUsage::STREAM:
+			return GL_STREAM_DRAW;
+		default:
+			return GL_STATIC_DRAW;
+	}
+}

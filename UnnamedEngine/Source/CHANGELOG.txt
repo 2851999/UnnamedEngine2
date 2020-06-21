@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 1 | Experimental 5
+
+* Changed VBO to assume the VulkanBufferObject should be
+  updatable when anything other than DataUsage::STATIC
+
+* Removed VBOUsage enum and replaced with DataUsage
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 1 | Experimental 4
 
 * Added VulkanBufferObject
