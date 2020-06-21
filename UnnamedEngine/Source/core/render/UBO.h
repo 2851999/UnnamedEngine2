@@ -24,6 +24,7 @@
 
 #include "../Window.h"
 #include "../vulkan/VulkanBuffer.h"
+#include "DataUsage.h"
 
 /*****************************************************************************
  * The UBO class is used to manage a uniform buffer object
@@ -34,8 +35,8 @@ private:
 	/* The buffer instance for OpenGL */
 	GLuint buffer = 0;
 
-	/* The buffers for Vulkan (one required per swap chain image) */
-	std::vector<VulkanBuffer*> vulkanBuffers;
+	/* The buffer for Vulkan */
+	VulkanBufferObject* vulkanBuffer = NULL;
 
 	/* The size of this buffer */
 	unsigned int size;
@@ -47,7 +48,7 @@ public:
 	static const unsigned int VULKAN_BINDING_OFFSET = 20;
 
 	/* Constructor */
-	UBO(void* data, unsigned int size, GLenum usage, unsigned int blockBinding);
+	UBO(void* data, unsigned int size, DataUsage usage, unsigned int blockBinding);
 
 	/* Destructor */
 	virtual ~UBO();
@@ -65,7 +66,7 @@ public:
 	VkWriteDescriptorSet getVkWriteDescriptorSet(unsigned int frame, const VkDescriptorSet descriptorSet, const VkDescriptorBufferInfo* bufferInfo);
 
 	/* Method to get a VulkanBuffer for a particular frame */
-	VulkanBuffer* getVkBuffer(unsigned int frame) { return vulkanBuffers[frame]; }
+	VulkanBuffer* getVkBuffer(unsigned int frame) { return vulkanBuffer->getBuffer(frame); }
 
 	/* Returns the binding index */
 	unsigned int getBinding() { return blockBinding; }

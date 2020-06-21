@@ -1,4 +1,15 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 1 | Experimental 6
+
+* Changed UBO to use DataUsage instead of the OpenGL usage
+* Changed UBO to use VulkanBufferObject
+
+* Removed UBO update queue in Vulkan
+
+* Fixed bug: Occasional flickering rendering a
+             ParticleSystem when multiple frames in flight
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 1 | Experimental 5
 
 * Changed VBO to assume the VulkanBufferObject should be

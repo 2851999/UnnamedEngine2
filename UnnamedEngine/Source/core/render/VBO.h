@@ -106,7 +106,7 @@ public:
 
 	/* Setters and getters */
 	inline std::vector<T>& getData() { return data; }
-	inline VulkanBuffer* getVkBuffer() { return vulkanBuffer->getBuffer(); }
+	inline VulkanBuffer* getVkCurrentBuffer() { return vulkanBuffer->getCurrentBuffer(); }
 	inline VkVertexInputBindingDescription getVkBindingDescription() { return vulkanVertexInputBindingDescription; }
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };

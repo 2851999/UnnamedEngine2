@@ -95,7 +95,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	Cubemap* environmentCubemap = Cubemap::createCubemap(ENVIRONMENT_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, envMapParameters);
 
 	ShaderBlock_GenPBREnvMap envMapGenData;
-	UBO* envMapGenUBO = new UBO(NULL, sizeof(ShaderBlock_GenPBREnvMap), GL_DYNAMIC_DRAW, ShaderInterface::BLOCK_PBR_ENV_MAP_GEN);
+	UBO* envMapGenUBO = new UBO(NULL, sizeof(ShaderBlock_GenPBREnvMap), DataUsage::DYNAMIC, ShaderInterface::BLOCK_PBR_ENV_MAP_GEN);
 	envMapGenUBO->bindGL();
 
 	shader1->use();
@@ -164,7 +164,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	Cubemap* prefilterCubemap = Cubemap::createCubemap(PREFILTER_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, prefilMapParameters);
 
 	ShaderBlock_GenPBRPrefilterMap prefilterMapGenData;
-	UBO* prefilterMapGenUBO = new UBO(NULL, sizeof(ShaderBlock_GenPBRPrefilterMap), GL_DYNAMIC_DRAW, ShaderInterface::BLOCK_PBR_PREFILTER_MAP_GEN);
+	UBO* prefilterMapGenUBO = new UBO(NULL, sizeof(ShaderBlock_GenPBRPrefilterMap), DataUsage::DYNAMIC, ShaderInterface::BLOCK_PBR_PREFILTER_MAP_GEN);
 	prefilterMapGenUBO->bindGL();
 
 	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, Window::getCurrentInstance()->getSettings().videoMaxAnisotropicSamples);

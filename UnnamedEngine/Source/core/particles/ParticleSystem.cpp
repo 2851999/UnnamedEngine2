@@ -202,18 +202,18 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 	shaderBillboardData.ue_cameraUp = Vector4f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2), 0.0f);
 
 	shaderBillboardData.ue_projectionViewMatrix = (Renderer::getCamera()->getProjectionViewMatrix());
-
-	//Update the UBO
-	descriptorSetBillboard->getUBO(0)->update(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
-
-	//Update the paricle data
-	vboPositionSizeData->updateStream(particleCount * sizeof(GLfloat) * 4);
-	vboColours->updateStream(particleCount * sizeof(GLfloat) * 4);
-	vboTextureData->updateStream(particleCount * sizeof(GLfloat) * 4);
 }
 
 void ParticleSystem::render() {
 	if (particleCount > 0) {
+		//Update the UBO
+		descriptorSetBillboard->getUBO(0)->updateFrame(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
+
+		//Update the paricle data
+		vboPositionSizeData->updateStream(particleCount * sizeof(GLfloat) * 4);
+		vboColours->updateStream(particleCount * sizeof(GLfloat) * 4);
+		vboTextureData->updateStream(particleCount * sizeof(GLfloat) * 4);
+
 		//Use the graphics pipeline
 		graphicsPipeline->bind();
 

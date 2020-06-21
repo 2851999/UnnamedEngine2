@@ -53,7 +53,7 @@ void RenderData::setup(RenderShader* renderShader) {
 		vbosFloat[i]->startRendering();
 
 		if (BaseEngine::usingVulkan()) {
-			vboVkInstances[i] = vbosFloat[i]->getVkBuffer()->getInstance();
+			vboVkInstances[i] = vbosFloat[i]->getVkCurrentBuffer()->getInstance();
 			vboVkOffsets[i] = 0;
 
 			bindingVkDescriptions.push_back(vbosFloat[i]->getVkBindingDescription());
@@ -67,7 +67,7 @@ void RenderData::setup(RenderShader* renderShader) {
 		vbosUInteger[i]->startRendering();
 
 		if (BaseEngine::usingVulkan()) {
-			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkBuffer()->getInstance();
+			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkCurrentBuffer()->getInstance();
 			vboVkOffsets[vbosFloat.size() + i] = 0;
 
 			bindingVkDescriptions.push_back(vbosUInteger[i]->getVkBindingDescription());
@@ -92,14 +92,14 @@ void RenderData::bindBuffers() {
 	else {
 		//Ensure correct VBO's are used for the current frame
 		for (unsigned int i = 0; i < vbosFloat.size(); ++i)
-			vboVkInstances[i] = vbosFloat[i]->getVkBuffer()->getInstance();
+			vboVkInstances[i] = vbosFloat[i]->getVkCurrentBuffer()->getInstance();
 
 		for (unsigned int i = 0; i < vbosUInteger.size(); ++i)
-			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkBuffer()->getInstance();
+			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkCurrentBuffer()->getInstance();
 
 		vkCmdBindVertexBuffers(Vulkan::getCurrentCommandBuffer(), 0, vboVkInstances.size(), vboVkInstances.data(), vboVkOffsets.data());
 		if (vboIndices)
-			vkCmdBindIndexBuffer(Vulkan::getCurrentCommandBuffer(), vboIndices->getVkBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
+			vkCmdBindIndexBuffer(Vulkan::getCurrentCommandBuffer(), vboIndices->getVkCurrentBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
 	}
 }
 void RenderData::unbindBuffers() {

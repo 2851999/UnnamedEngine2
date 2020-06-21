@@ -60,8 +60,8 @@ void BaseEngine::create() {
 		Font::initialiseFreeType();
 
 		//Assign the default font and text instance
-		//defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
-		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 60);
+		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
+		//defaultFont = new Font("resources/fonts/CONSOLA.TTF", 60);
 		//defaultFont = new Font("resources/fonts/testFont.fnt", 22);
 		//defaultFont = new Font("resources/fonts/testFont.fnt", 40);
 		textInstance = new Text(defaultFont, Colour::WHITE, 500);
@@ -209,48 +209,6 @@ void BaseEngine::renderDebugInfo() {
 	}
 
 	Renderer::addCamera(debugCamera);
-
-	//stopNext = ! stopNext;
-
-	//if (stopNext) {
-	//	textInstance->render(str("----------- DEBUG -----------\n") +
-	//		"Engine Version : " + str(Engine::Version) + "\n" +
-	//		"Engine Date    : " + str(Engine::DateCreated) + "\n" +
-	//		"Engine Build   : " + str(Engine::Build) + "\n" +
-	//		"Current Delta  : " + str(100) + "\n" +
-	//		"Current FPS    : " + str(105) + "\n" +
-	//		"----------- VIDEO -----------\n" +
-	//		"Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
-	//		"VSync          : " + str(getSettings().videoVSync) + "\n" +
-	//		"MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
-	//		"Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
-	//		"Vulkan         : " + str(getSettings().videoVulkan) + "\n" +
-	//		"----------- AUDIO -----------\n" +
-	//		"Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
-	//		"SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
-	//		"-----------------------------"
-	//		, 2, 16);
-	//} else {
-	//	//Appears if breakpoint here as below assigns the data, which will only be ready for the next render, but it also assigns numVertices/indices such that it will be too low for
-	//	//the next render with more characters above => Host coherent is not updated immediately, and has a delay, perhaps vkQueueSubmit?
-	//	textInstance->render(str("----------- DEBUG -----------\n") +
-	//		"Engine Version : " + str(Engine::Version) + "\n" +
-	//		"Engine Date    : " + str(Engine::DateCreated) + "\n" +
-	//		"Engine Build   : " + str(Engine::Build) + "\n" +
-	//		"Current Delta  : " + str(8) + "\n" +
-	//		"Current FPS    : " + str(105) + "\n" +
-	//		"----------- VIDEO -----------\n" +
-	//		"Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
-	//		"VSync          : " + str(getSettings().videoVSync) + "\n" +
-	//		"MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
-	//		"Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
-	//		"Vulkan         : " + str(getSettings().videoVulkan) + "\n" +
-	//		"----------- AUDIO -----------\n" +
-	//		"Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
-	//		"SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
-	//		"-----------------------------"
-	//		, 2, 16);
-	//}
 
 	if (getSettings().debugShowInformation) {
 		textInstance->render(str("----------- DEBUG -----------\n") +

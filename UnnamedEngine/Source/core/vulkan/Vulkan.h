@@ -84,32 +84,6 @@ private:
 	/* Method to update the descriptor sets in the update queue */
 	static void updateDescriptorSetQueue();
 
-	/* Structure for storing info about a requested UBO update */
-	struct UBOUpdateInfo {
-		//The UBO instance to be updated
-		UBO* ubo;
-
-		//The information needed to perform the update each frame
-		void*        data;
-		unsigned int offset;
-		unsigned int size;
-
-		//The next frame to update (different to the current to avoid synchronisation problems)
-		unsigned int nextUpdateFrame;
-
-		//Number of updates left to perform
-		unsigned int updatesLeft;
-	};
-
-	/* List of UBO updates to perform */
-	static std::vector<UBOUpdateInfo> uboUpdateQueue;
-
-	/* Method to update a UBO for the current frame (Returns whether the set has been fully updated) */
-	static bool updateUBOFrame(UBOUpdateInfo& info);
-
-	/* Method to update UBOs in the update queue*/
-	static void updateUBOQueue();
-
 	/* Structure for storing info about a requested VulkanBufferObject update */
 	struct VulkanBufferObjectUpdateInfo {
 		//The VulkanBufferObject instance to be updated
@@ -187,9 +161,6 @@ public:
 
 	/* Method to update a descriptor set */
 	static void updateDescriptorSet(DescriptorSet* set);
-
-	/* Method to update a UBO */
-	static void updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size);
 
 	/* Method to update a VulkanBufferObject */
 	static void updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size);

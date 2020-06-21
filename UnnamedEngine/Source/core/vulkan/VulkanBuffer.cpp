@@ -154,6 +154,6 @@ void VulkanBufferObject::update(void* data, unsigned int offset, unsigned int si
 		updateFrame(data, offset, size);
 }
 
-VulkanBuffer* VulkanBufferObject::getBuffer() {
+VulkanBuffer* VulkanBufferObject::getCurrentBuffer() {
 	return buffers[updatable ? Vulkan::getCurrentFrame() : 0];
 }

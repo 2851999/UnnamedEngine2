@@ -91,5 +91,8 @@ public:
 	void update(void* data, unsigned int offset, unsigned int size);
 
 	/* Returns the current buffer that should be used */
-	VulkanBuffer* getBuffer();
+	VulkanBuffer* getCurrentBuffer();
+	
+	/* Returns the buffer for a given frame */
+	VulkanBuffer* getBuffer(unsigned int frame) { return buffers[updatable ? frame : 0]; }
 };
