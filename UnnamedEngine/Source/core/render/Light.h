@@ -75,13 +75,13 @@ public:
 	static const unsigned int TYPE_SPOT        = 3;
 
 	/* Default size of shadow map's (width/height/depth) */
-	static const unsigned int SHADOW_MAP_SIZE = 1024;
+	static unsigned int DEFAULT_SHADOW_MAP_SIZE;
 
 	/* Default range of directional light shadows */
-	static float DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE;;
+	static float DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE;
 
 	/* The constructor */
-	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false, float directionalLightShadowRange = DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE);
+	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false, unsigned int shadowMapSize = DEFAULT_SHADOW_MAP_SIZE, float directionalLightShadowRange = DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE);
 
 	/* The destructor */
 	virtual ~Light();

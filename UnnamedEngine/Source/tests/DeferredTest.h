@@ -52,7 +52,7 @@ public:
 	virtual void onKeyPressed(int key) override;
 };
 
-bool Test::useVulkan = false;
+bool Test::useVulkan = true;
 
 void Test::initialise() {
 	getSettings().videoVulkan = useVulkan;
@@ -130,7 +130,7 @@ void Test::created() {
 	//renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 
 	//lightDir = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f);
-	light = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true, 35.0f))->setDirection(0.1f, -1.0f, 0.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	light = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true, 4096, 35.0f))->setDirection(0.1f, -1.0f, 0.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	//light = (new Light(Light::TYPE_SPOT, Vector3f(10.0f, 8.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	//light = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(203.47f, 201.31f, 200.79f));
 	lightDir = (new Light(Light::TYPE_SPOT, Vector3f(0.0f, 5.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(203.47f, 201.31f, 200.79f));

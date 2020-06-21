@@ -44,8 +44,6 @@ private:
 		GraphicsPipeline::ColourBlendState colourBlendState;
 		GraphicsPipeline::DepthState       depthState;
 		GraphicsPipeline::CullState        cullState;
-		uint32_t                           viewportWidth;
-		uint32_t                           viewportHeight;
 		bool                               viewportFlippedVk;
 	};
 
@@ -183,7 +181,7 @@ public:
 	static void addRenderShader(unsigned int id, std::string forwardShaderPath, std::vector<std::string> defines = {});
 
 	/* Method used to add a GraphicsPipelineLayout */
-	static void addGraphicsPipelineLayout(unsigned int id, unsigned int renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk);
+	static void addGraphicsPipelineLayout(unsigned int id, unsigned int renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, bool viewportFlippedVk);
 
 	/* Method to assign the current graphics pipeline */
 	static void setCurrentGraphicsPipeline(GraphicsPipeline* pipeline);

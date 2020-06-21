@@ -25,64 +25,65 @@
  * The Light class
  *****************************************************************************/
 
+unsigned int Light::DEFAULT_SHADOW_MAP_SIZE = 1024;
 float Light::DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE = 10.0f;
 
-Light::Light(unsigned int type, Vector3f position, bool castShadows, float directionalLightShadowRange) : type(type) {
+Light::Light(unsigned int type, Vector3f position, bool castShadows, unsigned int shadowMapSize, float directionalLightShadowRange) : type(type) {
 	setPosition(position);
 
 	if (castShadows) {
 		if (type == TYPE_DIRECTIONAL) {
 			//Create FBO
-			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_TEXTURE), true }
+			FBO* fbo = new FBO(shadowMapSize, shadowMapSize, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_TEXTURE), true }
 			});
 
 			//Create the shadow map render pass
 			shadowMapRenderPass = new RenderPass(fbo);
 
 			//Create the graphics pipelines
-			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
-			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass);
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass, shadowMapSize, shadowMapSize);
+			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass, shadowMapSize, shadowMapSize);
 
 			setProjectionMatrix(Matrix4f().initOrthographic(-directionalLightShadowRange, directionalLightShadowRange, -directionalLightShadowRange, directionalLightShadowRange, -directionalLightShadowRange, directionalLightShadowRange));
 		} else if (type == TYPE_POINT) {
 			//Create FBO
-			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
+			FBO* fbo = new FBO(shadowMapSize, shadowMapSize, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
 			});
 
 			//Create the shadow map render pass
 			shadowMapRenderPass = new RenderPass(fbo);
 
 			//Create the graphics pipelines
-			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP), shadowMapRenderPass);
-			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING), shadowMapRenderPass);
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP), shadowMapRenderPass, shadowMapSize, shadowMapSize);
+			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING), shadowMapRenderPass, shadowMapSize, shadowMapSize);
 
 			//Setup the shadow transforms for each face of the cubemap
 			for (unsigned int i = 0; i < 6; ++i)
 				lightShadowTransforms.push_back(Matrix4f());
 
 			//Setup the projection matrix for the shadow map rendering
-			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
+			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) shadowMapSize / (float) shadowMapSize, 1.0f, 25.0f));
 
 			//Create the shadow cubemap descriptor set
 			shadowCubemapDescriptorSet = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP));
 			shadowCubemapDescriptorSet->setup();
 		} else if (type == TYPE_SPOT) {
 			//Create FBO
-			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_TEXTURE), true }
+			FBO* fbo = new FBO(shadowMapSize, shadowMapSize, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_TEXTURE), true }
 			});
 
 			//Create the shadow map render pass
 			shadowMapRenderPass = new RenderPass(fbo);
 
 			//Create the graphics pipeline
-			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
-			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass);
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass, shadowMapSize, shadowMapSize);
+			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass, shadowMapSize, shadowMapSize);
 
 			//Setup the projection matrix for the shadow map rendering
-			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
+			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) shadowMapSize / (float) shadowMapSize, 1.0f, 25.0f));
 		}
 		//Update this light (in case it is static)
 		update();

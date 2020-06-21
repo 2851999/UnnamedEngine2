@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 3
+
+* Moved 'viewportWidth/Height' parameters to GraphicsPipeline
+  constructor instead of GraphicsPipelineLayout
+
+* Changed Light to allow the shadow map size to be changed
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 2 | Experimental 2
 
 * Some cleanup

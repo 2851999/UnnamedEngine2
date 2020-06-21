@@ -101,6 +101,10 @@ private:
 
 	/* List of game objects queued to be renered with this pipeline */
 	std::vector<GameObject*> queuedObjects;
+
+	/* Width and height of the viewport used */
+	uint32_t viewportWidth;
+	uint32_t viewportHeight;
 public:
 	/* Structure used to store data required for creating a render pipeline */
 	struct VertexInputData {
@@ -111,7 +115,7 @@ public:
 	};
 
 	/* Constructor */
-	GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass);
+	GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass, uint32_t viewportWidth = 0, uint32_t viewportHeight = 0);
 
 	/* Destructor */
 	virtual ~GraphicsPipeline();
@@ -164,15 +168,11 @@ private:
 	GraphicsPipeline::DepthState       depthState;
 	GraphicsPipeline::CullState        cullState;
 
-	/* The width and height of the view port */
-	uint32_t viewportWidth;
-	uint32_t viewportHeight;
-
 	/* States whether the viewport should be flipped (Vulkan is flipped compared to OpenGL) */
 	bool viewportFlippedVk;
 public:
 	/* Constructor */
-	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk);
+	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, bool viewportFlippedVk);
 
 	/* Destructor */
 	virtual ~GraphicsPipelineLayout();
@@ -184,7 +184,5 @@ public:
 	inline GraphicsPipeline::ColourBlendState& getColourBlendState() { return colourBlendState; }
 	inline GraphicsPipeline::DepthState& getDepthState() { return depthState; }
 	inline GraphicsPipeline::CullState& getCullState() { return cullState; }
-	inline uint32_t getViewportWidth() { return viewportWidth; }
-	inline uint32_t getViewportHeight() { return viewportHeight; }
 	inline bool getViewportFlippedVk() { return viewportFlippedVk; }
 };
