@@ -59,10 +59,14 @@ private:
 	/* The stride for data in this VBO */
 	unsigned int          stride = 0;
 
+	/* States whether this VBO will be used in instanced rendering */
 	bool                  instanced;
 
-	/* The bulkan buffer for use with Vulkan */
-	VulkanBuffer* vulkanBuffer = NULL;
+	/* States whether this VBO needs to be updated (For Vulkan synchronisation) */
+	bool                  updatable;
+
+	/* The Vulkan buffers for use with Vulkan */
+	std::vector<VulkanBuffer*> vulkanBuffers;
 
 	/* The attributes this VBO supplies */
 	std::vector<Attribute> attributes;
@@ -75,17 +79,16 @@ private:
 	GLenum convertToGL(VBOUsage usage);
 public:
 	/* The constructors */
-	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, VBOUsage usage, bool instanced = false) :
-		buffer(0), target(target), size(size), data(data), usage(usage), instanced(instanced) {}
+	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, VBOUsage usage, bool instanced = false, bool updatable = false) :
+		buffer(0), target(target), size(size), data(data), usage(usage), instanced(instanced), updatable(updatable) {}
 
 	/* The destructor */
 	virtual ~VBO() {
 		if (buffer > 0)
 			glDeleteBuffers(1, &buffer);
-		if (vulkanBuffer != NULL) {
-			delete vulkanBuffer;
-			vulkanBuffer = NULL;
-		}
+		for (VulkanBuffer* buffer : vulkanBuffers)
+			delete buffer;
+		vulkanBuffers.clear();
 	}
 
 	/* Various OpenGL methods */
@@ -107,11 +110,12 @@ public:
 
 	/* Methods used to update the VBO's data */
 	void update();
+	void updateFrame();
 	void updateStream(GLsizeiptr size);
 
 	/* Setters and getters */
 	inline std::vector<T>& getData() { return data; }
-	inline VulkanBuffer* getVkBuffer() { return vulkanBuffer; }
+	inline VulkanBuffer* getVkBuffer() { return vulkanBuffers[updatable ? Vulkan::getCurrentFrame() : 0]; }
 	inline VkVertexInputBindingDescription getVkBindingDescription() { return vulkanVertexInputBindingDescription; }
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };

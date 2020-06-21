@@ -281,7 +281,7 @@ public:
 	virtual ~MeshRenderData() { destroy(); }
 
 	/* Sets up for rendering */
-	void setup(MeshData* data, std::vector<Material*>& materials, VBOUsage vboUsage = VBOUsage::STATIC);
+	void setup(MeshData* data, std::vector<Material*>& materials, VBOUsage vboUsage = VBOUsage::STATIC, bool updatable = false);
 
 	/* Method to render using the data */
 	void render();
@@ -336,7 +336,7 @@ public:
 	virtual ~Mesh();
 
 	/* Method called to setup this mesh for rendering */
-	void setup(RenderShader* renderShader, VBOUsage vboUsage = VBOUsage::STATIC);
+	void setup(RenderShader* renderShader, VBOUsage vboUsage = VBOUsage::STATIC, bool updatable = false);
 
 	/* Method called to update the animation of this mesh */
 	void updateAnimation(float deltaSeconds);

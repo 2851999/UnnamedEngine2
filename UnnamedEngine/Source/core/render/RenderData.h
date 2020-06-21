@@ -32,20 +32,20 @@ private:
 	/* The VAO */
 	GLuint vao = 0;
 	/* The VBO's used for rendering */
-	std::vector<VBO<float>*> vbosFloat;
+	std::vector<VBO<float>*>         vbosFloat;
 	std::vector<VBO<unsigned int>*>  vbosUInteger;
-	VBO<unsigned int>*         vboIndices = NULL;
+	VBO<unsigned int>*               vboIndices = NULL;
 
 	/* The render mode */
 	GLenum mode;
 
 	/* States the 'count' used for rendering - the number of positions/
 	 * indices */
-	GLsizei count;
+	int count;
 
 	/* States the number of instances to render, instancing is only used if
 	 * this value is greater than zero */
-	GLsizei primcount = -1;
+	int primcount = -1;
 
 	/* The vertex buffer instances and offsets for Vulkan */
 	std::vector<VkBuffer> vboVkInstances;
@@ -95,8 +95,8 @@ public:
 	inline void addVBO(VBO<unsigned int>* vbo) { vbosUInteger.push_back(vbo); }
 	inline void setIndicesVBO(VBO<unsigned int>* vboIndices) { this->vboIndices = vboIndices; }
 	inline void setMode(GLenum mode) { this->mode = mode; }
-	inline void setCount(GLsizei count) { this->count = count; }
-	inline void setNumInstances(GLsizei primcount) { this->primcount = primcount; }
+	inline void setCount(int count) { this->count = count; }
+	inline void setNumInstances(int primcount) { this->primcount = primcount; }
 
 	inline GLuint getVAO() { return vao; }
 	inline std::vector<VkVertexInputBindingDescription> getVkBindingDescriptions() { return bindingVkDescriptions; }

@@ -120,7 +120,7 @@ void Test::created() {
 	utils_random::initialise();
 
 	//renderScene->addLight((new Light(Light::TYPE_DIRECTIONAL))->setDirection(0.0f, -1.0f, 0.4f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
-	for (unsigned int i = 0; i < 10; ++i) {
+	for (unsigned int i = 0; i < 11; ++i) {
 		Light* light = (new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-30.0f, 30.0f), utils_random::randomFloat(0.0f, 18.0f), utils_random::randomFloat(-12.0f, 12.0f)), true))->setDiffuseColour(Colour(utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f)));
 		renderScene->addLight(light);
 		manyLights.push_back(light);

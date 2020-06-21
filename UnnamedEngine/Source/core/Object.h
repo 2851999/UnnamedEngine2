@@ -67,7 +67,7 @@ public:
 	/* Used to set the internal mesh, previous will be deleted if there was one,
 	 * if a shader is supplied, then setup will be called on it otherwise it is assumed
 	 * it has already been setup */
-	void setMesh(Mesh* mesh, RenderShader* shader = NULL, VBOUsage vboUsage = VBOUsage::STATIC);
+	void setMesh(Mesh* mesh, RenderShader* shader = NULL, VBOUsage vboUsage = VBOUsage::STATIC, bool updatable = false);
 
 	inline bool hasMesh() { return mesh; }
 	inline Mesh* getMesh() { return mesh; }

@@ -63,6 +63,8 @@ private:
 	/* Debug console */
 	DebugConsole* debugConsole = NULL;
 
+	//bool stopNext = false;
+
 	/* Method used to initialise the graphics API being used for rendering (Returns whether initialisation was successful) */
 	bool initGraphicsAPI();
 public:
