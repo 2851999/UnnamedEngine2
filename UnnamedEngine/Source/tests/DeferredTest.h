@@ -196,10 +196,10 @@ void Test::update() {
 	light->update();
 	lightDir->update();
 
-	//for (Light* light : manyLights) {
-	//	light->getTransform()->translate(Vector3f(sin(utils_time::getSeconds()), 0.0f, cos(utils_time::getSeconds())) * 0.04f);
-	//	light->update();
-	//}
+	for (Light* light : manyLights) {
+		light->getTransform()->translate(Vector3f(sin(utils_time::getSeconds()), 0.0f, cos(utils_time::getSeconds())) * 0.04f);
+		light->update();
+	}
 
 	//currentExposure += exposureChangeDir * (1.0f * getDeltaSeconds());
 	//if (currentExposure <= minExposure) {

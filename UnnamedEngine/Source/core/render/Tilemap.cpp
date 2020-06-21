@@ -301,12 +301,12 @@ void TilemapLayer::setTileID(float x, float y, unsigned int id) {
 				mapTextureCoords[pos + 7] = bottom;
 
 				//Update the texture coordinates
-				vboTextureCoords->updateStream(mapTextureCoords.size() * sizeof(mapTextureCoords[0]));
+				vboTextureCoords->update();
 			}
 
 			//Update the visibility if necessary
 			if (visibilityChanged)
-				vboVisibility->updateStream(mapVisibility.size() * sizeof(mapVisibility[0]));
+				vboVisibility->update();
 
 			//Assign the id
 			data[dataIndex] = id;
@@ -416,7 +416,7 @@ TextureAtlas* Tilemap::loadTileset(std::string path, std::string name) {
 	return new TextureAtlas(texture, columns, rows, tileCount);
 }
 
-Tilemap* Tilemap::loadTilemap(std::string path, std::string name, bool editable, DataUsage usage) {
+Tilemap* Tilemap::loadTilemap(std::string path, std::string name, bool editable) {
 	//Load the file
 	MLDocument document;
 	document.load(path + name);
@@ -509,7 +509,7 @@ Tilemap* Tilemap::loadTilemap(std::string path, std::string name, bool editable,
 					data[i] -= (currentFirstGID - 1);
 			}
 			//Create and add this layer
-			tilemap->addLayer(new TilemapLayer(name, tileset, columns, rows, tileWidth, tileHeight, data, visible, editable, usage));
+			tilemap->addLayer(new TilemapLayer(name, tileset, columns, rows, tileWidth, tileHeight, data, visible, editable, editable ? DataUsage::DYNAMIC : DataUsage::STATIC));
 		}
 	}
 

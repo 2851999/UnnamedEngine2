@@ -160,7 +160,7 @@ Sprite::~Sprite() {
 }
 
 void Sprite::setupMesh(Texture* texture) {
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL), DataUsage::DYNAMIC);
 	//Add a sub data
 	getMesh()->getData()->addSubData(0, 0, 6, 0);
 	getMaterial()->setDiffuse(texture);

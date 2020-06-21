@@ -42,7 +42,7 @@ void VBO<T>::setup(unsigned int binding) {
 	//Check whether using Vulkan or OpenGL
 	if (! BaseEngine::usingVulkan()) {
 		//Get OpenGL to generate the buffer
-		glGenBuffers(1, &buffer);
+		glGenBuffers(1, &bufferGL);
 		//Bind the buffer
 		bindGL();
 		//Pass the data to OpenGL
@@ -192,7 +192,7 @@ void VBO<T>::update() {
 }
 
 template <typename T>
-void VBO<T>::updateStream(GLsizeiptr size) {
+void VBO<T>::updateStream(uint32_t size) {
 	if (! BaseEngine::usingVulkan()) {
 		bindGL();
 		//Buffer orphaning

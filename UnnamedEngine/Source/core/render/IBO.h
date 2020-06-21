@@ -31,32 +31,27 @@
 
 class IBO {
 private:
-	/* Various pieces of data for OpenGL */
-	GLuint                     bufferGL = 0;
-	unsigned int               size;
+	/* Buffer handle for OpenGL */
+	GLuint bufferGL = 0;
+
+	/* The Vulkan buffer for this IBO */
+	VulkanBufferObject* vulkanBuffer = NULL;
+
+	/* Data for this IBO */
+	uint32_t                   size;
 	std::vector<unsigned int>& data;
 	DataUsage                  usage;
-
-	/* The stride for data in this VBO */
-	unsigned int    stride = 0;
-
-	/* States whether this VBO will be used in instanced rendering */
-	bool            instanced;
-
-	/* The Vulkan buffer for this VBO */
-	VulkanBufferObject* vulkanBuffer = NULL;
 public:
 	/* The constructors */
-	IBO(unsigned int size, std::vector<unsigned int>& data, DataUsage usage, bool instanced = false) :
-		size(size), data(data), usage(usage), instanced(instanced) {
+	IBO(uint32_t size, std::vector<unsigned int>& data, DataUsage usage) :
+		size(size), data(data), usage(usage) {
 	}
 
 	/* The destructor */
 	virtual ~IBO() {
 		if (bufferGL > 0)
 			glDeleteBuffers(1, &bufferGL);
-		if (vulkanBuffer)
-			delete vulkanBuffer;
+		delete vulkanBuffer;
 	}
 
 	/* Various OpenGL methods */
@@ -72,7 +67,7 @@ public:
 	/* Methods used to update the VBO's data */
 	void update();
 	void updateFrame();
-	void updateStream(GLsizeiptr size);
+	void updateStream(uint32_t size);
 
 	/* Setters and getters */
 	inline VulkanBuffer* getVkCurrentBuffer() { return vulkanBuffer->getCurrentBuffer(); }

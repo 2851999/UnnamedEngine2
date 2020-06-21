@@ -71,7 +71,7 @@ void IBO::update() {
 		vulkanBuffer->update(data.data(), 0, data.size() * sizeof(unsigned int));
 }
 
-void IBO::updateStream(GLsizeiptr size) {
+void IBO::updateStream(uint32_t size) {
 	if (! BaseEngine::usingVulkan()) {
 		bindGL();
 		//Buffer orphaning

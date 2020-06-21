@@ -1,4 +1,16 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 2
+
+* Some cleanup
+
+* Removed 'usage' parameter in Tilemap::loadTilemap as now
+  determined by whether the map is editable or not
+
+* Fixed bug: Sprite could case problems updating texture
+             coordinates with multiple frames in flight when
+			 using Vulkan
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 2 | Experimental 1
 
 * Added IBO

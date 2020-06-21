@@ -176,5 +176,5 @@ public:
 	/* Method used to load a tileset from a file */
 	static TextureAtlas* loadTileset(std::string path, std::string name);
 	/* Method used to load a tile map from a file */
-	static Tilemap* loadTilemap(std::string path, std::string name, bool editable = false, DataUsage usage = DataUsage::STATIC);
+	static Tilemap* loadTilemap(std::string path, std::string name, bool editable = false);
 };
