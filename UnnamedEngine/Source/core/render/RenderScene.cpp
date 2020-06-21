@@ -68,6 +68,10 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing,
 		screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 	}
 
+	if (pbr)
+		//Default ambient light parameter for PBR
+		ambientLight = Colour(0.03f, 0.03f, 0.03f);
+
 	//Setup for deferred rendering if needed
 	if (deferred) {
 		descriptorSetGeometryBuffer = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(pbr ? ShaderInterface::DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING : ShaderInterface::DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING));
@@ -247,7 +251,7 @@ void RenderScene::addLight(Light* light) {
 	lights.push_back(light);
 
 	//Check if require new descriptor set for this
-	if (lights.size() % NUM_LIGHTS_IN_BATCH == 1) {
+	if ((lights.size() % NUM_LIGHTS_IN_BATCH) == 1) {
 		//Add a descriptor set for the new batch
 		DescriptorSet* descriptorSetLightBatch = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH));
 

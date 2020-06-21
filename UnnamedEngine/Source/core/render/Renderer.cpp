@@ -48,87 +48,6 @@ Cubemap* Renderer::blankCubemap;
 GraphicsPipeline* Renderer::currentGraphicsPipeline = NULL;
 RenderPass*       Renderer::defaultRenderPass       = NULL;
 
-const unsigned int Renderer::SHADER_MATERIAL                                       = 1;
-const unsigned int Renderer::SHADER_SKY_BOX                                        = 2;
-const unsigned int Renderer::SHADER_FONT                                           = 3;
-const unsigned int Renderer::SHADER_FONT_SDF                                       = 4;
-const unsigned int Renderer::SHADER_LIGHTING                                       = 5;
-const unsigned int Renderer::SHADER_LIGHTING_SKINNING                              = 6;
-const unsigned int Renderer::SHADER_BASIC_PBR_LIGHTING                             = 7;
-const unsigned int Renderer::SHADER_BASIC_PBR_LIGHTING_SKINNING                    = 8;
-const unsigned int Renderer::SHADER_FRAMEBUFFER                                    = 9;
-const unsigned int Renderer::SHADER_SHADOW_MAP                                     = 10;
-const unsigned int Renderer::SHADER_SHADOW_MAP_SKINNING                            = 11;
-const unsigned int Renderer::SHADER_SHADOW_CUBEMAP                                 = 12;
-const unsigned int Renderer::SHADER_SHADOW_CUBEMAP_SKINNING                        = 13;
-const unsigned int Renderer::SHADER_GAMMA_CORRECTION_FXAA                          = 14;
-const unsigned int Renderer::SHADER_DEFERRED_LIGHTING_GEOMETRY                     = 15;
-const unsigned int Renderer::SHADER_DEFERRED_LIGHTING_SKINNING_GEOMETRY            = 16;
-const unsigned int Renderer::SHADER_DEFERRED_LIGHTING                              = 17;
-const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY           = 18;
-const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY  = 19;
-const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING                    = 20;
-const unsigned int Renderer::SHADER_DEFERRED_PBR_SSR                               = 21;
-const unsigned int Renderer::SHADER_TILEMAP                                        = 22;
-const unsigned int Renderer::SHADER_PARTICLE_SYSTEM                                = 23;
-const unsigned int Renderer::SHADER_TERRAIN                                        = 24;
-const unsigned int Renderer::SHADER_DEFERRED_TERRAIN_GEOMETRY                      = 25;
-const unsigned int Renderer::SHADER_PBR_GEN_EQUI_TO_CUBE_MAP                       = 26;
-const unsigned int Renderer::SHADER_PBR_GEN_IRRADIANCE_MAP                         = 27;
-const unsigned int Renderer::SHADER_PBR_GEN_PREFILTER_MAP                          = 28;
-const unsigned int Renderer::SHADER_PBR_GEN_BRDF_INTEGRATION_MAP                   = 29;
-const unsigned int Renderer::SHADER_PBR_LIGHTING                                   = 30;
-const unsigned int Renderer::SHADER_PBR_LIGHTING_SKINNING                          = 31;
-const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING_GEOMETRY                 = 32;
-const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY        = 33;
-const unsigned int Renderer::SHADER_PBR_DEFERRED_LIGHTING                          = 34;
-const unsigned int Renderer::SHADER_BILLBOARDED_FONT                               = 35;
-const unsigned int Renderer::SHADER_BILLBOARDED_FONT_SDF                           = 36;
-
-const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                                      = 1;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                                       = 2;
-const unsigned int Renderer::GRAPHICS_PIPELINE_FONT                                          = 3;
-const unsigned int Renderer::GRAPHICS_PIPELINE_FONT_SDF                                      = 4;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING                                      = 5;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND                                = 6;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING                             = 7;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND                       = 8;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING                            = 9;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND                      = 10;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING                   = 11;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND             = 12;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP                                    = 13;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING                           = 14;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP                                = 15;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING                       = 16;
-const unsigned int Renderer::GRAPHICS_PIPELINE_GUI                                           = 17;
-const unsigned int Renderer::GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA                         = 18;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY                    = 19;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY           = 20;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING                             = 21;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND                       = 22;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY          = 23;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY = 24;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING                   = 25;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND             = 26;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_PBR_SSR                              = 27;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SPRITE                                        = 28;
-const unsigned int Renderer::GRAPHICS_PIPELINE_TILEMAP                                       = 29;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PARTICLE_SYSTEM                               = 30;
-const unsigned int Renderer::GRAPHICS_PIPELINE_TERRAIN                                       = 31;
-const unsigned int Renderer::GRAPHICS_PIPELINE_TERRAIN_BLEND                                 = 32;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY                     = 33;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_LIGHTING                                  = 34;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_LIGHTING_BLEND                            = 35;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_LIGHTING_SKINNING                         = 36;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_LIGHTING_SKINNING_BLEND                   = 37;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_GEOMETRY                = 38;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY       = 39;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING                         = 40;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND                   = 41;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BILLBOARDED_FONT                              = 42;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF                          = 43;
-
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
 }
@@ -533,5 +452,18 @@ GraphicsPipelineLayout* Renderer::getGraphicsPipelineLayout(unsigned int id) {
 	} else {
 		Logger::log("The GraphicsPipelineLayout with the id '" + utils_string::str(id) + "' could not be found", "Renderer", LogType::Error);
 		return NULL;
+	}
+}
+
+GLenum Renderer::convertToGL(DataUsage usage) {
+	switch (usage) {
+		case DataUsage::STATIC:
+			return GL_STATIC_DRAW;
+		case DataUsage::DYNAMIC:
+			return GL_DYNAMIC_DRAW;
+		case DataUsage::STREAM:
+			return GL_STREAM_DRAW;
+		default:
+			return GL_STATIC_DRAW;
 	}
 }

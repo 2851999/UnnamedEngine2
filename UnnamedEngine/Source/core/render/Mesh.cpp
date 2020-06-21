@@ -281,7 +281,7 @@ MeshRenderData::MeshRenderData(MeshData* data, RenderShader* renderShader) {
 	renderData = new RenderData(data->getRenderMode(), numVertices);
 }
 
-void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, VBOUsage vboUsage) {
+void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, DataUsage vboUsage) {
 	//The shader used for the setup
 	Shader* shader = setupShader->getShader();
 
@@ -355,11 +355,11 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, VB
 
 	//Setup bones
 	if (data->hasBones()) {
-		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), VBOUsage::STATIC);
+		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), DataUsage::STATIC);
 		vboBoneIDs->addAttributeWithType(GL_INT, ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
 		renderData->addVBO(vboBoneIDs);
 
-		vboBoneWeights = new VBO<float>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), VBOUsage::STATIC);
+		vboBoneWeights = new VBO<float>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), DataUsage::STATIC);
 		vboBoneWeights->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, 4);
 		renderData->addVBO(vboBoneWeights);
 	}
@@ -536,7 +536,7 @@ Mesh::~Mesh() {
 	delete data;
 }
 
-void Mesh::setup(RenderShader* renderShader, VBOUsage vboUsage) {
+void Mesh::setup(RenderShader* renderShader, DataUsage vboUsage) {
 	this->renderData = new MeshRenderData(this->data, renderShader);
 	this->renderData->setup(data, materials, vboUsage);
 }

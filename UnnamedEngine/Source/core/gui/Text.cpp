@@ -58,7 +58,7 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	else {
 		meshData = new MeshData(3, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS);
 
-		unsigned int numPositions = maxCharacters * 12;;
+		unsigned int numPositions = maxCharacters * 12;
 		unsigned int numTextureCoords = maxCharacters * 8;
 		unsigned int numIndices = maxCharacters * 6;
 		meshData->getPositions().resize(numPositions);
@@ -74,7 +74,7 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	this->font = font;
 	mesh->getMaterial()->setDiffuse(fontTexture);
 	mesh->getMaterial()->update();
-	setMesh(mesh, Renderer::getRenderShader(shaderType), VBOUsage::DYNAMIC);
+	setMesh(mesh, Renderer::getRenderShader(shaderType), DataUsage::DYNAMIC);
 
 	//Assign the colour and other properties
 	setColour(colour);

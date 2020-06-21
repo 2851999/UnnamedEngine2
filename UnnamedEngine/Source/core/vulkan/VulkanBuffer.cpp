@@ -75,11 +75,26 @@ void VulkanBuffer::copyData(const void* dataToCopy, unsigned int offset, VkDevic
 		//Map buffer memory into CPU accessible memory
 		void* data;
 		vkMapMemory(device->getLogical(), dest, offset, size, 0, &data); //Data is now mapped
-		memcpy(data, dataToCopy, (size_t) size); //+ odd number to size seems to fix Vulkan issues
+		memcpy(data, dataToCopy, (size_t) size);
 		vkUnmapMemory(device->getLogical(), dest); //Driver not necessarily copied yet, can either use heap that is host coherent,
 		//or use vkFlushMappedMemoryRanges/vkInvalidateMappedMemoryRanges
 		//First option ensures mapped memory always matches the contents of allocated memory (may lead to worse performance than explicit flushing - but doesn't matter?)
 		//Guaranteed to be complete as of next vkQueueSubmit
+
+		//vkDeviceWaitIdle(Vulkan::getDevice()->getLogical());
+
+		//void* data;
+		//vkMapMemory(device->getLogical(), dest, offset, size, 0, &data); //Data is now mapped
+		//memcpy(data, dataToCopy, (size_t)size);
+		//VkMappedMemoryRange mappedRange ={};
+
+		//mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+		//mappedRange.memory = dest;
+		//mappedRange.offset = offset;
+		//mappedRange.size = size;
+		//vkFlushMappedMemoryRanges(device->getLogical(), 1, &mappedRange);
+
+		//vkUnmapMemory(device->getLogical(), dest);
 	} else
 		Logger::log("Buffer is too small to copy the given data into", "VulkanBuffer", LogType::Warning);
 }
@@ -89,4 +104,56 @@ VulkanBuffer::~VulkanBuffer() {
 	vkFreeMemory(device->getLogical(), bufferMemory, nullptr);
 }
 
+/*****************************************************************************
+ * The VulkanBufferObject class
+ *****************************************************************************/
 
+VulkanBufferObject::VulkanBufferObject(VkDeviceSize bufferSize, VulkanDevice* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, bool useStaging, bool updatable) {
+	this->updatable = updatable;
+
+	//Create the necessary instances
+	if (updatable)
+		buffers.resize(Vulkan::getSwapChain()->getImageCount());
+	else
+		buffers.resize(1);
+
+	for (unsigned int i = 0; i < buffers.size(); ++i)
+		buffers[i] = new VulkanBuffer(bufferSize, device, usage, properties, useStaging);
+}
+
+VulkanBufferObject::VulkanBufferObject(void* data, VkDeviceSize size, VulkanDevice* device, VkBufferUsageFlags usage, bool useStaging, bool updatable) {
+	this->updatable = updatable;
+
+	//Create the necessary instances
+	if (updatable)
+		buffers.resize(Vulkan::getSwapChain()->getImageCount());
+	else
+		buffers.resize(1);
+
+	for (unsigned int i = 0; i < buffers.size(); ++i)
+		buffers[i] = new VulkanBuffer(data, size, device, usage, useStaging);
+
+}
+
+VulkanBufferObject::~VulkanBufferObject() {
+	for (VulkanBuffer* buffer : buffers)
+		delete buffer;
+}
+
+void VulkanBufferObject::updateFrame(const void* data, unsigned int offset, VkDeviceSize size) {
+	buffers[updatable ? Vulkan::getCurrentFrame() : 0]->copyData(data, offset, size);
+
+	if (! updatable)
+		Logger::log("Attempting to update VulkanBufferObject without being updatable can cause synchronisation issues", "VulkanBufferObject", LogType::Warning);
+}
+
+void VulkanBufferObject::update(void* data, unsigned int offset, unsigned int size) {
+	if (updatable)
+		Vulkan::updateVulkanBufferObject(this, data, offset, size);
+	else
+		updateFrame(data, offset, size);
+}
+
+VulkanBuffer* VulkanBufferObject::getCurrentBuffer() {
+	return buffers[updatable ? Vulkan::getCurrentFrame() : 0];
+}

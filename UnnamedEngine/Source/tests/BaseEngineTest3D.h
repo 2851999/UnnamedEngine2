@@ -61,14 +61,14 @@ void Test::onInitialise() {
 	getSettings().videoVSync = true;
 	getSettings().videoMaxFPS = 0;
 	//getSettings().videoSamples = 0;
-	getSettings().videoVulkan = false;
+	getSettings().videoVulkan = true;
 	getSettings().debugVkValidationLayersEnabled = true;
 }
 
 void Test::onCreated() {
-	Shader::compileEngineShaderToSPIRV("ParticleShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("ParticleShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
@@ -105,8 +105,8 @@ void Test::onCreated() {
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
 
-	//	model2->getMesh()->getSkeleton()->startAnimation("");
-		//model2->getMesh()->getSkeleton()->stopAnimation();
+	//model2->getMesh()->getSkeleton()->startAnimation("");
+	//model2->getMesh()->getSkeleton()->stopAnimation();
 
 	model3 = new GameObject3D(resourceLoader.loadModel("deformablesphere.dae"), shaderSkinning);
 	model3->setPosition(2.0f, 0.8f, 0.0f);

@@ -86,7 +86,7 @@ ShaderInterface::ShaderInterface() {
 
 	//Core
 	DescriptorSetLayout* cameraLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_CAMERA);
-	cameraLayout->addUBO(sizeof(ShaderBlock_Camera), GL_STATIC_DRAW, UBO_BINDING_LOCATION_CAMERA);
+	cameraLayout->addUBO(sizeof(ShaderBlock_Camera), DataUsage::STATIC, UBO_BINDING_LOCATION_CAMERA);
 	cameraLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_CAMERA, cameraLayout);
@@ -100,7 +100,7 @@ ShaderInterface::ShaderInterface() {
 	materialLayout->addTexture2D(4);
 	materialLayout->addTexture2D(5);
 
-	materialLayout->addUBO(sizeof(ShaderBlock_Material), GL_STATIC_DRAW, UBO_BINDING_LOCATION_MATERIAL);
+	materialLayout->addUBO(sizeof(ShaderBlock_Material), DataUsage::STATIC, UBO_BINDING_LOCATION_MATERIAL);
 
 	materialLayout->setup();
 
@@ -108,7 +108,7 @@ ShaderInterface::ShaderInterface() {
 
 	//Model
 	DescriptorSetLayout* modelLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_MODEL);
-	modelLayout->addUBO(sizeof(ShaderBlock_Model), GL_STATIC_DRAW, UBO_BINDING_LOCATION_MODEL);
+	modelLayout->addUBO(sizeof(ShaderBlock_Model), DataUsage::STATIC, UBO_BINDING_LOCATION_MODEL);
 	modelLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_MODEL, modelLayout);
@@ -118,29 +118,29 @@ ShaderInterface::ShaderInterface() {
 	//Add shadow map textures
 	lightBatchLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 7, 6);
 	lightBatchLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_CUBE, 13, 6);
-	lightBatchLayout->addUBO(sizeof(ShaderBlock_LightBatch), GL_STATIC_DRAW, UBO_BINDING_LOCATION_LIGHT_BATCH);
+	lightBatchLayout->addUBO(sizeof(ShaderBlock_LightBatch), DataUsage::STATIC, UBO_BINDING_LOCATION_LIGHT_BATCH);
 	lightBatchLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH, lightBatchLayout);
 
 	//Model skinning
 	DescriptorSetLayout* modelSkinningLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_MODEL);
-	modelSkinningLayout->addUBO(sizeof(ShaderBlock_Model), GL_STATIC_DRAW, UBO_BINDING_LOCATION_MODEL);
-	modelSkinningLayout->addUBO(sizeof(ShaderBlock_Skinning), GL_STATIC_DRAW, UBO_BINDING_LOCATION_SKINNING);
+	modelSkinningLayout->addUBO(sizeof(ShaderBlock_Model), DataUsage::STATIC, UBO_BINDING_LOCATION_MODEL);
+	modelSkinningLayout->addUBO(sizeof(ShaderBlock_Skinning), DataUsage::STATIC, UBO_BINDING_LOCATION_SKINNING);
 	modelSkinningLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING, modelSkinningLayout);
 
 	//Shadow cubemap
 	DescriptorSetLayout* shadowCubemapLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
-	shadowCubemapLayout->addUBO(sizeof(ShaderBlock_ShadowCubemap), GL_STATIC_DRAW, UBO_BINDING_LOCATION_SHADOW_CUBEMAP);
+	shadowCubemapLayout->addUBO(sizeof(ShaderBlock_ShadowCubemap), DataUsage::STATIC, UBO_BINDING_LOCATION_SHADOW_CUBEMAP);
 	shadowCubemapLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP, shadowCubemapLayout);
 
 	//Gamma correction FXAA
 	DescriptorSetLayout* gammaCorrectionFXAALayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
-	gammaCorrectionFXAALayout->addUBO(sizeof(ShaderBlock_GammaCorrectionFXAA), GL_STATIC_DRAW, UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA);
+	gammaCorrectionFXAALayout->addUBO(sizeof(ShaderBlock_GammaCorrectionFXAA), DataUsage::STATIC, UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA);
 	gammaCorrectionFXAALayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA, gammaCorrectionFXAALayout);
@@ -179,7 +179,7 @@ ShaderInterface::ShaderInterface() {
 
 	//Billboard
 	DescriptorSetLayout* billboardLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
-	billboardLayout->addUBO(sizeof(ShaderBlock_Billboard), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_BILLBOARD);
+	billboardLayout->addUBO(sizeof(ShaderBlock_Billboard), DataUsage::DYNAMIC, UBO_BINDING_LOCATION_BILLBOARD);
 	billboardLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_BILLBOARD, billboardLayout);
@@ -189,7 +189,7 @@ ShaderInterface::ShaderInterface() {
 
 	cdlodTerrainLayout->addTexture2D(6); //Height map
 
-	cdlodTerrainLayout->addUBO(sizeof(ShaderBlock_Terrain), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_TERRAIN);
+	cdlodTerrainLayout->addUBO(sizeof(ShaderBlock_Terrain), DataUsage::DYNAMIC, UBO_BINDING_LOCATION_TERRAIN);
 	cdlodTerrainLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_TERRAIN, cdlodTerrainLayout);
@@ -206,14 +206,14 @@ ShaderInterface::ShaderInterface() {
 
 	//SDF Text
 	DescriptorSetLayout* sdfTextLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
-	sdfTextLayout->addUBO(sizeof(ShaderBlock_SDFText), GL_STATIC_DRAW, UBO_BINDING_LOCATION_SDF_TEXT);
+	sdfTextLayout->addUBO(sizeof(ShaderBlock_SDFText), DataUsage::STATIC, UBO_BINDING_LOCATION_SDF_TEXT);
 	sdfTextLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_SDF_TEXT, sdfTextLayout);
 
 	//Billboarded SDF Text
 	DescriptorSetLayout* billboardSDFTextLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_SCENE);
-	billboardSDFTextLayout->addUBO(sizeof(ShaderBlock_Billboard), GL_DYNAMIC_DRAW, UBO_BINDING_LOCATION_BILLBOARD);
+	billboardSDFTextLayout->addUBO(sizeof(ShaderBlock_Billboard), DataUsage::DYNAMIC, UBO_BINDING_LOCATION_BILLBOARD);
 	billboardSDFTextLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT, billboardSDFTextLayout);

@@ -34,6 +34,8 @@ BaseEngine::BaseEngine() {
 	window = new Window();
 }
 
+using namespace utils_string;
+
 void BaseEngine::create() {
 	//Initialise the game, the settings should be set when this is called
 	initialise();
@@ -59,9 +61,10 @@ void BaseEngine::create() {
 
 		//Assign the default font and text instance
 		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
+		//defaultFont = new Font("resources/fonts/CONSOLA.TTF", 60);
 		//defaultFont = new Font("resources/fonts/testFont.fnt", 22);
 		//defaultFont = new Font("resources/fonts/testFont.fnt", 40);
-		textInstance = new Text(defaultFont, Colour::WHITE, 400);
+		textInstance = new Text(defaultFont, Colour::WHITE, 500);
 		//Create the debug camera
 		debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
 		debugCamera->update();
@@ -78,10 +81,10 @@ void BaseEngine::create() {
 			debugConsole->hide();
 		}
 
-		if (! getSettings().videoVulkan) {
+		if (!getSettings().videoVulkan) {
 
-		//	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
-		//	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
+			//	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
+			//	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 
 			if (getSettings().engineSplashScreen) {
 				Renderer::addCamera(debugCamera);
@@ -124,12 +127,12 @@ void BaseEngine::create() {
 
 		//The main game loop - continues until either the window is told to close,
 		//or the game requests it to stop
-		while ((! window->shouldClose()) && (! closeRequested)) {
+		while ((!window->shouldClose()) && (!closeRequested)) {
 			fpsLimiter.startFrame();
 			fpsCalculator.update();
 
 			//Ensure the debug console isn't open
-			if (! debugConsole || ! debugConsole->isVisible())
+			if (!debugConsole || !debugConsole->isVisible())
 				update();
 			else
 				debugConsole->update();
@@ -196,8 +199,6 @@ void BaseEngine::create() {
 	delete window;
 }
 
-using namespace utils_string;
-
 void BaseEngine::renderDebugInfo() {
 	if (! BaseEngine::usingVulkan()) {
 //		glEnable(GL_BLEND);
@@ -209,23 +210,25 @@ void BaseEngine::renderDebugInfo() {
 
 	Renderer::addCamera(debugCamera);
 
-	textInstance->render(str("----------- DEBUG -----------\n") +
-							 "Engine Version : " + str(Engine::Version) + "\n" +
-							 "Engine Date    : " + str(Engine::DateCreated) + "\n" +
-							 "Engine Build   : " + str(Engine::Build) + "\n" +
-							 "Current Delta  : " + str((int) getDelta()) + "\n" +
-							 "Current FPS    : " + str(getFPS()) + "\n" +
-							 "----------- VIDEO -----------\n" +
-							 "Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
-							 "VSync          : " + str(getSettings().videoVSync) + "\n" +
-							 "MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
-							 "Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
-							 "Vulkan         : " + str(getSettings().videoVulkan) + "\n" +
-							 "----------- AUDIO -----------\n" +
-							 "Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
-							 "SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
-							 "-----------------------------"
-							 , 2, 16);
+	if (getSettings().debugShowInformation) {
+		textInstance->render(str("----------- DEBUG -----------\n") +
+			"Engine Version : " + str(Engine::Version) + "\n" +
+			"Engine Date    : " + str(Engine::DateCreated) + "\n" +
+			"Engine Build   : " + str(Engine::Build) + "\n" +
+			"Current Delta  : " + str((int)getDelta()) + "\n" +
+			"Current FPS    : " + str(getFPS()) + "\n" +
+			"----------- VIDEO -----------\n" +
+			"Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
+			"VSync          : " + str(getSettings().videoVSync) + "\n" +
+			"MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
+			"Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
+			"Vulkan         : " + str(getSettings().videoVulkan) + "\n" +
+			"----------- AUDIO -----------\n" +
+			"Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
+			"SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
+			"-----------------------------"
+			, 2, 16);
+	}
 
 	Renderer::removeCamera();
 

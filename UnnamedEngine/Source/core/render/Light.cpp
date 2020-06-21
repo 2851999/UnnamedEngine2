@@ -25,7 +25,9 @@
  * The Light class
  *****************************************************************************/
 
-Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type) {
+float Light::DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE = 10.0f;
+
+Light::Light(unsigned int type, Vector3f position, bool castShadows, float directionalLightShadowRange) : type(type) {
 	setPosition(position);
 
 	if (castShadows) {
@@ -42,7 +44,7 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type
 			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
 			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass);
 
-			setProjectionMatrix(Matrix4f().initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f));
+			setProjectionMatrix(Matrix4f().initOrthographic(-directionalLightShadowRange, directionalLightShadowRange, -directionalLightShadowRange, directionalLightShadowRange, -directionalLightShadowRange, directionalLightShadowRange));
 		} else if (type == TYPE_POINT) {
 			//Create FBO
 			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
@@ -127,9 +129,6 @@ void Light::update() {
 		shadowCubemapData.shadowMatrices[3] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, -1.0f, 0.0f), Vector3f(0.0f, 0.0f, -1.0f));
 		shadowCubemapData.shadowMatrices[4] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, 1.0f), Vector3f(0.0f, -1.0f, 0.0f));
 		shadowCubemapData.shadowMatrices[5] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, -1.0f), Vector3f(0.0f, -1.0f, 0.0f));
-
-		//Update the descriptor set
-		shadowCubemapDescriptorSet->getUBO(0)->updateFrame(&shadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
 	} else if (type == TYPE_SPOT && shadowMapRenderPass) {
 		//The position of the spot light
 		Vector3f pos = getPosition();
@@ -153,9 +152,12 @@ void Light::update() {
 
 void Light::useView() {
 	//Bind the shadow cubemap if needed
-	if (shadowCubemapDescriptorSet)
+	if (shadowCubemapDescriptorSet) {
+		//Update the descriptor set
+		shadowCubemapDescriptorSet->getUBO(0)->updateFrame(&shadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
+
 		shadowCubemapDescriptorSet->bind();
-	else
+	} else
 		Camera::useView();
 }
 

@@ -129,7 +129,7 @@ public:
 	/* Stucture for storing information about a UBO */
 	struct UBOInfo {
 		unsigned int size;
-		GLenum       usage;
+		DataUsage    usage;
 		unsigned int binding;
 	};
 private:
@@ -169,7 +169,7 @@ public:
 	/* Methods to add UBOs and Textures to this layout */
 	inline void addTexture2D(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, binding, 1); }
 	inline void addTextureCube(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_CUBE, binding, 1); }
-	inline void addUBO(unsigned int size, GLenum usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
+	inline void addUBO(unsigned int size, DataUsage usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
 
 	/* Getters */
 	inline unsigned int getSetNumber() { return setNumber; }

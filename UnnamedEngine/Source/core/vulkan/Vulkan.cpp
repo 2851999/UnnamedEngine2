@@ -33,18 +33,18 @@
  * The Vulkan class
  *****************************************************************************/
 
-VkInstance                                   Vulkan::instance;
-VkSurfaceKHR                                 Vulkan::windowSurface;
-VulkanDevice*                                Vulkan::device;
-VulkanSwapChain*                             Vulkan::swapChain;
-VkCommandPool                                Vulkan::commandPool;
-std::vector<VkCommandBuffer>                 Vulkan::commandBuffers;
-std::vector<VkSemaphore>                     Vulkan::imageAvailableSemaphores;
-std::vector<VkSemaphore>                     Vulkan::renderFinishedSemaphores;
-std::vector<VkFence>                         Vulkan::inFlightFences;
-unsigned int                                 Vulkan::currentFrame = 0;
-std::vector<Vulkan::DescriptorSetUpdateInfo> Vulkan::descriptorSetUpdateQueue;
-std::vector<Vulkan::UBOUpdateInfo>			 Vulkan::uboUpdateQueue;
+VkInstance                                        Vulkan::instance;
+VkSurfaceKHR                                      Vulkan::windowSurface;
+VulkanDevice*                                     Vulkan::device;
+VulkanSwapChain*                                  Vulkan::swapChain;
+VkCommandPool                                     Vulkan::commandPool;
+std::vector<VkCommandBuffer>                      Vulkan::commandBuffers;
+std::vector<VkSemaphore>                          Vulkan::imageAvailableSemaphores;
+std::vector<VkSemaphore>                          Vulkan::renderFinishedSemaphores;
+std::vector<VkFence>                              Vulkan::inFlightFences;
+unsigned int                                      Vulkan::currentFrame = 0;
+std::vector<Vulkan::DescriptorSetUpdateInfo>      Vulkan::descriptorSetUpdateQueue;
+std::vector<Vulkan::VulkanBufferObjectUpdateInfo> Vulkan::vulkanBufferObjectUpdateQueue;
 
 bool Vulkan::initialise(Window* window) {
 	//Initialise Vulkan
@@ -424,9 +424,9 @@ void Vulkan::destroySyncObjects() {
 }
 
 void Vulkan::update() {
-	//Update descriptor sets and UBOs
+	//Update descriptor sets and VulkanBufferObjects
 	updateDescriptorSetQueue();
-	updateUBOQueue();
+	updateVulkanBufferObjectQueue();
 }
 
 void Vulkan::startDraw() {
@@ -529,10 +529,10 @@ void Vulkan::updateDescriptorSetQueue() {
 		descriptorSetUpdateQueue.erase(descriptorSetUpdateQueue.begin(), descriptorSetUpdateQueue.begin() + removeEnd);
 }
 
-void Vulkan::updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size) {
+void Vulkan::updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size) {
 	//Setup the structure for the queue
-	UBOUpdateInfo info;
-	info.ubo             = ubo;
+	VulkanBufferObjectUpdateInfo info;
+	info.instance        = instance;
 	info.data            = data;
 	info.offset          = offset;
 	info.size            = size;
@@ -540,12 +540,12 @@ void Vulkan::updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int s
 	info.updatesLeft     = getSwapChain()->getImageCount();
 
 	//Add the set to the update queue
-	uboUpdateQueue.push_back(info);
+	vulkanBufferObjectUpdateQueue.push_back(info);
 }
 
-bool Vulkan::updateUBOFrame(UBOUpdateInfo& info) {
+bool Vulkan::updateVulkanBufferObjectFrame(VulkanBufferObjectUpdateInfo& info) {
 	//Update the set for the current frame
-	info.ubo->updateFrame(info.data, info.offset, info.size);
+	info.instance->updateFrame(info.data, info.offset, info.size);
 
 	//Reduce the number of updates left by 1
 	info.updatesLeft--;
@@ -554,18 +554,18 @@ bool Vulkan::updateUBOFrame(UBOUpdateInfo& info) {
 	return info.updatesLeft <= 0;
 }
 
-void Vulkan::updateUBOQueue() {
+void Vulkan::updateVulkanBufferObjectQueue() {
 	//Indices of data to be removed
 	unsigned int removeEnd = 0;
 	//Go through the descriptor sets
-	for (unsigned int i = 0; i < uboUpdateQueue.size(); ++i) {
+	for (unsigned int i = 0; i < vulkanBufferObjectUpdateQueue.size(); ++i) {
 		//Update the current set, and prepare to remove it if finished updating
-		if (updateUBOFrame(uboUpdateQueue[i]))
+		if (updateVulkanBufferObjectFrame(vulkanBufferObjectUpdateQueue[i]))
 			removeEnd++;
 	}
 	//Remove all finished updates from the queue
 	if (removeEnd > 0)
-		uboUpdateQueue.erase(uboUpdateQueue.begin(), uboUpdateQueue.begin() + removeEnd);
+		vulkanBufferObjectUpdateQueue.erase(vulkanBufferObjectUpdateQueue.begin(), vulkanBufferObjectUpdateQueue.begin() + removeEnd);
 }
 
 VkSampleCountFlagBits Vulkan::getMaxUsableSampleCount(unsigned int targetSamples) {

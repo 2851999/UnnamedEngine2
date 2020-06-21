@@ -84,13 +84,13 @@ private:
 	/* Method to update the descriptor sets in the update queue */
 	static void updateDescriptorSetQueue();
 
-	/* Structure for storing info about a requested UBO update */
-	struct UBOUpdateInfo {
-		//The UBO instance to be updated
-		UBO* ubo;
+	/* Structure for storing info about a requested VulkanBufferObject update */
+	struct VulkanBufferObjectUpdateInfo {
+		//The VulkanBufferObject instance to be updated
+		VulkanBufferObject* instance;
 
 		//The information needed to perform the update each frame
-		void*        data;
+		void* data;
 		unsigned int offset;
 		unsigned int size;
 
@@ -101,14 +101,14 @@ private:
 		unsigned int updatesLeft;
 	};
 
-	/* List of UBO updates to perform */
-	static std::vector<UBOUpdateInfo> uboUpdateQueue;
+	/* List of VulkanBufferObject updates to perform */
+	static std::vector<VulkanBufferObjectUpdateInfo> vulkanBufferObjectUpdateQueue;
 
-	/* Method to update a UBO for the current frame (Returns whether the set has been fully updated) */
-	static bool updateUBOFrame(UBOUpdateInfo& info);
+	/* Method to update a VulkanBufferObject for the current frame (Returns whether the set has been fully updated) */
+	static bool updateVulkanBufferObjectFrame(VulkanBufferObjectUpdateInfo& info);
 
-	/* Method to update UBOs in the update queue*/
-	static void updateUBOQueue();
+	/* Method to update VulkanBufferObject in the update queue*/
+	static void updateVulkanBufferObjectQueue();
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -162,8 +162,8 @@ public:
 	/* Method to update a descriptor set */
 	static void updateDescriptorSet(DescriptorSet* set);
 
-	/* Method to update a UBO */
-	static void updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size);
+	/* Method to update a VulkanBufferObject */
+	static void updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size);
 
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);
