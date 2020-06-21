@@ -49,7 +49,7 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	for (unsigned int i = 0; i < 12u; ++i)
 		data.push_back(vertexBufferData[i]);
 
-	renderData = new RenderData(GL_TRIANGLE_STRIP, 4);
+	renderData = new RenderData(4);
 
 	shader = Renderer::getRenderShader(Renderer::SHADER_PARTICLE_SYSTEM);
 

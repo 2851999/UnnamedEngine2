@@ -113,15 +113,15 @@ void RenderData::renderWithoutBinding() {
 		if (primcount > 0) {
 			//Check for indices
 			if (ibo)
-				glDrawElementsInstanced(mode, count, GL_UNSIGNED_INT, (void*) NULL, primcount);
+				glDrawElementsInstanced(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), count, GL_UNSIGNED_INT, (void*) NULL, primcount);
 			else
-				glDrawArraysInstanced(mode, 0, count, primcount);
+				glDrawArraysInstanced(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), 0, count, primcount);
 		} else {
 			//Check for indices
 			if (ibo)
-				glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) NULL);
+				glDrawElements(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), count, GL_UNSIGNED_INT, (void*) NULL);
 			else
-				glDrawArrays(mode, 0, count);
+				glDrawArrays(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), 0, count);
 		}
 	} else {
 		if (primcount > 0) {
@@ -146,7 +146,7 @@ void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset
 		if (primcount == -1) {
 			//Check for indices
 			if (ibo)
-				glDrawElementsBaseVertex(mode, count, GL_UNSIGNED_INT, (void*) (indicesOffset * sizeof(unsigned int)), baseVertex); //Assume indices stored as unsigned integers
+				glDrawElementsBaseVertex(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), count, GL_UNSIGNED_INT, (void*) (indicesOffset * sizeof(unsigned int)), baseVertex); //Assume indices stored as unsigned integers
 		}
 	} else {
 		//Check for instancing

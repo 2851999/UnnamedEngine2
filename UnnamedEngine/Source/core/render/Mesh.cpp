@@ -278,7 +278,7 @@ MeshRenderData::MeshRenderData(MeshData* data, RenderShader* renderShader) {
 	}
 
 	//Create the RenderData instance
-	renderData = new RenderData(data->getRenderMode(), count);
+	renderData = new RenderData(count);
 }
 
 void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, DataUsage vboUsage) {

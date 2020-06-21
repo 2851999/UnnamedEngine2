@@ -58,10 +58,10 @@ public:
 };
 
 void Test::onInitialise() {
-	getSettings().videoVSync = true;
+	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
 	//getSettings().videoSamples = 0;
-	getSettings().videoVulkan = true;
+	getSettings().videoVulkan = false;
 	getSettings().debugVkValidationLayersEnabled = true;
 }
 

@@ -199,7 +199,7 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 
 		modelMatrix.initIdentity();
 
-		renderData = new RenderData(GL_TRIANGLES, numIndices);
+		renderData = new RenderData(numIndices);
 		RenderShader* renderShader = Renderer::getRenderShader(Renderer::SHADER_TILEMAP);
 		shader = renderShader;
 

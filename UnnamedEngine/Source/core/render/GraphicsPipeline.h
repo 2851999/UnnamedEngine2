@@ -170,6 +170,9 @@ private:
 
 	/* States whether the viewport should be flipped (Vulkan is flipped compared to OpenGL) */
 	bool viewportFlippedVk;
+
+	/* Primitive topology used for OpenGL */
+	GLenum primitiveTopologyGL;
 public:
 	/* Constructor */
 	GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, bool viewportFlippedVk);
@@ -185,4 +188,5 @@ public:
 	inline GraphicsPipeline::DepthState& getDepthState() { return depthState; }
 	inline GraphicsPipeline::CullState& getCullState() { return cullState; }
 	inline bool getViewportFlippedVk() { return viewportFlippedVk; }
+	inline GLenum getPrimitiveTopologyGL() { return primitiveTopologyGL; }
 };

@@ -1,4 +1,11 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 4
+
+* Changed RenderData to use the current GraphicsPipeline
+  bound to determine the primitive topology to use when
+  using OpenGL
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 2 | Experimental 3
 
 * Moved 'viewportWidth/Height' parameters to GraphicsPipeline

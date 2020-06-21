@@ -37,9 +37,6 @@ private:
 	std::vector<VBO<unsigned int>*>  vbosUInteger;
 	IBO*                             ibo = NULL;
 
-	/* The render mode */
-	GLenum mode;
-
 	/* States the 'count' used for rendering - the number of positions/
 	 * indices */
 	int count;
@@ -63,7 +60,7 @@ private:
 	ShaderBlock_Model modelData;
 public:
 	/* The constructor */
-	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}
+	RenderData(GLsizei count) : count(count) {}
 
 	/* The destructor */
 	virtual ~RenderData();
@@ -95,7 +92,6 @@ public:
 	inline void addVBO(VBO<float>* vbo) { vbosFloat.push_back(vbo); }
 	inline void addVBO(VBO<unsigned int>* vbo) { vbosUInteger.push_back(vbo); }
 	inline void setIBO(IBO* ibo) { this->ibo = ibo; }
-	inline void setMode(GLenum mode) { this->mode = mode; }
 	inline void setCount(int count) { this->count = count; }
 	inline void setNumInstances(int primcount) { this->primcount = primcount; }
 
