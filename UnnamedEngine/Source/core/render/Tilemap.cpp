@@ -203,18 +203,18 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 		RenderShader* renderShader = Renderer::getRenderShader(Renderer::SHADER_TILEMAP);
 		shader = renderShader;
 
-		vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, mapIndices.size() * sizeof(mapIndices[0]), mapIndices, usage);
-		renderData->setIndicesVBO(vboIndices);
+		ibo = new IBO(mapIndices.size() * sizeof(mapIndices[0]), mapIndices, usage);
+		renderData->setIBO(ibo);
 
-		vboVertices = new VBO<float>(GL_ARRAY_BUFFER, mapVertices.size() * sizeof(mapVertices[0]), mapVertices, usage, false);
+		vboVertices = new VBO<float>(mapVertices.size() * sizeof(mapVertices[0]), mapVertices, usage, false);
 		vboVertices->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, 2);
 		renderData->addVBO(vboVertices);
 
-		vboTextureCoords = new VBO<float>(GL_ARRAY_BUFFER, mapTextureCoords.size() * sizeof(mapTextureCoords[0]), mapTextureCoords, usage, false);
+		vboTextureCoords = new VBO<float>(mapTextureCoords.size() * sizeof(mapTextureCoords[0]), mapTextureCoords, usage, false);
 		vboTextureCoords->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, 2);
 		renderData->addVBO(vboTextureCoords);
 
-		vboVisibility = new VBO<float>(GL_ARRAY_BUFFER, mapVisibility.size() * sizeof(mapVisibility[0]), mapVisibility, usage, false);
+		vboVisibility = new VBO<float>(mapVisibility.size() * sizeof(mapVisibility[0]), mapVisibility, usage, false);
 		vboVisibility->addAttribute(ATTRIBUTE_LOCATION_VISIBILITY, 1);
 		renderData->addVBO(vboVisibility);
 
@@ -226,7 +226,7 @@ TilemapLayer::~TilemapLayer() {
 	if (visible) {
 		delete material;
 		delete renderData;
-		delete vboIndices;
+		delete ibo;
 		delete vboVertices;
 		delete vboTextureCoords;
 		delete vboVisibility;

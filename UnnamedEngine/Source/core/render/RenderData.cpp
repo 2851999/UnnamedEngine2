@@ -77,9 +77,9 @@ void RenderData::setup(RenderShader* renderShader) {
 	}
 
 	//Now setup the indices VBO if assigned
-	if (vboIndices) {
-		vboIndices->setup(0);
-		vboIndices->startRendering();
+	if (ibo) {
+		ibo->setup();
+		ibo->startRendering();
 	}
 
 	if (! BaseEngine::usingVulkan())
@@ -98,8 +98,8 @@ void RenderData::bindBuffers() {
 			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkCurrentBuffer()->getInstance();
 
 		vkCmdBindVertexBuffers(Vulkan::getCurrentCommandBuffer(), 0, vboVkInstances.size(), vboVkInstances.data(), vboVkOffsets.data());
-		if (vboIndices)
-			vkCmdBindIndexBuffer(Vulkan::getCurrentCommandBuffer(), vboIndices->getVkCurrentBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
+		if (ibo)
+			vkCmdBindIndexBuffer(Vulkan::getCurrentCommandBuffer(), ibo->getVkCurrentBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
 	}
 }
 void RenderData::unbindBuffers() {
@@ -112,13 +112,13 @@ void RenderData::renderWithoutBinding() {
 		//Check for instancing
 		if (primcount > 0) {
 			//Check for indices
-			if (vboIndices)
+			if (ibo)
 				glDrawElementsInstanced(mode, count, GL_UNSIGNED_INT, (void*) NULL, primcount);
 			else
 				glDrawArraysInstanced(mode, 0, count, primcount);
 		} else {
 			//Check for indices
-			if (vboIndices)
+			if (ibo)
 				glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) NULL);
 			else
 				glDrawArrays(mode, 0, count);
@@ -126,13 +126,13 @@ void RenderData::renderWithoutBinding() {
 	} else {
 		if (primcount > 0) {
 			//Check for indices
-			if (vboIndices)
+			if (ibo)
 				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, primcount, 0, 0, 0);
 			else
 				vkCmdDraw(Vulkan::getCurrentCommandBuffer(), count, primcount, 0, 0);
 		} else if (primcount == -1) {
 			//Check for indices
-			if (vboIndices)
+			if (ibo)
 				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, 1, 0, 0, 0);
 			else
 				vkCmdDraw(Vulkan::getCurrentCommandBuffer(), count, 1, 0, 0);
@@ -145,14 +145,14 @@ void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset
 		//Check for instancing
 		if (primcount == -1) {
 			//Check for indices
-			if (vboIndices)
+			if (ibo)
 				glDrawElementsBaseVertex(mode, count, GL_UNSIGNED_INT, (void*) (indicesOffset * sizeof(unsigned int)), baseVertex); //Assume indices stored as unsigned integers
 		}
 	} else {
 		//Check for instancing
 		if (primcount == -1) {
 			//Check for indices
-			if (vboIndices)
+			if (ibo)
 				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, 1, indicesOffset, baseVertex, 0);
 		}
 	}

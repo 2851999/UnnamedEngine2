@@ -19,6 +19,7 @@
 #pragma once
 
 #include "VBO.h"
+#include "IBO.h"
 #include "UBO.h"
 #include "Texture.h"
 #include "ShaderInterface.h"
@@ -34,7 +35,7 @@ private:
 	/* The VBO's used for rendering */
 	std::vector<VBO<float>*>         vbosFloat;
 	std::vector<VBO<unsigned int>*>  vbosUInteger;
-	VBO<unsigned int>*               vboIndices = NULL;
+	IBO*                             ibo = NULL;
 
 	/* The render mode */
 	GLenum mode;
@@ -93,7 +94,7 @@ public:
 	/* The setters and getters */
 	inline void addVBO(VBO<float>* vbo) { vbosFloat.push_back(vbo); }
 	inline void addVBO(VBO<unsigned int>* vbo) { vbosUInteger.push_back(vbo); }
-	inline void setIndicesVBO(VBO<unsigned int>* vboIndices) { this->vboIndices = vboIndices; }
+	inline void setIBO(IBO* ibo) { this->ibo = ibo; }
 	inline void setMode(GLenum mode) { this->mode = mode; }
 	inline void setCount(int count) { this->count = count; }
 	inline void setNumInstances(int primcount) { this->primcount = primcount; }

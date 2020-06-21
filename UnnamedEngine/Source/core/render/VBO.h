@@ -48,17 +48,16 @@ public:
 	};
 private:
 	/* Various pieces of data for OpenGL */
-	GLuint           buffer;
-	GLenum           target;
-	GLsizeiptr       size;
-	std::vector<T>&  data;
-	DataUsage        usage;
+	GLuint          buffer;
+	unsigned int    size;
+	std::vector<T>& data;
+	DataUsage       usage;
 
 	/* The stride for data in this VBO */
-	unsigned int          stride = 0;
+	unsigned int    stride = 0;
 
 	/* States whether this VBO will be used in instanced rendering */
-	bool                  instanced;
+	bool            instanced;
 
 	/* The Vulkan buffer for this VBO */
 	VulkanBufferObject* vulkanBuffer = NULL;
@@ -71,22 +70,21 @@ private:
 	std::vector<VkVertexInputAttributeDescription> vulkanAttributeDescriptions;
 public:
 	/* The constructors */
-	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, DataUsage usage, bool instanced = false) :
-		buffer(0), target(target), size(size), data(data), usage(usage), instanced(instanced) {}
+	VBO(unsigned int size, std::vector<T>& data, DataUsage usage, bool instanced = false) :
+		buffer(0), size(size), data(data), usage(usage), instanced(instanced) {}
 
 	/* The destructor */
 	virtual ~VBO() {
 		if (buffer > 0)
 			glDeleteBuffers(1, &buffer);
-		if (vulkanBuffer)
-			delete vulkanBuffer;
+		delete vulkanBuffer;
 	}
 
 	/* Various OpenGL methods */
-	inline void bind() { glBindBuffer(target, buffer); }
+	inline void bindGL() { glBindBuffer(GL_ARRAY_BUFFER, buffer); }
 
 	/* Used to add an attribute */
-	void addAttributeWithType(GLuint type, GLint location, GLint size, GLuint divisor = 0);
+	void addAttributeWithType(GLuint type, GLint location, int size, GLuint divisor = 0);
 	inline void addAttribute(int location, int size, unsigned int divisor = 0) { addAttributeWithType(GL_FLOAT, location, size, divisor); }
 
 	/* Used to create and setup this VBO */
@@ -110,4 +108,3 @@ public:
 	inline VkVertexInputBindingDescription getVkBindingDescription() { return vulkanVertexInputBindingDescription; }
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };
-

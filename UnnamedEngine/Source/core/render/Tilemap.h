@@ -65,11 +65,13 @@ private:
 	/* The material of this layer used for rendering */
 	Material* material;
 
-	/* The VBO's for OpenGL */
-	VBO<unsigned int>* vboIndices = NULL;
-	VBO<float>* vboVertices = NULL;
+	/* The IBO */
+	IBO* ibo = NULL;
+
+	/* The VBO's */
+	VBO<float>* vboVertices      = NULL;
 	VBO<float>* vboTextureCoords = NULL;
-	VBO<float>* vboVisibility = NULL;
+	VBO<float>* vboVisibility    = NULL;
 
 	/* The shader used for rendering */
 	RenderShader* shader = NULL;
