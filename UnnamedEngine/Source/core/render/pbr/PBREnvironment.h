@@ -24,18 +24,19 @@
   *****************************************************************************/
 
 #include "../Texture.h"
+#include "../FBO.h"
 
 class PBREnvironment {
 private:
 	/* The cubemaps and textures required */
-	Cubemap* environmentCubemap = NULL;
+	FramebufferAttachment* environmentCubemap = NULL;
 	Cubemap* irradianceCubemap = NULL;
 	Cubemap* prefilterCubemap = NULL;
 
 	Texture* brdfLUTTexture = NULL;
 public:
 	/* The constructor */
-	PBREnvironment(Cubemap* environmentCubemap, Cubemap* irradianceCubemap, Cubemap* prefilterCubemap, Texture* brdfLUTTexture) :
+	PBREnvironment(FramebufferAttachment* environmentCubemap, Cubemap* irradianceCubemap, Cubemap* prefilterCubemap, Texture* brdfLUTTexture) :
 		environmentCubemap(environmentCubemap), irradianceCubemap(irradianceCubemap), prefilterCubemap(prefilterCubemap), brdfLUTTexture(brdfLUTTexture) {
 	}
 
@@ -49,7 +50,7 @@ public:
 	}
 
 	/* Getters */
-	Cubemap* getEnvironmentCubemap() { return environmentCubemap; }
+	FramebufferAttachment* getEnvironmentCubemap() { return environmentCubemap; }
 	Cubemap* getIrradianceCubemap() { return irradianceCubemap; }
 	Cubemap* getPrefilterCubemap() { return prefilterCubemap; }
 

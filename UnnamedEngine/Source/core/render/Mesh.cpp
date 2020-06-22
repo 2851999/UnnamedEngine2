@@ -268,17 +268,17 @@ MeshRenderData::MeshRenderData(MeshData* data, RenderShader* renderShader) {
 	this->setupShader = renderShader;
 	//Determine the number of vertices
 	if (data->hasIndices()) {
-		//As the data has indices, this will determine the number of vertices
-		numVertices = data->getNumIndices();
+		//As the data has indices, this will determine the count
+		count = data->getNumIndices();
 		hasIndices = true;
 	} else {
-		//As there are no indices, the number of positions will be the number of vertices
-		numVertices = data->getNumPositions();
+		//As there are no indices, the number of positions will be the value needed for count
+		count = data->getNumPositions();
 		hasIndices = false;
 	}
 
 	//Create the RenderData instance
-	renderData = new RenderData(data->getRenderMode(), numVertices);
+	renderData = new RenderData(count);
 }
 
 void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, DataUsage vboUsage) {
@@ -287,42 +287,42 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, Da
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
-		vboPositions = new VBO<float>(GL_ARRAY_BUFFER, data->getPositions().size() * sizeof(data->getPositions()[0]), data->getPositions(), vboUsage);
+		vboPositions = new VBO<float>(data->getPositions().size() * sizeof(data->getPositions()[0]), data->getPositions(), vboUsage);
 		vboPositions->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, data->getNumDimensions());
 		renderData->addVBO(vboPositions);
 	}
 
 	//Setup colours
 	if (data->hasColours() && data->separateColours()) {
-		vboColours = new VBO<float>(GL_ARRAY_BUFFER, data->getColours().size() * sizeof(data->getColours()[0]), data->getColours(), vboUsage);
+		vboColours = new VBO<float>(data->getColours().size() * sizeof(data->getColours()[0]), data->getColours(), vboUsage);
 		vboColours->addAttribute(shader->getAttributeLocation("Colour"), 4); //Won't work for Vulkan
 		renderData->addVBO(vboColours);
 	}
 
 	//Setup texture coordinates
 	if (data->hasTextureCoords() && data->separateTextureCoords()) {
-		vboTextureCoords = new VBO<float>(GL_ARRAY_BUFFER, data->getTextureCoords().size() * sizeof(data->getTextureCoords()[0]), data->getTextureCoords(), vboUsage);
+		vboTextureCoords = new VBO<float>(data->getTextureCoords().size() * sizeof(data->getTextureCoords()[0]), data->getTextureCoords(), vboUsage);
 		vboTextureCoords->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TEXTURE_COORD, 2);
 		renderData->addVBO(vboTextureCoords);
 	}
 
 	//Setup normals
 	if (data->hasNormals() && data->separateNormals()) {
-		vboNormals = new VBO<float>(GL_ARRAY_BUFFER, data->getNormals().size() * sizeof(data->getNormals()[0]), data->getNormals(), vboUsage);
+		vboNormals = new VBO<float>(data->getNormals().size() * sizeof(data->getNormals()[0]), data->getNormals(), vboUsage);
 		vboNormals->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_NORMAL, 3);
 		renderData->addVBO(vboNormals);
 	}
 
 	//Setup tangents
 	if (data->hasTangents() && data->separateTangents()) {
-		vboTangents = new VBO<float>(GL_ARRAY_BUFFER, data->getTangents().size() * sizeof(data->getTangents()[0]), data->getTangents(), vboUsage);
+		vboTangents = new VBO<float>(data->getTangents().size() * sizeof(data->getTangents()[0]), data->getTangents(), vboUsage);
 		vboTangents->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_TANGENT, 3);
 		renderData->addVBO(vboTangents);
 	}
 
 	//Setup bitangents
 	if (data->hasBitangents() && data->separateBitangents()) {
-		vboBitangents = new VBO<float>(GL_ARRAY_BUFFER, data->getBitangents().size() * sizeof(data->getBitangents()[0]), data->getBitangents(), vboUsage);
+		vboBitangents = new VBO<float>(data->getBitangents().size() * sizeof(data->getBitangents()[0]), data->getBitangents(), vboUsage);
 		vboBitangents->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BITANGENT, 3);
 		renderData->addVBO(vboBitangents);
 	}
@@ -330,7 +330,7 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, Da
 	//Check to see whether the 'other' VBO is required
 	if (data->hasOthers()) {
 
-		vboOthers = new VBO<float>(GL_ARRAY_BUFFER, data->getOthers().size() * sizeof(data->getOthers()[0]), data->getOthers(), vboUsage);
+		vboOthers = new VBO<float>(data->getOthers().size() * sizeof(data->getOthers()[0]), data->getOthers(), vboUsage);
 
 		if (data->hasPositions() && ! data->separatePositions())
 			vboOthers->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, data->getNumDimensions());
@@ -355,19 +355,19 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, Da
 
 	//Setup bones
 	if (data->hasBones()) {
-		vboBoneIDs = new VBO<unsigned int>(GL_ARRAY_BUFFER, data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), DataUsage::STATIC);
+		vboBoneIDs = new VBO<unsigned int>(data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), DataUsage::STATIC);
 		vboBoneIDs->addAttributeWithType(GL_INT, ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
 		renderData->addVBO(vboBoneIDs);
 
-		vboBoneWeights = new VBO<float>(GL_ARRAY_BUFFER, data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), DataUsage::STATIC);
+		vboBoneWeights = new VBO<float>(data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), DataUsage::STATIC);
 		vboBoneWeights->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, 4);
 		renderData->addVBO(vboBoneWeights);
 	}
 
 	//Check to see whether indices are needed
 	if (data->hasIndices()) {
-		vboIndices = new VBO<unsigned int>(GL_ELEMENT_ARRAY_BUFFER, data->getNumIndices() * sizeof(data->getIndices()[0]), data->getIndices(), vboUsage);
-		renderData->setIndicesVBO(vboIndices);
+		ibo = new IBO(data->getNumIndices() * sizeof(data->getIndices()[0]), data->getIndices(), vboUsage);
+		renderData->setIBO(ibo);
 	}
 
 	//Setup the materials for rendering
@@ -386,12 +386,12 @@ void MeshRenderData::updatePositions(MeshData* data) {
 	if (vboPositions) {
 		//Determine the number of vertices
 		if (data->hasIndices()) {
-			//As the data has indices, this will determine the number of vertices
-			numVertices = data->getNumIndices();
+			//As the data has indices, this will determine the count
+			count = data->getNumIndices();
 			hasIndices = true;
 		} else {
-			//As there are no indices, the number of positions will be the number of vertices
-			numVertices = data->getNumPositions();
+			//As there are no indices, the number of positions will be the value needed for count
+			count = data->getNumPositions();
 			hasIndices = false;
 		}
 
@@ -404,7 +404,7 @@ void MeshRenderData::updatePositions(MeshData* data) {
 		} else
 			vboPositions->update();
 
-		renderData->setCount(numVertices);
+		renderData->setCount(count);
 	} else
 		Logger::log("Cannot update positions as the VBO is not assigned (Are they stored separately?)", "MeshRenderData", LogType::Warning);
 }
@@ -480,21 +480,21 @@ void MeshRenderData::updateBitangents() {
 }
 
 void MeshRenderData::updateIndices(MeshData* data) {
-	if (vboIndices) {
-		//As the data has indices, this will determine the number of vertices
-		numVertices = data->getNumIndices();
+	if (ibo) {
+		//As the data has indices, this will determine the count
+		count = data->getNumIndices();
 		hasIndices = true;
 
-		renderData->setCount(numVertices);
+		renderData->setCount(count);
 
 		if (! BaseEngine::usingVulkan()) {
 			glBindVertexArray(renderData->getVAO());
 
-			vboIndices->update();
+			ibo->update();
 
 			glBindVertexArray(0);
 		} else
-			vboIndices->update();
+			ibo->update();
 	} else
 		Logger::log("Cannot update indices as the VBO is not assigned", "MeshRenderData", LogType::Warning);
 }
@@ -507,10 +507,10 @@ void MeshRenderData::destroy() {
 	delete vboNormals;
 	delete vboTangents;
 	delete vboBitangents;
-	delete vboOthers;
-	delete vboIndices;
 	delete vboBoneIDs;
 	delete vboBoneWeights;
+	delete vboOthers;
+	delete ibo;
 }
 
 /*****************************************************************************

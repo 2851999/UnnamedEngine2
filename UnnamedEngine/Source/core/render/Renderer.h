@@ -44,8 +44,6 @@ private:
 		GraphicsPipeline::ColourBlendState colourBlendState;
 		GraphicsPipeline::DepthState       depthState;
 		GraphicsPipeline::CullState        cullState;
-		uint32_t                           viewportWidth;
-		uint32_t                           viewportHeight;
 		bool                               viewportFlippedVk;
 	};
 
@@ -150,6 +148,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND                   = 41;
 	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT                              = 42;
 	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF                          = 43;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP                      = 44;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
@@ -183,7 +182,7 @@ public:
 	static void addRenderShader(unsigned int id, std::string forwardShaderPath, std::vector<std::string> defines = {});
 
 	/* Method used to add a GraphicsPipelineLayout */
-	static void addGraphicsPipelineLayout(unsigned int id, unsigned int renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk);
+	static void addGraphicsPipelineLayout(unsigned int id, unsigned int renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, bool viewportFlippedVk);
 
 	/* Method to assign the current graphics pipeline */
 	static void setCurrentGraphicsPipeline(GraphicsPipeline* pipeline);

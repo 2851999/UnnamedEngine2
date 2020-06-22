@@ -51,6 +51,7 @@ const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_TERRAIN              
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT             = 12;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_SDF_TEXT                    = 13;
 const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT          = 14;
+const unsigned int ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP    = 15;
 
 /* The locations for attributes in the shaders */
 const unsigned int ShaderInterface::ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -217,6 +218,17 @@ ShaderInterface::ShaderInterface() {
 	billboardSDFTextLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT, billboardSDFTextLayout);
+
+	//PBR GenEquiToCubeMap
+	DescriptorSetLayout* pbrGenEquiToCubeMapLayout = new DescriptorSetLayout(0);
+
+	pbrGenEquiToCubeMapLayout->addTexture2D(0);
+
+	pbrGenEquiToCubeMapLayout->addUBO(sizeof(ShaderBlock_PBRGenEnvMap), DataUsage::STATIC, 0);
+
+	pbrGenEquiToCubeMapLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP, pbrGenEquiToCubeMapLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -407,6 +419,8 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_SDF_TEXT));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT));
+	} else if (shaderID == Renderer::SHADER_PBR_GEN_EQUI_TO_CUBE_MAP) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP));
 	}
 }
 

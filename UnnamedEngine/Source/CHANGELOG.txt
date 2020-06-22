@@ -1,4 +1,84 @@
 --------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 (V0.5.3)
+
+* Added IBO
+* Added FramebufferAttachment::Type::COLOUR_CUBEMAP
+
+* Changed RenderData to use the current GraphicsPipeline
+  bound to determine the primitive topology to use when
+  using OpenGL
+* Changed SkyBox to take a Texture instance instead of
+  Cubemap for better compatability with
+  FramebufferAttachment
+* Changed equirectangular to cubemap generation in
+  PBREnvironment to use a geometry shader
+
+* Moved 'viewportWidth/Height' parameters to GraphicsPipeline
+  constructor instead of GraphicsPipelineLayout
+
+* Removed 'usage' parameter in Tilemap::loadTilemap as now
+  determined by whether the map is editable or not
+
+* Fixed bug: Sprite could case problems updating texture
+             coordinates with multiple frames in flight when
+			 using Vulkan
+
+* Some cleanup
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 6
+
+* Changed equirectangular to cubemap generation in
+  PBREnvironment to use a geometry shader
+
+* Fixed IBL in previous commit
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 5
+
+* Added FramebufferAttachment::Type::COLOUR_CUBEMAP
+
+* Changed SkyBox to take a Texture instance instead of
+  Cubemap for better compatability with
+  FramebufferAttachment
+
+* IBL currently broken
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 4
+
+* Changed RenderData to use the current GraphicsPipeline
+  bound to determine the primitive topology to use when
+  using OpenGL
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 3
+
+* Moved 'viewportWidth/Height' parameters to GraphicsPipeline
+  constructor instead of GraphicsPipelineLayout
+
+* Changed Light to allow the shadow map size to be changed
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 2
+
+* Some cleanup
+
+* Removed 'usage' parameter in Tilemap::loadTilemap as now
+  determined by whether the map is editable or not
+
+* Fixed bug: Sprite could case problems updating texture
+             coordinates with multiple frames in flight when
+			 using Vulkan
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 1
+
+* Added IBO
+
+* Some cleanup
+
+--------------------------------------------------------------
 Release 2 | Beta 2 | Development 2 (V0.5.2)
 
 * Added VulkanBufferObject
@@ -20,9 +100,7 @@ Release 2 | Beta 2 | Development 2 (V0.5.2)
 * Fixed bug: Multiple point light shadows would cause
              flickering when using Vulkan
 * Fixed bug: Updating a VBO could cause problems in Vulkan
-             with multiple fames in flight
-* Fixed bug: Occasional flickering rendering a
-             ParticleSystem when multiple frames in flight
+             with multiple frames in flight
 
 * Some cleanup of Renderer
 
@@ -35,7 +113,8 @@ Release 2 | Beta 2 | Development 1 | Experimental 6
 * Removed UBO update queue in Vulkan
 
 * Fixed bug: Occasional flickering rendering a
-             ParticleSystem when multiple frames in flight
+             ParticleSystem when multiple frames were in
+			 flight
 
 -------------------------------------------------------------
 Release 2 | Beta 2 | Development 1 | Experimental 5
@@ -52,7 +131,7 @@ Release 2 | Beta 2 | Development 1 | Experimental 4
 * Added VulkanBufferObject
 
 * Fixed bug: Updating a VBO could cause problems in Vulkan
-             with multiple fames in flight
+             with multiple frames in flight
 
 * Some cleanup of previous commit
 

@@ -58,6 +58,15 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 
 			getParameters().setFilter(TextureParameters::Filter::NEAREST);
 			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+		}  else if (type == Type::COLOUR_CUBEMAP) {
+				vulkanFormat      = VK_FORMAT_R16G16B16A16_SFLOAT;
+				usage             = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+				aspectMask        = VK_IMAGE_ASPECT_COLOR_BIT;
+				vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+				imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			//getParameters().setFilter(TextureParameters::Filter::LINEAR); //Assigned in PBREnvironment currently
+			//getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		} else if (type == Type::DEPTH_TEXTURE) {
 			vulkanFormat      = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -87,7 +96,7 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		}
 
-		if (type != Type::DEPTH_CUBEMAP)
+		if (type != Type::COLOUR_CUBEMAP && type != Type::DEPTH_CUBEMAP)
 			setupVk(getWidth(), getHeight(), static_cast<VkSampleCountFlagBits>(samples == 0 ? 1 : samples), vulkanFormat, usage, aspectMask, imageLayout);
 		else
 			setupCubemapVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask, imageLayout);
@@ -106,6 +115,15 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 
 			getParameters().setFilter(TextureParameters::Filter::NEAREST);
 			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+		}  else if (type == Type::COLOUR_CUBEMAP) {
+			getParameters().setTarget(GL_TEXTURE_CUBE_MAP);
+			internalFormat = GL_RGBA16F;
+			format = GL_RGBA;
+			glType = GL_FLOAT;
+			attachment = GL_COLOR_ATTACHMENT0 + indexOfColourAttachment;
+
+			//getParameters().setFilter(TextureParameters::Filter::LINEAR); //Assigned in PBREnvironment currently
+			//getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		} else if (type == Type::DEPTH_TEXTURE) {
 			getParameters().setTarget(GL_TEXTURE_2D);
 			internalFormat = GL_DEPTH_COMPONENT24;
@@ -135,7 +153,7 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		}
 
-		if (type != Type::DEPTH_CUBEMAP) {
+		if (type != Type::COLOUR_CUBEMAP && type != Type::DEPTH_CUBEMAP) {
 			//Check for render buffer object
 			if (getParameters().getTarget() == GL_RENDERBUFFER) {
 				//Setup the render buffer
@@ -169,12 +187,18 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			create();
 			bind();
 
+			//glTexStorage2D(GL_TEXTURE_CUBE_MAP, 1, GL_RGBA16F, getWidth(), getHeight());
+
 			for (unsigned int i = 0; i < 6; ++i) {
 				//if (multisample)
 				//	glTexImage2DMultisample(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
 				//else
-					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
 			}
+
+			//https://www.khronos.org/opengl/wiki/Common_Mistakes#Creating_a_complete_texture ?????
+			//Seem to have to do here in order to not have GL_INVALID_OPERATION occur when trying later
+			//glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 			applyParameters(false, false);
 
@@ -220,7 +244,7 @@ FBO::FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachmentInfo>
 		else
 			this->attachments[i].shouldDelete = false;
 
-		if (this->attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE)
+		if (this->attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE || this->attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_CUBEMAP)
 			index++;
 	}
 
@@ -274,7 +298,7 @@ void FBO::setup(RenderPass* renderPass) {
 			attachments[i].attachment->setup(index);
 
 			//Add the colour attachments
-			if (attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE) {
+			if (attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE || attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_CUBEMAP) {
 				colourAttachments.push_back(GL_COLOR_ATTACHMENT0 + i);
 				index++;
 			}

@@ -24,7 +24,7 @@
  * The SkyBox class
  *****************************************************************************/
 
-SkyBox::SkyBox(Cubemap* cubemap) {
+SkyBox::SkyBox(Texture* cubemap) {
 	//Assign the cubemap
 	this->cubemap = cubemap;
 	//Create the skybox

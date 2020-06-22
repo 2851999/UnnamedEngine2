@@ -49,11 +49,11 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	for (unsigned int i = 0; i < 12u; ++i)
 		data.push_back(vertexBufferData[i]);
 
-	renderData = new RenderData(GL_TRIANGLE_STRIP, 4);
+	renderData = new RenderData(4);
 
 	shader = Renderer::getRenderShader(Renderer::SHADER_PARTICLE_SYSTEM);
 
-	vboVertices = new VBO<float>(GL_ARRAY_BUFFER, sizeof(vertexBufferData), data, DataUsage::STATIC, false);
+	vboVertices = new VBO<float>(sizeof(vertexBufferData), data, DataUsage::STATIC, false);
 	vboVertices->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, 3, 0);
 	renderData->addVBO(vboVertices);
 
@@ -62,15 +62,15 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	particleColourData.resize(maxParticles * 4);
 	particleTextureData.resize(maxParticles * 4);
 
-	vboPositionSizeData = new VBO<float>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(float), particlePositionSizeData, DataUsage::STREAM, true);
+	vboPositionSizeData = new VBO<float>(maxParticles * 4 * sizeof(float), particlePositionSizeData, DataUsage::STREAM, true);
 	vboPositionSizeData->addAttribute(ATTRIBUTE_LOCATION_POSITION_DATA, 4, 1);
 	renderData->addVBO(vboPositionSizeData);
 
-	vboColours = new VBO<float>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(float), particleColourData, DataUsage::STREAM, true);
+	vboColours = new VBO<float>(maxParticles * 4 * sizeof(float), particleColourData, DataUsage::STREAM, true);
 	vboColours->addAttribute(ATTRIBUTE_LOCATION_COLOUR, 4, 1);
 	renderData->addVBO(vboColours);
 
-	vboTextureData = new VBO<float>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(float), particleTextureData, DataUsage::STREAM, true);
+	vboTextureData = new VBO<float>(maxParticles * 4 * sizeof(float), particleTextureData, DataUsage::STREAM, true);
 	vboTextureData->addAttribute(ATTRIBUTE_LOCATION_TEXTURE_DATA, 4, 1);
 	renderData->addVBO(vboTextureData);
 

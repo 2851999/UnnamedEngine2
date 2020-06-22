@@ -29,7 +29,15 @@
   * The GraphicsPipeline class
   *****************************************************************************/
 
-GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass) : layout(layout), renderShader(layout->getRenderShader()), colourBlendState(layout->getColourBlendState()), depthState(layout->getDepthState()), cullState(layout->getCullState()) {
+GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* renderPass, uint32_t viewportWidth, uint32_t viewportHeight) : layout(layout), viewportWidth(viewportWidth), viewportHeight(viewportHeight), renderShader(layout->getRenderShader()), colourBlendState(layout->getColourBlendState()), depthState(layout->getDepthState()), cullState(layout->getCullState()) {
+	//Check if the viewport width/height was assigned
+	if (this->viewportWidth == 0) {
+		//Assign default values of the window width/height
+		Settings settings = Window::getCurrentInstance()->getSettings();
+		this->viewportWidth  = settings.windowWidth;
+		this->viewportHeight = settings.windowHeight;
+	}
+	
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
 		VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
@@ -78,21 +86,21 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 		VkViewport viewport = {};
 		if (layout->getViewportFlippedVk()) {
 			viewport.x      = 0.0f;
-			viewport.y      = (float) layout->getViewportHeight();
-			viewport.width  = (float) layout->getViewportWidth();
+			viewport.y      = (float) this->viewportHeight;
+			viewport.width  = (float) this->viewportWidth;
 			viewport.height = -((float) viewport.y); //Flip so that it resembles OpenGL
 		} else {
 			viewport.x      = 0.0f;
 			viewport.y      = 0.0f;
-			viewport.width  = (float) layout->getViewportWidth();
-			viewport.height = (float) layout->getViewportHeight();
+			viewport.width  = (float) this->viewportWidth;
+			viewport.height = (float) this->viewportHeight;
 		}
 		viewport.minDepth   = 0.0f;
 		viewport.maxDepth   = 1.0f;
 
 		VkRect2D scissor = {};
 		scissor.offset = { 0, 0 };
-		scissor.extent = { layout->getViewportWidth(), layout->getViewportHeight() };
+		scissor.extent = { this->viewportWidth, this->viewportHeight };
 
 		VkPipelineViewportStateCreateInfo viewportState = {};
 		viewportState.sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -210,7 +218,7 @@ void GraphicsPipeline::bind() {
 		vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline);
 	} else {
 		//Assign the viewport
-		glViewport(0, 0, layout->getViewportWidth(), layout->getViewportHeight());
+		glViewport(0, 0, viewportWidth, viewportHeight);
 
 		//Use the shader
 		renderShader->getShader()->use();
@@ -436,8 +444,8 @@ VkFrontFace GraphicsPipeline::convertToVk(FrontFace face) {
  * The GraphicsPipelineLayout class
  *****************************************************************************/
 
-GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk) :
-	renderShader(renderShader), vertexInputData(vertexInputData), colourBlendState(colourBlendState), depthState(depthState), cullState(cullState), viewportWidth(viewportWidth), viewportHeight(viewportHeight), viewportFlippedVk(viewportFlippedVk) {
+GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, bool viewportFlippedVk) :
+	renderShader(renderShader), vertexInputData(vertexInputData), colourBlendState(colourBlendState), depthState(depthState), cullState(cullState), viewportFlippedVk(viewportFlippedVk) {
 
 	//Ensure using Vulkan
 	if (BaseEngine::usingVulkan()) {
@@ -448,7 +456,7 @@ GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, Graph
 		for (auto& it : renderShader->getDescriptorSetLayouts())
 			layouts.push_back(it.second->getVkLayout());
 
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo ={};
 		pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount         = static_cast<uint32_t>(layouts.size()); //Optional
 		pipelineLayoutInfo.pSetLayouts            = layouts.data(); //Optional
@@ -457,6 +465,9 @@ GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, Graph
 
 		if (vkCreatePipelineLayout(Vulkan::getDevice()->getLogical(), &pipelineLayoutInfo, nullptr, &vulkanPipelineLayout) != VK_SUCCESS)
 			Logger::log("Failed to create pipeline layout", "RenderPipeline", LogType::Error);
+	} else {
+		//Assign the primitive topology used for rendering in OpenGL
+		primitiveTopologyGL = GraphicsPipeline::convertToGL(vertexInputData.primitiveTopology);
 	}
 }
 
