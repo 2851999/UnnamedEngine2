@@ -159,11 +159,22 @@ void Test::onCreated() {
 
 	mit1->getMesh()->getMaterial(2)->setShininess(Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_rough.jpg"));
 	mit1->getMesh()->getMaterial(2)->setNormalMap(Texture::loadTexture(resourceLoader.getAbsPathModels() + "Sphere-Bot Basic/Sphere_Bot_nmap_1.jpg"));
+	mit1->getMesh()->getMaterial(2)->update();
 
 	//mit1->setScale(0.5f, 0.5f, 0.5f);
 	mit1->setPosition(10.0f, 1.0f, 0.0f);
 	mit1->update();
 	scene->add(mit1);
+
+	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
+
+	GameObject3D* model2 = new GameObject3D(mesh2, pbrRenderShader);
+	model2->setPosition(0.0f, 1.5f, 0.0f);
+	model2->update();
+	model2->getMesh()->getMaterial(1)->setDiffuse(environment->getBRDFLUTTexture());
+	model2->getMesh()->getMaterial(1)->update();
+	scene->add(model2);
+
 
 	//	GameObject3D* testObject = new GameObject3D(resourceLoader.loadPBRModel("pbr/", "Cerberus_LP.FBX"), pbrRenderShader);
 	//	testObject->setScale(0.05f, 0.05f, 0.05f);

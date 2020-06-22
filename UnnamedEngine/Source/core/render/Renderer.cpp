@@ -251,6 +251,8 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP, SHADER_PBR_GEN_EQUI_TO_CUBE_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, true);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_IRRADIANCE_MAP, SHADER_PBR_GEN_IRRADIANCE_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, true);
 
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_BRDF_INTEGRATION_MAP, SHADER_PBR_GEN_BRDF_INTEGRATION_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, true);
+
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();
 

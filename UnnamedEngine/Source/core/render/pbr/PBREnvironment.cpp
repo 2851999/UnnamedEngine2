@@ -226,28 +226,26 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	//-------------------------------------------------- RENDER BDRF INTEGRATION MAP --------------------------------------------------
 
-	Texture* brdfLUTTexture = new Texture(TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true));
-	brdfLUTTexture->bind();
+	//Texture* brdfLUTTexture = new Texture(TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true));
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, 0, GL_RG, GL_FLOAT, 0);
+	FramebufferAttachment* brdfLUTTexture = new FramebufferAttachment(BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, FramebufferAttachment::Type::COLOUR_TEXTURE);
+	brdfLUTTexture->getParameters().setFilter(TextureParameters::Filter::LINEAR);
+	brdfLUTTexture->getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 
-	brdfLUTTexture->applyParameters(false);
+	FBO* fboBRDFLUTTexture = new FBO(BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, {
+		FramebufferAttachmentInfo{ brdfLUTTexture, true, false }//,
+		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
+	});
 
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTTexture->getHandle(), 0);
+	RenderPass* renderPassBRDFLUTTexture = new RenderPass(fboBRDFLUTTexture);
+	GraphicsPipeline* pipelineBRDFLUTTexture = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_PBR_GEN_BRDF_INTEGRATION_MAP), renderPassBRDFLUTTexture, BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE);
 
-	glViewport(0, 0, BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE);
-	shader4->use();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	renderPassBRDFLUTTexture->begin();
+	pipelineBRDFLUTTexture->bind();
+
 	quadMesh->render();
 
-	brdfLUTTexture->unbind();
-
-	shader4->stopUsing();
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	renderPassBRDFLUTTexture->end();
 
 	//---------------------------------------------------------------------------------------------------------------------------------
 

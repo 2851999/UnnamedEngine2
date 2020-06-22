@@ -151,6 +151,8 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP                      = 44;
 	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_IRRADIANCE_MAP                        = 45;
 
+	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_BRDF_INTEGRATION_MAP                  = 47;
+
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */
 	static void addCamera(Camera* camera);

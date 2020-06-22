@@ -1,4 +1,10 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 2
+
+* Fixed bug: BRDF LUT was not generated correctly
+             in PBREnvironment
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 3 | Experimental 1
 
 * Changed irradiance cubemap generation in PBREnvironment to
