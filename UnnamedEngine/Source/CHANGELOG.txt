@@ -1,5 +1,46 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 1
+
+* Changed irradiance cubemap generation in PBREnvironment to
+  use a geometry shader
+
+* Fixed bug: Irradiance cubemap was not generated correctly
+             in PBREnvironment
+
+* Some cleanup
+
+--------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 (V0.5.3)
+
+* Added IBO
+* Added FramebufferAttachment::Type::COLOUR_CUBEMAP
+
+* Changed RenderData to use the current GraphicsPipeline
+  bound to determine the primitive topology to use when
+  using OpenGL
+* Changed SkyBox to take a Texture instance instead of
+  Cubemap for better compatability with
+  FramebufferAttachment
+* Changed equirectangular to cubemap generation in
+  PBREnvironment to use a geometry shader
+
+* Moved 'viewportWidth/Height' parameters to GraphicsPipeline
+  constructor instead of GraphicsPipelineLayout
+
+* Removed 'usage' parameter in Tilemap::loadTilemap as now
+  determined by whether the map is editable or not
+
+* Fixed bug: Sprite could case problems updating texture
+             coordinates with multiple frames in flight when
+			 using Vulkan
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 2 | Experimental 6
+
+* Changed equirectangular to cubemap generation in
+  PBREnvironment to use a geometry shader
 
 * Fixed IBL in previous commit
 

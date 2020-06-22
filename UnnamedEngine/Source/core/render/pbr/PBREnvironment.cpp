@@ -130,6 +130,35 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	//---------------------------------- RENDER IRRADIANCE CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP ----------------------------------
 
+	FramebufferAttachment* irradianceCubemap = new FramebufferAttachment(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP);
+	irradianceCubemap->getParameters().setFilter(TextureParameters::Filter::LINEAR);
+	irradianceCubemap->getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
+
+	FBO* fboIrradianceMap = new FBO(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, {
+		FramebufferAttachmentInfo{ irradianceCubemap, true, false }//,
+		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
+	});
+
+	RenderPass* renderPassIrradianceMap = new RenderPass(fboIrradianceMap);
+	GraphicsPipeline* pipelineIrradianceMap = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_PBR_GEN_IRRADIANCE_MAP), renderPassEquiToCubeMap, IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE);
+	DescriptorSet* descriptorSetIrradianceMap = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP));
+	descriptorSetIrradianceMap->setTexture(0, environmentCubemap);
+
+	descriptorSetIrradianceMap->getUBO(0)->updateFrame(&genEnvMapData, 0, sizeof(ShaderBlock_PBRGenEnvMap));
+
+	descriptorSetIrradianceMap->setup();
+
+	renderPassIrradianceMap->begin();
+	pipelineIrradianceMap->bind();
+	descriptorSetIrradianceMap->bind();
+
+	cubeMesh->render();
+
+	renderPassIrradianceMap->end();
+
+	//--------------------- RENDER PREFILTER CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP (SPLIT SUM APPROXIMATION) ---------------------
+
 	//Create and setup the FBO and RBO for rendering
 	unsigned int captureFBO;
 	unsigned int captureRBO;
@@ -144,36 +173,6 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	ShaderBlock_GenPBREnvMap envMapGenData;
 	UBO* envMapGenUBO = new UBO(NULL, sizeof(ShaderBlock_GenPBREnvMap), DataUsage::DYNAMIC, ShaderInterface::BLOCK_PBR_ENV_MAP_GEN);
 	envMapGenUBO->bindGL();
-
-	TextureParameters irMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true);
-	Cubemap* irradianceCubemap = Cubemap::createCubemap(IRRADIANCE_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, irMapParameters);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE);
-
-	shader2->use();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubemap->getHandle());
-	shader2->setUniformi("EnvMap", 0);
-	envMapGenData.projection = captureProjection;
-
-	glViewport(0, 0, IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE);
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	for (unsigned int i = 0; i < 6; i++) {
-		envMapGenData.view = captureViews[i];
-		envMapGenUBO->update(&envMapGenData, 0, sizeof(ShaderBlock_GenPBREnvMap));
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceCubemap->getHandle(), 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		cubeMesh->render();
-	}
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	shader2->stopUsing();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	//--------------------- RENDER PREFILTER CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP (SPLIT SUM APPROXIMATION) ---------------------
 
 	TextureParameters prefilMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true);
 	prefilMapParameters.setMinFilter(TextureParameters::Filter::LINEAR_MIPMAP_LINEAR);

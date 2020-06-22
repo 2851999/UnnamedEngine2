@@ -173,58 +173,59 @@ private:
 	std::unordered_map<unsigned int, DescriptorSetLayout*> descriptorSetLayouts;
 public:
 	/* Set numbers used for specific kinds of descriptor sets*/
-	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_CAMERA;
-	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_MATERIAL;
-	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_MODEL;
-	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH;
-	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_SCENE;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_CAMERA      = 0;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_MATERIAL    = 1;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_MODEL       = 2;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH = 3;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_SCENE       = 4;
 
 	/* IDs for descriptor set layouts */
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_CAMERA;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_MATERIAL;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_TERRAIN;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_SDF_TEXT;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_CAMERA                      = 0;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_MATERIAL                    = 1;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL                       = 2;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH                 = 3;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING              = 4;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP              = 5;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA       = 6;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING           = 7;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING = 8;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR            = 9;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD                   = 10;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_TERRAIN                     = 11;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT             = 12;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_SDF_TEXT                    = 13;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT          = 14;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP    = 15;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP      = 16;
 
 	/* The locations for attributes in the shaders */
-	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
-	static const unsigned int ATTRIBUTE_LOCATION_TEXTURE_COORD;
-	static const unsigned int ATTRIBUTE_LOCATION_NORMAL;
-	static const unsigned int ATTRIBUTE_LOCATION_TANGENT;
-	static const unsigned int ATTRIBUTE_LOCATION_BITANGENT;
-	static const unsigned int ATTRIBUTE_LOCATION_BONE_IDS;
-	static const unsigned int ATTRIBUTE_LOCATION_BONE_WEIGHTS;
+	static const unsigned int ATTRIBUTE_LOCATION_POSITION      = 0;
+	static const unsigned int ATTRIBUTE_LOCATION_TEXTURE_COORD = 1;
+	static const unsigned int ATTRIBUTE_LOCATION_NORMAL        = 2;
+	static const unsigned int ATTRIBUTE_LOCATION_TANGENT       = 3;
+	static const unsigned int ATTRIBUTE_LOCATION_BITANGENT     = 4;
+	static const unsigned int ATTRIBUTE_LOCATION_BONE_IDS      = 5;
+	static const unsigned int ATTRIBUTE_LOCATION_BONE_WEIGHTS  = 6;
 
 	/* The ids for particular shader blocks */
-	static const unsigned int BLOCK_PBR_ENV_MAP_GEN;
-	static const unsigned int BLOCK_PBR_PREFILTER_MAP_GEN;
-	static const unsigned int BLOCK_PBR_LIGHTING_CORE;
+	static const unsigned int BLOCK_PBR_ENV_MAP_GEN        = 8;
+	static const unsigned int BLOCK_PBR_PREFILTER_MAP_GEN  = 9;
+	static const unsigned int BLOCK_PBR_LIGHTING_CORE      = 10;
 
 	/* Binding locations for shader blocks */
-	static const unsigned int UBO_BINDING_LOCATION_CAMERA;
-	static const unsigned int UBO_BINDING_LOCATION_MODEL;
-	static const unsigned int UBO_BINDING_LOCATION_MATERIAL;
-	static const unsigned int UBO_BINDING_LOCATION_SKINNING;
-	static const unsigned int UBO_BINDING_LOCATION_LIGHT_BATCH;
-	static const unsigned int UBO_BINDING_LOCATION_TERRAIN;
-	static const unsigned int UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA;
-	static const unsigned int UBO_BINDING_LOCATION_GEN_PBR_ENV_MAP;
-	static const unsigned int UBO_BINDING_LOCATION_GEN_PBR_PREFILTER_MAP;
-	static const unsigned int UBO_BINDING_LOCATION_PBR_LIGHTING_CORE;
-	static const unsigned int UBO_BINDING_LOCATION_BILLBOARD;
-	static const unsigned int UBO_BINDING_LOCATION_SHADOW_CUBEMAP;
-	static const unsigned int UBO_BINDING_LOCATION_SDF_TEXT;
+	static const unsigned int UBO_BINDING_LOCATION_CAMERA                 = 1;
+	static const unsigned int UBO_BINDING_LOCATION_MODEL                  = 2;
+	static const unsigned int UBO_BINDING_LOCATION_MATERIAL               = 3;
+	static const unsigned int UBO_BINDING_LOCATION_SKINNING               = 4;
+	static const unsigned int UBO_BINDING_LOCATION_LIGHT_BATCH            = 5;
+	static const unsigned int UBO_BINDING_LOCATION_TERRAIN                = 6;
+	static const unsigned int UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA  = 7;
+	static const unsigned int UBO_BINDING_LOCATION_GEN_PBR_ENV_MAP        = 8;
+	static const unsigned int UBO_BINDING_LOCATION_GEN_PBR_PREFILTER_MAP  = 9;
+	static const unsigned int UBO_BINDING_LOCATION_PBR_LIGHTING_CORE      = 10;
+	static const unsigned int UBO_BINDING_LOCATION_BILLBOARD              = 11;
+	static const unsigned int UBO_BINDING_LOCATION_SHADOW_CUBEMAP         = 12;
+	static const unsigned int UBO_BINDING_LOCATION_SDF_TEXT               = 4;
 
 	/* Constructor */
 	ShaderInterface();

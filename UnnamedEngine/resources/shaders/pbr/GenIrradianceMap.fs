@@ -1,17 +1,15 @@
 #version 420
 
-layout(location = 0) in vec3 localPos;
+layout(set = 0, binding = 0) uniform samplerCube environmentMap;
+
+layout(location = 0) in vec4 localPos;
 
 layout(location = 0) out vec4 FragColor;
-
-#map uniform EnvMap environmentMap
-
-uniform samplerCube environmentMap;
 
 const float PI = 3.14159265359;
 
 void main() {		
-	vec3 normal = normalize(localPos);
+	vec3 normal = normalize(localPos.xyz);
 	vec3 irradiance = vec3(0.0);
 
 	vec3 up    = vec3(0.0, 1.0, 0.0);

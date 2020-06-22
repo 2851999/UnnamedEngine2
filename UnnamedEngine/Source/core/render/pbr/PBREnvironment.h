@@ -30,13 +30,13 @@ class PBREnvironment {
 private:
 	/* The cubemaps and textures required */
 	FramebufferAttachment* environmentCubemap = NULL;
-	Cubemap* irradianceCubemap = NULL;
+	FramebufferAttachment* irradianceCubemap = NULL;
 	Cubemap* prefilterCubemap = NULL;
 
 	Texture* brdfLUTTexture = NULL;
 public:
 	/* The constructor */
-	PBREnvironment(FramebufferAttachment* environmentCubemap, Cubemap* irradianceCubemap, Cubemap* prefilterCubemap, Texture* brdfLUTTexture) :
+	PBREnvironment(FramebufferAttachment* environmentCubemap, FramebufferAttachment* irradianceCubemap, Cubemap* prefilterCubemap, Texture* brdfLUTTexture) :
 		environmentCubemap(environmentCubemap), irradianceCubemap(irradianceCubemap), prefilterCubemap(prefilterCubemap), brdfLUTTexture(brdfLUTTexture) {
 	}
 
@@ -51,7 +51,7 @@ public:
 
 	/* Getters */
 	FramebufferAttachment* getEnvironmentCubemap() { return environmentCubemap; }
-	Cubemap* getIrradianceCubemap() { return irradianceCubemap; }
+	FramebufferAttachment* getIrradianceCubemap() { return irradianceCubemap; }
 	Cubemap* getPrefilterCubemap() { return prefilterCubemap; }
 
 	Texture* getBRDFLUTTexture() { return brdfLUTTexture; }
