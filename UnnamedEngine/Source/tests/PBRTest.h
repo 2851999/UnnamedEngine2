@@ -92,7 +92,7 @@ void Test::onCreated() {
 
 	//light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 
-	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), false))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 
 	utils_random::initialise();
 	/*
@@ -184,7 +184,7 @@ void Test::onCreated() {
 
 	//	scene->add(testObject);
 
-	camera->setMovementSpeed(5.0f);
+	camera->setMovementSpeed(50.0f);
 }
 
 void Test::onUpdate() {

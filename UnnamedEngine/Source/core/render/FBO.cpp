@@ -65,8 +65,8 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 				vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-			getParameters().setFilter(TextureParameters::Filter::LINEAR);
-			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+			//getParameters().setFilter(TextureParameters::Filter::LINEAR); //Assigned in PBREnvironment currently
+			//getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		} else if (type == Type::DEPTH_TEXTURE) {
 			vulkanFormat      = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -122,8 +122,8 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 			glType = GL_FLOAT;
 			attachment = GL_COLOR_ATTACHMENT0 + indexOfColourAttachment;
 
-			getParameters().setFilter(TextureParameters::Filter::LINEAR);
-			getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+			//getParameters().setFilter(TextureParameters::Filter::LINEAR); //Assigned in PBREnvironment currently
+			//getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		} else if (type == Type::DEPTH_TEXTURE) {
 			getParameters().setTarget(GL_TEXTURE_2D);
 			internalFormat = GL_DEPTH_COMPONENT24;
@@ -194,8 +194,11 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 				//	glTexImage2DMultisample(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
 				//else
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
-				//glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, getHandle(), 0);
 			}
+
+			//https://www.khronos.org/opengl/wiki/Common_Mistakes#Creating_a_complete_texture ?????
+			//Seem to have to do here in order to not have GL_INVALID_OPERATION occur when trying later
+			//glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 			applyParameters(false, false);
 

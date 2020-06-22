@@ -1,4 +1,9 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 6
+
+* Fixed IBL in previous commit
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 2 | Experimental 5
 
 * Added FramebufferAttachment::Type::COLOUR_CUBEMAP

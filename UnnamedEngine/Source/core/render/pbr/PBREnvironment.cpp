@@ -82,22 +82,28 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	//---------------------------------- RENDER ENVIRONMENT CUBEMAP FROM EQUIRECTANGULAR MAP ----------------------------------
 
 	FramebufferAttachment* environmentCubemap = new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP);
+	environmentCubemap->getParameters().setMinFilter(TextureParameters::Filter::LINEAR_MIPMAP_LINEAR);
+	//environmentCubemap->getParameters().setMinFilter(TextureParameters::Filter::LINEAR);
+	environmentCubemap->getParameters().setMagFilter(TextureParameters::Filter::LINEAR);
+	environmentCubemap->getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
 
 	FBO* fboEquiToCubemap = new FBO(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, {
 		FramebufferAttachmentInfo{ environmentCubemap, true, false }//,
-		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH), true }
+		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
 	});
 
 	RenderPass* renderPassEquiToCubeMap = new RenderPass(fboEquiToCubemap);
-	GraphicsPipeline* pipelineEquiToCubeMap = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP), renderPassEquiToCubeMap);
+	GraphicsPipeline* pipelineEquiToCubeMap = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP), renderPassEquiToCubeMap, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE);
 	DescriptorSet* descriptorSetEquiToCubeMap = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP));
 	descriptorSetEquiToCubeMap->setTexture(0, texture);
-	descriptorSetEquiToCubeMap->setup();
 
 	ShaderBlock_PBRGenEnvMap genEnvMapData;
 	for (unsigned int i = 0; i < 6; ++i)
 		genEnvMapData.projectionViewMatrices[i] = captureProjection * captureViews[i];
 	descriptorSetEquiToCubeMap->getUBO(0)->updateFrame(&genEnvMapData, 0, sizeof(ShaderBlock_PBRGenEnvMap));
+
+	descriptorSetEquiToCubeMap->setup();
 
 	renderPassEquiToCubeMap->begin();
 	pipelineEquiToCubeMap->bind();
@@ -117,8 +123,8 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	renderPassEquiToCubeMap->end();
 
 	//Generate mip map as now assigned the texture
-	//environmentCubemap->bind();
-	//glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	environmentCubemap->bind();
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 	//glClearColor(0.0, 0.0, 0.0, 1.0);
 
