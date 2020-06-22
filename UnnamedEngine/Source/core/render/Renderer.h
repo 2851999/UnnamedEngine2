@@ -148,6 +148,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND                   = 41;
 	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT                              = 42;
 	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF                          = 43;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP                      = 44;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

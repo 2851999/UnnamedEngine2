@@ -1,4 +1,15 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 2 | Experimental 5
+
+* Added FramebufferAttachment::Type::COLOUR_CUBEMAP
+
+* Changed SkyBox to take a Texture instance instead of
+  Cubemap for better compatability with
+  FramebufferAttachment
+
+* IBL currently broken
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 2 | Experimental 4
 
 * Changed RenderData to use the current GraphicsPipeline

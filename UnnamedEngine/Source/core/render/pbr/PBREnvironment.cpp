@@ -22,12 +22,17 @@
 #include "../Renderer.h"
 #include "../../Window.h"
 #include "../../../utils/Utils.h"
+#include "../../BaseEngine.h"
 
  /*****************************************************************************
   * The PBREnvironment class
   *****************************************************************************/
 
 PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
+	//Quick fix for no pipeline being bound to get primitive topology  from
+	GraphicsPipeline* pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), Renderer::getDefaultRenderPass());
+	pipeline->bind();
+
 	//For now these are the sizes of the maps (for cubemaps this is the size of each side)
 	const unsigned int ENVIRONMENT_MAP_SIZE  = 512;
 	const unsigned int IRRADIANCE_MAP_SIZE   = 32;
@@ -41,7 +46,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	const Matrix4f captureProjection = Matrix4f().initPerspective(90.0f, 1.0f, 0.1f, 10.0f);
 	const Matrix4f captureViews[6] ={
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f)),
-			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(-1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f)),
+			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(-1.0f, 0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f,  1.0f,  0.0f), Vector3f(0.0f,  0.0f,  1.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f, -1.0f,  0.0f), Vector3f(0.0f,  0.0f, -1.0f)),
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f,  0.0f,  1.0f), Vector3f(0.0f, -1.0f,  0.0f)),
@@ -69,6 +74,56 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	cubeMesh->setup(cubeMeshData, materials);
 	quadMesh->setup(quadMeshData, materials);
 
+	//Load the texture for the equirectangular map ensuring it's the right way up
+	Texture::setFlipVerticallyOnLoad(true);
+	Texture* texture = Texture::loadTexturef(path, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true));
+	Texture::setFlipVerticallyOnLoad(false);
+
+	//---------------------------------- RENDER ENVIRONMENT CUBEMAP FROM EQUIRECTANGULAR MAP ----------------------------------
+
+	FramebufferAttachment* environmentCubemap = new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP);
+
+	FBO* fboEquiToCubemap = new FBO(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, {
+		FramebufferAttachmentInfo{ environmentCubemap, true, false }//,
+		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH), true }
+	});
+
+	RenderPass* renderPassEquiToCubeMap = new RenderPass(fboEquiToCubemap);
+	GraphicsPipeline* pipelineEquiToCubeMap = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP), renderPassEquiToCubeMap);
+	DescriptorSet* descriptorSetEquiToCubeMap = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP));
+	descriptorSetEquiToCubeMap->setTexture(0, texture);
+	descriptorSetEquiToCubeMap->setup();
+
+	ShaderBlock_PBRGenEnvMap genEnvMapData;
+	for (unsigned int i = 0; i < 6; ++i)
+		genEnvMapData.projectionViewMatrices[i] = captureProjection * captureViews[i];
+	descriptorSetEquiToCubeMap->getUBO(0)->updateFrame(&genEnvMapData, 0, sizeof(ShaderBlock_PBRGenEnvMap));
+
+	renderPassEquiToCubeMap->begin();
+	pipelineEquiToCubeMap->bind();
+	descriptorSetEquiToCubeMap->bind();
+
+	//Create the environment cubemap
+	//TextureParameters envMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true);
+	//envMapParameters.setMinFilter(TextureParameters::Filter::LINEAR_MIPMAP_LINEAR);
+	//envMapParameters.preventGenerateMipMaps();
+	//Cubemap* environmentCubemap = Cubemap::createCubemap(ENVIRONMENT_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, envMapParameters);
+
+	cubeMesh->render();
+
+	//glClearColor(1.0, 0.0, 0.0, 1.0);
+	//glClear(GL_COLOR_BUFFER_BIT);
+
+	renderPassEquiToCubeMap->end();
+
+	//Generate mip map as now assigned the texture
+	//environmentCubemap->bind();
+	//glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+	//glClearColor(0.0, 0.0, 0.0, 1.0);
+
+	//---------------------------------- RENDER IRRADIANCE CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP ----------------------------------
+
 	//Create and setup the FBO and RBO for rendering
 	unsigned int captureFBO;
 	unsigned int captureRBO;
@@ -80,53 +135,9 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, maxSize, maxSize);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
-	//Load the texture for the equirectangular map ensuring it's the right way up
-	Texture::setFlipVerticallyOnLoad(true);
-	Texture* texture = Texture::loadTexturef(path, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true));
-	Texture::setFlipVerticallyOnLoad(false);
-
-	//---------------------------------- RENDER ENVIRONMENT CUBEMAP FROM EQUIRECTANGULAR MAP ----------------------------------
-
-	glActiveTexture(GL_TEXTURE0);
-	//Create the environment cubemap
-	TextureParameters envMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true);
-	envMapParameters.setMinFilter(TextureParameters::Filter::LINEAR_MIPMAP_LINEAR);
-	envMapParameters.preventGenerateMipMaps();
-	Cubemap* environmentCubemap = Cubemap::createCubemap(ENVIRONMENT_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, envMapParameters);
-
 	ShaderBlock_GenPBREnvMap envMapGenData;
 	UBO* envMapGenUBO = new UBO(NULL, sizeof(ShaderBlock_GenPBREnvMap), DataUsage::DYNAMIC, ShaderInterface::BLOCK_PBR_ENV_MAP_GEN);
 	envMapGenUBO->bindGL();
-
-	shader1->use();
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture->getHandle());
-
-	shader1->setUniformi("EquiMap", 0);
-	envMapGenData.projection = captureProjection;
-
-	glViewport(0, 0, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE);
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	for (unsigned int i = 0; i < 6; i++) {
-		envMapGenData.view = captureViews[i];
-		envMapGenUBO->update(&envMapGenData, 0, sizeof(ShaderBlock_GenPBREnvMap));
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, environmentCubemap->getHandle(), 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		cubeMesh->render();
-	}
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	shader1->stopUsing();
-
-	//Generate mip map as now assigned the texture
-	environmentCubemap->bind();
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-
-	//---------------------------------- RENDER IRRADIANCE CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP ----------------------------------
 
 	TextureParameters irMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true);
 	Cubemap* irradianceCubemap = Cubemap::createCubemap(IRRADIANCE_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, irMapParameters);
@@ -244,6 +255,8 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	delete cubeMesh;
 	delete quadMesh;
+
+	delete pipeline;
 
 	return new PBREnvironment(environmentCubemap, irradianceCubemap, prefilterCubemap, brdfLUTTexture);
 }

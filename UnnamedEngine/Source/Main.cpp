@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "tests/BaseEngineTest3D.h"
+#include "tests/PBRTest.h"
 
 #include "utils/Utils.h"
 //#include "examples/basic/BasicRendering3D.h"
