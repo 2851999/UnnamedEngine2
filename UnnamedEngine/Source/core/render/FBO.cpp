@@ -355,7 +355,7 @@ void FBO::setup(RenderPass* renderPass) {
 		}
 
 		//Create the framebuffer
-		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments, attachments.size() == 1 && (attachments[0].attachment->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP));
+		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments, attachments.size() == 1 && (attachments[0].attachment->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP || attachments[0].attachment->getType() == FramebufferAttachment::Type::COLOUR_CUBEMAP));
 	} else {
 		//Generate and bind the FBO
 		glGenFramebuffers(1, &glFBO);

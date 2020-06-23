@@ -39,6 +39,7 @@ VulkanDevice*                                     Vulkan::device;
 VulkanSwapChain*                                  Vulkan::swapChain;
 VkCommandPool                                     Vulkan::commandPool;
 std::vector<VkCommandBuffer>                      Vulkan::commandBuffers;
+VkCommandBuffer                                   Vulkan::overrideCommandBuffer = VK_NULL_HANDLE;
 std::vector<VkSemaphore>                          Vulkan::imageAvailableSemaphores;
 std::vector<VkSemaphore>                          Vulkan::renderFinishedSemaphores;
 std::vector<VkFence>                              Vulkan::inFlightFences;

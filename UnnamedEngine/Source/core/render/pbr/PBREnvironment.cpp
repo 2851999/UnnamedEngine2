@@ -29,9 +29,14 @@
   *****************************************************************************/
 
 PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
-	//Quick fix for no pipeline being bound to get primitive topology  from
-	GraphicsPipeline* pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), Renderer::getDefaultRenderPass());
-	pipeline->bind();
+
+	std::cout << "START!!!!!!" << std::endl;
+
+	VkCommandBuffer vulkanCommandBuffer;
+	if (BaseEngine::usingVulkan()) {
+		vulkanCommandBuffer = Vulkan::beginSingleTimeCommands();
+		Vulkan::setOverrideCommandBuffer(vulkanCommandBuffer);
+	}
 
 	//For now these are the sizes of the maps (for cubemaps this is the size of each side)
 	const unsigned int ENVIRONMENT_MAP_SIZE  = 512;
@@ -59,11 +64,6 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	RenderShader* renderShader3 = Renderer::getRenderShader(Renderer::SHADER_PBR_GEN_PREFILTER_MAP);
 	RenderShader* renderShader4 = Renderer::getRenderShader(Renderer::SHADER_PBR_GEN_BRDF_INTEGRATION_MAP);
 
-	Shader* shader1 = renderShader1->getShader();
-	Shader* shader2 = renderShader2->getShader();
-	Shader* shader3 = renderShader3->getShader();
-	Shader* shader4 = renderShader4->getShader();
-
 	//Create meshes to render a cubemap and 2D texture
 	MeshData* cubeMeshData = MeshBuilder::createCube(1.0f, 1.0f, 1.0f);
 	MeshData* quadMeshData = MeshBuilder::createQuad(Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(1.0f, 1.0f), Vector2f(-1.0f, 1.0f), NULL);
@@ -90,7 +90,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
 
 	FBO* fboEquiToCubemap = new FBO(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, {
-		FramebufferAttachmentInfo{ environmentCubemap, true, 0, false }//,
+		FramebufferAttachmentInfo{ environmentCubemap, true, -1, false }//,
 		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
 	});
 
@@ -135,7 +135,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
 
 	FBO* fboIrradianceMap = new FBO(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, {
-		FramebufferAttachmentInfo{ irradianceCubemap, true, 0, false }//,
+		FramebufferAttachmentInfo{ irradianceCubemap, true, -1, false }//,
 		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
 	});
 
@@ -158,7 +158,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	//--------------------- RENDER PREFILTER CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP (SPLIT SUM APPROXIMATION) ---------------------
 
-	const unsigned int maxMipLevels = 4;
+	const unsigned int maxMipLevels = 5;
 
 	FramebufferAttachment* prefilterCubemap = new FramebufferAttachment(PREFILTER_MAP_SIZE, PREFILTER_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR_MIPMAP_LINEAR, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true), 0, maxMipLevels);
 
@@ -168,7 +168,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	std::vector<GraphicsPipeline*> pipelinesPrefilterMap;
 	std::vector<DescriptorSet*> descriptorSetsPrefilterMap;
 
-	for (unsigned int mip = 0; mip <= maxMipLevels; ++mip) {
+	for (unsigned int mip = 0; mip < maxMipLevels; ++mip) {
 		unsigned int mipSize = PREFILTER_MAP_SIZE * pow(0.5, mip);
 
 		FBO* fboPrefilterMap = new FBO(mipSize, mipSize, {
@@ -213,7 +213,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	FramebufferAttachment* brdfLUTTexture = new FramebufferAttachment(BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE));
 
 	FBO* fboBRDFLUTTexture = new FBO(BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, {
-		FramebufferAttachmentInfo{ brdfLUTTexture, true, false }//,
+		FramebufferAttachmentInfo{ brdfLUTTexture, true, -1, false }//,
 		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
 	});
 
@@ -227,12 +227,17 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	renderPassBRDFLUTTexture->end();
 
+	if (BaseEngine::usingVulkan()) {
+		Vulkan::endSingleTimeCommands(vulkanCommandBuffer);
+		Vulkan::setOverrideCommandBuffer(VK_NULL_HANDLE);
+	}
+
+	std::cout << "END!!!!!!" << std::endl;
+
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	delete cubeMesh;
 	delete quadMesh;
-
-	delete pipeline;
 
 	return new PBREnvironment(environmentCubemap, irradianceCubemap, prefilterCubemap, brdfLUTTexture);
 }

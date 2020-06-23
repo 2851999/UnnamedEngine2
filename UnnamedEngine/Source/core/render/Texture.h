@@ -217,7 +217,7 @@ public:
 
 	/* Obtains the Vulkan format that an image should have from its number of colour
 	 * components and whether it should be SRGB */
-	static void getTextureFormatVk(int numComponents, bool srgb, VkFormat& format);
+	static void getTextureFormatVk(int numComponents, bool srgb, bool useFloat, VkFormat& format);
 
 	/* Returns a texture instance created using the data given */
 	static Texture* createTexture(std::string path, void* data, int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool applyParameters = true);

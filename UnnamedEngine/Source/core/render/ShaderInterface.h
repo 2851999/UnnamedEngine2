@@ -113,11 +113,6 @@ struct ShaderBlock_GammaCorrectionFXAA {
 	int fxaa;
 };
 
-struct ShaderBlock_GenPBREnvMap {
-	Matrix4f projection;
-	Matrix4f view;
-};
-
 struct ShaderBlock_PBRGenEnvMap {
 	Matrix4f projectionViewMatrices[6];
 };

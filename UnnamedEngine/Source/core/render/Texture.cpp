@@ -282,8 +282,11 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 			numComponents = 4;
 
 		VkDeviceSize imageSize = width * height * numComponents;
+		if (type == GL_FLOAT)
+			imageSize *= sizeof(float);
+
 		VkFormat format;
-		Texture::getTextureFormatVk(numComponents, parameters.getSRGB(), format);
+		Texture::getTextureFormatVk(numComponents, parameters.getSRGB(), type == GL_FLOAT, format);
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
@@ -364,7 +367,7 @@ Texture::~Texture() {
 void Texture::generateMipmapsVk() {
 	//Obtain the format used for this image
 	VkFormat format;
-	getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), format);
+	getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), false, format);
 
 	//Check the used image format supports linear blitting
 	VkFormatProperties formatProperties;
@@ -499,25 +502,48 @@ void Texture::getTextureFormatGL(int numComponents, bool srgb, GLint& internalFo
 		format = internalFormat;
 }
 
-void Texture::getTextureFormatVk(int numComponents, bool srgb, VkFormat& format) {
-	if (srgb) {
-		if (numComponents == 1)
-			format = VK_FORMAT_R8_SRGB;
-		else if (numComponents == 2)
-			format = VK_FORMAT_R8G8_SRGB;
-		else if (numComponents == 3)
-			format = VK_FORMAT_R8G8B8_SRGB;
-		else if (numComponents == 4)
-			format = VK_FORMAT_R8G8B8A8_SRGB;
+void Texture::getTextureFormatVk(int numComponents, bool srgb, bool useFloat, VkFormat& format) {
+	if (useFloat) {
+		if (srgb) {
+			//sizeof(float) = 4 => 32 bit needed for loading float textures with stbi_loadf
+			if (numComponents == 1)
+				format = VK_FORMAT_R32_SFLOAT;
+			else if (numComponents == 2)
+				format = VK_FORMAT_R32G32_SFLOAT;
+			else if (numComponents == 3)
+				format = VK_FORMAT_R32G32B32_SFLOAT;
+			else if (numComponents == 4)
+				format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		} else {
+			if (numComponents == 1)
+				format = VK_FORMAT_R32_SFLOAT;
+			else if (numComponents == 2)
+				format = VK_FORMAT_R32G32_SFLOAT;
+			else if (numComponents == 3)
+				format = VK_FORMAT_R32G32B32_SFLOAT;
+			else if (numComponents == 4)
+				format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		}
 	} else {
-		if (numComponents == 1)
-			format = VK_FORMAT_R8_UNORM;
-		else if (numComponents == 2)
-			format = VK_FORMAT_R8G8_UNORM;
-		else if (numComponents == 3)
-			format = VK_FORMAT_R8G8B8_UNORM;
-		else if (numComponents == 4)
-			format = VK_FORMAT_R8G8B8A8_UNORM;
+		if (srgb) {
+			if (numComponents == 1)
+				format = VK_FORMAT_R8_SRGB;
+			else if (numComponents == 2)
+				format = VK_FORMAT_R8G8_SRGB;
+			else if (numComponents == 3)
+				format = VK_FORMAT_R8G8B8_SRGB;
+			else if (numComponents == 4)
+				format = VK_FORMAT_R8G8B8A8_SRGB;
+		} else {
+			if (numComponents == 1)
+				format = VK_FORMAT_R8_UNORM;
+			else if (numComponents == 2)
+				format = VK_FORMAT_R8G8_UNORM;
+			else if (numComponents == 3)
+				format = VK_FORMAT_R8G8B8_UNORM;
+			else if (numComponents == 4)
+				format = VK_FORMAT_R8G8B8A8_UNORM;
+		}
 	}
 }
 
@@ -628,7 +654,7 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 			const VkDeviceSize imageSize = layerSize * 6; //Assume texture sizes are identical
 
 			VkFormat format;
-			Texture::getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), format);
+			Texture::getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), false, format);
 
 			//Staging buffer
 			VkBuffer stagingBuffer;

@@ -54,7 +54,7 @@ private:
 	std::vector<VkVertexInputAttributeDescription> attributeVkDescriptions;
 
 	/* The descriptor set corresponding to this render data (model) */
-	DescriptorSet* descriptorSetModel;
+	DescriptorSet* descriptorSetModel = NULL;
 
 	/* Data for the above descriptor set */
 	ShaderBlock_Model modelData;

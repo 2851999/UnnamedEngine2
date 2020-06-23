@@ -1,8 +1,15 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 5
+
+* Started adding IBL when using Vulkan
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 3 | Experimental 4
 
 * Changed PBREnvironment to use more generic methods to
   generate textures for IBL
+* Changed prefilter cubemap generation in PBREnvironment to
+  use a geometry shader
 
 * Fixed bug: Prefilter cubemap  was not generated correctly
              in PBREnvironment

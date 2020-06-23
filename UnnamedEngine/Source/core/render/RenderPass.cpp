@@ -124,6 +124,9 @@ RenderPass::RenderPass(FBO* fbo) : fbo(fbo) {
 				subpass.pColorAttachments = colourAttachmentReferences.data();
 				subpass.pDepthStencilAttachment = &depthAttachmentRef;
 			} else {
+				//This case is for when a single colour and a single depth attachment is supplied, however also want
+				//to support case when just a colour attachment is assigned
+
 				//Use specified framebuffer
 				dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 				dependencies[0].dstSubpass = 0;
@@ -144,12 +147,21 @@ RenderPass::RenderPass(FBO* fbo) : fbo(fbo) {
 				colourAttachmentRef.attachment = 0;
 				colourAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-				depthAttachmentRef.attachment = 1;
+				//Check for a single colour attachment
+				if (fbo->getAttachmentCount() == 1) {
+					depthAttachmentRef.attachment = VK_ATTACHMENT_UNUSED;
+				} else {
+					depthAttachmentRef.attachment = 1;
+				}
+
 				depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 				subpass.colorAttachmentCount = 1;
 				subpass.pColorAttachments = &colourAttachmentRef;
-				subpass.pDepthStencilAttachment = &depthAttachmentRef;
+				if (fbo->getAttachmentCount() == 1)
+					subpass.pDepthStencilAttachment = VK_NULL_HANDLE;
+				else
+					subpass.pDepthStencilAttachment = &depthAttachmentRef;
 			}
 		} else {
 			//Using default framebuffer directly
@@ -263,9 +275,14 @@ void RenderPass::begin() {
 				clearValues[i].color = { 0.0f, 0.0f, 0.0f, 0.0f };
 			clearValues[clearValues.size() - 1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
 		} else {
-			clearValues.resize(2);
-			clearValues[0].color = { 0.0f, 0.0f, 0.0f, 0.0f };
-			clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
+			if (fbo && fbo->getAttachmentCount() == 1) { //Colour ONLY
+				clearValues.resize(1);
+				clearValues[0].color = { 0.0f, 0.0f, 0.0f, 0.0f };
+			} else {
+				clearValues.resize(2);
+				clearValues[0].color = { 0.0f, 0.0f, 0.0f, 0.0f };
+				clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
+			}
 		}
 
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
