@@ -1,3 +1,5 @@
+#version 420
+#define UE_NO_DEFERRED
 #include "PBRLightingCore.fs"
 
 layout(location = 0) out vec4 ue_FragColour;

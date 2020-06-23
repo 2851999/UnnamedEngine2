@@ -151,6 +151,16 @@ ShaderInterface::ShaderInterface() {
 
 	add(DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT, pbrEnvironmentLayout);
 
+	//PBR environment
+	DescriptorSetLayout* pbrEnvironmentNoDeferredLayout = new DescriptorSetLayout(4);
+	pbrEnvironmentNoDeferredLayout->addTextureCube(20);
+	pbrEnvironmentNoDeferredLayout->addTextureCube(21);
+	pbrEnvironmentNoDeferredLayout->addTexture2D(22);
+
+	pbrEnvironmentNoDeferredLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT_NO_DEFERRED, pbrEnvironmentNoDeferredLayout);
+
 	//SDF Text
 	DescriptorSetLayout* sdfTextLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
 	sdfTextLayout->addUBO(sizeof(ShaderBlock_SDFText), DataUsage::STATIC, UBO_BINDING_LOCATION_SDF_TEXT);

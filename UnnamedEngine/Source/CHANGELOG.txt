@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 7
+
+* Changed Shader 'loadShaderSource' to ignore additional
+  occurences of #version such that the one that appears
+  first is taken (this means versions before includes take
+  precedence)
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 3 | Experimental 6
 
 * Added IBL when using Vulkan

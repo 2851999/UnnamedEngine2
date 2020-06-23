@@ -188,11 +188,12 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD                   = 10;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_TERRAIN                     = 11;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT             = 12;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_SDF_TEXT                    = 13;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT          = 14;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP    = 15;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP      = 16;
-	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP       = 17;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT_NO_DEFERRED = 13;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_SDF_TEXT                    = 14;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT          = 15;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP    = 16;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP      = 17;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP       = 18;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION      = 0;

@@ -139,7 +139,7 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing,
 	}
 
 	if (pbrEnvironment) {
-		descriptorSetPBREnvironment = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT));
+		descriptorSetPBREnvironment = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(deferred ? ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT : ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT_NO_DEFERRED));
 		descriptorSetPBREnvironment->setTexture(0, pbrEnvironment->getIrradianceCubemap());
 		descriptorSetPBREnvironment->setTexture(1, pbrEnvironment->getPrefilterCubemap());
 		descriptorSetPBREnvironment->setTexture(2, pbrEnvironment->getBRDFLUTTexture());

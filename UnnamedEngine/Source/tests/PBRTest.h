@@ -41,7 +41,7 @@ private:
 
 	GameObject3D* mit1;
 
-	bool deferred = true;
+	bool deferred = false;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -103,7 +103,7 @@ void Test::onCreated() {
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_LIGHTING);
 	pbrRenderShaderSkinning = Renderer::getRenderShader(Renderer::SHADER_LIGHTING_SKINNING);
 
-	scene = new RenderScene(deferred, true, true, true, environment);
+	scene = new RenderScene(deferred, true, false, true, environment);
 	scene->setPostProcessingParameters(true, true, 0.5f);
 
 	//light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
@@ -211,7 +211,7 @@ void Test::onCreated() {
 
 	//	scene->add(testObject);
 
-	camera->setMovementSpeed(50.0f);
+	camera->setMovementSpeed(5.0f);
 }
 
 void Test::onUpdate() {
