@@ -4,7 +4,7 @@
 
 layout(location = 0) in vec2 texCoords;
 
-layout(location = 0) out vec2 FragColor;
+layout(location = 0) out vec4 FragColor;
 
 vec2 integrateBRDF(float NdotV, float roughness) {
     vec3 V;
@@ -44,5 +44,5 @@ vec2 integrateBRDF(float NdotV, float roughness) {
 
 void main() {
     vec2 integratedBRDF = integrateBRDF(texCoords.x, texCoords.y);
-    FragColor = integratedBRDF;
+    FragColor = vec4(integratedBRDF, 0.0, 1.0);
 }

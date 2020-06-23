@@ -35,6 +35,10 @@ FramebufferAttachment::~FramebufferAttachment() {
 	if (! BaseEngine::usingVulkan()) {
 		if (getParameters().getTarget() == GL_RENDERBUFFER)
 			glDeleteRenderbuffers(1, &glRBO);
+	} else {
+		//Destroy any created image views for rendering
+		for (unsigned int i = 0; i < vulkanMipMapImageViews.size(); ++i)
+			vkDestroyImageView(Vulkan::getDevice()->getLogical(), vulkanMipMapImageViews[i], nullptr);
 	}
 }
 

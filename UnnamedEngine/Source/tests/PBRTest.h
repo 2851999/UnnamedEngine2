@@ -64,10 +64,13 @@ void Test::onInitialise() {
 	//getSettings().windowFullscreen = true;
 
 	//Logger::startFileOutput("C:/UnnamedEngine/logs.txt");
+
+	VulkanSwapChain::clearDefaultDepthBufferOnLoad = false;
 }
 
 void Test::onCreated() {
-	Shader::compileEngineShaderToSPIRV("pbr/GenEquiToCube", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("pbr/GenEquiToCube", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("pbr/GenIrradianceMap", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("pbr/GenPrefilterMap", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("pbr/GenBRDFIntegrationMap", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
@@ -97,10 +100,10 @@ void Test::onCreated() {
 	camera->setSkyBox(new SkyBox(environment->getEnvironmentCubemap()));
 	camera->setFlying(true);
 
-	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING);
-	pbrRenderShaderSkinning = Renderer::getRenderShader(Renderer::SHADER_PBR_LIGHTING_SKINNING);
+	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_LIGHTING);
+	pbrRenderShaderSkinning = Renderer::getRenderShader(Renderer::SHADER_LIGHTING_SKINNING);
 
-	scene = new RenderScene(deferred, true, true, true);
+	scene = new RenderScene(deferred, true, true, true, environment);
 	scene->setPostProcessingParameters(true, true, 0.5f);
 
 	//light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));

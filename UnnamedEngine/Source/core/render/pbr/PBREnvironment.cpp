@@ -29,9 +29,6 @@
   *****************************************************************************/
 
 PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
-
-	std::cout << "START!!!!!!" << std::endl;
-
 	VkCommandBuffer vulkanCommandBuffer;
 	if (BaseEngine::usingVulkan()) {
 		vulkanCommandBuffer = Vulkan::beginSingleTimeCommands();
@@ -58,18 +55,12 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 			Matrix4f().initLookAt(Vector3f(0.0f, 0.0f, 0.0f), Vector3f(0.0f,  0.0f, -1.0f), Vector3f(0.0f, -1.0f,  0.0f))
 	};
 
-	//Get the shaders
-	RenderShader* renderShader1 = Renderer::getRenderShader(Renderer::SHADER_PBR_GEN_EQUI_TO_CUBE_MAP);
-	RenderShader* renderShader2 = Renderer::getRenderShader(Renderer::SHADER_PBR_GEN_IRRADIANCE_MAP);
-	RenderShader* renderShader3 = Renderer::getRenderShader(Renderer::SHADER_PBR_GEN_PREFILTER_MAP);
-	RenderShader* renderShader4 = Renderer::getRenderShader(Renderer::SHADER_PBR_GEN_BRDF_INTEGRATION_MAP);
-
 	//Create meshes to render a cubemap and 2D texture
 	MeshData* cubeMeshData = MeshBuilder::createCube(1.0f, 1.0f, 1.0f);
 	MeshData* quadMeshData = MeshBuilder::createQuad(Vector2f(-1.0f, -1.0f), Vector2f(1.0f, -1.0f), Vector2f(1.0f, 1.0f), Vector2f(-1.0f, 1.0f), NULL);
 
-	MeshRenderData* cubeMesh = new MeshRenderData(cubeMeshData, renderShader1);
-	MeshRenderData* quadMesh = new MeshRenderData(quadMeshData, renderShader4);
+	MeshRenderData* cubeMesh = new MeshRenderData(cubeMeshData, Renderer::getRenderShader(Renderer::SHADER_PBR_GEN_EQUI_TO_CUBE_MAP));
+	MeshRenderData* quadMesh = new MeshRenderData(quadMeshData, Renderer::getRenderShader(Renderer::SHADER_PBR_GEN_BRDF_INTEGRATION_MAP));
 	std::vector<Material*> materials;
 	cubeMesh->setup(cubeMeshData, materials);
 	quadMesh->setup(quadMeshData, materials);
@@ -232,12 +223,26 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 		Vulkan::setOverrideCommandBuffer(VK_NULL_HANDLE);
 	}
 
-	std::cout << "END!!!!!!" << std::endl;
-
 	//---------------------------------------------------------------------------------------------------------------------------------
 
 	delete cubeMesh;
 	delete quadMesh;
+
+	delete renderPassEquiToCubeMap;
+	delete pipelineEquiToCubeMap;
+	delete descriptorSetEquiToCubeMap;
+	delete renderPassIrradianceMap;
+	delete pipelineIrradianceMap;
+	delete descriptorSetIrradianceMap;
+	for (unsigned int i = 0; i < renderPassesPrefilterMap.size(); ++i)
+		delete renderPassesPrefilterMap[i];
+	for (unsigned int i = 0; i < pipelinesPrefilterMap.size(); ++i)
+		delete pipelinesPrefilterMap[i];
+	for (unsigned int i = 0; i < descriptorSetsPrefilterMap.size(); ++i)
+		delete descriptorSetsPrefilterMap[i];
+	delete descriptorSetPrefilterMap;
+	delete renderPassBRDFLUTTexture;
+	delete pipelineBRDFLUTTexture;
 
 	return new PBREnvironment(environmentCubemap, irradianceCubemap, prefilterCubemap, brdfLUTTexture);
 }
