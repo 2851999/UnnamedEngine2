@@ -186,6 +186,15 @@ ShaderInterface::ShaderInterface() {
 	pbrGenIrradianceMapLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP, pbrGenIrradianceMapLayout);
+
+	//PBR GenPrefilterMap
+	DescriptorSetLayout* pbrGenPrefilterMapLayout = new DescriptorSetLayout(1);
+
+	pbrGenPrefilterMapLayout->addUBO(sizeof(ShaderBlock_PBRGenPrefilterMap), DataUsage::STATIC, 1);
+
+	pbrGenPrefilterMapLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP, pbrGenPrefilterMapLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -380,6 +389,9 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP));
 	} else if (shaderID == Renderer::SHADER_PBR_GEN_IRRADIANCE_MAP) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP));
+	} else if (shaderID == Renderer::SHADER_PBR_GEN_PREFILTER_MAP) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP));
 	}
 }
 

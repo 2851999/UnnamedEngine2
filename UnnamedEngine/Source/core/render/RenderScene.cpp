@@ -45,7 +45,7 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing,
 
 		//Setup the offscreen render pass
 		FBO* fbo = new FBO(width, height, {
-			FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE), true },
+			FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
 			FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), ! deferred } //When deferred, geometry pass must clear depth buffer, not post process
 		});
 
@@ -84,14 +84,14 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing,
 				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
 				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
 				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
-				FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), true }
+				FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true }
 			});
 		} else {
 			fbo = new FBO(width, height, {
 				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
 				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
 				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
-				FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH), true }
+				FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true }
 			});
 		}
 

@@ -1,4 +1,13 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 4
+
+* Changed PBREnvironment to use more generic methods to
+  generate textures for IBL
+
+* Fixed bug: Prefilter cubemap  was not generated correctly
+             in PBREnvironment
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 3 | Experimental 3
 
 * Added 'textureParameters' to the FramebufferAttachment

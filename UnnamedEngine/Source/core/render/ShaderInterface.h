@@ -122,7 +122,7 @@ struct ShaderBlock_PBRGenEnvMap {
 	Matrix4f projectionViewMatrices[6];
 };
 
-struct ShaderBlock_GenPBRPrefilterMap {
+struct ShaderBlock_PBRGenPrefilterMap {
 	float envMapSize;
 	float roughness;
 };
@@ -197,6 +197,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT          = 14;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP    = 15;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP      = 16;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP       = 17;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION      = 0;

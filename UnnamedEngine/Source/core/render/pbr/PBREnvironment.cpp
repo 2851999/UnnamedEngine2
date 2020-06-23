@@ -90,7 +90,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
 
 	FBO* fboEquiToCubemap = new FBO(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, {
-		FramebufferAttachmentInfo{ environmentCubemap, true, false }//,
+		FramebufferAttachmentInfo{ environmentCubemap, true, 0, false }//,
 		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
 	});
 
@@ -135,12 +135,12 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
 
 	FBO* fboIrradianceMap = new FBO(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, {
-		FramebufferAttachmentInfo{ irradianceCubemap, true, false }//,
+		FramebufferAttachmentInfo{ irradianceCubemap, true, 0, false }//,
 		//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
 	});
 
 	RenderPass* renderPassIrradianceMap = new RenderPass(fboIrradianceMap);
-	GraphicsPipeline* pipelineIrradianceMap = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_PBR_GEN_IRRADIANCE_MAP), renderPassEquiToCubeMap, IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE);
+	GraphicsPipeline* pipelineIrradianceMap = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_PBR_GEN_IRRADIANCE_MAP), renderPassIrradianceMap, IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE);
 	DescriptorSet* descriptorSetIrradianceMap = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP));
 	descriptorSetIrradianceMap->setTexture(0, environmentCubemap);
 
@@ -158,70 +158,53 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	//--------------------- RENDER PREFILTER CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP (SPLIT SUM APPROXIMATION) ---------------------
 
-	//Create and setup the FBO and RBO for rendering
-	unsigned int captureFBO;
-	unsigned int captureRBO;
-	glGenFramebuffers(1, &captureFBO);
-	glGenRenderbuffers(1, &captureRBO);
+	const unsigned int maxMipLevels = 4;
 
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, maxSize, maxSize);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+	FramebufferAttachment* prefilterCubemap = new FramebufferAttachment(PREFILTER_MAP_SIZE, PREFILTER_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR_MIPMAP_LINEAR, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true), 0, maxMipLevels);
 
-	ShaderBlock_GenPBREnvMap envMapGenData;
-	UBO* envMapGenUBO = new UBO(NULL, sizeof(ShaderBlock_GenPBREnvMap), DataUsage::DYNAMIC, ShaderInterface::BLOCK_PBR_ENV_MAP_GEN);
-	envMapGenUBO->bindGL();
+	std::vector<ShaderBlock_PBRGenPrefilterMap> prefilterMapGenDatas;
+	prefilterMapGenDatas.resize(maxMipLevels);
+	std::vector<RenderPass*> renderPassesPrefilterMap;
+	std::vector<GraphicsPipeline*> pipelinesPrefilterMap;
+	std::vector<DescriptorSet*> descriptorSetsPrefilterMap;
 
-	TextureParameters prefilMapParameters = TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true);
-	prefilMapParameters.setMinFilter(TextureParameters::Filter::LINEAR_MIPMAP_LINEAR);
-	prefilMapParameters.preventGenerateMipMaps();
-	Cubemap* prefilterCubemap = Cubemap::createCubemap(PREFILTER_MAP_SIZE, GL_RGB16F, GL_RGB, GL_FLOAT, prefilMapParameters);
+	for (unsigned int mip = 0; mip <= maxMipLevels; ++mip) {
+		unsigned int mipSize = PREFILTER_MAP_SIZE * pow(0.5, mip);
 
-	ShaderBlock_GenPBRPrefilterMap prefilterMapGenData;
-	UBO* prefilterMapGenUBO = new UBO(NULL, sizeof(ShaderBlock_GenPBRPrefilterMap), DataUsage::DYNAMIC, ShaderInterface::BLOCK_PBR_PREFILTER_MAP_GEN);
-	prefilterMapGenUBO->bindGL();
+		FBO* fboPrefilterMap = new FBO(mipSize, mipSize, {
+			FramebufferAttachmentInfo{ prefilterCubemap, true, static_cast<int>(mip), false }//,
+			//FramebufferAttachmentInfo{ new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
+		});
 
-	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, Window::getCurrentInstance()->getSettings().videoMaxAnisotropicSamples);
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP); //Allocate required memory
+		RenderPass* renderPassPrefilterMap = new RenderPass(fboPrefilterMap);
+		GraphicsPipeline* pipelinePrefilterMap = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_PBR_GEN_PREFILTER_MAP), renderPassPrefilterMap, mipSize, mipSize);
 
-	prefilterCubemap->unbind();
+		prefilterMapGenDatas[mip].envMapSize = ENVIRONMENT_MAP_SIZE;
+		prefilterMapGenDatas[mip].roughness = ((float) mip) / ((float) (maxMipLevels - 1));
 
-	shader3->use();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, environmentCubemap->getHandle());
-	shader3->setUniformi("EnvMap", 0);
-	envMapGenData.projection = captureProjection;
-	prefilterMapGenData.envMapSize = ENVIRONMENT_MAP_SIZE;
+		DescriptorSet* descriptorSetPrefilterMap = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP));
+		descriptorSetPrefilterMap->getUBO(0)->updateFrame(&prefilterMapGenDatas[mip], 0, sizeof(ShaderBlock_PBRGenPrefilterMap));
+		descriptorSetPrefilterMap->setup();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	const unsigned int maxMipLevels = 5;
-
-	for (unsigned int mip = 0; mip < maxMipLevels; mip++) {
-		//Resize framebuffer based on number of levels
-		unsigned int mipWidth = PREFILTER_MAP_SIZE * pow(0.5, mip);
-		unsigned int mipHeight = mipWidth;
-
-		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
-		glViewport(0, 0, mipWidth, mipHeight);
-
-		float roughness = (float) mip / (float) (maxMipLevels - 1);
-		prefilterMapGenData.roughness = roughness;
-		prefilterMapGenUBO->update(&prefilterMapGenData, 0, sizeof(ShaderBlock_GenPBRPrefilterMap));
-		for (unsigned int i = 0; i < 6; i++) {
-			envMapGenData.view = captureViews[i];
-			envMapGenUBO->update(&envMapGenData, 0, sizeof(ShaderBlock_GenPBREnvMap));
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, prefilterCubemap->getHandle(), mip);
-
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			cubeMesh->render();
-		}
+		renderPassesPrefilterMap.push_back(renderPassPrefilterMap);
+		pipelinesPrefilterMap.push_back(pipelinePrefilterMap);
+		descriptorSetsPrefilterMap.push_back(descriptorSetPrefilterMap);
 	}
 
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	shader3->stopUsing();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	DescriptorSet* descriptorSetPrefilterMap = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP));
+	descriptorSetPrefilterMap->setTexture(0, environmentCubemap);
+
+	for (unsigned int i = 0; i < maxMipLevels; ++i) {
+		renderPassesPrefilterMap[i]->begin();
+
+		pipelinesPrefilterMap[i]->bind();
+		descriptorSetIrradianceMap->bind();
+		descriptorSetsPrefilterMap[i]->bind();
+
+		cubeMesh->render();
+
+		renderPassesPrefilterMap[i]->end();
+	}
 
 	//-------------------------------------------------- RENDER BDRF INTEGRATION MAP --------------------------------------------------
 
@@ -245,13 +228,6 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	renderPassBRDFLUTTexture->end();
 
 	//---------------------------------------------------------------------------------------------------------------------------------
-
-	//Reset the normal view port
-	glViewport(0, 0, Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight);
-
-	//Delete the resources created
-	glDeleteFramebuffers(1, &captureFBO);
-	glDeleteRenderbuffers(1, &captureRBO);
 
 	delete cubeMesh;
 	delete quadMesh;

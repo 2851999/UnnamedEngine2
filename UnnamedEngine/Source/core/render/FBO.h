@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <map>
+
 #include "Framebuffer.h"
 #include "Texture.h"
 
@@ -40,8 +42,14 @@ private:
 	/* The number of samples of this store */
 	unsigned int samples;
 
+	/* The number of mipmaps that must be avaiable for storing data in this texture */
+	unsigned int numStorageMipMaps;
+
 	/* The format of this store */
 	VkFormat vulkanFormat;
+
+	/* Aspect mask used for this store */
+	VkImageAspectFlags vulkanAspectMask;
 
 	/* The final layout required for this attachment */
 	VkImageLayout vulkanFinalLayout;
@@ -51,9 +59,12 @@ private:
 
 	/* States whether this attachment has been setup */
 	bool beenSetup = false;
+
+	/* Image views for rendering to different mip maps (if necessary) */
+	std::map<uint32_t, VkImageView> vulkanMipMapImageViews;
 public:
 	/* Constructor */
-	FramebufferAttachment(uint32_t width, uint32_t height, Type type, TextureParameters textureParameters = TextureParameters(), unsigned int samples = 0);
+	FramebufferAttachment(uint32_t width, uint32_t height, Type type, TextureParameters textureParameters = TextureParameters(), unsigned int samples = 0, unsigned int numStorageMipMaps = 0);
 
 	/* Destructor */
 	virtual ~FramebufferAttachment();
@@ -62,12 +73,16 @@ public:
 	   current colour attachment in the FBO (used for OpenGL) */
 	void setup(unsigned int indexOfColourAttachment);
 
+	/* Method to setup this attachment for use with an FBO */
+	void setupFBO(unsigned int indexOfColourAttachment, int mipLevel); //If mipLevel == -1, assumed should use default image view
+
 	/* Method to obtain the attachment description of this attachment for Vulkan */
 	VkAttachmentDescription getVkAttachmentDescription(bool clearOnLoad);
 
 	/* Getters */
 	inline Type getType() { return type; }
 	inline bool hasBeenSetup() { return beenSetup; }
+	VkImageView& getVkImageViewMipMap(int mipMap) { return (mipMap == -1) ? getVkImageView() : vulkanMipMapImageViews.at(static_cast<uint32_t>(mipMap)); }
 };
 
 /*****************************************************************************
@@ -77,6 +92,7 @@ public:
 struct FramebufferAttachmentInfo {
 	FramebufferAttachment* attachment;
 	bool                   clearOnLoad;
+	int                    mipLevel     = -1;   //Mip level to render to using the FBO
 	bool                   shouldDelete = true; //Used to ensure if a new attachment is supplied to FBO, then it will delete it when destroyed, otherwise assumes it could be used elsewhere
 };
 

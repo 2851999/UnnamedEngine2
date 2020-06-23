@@ -26,7 +26,7 @@
   * The FramebufferAttachment class
   *****************************************************************************/
 
-FramebufferAttachment::FramebufferAttachment(uint32_t width, uint32_t height, Type type, TextureParameters textureParameters, unsigned int samples) : Texture(textureParameters), type(type), samples(samples) {
+FramebufferAttachment::FramebufferAttachment(uint32_t width, uint32_t height, Type type, TextureParameters textureParameters, unsigned int samples, unsigned int numStorageMipMaps) : Texture(textureParameters), type(type), samples(samples), numStorageMipMaps(numStorageMipMaps) {
 	setWidth(width);
 	setHeight(height);
 }
@@ -46,31 +46,30 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 		//Setup the texture for Vulkan
 
 		VkImageUsageFlags usage;
-		VkImageAspectFlags aspectMask;
 		VkImageLayout imageLayout;
 
 		if (type == Type::COLOUR_TEXTURE) {
 			vulkanFormat      = VK_FORMAT_R16G16B16A16_SFLOAT; //Equivalent to OpenGL below - Should really check if supported first
 			usage             = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			aspectMask        = VK_IMAGE_ASPECT_COLOR_BIT;
+			vulkanAspectMask  = VK_IMAGE_ASPECT_COLOR_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 			//getParameters().setFilter(TextureParameters::Filter::NEAREST);
 			//getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
-		}  else if (type == Type::COLOUR_CUBEMAP) {
-				vulkanFormat      = VK_FORMAT_R16G16B16A16_SFLOAT;
-				usage             = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-				aspectMask        = VK_IMAGE_ASPECT_COLOR_BIT;
-				vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-				imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		} else if (type == Type::COLOUR_CUBEMAP) {
+			vulkanFormat      = VK_FORMAT_R16G16B16A16_SFLOAT;
+			usage             = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			vulkanAspectMask  = VK_IMAGE_ASPECT_COLOR_BIT;
+			vulkanFinalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
 			//getParameters().setFilter(TextureParameters::Filter::LINEAR); //Assigned in PBREnvironment currently
 			//getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 		} else if (type == Type::DEPTH_TEXTURE) {
 			vulkanFormat      = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
+			vulkanAspectMask  = VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
@@ -79,7 +78,7 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 		} else if (type == Type::DEPTH) {
 			vulkanFormat	  = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-			aspectMask        = Vulkan::hasStencilComponent(vulkanFormat) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT;
+			vulkanAspectMask  = Vulkan::hasStencilComponent(vulkanFormat) ? (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT) : VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
@@ -88,7 +87,7 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 		} else if (type == Type::DEPTH_CUBEMAP) {
 			vulkanFormat      = Vulkan::findDepthFormat();
 			usage             = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-			aspectMask        = VK_IMAGE_ASPECT_DEPTH_BIT;
+			vulkanAspectMask  = VK_IMAGE_ASPECT_DEPTH_BIT;
 			vulkanFinalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			imageLayout       = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
@@ -97,9 +96,9 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 		}
 
 		if (type != Type::COLOUR_CUBEMAP && type != Type::DEPTH_CUBEMAP)
-			setupVk(getWidth(), getHeight(), static_cast<VkSampleCountFlagBits>(samples == 0 ? 1 : samples), vulkanFormat, usage, aspectMask, imageLayout);
+			setupVk(getWidth(), getHeight(), (numStorageMipMaps == 0 ? 1 : numStorageMipMaps), static_cast<VkSampleCountFlagBits>(samples == 0 ? 1 : samples), vulkanFormat, usage, vulkanAspectMask, imageLayout);
 		else
-			setupCubemapVk(getWidth(), getHeight(), vulkanFormat, usage, aspectMask, imageLayout);
+			setupCubemapVk(getWidth(), getHeight(), (numStorageMipMaps == 0 ? 1 : numStorageMipMaps), vulkanFormat, usage, vulkanAspectMask, imageLayout);
 	} else {
 		GLint internalFormat;
 		GLenum format;
@@ -115,7 +114,7 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 
 			//getParameters().setFilter(TextureParameters::Filter::NEAREST);
 			//getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
-		}  else if (type == Type::COLOUR_CUBEMAP) {
+		} else if (type == Type::COLOUR_CUBEMAP) {
 			getParameters().setTarget(GL_TEXTURE_CUBE_MAP);
 			internalFormat = GL_RGBA16F;
 			format = GL_RGBA;
@@ -166,7 +165,7 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 				glBindRenderbuffer(getParameters().getTarget(), 0);
 
 				//Attach to framebuffer
-				glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), glRBO);
+				//glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), glRBO);
 			} else {
 				//Setup the texture
 				create();
@@ -175,11 +174,12 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 				//	glTexImage2DMultisample(getParameters().getTarget(), Window::getCurrentInstance()->getSettings().videoSamples, internalFormat, getWidth(), getHeight(), true);
 				//else
 				glTexImage2D(getParameters().getTarget(), 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
+				glTexParameteri(getParameters().getTarget(), GL_TEXTURE_MAX_LEVEL, numStorageMipMaps);
 
 				applyParameters(false);
 
 				//Attach to framebuffer
-				glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), getHandle(), 0);
+				//glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), getHandle(), 0);
 				unbind();
 			}
 		} else {
@@ -196,15 +196,83 @@ void FramebufferAttachment::setup(unsigned int indexOfColourAttachment) {
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, getWidth(), getHeight(), 0, format, glType, NULL);
 			}
 
-			//https://www.khronos.org/opengl/wiki/Common_Mistakes#Creating_a_complete_texture ?????
+			//https://www.khronos.org/opengl/wiki/Common_Mistakes#Creating_a_complete_texture
 			//Seem to have to do here in order to not have GL_INVALID_OPERATION occur when trying later
 			//glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
+			glTexParameteri(getParameters().getTarget(), GL_TEXTURE_MAX_LEVEL, numStorageMipMaps);
 			applyParameters(false, false);
 
 			//Attach to framebuffer
-			glFramebufferTexture(GL_FRAMEBUFFER, attachment, getHandle(), 0);
+			//glFramebufferTexture(GL_FRAMEBUFFER, attachment, getHandle(), mipLevel);
 			unbind();
+		}
+	}
+}
+
+void FramebufferAttachment::setupFBO(unsigned int indexOfColourAttachment, int mipLevel) {
+	//Ensure textures have been setup assigned
+	if (beenSetup) {
+		//Has already been setup, so just need to use framebuffer appropriately
+
+		//Check whether using Vulkan
+		if (BaseEngine::usingVulkan()) {
+
+
+			//Check to see if the mip level is such that a specific level should be used in the FBO
+			if (mipLevel > -1) {
+				//Add the new level if needed
+				if (vulkanMipMapImageViews.find(mipLevel) == vulkanMipMapImageViews.end()) {
+					//Create and append the new image view
+
+					VkImageView imageView;
+					if (type != Type::COLOUR_CUBEMAP && type != Type::DEPTH_CUBEMAP)
+						imageView = Vulkan::createImageView(getVkImage(), VK_IMAGE_VIEW_TYPE_2D, vulkanFormat, vulkanAspectMask, 1, mipLevel, 1);
+					else
+						imageView = Vulkan::createImageView(getVkImage(), VK_IMAGE_VIEW_TYPE_CUBE, vulkanFormat, vulkanAspectMask, 1, mipLevel, 6);
+					vulkanMipMapImageViews.insert(std::pair<uint32_t, VkImageView>(mipLevel, imageView));
+				}
+			}
+		} else {
+			GLenum attachment;
+			if (type == Type::COLOUR_TEXTURE) {
+				attachment = GL_COLOR_ATTACHMENT0 + indexOfColourAttachment;
+			} else if (type == Type::COLOUR_CUBEMAP) {
+				attachment = GL_COLOR_ATTACHMENT0 + indexOfColourAttachment;
+			} else if (type == Type::DEPTH_TEXTURE) {
+				attachment = GL_DEPTH_ATTACHMENT;
+			} else if (type == Type::DEPTH) {
+				attachment = GL_DEPTH_ATTACHMENT;
+			} else if (type == Type::DEPTH_CUBEMAP) {
+				attachment = GL_DEPTH_ATTACHMENT;
+			}
+
+			if (type != Type::COLOUR_CUBEMAP && type != Type::DEPTH_CUBEMAP) {
+				//Check for render buffer object
+				if (getParameters().getTarget() == GL_RENDERBUFFER) {
+					glBindRenderbuffer(getParameters().getTarget(), 0);
+
+					//Attach to framebuffer
+					glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), glRBO);
+				} else {
+					//Setup the texture
+					bind();
+
+					//Attach to framebuffer
+					glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, getParameters().getTarget(), getHandle(), (mipLevel == -1) ? 0 : mipLevel);
+					unbind();
+				}
+			} else {
+				bind();
+
+				//https://www.khronos.org/opengl/wiki/Common_Mistakes#Creating_a_complete_texture
+				//Seem to have to do here in order to not have GL_INVALID_OPERATION occur when trying later
+				//glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+				//Attach to framebuffer
+				glFramebufferTexture(GL_FRAMEBUFFER, attachment, getHandle(), (mipLevel == -1) ? 0 : mipLevel);
+				unbind();
+			}
 		}
 	}
 }
@@ -276,9 +344,15 @@ void FBO::setup(RenderPass* renderPass) {
 		std::vector<VkImageView> framebufferAttachments;
 
 		//Go through each attachment
-		for (unsigned int i = 0; i < attachments.size(); ++i)
+		for (unsigned int i = 0; i < attachments.size(); ++i) {
+			//Setup the current attachment
+			attachments[i].attachment->setupFBO(0, attachments[i].mipLevel);
 			//Add the attachment and its description to the lists
-			framebufferAttachments.push_back(attachments[i].attachment->getVkImageView());
+			if (attachments[i].mipLevel >= 0)
+				framebufferAttachments.push_back(attachments[i].attachment->getVkImageViewMipMap(attachments[i].mipLevel));
+			else
+				framebufferAttachments.push_back(attachments[i].attachment->getVkImageView());
+		}
 
 		//Create the framebuffer
 		framebuffer = new Framebuffer(renderPass->getVkInstance(), width, height, framebufferAttachments, attachments.size() == 1 && (attachments[0].attachment->getType() == FramebufferAttachment::Type::DEPTH_CUBEMAP));
@@ -295,7 +369,7 @@ void FBO::setup(RenderPass* renderPass) {
 		//Go though each attached FramebufferAttachment
 		for (unsigned int i = 0; i < attachments.size(); i++) {
 			//Setup the current attachment
-			attachments[i].attachment->setup(index);
+			attachments[i].attachment->setupFBO(index, attachments[i].mipLevel);
 
 			//Add the colour attachments
 			if (attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_TEXTURE || attachments[i].attachment->getType() == FramebufferAttachment::Type::COLOUR_CUBEMAP) {
