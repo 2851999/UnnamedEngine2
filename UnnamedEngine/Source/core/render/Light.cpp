@@ -35,7 +35,7 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows, unsigned in
 		if (type == TYPE_DIRECTIONAL) {
 			//Create FBO
 			FBO* fbo = new FBO(shadowMapSize, shadowMapSize, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_TEXTURE), true }
+				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_BORDER)), true }
 			});
 
 			//Create the shadow map render pass
@@ -49,7 +49,7 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows, unsigned in
 		} else if (type == TYPE_POINT) {
 			//Create FBO
 			FBO* fbo = new FBO(shadowMapSize, shadowMapSize, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
+				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_CUBEMAP, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true }
 			});
 
 			//Create the shadow map render pass
@@ -72,7 +72,7 @@ Light::Light(unsigned int type, Vector3f position, bool castShadows, unsigned in
 		} else if (type == TYPE_SPOT) {
 			//Create FBO
 			FBO* fbo = new FBO(shadowMapSize, shadowMapSize, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_TEXTURE), true }
+				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_BORDER)), true }
 			});
 
 			//Create the shadow map render pass

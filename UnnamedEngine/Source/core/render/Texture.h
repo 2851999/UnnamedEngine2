@@ -59,8 +59,9 @@ public:
 	TextureParameters() {}
 	TextureParameters(GLuint target) : target(target) {}
 	TextureParameters(GLuint target, Filter filter) : target(target), minFilter(filter), magFilter(filter) {}
-	TextureParameters(GLuint target, Filter filter, AddressMode addressMode) : target(target), minFilter(filter), magFilter(filter), addressMode(addressMode) {}
 	TextureParameters(GLuint target, Filter filter, AddressMode addressMode, bool srgb = DEFAULT_SRGB) : target(target), minFilter(filter), magFilter(filter), addressMode(addressMode), srgb(srgb) {}
+	TextureParameters(GLuint target, Filter minFilter, Filter magFilter) : target(target), minFilter(minFilter), magFilter(magFilter) {}
+	TextureParameters(GLuint target, Filter minFilter, Filter magFilter, AddressMode addressMode, bool srgb = DEFAULT_SRGB) : target(target), minFilter(minFilter), magFilter(magFilter), addressMode(addressMode), srgb(srgb) {}
 
 	/* Methods used to apply the texture parameters to a texture */
 	void apply(GLuint texture, bool bind, bool unbind);

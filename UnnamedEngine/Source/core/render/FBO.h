@@ -53,7 +53,7 @@ private:
 	bool beenSetup = false;
 public:
 	/* Constructor */
-	FramebufferAttachment(uint32_t width, uint32_t height, Type type, unsigned int samples = 0);
+	FramebufferAttachment(uint32_t width, uint32_t height, Type type, TextureParameters textureParameters = TextureParameters(), unsigned int samples = 0);
 
 	/* Destructor */
 	virtual ~FramebufferAttachment();

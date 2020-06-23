@@ -80,12 +80,13 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	Texture::setFlipVerticallyOnLoad(false);
 
 	//---------------------------------- RENDER ENVIRONMENT CUBEMAP FROM EQUIRECTANGULAR MAP ----------------------------------
+	TextureParameters environmentCubemapTextureParameters = TextureParameters();
+	//environmentCubemapTextureParameters.setMinFilter(TextureParameters::Filter::LINEAR_MIPMAP_LINEAR);
+	environmentCubemapTextureParameters.setMinFilter(TextureParameters::Filter::LINEAR);
+	environmentCubemapTextureParameters.setMagFilter(TextureParameters::Filter::LINEAR);
+	environmentCubemapTextureParameters.setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 
-	FramebufferAttachment* environmentCubemap = new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP);
-	environmentCubemap->getParameters().setMinFilter(TextureParameters::Filter::LINEAR_MIPMAP_LINEAR);
-	//environmentCubemap->getParameters().setMinFilter(TextureParameters::Filter::LINEAR);
-	environmentCubemap->getParameters().setMagFilter(TextureParameters::Filter::LINEAR);
-	environmentCubemap->getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+	FramebufferAttachment* environmentCubemap = new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, environmentCubemapTextureParameters);
 	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
 
 	FBO* fboEquiToCubemap = new FBO(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, {
@@ -123,16 +124,14 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	renderPassEquiToCubeMap->end();
 
 	//Generate mip map as now assigned the texture
-	environmentCubemap->bind();
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	//environmentCubemap->bind();
+	//glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 	//glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	//---------------------------------- RENDER IRRADIANCE CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP ----------------------------------
 
-	FramebufferAttachment* irradianceCubemap = new FramebufferAttachment(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP);
-	irradianceCubemap->getParameters().setFilter(TextureParameters::Filter::LINEAR);
-	irradianceCubemap->getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+	FramebufferAttachment* irradianceCubemap = new FramebufferAttachment(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true));
 	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
 
 	FBO* fboIrradianceMap = new FBO(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, {
@@ -228,9 +227,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	//Texture* brdfLUTTexture = new Texture(TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true));
 
-	FramebufferAttachment* brdfLUTTexture = new FramebufferAttachment(BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, FramebufferAttachment::Type::COLOUR_TEXTURE);
-	brdfLUTTexture->getParameters().setFilter(TextureParameters::Filter::LINEAR);
-	brdfLUTTexture->getParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+	FramebufferAttachment* brdfLUTTexture = new FramebufferAttachment(BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE));
 
 	FBO* fboBRDFLUTTexture = new FBO(BRDF_LUT_TEXTURE_SIZE, BRDF_LUT_TEXTURE_SIZE, {
 		FramebufferAttachmentInfo{ brdfLUTTexture, true, false }//,
