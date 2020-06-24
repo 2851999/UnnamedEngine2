@@ -381,7 +381,7 @@ void Renderer::destroy() {
 using namespace utils_string;
 
 Shader* Renderer::loadEngineShader(UnloadedShaderInfo& shaderInfo) {
-	if (!BaseEngine::usingVulkan())
+	if (! BaseEngine::usingVulkan())
 		return Shader::loadShader("resources/shaders/" + shaderInfo.path, shaderInfo.defines);
 	else
 		return Shader::loadShader("resources/shaders-vulkan/" + shaderInfo.path, shaderInfo.defines);

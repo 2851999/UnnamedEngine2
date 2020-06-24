@@ -12,7 +12,7 @@ layout(set = 3, binding = 3) uniform sampler2D ue_gMetalnessAO;
 const float stepValue = 1;
 const float minRayStep = 0.1;
 const float maxSteps = 30;
-const int numBinarySearchSteps = 5;
+const int numBinarySearchSteps = 10;
 const float reflectionSpecularFalloffExponent = 3.0;
 
 const vec3 scale = vec3(0.8, 0.8, 0.8);

@@ -97,9 +97,13 @@ private:
 	Mesh* screenTextureMesh;
 	Mesh* deferredRenderingScreenTextureMesh;
 	Mesh* bloomSSRScreenTextureMesh; //Renders to SSR pass with bloom info
-	Mesh* gaussianBlurBloomScreenTextureMesh1; //Renders to gaussian blur pass with bright texture
-	Mesh* gaussianBlurBloomScreenTextureMesh2; //Renders to gaussian blur pass with bright texture
-	Mesh* gaussianBlurBloomScreenTextureMesh3; //Renders to gaussian blur pass with bright texture
+	/* These render to the gaussian blur pass, where
+	   1 - uses attachment from lighting framebuffer
+	   2 - uses attachment from gaussianBlur1RenderPass1
+	   3 - uses attachment from gaussianBlur1RenderPass2 */
+	Mesh* gaussianBlurBloomScreenTextureMesh1;
+	Mesh* gaussianBlurBloomScreenTextureMesh2;
+	Mesh* gaussianBlurBloomScreenTextureMesh3;
 
 	/* Graphics pipeline for rendering the final quad */
 	GraphicsPipeline* pipelineFinal;
@@ -110,6 +114,7 @@ private:
 	/* Bloom render pass -> rendering to normal/bright textures */
 	RenderPass* deferredBloomRenderPass = NULL;
 
+	/* Render passes for gaussian blur */
 	RenderPass* gaussianBlur1RenderPass = NULL;
 	RenderPass* gaussianBlur2RenderPass = NULL;
 
@@ -122,12 +127,18 @@ private:
 	/* Descriptor set for the geometry buffer */
 	DescriptorSet* descriptorSetGeometryBuffer;
 
+	/* Descriptor sets for gaussian blur */
 	ShaderBlock_GaussianBlur gaussianBlurData[2];
 	DescriptorSet* descriptorSetsGaussianBlur[2];
+
+	/* Number of blurs to execute for bloom */
 	unsigned int gaussianBlurAmount = 6;
 
-	/* Descriptor set for the geometry buffer SSR */
+	/* Descriptor set for the geometry buffer to be used for the SSR shader*/
 	DescriptorSet* descriptorSetGeometryBufferSSR;
+
+	/* Returns a MeshData* instance for rendering to the screen */
+	MeshData* createScreenMeshData();
 
 	/* Method used to render this scene (Ignoring any post processing) */
 	void renderScene();

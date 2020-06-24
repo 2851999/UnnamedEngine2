@@ -1,3 +1,6 @@
+#version 420
+
+#define UE_VERTEX_INPUT_ONLY
 #include "../Core.vs"
 
 #ifdef UE_SKINNING

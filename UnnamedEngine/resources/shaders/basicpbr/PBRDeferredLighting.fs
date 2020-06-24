@@ -1,3 +1,6 @@
+#version 420
+
+#define UE_DEFERRED_LIGHTING
 #include "PBRLightingCore.fs"
 
 layout(set = 4, binding = 0) uniform sampler2D ue_gPosition;

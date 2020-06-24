@@ -107,14 +107,14 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 
 	for (unsigned int i = 0; i < images.size(); ++i)
 		//Create the image view
-		imageViews[i] = Vulkan::createImageView(images[i], VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+		imageViews[i] = Vulkan::createImageView(images[i], VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 0, 1);
 
 	//Obtain the number of samples being used
 	numSamples = settings.videoSamples;
 	//Now setup the colour buffer if necessary
 	if (numSamples > 0) {
 		Vulkan::createImage(extent.width, extent.height, 1, 1, static_cast<VkSampleCountFlagBits>(numSamples), surfaceFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colourImage, colourImageMemory);
-		colourImageView = Vulkan::createImageView(colourImage, VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+		colourImageView = Vulkan::createImageView(colourImage, VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 0, 1);
 
 		Vulkan::transitionImageLayout(colourImage, surfaceFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1, 1);
 	}

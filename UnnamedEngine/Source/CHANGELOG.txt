@@ -1,4 +1,15 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 4 | Experimental 4
+
+* Changed ShaderInterface to only create
+  DescriptorSetLayout's when needed
+
+* Fixed bug: Had output data in ShadowCubemapShader.vs that
+             was not used in ShadowCubemapShader.gs
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 4 | Experimental 3
 
 * Added bloom when using Vulkan

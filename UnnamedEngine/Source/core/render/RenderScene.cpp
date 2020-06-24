@@ -55,13 +55,7 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool pos
 		pipelineGammaCorrectionFXAA = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA), Renderer::getDefaultRenderPass());
 
 		//Setup the screen texture mesh
-		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+		MeshData* meshData = createScreenMeshData();
 		screenTextureMesh = new Mesh(meshData);
 		screenTextureMesh->getMaterial()->setDiffuse(postProcessingRenderPass->getFBO()->getAttachment(0));
 
@@ -105,13 +99,7 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool pos
 		descriptorSetGeometryBuffer->setup();
 
 		//Setup the screen texture mesh
-		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+		MeshData* meshData = createScreenMeshData();
 		deferredRenderingScreenTextureMesh = new Mesh(meshData);
 		deferredRenderingScreenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 
@@ -141,37 +129,19 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool pos
 			pipelineGaussianBlur2 = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GAUSSIAN_BLUR), gaussianBlur2RenderPass);
 
 			//Setup the screen texture meshes
-			MeshData* meshData1 = new MeshData(MeshData::DIMENSIONS_2D);
-			meshData1->addPosition(Vector2f(-1.0f, 1.0f));  meshData1->addTextureCoord(Vector2f(0.0f, 1.0f));
-			meshData1->addPosition(Vector2f(-1.0f, -1.0f)); meshData1->addTextureCoord(Vector2f(0.0f, 0.0f));
-			meshData1->addPosition(Vector2f(1.0f, -1.0f));  meshData1->addTextureCoord(Vector2f(1.0f, 0.0f));
-			meshData1->addPosition(Vector2f(-1.0f, 1.0f));  meshData1->addTextureCoord(Vector2f(0.0f, 1.0f));
-			meshData1->addPosition(Vector2f(1.0f, -1.0f));  meshData1->addTextureCoord(Vector2f(1.0f, 0.0f));
-			meshData1->addPosition(Vector2f(1.0f, 1.0f));   meshData1->addTextureCoord(Vector2f(1.0f, 1.0f));
+			MeshData* meshData1 = createScreenMeshData();
 			gaussianBlurBloomScreenTextureMesh1 = new Mesh(meshData1);
 			gaussianBlurBloomScreenTextureMesh1->getMaterial()->setDiffuse(deferredBloomRenderPass->getFBO()->getAttachment(1)); //Bright texture
 
 			gaussianBlurBloomScreenTextureMesh1->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 
-			MeshData* meshData2 = new MeshData(MeshData::DIMENSIONS_2D);
-			meshData2->addPosition(Vector2f(-1.0f, 1.0f));  meshData2->addTextureCoord(Vector2f(0.0f, 1.0f));
-			meshData2->addPosition(Vector2f(-1.0f, -1.0f)); meshData2->addTextureCoord(Vector2f(0.0f, 0.0f));
-			meshData2->addPosition(Vector2f(1.0f, -1.0f));  meshData2->addTextureCoord(Vector2f(1.0f, 0.0f));
-			meshData2->addPosition(Vector2f(-1.0f, 1.0f));  meshData2->addTextureCoord(Vector2f(0.0f, 1.0f));
-			meshData2->addPosition(Vector2f(1.0f, -1.0f));  meshData2->addTextureCoord(Vector2f(1.0f, 0.0f));
-			meshData2->addPosition(Vector2f(1.0f, 1.0f));   meshData2->addTextureCoord(Vector2f(1.0f, 1.0f));
+			MeshData* meshData2 = createScreenMeshData();
 			gaussianBlurBloomScreenTextureMesh2 = new Mesh(meshData2);
 			gaussianBlurBloomScreenTextureMesh2->getMaterial()->setDiffuse(gaussianBlur1RenderPass->getFBO()->getAttachment(0)); //Bright texture
 
 			gaussianBlurBloomScreenTextureMesh2->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 
-			MeshData* meshData3 = new MeshData(MeshData::DIMENSIONS_2D);
-			meshData3->addPosition(Vector2f(-1.0f, 1.0f));  meshData3->addTextureCoord(Vector2f(0.0f, 1.0f));
-			meshData3->addPosition(Vector2f(-1.0f, -1.0f)); meshData3->addTextureCoord(Vector2f(0.0f, 0.0f));
-			meshData3->addPosition(Vector2f(1.0f, -1.0f));  meshData3->addTextureCoord(Vector2f(1.0f, 0.0f));
-			meshData3->addPosition(Vector2f(-1.0f, 1.0f));  meshData3->addTextureCoord(Vector2f(0.0f, 1.0f));
-			meshData3->addPosition(Vector2f(1.0f, -1.0f));  meshData3->addTextureCoord(Vector2f(1.0f, 0.0f));
-			meshData3->addPosition(Vector2f(1.0f, 1.0f));   meshData3->addTextureCoord(Vector2f(1.0f, 1.0f));
+			MeshData* meshData3 = createScreenMeshData();
 			gaussianBlurBloomScreenTextureMesh3 = new Mesh(meshData3);
 			gaussianBlurBloomScreenTextureMesh3->getMaterial()->setDiffuse(gaussianBlur2RenderPass->getFBO()->getAttachment(0)); //Bright texture
 
@@ -188,13 +158,7 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool pos
 			descriptorSetsGaussianBlur[1]->getUBO(0)->update(&gaussianBlurData[1], 0, sizeof(ShaderBlock_GaussianBlur));
 			descriptorSetsGaussianBlur[1]->setup();
 
-			MeshData* meshData4 = new MeshData(MeshData::DIMENSIONS_2D);
-			meshData4->addPosition(Vector2f(-1.0f, 1.0f));  meshData4->addTextureCoord(Vector2f(0.0f, 1.0f));
-			meshData4->addPosition(Vector2f(-1.0f, -1.0f)); meshData4->addTextureCoord(Vector2f(0.0f, 0.0f));
-			meshData4->addPosition(Vector2f(1.0f, -1.0f));  meshData4->addTextureCoord(Vector2f(1.0f, 0.0f));
-			meshData4->addPosition(Vector2f(-1.0f, 1.0f));  meshData4->addTextureCoord(Vector2f(0.0f, 1.0f));
-			meshData4->addPosition(Vector2f(1.0f, -1.0f));  meshData4->addTextureCoord(Vector2f(1.0f, 0.0f));
-			meshData4->addPosition(Vector2f(1.0f, 1.0f));   meshData4->addTextureCoord(Vector2f(1.0f, 1.0f));
+			MeshData* meshData4 = createScreenMeshData();
 			bloomSSRScreenTextureMesh = new Mesh(meshData4);
 			bloomSSRScreenTextureMesh->getMaterial()->setAmbient(((gaussianBlurAmount % 2) == 1) ? gaussianBlur1RenderPass->getFBO()->getAttachment(0) : gaussianBlur2RenderPass->getFBO()->getAttachment(0));
 			bloomSSRScreenTextureMesh->getMaterial()->setDiffuse(deferredBloomRenderPass->getFBO()->getAttachment(0));
@@ -683,4 +647,15 @@ void RenderScene::setPostProcessingParameters(bool gammaCorrection, bool fxaa, f
 	shaderGammaCorrectionFXAAData.exposureIn   = exposureIn;
 
 	descriptorSetGammaCorrectionFXAA->getUBO(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
+}
+
+MeshData* RenderScene::createScreenMeshData() {
+	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+	return meshData;
 }
