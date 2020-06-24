@@ -1,5 +1,5 @@
 --------------------------------------------------------------
-Release 2 | Beta 2 | Development 3 (V0.5.4)
+Release 2 | Beta 2 | Development 4 (V0.5.4)
 
 * Added 'textureParameters' to the FramebufferAttachment
   constructor
