@@ -77,7 +77,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	environmentCubemapTextureParameters.setMagFilter(TextureParameters::Filter::LINEAR);
 	environmentCubemapTextureParameters.setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
 
-	FramebufferAttachment* environmentCubemap = new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, environmentCubemapTextureParameters);
+	FramebufferAttachment* environmentCubemap = new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, environmentCubemapTextureParameters, 1);
 	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
 
 	FBO* fboEquiToCubemap = new FBO(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, {
@@ -122,7 +122,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	//---------------------------------- RENDER IRRADIANCE CUBEMAP BY CONVOLUTING THE ENVIRONMENT MAP ----------------------------------
 
-	FramebufferAttachment* irradianceCubemap = new FramebufferAttachment(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true));
+	FramebufferAttachment* irradianceCubemap = new FramebufferAttachment(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true), 1);
 	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE
 
 	FBO* fboIrradianceMap = new FBO(IRRADIANCE_MAP_SIZE, IRRADIANCE_MAP_SIZE, {
@@ -151,7 +151,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	const unsigned int maxMipLevels = 5;
 
-	FramebufferAttachment* prefilterCubemap = new FramebufferAttachment(PREFILTER_MAP_SIZE, PREFILTER_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR_MIPMAP_LINEAR, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true), 0, maxMipLevels);
+	FramebufferAttachment* prefilterCubemap = new FramebufferAttachment(PREFILTER_MAP_SIZE, PREFILTER_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, TextureParameters(GL_TEXTURE_CUBE_MAP, TextureParameters::Filter::LINEAR_MIPMAP_LINEAR, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true), 1, maxMipLevels);
 
 	std::vector<ShaderBlock_PBRGenPrefilterMap> prefilterMapGenDatas;
 	prefilterMapGenDatas.resize(maxMipLevels);

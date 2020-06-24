@@ -1,4 +1,9 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 8
+
+* Fixed bug: MSAA when using Vulkan did not work
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 3 | Experimental 7
 
 * Changed Shader 'loadShaderSource' to ignore additional
