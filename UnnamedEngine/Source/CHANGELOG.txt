@@ -1,4 +1,9 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 4 | Experimental 2
+
+* Readed bloom when using OpenGL
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 4 | Experimental 1
 
 * Started readding bloom

@@ -79,11 +79,12 @@ void Test::onCreated() {
 	//Shader::compileEngineShaderToSPIRV("pbr/PBRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
 	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
 	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
-	Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
-	Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_BLOOM" });
-	Shader::compileEngineShaderToSPIRV("postprocessing/GaussianBlur", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	Shader::compileEngineShaderToSPIRV("postprocessing/BloomShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+
+	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_BLOOM" });
+	//Shader::compileEngineShaderToSPIRV("postprocessing/GaussianBlur", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("postprocessing/BloomShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	//Logger::stopFileOutput();
 

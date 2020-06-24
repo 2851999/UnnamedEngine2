@@ -88,17 +88,30 @@ private:
 	GraphicsPipeline* pipelineGammaCorrectionFXAA;
 	GraphicsPipeline* pipelineDeferredLighting;
 	GraphicsPipeline* pipelineDeferredLightingBlend;
+	GraphicsPipeline* pipelineGaussianBlur1;
+	GraphicsPipeline* pipelineGaussianBlur2;
+	GraphicsPipeline* pipelineBloomCombine;
 	GraphicsPipeline* pipelineDeferredSSR;
 
 	/* Meshes for rendering to the screen */
 	Mesh* screenTextureMesh;
 	Mesh* deferredRenderingScreenTextureMesh;
+	Mesh* bloomSSRScreenTextureMesh; //Renders to SSR pass with bloom info
+	Mesh* gaussianBlurBloomScreenTextureMesh1; //Renders to gaussian blur pass with bright texture
+	Mesh* gaussianBlurBloomScreenTextureMesh2; //Renders to gaussian blur pass with bright texture
+	Mesh* gaussianBlurBloomScreenTextureMesh3; //Renders to gaussian blur pass with bright texture
 
 	/* Graphics pipeline for rendering the final quad */
 	GraphicsPipeline* pipelineFinal;
 
 	/* Deferred geometry render pass */
 	RenderPass* deferredGeometryRenderPass = NULL;
+
+	/* Bloom render pass -> rendering to normal/bright textures */
+	RenderPass* deferredBloomRenderPass = NULL;
+
+	RenderPass* gaussianBlur1RenderPass = NULL;
+	RenderPass* gaussianBlur2RenderPass = NULL;
 
 	/* SSR render pass */
 	RenderPass* deferredPBRSSRRenderPass = NULL;
@@ -108,6 +121,10 @@ private:
 
 	/* Descriptor set for the geometry buffer */
 	DescriptorSet* descriptorSetGeometryBuffer;
+
+	ShaderBlock_GaussianBlur gaussianBlurData[2];
+	DescriptorSet* descriptorSetsGaussianBlur[2];
+	unsigned int gaussianBlurAmount = 6;
 
 	/* Descriptor set for the geometry buffer SSR */
 	DescriptorSet* descriptorSetGeometryBufferSSR;
