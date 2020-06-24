@@ -25,7 +25,7 @@
 
 #include "../BaseEngine.h"
 
-RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing, PBREnvironment* pbrEnvironment) : deferred(deferred), pbr(pbr), ssr(ssr), postProcessing(postProcessing), pbrEnvironment(pbrEnvironment) {
+RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool postProcessing, PBREnvironment* pbrEnvironment) : deferred(deferred), pbr(pbr), ssr(ssr), bloom(bloom), postProcessing(postProcessing), pbrEnvironment(pbrEnvironment) {
 	//Create the FBO for rendering offscreen
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;

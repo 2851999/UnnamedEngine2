@@ -1,9 +1,10 @@
 #include "PostProcess.fs"
 
-#map uniform Horizontal horizontal
+layout(std140, set = 3, binding = 7) uniform UEGaussianBlurData {
+	bool horizontal;
+};
 
-uniform bool horizontal;
-uniform float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
+const float weight[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
 layout(location = 0) out vec4 ue_FragColour;
 

@@ -149,6 +149,10 @@ struct ShaderBlock_SDFText {
 	Vector2f shadowOffset;
 };
 
+struct ShaderBlock_GaussianBlur {
+	bool horizontal;
+};
+
 /*****************************************************************************
  * The ShaderInterface class handles data transfer to shaders via UBO's
  *****************************************************************************/
@@ -194,6 +198,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP    = 16;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP      = 17;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP       = 18;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR               = 19;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION      = 0;
@@ -223,6 +228,7 @@ public:
 	static const unsigned int UBO_BINDING_LOCATION_BILLBOARD              = 11;
 	static const unsigned int UBO_BINDING_LOCATION_SHADOW_CUBEMAP         = 12;
 	static const unsigned int UBO_BINDING_LOCATION_SDF_TEXT               = 4;
+	static const unsigned int UBO_BINDING_LOCATION_GAUSSIAN_BLUR          = 7;
 
 	/* Constructor */
 	ShaderInterface();

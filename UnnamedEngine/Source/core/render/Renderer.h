@@ -101,8 +101,11 @@ public:
 	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING_GEOMETRY                 = 32;
 	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY        = 33;
 	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING                          = 34;
-	static const unsigned int SHADER_BILLBOARDED_FONT                               = 35;
-	static const unsigned int SHADER_BILLBOARDED_FONT_SDF                           = 36;
+	static const unsigned int SHADER_PBR_DEFERRED_LIGHTING_BLOOM                    = 35;
+	static const unsigned int SHADER_BILLBOARDED_FONT                               = 36;
+	static const unsigned int SHADER_BILLBOARDED_FONT_SDF                           = 37;
+	static const unsigned int SHADER_GAUSSIAN_BLUR                                  = 38;
+	static const unsigned int SHADER_BLOOM                                          = 39;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL                                      = 1;
@@ -146,12 +149,16 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY       = 39;
 	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING                         = 40;
 	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND                   = 41;
-	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT                              = 42;
-	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF                          = 43;
-	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP                      = 44;
-	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_IRRADIANCE_MAP                        = 45;
-	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_PREFILTER_MAP                         = 46;
-	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_BRDF_INTEGRATION_MAP                  = 47;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLOOM                   = 42;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLOOM_BLEND             = 43;
+	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT                              = 44;
+	static const unsigned int GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF                          = 45;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP                      = 46;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_IRRADIANCE_MAP                        = 47;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_PREFILTER_MAP                         = 48;
+	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_BRDF_INTEGRATION_MAP                  = 49;
+	static const unsigned int GRAPHICS_PIPELINE_GAUSSIAN_BLUR                                 = 50;
+	static const unsigned int GRAPHICS_PIPELINE_BLOOM                                         = 51;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

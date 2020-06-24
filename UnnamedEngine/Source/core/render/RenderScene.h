@@ -56,6 +56,9 @@ private:
 	/* Boolean that states whether SSR should be used or not */
 	bool ssr;
 
+	/* Boolean that states whether bloom should be used or not */
+	bool bloom;
+
 	/* Boolean that states whether post processing should be used or not */
 	bool postProcessing;
 
@@ -116,7 +119,7 @@ public:
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
 	/* Constructor */
-	RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing, PBREnvironment* pbrEnvironment = NULL);
+	RenderScene(bool deferred, bool pbr, bool ssr, bool blooms, bool postProcessing, PBREnvironment* pbrEnvironment = NULL);
 
 	/* Destructor */
 	virtual ~RenderScene();

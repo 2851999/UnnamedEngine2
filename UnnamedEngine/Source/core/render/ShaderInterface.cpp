@@ -205,6 +205,13 @@ ShaderInterface::ShaderInterface() {
 	pbrGenPrefilterMapLayout->setup();
 
 	add(DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP, pbrGenPrefilterMapLayout);
+
+	//Gaussian blur
+	DescriptorSetLayout* gaussianBlurLayout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
+	gaussianBlurLayout->addUBO(sizeof(ShaderBlock_GaussianBlur), DataUsage::STATIC, UBO_BINDING_LOCATION_GAUSSIAN_BLUR);
+	gaussianBlurLayout->setup();
+
+	add(DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR, gaussianBlurLayout);
 }
 
 ShaderInterface::~ShaderInterface() {
@@ -386,6 +393,15 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 	} else if (shaderID == Renderer::SHADER_PBR_GEN_PREFILTER_MAP) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP));
+	} else if (shaderID == Renderer::SHADER_GAUSSIAN_BLUR) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR));
+	} else if (shaderID == Renderer::SHADER_BLOOM) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 	}
 }
 
