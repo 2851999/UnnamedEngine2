@@ -33,10 +33,17 @@ RenderData::~RenderData() {
 }
 
 void RenderData::setup(RenderShader* renderShader) {
-	//Create the descriptor set
-	descriptorSetModel = new DescriptorSet(renderShader->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MODEL));
-	//Setup the descriptor set
-	descriptorSetModel->setup();
+	//HACK TO ALLOW PBREnvironment to work
+	if (renderShader->getID() != Renderer::SHADER_PBR_GEN_EQUI_TO_CUBE_MAP &&
+		renderShader->getID() != Renderer::SHADER_PBR_GEN_IRRADIANCE_MAP &&
+		renderShader->getID() != Renderer::SHADER_PBR_GEN_PREFILTER_MAP &&
+		renderShader->getID() != Renderer::SHADER_PBR_GEN_BRDF_INTEGRATION_MAP) {
+
+		//Create the descriptor set
+		descriptorSetModel = new DescriptorSet(renderShader->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MODEL));
+		//Setup the descriptor set
+		descriptorSetModel->setup();
+	}
 
 	if (! BaseEngine::usingVulkan()) {
 		//Generate the VAO and bind it

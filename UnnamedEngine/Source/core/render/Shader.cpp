@@ -406,12 +406,18 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int ubo
 		if (hasVersion && ! added) {
 			source.source += preSource + "\n";
 			added = true;
-		}  else if ((!hasVersion) && utils_string::strStartsWith(line, "#version"))
+		}  else if ((! hasVersion) && utils_string::strStartsWith(line, "#version"))
 			hasVersion = true;
 		else if (line != "")
 			hasVersion = true; //Assume has no version
-		//Append the line onto the source
-		source.source += line + "\n";
+
+		//Only append onto the source if it does not define another version (so that the first occrurance is treated as
+		//the one that should be used - in the case of includes this means versions before includes take precedence)
+		if (! (hasVersion && added && utils_string::strStartsWith(line, "#version")))
+			//Append the line onto the source
+			source.source += line + "\n";
+		//else
+		//	std::cout << line << std::endl;
 	}
 
 //	std::cout << "----------------------------------------------" << std::endl;

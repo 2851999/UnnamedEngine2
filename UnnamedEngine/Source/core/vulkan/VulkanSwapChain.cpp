@@ -138,7 +138,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	colourAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
 	colourAttachment.finalLayout    = numSamples > 0 ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-	depthAttachment = new FramebufferAttachment(extent.width, extent.height, FramebufferAttachment::Type::DEPTH, numSamples);
+	depthAttachment = new FramebufferAttachment(extent.width, extent.height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE), numSamples, 0);
 	depthAttachment->setup(0);
 
 	////Setup the depth attachment info

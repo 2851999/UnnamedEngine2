@@ -1,4 +1,87 @@
 --------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 (V0.5.4)
+
+* Added 'textureParameters' to the FramebufferAttachment
+  constructor
+* Added IBL when using Vulkan
+
+* Changed irradiance cubemap generation in PBREnvironment to
+  use a geometry shader
+* Changed FBO so texture parameters given in a 
+  FramebufferAttachment are not overridden
+* Changed prefilter cubemap generation in PBREnvironment to
+  use a geometry shader
+* Changed Shader 'loadShaderSource' to ignore additional
+  occurences of #version such that the one that appears
+  first is taken (this means versions before includes take
+  precedence)
+
+* Fixed bug: Irradiance cubemap was not generated correctly
+             in PBREnvironment
+
+* Some cleanup
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 8
+
+* Fixed bug: MSAA when using Vulkan did not work
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 7
+
+* Changed Shader 'loadShaderSource' to ignore additional
+  occurences of #version such that the one that appears
+  first is taken (this means versions before includes take
+  precedence)
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 6
+
+* Added IBL when using Vulkan
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 5
+
+* Started adding IBL when using Vulkan
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 4
+
+* Changed PBREnvironment to use more generic methods to
+  generate textures for IBL
+* Changed prefilter cubemap generation in PBREnvironment to
+  use a geometry shader
+
+* Fixed bug: Prefilter cubemap  was not generated correctly
+             in PBREnvironment
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 3
+
+* Added 'textureParameters' to the FramebufferAttachment
+  constructor
+
+* Changed FBO so texture parameters given in a 
+  FramebufferAttachment are not overridden
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 2
+
+* Fixed bug: BRDF LUT was not generated correctly
+             in PBREnvironment
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 3 | Experimental 1
+
+* Changed irradiance cubemap generation in PBREnvironment to
+  use a geometry shader
+
+* Fixed bug: Irradiance cubemap was not generated correctly
+             in PBREnvironment
+
+* Some cleanup
+
+--------------------------------------------------------------
 Release 2 | Beta 2 | Development 3 (V0.5.3)
 
 * Added IBO

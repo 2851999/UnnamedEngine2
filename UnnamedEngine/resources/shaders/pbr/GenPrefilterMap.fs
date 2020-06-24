@@ -2,15 +2,13 @@
 
 #include "PBRCore.fs"
 
-layout(location = 0) in vec3 localPos;
+layout(set = 0, binding = 0) uniform samplerCube environmentMap;
+
+layout(location = 0) in vec4 localPos;
 
 layout(location = 0) out vec4 FragColor;
 
-#map uniform EnvMap environmentMap
-
-uniform samplerCube environmentMap;
-
-layout(std140, binding = 9) uniform UEEquiToCubeGenData {
+layout(std140, set = 1, binding = 1) uniform UEPrefilterMapGenData {
 	float envMapSize;
 	float roughness;
 };
@@ -18,7 +16,7 @@ layout(std140, binding = 9) uniform UEEquiToCubeGenData {
 void main() {
     const uint SAMPLE_COUNT = 1024u;
 
-	vec3 N = normalize(localPos);    
+	vec3 N = normalize(localPos.xyz);    
     vec3 R = N;
     vec3 V = R;
 

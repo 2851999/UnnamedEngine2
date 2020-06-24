@@ -210,6 +210,44 @@ void Texture::setupCubemapVk(uint32_t width, uint32_t height, VkFormat format, V
 	imageInfo.sampler = textureVkSampler;
 }
 
+void Texture::setupVk(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits samples, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout) {
+	//Create the image
+	Vulkan::createImage(width, height, mipLevels, 1, samples, format, VK_IMAGE_TILING_OPTIMAL, usage, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
+	//Create the image view
+	textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, aspectMask, mipLevels, 1);
+	//Create the sampler
+	VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
+	samplerInfo.maxLod = 1.0f;
+	samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE; //For depth
+
+	if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
+		Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
+
+	//Setup the descriptor info
+	imageInfo.imageLayout = imageLayout;
+	imageInfo.imageView = textureVkImageView;
+	imageInfo.sampler = textureVkSampler;
+}
+
+void Texture::setupCubemapVk(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout) {
+	//Create the image
+	Vulkan::createImage(width, height, mipLevels, 6, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
+	//Create the image view
+	textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_CUBE, format, aspectMask, mipLevels, 6);
+	//Create the sampler
+	VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
+	samplerInfo.maxLod = 1.0f;
+	samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE; //For depth
+
+	if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
+		Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
+
+	//Setup the descriptor info
+	imageInfo.imageLayout = imageLayout;
+	imageInfo.imageView = textureVkImageView;
+	imageInfo.sampler = textureVkSampler;
+}
+
 Texture::Texture(void* imageData, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters, bool shouldApplyParameters) : width(width), height(height), numComponents(numComponents), parameters(parameters) {
 	//Check whether using OpenGL or Vulkan
 	if (! BaseEngine::usingVulkan()) {
@@ -244,8 +282,11 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 			numComponents = 4;
 
 		VkDeviceSize imageSize = width * height * numComponents;
+		if (type == GL_FLOAT)
+			imageSize *= sizeof(float);
+
 		VkFormat format;
-		Texture::getTextureFormatVk(numComponents, parameters.getSRGB(), format);
+		Texture::getTextureFormatVk(numComponents, parameters.getSRGB(), type == GL_FLOAT, format);
 
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
@@ -326,7 +367,7 @@ Texture::~Texture() {
 void Texture::generateMipmapsVk() {
 	//Obtain the format used for this image
 	VkFormat format;
-	getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), format);
+	getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), false, format);
 
 	//Check the used image format supports linear blitting
 	VkFormatProperties formatProperties;
@@ -461,25 +502,48 @@ void Texture::getTextureFormatGL(int numComponents, bool srgb, GLint& internalFo
 		format = internalFormat;
 }
 
-void Texture::getTextureFormatVk(int numComponents, bool srgb, VkFormat& format) {
-	if (srgb) {
-		if (numComponents == 1)
-			format = VK_FORMAT_R8_SRGB;
-		else if (numComponents == 2)
-			format = VK_FORMAT_R8G8_SRGB;
-		else if (numComponents == 3)
-			format = VK_FORMAT_R8G8B8_SRGB;
-		else if (numComponents == 4)
-			format = VK_FORMAT_R8G8B8A8_SRGB;
+void Texture::getTextureFormatVk(int numComponents, bool srgb, bool useFloat, VkFormat& format) {
+	if (useFloat) {
+		if (srgb) {
+			//sizeof(float) = 4 => 32 bit needed for loading float textures with stbi_loadf
+			if (numComponents == 1)
+				format = VK_FORMAT_R32_SFLOAT;
+			else if (numComponents == 2)
+				format = VK_FORMAT_R32G32_SFLOAT;
+			else if (numComponents == 3)
+				format = VK_FORMAT_R32G32B32_SFLOAT;
+			else if (numComponents == 4)
+				format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		} else {
+			if (numComponents == 1)
+				format = VK_FORMAT_R32_SFLOAT;
+			else if (numComponents == 2)
+				format = VK_FORMAT_R32G32_SFLOAT;
+			else if (numComponents == 3)
+				format = VK_FORMAT_R32G32B32_SFLOAT;
+			else if (numComponents == 4)
+				format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		}
 	} else {
-		if (numComponents == 1)
-			format = VK_FORMAT_R8_UNORM;
-		else if (numComponents == 2)
-			format = VK_FORMAT_R8G8_UNORM;
-		else if (numComponents == 3)
-			format = VK_FORMAT_R8G8B8_UNORM;
-		else if (numComponents == 4)
-			format = VK_FORMAT_R8G8B8A8_UNORM;
+		if (srgb) {
+			if (numComponents == 1)
+				format = VK_FORMAT_R8_SRGB;
+			else if (numComponents == 2)
+				format = VK_FORMAT_R8G8_SRGB;
+			else if (numComponents == 3)
+				format = VK_FORMAT_R8G8B8_SRGB;
+			else if (numComponents == 4)
+				format = VK_FORMAT_R8G8B8A8_SRGB;
+		} else {
+			if (numComponents == 1)
+				format = VK_FORMAT_R8_UNORM;
+			else if (numComponents == 2)
+				format = VK_FORMAT_R8G8_UNORM;
+			else if (numComponents == 3)
+				format = VK_FORMAT_R8G8B8_UNORM;
+			else if (numComponents == 4)
+				format = VK_FORMAT_R8G8B8A8_UNORM;
+		}
 	}
 }
 
@@ -590,7 +654,7 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 			const VkDeviceSize imageSize = layerSize * 6; //Assume texture sizes are identical
 
 			VkFormat format;
-			Texture::getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), format);
+			Texture::getTextureFormatVk(STBI_rgb_alpha, parameters.getSRGB(), false, format);
 
 			//Staging buffer
 			VkBuffer stagingBuffer;

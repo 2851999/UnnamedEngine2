@@ -5,9 +5,15 @@
 //Need to ensure doesn't conflict with deferred geometry buffer textures
 //In the case of forward rendering the lighting shadow maps will have the
 //greatest impact
+#ifndef UE_NO_DEFERRED
 layout(set = 5, binding = 20) uniform samplerCube ue_irradianceMap;
 layout(set = 5, binding = 21) uniform samplerCube ue_prefilterMap;
 layout(set = 5, binding = 22) uniform sampler2D   ue_brdfLUT;
+#else
+layout(set = 4, binding = 20) uniform samplerCube ue_irradianceMap;
+layout(set = 4, binding = 21) uniform samplerCube ue_prefilterMap;
+layout(set = 4, binding = 22) uniform sampler2D   ue_brdfLUT;
+#endif
 
 vec3 ueCalculateLightPBR(UELight light, vec3 lightDirection, vec3 normal, vec3 viewDirection, vec3 fragPos, vec3 albedo, float metalness, float roughness, vec3 F0) {
     vec3 lightColor = light.diffuseColour.xyz;

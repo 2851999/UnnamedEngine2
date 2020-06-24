@@ -248,7 +248,10 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BILLBOARDED_FONT, SHADER_BILLBOARDED_FONT, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, billboardedFontDepthState, defaultCullState, true);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF, SHADER_BILLBOARDED_FONT_SDF, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, billboardedFontDepthState, defaultCullState, true);
 
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP, SHADER_PBR_GEN_EQUI_TO_CUBE_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP, SHADER_PBR_GEN_EQUI_TO_CUBE_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_IRRADIANCE_MAP, SHADER_PBR_GEN_IRRADIANCE_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_PREFILTER_MAP, SHADER_PBR_GEN_PREFILTER_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_BRDF_INTEGRATION_MAP, SHADER_PBR_GEN_BRDF_INTEGRATION_MAP, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, false);
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();

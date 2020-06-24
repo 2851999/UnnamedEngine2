@@ -55,6 +55,9 @@ private:
 	/* Command buffers (one for each swap chain image) */
 	static std::vector<VkCommandBuffer> commandBuffers;
 
+	/* Command buffer for overriding the above ones, e.g. when rendering in PBREnvironment */
+	static VkCommandBuffer overrideCommandBuffer;
+
 	/* Synchronisation objects */
 	static std::vector<VkSemaphore> imageAvailableSemaphores; //Signals image acquired ready for rendering
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
@@ -139,6 +142,9 @@ public:
 
 	static void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t layerCount);
+
+	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t baseMipLevel, uint32_t layerCount);
+
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels, uint32_t layerCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE); //Pass VK_NULL_HANDLE for command buffer to let this method create one
 	static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	static VkCommandBuffer beginSingleTimeCommands();
@@ -193,13 +199,17 @@ public:
 	/* Waits for device to be finished working */
 	static inline void waitDeviceIdle() { vkDeviceWaitIdle(device->getLogical()); }
 
+	/* Assigns the override command buffer for future calls of 'getCurrentCommandBuffer', VK_NULL_HANDLE ensure the current
+	   one for rendering is used instead */
+	static inline void setOverrideCommandBuffer(VkCommandBuffer commandBuffer) { overrideCommandBuffer = commandBuffer; }
+
 	/* Getters */
 	static inline VkInstance& getInstance() { return instance; }
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
 	static inline VulkanDevice* getDevice() { return device; }
 	static inline VulkanSwapChain* getSwapChain() { return swapChain; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
-	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
+	static inline VkCommandBuffer& getCurrentCommandBuffer() { return (overrideCommandBuffer == VK_NULL_HANDLE) ? commandBuffers[currentFrame] : overrideCommandBuffer; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }
 	static inline unsigned int getNextFrame() { return (currentFrame + 1) % swapChain->getImageCount(); }
 };
