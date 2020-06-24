@@ -136,7 +136,7 @@ public:
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
 	/* Constructor */
-	RenderScene(bool deferred, bool pbr, bool ssr, bool blooms, bool postProcessing, PBREnvironment* pbrEnvironment = NULL);
+	RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool postProcessing, PBREnvironment* pbrEnvironment = NULL);
 
 	/* Destructor */
 	virtual ~RenderScene();

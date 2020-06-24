@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 4 | Experimental 3
+
+* Added bloom when using Vulkan
+
+* Fixed bug: Bloom would not work without SSR
+* Fixed bug: Bloom would not work without post processing
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 4 | Experimental 2
 
 * Readed bloom when using OpenGL
