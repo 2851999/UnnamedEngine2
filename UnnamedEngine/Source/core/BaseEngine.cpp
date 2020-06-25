@@ -81,7 +81,7 @@ void BaseEngine::create() {
 			debugConsole->hide();
 		}
 
-		if (!getSettings().videoVulkan) {
+		if (! getSettings().videoVulkan) {
 
 			//	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 			//	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);

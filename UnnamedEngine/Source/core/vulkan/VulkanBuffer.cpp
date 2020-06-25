@@ -136,6 +136,8 @@ VulkanBufferObject::VulkanBufferObject(void* data, VkDeviceSize size, VulkanDevi
 }
 
 VulkanBufferObject::~VulkanBufferObject() {
+	if (m_isInUpdateQueue)
+		Vulkan::removeFromVulkanBufferObjectQueue(this);
 	for (VulkanBuffer* buffer : buffers)
 		delete buffer;
 }
@@ -148,9 +150,10 @@ void VulkanBufferObject::updateFrame(const void* data, unsigned int offset, VkDe
 }
 
 void VulkanBufferObject::update(void* data, unsigned int offset, unsigned int size) {
-	if (updatable)
+	if (updatable) {
+		m_isInUpdateQueue = true;
 		Vulkan::updateVulkanBufferObject(this, data, offset, size);
-	else
+	}  else
 		updateFrame(data, offset, size);
 }
 

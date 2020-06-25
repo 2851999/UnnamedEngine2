@@ -1,4 +1,22 @@
 -------------------------------------------------------------
+Release 2 | Beta 2 | Development 4 | Experimental 5
+
+* Changed RenderPass so more FBO configurations can be used
+
+* Fixed bug: ParticleEmitter emitted new particles that
+             would be rendered over all others in a
+			 ParticleSystem
+* Fixed bug: Default value of 'maxCharacters' in Text was
+             not assigned
+* Fixed bug: Crash when using Vulkan and trying to update
+             a Sprite layer created with 'addMaxLayers'
+* Fixed bug: Deletion of a DescriptorSet/VulkanBufferObject
+             being updated using a queue in Vulkan caused a
+			 crash
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 2 | Beta 2 | Development 4 | Experimental 4
 
 * Changed ShaderInterface to only create

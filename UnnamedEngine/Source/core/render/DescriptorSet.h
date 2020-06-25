@@ -83,6 +83,10 @@ private:
 	/* The descriptor sets required in Vulkan (one per swap chain image) */
 	std::vector<VkDescriptorSet> vulkanDescriptorSets;
 
+	/* States whether this object is currently within the update queue
+       in Vulkan*/
+	bool m_isInUpdateQueue = false;
+
 	/* Method used to update this descriptor set for Vulkan (This method updates for
 	   all internal descriptor sets and as such should not be used during rendering) */
 	void updateAllVk();
@@ -118,6 +122,11 @@ public:
 	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
 	inline unsigned int getNumUBOs() { return ubos.size(); }
 	inline Texture* getTexture(unsigned int index) { return textures[index].texture; }
+
+	/* Called when this instance is removed from the update queue */
+	void removedFromUpdateQueue() { m_isInUpdateQueue = false; }
+	/* Returns whether this instance is within the update queue */
+	bool isInUpdateQueue() { return m_isInUpdateQueue; }
 };
 
 /*****************************************************************************

@@ -166,8 +166,14 @@ public:
 	/* Method to update a descriptor set */
 	static void updateDescriptorSet(DescriptorSet* set);
 
+	/* Method to remove all occurences of a descriptor set from the update queue */
+	static void removeFromDescriptorSetQueue(DescriptorSet* set);
+
 	/* Method to update a VulkanBufferObject */
 	static void updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size);
+
+	/* Method to remove all occurences of a VulkanBufferObject from the update queue */
+	static void removeFromVulkanBufferObjectQueue(VulkanBufferObject* instance);
 
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);

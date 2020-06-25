@@ -76,6 +76,10 @@ private:
 
 	/* States whether this object should allow for updating */
 	bool updatable;
+
+	/* States whether this object is currently within the update queue
+	   in Vulkan*/
+	bool m_isInUpdateQueue = false;
 public:
 	/* Constructors */
 	VulkanBufferObject(VkDeviceSize bufferSize, VulkanDevice* device, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, bool useStaging = true, bool updatable = false);
@@ -95,4 +99,9 @@ public:
 	
 	/* Returns the buffer for a given frame */
 	VulkanBuffer* getBuffer(unsigned int frame) { return buffers[updatable ? frame : 0]; }
+
+	/* Called when this instance is removed from the update queue */
+	void removedFromUpdateQueue() { m_isInUpdateQueue = false; }
+	/* Returns whether this instance is within the update queue */
+	bool isInUpdateQueue() { return m_isInUpdateQueue; }
 };

@@ -194,9 +194,12 @@ void Sprite::setup(TextureAtlas* textureAtlas, float width, float height) {
 }
 
 void Sprite::addMaxLayers(unsigned int maxLayers) {
-	while (getMesh()->getNumMaterials() < maxLayers)
+	while (getMesh()->getNumMaterials() < maxLayers) {
 		//Add a Material for this new layer
-		getMesh()->addMaterial(new Material());
+		Material* material = new Material();
+		material->setup();
+		getMesh()->addMaterial(material);
+	}
 }
 
 void Sprite::setLayer(unsigned int layer, Texture* texture) {

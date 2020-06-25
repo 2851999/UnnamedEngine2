@@ -122,8 +122,6 @@ void ParticleSystem::reset() {
 }
 
 void ParticleSystem::update(float delta, Vector3f cameraPosition) {
-	//Update the particle emitter
-	emitter->update(delta);
 	//Reset the particle count
 	particleCount = 0;
 	//The offset for the indices of the current particle
@@ -189,7 +187,11 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 			}
 		}
 	}
-	//Sort the particles
+
+	//Update the particle emitter
+	emitter->update(delta, cameraPosition);
+
+	//Sort the particles after emitting new particles to ensure the new ones have the right order for rendering
 	std::sort(particles.begin(), particles.end());
 
 	//Assign the data for the billboarding

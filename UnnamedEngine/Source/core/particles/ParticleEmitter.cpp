@@ -28,7 +28,7 @@ void ParticleEmitter::reset() {
 	particlesToEmit = 0;
 }
 
-void ParticleEmitter::update(float delta) {
+void ParticleEmitter::update(float delta, Vector3f cameraPosition) {
 	//Check whether this emitter is active
 	if (active && system) {
 		//Cumulate the delta
@@ -68,6 +68,8 @@ void ParticleEmitter::update(float delta) {
 			particle.life = particleLifeSpan;
 			particle.velocity = particleInitialVelocity;
 			particle.textureIndex = 0;
+			//Update the distance of the particle from the camera
+			particle.cameraDistance = (particle.position - cameraPosition).length();
 
 			emitParticle(particle);
 		}

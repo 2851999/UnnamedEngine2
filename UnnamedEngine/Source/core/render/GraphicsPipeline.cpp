@@ -167,7 +167,7 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 		}
 
 		//Colour attachments
-		std::vector<VkPipelineColorBlendAttachmentState> colourBlendAttachments((renderPass->getFBO() && renderPass->getFBO()->getAttachmentCount() > 2) ? (renderPass->getFBO()->getAttachmentCount() - 1) : 1);
+		std::vector<VkPipelineColorBlendAttachmentState> colourBlendAttachments(renderPass->getNumColourAttachments());
 		for (unsigned int i = 0; i < colourBlendAttachments.size(); ++i)
 			colourBlendAttachments[i] = colourBlendAttachment;
 

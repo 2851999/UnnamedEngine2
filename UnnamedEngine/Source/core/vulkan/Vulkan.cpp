@@ -522,12 +522,36 @@ void Vulkan::updateDescriptorSetQueue() {
 	//Go through the descriptor sets
 	for (unsigned int i = 0; i < descriptorSetUpdateQueue.size(); ++i) {
 		//Update the current set, and prepare to remove it if finished updating
-		if (updateDescriptorSetFrame(descriptorSetUpdateQueue[i]))
+		if (updateDescriptorSetFrame(descriptorSetUpdateQueue[i])) {
+			descriptorSetUpdateQueue[i].set->removedFromUpdateQueue();
 			removeEnd++;
+		}
 	}
 	//Remove all finished updates from the queue
 	if (removeEnd > 0)
 		descriptorSetUpdateQueue.erase(descriptorSetUpdateQueue.begin(), descriptorSetUpdateQueue.begin() + removeEnd);
+}
+
+void Vulkan::removeFromDescriptorSetQueue(DescriptorSet* set) {
+	//Remove all occurences of the descriptor set from the queue
+	unsigned int i = 0;
+	while (i < descriptorSetUpdateQueue.size()) {
+		if (descriptorSetUpdateQueue[i].set == set)
+			descriptorSetUpdateQueue.erase(descriptorSetUpdateQueue.begin() + i);
+		else
+			++i;
+	}
+}
+
+void Vulkan::removeFromVulkanBufferObjectQueue(VulkanBufferObject* instance) {
+	//Remove all occurences of the descriptor set from the queue
+	unsigned int i = 0;
+	while (i < vulkanBufferObjectUpdateQueue.size()) {
+		if (vulkanBufferObjectUpdateQueue[i].instance == instance)
+			vulkanBufferObjectUpdateQueue.erase(vulkanBufferObjectUpdateQueue.begin() + i);
+		else
+			++i;
+	}
 }
 
 void Vulkan::updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size) {
@@ -561,8 +585,10 @@ void Vulkan::updateVulkanBufferObjectQueue() {
 	//Go through the descriptor sets
 	for (unsigned int i = 0; i < vulkanBufferObjectUpdateQueue.size(); ++i) {
 		//Update the current set, and prepare to remove it if finished updating
-		if (updateVulkanBufferObjectFrame(vulkanBufferObjectUpdateQueue[i]))
+		if (updateVulkanBufferObjectFrame(vulkanBufferObjectUpdateQueue[i])) {
+			vulkanBufferObjectUpdateQueue[i].instance->removedFromUpdateQueue();
 			removeEnd++;
+		}
 	}
 	//Remove all finished updates from the queue
 	if (removeEnd > 0)
