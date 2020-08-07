@@ -43,6 +43,12 @@ Font::Font(std::string path, unsigned int size, TextureParameters parameters) {
 	}
 }
 
+Font::~Font() {
+	delete texture;
+	if (descriptorSetSDFText)
+		delete descriptorSetSDFText;
+}
+
 void Font::setup(std::string path, unsigned int size, TextureParameters parameters) {
 	this->size = size;
 	FT_Face face;
@@ -167,7 +173,7 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 
 	    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
 	    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);
-		VkImageView textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+		VkImageView textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 0, 1);
 
 		texture = new Texture(width, height, textureVkImage, textureVkImageMemory, textureVkImageView, parameters);
 	}
@@ -224,6 +230,21 @@ void Font::setupSDF(std::string path, unsigned int size, TextureParameters param
 
 	//Load the texture
 	texture = Texture::loadTexture(utils_string::replaceAll(path, ".fnt", ".png"), parameters);
+
+	//Setup the descriptor set
+	descriptorSetSDFText = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_SDF_TEXT));
+	descriptorSetSDFText->setup();
+
+	//Assign the default values for the rendering parameters
+	sdfTextParameters.smoothing = 0.1f;
+	sdfTextParameters.outline = 0.0f;
+	sdfTextParameters.outlineColour = Colour::BLACK;
+	sdfTextParameters.shadow = 0.0f;
+	sdfTextParameters.shadowSmoothing = 0.2f;
+	sdfTextParameters.shadowColour = Colour(Colour::BLACK, 0.8f);
+	sdfTextParameters.shadowOffset = Vector2f(5.0f / texture->getWidth(), 5.0f / texture->getHeight());
+
+	updateSDFParameters();
 }
 
 int32_t Font::nextValuePair(std::stringstream* stream) {
@@ -233,6 +254,11 @@ int32_t Font::nextValuePair(std::stringstream* stream) {
 	std::string value = pair.substr(spos + 1);
 	int32_t val = std::stoi(value);
 	return val;
+}
+
+void Font::bindDescriptorSets() {
+	if (sdf)
+		descriptorSetSDFText->bind();
 }
 
 void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
@@ -361,10 +387,6 @@ void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
 	}
 }
 
-void Font::destroy() {
-	delete texture;
-}
-
 float Font::getWidth(std::string text) {
 	//The width
 	float width = 0;
@@ -426,3 +448,7 @@ void Font::destroyFreeType() {
 	FT_Done_FreeType(ftLibrary);
 }
 
+
+void Font::updateSDFParameters() {
+	descriptorSetSDFText->getUBO(0)->update(&sdfTextParameters, 0, sizeof(ShaderBlock_SDFText));
+}

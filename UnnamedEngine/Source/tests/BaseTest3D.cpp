@@ -46,7 +46,7 @@ void BaseTest3D::created() {
 	camera = new DebugCamera(90.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
 
 	physicsScene = new PhysicsScene3D();
-	renderScene = new RenderScene(false, false, false, false);
+	renderScene = new RenderScene(false, false, false, false, false);
 
 	soundSystem = new SoundSystem();
 	soundSystem->createListener(camera);

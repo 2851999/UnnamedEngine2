@@ -31,13 +31,13 @@ private:
 	GraphicsPipeline* pipelineSkybox;
 
 	/* The skybox texture */
-	Cubemap* cubemap;
+	Texture* cubemap;
 
 	/* The skybox */
 	GameObject3D* box;
 public:
 	/* The constructors */
-	SkyBox(Cubemap* cubemap);
+	SkyBox(Texture* cubemap);
 	SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom) : SkyBox(new Cubemap(path, { right, left, top, bottom, back, front })) {}
 	SkyBox(std::string path, std::string fileExtension) : SkyBox(path, "front" + fileExtension, "back" + fileExtension, "left" + fileExtension, "right" + fileExtension, "top" + fileExtension, "bottom" + fileExtension) {}
 
@@ -54,7 +54,7 @@ public:
 
 	/* Getters */
 	inline GraphicsPipeline* getGraphicsPipeline() { return pipelineSkybox; }
-	inline Cubemap* getCubemap() { return cubemap; }
+	inline Texture* getTexture() { return cubemap; }
 	inline GameObject3D* getBox() { return box; }
 };
 

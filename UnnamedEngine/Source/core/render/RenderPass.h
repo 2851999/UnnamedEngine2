@@ -29,12 +29,18 @@ private:
 	/* The Vulkan instance */
 	VkRenderPass vulkanInstance = VK_NULL_HANDLE;
 
+	/* Clear values for beginning the render pass */
+	std::vector<VkClearValue> vulkanClearValues;
+
 	/* Framebuffer object for rendering this render pass to,
 	   if NULL assumes default framebuffer should be used */
 	FBO* fbo = NULL;
 
 	/* The number of samples this render pass uses */
 	unsigned int numSamples = 0;
+
+	/* The number of colour attachments the framebuffer has */
+	unsigned int numColourAttachments;
 public:
 	/* Constructor with the FBO to use for rendering */
 	RenderPass(FBO* fbo = NULL);
@@ -52,4 +58,5 @@ public:
 	inline VkRenderPass& getVkInstance() { return vulkanInstance; }
 	inline FBO* getFBO() { return fbo; }
 	inline unsigned int getNumSamples() { return numSamples; }
+	inline unsigned int getNumColourAttachments() { return numColourAttachments; } //Used for GraphicsPipeline when using Vulkan
 };

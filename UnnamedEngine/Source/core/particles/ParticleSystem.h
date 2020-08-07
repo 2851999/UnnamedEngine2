@@ -101,11 +101,11 @@ private:
 	/* The maximum number of particles for this system */
 	unsigned int maxParticles = 1800;
 
-	/* Descriptor set for billboarding */
-	DescriptorSet* descriptorSetBillboard;
-
 	/* Data structure for billboarding */
 	ShaderBlock_Billboard shaderBillboardData;
+
+	/* Descriptor set for billboarding */
+	DescriptorSet* descriptorSetBillboard;
 
 	/* Graphics pipeline for rendering */
 	GraphicsPipeline* graphicsPipeline;

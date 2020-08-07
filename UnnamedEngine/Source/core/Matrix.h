@@ -378,29 +378,7 @@ public:
 		return (*this);
 	}
 
-	const Matrix4f& initOrthographic(float left, float right, float bottom, float top, float zNear, float zFar) {
-		set(0, 0, 2.0f / (right - left));
-		set(0, 1, 0);
-		set(0, 2, 0);
-		set(0, 3, -(right + left) / (right - left));
-
-		set(1, 0, 0);
-		set(1, 1, 2.0f / (top - bottom));
-		set(1, 2, 0);
-		set(1, 3, -(top + bottom) / (top - bottom));
-
-		set(2, 0, 0);
-		set(2, 1, 0);
-		set(2, 2, -2.0f / (zFar - zNear));
-		set(2, 3, -(zFar + zNear) / (zFar - zNear));
-
-		set(3, 0, 0);
-		set(3, 1, 0);
-		set(3, 2, 0);
-		set(3, 3, 1);
-
-		return (*this);
-	}
+	const Matrix4f& initOrthographic(float left, float right, float bottom, float top, float zNear, float zFar);
 
 	const Matrix4f& initFrustum(float left, float right, float bottom, float top, float zNear, float zFar) {
 		set(0, 0, 2.0f * zNear / (right - left));

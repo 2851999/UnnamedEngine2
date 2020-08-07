@@ -48,66 +48,6 @@ Cubemap* Renderer::blankCubemap;
 GraphicsPipeline* Renderer::currentGraphicsPipeline = NULL;
 RenderPass*       Renderer::defaultRenderPass       = NULL;
 
-const unsigned int Renderer::SHADER_MATERIAL                                       = 1;
-const unsigned int Renderer::SHADER_SKY_BOX                                        = 2;
-const unsigned int Renderer::SHADER_FONT                                           = 3;
-const unsigned int Renderer::SHADER_FONT_SDF                                       = 4;
-const unsigned int Renderer::SHADER_LIGHTING                                       = 5;
-const unsigned int Renderer::SHADER_LIGHTING_SKINNING                              = 6;
-const unsigned int Renderer::SHADER_BASIC_PBR_LIGHTING                             = 7;
-const unsigned int Renderer::SHADER_BASIC_PBR_LIGHTING_SKINNING                    = 8;
-const unsigned int Renderer::SHADER_FRAMEBUFFER                                    = 9;
-const unsigned int Renderer::SHADER_SHADOW_MAP                                     = 10;
-const unsigned int Renderer::SHADER_SHADOW_MAP_SKINNING                            = 11;
-const unsigned int Renderer::SHADER_SHADOW_CUBEMAP                                 = 12;
-const unsigned int Renderer::SHADER_SHADOW_CUBEMAP_SKINNING                        = 13;
-const unsigned int Renderer::SHADER_GAMMA_CORRECTION_FXAA                          = 14;
-const unsigned int Renderer::SHADER_DEFERRED_LIGHTING_GEOMETRY                     = 15;
-const unsigned int Renderer::SHADER_DEFERRED_LIGHTING_SKINNING_GEOMETRY            = 16;
-const unsigned int Renderer::SHADER_DEFERRED_LIGHTING                              = 17;
-const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY           = 18;
-const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY  = 19;
-const unsigned int Renderer::SHADER_BASIC_PBR_DEFERRED_LIGHTING                    = 20;
-const unsigned int Renderer::SHADER_DEFERRED_PBR_SSR                               = 21;
-const unsigned int Renderer::SHADER_TILEMAP                                        = 22;
-const unsigned int Renderer::SHADER_PARTICLE_SYSTEM                                = 23;
-const unsigned int Renderer::SHADER_TERRAIN                                        = 24;
-const unsigned int Renderer::SHADER_DEFERRED_TERRAIN_GEOMETRY                      = 25;
-
-const unsigned int Renderer::GRAPHICS_PIPELINE_MATERIAL                                      = 1;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SKY_BOX                                       = 2;
-const unsigned int Renderer::GRAPHICS_PIPELINE_FONT                                          = 3;
-const unsigned int Renderer::GRAPHICS_PIPELINE_FONT_SDF                                      = 4;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING                                      = 5;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_BLEND                                = 6;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING                             = 7;
-const unsigned int Renderer::GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND                       = 8;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING                            = 9;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND                      = 10;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING                   = 11;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND             = 12;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP                                    = 13;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING                           = 14;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP                                = 15;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING                       = 16;
-const unsigned int Renderer::GRAPHICS_PIPELINE_GUI                                           = 17;
-const unsigned int Renderer::GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA                         = 18;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY                    = 19;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY           = 20;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING                             = 21;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND                       = 22;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY          = 23;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY = 24;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING                   = 25;
-const unsigned int Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND             = 26;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_PBR_SSR                              = 27;
-const unsigned int Renderer::GRAPHICS_PIPELINE_SPRITE                                        = 28;
-const unsigned int Renderer::GRAPHICS_PIPELINE_TILEMAP                                       = 29;
-const unsigned int Renderer::GRAPHICS_PIPELINE_PARTICLE_SYSTEM                               = 30;
-const unsigned int Renderer::GRAPHICS_PIPELINE_TERRAIN                                       = 31;
-const unsigned int Renderer::GRAPHICS_PIPELINE_TERRAIN_BLEND                                 = 32;
-const unsigned int Renderer::GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY                     = 33;
-
 void Renderer::addCamera(Camera* camera) {
 	cameras.push_back(camera);
 }
@@ -153,11 +93,26 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY, "basicpbr/PBRDeferredGeometry", { "UE_GEOMETRY_ONLY" });
 	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, "basicpbr/PBRDeferredGeometry", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
 	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING, "basicpbr/PBRDeferredLighting");
+	addRenderShader(SHADER_BASIC_PBR_DEFERRED_LIGHTING_BLOOM, "basicpbr/PBRDeferredLighting", { "UE_BLOOM" });
 	addRenderShader(SHADER_DEFERRED_PBR_SSR, "postprocessing/SSRShader");
 	addRenderShader(SHADER_TILEMAP, "TilemapShader");
 	addRenderShader(SHADER_PARTICLE_SYSTEM, "ParticleShader");
 	addRenderShader(SHADER_TERRAIN, "terrain/Terrain");
 	addRenderShader(SHADER_DEFERRED_TERRAIN_GEOMETRY, "terrain/DeferredTerrainGeometry", { "UE_GEOMETRY_ONLY" });
+	addRenderShader(SHADER_PBR_GEN_EQUI_TO_CUBE_MAP, "pbr/GenEquiToCube");
+	addRenderShader(SHADER_PBR_GEN_IRRADIANCE_MAP, "pbr/GenIrradianceMap");
+	addRenderShader(SHADER_PBR_GEN_PREFILTER_MAP, "pbr/GenPrefilterMap");
+	addRenderShader(SHADER_PBR_GEN_BRDF_INTEGRATION_MAP, "pbr/GenBRDFIntegrationMap");
+	addRenderShader(SHADER_PBR_LIGHTING, "pbr/PBRShader");
+	addRenderShader(SHADER_PBR_LIGHTING_SKINNING, "pbr/PBRShader", { "UE_SKINNING" });
+	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING_GEOMETRY, "pbr/PBRDeferredGeometry", { "UE_GEOMETRY_ONLY" });
+	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, "pbr/PBRDeferredGeometry", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING, "pbr/PBRDeferredLighting");
+	addRenderShader(SHADER_PBR_DEFERRED_LIGHTING_BLOOM, "pbr/PBRDeferredLighting", { "UE_BLOOM" });
+	addRenderShader(SHADER_BILLBOARDED_FONT, "billboard/BillboardedFontShader");
+	addRenderShader(SHADER_BILLBOARDED_FONT_SDF, "billboard/BillboardedFontSDFShader");
+	addRenderShader(SHADER_GAUSSIAN_BLUR, "postprocessing/GaussianBlur");
+	addRenderShader(SHADER_BLOOM, "postprocessing/BloomShader");
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -222,39 +177,43 @@ void Renderer::initialise() {
 	particleSystemDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS;
 	particleSystemDepthState.depthWriteEnable = false;
 
-	//Obtain the window width and height
-	uint32_t windowWidth = Window::getCurrentInstance()->getSettings().windowWidth;
-	uint32_t windowHeight = Window::getCurrentInstance()->getSettings().windowHeight;
+	//Depth state for billboarded font
+	GraphicsPipeline::DepthState billboardedFontDepthState;
+	billboardedFontDepthState.depthTestEnable = true;
+	billboardedFontDepthState.depthCompareOp = GraphicsPipeline::CompareOperation::LESS_OR_EQUAL;
+	billboardedFontDepthState.depthWriteEnable = false;
 
 	//Setup the default pipelines
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_MATERIAL, SHADER_MATERIAL, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SKY_BOX, SHADER_SKY_BOX, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_FONT, SHADER_FONT, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, fontDepthState, defaultCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_FONT_SDF, SHADER_FONT_SDF, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, fontDepthState, defaultCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING, SHADER_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_BLEND, SHADER_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_SKINNING, SHADER_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND, SHADER_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING, SHADER_BASIC_PBR_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND, SHADER_BASIC_PBR_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING, SHADER_BASIC_PBR_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND, SHADER_BASIC_PBR_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_MAP, SHADER_SHADOW_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING, SHADER_SHADOW_MAP_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP,SHADER_SHADOW_CUBEMAP, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING, SHADER_SHADOW_CUBEMAP_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, Light::SHADOW_MAP_SIZE, Light::SHADOW_MAP_SIZE, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GUI, SHADER_MATERIAL, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA, SHADER_GAMMA_CORRECTION_FXAA, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, windowWidth, windowHeight, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY, SHADER_DEFERRED_LIGHTING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY, SHADER_DEFERRED_LIGHTING_SKINNING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING, SHADER_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND, SHADER_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY, SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING, SHADER_BASIC_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND, SHADER_BASIC_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_PBR_SSR, SHADER_DEFERRED_PBR_SSR, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, windowWidth, windowHeight, false);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SPRITE, SHADER_MATERIAL, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_MATERIAL, SHADER_MATERIAL, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, defaultDepthState, defaultCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SKY_BOX, SHADER_SKY_BOX, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_FONT, SHADER_FONT, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, fontDepthState, defaultCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_FONT_SDF, SHADER_FONT_SDF, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, fontDepthState, defaultCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING, SHADER_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_BLEND, SHADER_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_SKINNING, SHADER_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_LIGHTING_SKINNING_BLEND, SHADER_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING, SHADER_BASIC_PBR_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_BLEND, SHADER_BASIC_PBR_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING, SHADER_BASIC_PBR_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_LIGHTING_SKINNING_BLEND, SHADER_BASIC_PBR_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_MAP, SHADER_SHADOW_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING, SHADER_SHADOW_MAP_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP,SHADER_SHADOW_CUBEMAP, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING, SHADER_SHADOW_CUBEMAP_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GUI, SHADER_MATERIAL, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA, SHADER_GAMMA_CORRECTION_FXAA, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING_GEOMETRY, SHADER_DEFERRED_LIGHTING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING_SKINNING_GEOMETRY, SHADER_DEFERRED_LIGHTING_SKINNING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING, SHADER_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND, SHADER_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY, SHADER_BASIC_PBR_DEFERRED_LIGHTING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, SHADER_BASIC_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING, SHADER_BASIC_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND, SHADER_BASIC_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLOOM, SHADER_BASIC_PBR_DEFERRED_LIGHTING_BLOOM, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLOOM_BLEND, SHADER_BASIC_PBR_DEFERRED_LIGHTING_BLOOM, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_PBR_SSR, SHADER_DEFERRED_PBR_SSR, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SPRITE, SHADER_MATERIAL, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, true);
 	
 	GraphicsPipeline::VertexInputData tilemapVertexInputData;
 	tilemapVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, 0, VK_FORMAT_R32G32_SFLOAT, 0));
@@ -264,7 +223,7 @@ void Renderer::initialise() {
 	tilemapVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(TilemapLayer::ATTRIBUTE_LOCATION_VISIBILITY, 2, VK_FORMAT_R32_SFLOAT, 0));
 	tilemapVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(2, 1 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
 
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TILEMAP, SHADER_TILEMAP, tilemapVertexInputData, alphaBlendState, defaultDepthState, defaultCullState, windowWidth, windowHeight, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TILEMAP, SHADER_TILEMAP, tilemapVertexInputData, alphaBlendState, defaultDepthState, defaultCullState, true);
 
 	GraphicsPipeline::VertexInputData particleSystemVertexInputData;
 	particleSystemVertexInputData.primitiveTopology = GraphicsPipeline::PrimitiveTopology::TRIANGLE_STRIP;
@@ -277,12 +236,34 @@ void Renderer::initialise() {
 	particleSystemVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ParticleSystem::ATTRIBUTE_LOCATION_TEXTURE_DATA, 3, VK_FORMAT_R32G32B32A32_SFLOAT, 0));
 	particleSystemVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(3, 4 * sizeof(float), VK_VERTEX_INPUT_RATE_INSTANCE));
 
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PARTICLE_SYSTEM, SHADER_PARTICLE_SYSTEM, particleSystemVertexInputData, alphaBlendState, particleSystemDepthState, defaultCullState, windowWidth, windowHeight, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PARTICLE_SYSTEM, SHADER_PARTICLE_SYSTEM, particleSystemVertexInputData, alphaBlendState, particleSystemDepthState, defaultCullState, true);
 
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TERRAIN, SHADER_TERRAIN, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::SEPARATE_POSITIONS), alphaBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TERRAIN_BLEND, SHADER_TERRAIN, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::SEPARATE_POSITIONS), alphaLightBlendState, lightBlendDepthState, lightingCullState, windowWidth, windowHeight, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TERRAIN, SHADER_TERRAIN, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::SEPARATE_POSITIONS), alphaBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TERRAIN_BLEND, SHADER_TERRAIN, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::SEPARATE_POSITIONS), alphaLightBlendState, lightBlendDepthState, lightingCullState, true);
 
-	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY, SHADER_DEFERRED_TERRAIN_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::SEPARATE_POSITIONS), defaultBlendState, lightDepthState, lightingCullState, windowWidth, windowHeight, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_TERRAIN_GEOMETRY, SHADER_DEFERRED_TERRAIN_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::SEPARATE_POSITIONS), defaultBlendState, lightDepthState, lightingCullState, true);
+
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_LIGHTING, SHADER_PBR_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_LIGHTING_BLEND, SHADER_PBR_LIGHTING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_LIGHTING_SKINNING, SHADER_PBR_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_LIGHTING_SKINNING_BLEND, SHADER_PBR_LIGHTING_SKINNING, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), alphaLightBlendState, lightBlendDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_GEOMETRY, SHADER_PBR_DEFERRED_LIGHTING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, SHADER_PBR_DEFERRED_LIGHTING_SKINNING_GEOMETRY, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD, MeshData::NORMAL, MeshData::TANGENT, MeshData::BITANGENT, MeshData::BONE_ID, MeshData::BONE_WEIGHT }, MeshData::NONE), defaultBlendState, lightDepthState, lightingCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING, SHADER_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND, SHADER_PBR_DEFERRED_LIGHTING, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLOOM, SHADER_PBR_DEFERRED_LIGHTING_BLOOM, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLOOM_BLEND, SHADER_PBR_DEFERRED_LIGHTING_BLOOM, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BILLBOARDED_FONT, SHADER_BILLBOARDED_FONT, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, billboardedFontDepthState, defaultCullState, true);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF, SHADER_BILLBOARDED_FONT_SDF, MeshData::computeVertexInputData(3, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, billboardedFontDepthState, defaultCullState, true);
+
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_EQUI_TO_CUBE_MAP, SHADER_PBR_GEN_EQUI_TO_CUBE_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_IRRADIANCE_MAP, SHADER_PBR_GEN_IRRADIANCE_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_PREFILTER_MAP, SHADER_PBR_GEN_PREFILTER_MAP, MeshData::computeVertexInputData(3, { MeshData::POSITION }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_PBR_GEN_BRDF_INTEGRATION_MAP, SHADER_PBR_GEN_BRDF_INTEGRATION_MAP, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::Flag::NONE), defaultBlendState, skyboxDepthState, defaultCullState, false);
+
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GAUSSIAN_BLUR, SHADER_GAUSSIAN_BLUR, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, false);
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BLOOM, SHADER_BLOOM, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, false);
+
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();
@@ -400,7 +381,7 @@ void Renderer::destroy() {
 using namespace utils_string;
 
 Shader* Renderer::loadEngineShader(UnloadedShaderInfo& shaderInfo) {
-	if (!BaseEngine::usingVulkan())
+	if (! BaseEngine::usingVulkan())
 		return Shader::loadShader("resources/shaders/" + shaderInfo.path, shaderInfo.defines);
 	else
 		return Shader::loadShader("resources/shaders-vulkan/" + shaderInfo.path, shaderInfo.defines);
@@ -410,8 +391,8 @@ void Renderer::addRenderShader(unsigned int id, std::string forwardShaderPath, s
 	unloadedShaders.insert(std::pair<unsigned int, UnloadedShaderInfo>(id, { forwardShaderPath, defines }));
 }
 
-void Renderer::addGraphicsPipelineLayout(unsigned int id, unsigned int renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, uint32_t viewportWidth, uint32_t viewportHeight, bool viewportFlippedVk) {
-	unloadedGraphicsPipelineLayouts.insert(std::pair<unsigned int, UnloadedGraphicsPipelineLayoutInfo>(id, { renderShader, vertexInputData, colourBlendState, depthState, cullState, viewportWidth, viewportHeight, viewportFlippedVk }));
+void Renderer::addGraphicsPipelineLayout(unsigned int id, unsigned int renderShader, GraphicsPipeline::VertexInputData vertexInputData, GraphicsPipeline::ColourBlendState colourBlendState, GraphicsPipeline::DepthState depthState, GraphicsPipeline::CullState cullState, bool viewportFlippedVk) {
+	unloadedGraphicsPipelineLayouts.insert(std::pair<unsigned int, UnloadedGraphicsPipelineLayoutInfo>(id, { renderShader, vertexInputData, colourBlendState, depthState, cullState, viewportFlippedVk }));
 }
 
 void Renderer::setCurrentGraphicsPipeline(GraphicsPipeline* pipeline) {
@@ -478,11 +459,24 @@ GraphicsPipelineLayout* Renderer::getGraphicsPipelineLayout(unsigned int id) {
 	else if (unloadedGraphicsPipelineLayouts.count(id) > 0) {
 		//Create the layout then return it
 		UnloadedGraphicsPipelineLayoutInfo info = unloadedGraphicsPipelineLayouts.at(id);
-		GraphicsPipelineLayout* layout = new GraphicsPipelineLayout(getRenderShader(info.renderShader), info.vertexInputData, info.colourBlendState, info.depthState, info.cullState, info.viewportWidth, info.viewportHeight, info.viewportFlippedVk);
+		GraphicsPipelineLayout* layout = new GraphicsPipelineLayout(getRenderShader(info.renderShader), info.vertexInputData, info.colourBlendState, info.depthState, info.cullState, info.viewportFlippedVk);
 		loadedGraphicsPipelineLayouts.insert(std::pair<unsigned int, GraphicsPipelineLayout*>(id, layout));
 		return layout;
 	} else {
 		Logger::log("The GraphicsPipelineLayout with the id '" + utils_string::str(id) + "' could not be found", "Renderer", LogType::Error);
 		return NULL;
+	}
+}
+
+GLenum Renderer::convertToGL(DataUsage usage) {
+	switch (usage) {
+		case DataUsage::STATIC:
+			return GL_STATIC_DRAW;
+		case DataUsage::DYNAMIC:
+			return GL_DYNAMIC_DRAW;
+		case DataUsage::STREAM:
+			return GL_STREAM_DRAW;
+		default:
+			return GL_STATIC_DRAW;
 	}
 }

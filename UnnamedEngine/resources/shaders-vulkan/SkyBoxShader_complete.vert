@@ -36,6 +36,7 @@ layout(location = UE_LOCATION_NORMAL) in vec3 ue_normal;
 layout(location = UE_LOCATION_TANGENT) in vec3 ue_tangent;
 layout(location = UE_LOCATION_BITANGENT) in vec3 ue_bitangent;
 
+#ifndef UE_VERTEX_INPUT_ONLY
 layout(location = 0) out vec3 ue_frag_position;
 layout(location = 1) out vec2 ue_frag_textureCoord;
 layout(location = 2) out vec3 ue_frag_normal;
@@ -52,6 +53,7 @@ void ueAssignTextureCoord() {
 void ueCalculatePosition() {
 	gl_Position = ue_mvpMatrix * vec4(ue_position, 1.0);
 }
+#endif
 
 void main() {
 	ue_frag_position = ue_position;

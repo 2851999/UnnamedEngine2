@@ -257,21 +257,22 @@ private:
 	/* The shader used when assigning attribute locations */
 	RenderShader* setupShader = NULL;
 
-	/* The various Vertex Buffer Objects for this mesh */
-	VBO<GLfloat>* vboPositions     = NULL;
-	VBO<GLfloat>* vboColours       = NULL;
-	VBO<GLfloat>* vboTextureCoords = NULL;
-	VBO<GLfloat>* vboNormals       = NULL;
-	VBO<GLfloat>* vboTangents      = NULL;
-	VBO<GLfloat>* vboBitangents    = NULL;
-	VBO<unsigned int>* vboIndices  = NULL;
-	VBO<GLfloat>* vboOthers        = NULL;
+	/* The various VBOs for this mesh */
+	VBO<float>*        vboPositions     = NULL;
+	VBO<float>*        vboColours       = NULL;
+	VBO<float>*        vboTextureCoords = NULL;
+	VBO<float>*        vboNormals       = NULL;
+	VBO<float>*        vboTangents      = NULL;
+	VBO<float>*        vboBitangents    = NULL;
+	VBO<unsigned int>* vboBoneIDs       = NULL;
+	VBO<float>*        vboBoneWeights   = NULL;
+	VBO<float>*        vboOthers        = NULL;
 
-	VBO<unsigned int>* vboBoneIDs = NULL;
-	VBO<GLfloat>*  vboBoneWeights = NULL;
+	/* IBO for this mesh (May be NULL if not indexed) */
+	IBO* ibo = NULL;
 
-	/* The number of vertices that this class stores data about */
-	int numVertices = 0;
+	/* The number of vertices/indices used for rendering */
+	int count = 0;
 
 	/* Used to identify whether Mesh is indexed */
 	bool hasIndices = false;
@@ -281,7 +282,7 @@ public:
 	virtual ~MeshRenderData() { destroy(); }
 
 	/* Sets up for rendering */
-	void setup(MeshData* data, std::vector<Material*>& materials, VBOUsage vboUsage = VBOUsage::STATIC);
+	void setup(MeshData* data, std::vector<Material*>& materials, DataUsage vboUsage = DataUsage::STATIC);
 
 	/* Method to render using the data */
 	void render();
@@ -336,7 +337,7 @@ public:
 	virtual ~Mesh();
 
 	/* Method called to setup this mesh for rendering */
-	void setup(RenderShader* renderShader, VBOUsage vboUsage = VBOUsage::STATIC);
+	void setup(RenderShader* renderShader, DataUsage vboUsage = DataUsage::STATIC);
 
 	/* Method called to update the animation of this mesh */
 	void updateAnimation(float deltaSeconds);

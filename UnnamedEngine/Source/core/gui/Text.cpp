@@ -35,16 +35,18 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 
 	if (maxCharacters == 0)
 		//Use the default number
-		maxCharacters = DEFAULT_MAX_CHARACTERS;
+		this->maxCharacters = DEFAULT_MAX_CHARACTERS;
 
 	//The shader type to use
 	unsigned int shaderType;
 	if (! billboarded)
 		shaderType = Renderer::SHADER_FONT;
 	else {
-		//shaderType = Renderer::SHADER_BILLBOARDED_FONT;
-		//Get the UBO for the billboard
-		//shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);
+		shaderType = Renderer::SHADER_BILLBOARDED_FONT;
+
+		//Setup the billboard descriptor set
+		descriptorSetBillboard = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(font->usesSDF() ? ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT : ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD));
+		descriptorSetBillboard->setup();
 	}
 
 	//Create the Mesh instance and assign the texture
@@ -56,13 +58,13 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	else {
 		meshData = new MeshData(3, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS);
 
-		unsigned int numPositions = maxCharacters * 12;;
-		unsigned int numTextureCoords = maxCharacters * 8;
-		unsigned int numIndices = maxCharacters * 6;
+		unsigned int numPositions = this->maxCharacters * 12;
+		unsigned int numTextureCoords = this->maxCharacters * 8;
+		unsigned int numIndices = this->maxCharacters * 6;
 		meshData->getPositions().resize(numPositions);
 		meshData->getTextureCoords().resize(numTextureCoords);
 		meshData->getIndices().resize(numIndices);
-		meshData->setNumPositions(maxCharacters);
+		meshData->setNumPositions(this->maxCharacters);
 		meshData->setNumTextureCoords(numTextureCoords);
 		meshData->setNumIndices(numIndices);
 	}
@@ -72,7 +74,7 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	this->font = font;
 	mesh->getMaterial()->setDiffuse(fontTexture);
 	mesh->getMaterial()->update();
-	setMesh(mesh, Renderer::getRenderShader(shaderType), VBOUsage::DYNAMIC);
+	setMesh(mesh, Renderer::getRenderShader(shaderType), DataUsage::DYNAMIC);
 
 	//Assign the colour and other properties
 	setColour(colour);
@@ -83,13 +85,22 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	GameObject3D::update();
 
 	//Obtain the graphics pipeline used for rendering
-	if (! queuedPipeline)
-		pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT), Renderer::getDefaultRenderPass());
+	if (! queuedPipeline) {
+		unsigned int pipelineID = Renderer::GRAPHICS_PIPELINE_FONT;
+		if (billboarded)
+			pipelineID = font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_BILLBOARDED_FONT_SDF : Renderer::GRAPHICS_PIPELINE_BILLBOARDED_FONT;
+		else
+			pipelineID = font->usesSDF() ? Renderer::GRAPHICS_PIPELINE_FONT_SDF : Renderer::GRAPHICS_PIPELINE_FONT;
+
+		pipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pipelineID), Renderer::getDefaultRenderPass());
+	}
 }
 
 Text::~Text() {
 	if (pipeline)
 		delete pipeline;
+	if (descriptorSetBillboard)
+		delete descriptorSetBillboard;
 }
 
 void Text::update(std::string text) {
@@ -113,7 +124,7 @@ void Text::update(std::string text) {
 		getMesh()->getRenderData()->updateTextureCoords();
 		getMesh()->getRenderData()->updateIndices(data);
 	} else
-		Logger::log("Cannot update text as the requested text exceeds the maximum number of characters", "Text", LogType::Warning);
+		Logger::log("Cannot update text as the requested text exceeds the maximum number of characters, 'text' = " + text, "Text", LogType::Warning);
 }
 
 void Text::update(std::string text, Vector2f position) {
@@ -146,12 +157,10 @@ void Text::render() {
 }
 
 void Text::queuedRender() {
+	//Check if billboarding in which case the UBO for it needs to be updated
 	if (billboarded) {
-		Shader* shader = getShader();
-		shader->use();
-
+		//Assign the shader uniforms for the billboarding
 		Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
-
 		shaderBillboardData.ue_cameraRight = Vector4f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2), 0.0f);
 		shaderBillboardData.ue_cameraUp = Vector4f(-matrix.get(1, 0), -matrix.get(1, 1), -matrix.get(1, 2), 0.0f);
 		shaderBillboardData.ue_billboardSize = Vector2f(0.005f, 0.005f);
@@ -159,13 +168,15 @@ void Text::queuedRender() {
 
 		shaderBillboardData.ue_projectionViewMatrix = (Renderer::getCamera()->getProjectionViewMatrix());
 
-		shaderBillboardUBO->update(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
+		//Update the UBO
+		descriptorSetBillboard->getUBO(0)->updateFrame(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
+		descriptorSetBillboard->bind();
+	}
 
-		GameObject3D::render();
+	//Bind the descriptor sets needed
+	font->bindDescriptorSets();
 
-		shader->stopUsing();
-	} else
-		GameObject3D::render();
+	GameObject3D::render();
 }
 
 void Text::setFont(Font* font) {

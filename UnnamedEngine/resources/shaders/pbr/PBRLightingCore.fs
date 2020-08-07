@@ -2,17 +2,18 @@
 
 #include "PBRCore.fs"
 
-#map uniform IrradianceMap ue_irradianceMap
-#map uniform PrefilterMap ue_prefilterMap
-#map uniform BRDFLUT ue_brdfLUT
-
-uniform samplerCube ue_irradianceMap;
-uniform samplerCube ue_prefilterMap;
-uniform sampler2D   ue_brdfLUT;
-
-layout(std140, binding = 10) uniform UEPBRLightingCoreData {
-	bool ue_useAmbient;
-};
+//Need to ensure doesn't conflict with deferred geometry buffer textures
+//In the case of forward rendering the lighting shadow maps will have the
+//greatest impact
+#ifndef UE_NO_DEFERRED
+layout(set = 5, binding = 20) uniform samplerCube ue_irradianceMap;
+layout(set = 5, binding = 21) uniform samplerCube ue_prefilterMap;
+layout(set = 5, binding = 22) uniform sampler2D   ue_brdfLUT;
+#else
+layout(set = 4, binding = 20) uniform samplerCube ue_irradianceMap;
+layout(set = 4, binding = 21) uniform samplerCube ue_prefilterMap;
+layout(set = 4, binding = 22) uniform sampler2D   ue_brdfLUT;
+#endif
 
 vec3 ueCalculateLightPBR(UELight light, vec3 lightDirection, vec3 normal, vec3 viewDirection, vec3 fragPos, vec3 albedo, float metalness, float roughness, vec3 F0) {
     vec3 lightColor = light.diffuseColour.xyz;
@@ -123,7 +124,7 @@ vec3 ueGetLightingPBR(vec3 normal, vec3 fragPos, vec3 albedo, float metalness, f
     //Ambient lighting
     vec3 ambient = vec3(0.0);
 
-    if (ue_useAmbient) {
+    if (ue_lightAmbient.r > 0.0) {
 	    vec3 F = fresnelSchlickRoughness(max(dot(normal, V), 0.0), F0, roughness);
 	    vec3 kS = F;
 	    vec3 kD = 1.0 - kS;

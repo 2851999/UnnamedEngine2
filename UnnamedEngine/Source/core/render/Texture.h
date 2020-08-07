@@ -59,8 +59,9 @@ public:
 	TextureParameters() {}
 	TextureParameters(GLuint target) : target(target) {}
 	TextureParameters(GLuint target, Filter filter) : target(target), minFilter(filter), magFilter(filter) {}
-	TextureParameters(GLuint target, Filter filter, AddressMode addressMode) : target(target), minFilter(filter), magFilter(filter), addressMode(addressMode) {}
 	TextureParameters(GLuint target, Filter filter, AddressMode addressMode, bool srgb = DEFAULT_SRGB) : target(target), minFilter(filter), magFilter(filter), addressMode(addressMode), srgb(srgb) {}
+	TextureParameters(GLuint target, Filter minFilter, Filter magFilter) : target(target), minFilter(minFilter), magFilter(magFilter) {}
+	TextureParameters(GLuint target, Filter minFilter, Filter magFilter, AddressMode addressMode, bool srgb = DEFAULT_SRGB) : target(target), minFilter(minFilter), magFilter(magFilter), addressMode(addressMode), srgb(srgb) {}
 
 	/* Methods used to apply the texture parameters to a texture */
 	void apply(GLuint texture, bool bind, bool unbind);
@@ -140,23 +141,23 @@ protected:
 public:
 	/* The constructors */
 	Texture(TextureParameters parameters = TextureParameters());
-	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : texture(texture), parameters(parameters) {}
-	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : width(width), height(height), parameters(parameters) { create(); }
-	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : texture(texture), width(width), height(height), parameters(parameters) {}
+	Texture(GLuint texture, TextureParameters parameters = TextureParameters()) : Resource(), texture(texture), parameters(parameters) {}
+	Texture(unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : Resource(), width(width), height(height), parameters(parameters) { create(); }
+	Texture(GLuint texture, unsigned int width, unsigned int height, TextureParameters parameters = TextureParameters()) : Resource(), texture(texture), width(width), height(height), parameters(parameters) {}
 	Texture(void* data, unsigned int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool shouldApplyParameters = true);
 	Texture(unsigned int width, unsigned int height, VkImage textureVkImage, VkDeviceMemory textureVkImageMemory, VkImageView textureVkImageView, TextureParameters parameters = TextureParameters());
 
 	/* The destructor */
-	virtual ~Texture() { destroy(); }
+	virtual ~Texture();
 
 	/* The create method simply obtains a handle for the texture from OpenGL */
 	void create();
 
 	/* Method to setup this texture for Vulkan (used to create image for RenderPass) */
-	void setupVk(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	void setupVk(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits samples, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	/* Method to setup this texture for Vulkan for a cubemap (used to create image for RenderPass) */
-	void setupCubemapVk(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	void setupCubemapVk(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	/* Various methods to apply the texture parameters, but will only do so if the
 	 * texture has been assigned */
@@ -177,9 +178,6 @@ public:
 	inline void bind()   { glBindTexture(parameters.getTarget(), texture); }
 	inline void unbind() { glBindTexture(parameters.getTarget(), 0); }
 
-	/* Called to delete this texture */
-	virtual void destroy() override;
-
 	/* The setters and getters */
 	inline void setParameters(TextureParameters& parameters) { this->parameters = parameters; }
 	inline void setWidth(unsigned int width) { this->width = width; }
@@ -196,6 +194,7 @@ public:
 	inline bool hasTexture() { return texture > 0; }
 	inline std::string getPath() { return path; }
 	inline bool hasPath() { return path.length() > 0; }
+	VkImage& getVkImage() { return textureVkImage; }
 	VkImageView& getVkImageView() { return textureVkImageView; }
 	const VkDescriptorImageInfo getVkImageInfo() { return imageInfo; }
 
@@ -212,7 +211,7 @@ public:
 
 	/* Obtains the Vulkan format that an image should have from its number of colour
 	 * components and whether it should be SRGB */
-	static void getTextureFormatVk(int numComponents, bool srgb, VkFormat& format);
+	static void getTextureFormatVk(int numComponents, bool srgb, bool useFloat, VkFormat& format);
 
 	/* Returns a texture instance created using the data given */
 	static Texture* createTexture(std::string path, void* data, int numComponents, int width, int height, GLenum type, TextureParameters parameters = TextureParameters(), bool applyParameters = true);

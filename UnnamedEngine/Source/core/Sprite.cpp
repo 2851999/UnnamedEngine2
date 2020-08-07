@@ -160,7 +160,7 @@ Sprite::~Sprite() {
 }
 
 void Sprite::setupMesh(Texture* texture) {
-	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+	setMesh(new Mesh(MeshBuilder::createQuad(getWidth(), getHeight(), texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL), DataUsage::DYNAMIC);
 	//Add a sub data
 	getMesh()->getData()->addSubData(0, 0, 6, 0);
 	getMaterial()->setDiffuse(texture);
@@ -194,9 +194,12 @@ void Sprite::setup(TextureAtlas* textureAtlas, float width, float height) {
 }
 
 void Sprite::addMaxLayers(unsigned int maxLayers) {
-	while (getMesh()->getNumMaterials() < maxLayers)
+	while (getMesh()->getNumMaterials() < maxLayers) {
 		//Add a Material for this new layer
-		getMesh()->addMaterial(new Material());
+		Material* material = new Material();
+		material->setup();
+		getMesh()->addMaterial(material);
+	}
 }
 
 void Sprite::setLayer(unsigned int layer, Texture* texture) {

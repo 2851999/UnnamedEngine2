@@ -45,7 +45,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	extent                               = chooseSwapExtent(swapChainSupportDetails.capabilities, settings);
 
 	//Assign the VSync setting based on what is being used
-	Window::getCurrentInstance()->getSettings().videoVSync = (presentMode == VK_PRESENT_MODE_FIFO_KHR);
+	Window::getCurrentInstance()->getSettings().videoVSync = (presentMode == VK_PRESENT_MODE_FIFO_KHR) ? 1 : ((presentMode == VK_PRESENT_MODE_MAILBOX_KHR) ? 2 : 0);
 
 	//Obtain the queue family indices
 	VulkanDeviceQueueFamilies queueFamilies = device->getQueueFamilies();
@@ -107,14 +107,14 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 
 	for (unsigned int i = 0; i < images.size(); ++i)
 		//Create the image view
-		imageViews[i] = Vulkan::createImageView(images[i], VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+		imageViews[i] = Vulkan::createImageView(images[i], VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 0, 1);
 
 	//Obtain the number of samples being used
 	numSamples = settings.videoSamples;
 	//Now setup the colour buffer if necessary
 	if (numSamples > 0) {
 		Vulkan::createImage(extent.width, extent.height, 1, 1, static_cast<VkSampleCountFlagBits>(numSamples), surfaceFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colourImage, colourImageMemory);
-		colourImageView = Vulkan::createImageView(colourImage, VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+		colourImageView = Vulkan::createImageView(colourImage, VK_IMAGE_VIEW_TYPE_2D, surfaceFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1, 0, 1);
 
 		Vulkan::transitionImageLayout(colourImage, surfaceFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1, 1);
 	}
@@ -138,7 +138,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	colourAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
 	colourAttachment.finalLayout    = numSamples > 0 ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-	depthAttachment = new FramebufferAttachment(extent.width, extent.height, FramebufferAttachment::Type::DEPTH, numSamples);
+	depthAttachment = new FramebufferAttachment(extent.width, extent.height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE), numSamples, 0);
 	depthAttachment->setup(0);
 
 	////Setup the depth attachment info

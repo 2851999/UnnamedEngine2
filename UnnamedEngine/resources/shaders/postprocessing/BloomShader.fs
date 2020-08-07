@@ -1,8 +1,6 @@
 #include "PostProcess.fs"
 
-#map uniform BloomTexture ue_bloomTexture
-
-uniform sampler2D ue_bloomTexture;
+layout(set = 1, binding = 0) uniform sampler2D ue_bloomTexture;
 
 layout(location = 0) out vec4 ue_FragColour;
 

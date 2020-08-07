@@ -114,7 +114,7 @@ void GUIComponentRenderer::setTexture(Texture* texture) {
 void GUIComponentRenderer::setFont(Font* font) {
 	this->font = font;
 	if (! textInstance)
-		textInstance = new Text(DEFAULT_FONT, Colour::WHITE, 100, false, true);
+		textInstance = new Text(DEFAULT_FONT, Colour::WHITE, Text::DEFAULT_MAX_CHARACTERS, false, true);
 	textInstance->setFont(font);
 }
 

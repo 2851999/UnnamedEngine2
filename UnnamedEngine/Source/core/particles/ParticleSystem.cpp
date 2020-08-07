@@ -49,11 +49,11 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	for (unsigned int i = 0; i < 12u; ++i)
 		data.push_back(vertexBufferData[i]);
 
-	renderData = new RenderData(GL_TRIANGLE_STRIP, 4);
+	renderData = new RenderData(4);
 
 	shader = Renderer::getRenderShader(Renderer::SHADER_PARTICLE_SYSTEM);
 
-	vboVertices = new VBO<float>(GL_ARRAY_BUFFER, sizeof(vertexBufferData), data, VBOUsage::STATIC, false);
+	vboVertices = new VBO<float>(sizeof(vertexBufferData), data, DataUsage::STATIC, false);
 	vboVertices->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, 3, 0);
 	renderData->addVBO(vboVertices);
 
@@ -62,15 +62,15 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	particleColourData.resize(maxParticles * 4);
 	particleTextureData.resize(maxParticles * 4);
 
-	vboPositionSizeData = new VBO<float>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(float), particlePositionSizeData, VBOUsage::STREAM, true);
+	vboPositionSizeData = new VBO<float>(maxParticles * 4 * sizeof(float), particlePositionSizeData, DataUsage::STREAM, true);
 	vboPositionSizeData->addAttribute(ATTRIBUTE_LOCATION_POSITION_DATA, 4, 1);
 	renderData->addVBO(vboPositionSizeData);
 
-	vboColours = new VBO<float>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(float), particleColourData, VBOUsage::STREAM, true);
+	vboColours = new VBO<float>(maxParticles * 4 * sizeof(float), particleColourData, DataUsage::STREAM, true);
 	vboColours->addAttribute(ATTRIBUTE_LOCATION_COLOUR, 4, 1);
 	renderData->addVBO(vboColours);
 
-	vboTextureData = new VBO<float>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(float), particleTextureData, VBOUsage::STREAM, true);
+	vboTextureData = new VBO<float>(maxParticles * 4 * sizeof(float), particleTextureData, DataUsage::STREAM, true);
 	vboTextureData->addAttribute(ATTRIBUTE_LOCATION_TEXTURE_DATA, 4, 1);
 	renderData->addVBO(vboTextureData);
 
@@ -122,8 +122,6 @@ void ParticleSystem::reset() {
 }
 
 void ParticleSystem::update(float delta, Vector3f cameraPosition) {
-	//Update the particle emitter
-	emitter->update(delta);
 	//Reset the particle count
 	particleCount = 0;
 	//The offset for the indices of the current particle
@@ -189,7 +187,11 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 			}
 		}
 	}
-	//Sort the particles
+
+	//Update the particle emitter
+	emitter->update(delta, cameraPosition);
+
+	//Sort the particles after emitting new particles to ensure the new ones have the right order for rendering
 	std::sort(particles.begin(), particles.end());
 
 	//Assign the data for the billboarding
@@ -202,18 +204,18 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 	shaderBillboardData.ue_cameraUp = Vector4f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2), 0.0f);
 
 	shaderBillboardData.ue_projectionViewMatrix = (Renderer::getCamera()->getProjectionViewMatrix());
-
-	//Update the UBO
-	descriptorSetBillboard->getUBO(0)->update(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
-
-	//Update the paricle data
-	vboPositionSizeData->updateStream(particleCount * sizeof(GLfloat) * 4);
-	vboColours->updateStream(particleCount * sizeof(GLfloat) * 4);
-	vboTextureData->updateStream(particleCount * sizeof(GLfloat) * 4);
 }
 
 void ParticleSystem::render() {
 	if (particleCount > 0) {
+		//Update the UBO
+		descriptorSetBillboard->getUBO(0)->updateFrame(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
+
+		//Update the paricle data
+		vboPositionSizeData->updateStream(particleCount * sizeof(GLfloat) * 4);
+		vboColours->updateStream(particleCount * sizeof(GLfloat) * 4);
+		vboTextureData->updateStream(particleCount * sizeof(GLfloat) * 4);
+
 		//Use the graphics pipeline
 		graphicsPipeline->bind();
 

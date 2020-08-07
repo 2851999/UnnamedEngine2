@@ -35,9 +35,11 @@ private:
 	/* States whether this text is billboarded or not */
 	bool billboarded = false;
 
-	/* UBO and data structure for billboarding */
-	UBO* shaderBillboardUBO;
+	/* Data structure for billboarding */
 	ShaderBlock_Billboard shaderBillboardData;
+
+	/* Descriptor set for billboarding */
+	DescriptorSet* descriptorSetBillboard = NULL;
 
 	/* The maximum number of characters this instance can render (only relevant for Vulkan) */
 	unsigned int maxCharacters;

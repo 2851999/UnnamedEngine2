@@ -34,6 +34,11 @@ private:
 	GameObject3D* mit1;
 	Light* light;
 	Light* lightDir;
+	std::vector<Light*> manyLights;
+	float currentExposure;
+	float exposureChangeDir;
+	float minExposure = 0.1f;
+	float maxExposure = 2.0f;
 public:
 	static bool useVulkan;
 
@@ -85,7 +90,7 @@ void Test::created() {
 	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
 	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
 	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	InputBindings* bindings = new InputBindings();
 	bindings->load("C:/UnnamedEngine/config/Controller.xml", getWindow()->getInputManager());
@@ -105,24 +110,30 @@ void Test::created() {
 	unsigned int shader = Renderer::SHADER_LIGHTING;
 	unsigned int shaderSkinning = Renderer::SHADER_LIGHTING_SKINNING;
 
-	renderScene = new RenderScene(true, true, false, true);
-	renderScene->setPostProcessingParameters(true, true, 0.5f);
+	currentExposure = 0.5f;
+	exposureChangeDir = 1.0f;
+	renderScene = new RenderScene(true, true, false, false, true);
+	renderScene->setPostProcessingParameters(true, true, currentExposure);
 
 	//renderScene->disableLighting();
 
 	utils_random::initialise();
 
 	//renderScene->addLight((new Light(Light::TYPE_DIRECTIONAL))->setDirection(0.0f, -1.0f, 0.4f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
-	for (unsigned int i = 0; i < 20; ++i)
-		renderScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-8.0f, 8.0f), utils_random::randomFloat(0.0f, 10.0f), utils_random::randomFloat(-8.0f, 8.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f), utils_random::randomFloat(1.0f, 3.0f))));
+	for (unsigned int i = 0; i < 10; ++i) {
+		Light* light = (new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-30.0f, 30.0f), utils_random::randomFloat(0.0f, 18.0f), utils_random::randomFloat(-12.0f, 12.0f)), true))->setDiffuseColour(Colour(utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f)));
+		renderScene->addLight(light);
+		manyLights.push_back(light);
+	}
 	//light = (new Light(Light::TYPE_POINT, Vector3f(1.5f, 1.2f, 2.0f), false))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	//renderScene->addLight(light);
 	//renderScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 
 	//lightDir = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true))->setDirection(0.0f, -1.0f, 0.0001f);
+	light = (new Light(Light::TYPE_DIRECTIONAL, Vector3f(), true, 4096, 35.0f))->setDirection(0.1f, -1.0f, 0.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 	//light = (new Light(Light::TYPE_SPOT, Vector3f(10.0f, 8.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
-	light = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
-	lightDir = (new Light(Light::TYPE_SPOT, Vector3f(0.0f, 5.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	//light = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(203.47f, 201.31f, 200.79f));
+	lightDir = (new Light(Light::TYPE_SPOT, Vector3f(0.0f, 5.0f, 0.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(203.47f, 201.31f, 200.79f));
 	renderScene->addLight(light);
 	renderScene->addLight(lightDir);
 
@@ -150,11 +161,18 @@ void Test::created() {
 	mit1 = new GameObject3D(MeshLoader::loadModel("C:/UnnamedEngine/models/Sphere-Bot Basic/", "bot.dae"), shaderSkinning);
 	mit1->getMesh()->getSkeleton()->startAnimation("");
 	mit1->setPosition(10.0f, 1.0f, 0.0f);
+	mit1->getMesh()->getMaterial(2)->setShininess(Texture::loadTexture("C:/UnnamedEngine/models/Sphere-Bot Basic/Sphere_Bot_rough.jpg")); //Need to be loaded separately for some reason
+	mit1->getMesh()->getMaterial(2)->setNormalMap(Texture::loadTexture("C:/UnnamedEngine/models/Sphere-Bot Basic/Sphere_Bot_nmap_1.jpg"));
+	mit1->getMesh()->getMaterial(2)->update();
 	mit1->update();
 	renderScene->add(mit1);
 
 	//model2->getMesh()->getMaterial(1)->setDiffuse(Renderer::getBlankTexture());
 	//model2->getMesh()->getMaterial(1)->update();
+
+	//Make OpenGL's depth values behave like Vulkan
+	//https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_clip_control.txt
+	//glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 }
 
 void Test::update() {
@@ -177,6 +195,29 @@ void Test::update() {
 
 	light->update();
 	lightDir->update();
+
+	for (Light* light : manyLights) {
+		light->getTransform()->translate(Vector3f(sin(utils_time::getSeconds()), 0.0f, cos(utils_time::getSeconds())) * 0.04f);
+		light->update();
+	}
+
+	//currentExposure += exposureChangeDir * (1.0f * getDeltaSeconds());
+	//if (currentExposure <= minExposure) {
+	//	currentExposure = minExposure;
+	//	exposureChangeDir *= -1;
+	//} else if (currentExposure >= maxExposure) {
+	//	currentExposure = maxExposure;
+	//	exposureChangeDir *= -1;
+	//}
+	//renderScene->setPostProcessingParameters(true, true, currentExposure);
+
+	if (Keyboard::isPressed(GLFW_KEY_HOME)) {
+		currentExposure += (10.0f * getDeltaSeconds());
+		renderScene->setPostProcessingParameters(true, true, currentExposure);
+	} else if (Keyboard::isPressed(GLFW_KEY_END)) {
+		currentExposure -= (10.0f * getDeltaSeconds());
+		renderScene->setPostProcessingParameters(true, true, currentExposure);
+	}
 }
 
 void Test::renderOffscreen() {

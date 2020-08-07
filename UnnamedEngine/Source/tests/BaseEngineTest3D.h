@@ -40,8 +40,8 @@ private:
 	GameObject3D* model3;
 	//	GameObject3D* box;
 
-	//Font* font;
-	//Text* text;
+	Font* font;
+	Text* text;
 
 	//	HeightMapTerrain* terrain;
 
@@ -66,7 +66,9 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
-	Shader::compileEngineShaderToSPIRV("ParticleShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("ParticleShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
@@ -103,8 +105,8 @@ void Test::onCreated() {
 	model2->setPosition(0.0f, 0.8f, 2.0f);
 	model2->update();
 
-	//	model2->getMesh()->getSkeleton()->startAnimation("");
-		//model2->getMesh()->getSkeleton()->stopAnimation();
+	//model2->getMesh()->getSkeleton()->startAnimation("");
+	//model2->getMesh()->getSkeleton()->stopAnimation();
 
 	model3 = new GameObject3D(resourceLoader.loadModel("deformablesphere.dae"), shaderSkinning);
 	model3->setPosition(2.0f, 0.8f, 0.0f);
@@ -147,9 +149,13 @@ void Test::onCreated() {
 	//	soundSystem->playAsMusic("Music", resourceLoader.loadAudio("Sound.ogg"));
 	//	soundSystem->playAsSoundEffect("SoundEffect", resourceLoader.loadAudio("Sound.wav"), particleEmitter);
 
-	//font = new Font("resources/fonts/CONSOLA.TTF", 64, TextureParameters().setFilter(GL_LINEAR));
-	//text = new Text(font, Colour::WHITE, 100, true);
-	//text->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
+	//font = new Font("resources/fonts/CONSOLA.TTF", 64, TextureParameters().setFilter(TextureParameters::Filter::LINEAR));
+	font = new Font("resources/fonts/testFont.fnt", 100);
+	font->setSDFOutline(0.1);
+	font->setSDFShadow(true);
+	font->updateSDFParameters();
+	text = new Text(font, Colour::WHITE, 100, true);
+	text->update("Hello World!", Vector3f(0.0f, 2.0f, 0.0f));
 
 	//	terrain = new HeightMapTerrain();
 	//	terrain->setup("D:/Storage/Users/Joel/Desktop/heightmap.jpg", 8);
@@ -197,7 +203,7 @@ void Test::onUpdate() {
 
 void Test::onRender() {
 	particleSystem->render();
-	//text->render();
+	text->render();
 	//	terrain->render();
 
 	//	box->render();
@@ -221,6 +227,8 @@ void Test::onRender() {
 
 void Test::onDestroy() {
 	delete particleSystem;
+	delete text;
+	delete font;
 }
 
 void Test::onKeyPressed(int key) {

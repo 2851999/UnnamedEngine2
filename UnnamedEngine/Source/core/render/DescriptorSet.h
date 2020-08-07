@@ -83,6 +83,10 @@ private:
 	/* The descriptor sets required in Vulkan (one per swap chain image) */
 	std::vector<VkDescriptorSet> vulkanDescriptorSets;
 
+	/* States whether this object is currently within the update queue
+       in Vulkan*/
+	bool m_isInUpdateQueue = false;
+
 	/* Method used to update this descriptor set for Vulkan (This method updates for
 	   all internal descriptor sets and as such should not be used during rendering) */
 	void updateAllVk();
@@ -118,6 +122,11 @@ public:
 	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
 	inline unsigned int getNumUBOs() { return ubos.size(); }
 	inline Texture* getTexture(unsigned int index) { return textures[index].texture; }
+
+	/* Called when this instance is removed from the update queue */
+	void removedFromUpdateQueue() { m_isInUpdateQueue = false; }
+	/* Returns whether this instance is within the update queue */
+	bool isInUpdateQueue() { return m_isInUpdateQueue; }
 };
 
 /*****************************************************************************
@@ -129,7 +138,7 @@ public:
 	/* Stucture for storing information about a UBO */
 	struct UBOInfo {
 		unsigned int size;
-		GLenum       usage;
+		DataUsage    usage;
 		unsigned int binding;
 	};
 private:
@@ -169,7 +178,7 @@ public:
 	/* Methods to add UBOs and Textures to this layout */
 	inline void addTexture2D(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, binding, 1); }
 	inline void addTextureCube(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_CUBE, binding, 1); }
-	inline void addUBO(unsigned int size, GLenum usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
+	inline void addUBO(unsigned int size, DataUsage usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
 
 	/* Getters */
 	inline unsigned int getSetNumber() { return setNumber; }

@@ -47,7 +47,19 @@ Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShaderM
 }
 
 Shader::~Shader() {
-	destroy();
+	if (!BaseEngine::usingVulkan()) {
+		glDeleteProgram(program);
+		//Go through each attached shader and delete them
+		for (unsigned int i = 0; i < attachedShaders.size(); i++)
+			glDeleteShader(attachedShaders[i]);
+		attachedShaders.clear();
+	} else {
+		//Destroy the shader modules
+		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
+		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
+		if (geometryShaderModule != VK_NULL_HANDLE)
+			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), geometryShaderModule, nullptr);
+	}
 }
 
 void Shader::attach(GLuint shader) {
@@ -93,22 +105,6 @@ void Shader::use() {
 void Shader::stopUsing() {
 	glUseProgram(0);
 	currentShader = NULL;
-}
-
-void Shader::destroy() {
-	if (! BaseEngine::usingVulkan()) {
-		glDeleteProgram(program);
-		//Go through each attached shader and delete them
-		for (unsigned int i = 0; i < attachedShaders.size(); i++)
-			glDeleteShader(attachedShaders[i]);
-		attachedShaders.clear();
-	} else {
-		//Destroy the shader modules
-		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
-		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
-		if (geometryShaderModule != VK_NULL_HANDLE)
-			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), geometryShaderModule, nullptr);
-	}
 }
 
 void Shader::addUniform(std::string id, std::string name) {
@@ -410,12 +406,18 @@ Shader::ShaderSource Shader::loadShaderSource(std::string path, unsigned int ubo
 		if (hasVersion && ! added) {
 			source.source += preSource + "\n";
 			added = true;
-		}  else if ((!hasVersion) && utils_string::strStartsWith(line, "#version"))
+		}  else if ((! hasVersion) && utils_string::strStartsWith(line, "#version"))
 			hasVersion = true;
 		else if (line != "")
 			hasVersion = true; //Assume has no version
-		//Append the line onto the source
-		source.source += line + "\n";
+
+		//Only append onto the source if it does not define another version (so that the first occrurance is treated as
+		//the one that should be used - in the case of includes this means versions before includes take precedence)
+		if (! (hasVersion && added && utils_string::strStartsWith(line, "#version")))
+			//Append the line onto the source
+			source.source += line + "\n";
+		//else
+		//	std::cout << line << std::endl;
 	}
 
 //	std::cout << "----------------------------------------------" << std::endl;

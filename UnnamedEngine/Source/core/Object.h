@@ -36,6 +36,10 @@ private:
 
 	/* The RenderShader used when rendering */
 	RenderShader* renderShader;
+
+	/* States whether this object is currently within the queue to be
+	   rendered in Vulkan*/
+	bool m_isInRenderQueue = false;
 protected:
 	/* Transform for this object */
 	Transform* transform = new Transform();
@@ -67,7 +71,7 @@ public:
 	/* Used to set the internal mesh, previous will be deleted if there was one,
 	 * if a shader is supplied, then setup will be called on it otherwise it is assumed
 	 * it has already been setup */
-	void setMesh(Mesh* mesh, RenderShader* shader = NULL, VBOUsage vboUsage = VBOUsage::STATIC);
+	void setMesh(Mesh* mesh, RenderShader* shader = NULL, DataUsage vboUsage = DataUsage::STATIC);
 
 	inline bool hasMesh() { return mesh; }
 	inline Mesh* getMesh() { return mesh; }

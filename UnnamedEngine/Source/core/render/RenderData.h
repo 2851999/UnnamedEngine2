@@ -19,6 +19,7 @@
 #pragma once
 
 #include "VBO.h"
+#include "IBO.h"
 #include "UBO.h"
 #include "Texture.h"
 #include "ShaderInterface.h"
@@ -32,20 +33,17 @@ private:
 	/* The VAO */
 	GLuint vao = 0;
 	/* The VBO's used for rendering */
-	std::vector<VBO<float>*> vbosFloat;
+	std::vector<VBO<float>*>         vbosFloat;
 	std::vector<VBO<unsigned int>*>  vbosUInteger;
-	VBO<unsigned int>*         vboIndices = NULL;
-
-	/* The render mode */
-	GLenum mode;
+	IBO*                             ibo = NULL;
 
 	/* States the 'count' used for rendering - the number of positions/
 	 * indices */
-	GLsizei count;
+	int count;
 
 	/* States the number of instances to render, instancing is only used if
 	 * this value is greater than zero */
-	GLsizei primcount = -1;
+	int primcount = -1;
 
 	/* The vertex buffer instances and offsets for Vulkan */
 	std::vector<VkBuffer> vboVkInstances;
@@ -56,13 +54,13 @@ private:
 	std::vector<VkVertexInputAttributeDescription> attributeVkDescriptions;
 
 	/* The descriptor set corresponding to this render data (model) */
-	DescriptorSet* descriptorSetModel;
+	DescriptorSet* descriptorSetModel = NULL;
 
 	/* Data for the above descriptor set */
 	ShaderBlock_Model modelData;
 public:
 	/* The constructor */
-	RenderData(GLenum mode, GLsizei count) : mode(mode), count(count) {}
+	RenderData(GLsizei count) : count(count) {}
 
 	/* The destructor */
 	virtual ~RenderData();
@@ -93,10 +91,9 @@ public:
 	/* The setters and getters */
 	inline void addVBO(VBO<float>* vbo) { vbosFloat.push_back(vbo); }
 	inline void addVBO(VBO<unsigned int>* vbo) { vbosUInteger.push_back(vbo); }
-	inline void setIndicesVBO(VBO<unsigned int>* vboIndices) { this->vboIndices = vboIndices; }
-	inline void setMode(GLenum mode) { this->mode = mode; }
-	inline void setCount(GLsizei count) { this->count = count; }
-	inline void setNumInstances(GLsizei primcount) { this->primcount = primcount; }
+	inline void setIBO(IBO* ibo) { this->ibo = ibo; }
+	inline void setCount(int count) { this->count = count; }
+	inline void setNumInstances(int primcount) { this->primcount = primcount; }
 
 	inline GLuint getVAO() { return vao; }
 	inline std::vector<VkVertexInputBindingDescription> getVkBindingDescriptions() { return bindingVkDescriptions; }

@@ -2,11 +2,13 @@
 #include "../Material.fs"
 #include "Lighting.glsl"
 
+#ifndef UE_DEFERRED_LIGHTING
 layout(location = 7) in vec3 ue_tangentViewPos;
 layout(location = 8) in vec3 ue_tangentFragPos;
 
 layout(location = 9) in mat3 ue_frag_tbnMatrix;
 layout(location = 13) in vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
+#endif
 
 //layout(binding = 6) uniform samplerCube ue_environmentMap;
 
@@ -185,6 +187,7 @@ vec3 ueGetLighting(vec3 normal, vec3 fragPos, vec3 ambientColour, vec3 diffuseCo
 	return ambientLight + otherLight;
 }
 
+#ifndef UE_DEFERRED_LIGHTING
 //Returns the texture coordinate taking into account parralax mapping
 vec2 ueCalculateTextureCoord() {
 	vec2 textureCoord = ue_frag_textureCoord;
@@ -208,3 +211,4 @@ vec3 ueCalculateNormal(vec2 textureCoord) {
 
 	return normal;
 }
+#endif

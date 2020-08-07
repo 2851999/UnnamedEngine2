@@ -65,11 +65,13 @@ private:
 	/* The material of this layer used for rendering */
 	Material* material;
 
-	/* The VBO's for OpenGL */
-	VBO<unsigned int>* vboIndices = NULL;
-	VBO<float>* vboVertices = NULL;
+	/* The IBO */
+	IBO* ibo = NULL;
+
+	/* The VBO's */
+	VBO<float>* vboVertices      = NULL;
 	VBO<float>* vboTextureCoords = NULL;
-	VBO<float>* vboVisibility = NULL;
+	VBO<float>* vboVisibility    = NULL;
 
 	/* The shader used for rendering */
 	RenderShader* shader = NULL;
@@ -81,7 +83,7 @@ public:
 	static const unsigned int ATTRIBUTE_LOCATION_VISIBILITY;
 
 	/* The constructor */
-	TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int>& data, bool visible, bool editable, VBOUsage usage);
+	TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int>& data, bool visible, bool editable, DataUsage usage);
 
 	/* The destructor */
 	virtual ~TilemapLayer();
@@ -174,5 +176,5 @@ public:
 	/* Method used to load a tileset from a file */
 	static TextureAtlas* loadTileset(std::string path, std::string name);
 	/* Method used to load a tile map from a file */
-	static Tilemap* loadTilemap(std::string path, std::string name, bool editable = false, VBOUsage usage = VBOUsage::STATIC);
+	static Tilemap* loadTilemap(std::string path, std::string name, bool editable = false);
 };

@@ -36,6 +36,7 @@ layout(location = UE_LOCATION_NORMAL) in vec3 ue_normal;
 layout(location = UE_LOCATION_TANGENT) in vec3 ue_tangent;
 layout(location = UE_LOCATION_BITANGENT) in vec3 ue_bitangent;
 
+#ifndef UE_VERTEX_INPUT_ONLY
 layout(location = 0) out vec3 ue_frag_position;
 layout(location = 1) out vec2 ue_frag_textureCoord;
 layout(location = 2) out vec3 ue_frag_normal;
@@ -52,6 +53,7 @@ void ueAssignTextureCoord() {
 void ueCalculatePosition() {
 	gl_Position = ue_mvpMatrix * vec4(ue_position, 1.0);
 }
+#endif
 /* The material structure */
 struct UEMaterial {
 	vec4 ambientColour;
@@ -104,6 +106,7 @@ mat4 ueGetBoneTransform() {
 }
 #endif
 
+#ifndef UE_GEOMETRY_ONLY
 #define MAX_LIGHTS 6
 
 struct UELight {
@@ -133,12 +136,15 @@ layout(std140, set = 3, binding = 25) uniform UELightBatchData {
 	
 	bool ue_useEnvironmentMap;
 };
+#endif
 
 layout(location = 7) out vec3 ue_tangentViewPos;
 layout(location = 8) out vec3 ue_tangentFragPos;
 
 layout(location = 9) out mat3 ue_frag_tbnMatrix;
+#ifndef UE_GEOMETRY_ONLY
 layout(location = 13) out vec4 ue_frag_pos_lightspace[MAX_LIGHTS];
+#endif
 
 #ifdef UE_SKINNING
 void ueAssignLightingData() {
@@ -154,9 +160,10 @@ void ueAssignLightingData() {
 		ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
 		ue_frag_normal = normalMatrix * ue_normal;
 	}
-	
+#ifndef UE_GEOMETRY_ONLY
 	for (int i = 0; i < ue_numLights; i++)
 		ue_frag_pos_lightspace[i] = ue_lightSpaceMatrix[i] * vec4(ue_frag_position, 1.0);
+#endif
 	
 	if (ue_material.hasNormalMap) {
 		vec3 T;
@@ -192,8 +199,10 @@ void ueAssignLightingData() {
 	ue_frag_position = vec3(ue_modelMatrix * vec4(ue_position, 1.0));
 	ue_frag_normal = normalMatrix * ue_normal;
 	
+#ifndef UE_GEOMETRY_ONLY
 	for (int i = 0; i < ue_numLights; i++)
 		ue_frag_pos_lightspace[i] = ue_lightSpaceMatrix[i] * vec4(ue_frag_position, 1.0);
+#endif
 	
 	if (ue_material.hasNormalMap) {
 		vec3 T = normalize(normalMatrix * ue_tangent);

@@ -60,6 +60,8 @@ DescriptorSet::~DescriptorSet() {
 	//Destory Vulkan data
 	if (vulkanDescriptorPool != VK_NULL_HANDLE)
 		vkDestroyDescriptorPool(Vulkan::getDevice()->getLogical(), vulkanDescriptorPool, nullptr);
+	if (m_isInUpdateQueue)
+		Vulkan::removeFromDescriptorSetQueue(this);
 	for (UBO* ubo : ubos)
 		delete ubo;
 	ubos.clear();
@@ -198,9 +200,11 @@ void DescriptorSet::updateVk(unsigned int frame) {
 
 void DescriptorSet::update() {
 	//Check if using Vulkan
-	if (BaseEngine::usingVulkan())
+	if (BaseEngine::usingVulkan()) {
+		m_isInUpdateQueue = true;
 		//Update this descriptor set
 		Vulkan::updateDescriptorSet(this);
+	}
 }
 
 void DescriptorSet::bind() {

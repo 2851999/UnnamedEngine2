@@ -33,10 +33,17 @@ RenderData::~RenderData() {
 }
 
 void RenderData::setup(RenderShader* renderShader) {
-	//Create the descriptor set
-	descriptorSetModel = new DescriptorSet(renderShader->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MODEL));
-	//Setup the descriptor set
-	descriptorSetModel->setup();
+	//HACK TO ALLOW PBREnvironment to work
+	if (renderShader->getID() != Renderer::SHADER_PBR_GEN_EQUI_TO_CUBE_MAP &&
+		renderShader->getID() != Renderer::SHADER_PBR_GEN_IRRADIANCE_MAP &&
+		renderShader->getID() != Renderer::SHADER_PBR_GEN_PREFILTER_MAP &&
+		renderShader->getID() != Renderer::SHADER_PBR_GEN_BRDF_INTEGRATION_MAP) {
+
+		//Create the descriptor set
+		descriptorSetModel = new DescriptorSet(renderShader->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_NUMBER_PER_MODEL));
+		//Setup the descriptor set
+		descriptorSetModel->setup();
+	}
 
 	if (! BaseEngine::usingVulkan()) {
 		//Generate the VAO and bind it
@@ -53,7 +60,7 @@ void RenderData::setup(RenderShader* renderShader) {
 		vbosFloat[i]->startRendering();
 
 		if (BaseEngine::usingVulkan()) {
-			vboVkInstances[i] = vbosFloat[i]->getVkBuffer()->getInstance();
+			vboVkInstances[i] = vbosFloat[i]->getVkCurrentBuffer()->getInstance();
 			vboVkOffsets[i] = 0;
 
 			bindingVkDescriptions.push_back(vbosFloat[i]->getVkBindingDescription());
@@ -67,7 +74,7 @@ void RenderData::setup(RenderShader* renderShader) {
 		vbosUInteger[i]->startRendering();
 
 		if (BaseEngine::usingVulkan()) {
-			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkBuffer()->getInstance();
+			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkCurrentBuffer()->getInstance();
 			vboVkOffsets[vbosFloat.size() + i] = 0;
 
 			bindingVkDescriptions.push_back(vbosUInteger[i]->getVkBindingDescription());
@@ -77,9 +84,9 @@ void RenderData::setup(RenderShader* renderShader) {
 	}
 
 	//Now setup the indices VBO if assigned
-	if (vboIndices) {
-		vboIndices->setup(0);
-		vboIndices->startRendering();
+	if (ibo) {
+		ibo->setup();
+		ibo->startRendering();
 	}
 
 	if (! BaseEngine::usingVulkan())
@@ -90,9 +97,16 @@ void RenderData::bindBuffers() {
 	if (! BaseEngine::usingVulkan())
 		glBindVertexArray(vao);
 	else {
+		//Ensure correct VBO's are used for the current frame
+		for (unsigned int i = 0; i < vbosFloat.size(); ++i)
+			vboVkInstances[i] = vbosFloat[i]->getVkCurrentBuffer()->getInstance();
+
+		for (unsigned int i = 0; i < vbosUInteger.size(); ++i)
+			vboVkInstances[vbosFloat.size() + i] = vbosUInteger[i]->getVkCurrentBuffer()->getInstance();
+
 		vkCmdBindVertexBuffers(Vulkan::getCurrentCommandBuffer(), 0, vboVkInstances.size(), vboVkInstances.data(), vboVkOffsets.data());
-		if (vboIndices)
-			vkCmdBindIndexBuffer(Vulkan::getCurrentCommandBuffer(), vboIndices->getVkBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
+		if (ibo)
+			vkCmdBindIndexBuffer(Vulkan::getCurrentCommandBuffer(), ibo->getVkCurrentBuffer()->getInstance(), 0, VK_INDEX_TYPE_UINT32); //Using unsigned int which is 32 bit
 	}
 }
 void RenderData::unbindBuffers() {
@@ -105,27 +119,27 @@ void RenderData::renderWithoutBinding() {
 		//Check for instancing
 		if (primcount > 0) {
 			//Check for indices
-			if (vboIndices)
-				glDrawElementsInstanced(mode, count, GL_UNSIGNED_INT, (void*) NULL, primcount);
+			if (ibo)
+				glDrawElementsInstanced(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), count, GL_UNSIGNED_INT, (void*) NULL, primcount);
 			else
-				glDrawArraysInstanced(mode, 0, count, primcount);
+				glDrawArraysInstanced(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), 0, count, primcount);
 		} else {
 			//Check for indices
-			if (vboIndices)
-				glDrawElements(mode, count, GL_UNSIGNED_INT, (void*) NULL);
+			if (ibo)
+				glDrawElements(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), count, GL_UNSIGNED_INT, (void*) NULL);
 			else
-				glDrawArrays(mode, 0, count);
+				glDrawArrays(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), 0, count);
 		}
 	} else {
 		if (primcount > 0) {
 			//Check for indices
-			if (vboIndices)
+			if (ibo)
 				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, primcount, 0, 0, 0);
 			else
 				vkCmdDraw(Vulkan::getCurrentCommandBuffer(), count, primcount, 0, 0);
 		} else if (primcount == -1) {
 			//Check for indices
-			if (vboIndices)
+			if (ibo)
 				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, 1, 0, 0, 0);
 			else
 				vkCmdDraw(Vulkan::getCurrentCommandBuffer(), count, 1, 0, 0);
@@ -138,14 +152,14 @@ void RenderData::renderBaseVertex(unsigned int count, unsigned int indicesOffset
 		//Check for instancing
 		if (primcount == -1) {
 			//Check for indices
-			if (vboIndices)
-				glDrawElementsBaseVertex(mode, count, GL_UNSIGNED_INT, (void*) (indicesOffset * sizeof(unsigned int)), baseVertex); //Assume indices stored as unsigned integers
+			if (ibo)
+				glDrawElementsBaseVertex(Renderer::getCurrentGraphicsPipeline()->getLayout()->getPrimitiveTopologyGL(), count, GL_UNSIGNED_INT, (void*) (indicesOffset * sizeof(unsigned int)), baseVertex); //Assume indices stored as unsigned integers
 		}
 	} else {
 		//Check for instancing
 		if (primcount == -1) {
 			//Check for indices
-			if (vboIndices)
+			if (ibo)
 				vkCmdDrawIndexed(Vulkan::getCurrentCommandBuffer(), count, 1, indicesOffset, baseVertex, 0);
 		}
 	}

@@ -55,6 +55,9 @@ private:
 	/* Command buffers (one for each swap chain image) */
 	static std::vector<VkCommandBuffer> commandBuffers;
 
+	/* Command buffer for overriding the above ones, e.g. when rendering in PBREnvironment */
+	static VkCommandBuffer overrideCommandBuffer;
+
 	/* Synchronisation objects */
 	static std::vector<VkSemaphore> imageAvailableSemaphores; //Signals image acquired ready for rendering
 	static std::vector<VkSemaphore> renderFinishedSemaphores; //Signals rendering finished, can present
@@ -84,13 +87,13 @@ private:
 	/* Method to update the descriptor sets in the update queue */
 	static void updateDescriptorSetQueue();
 
-	/* Structure for storing info about a requested UBO update */
-	struct UBOUpdateInfo {
-		//The UBO instance to be updated
-		UBO* ubo;
+	/* Structure for storing info about a requested VulkanBufferObject update */
+	struct VulkanBufferObjectUpdateInfo {
+		//The VulkanBufferObject instance to be updated
+		VulkanBufferObject* instance;
 
 		//The information needed to perform the update each frame
-		void*        data;
+		void* data;
 		unsigned int offset;
 		unsigned int size;
 
@@ -101,14 +104,14 @@ private:
 		unsigned int updatesLeft;
 	};
 
-	/* List of UBO updates to perform */
-	static std::vector<UBOUpdateInfo> uboUpdateQueue;
+	/* List of VulkanBufferObject updates to perform */
+	static std::vector<VulkanBufferObjectUpdateInfo> vulkanBufferObjectUpdateQueue;
 
-	/* Method to update a UBO for the current frame (Returns whether the set has been fully updated) */
-	static bool updateUBOFrame(UBOUpdateInfo& info);
+	/* Method to update a VulkanBufferObject for the current frame (Returns whether the set has been fully updated) */
+	static bool updateVulkanBufferObjectFrame(VulkanBufferObjectUpdateInfo& info);
 
-	/* Method to update UBOs in the update queue*/
-	static void updateUBOQueue();
+	/* Method to update VulkanBufferObject in the update queue*/
+	static void updateVulkanBufferObjectQueue();
 public:
 	/* Method to initialise everything required for Vulkan - returns if this was successful */
 	static bool initialise(Window* window);
@@ -138,7 +141,8 @@ public:
 	static void createCommandBuffers(); //(Destroyed with command pool)
 
 	static void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t layerCount);
+	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t baseMipLevel, uint32_t layerCount);
+
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels, uint32_t layerCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE); //Pass VK_NULL_HANDLE for command buffer to let this method create one
 	static void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	static VkCommandBuffer beginSingleTimeCommands();
@@ -162,8 +166,14 @@ public:
 	/* Method to update a descriptor set */
 	static void updateDescriptorSet(DescriptorSet* set);
 
-	/* Method to update a UBO */
-	static void updateUBO(UBO* ubo, void* data, unsigned int offset, unsigned int size);
+	/* Method to remove all occurences of a descriptor set from the update queue */
+	static void removeFromDescriptorSetQueue(DescriptorSet* set);
+
+	/* Method to update a VulkanBufferObject */
+	static void updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size);
+
+	/* Method to remove all occurences of a VulkanBufferObject from the update queue */
+	static void removeFromVulkanBufferObjectQueue(VulkanBufferObject* instance);
 
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);
@@ -193,13 +203,17 @@ public:
 	/* Waits for device to be finished working */
 	static inline void waitDeviceIdle() { vkDeviceWaitIdle(device->getLogical()); }
 
+	/* Assigns the override command buffer for future calls of 'getCurrentCommandBuffer', VK_NULL_HANDLE ensure the current
+	   one for rendering is used instead */
+	static inline void setOverrideCommandBuffer(VkCommandBuffer commandBuffer) { overrideCommandBuffer = commandBuffer; }
+
 	/* Getters */
 	static inline VkInstance& getInstance() { return instance; }
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }
 	static inline VulkanDevice* getDevice() { return device; }
 	static inline VulkanSwapChain* getSwapChain() { return swapChain; }
 	static inline VkCommandPool& getCommandPool() { return commandPool; }
-	static inline VkCommandBuffer& getCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
+	static inline VkCommandBuffer& getCurrentCommandBuffer() { return (overrideCommandBuffer == VK_NULL_HANDLE) ? commandBuffers[currentFrame] : overrideCommandBuffer; }
 	static inline unsigned int getCurrentFrame() { return currentFrame; }
 	static inline unsigned int getNextFrame() { return (currentFrame + 1) % swapChain->getImageCount(); }
 };

@@ -25,62 +25,65 @@
  * The Light class
  *****************************************************************************/
 
-Light::Light(unsigned int type, Vector3f position, bool castShadows) : type(type) {
+unsigned int Light::DEFAULT_SHADOW_MAP_SIZE = 1024;
+float Light::DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE = 10.0f;
+
+Light::Light(unsigned int type, Vector3f position, bool castShadows, unsigned int shadowMapSize, float directionalLightShadowRange) : type(type) {
 	setPosition(position);
 
 	if (castShadows) {
 		if (type == TYPE_DIRECTIONAL) {
 			//Create FBO
-			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_TEXTURE), true }
+			FBO* fbo = new FBO(shadowMapSize, shadowMapSize, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_BORDER)), true }
 			});
 
 			//Create the shadow map render pass
 			shadowMapRenderPass = new RenderPass(fbo);
 
 			//Create the graphics pipelines
-			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
-			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass);
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass, shadowMapSize, shadowMapSize);
+			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass, shadowMapSize, shadowMapSize);
 
-			setProjectionMatrix(Matrix4f().initOrthographic(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 20.0f));
+			setProjectionMatrix(Matrix4f().initOrthographic(-directionalLightShadowRange, directionalLightShadowRange, -directionalLightShadowRange, directionalLightShadowRange, -directionalLightShadowRange, directionalLightShadowRange));
 		} else if (type == TYPE_POINT) {
 			//Create FBO
-			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_CUBEMAP), true }
+			FBO* fbo = new FBO(shadowMapSize, shadowMapSize, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_CUBEMAP, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true }
 			});
 
 			//Create the shadow map render pass
 			shadowMapRenderPass = new RenderPass(fbo);
 
 			//Create the graphics pipelines
-			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP), shadowMapRenderPass);
-			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING), shadowMapRenderPass);
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP), shadowMapRenderPass, shadowMapSize, shadowMapSize);
+			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_CUBEMAP_SKINNING), shadowMapRenderPass, shadowMapSize, shadowMapSize);
 
 			//Setup the shadow transforms for each face of the cubemap
 			for (unsigned int i = 0; i < 6; ++i)
 				lightShadowTransforms.push_back(Matrix4f());
 
 			//Setup the projection matrix for the shadow map rendering
-			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
+			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) shadowMapSize / (float) shadowMapSize, 1.0f, 25.0f));
 
 			//Create the shadow cubemap descriptor set
 			shadowCubemapDescriptorSet = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP));
 			shadowCubemapDescriptorSet->setup();
 		} else if (type == TYPE_SPOT) {
 			//Create FBO
-			FBO* fbo = new FBO(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, FramebufferAttachment::Type::DEPTH_TEXTURE), true }
+			FBO* fbo = new FBO(shadowMapSize, shadowMapSize, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(shadowMapSize, shadowMapSize, FramebufferAttachment::Type::DEPTH_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_BORDER)), true }
 			});
 
 			//Create the shadow map render pass
 			shadowMapRenderPass = new RenderPass(fbo);
 
 			//Create the graphics pipeline
-			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass);
-			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass);
+			shadowMapGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP), shadowMapRenderPass, shadowMapSize, shadowMapSize);
+			shadowMapSkinningGraphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SHADOW_MAP_SKINNING), shadowMapRenderPass, shadowMapSize, shadowMapSize);
 
 			//Setup the projection matrix for the shadow map rendering
-			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) SHADOW_MAP_SIZE / (float) SHADOW_MAP_SIZE, 1.0f, 25.0f));
+			setProjectionMatrix(Matrix4f().initPerspective(90.0f, (float) shadowMapSize / (float) shadowMapSize, 1.0f, 25.0f));
 		}
 		//Update this light (in case it is static)
 		update();
@@ -127,9 +130,6 @@ void Light::update() {
 		shadowCubemapData.shadowMatrices[3] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, -1.0f, 0.0f), Vector3f(0.0f, 0.0f, -1.0f));
 		shadowCubemapData.shadowMatrices[4] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, 1.0f), Vector3f(0.0f, -1.0f, 0.0f));
 		shadowCubemapData.shadowMatrices[5] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, -1.0f), Vector3f(0.0f, -1.0f, 0.0f));
-
-		//Update the descriptor set
-		shadowCubemapDescriptorSet->getUBO(0)->updateFrame(&shadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
 	} else if (type == TYPE_SPOT && shadowMapRenderPass) {
 		//The position of the spot light
 		Vector3f pos = getPosition();
@@ -153,9 +153,12 @@ void Light::update() {
 
 void Light::useView() {
 	//Bind the shadow cubemap if needed
-	if (shadowCubemapDescriptorSet)
+	if (shadowCubemapDescriptorSet) {
+		//Update the descriptor set
+		shadowCubemapDescriptorSet->getUBO(0)->updateFrame(&shadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
+
 		shadowCubemapDescriptorSet->bind();
-	else
+	} else
 		Camera::useView();
 }
 
