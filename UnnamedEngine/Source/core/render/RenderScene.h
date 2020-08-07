@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2020 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,152 +16,160 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_RENDERSCENE_H_
-#define CORE_RENDER_RENDERSCENE_H_
+#pragma once
 
 #include "Light.h"
-#include "GeometryBuffer.h"
+#include "GraphicsPipeline.h"
+#include "RenderPass.h"
 #include "pbr/PBREnvironment.h"
-#include "../Object.h"
-#include "PostProcessing.h"
 
-/*****************************************************************************
- * The RenderScene3D class is used to help to manage the rendering of a set
- * of GameObject3D instances
- *****************************************************************************/
-
-class RenderScene3D {
+class RenderScene {
 private:
-	/* Structure used to group together objects with the same shader */
-	struct RenderBatch {
-		RenderShader* shader;
+	/* Structure containing a batch of objects that need to be rendered, along with the GraphicsPipeline required to do it */
+	struct ObjectBatch {
+		/* States whether this batch uses skinning */
+		bool skinning;
+
+		/* Pipelines for rendering */
+		GraphicsPipeline* graphicsPipeline = NULL;
+		GraphicsPipeline* graphicsPipelineBlend = NULL; //May be NULL if deferred geometry
+
+		/* The objects to be rendered with the above pipeline */
 		std::vector<GameObject3D*> objects;
 	};
 
-	/* The RenderBatches in this scene */
-	std::vector<RenderBatch> batches;
+	/* The object batches containing all of the scene objects to be rendered */
+	std::unordered_map<unsigned int, ObjectBatch> objectBatches;
 
-	/* The lights in this scene */
+	/* Lights in this scene */
 	std::vector<Light*> lights;
 
-	/* Various shaders that might be needed */
-	Shader* shadowMapShader;
-	Shader* shadowCubemapShader;
-
-	/* The ambient light used in lighting */
-	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
-
-	/* Boolean to determine whether lighting should be used or not */
+	/* Boolean that states whether lighting should be used or not */
 	bool lighting = true;
 
-	/* States whether deferred rendering should be used */
-	bool deferredRendering = false;
+	/* Boolean that states whether deferred rendering should be used or not */
+	bool deferred;
 
-	/* The geometry buffer used in deferred rendering */
-	GeometryBuffer* gBuffer = NULL;
+	/* Boolean that states whether PBR should be used or not */
+	bool pbr;
 
-	/* States whether the geometry pass is being rendered */
-	bool geometryPass = false;
+	/* Boolean that states whether SSR should be used or not */
+	bool ssr;
 
-	/* States whether the skybox should be used as an environment map */
-	bool useEnvironmentMap = false;
+	/* Boolean that states whether bloom should be used or not */
+	bool bloom;
 
-	/* States whether PBR should be used */
-	bool pbr = false;
+	/* Boolean that states whether post processing should be used or not */
+	bool postProcessing;
 
-	/* The environment used for PBR */
+	/* PBREnvironment instance (For IBL) */
 	PBREnvironment* pbrEnvironment = NULL;
 
-	/* Post processor used for applying gamma correction */
-	PostProcessor* postProcessor = NULL;
+	/* Descriptor set passing the environment to the shader */
+	DescriptorSet* descriptorSetPBREnvironment = NULL;
 
-	/* Intermediate FBO used for antialiasing */
-	PostProcessor* intermediateFBO = NULL;
+	/* The ambient light used in phong shading/when using pbr this can control the
+	   contribution ambient lighting has */
+	Colour ambientLight = Colour(0.01f, 0.01f, 0.01f);
 
-	/* States whether the scene should be rendered in wireframe mode */
-	bool renderWireframe = false;
+	/* The light batch descriptor sets */
+	std::vector<DescriptorSet*> descriptorSetLightBatches;
 
-	/* The lighting data UBO for the shaders */
-	UBO* shaderLightingUBO;
+	/* The data to be sent to the shader about a light batch when doing lighting */
+	ShaderBlock_LightBatch shaderLightBatchData;
 
-	/* The structure used to update the lighting data UBO */
-	ShaderBlock_Lighting shaderLightingData;
+	/* The data to be sent to the gama correction/FXAA shader */
+	ShaderBlock_GammaCorrectionFXAA shaderGammaCorrectionFXAAData;
 
-	/* The gamma correction UBO for the shaders */
-	UBO* shaderGammaCorrectionUBO;
+	/* Desriptor set for gamma correction/FXAA data*/
+	DescriptorSet* descriptorSetGammaCorrectionFXAA;
 
-	/* The structure used to update the gamma correction data UBO */
-	ShaderBlock_GammaCorrection shaderGammaCorrectionData;
+	/* The graphics pipelines required for rendering */
+	GraphicsPipeline* pipelineGammaCorrectionFXAA;
+	GraphicsPipeline* pipelineDeferredLighting;
+	GraphicsPipeline* pipelineDeferredLightingBlend;
+	GraphicsPipeline* pipelineGaussianBlur1;
+	GraphicsPipeline* pipelineGaussianBlur2;
+	GraphicsPipeline* pipelineBloomCombine;
+	GraphicsPipeline* pipelineDeferredSSR;
 
-	/* The PBR lighting core UBO for the shaders */
-	UBO* shaderPBRLightingCoreUBO;
+	/* Meshes for rendering to the screen */
+	Mesh* screenTextureMesh;
+	Mesh* deferredRenderingScreenTextureMesh;
+	Mesh* bloomSSRScreenTextureMesh; //Renders to SSR pass with bloom info
+	/* These render to the gaussian blur pass, where
+	   1 - uses attachment from lighting framebuffer
+	   2 - uses attachment from gaussianBlur1RenderPass1
+	   3 - uses attachment from gaussianBlur1RenderPass2 */
+	Mesh* gaussianBlurBloomScreenTextureMesh1;
+	Mesh* gaussianBlurBloomScreenTextureMesh2;
+	Mesh* gaussianBlurBloomScreenTextureMesh3;
 
-	/* The structure used to update the PBR lighting core data UBO */
-	ShaderBlock_PBRLightingCore shaderPBRLightingCoreData;
+	/* Graphics pipeline for rendering the final quad */
+	GraphicsPipeline* pipelineFinal;
 
-	/* The shadow cubemap UBO for the shaders */
-	UBO* shaderShadowCubemapUBO;
+	/* Deferred geometry render pass */
+	RenderPass* deferredGeometryRenderPass = NULL;
 
-	/* The structure used to update the shadow cubemap data UBO */
-	ShaderBlock_ShadowCubemap shaderShadowCubemapData;
+	/* Bloom render pass -> rendering to normal/bright textures */
+	RenderPass* deferredBloomRenderPass = NULL;
 
-	/* Methods used before and after actual rendering of the scene when using forward rendering to handle the
-	 * framebuffers/gamma correction */
-	void forwardPreRender();
-	void forwardPostRender();
+	/* Render passes for gaussian blur */
+	RenderPass* gaussianBlur1RenderPass = NULL;
+	RenderPass* gaussianBlur2RenderPass = NULL;
 
-	/* Used to render the lighting pass given the shader to use (and index of the batch to render for forward rendering) */
-	void renderLighting(RenderShader* renderShader, int indexOfBatch = -1);
+	/* SSR render pass */
+	RenderPass* deferredPBRSSRRenderPass = NULL;
 
-	/* Used to render the scene to the shadow maps */
-	void renderShadowMaps();
+	/* Post processing render pass */
+	RenderPass* postProcessingRenderPass = NULL;
 
-	/* Used to render the scene to a light's shadow map */
-	void renderShadowMap(Light* light);
+	/* Descriptor set for the geometry buffer */
+	DescriptorSet* descriptorSetGeometryBuffer;
+
+	/* Descriptor sets for gaussian blur */
+	ShaderBlock_GaussianBlur gaussianBlurData[2];
+	DescriptorSet* descriptorSetsGaussianBlur[2];
+
+	/* Number of blurs to execute for bloom */
+	unsigned int gaussianBlurAmount = 6;
+
+	/* Descriptor set for the geometry buffer to be used for the SSR shader*/
+	DescriptorSet* descriptorSetGeometryBufferSSR;
+
+	/* Returns a MeshData* instance for rendering to the screen */
+	MeshData* createScreenMeshData();
+
+	/* Method used to render this scene (Ignoring any post processing) */
+	void renderScene();
 public:
-	/* The number of lights in each set */
-	static const unsigned int NUM_LIGHTS_IN_SET = 6;
+	/* The number of lights that can be rendered at once */
+	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
-	/* The constructor */
-	RenderScene3D();
+	/* Constructor */
+	RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool postProcessing, PBREnvironment* pbrEnvironment = NULL);
 
-	/* The destructor */
-	virtual ~RenderScene3D();
+	/* Destructor */
+	virtual ~RenderScene();
 
-	/* Method used to enable deferred rendering */
-	void enableDeferred();
-
-	/* Method used to enable pbr rendering */
-	inline void enablePBR() { pbr = true; }
-
-	/* The method used to render all of the objects */
-	void render();
-
-	/* Used to add an object to this scene */
+	/* Adds an object to the scene */
 	void add(GameObject3D* object);
 
-	/* Used to add a light to this scene */
-	inline void addLight(Light* light) { lights.push_back(light); }
+	/* Adds a light to the scene */
+	void addLight(Light* light);
 
-	/* Displays the various buffers on the screen used for deferred rendering */
-	void showDeferredBuffers();
+	/* Method used to do any rendering without the default render pass */
+	void renderOffscreen();
 
-	/* Getters and setters */
+	/* Method used to render all of the objects */
+	void render();
+
+	/* Setters and getters */
+	inline void enableLighting() { this->lighting = true; }
+	inline void disableLighting() { this->lighting = false; }
 	inline void setAmbientLight(Colour ambientLight) { this->ambientLight = ambientLight; }
-	inline void enableLighting() { lighting = true; }
-	inline void disableLighting() { lighting = false; }
-	inline void enableWireframe() { renderWireframe = true; }
-	inline void disableWireframe() { renderWireframe = false; }
-	inline void setPBREnvironment(PBREnvironment* environment) { this->pbrEnvironment = environment; }
+	void setPostProcessingParameters(bool gammaCorrection, bool fxaa, float exposureIn = -1.0f);
+
 	inline Colour getAmbientLight() { return ambientLight; }
-	inline bool isLightingEnabled() { return lighting; }
-	inline PBREnvironment* getPBREnvironment() { return pbrEnvironment; }
-	inline bool hasObjects() { return batches.size() > 0; }
-
-	/* Used to apply some post processing options */
-	void enableGammaCorrection();
-	void disableGammaCorrection();
-	void setExposure(float exposure);
+	inline bool hasObjects() { return objectBatches.size() > 0; }
 };
-
-#endif /* CORE_RENDER_RENDERSCENE_H_ */

@@ -16,11 +16,10 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_AUDIO_AUDIO_H_
-#define CORE_AUDIO_AUDIO_H_
+#pragma once
 
-#include <AL/al.h>
-#include <AL/alc.h>
+#include <al.h>
+#include <alc.h>
 
 #include "../Object.h"
 
@@ -340,4 +339,3 @@ public:
 	static inline bool hasContext() { return context; }
 };
 
-#endif /* CORE_AUDIO_AUDIO_H_ */

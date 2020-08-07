@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_SKYBOX_H_
-#define CORE_RENDER_SKYBOX_H_
+#pragma once
 
 #include "Texture.h"
 #include "../Object.h"
@@ -28,14 +27,17 @@
 
 class SkyBox {
 private:
+	/* The graphics pipeline required to render the skybox */
+	GraphicsPipeline* pipelineSkybox;
+
 	/* The skybox texture */
-	Cubemap* cubemap;
+	Texture* cubemap;
 
 	/* The skybox */
 	GameObject3D* box;
 public:
 	/* The constructors */
-	SkyBox(Cubemap* cubemap);
+	SkyBox(Texture* cubemap);
 	SkyBox(std::string path, std::string front, std::string back, std::string left, std::string right, std::string top, std::string bottom) : SkyBox(new Cubemap(path, { right, left, top, bottom, back, front })) {}
 	SkyBox(std::string path, std::string fileExtension) : SkyBox(path, "front" + fileExtension, "back" + fileExtension, "left" + fileExtension, "right" + fileExtension, "top" + fileExtension, "bottom" + fileExtension) {}
 
@@ -45,13 +47,14 @@ public:
 	/* Method to update this skybox's position */
 	void update(Vector3f cameraPosition);
 	/* Method to render this skybox */
-	void render();
+	void render(bool bindPipeline);
 
 	/* Method to free up all resources used by this skybox */
 	void destroy();
 
 	/* Getters */
-	inline Cubemap* getCubemap() { return cubemap; }
+	inline GraphicsPipeline* getGraphicsPipeline() { return pipelineSkybox; }
+	inline Texture* getTexture() { return cubemap; }
+	inline GameObject3D* getBox() { return box; }
 };
 
-#endif /* CORE_RENDER_SKYBOX_H_ */

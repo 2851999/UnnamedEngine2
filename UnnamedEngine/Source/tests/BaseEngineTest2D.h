@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef BASEENGINETEST2D_H_
-#define BASEENGINETEST2D_H_
+#pragma once
 
 #include "../core/BaseEngine.h"
 #include "../core/render/Camera.h"
@@ -37,6 +36,7 @@ private:
 	Sprite* sprite;
 	Tilemap* tilemap;
 	SoundSystem* soundSystem;
+	GraphicsPipeline* graphicsPipeline;
 public:
 	virtual ~Test() {}
 
@@ -67,21 +67,28 @@ public:
 void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
 	getSettings().videoVSync = 1;
-//	getSettings().videoMaxFPS = 0;
+	//	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = 16;
 	getSettings().videoMaxAnisotropicSamples = 16;
+	getSettings().videoVulkan = true;
+	getSettings().debugVkValidationLayersEnabled = true;
 }
 
 void Test::created() {
-	TextureParameters::DEFAULT_CLAMP = GL_CLAMP_TO_EDGE;
-	TextureParameters::DEFAULT_FILTER = GL_LINEAR;
+	Shader::compileEngineShaderToSPIRV("TilemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
-	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(GL_LINEAR_MIPMAP_LINEAR));
-	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture)), Renderer::SHADER_MATERIAL);
+	graphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SPRITE), Renderer::getDefaultRenderPass());
+
+	TextureParameters::DEFAULT_ADDRESS_MODE = TextureParameters::AddressMode::CLAMP_TO_EDGE;
+	TextureParameters::DEFAULT_FILTER = TextureParameters::Filter::LINEAR;
+
+	Texture* texture = Texture::loadTexture("C:/UnnamedEngine/textures/skybox1/front.png", TextureParameters().setFilter(TextureParameters::Filter::LINEAR_MIPMAP_LINEAR));
+	object = new GameObject2D(new Mesh(MeshBuilder::createQuad(200, 200, texture, MeshData::SEPARATE_TEXTURE_COORDS)), Renderer::SHADER_MATERIAL);
 	object->setSize(200, 200);
 	object->setPosition(getSettings().windowWidth / 2 - 100, getSettings().windowHeight / 2 - 100);
 	object->getMaterial()->setDiffuse(texture);
 	object->getMaterial()->setDiffuse(Colour::WHITE);
+	object->getMaterial()->update();
 	object->update();
 
 	sprite = new Sprite(texture, 100, 100);
@@ -119,7 +126,7 @@ void Test::update() {
 	object->getTransform()->rotate(60.0f * getDeltaSeconds());
 	object->update();
 
-	sprite->update(getDeltaSeconds());
+	sprite->update();
 }
 
 void Test::onMousePressed(int button) {
@@ -127,12 +134,12 @@ void Test::onMousePressed(int button) {
 	Vector2d mousePos = Mouse::getPosition();
 	float worldX = (float) mousePos.getX() + cameraPos.getX();
 	float worldY = (float) mousePos.getY() + cameraPos.getY();
-//	std::cout << tilemap->getLayers()[0]->getTileID(worldX, worldY) << std::endl;
+	//	std::cout << tilemap->getLayers()[0]->getTileID(worldX, worldY) << std::endl;
 	tilemap->getLayers()[0]->setTileID(worldX, worldY, 1);
 }
 
 void Test::render() {
-	utils_gl::setupSimple2DView();
+	graphicsPipeline->bind();
 
 	object->render();
 
@@ -144,7 +151,8 @@ void Test::render() {
 void Test::destroy() {
 	delete soundSystem;
 	delete object;
+	delete sprite;
 	delete camera;
+	delete graphicsPipeline;
+	delete tilemap;
 }
-
-#endif /* BASEENGINETEST2D_H_ */

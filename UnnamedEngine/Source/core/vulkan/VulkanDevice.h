@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_VULKAN_VULKANDEVICE_H_
-#define CORE_VULKAN_VULKANDEVICE_H_
+#pragma once
 
 #include "../Window.h"
 
@@ -80,6 +79,10 @@ public:
 	/* Destructor */
 	virtual ~VulkanDevice();
 
+	/* Utility methods to find out more about this device */
+	std::string listLimits();
+	std::string listSupportedExtensions();
+
 	/* Setters and getters */
 	VkPhysicalDevice& getPhysical() { return physicalDevice; }
 	VkDevice&         getLogical()  { return logicalDevice;  }
@@ -100,4 +103,3 @@ public:
 	static VulkanDeviceSwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 };
 
-#endif /* CORE_VULKAN_VULKANDEVICE_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXPERIMENTAL_TERRAIN_HEIGHTMAPTERRAIN_H_
-#define EXPERIMENTAL_TERRAIN_HEIGHTMAPTERRAIN_H_
+#pragma once
 
 #include "../../core/Object.h"
 
@@ -34,4 +33,3 @@ public:
 };
 
 
-#endif /* EXPERIMENTAL_TERRAIN_HEIGHTMAPTERRAIN_H_ */

@@ -26,11 +26,12 @@
  * The CDLODQuadTree class
  *****************************************************************************/
 
-CDLODQuadTreeNode::CDLODQuadTreeNode(CDLODHeightMap* heightMap, float nodeSize, int lod, float x, float z) {
+CDLODQuadTreeNode::CDLODQuadTreeNode(CDLODHeightMap* heightMap, float meshSize, float nodeSize, int lod, float x, float z) {
 	//Assign the position and size
 	this->x = x;
 	this->z = z;
 	this->size = nodeSize;
+
 	//Check whether this is a leaf node
 	if (lod == 0) {
 		isLeafNode = true;
@@ -55,15 +56,24 @@ CDLODQuadTreeNode::CDLODQuadTreeNode(CDLODHeightMap* heightMap, float nodeSize, 
 		float qSize = halfSize / 2.0f;
 
 		//Assign the nodes
-		children[0] = new CDLODQuadTreeNode(heightMap, halfSize, lod - 1, x - qSize, z + qSize); //Top left
-		children[1] = new CDLODQuadTreeNode(heightMap, halfSize, lod - 1, x + qSize, z + qSize); //Top right
-		children[2] = new CDLODQuadTreeNode(heightMap, halfSize, lod - 1, x - qSize, z - qSize); //Bottom left
-		children[3] = new CDLODQuadTreeNode(heightMap, halfSize, lod - 1, x + qSize, z - qSize); //Bottom right
+		children[0] = new CDLODQuadTreeNode(heightMap, meshSize, halfSize, lod - 1, x - qSize, z + qSize); //Top left
+		children[1] = new CDLODQuadTreeNode(heightMap, meshSize, halfSize, lod - 1, x + qSize, z + qSize); //Top right
+		children[2] = new CDLODQuadTreeNode(heightMap, meshSize, halfSize, lod - 1, x - qSize, z - qSize); //Bottom left
+		children[3] = new CDLODQuadTreeNode(heightMap, meshSize, halfSize, lod - 1, x + qSize, z - qSize); //Bottom right
 
 		//Assign the maximum and minimum height values
 		minHeight = utils_maths::min(utils_maths::min(children[0]->getMinHeight(), children[1]->getMinHeight()), utils_maths::min(children[2]->getMinHeight(), children[3]->getMinHeight()));
 		maxHeight = utils_maths::max(utils_maths::max(children[0]->getMaxHeight(), children[1]->getMaxHeight()), utils_maths::max(children[2]->getMaxHeight(), children[3]->getMaxHeight()));
 	}
+
+	//Create the descriptor set for this node
+	descriptorSetTerrain = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_TERRAIN));
+	descriptorSetTerrain->setTexture(0, heightMap->getTexture());
+	descriptorSetTerrain->setup();
+
+	shaderTerrainData.ue_heightScale = heightMap->getHeightScale();
+	shaderTerrainData.ue_size = heightMap->getSize();
+	shaderTerrainData.ue_gridSize = Vector2f(meshSize, meshSize);
 
 //	debugMesh = new GameObject3D(new Mesh(MeshBuilder::createCube(nodeSize, maxHeight - minHeight, nodeSize)), Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
 //	debugMesh->setPosition(Vector3f(x, (maxHeight + minHeight) / 2.0f, z));
@@ -77,6 +87,17 @@ CDLODQuadTreeNode::~CDLODQuadTreeNode() {
 		delete children[2];
 		delete children[3];
 	}
+	delete descriptorSetTerrain;
+}
+
+void CDLODQuadTreeNode::update() {
+	//Assign UBO data
+	shaderTerrainData.ue_translation = Vector4f(getX(), 0.0f, getZ(), 0.0f);
+	shaderTerrainData.ue_scale = getSize();
+	shaderTerrainData.ue_range = getRange();
+
+	//Update the UBO
+	descriptorSetTerrain->getUBO(0)->updateFrame(&shaderTerrainData, 0, sizeof(ShaderBlock_Terrain));
 }
 
 bool CDLODQuadTreeNode::LODSelect(std::vector<int> ranges, int lodLevel, Camera3D* camera, std::vector<CDLODQuadTreeNode*>& selectionList) {

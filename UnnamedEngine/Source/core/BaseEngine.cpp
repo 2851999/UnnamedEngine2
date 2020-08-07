@@ -34,6 +34,8 @@ BaseEngine::BaseEngine() {
 	window = new Window();
 }
 
+using namespace utils_string;
+
 void BaseEngine::create() {
 	//Initialise the game, the settings should be set when this is called
 	initialise();
@@ -59,7 +61,10 @@ void BaseEngine::create() {
 
 		//Assign the default font and text instance
 		defaultFont = new Font("resources/fonts/CONSOLA.TTF", 16);
-		textInstance = new Text(defaultFont, Colour::WHITE, 400);
+		//defaultFont = new Font("resources/fonts/CONSOLA.TTF", 60);
+		//defaultFont = new Font("resources/fonts/testFont.fnt", 22);
+		//defaultFont = new Font("resources/fonts/testFont.fnt", 40);
+		textInstance = new Text(defaultFont, Colour::WHITE, 500);
 		//Create the debug camera
 		debugCamera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
 		debugCamera->update();
@@ -69,17 +74,17 @@ void BaseEngine::create() {
 		//Initialise the Audio system
 		AudioManager::initialise();
 
+		//Create the debug console if needed
+		if (getSettings().debugConsoleEnabled) {
+			debugConsole = new DebugConsole(this);
+			debugConsole->enable();
+			debugConsole->hide();
+		}
+
 		if (! getSettings().videoVulkan) {
 
-			//Create the debug console
-			if (getSettings().debugConsoleEnabled) {
-				debugConsole = new DebugConsole(this);
-				debugConsole->enable();
-				debugConsole->hide();
-			}
-
-		//	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
-		//	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
+			//	glScissor(0, 0, getSettings().windowWidth, getSettings().windowHeight);
+			//	glViewport(0, 0, getSettings().windowWidth, getSettings().windowHeight);
 
 			if (getSettings().engineSplashScreen) {
 				Renderer::addCamera(debugCamera);
@@ -92,8 +97,8 @@ void BaseEngine::create() {
 				glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-				Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST));
-				Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST));
+				Font* font = new Font("resources/fonts/SEGOEUIL.TTF", 64, TextureParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE).setFilter(TextureParameters::Filter::NEAREST));
+				Font* font2 = new Font("resources/fonts/SEGOEUIL.TTF", 32, TextureParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE).setFilter(TextureParameters::Filter::NEAREST));
 				textInstance->setFont(font);
 				textInstance->setColour(Colour::BLACK);
 				textInstance->render("Unnamed Engine", getSettings().windowWidth / 2 - font->getWidth("Unnamed Engine") / 2, getSettings().windowHeight / 2 - font->getHeight("Unnamed Engine") / 2);
@@ -122,31 +127,48 @@ void BaseEngine::create() {
 
 		//The main game loop - continues until either the window is told to close,
 		//or the game requests it to stop
-		while ((! window->shouldClose()) && (! closeRequested)) {
+		while ((!window->shouldClose()) && (!closeRequested)) {
 			fpsLimiter.startFrame();
 			fpsCalculator.update();
 
 			//Ensure the debug console isn't open
-			if (! debugConsole || ! debugConsole->isVisible())
+			if (!debugConsole || !debugConsole->isVisible())
 				update();
+			else
+				debugConsole->update();
 
-			if (getSettings().videoVulkan)
+			if (getSettings().videoVulkan) {
+				//Update Vulkan and begin drawing
+				//Start draw first to perform synchronisation necessary to perform updates
 				Vulkan::startDraw();
+				Vulkan::update();
+			}
+
+			renderOffscreen();
+
+			//Start the default RenderPass
+			Renderer::getDefaultRenderPass()->begin();
 			render();
 
 			if (getSettings().debugShowInformation)
 				renderDebugInfo();
 
-			if (! getSettings().videoVulkan) {
-				if (getSettings().debugConsoleEnabled)
-					renderDebugConsole();
-			} else
+			if (getSettings().debugConsoleEnabled)
+				renderDebugConsole();
+
+			//Stop the default RenderPass
+			Renderer::getDefaultRenderPass()->end();
+
+			if (getSettings().videoVulkan)
 				Vulkan::stopDraw();
 
 			window->update();
 
+			//vkDeviceWaitIdle(Vulkan::getDevice()->getLogical());
+
 			fpsLimiter.endFrame();
 		}
+
 		//Wait for a suitable time
 		if (getSettings().videoVulkan)
 			Vulkan::waitDeviceIdle();
@@ -158,14 +180,13 @@ void BaseEngine::create() {
 		Renderer::destroy();
 		Font::destroyFreeType();
 		delete textInstance;
+		delete defaultFont;
 		delete debugCamera;
 
 		AudioManager::destroy();
 
-		if (! getSettings().videoVulkan) {
-			if (debugConsole)
-				delete debugConsole;
-		}
+		if (debugConsole)
+			delete debugConsole;
 		ResourceManager::destroyAllManagers();
 	} else
 		//Failed to initialise the graphics API
@@ -178,12 +199,8 @@ void BaseEngine::create() {
 	delete window;
 }
 
-using namespace utils_string;
-
 void BaseEngine::renderDebugInfo() {
 	if (! BaseEngine::usingVulkan()) {
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
 //		glEnable(GL_BLEND);
 //		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -193,22 +210,25 @@ void BaseEngine::renderDebugInfo() {
 
 	Renderer::addCamera(debugCamera);
 
-	textInstance->render(str("----------- DEBUG -----------\n") +
-							 "Engine Version : " + str(Engine::Version) + "\n" +
-							 "Engine Date    : " + str(Engine::DateCreated) + "\n" +
-							 "Engine Build   : " + str(Engine::Build) + "\n" +
-							 "Current Delta  : " + str((int) getDelta()) + "\n" +
-							 "Current FPS    : " + str(getFPS()) + "\n" +
-							 "----------- VIDEO -----------\n" +
-							 "Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
-							 "VSync          : " + str(getSettings().videoVSync) + "\n" +
-							 "MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
-							 "Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
-							 "----------- AUDIO -----------\n" +
-							 "Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
-							 "SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
-							 "-----------------------------"
-							 , 2, 16);
+	if (getSettings().debugShowInformation) {
+		textInstance->render(str("----------- DEBUG -----------\n") +
+			"Engine Version : " + str(Engine::Version) + "\n" +
+			"Engine Date    : " + str(Engine::DateCreated) + "\n" +
+			"Engine Build   : " + str(Engine::Build) + "\n" +
+			"Current Delta  : " + str((int)getDelta()) + "\n" +
+			"Current FPS    : " + str(getFPS()) + "\n" +
+			"----------- VIDEO -----------\n" +
+			"Resolution     : " + str(getSettings().videoResolution.getX()) + "x" + str(getSettings().videoResolution.getY()) + "\n" +
+			"VSync          : " + str(getSettings().videoVSync) + "\n" +
+			"MSAA Samples   : " + str(getSettings().videoSamples) + "\n" +
+			"Max AF Samples : " + str(getSettings().videoMaxAnisotropicSamples) + "\n" +
+			"Vulkan         : " + str(getSettings().videoVulkan) + "\n" +
+			"----------- AUDIO -----------\n" +
+			"Music Volume   : " + str(getSettings().audioMusicVolume) + "\n" +
+			"SFX Volume     : " + str(getSettings().audioSoundEffectVolume) + "\n" +
+			"-----------------------------"
+			, 2, 16);
+	}
 
 	Renderer::removeCamera();
 
@@ -217,24 +237,23 @@ void BaseEngine::renderDebugInfo() {
 			utils_gl::enableWireframe();
 
 //		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_TEXTURE_2D);
 	}
 }
 
 void BaseEngine::renderDebugConsole() {
 	//Render the debug console if needed
 	if (debugConsole->isVisible()) {
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_TEXTURE_2D);
+		//glDisable(GL_DEPTH_TEST);
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		Renderer::addCamera(debugCamera);
 
 		if (debugConsole->isWireframeEnabled())
 			utils_gl::disableWireframe();
 
-		debugConsole->update();
 		debugConsole->render();
 
 		if (debugConsole->isWireframeEnabled())
@@ -242,8 +261,8 @@ void BaseEngine::renderDebugConsole() {
 
 		Renderer::removeCamera();
 
-		glDisable(GL_BLEND);
-		glDisable(GL_TEXTURE_2D);
+		//glDisable(GL_BLEND);
+		//glDisable(GL_TEXTURE_2D);
 	}
 }
 

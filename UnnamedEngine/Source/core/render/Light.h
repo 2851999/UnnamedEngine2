@@ -16,10 +16,8 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_LIGHT_H_
-#define CORE_RENDER_LIGHT_H_
+#pragma once
 
-#include "FBO.h"
 #include "Renderer.h"
 #include "../Object.h"
 #include "../Frustum.h"
@@ -28,7 +26,7 @@
  * The Light class contains the information required to create a light
  *****************************************************************************/
 
-class Light : public GameObject3D {
+class Light : public Camera3D {
 private:
 	/* This light's type */
 	unsigned int type;
@@ -45,19 +43,16 @@ private:
 	float linear    = 0.0f;
 	float quadratic = 1.0f;
 
-	/* The inner and outer cutoff values for spot lights (taken in degrees) */
+	/* The inner and outer cutoff values for spot lights (taken as cos of the angle) */
 	float innerCutoff = 0;
 	float outerCutoff = 0;
 
-	/* The FBO if assigned for shadow mapping */
-	FBO* depthBuffer = NULL;
+	/* The shadow map render pass if assigned for shadow mapping */
+	RenderPass* shadowMapRenderPass = NULL;
 
-	/* The size of the shadow map (width and height) */
-	unsigned int shadowMapSize = 1024;
-
-	/* The light projection and view matrices */
-	Matrix4f lightProjection;
-	Matrix4f lightView;
+	/* The shadow map graphics pipelines if assigned for shadow mapping */
+	GraphicsPipeline* shadowMapGraphicsPipeline = NULL;
+	GraphicsPipeline* shadowMapSkinningGraphicsPipeline = NULL;
 
 	/* Shadow transforms for point lights */
 	std::vector<Matrix4f> lightShadowTransforms;
@@ -67,21 +62,37 @@ private:
 
 	/* Combination of the above matrices, assigned in the update method */
 	Matrix4f lightProjectionView;
+
+	/* The shadow cubemap descriptor set (for point light shadows) */
+	DescriptorSet* shadowCubemapDescriptorSet = NULL;
+
+	/* The cubemap shadow data */
+	ShaderBlock_ShadowCubemap shadowCubemapData;
 public:
 	/* Various light types */
 	static const unsigned int TYPE_DIRECTIONAL = 1;
 	static const unsigned int TYPE_POINT       = 2;
 	static const unsigned int TYPE_SPOT        = 3;
 
+	/* Default size of shadow map's (width/height/depth) */
+	static unsigned int DEFAULT_SHADOW_MAP_SIZE;
+
+	/* Default range of directional light shadows */
+	static float DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE;
+
 	/* The constructor */
-	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false);
+	Light(unsigned int type, Vector3f position = Vector3f(), bool castShadows = false, unsigned int shadowMapSize = DEFAULT_SHADOW_MAP_SIZE, float directionalLightShadowRange = DEFAULT_DIRECTIONAL_LIGHT_SHADOW_RANGE);
 
 	/* The destructor */
-	virtual ~Light() { delete depthBuffer; }
+	virtual ~Light();
 
 	/* The method used to update the view matrix for this light - should be
 	 * called when the light moves/after assigning the initial values */
-	void update();
+	void update() override;
+
+	/* Called to use this light's view, also binds shadow cubemap descriptor set if
+	   assigned */
+	void useView() override;
 
 	/* The method called to assign the uniforms in a shader for this light */
 	virtual void setUniforms(ShaderStruct_Light& lightData);
@@ -97,6 +108,8 @@ public:
 	inline Light* setQuadraticAttenuation(float value) { quadratic = value; return this; }
 	inline Light* setInnerCutoff(float innerCutoff) { this->innerCutoff = innerCutoff; return this; }
 	inline Light* setOuterCutoff(float outerCutoff) { this->outerCutoff = outerCutoff; return this; }
+	inline Light* setInnerCutoffDegrees(float innerCutoff) { this->innerCutoff = cos(utils_maths::toRadians(innerCutoff)); return this; }
+	inline Light* setOuterCutoffDegrees(float outerCutoff) { this->outerCutoff = cos(utils_maths::toRadians(outerCutoff)); return this; }
 
 	inline int getType() { return type; }
 	inline Vector3f getDirection() { return direction; }
@@ -108,14 +121,12 @@ public:
 	inline float getInnerCutoff() { return innerCutoff; }
 	inline float getOuterCutoff() { return outerCutoff; }
 
-	inline FBO* getDepthBuffer() { return depthBuffer; }
-	inline bool hasDepthBuffer() { return depthBuffer; }
-	inline unsigned int getShadowMapSize() { return shadowMapSize; }
-	inline Matrix4f getLightProjectionMatrix() { return lightProjection; }
 	inline Matrix4f& getLightShadowTransform(unsigned int index) { return lightShadowTransforms[index]; }
-	inline Matrix4f getLightViewMatrix() { return lightView; }
 	inline Matrix4f getLightSpaceMatrix() { return lightProjectionView; }
 	inline Frustum& getFrustum() { return frustum; }
+	inline bool hasShadowMap() { return shadowMapRenderPass; }
+	inline RenderPass* getShadowMapRenderPass() { return shadowMapRenderPass; }
+	inline GraphicsPipeline* getShadowMapGraphicsPipeline() { return shadowMapGraphicsPipeline; }
+	inline GraphicsPipeline* getShadowMapSkinningGraphicsPipeline() { return shadowMapSkinningGraphicsPipeline; }
 };
 
-#endif /* CORE_RENDER_LIGHT_H_ */

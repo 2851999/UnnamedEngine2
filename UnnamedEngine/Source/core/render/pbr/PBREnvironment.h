@@ -16,29 +16,29 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_PBR_PBRENVIRONMENT_H_
-#define CORE_RENDER_PBR_PBRENVIRONMENT_H_
+#pragma once
 
-
-/*****************************************************************************
- * The PBREnvironment class is used to store the textures required for
- * representing an environment
- *****************************************************************************/
+ /*****************************************************************************
+  * The PBREnvironment class is used to store the textures required for
+  * representing an environment
+  *****************************************************************************/
 
 #include "../Texture.h"
+#include "../FBO.h"
 
 class PBREnvironment {
 private:
 	/* The cubemaps and textures required */
-	Cubemap* environmentCubemap = NULL;
-	Cubemap* irradianceCubemap = NULL;
-	Cubemap* prefilterCubemap = NULL;
+	Texture* environmentCubemap = NULL;
+	Texture* irradianceCubemap = NULL;
+	Texture* prefilterCubemap = NULL;
 
 	Texture* brdfLUTTexture = NULL;
 public:
 	/* The constructor */
-	PBREnvironment(Cubemap* environmentCubemap, Cubemap* irradianceCubemap, Cubemap* prefilterCubemap, Texture* brdfLUTTexture) :
-		environmentCubemap(environmentCubemap), irradianceCubemap(irradianceCubemap), prefilterCubemap(prefilterCubemap), brdfLUTTexture(brdfLUTTexture) {}
+	PBREnvironment(Texture* environmentCubemap, Texture* irradianceCubemap, Texture* prefilterCubemap, Texture* brdfLUTTexture) :
+		environmentCubemap(environmentCubemap), irradianceCubemap(irradianceCubemap), prefilterCubemap(prefilterCubemap), brdfLUTTexture(brdfLUTTexture) {
+	}
 
 	/* The destructor */
 	virtual ~PBREnvironment() {
@@ -50,9 +50,9 @@ public:
 	}
 
 	/* Getters */
-	Cubemap* getEnvironmentCubemap() { return environmentCubemap; }
-	Cubemap* getIrradianceCubemap() { return irradianceCubemap; }
-	Cubemap* getPrefilterCubemap() { return prefilterCubemap; }
+	Texture* getEnvironmentCubemap() { return environmentCubemap; }
+	Texture* getIrradianceCubemap() { return irradianceCubemap; }
+	Texture* getPrefilterCubemap() { return prefilterCubemap; }
 
 	Texture* getBRDFLUTTexture() { return brdfLUTTexture; }
 
@@ -60,6 +60,3 @@ public:
 	 * environment map texture */
 	static PBREnvironment* loadAndGenerate(std::string path);
 };
-
-
-#endif /* CORE_RENDER_PBR_PBRENVIRONMENT_H_ */

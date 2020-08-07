@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_SKINNING_H_
-#define CORE_RENDER_SKINNING_H_
+#pragma once
 
 #include <vector>
 
@@ -257,4 +256,3 @@ public:
 	inline unsigned int getRootBoneIndex() { return rootBoneIndex; }
 };
 
-#endif /* CORE_RENDER_SKINNING_H_ */

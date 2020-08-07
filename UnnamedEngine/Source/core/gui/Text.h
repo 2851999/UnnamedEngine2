@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_TEXT_H_
-#define CORE_GUI_TEXT_H_
+#pragma once
 
 #include "Font.h"
 
@@ -36,21 +35,29 @@ private:
 	/* States whether this text is billboarded or not */
 	bool billboarded = false;
 
-	/* UBO and data structure for billboarding */
-	UBO* shaderBillboardUBO;
+	/* Data structure for billboarding */
 	ShaderBlock_Billboard shaderBillboardData;
+
+	/* Descriptor set for billboarding */
+	DescriptorSet* descriptorSetBillboard = NULL;
 
 	/* The maximum number of characters this instance can render (only relevant for Vulkan) */
 	unsigned int maxCharacters;
+
+	/* States whether a queued pipeline should be used */
+	bool queuedPipeline;
+
+	/* The graphics pipeline used to render this text */
+	GraphicsPipeline* pipeline = NULL;
 public:
 	/* The default maximum number of characters */
 	static unsigned int DEFAULT_MAX_CHARACTERS;
 
 	/* The constructors */
-	Text(Font* font, Colour colour = Colour::WHITE, unsigned int maxCharacters = 0, bool billboarded = false); //0 in maxCharacters indicates the default number should be used
+	Text(Font* font, Colour colour = Colour::WHITE, unsigned int maxCharacters = 0, bool billboarded = false, bool queuedPipeline = false); //0 in maxCharacters indicates the default number should be used
 
 	/* The destructor */
-	virtual ~Text() {}
+	virtual ~Text();
 
 	/* Methods used to update this text instance ready to render some text */
 	void update(std::string text);
@@ -61,13 +68,17 @@ public:
 	inline void update(Vector2f position) { update(Vector3f(position)); }
 	inline void update(float x, float y, float z = 0.0f) { update(Vector3f(x, y, z)); }
 
-	/* Method used to render the current text */
+	/* Methods used to render the current text */
 	virtual void render() override;
+	virtual void queuedRender() override;
 
 	/* Methods used to update and render some text */
 	inline void render(std::string text, Vector2f position) {
-		update(text, position);
-		render();
+		//Only update and render if there is text
+		if (text.size() > 0) {
+			update(text, position);
+			render();
+		}
 	}
 
 	inline void render(std::string text, float x, float y) {
@@ -75,8 +86,11 @@ public:
 	}
 
 	inline void render(std::string text, Vector3f position) {
-		update(text, position);
-		render();
+		//Only update and render if there is text
+		if (text.size() > 0) {
+			update(text, position);
+			render();
+		}
 	}
 
 	inline void render(std::string text, float x, float y, float z) {
@@ -95,4 +109,3 @@ public:
 	inline Colour getColour() { return getMaterial()->getDiffuseColour(); }
 };
 
-#endif /* CORE_GUI_TEXT_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PHYSICS_PHYSICSOBJECT_H_
-#define CORE_PHYSICS_PHYSICSOBJECT_H_
+#pragma once
 
 #include "Collider.h"
 #include "../Object.h"
@@ -175,4 +174,3 @@ public:
 	inline bool hasCollider() { return collider; }
 };
 
-#endif /* CORE_PHYSICS_PHYSICSOBJECT_H_ */

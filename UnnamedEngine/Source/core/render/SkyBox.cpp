@@ -24,13 +24,17 @@
  * The SkyBox class
  *****************************************************************************/
 
-SkyBox::SkyBox(Cubemap* cubemap) {
+SkyBox::SkyBox(Texture* cubemap) {
 	//Assign the cubemap
 	this->cubemap = cubemap;
 	//Create the skybox
 	Mesh* mesh = new Mesh(MeshBuilder::createCube(1.0f, 1.0f, 1.0f));
 	mesh->getMaterial()->setDiffuse(cubemap);
+	//mesh->getMaterial()->update();
 	box = new GameObject3D(mesh, Renderer::getRenderShader(Renderer::SHADER_SKY_BOX));
+
+	//Obtain the skybox graphics pipeline
+	pipelineSkybox = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SKY_BOX), Renderer::getDefaultRenderPass());
 }
 
 void SkyBox::update(Vector3f cameraPosition) {
@@ -39,27 +43,19 @@ void SkyBox::update(Vector3f cameraPosition) {
 	box->update();
 }
 
-void SkyBox::render() {
-	Shader* shader = NULL;
-	if (! BaseEngine::usingVulkan()) {
-		glDepthFunc(GL_LEQUAL);
-		//glDepthMask(false); //Should be applied by GraphicsState
+void SkyBox::render(bool bindPipeline) {
+	if (! BaseEngine::usingVulkan())
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		//To work the skybox must be drawn before anything else
-		shader = box->getShader();
-		shader->use();
-	}
 
-	Renderer::getShaderBlock_Core().ue_viewMatrix = Renderer::getCamera()->getViewMatrix();
-	Renderer::getShaderBlock_Core().ue_projectionMatrix =  Renderer::getCamera()->getProjectionMatrix();
+	//Bind the pipeline
+	if (bindPipeline)
+		pipelineSkybox->bind();
 
 	box->render();
-
-	if (! BaseEngine::usingVulkan())
-		shader->stopUsing();
 }
 
 void SkyBox::destroy() {
 	//Destroy created resources
+	delete pipelineSkybox;
 	delete box;
 }

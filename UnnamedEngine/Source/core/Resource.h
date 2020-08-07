@@ -16,10 +16,10 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RESOURCE_H_
-#define CORE_RESOURCE_H_
+#pragma once
 
 #include <vector>
+#include <iostream>
 
 class Resource;
 
@@ -65,7 +65,6 @@ public:
 /*****************************************************************************
  * The Resource class is inherited from to allow data to be managed
  *****************************************************************************/
-#include <iostream>
 
 class Resource {
 private:
@@ -77,9 +76,5 @@ public:
 
 	/* The destructor */
 	virtual ~Resource() { manager->remove(this); }
-
-	/* The method called when all resources being used should be released */
-	virtual void destroy() {}
 };
 
-#endif /* CORE_RESOURCE_H_ */

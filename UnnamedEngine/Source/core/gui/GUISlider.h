@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUISLIDER_H_
-#define CORE_GUI_GUISLIDER_H_
+#pragma once
 
 #include "GUIButton.h"
 
@@ -92,4 +91,3 @@ public:
 	inline float getInterval() { return interval; }
 };
 
-#endif /* CORE_GUI_GUISLIDER_H_ */

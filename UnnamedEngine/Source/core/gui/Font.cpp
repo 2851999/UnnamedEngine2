@@ -18,6 +18,8 @@
 
 #include "Font.h"
 
+#include <fstream>
+
 #include "../BaseEngine.h"
 #include "../render/Renderer.h"
 #include "../../utils/Logging.h"
@@ -31,7 +33,24 @@ FT_Library Font::ftLibrary;
 
 const float Font::RENDER_SCALE = 2.0f;
 
+Font::Font(std::string path, unsigned int size, TextureParameters parameters) {
+	//Check the font type
+	if (! utils_string::strEndsWith(path, ".fnt"))
+		setup(path, size, parameters);
+	else {
+		sdf = true;
+		setupSDF(path, size, parameters);
+	}
+}
+
+Font::~Font() {
+	delete texture;
+	if (descriptorSetSDFText)
+		delete descriptorSetSDFText;
+}
+
 void Font::setup(std::string path, unsigned int size, TextureParameters parameters) {
+	this->size = size;
 	FT_Face face;
 	//Attempt to get the font face
 	if (FT_New_Face(ftLibrary, path.c_str(), 0, &face)) {
@@ -60,7 +79,7 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 		//Add onto the width
 		width += glyphSlot->bitmap.width + GLYPH_SPACING;
 		//Update the height to make it the same as the tallest letter
-		height = utils_maths::max(height, glyphSlot->bitmap.rows);
+		height = utils_maths::max(height, (int) glyphSlot->bitmap.rows);
 	}
 
 	if (! BaseEngine::usingVulkan()) {
@@ -90,6 +109,7 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 			glyphs[i - ASCII_START].glyphLeft   = glyphSlot->bitmap_left;
 			glyphs[i - ASCII_START].glyphTop    = glyphSlot->bitmap_top;
 			glyphs[i - ASCII_START].xOffset     = xOffset;
+			glyphs[i - ASCII_START].yOffset = 0;
 
 			//Increment the x offset
 			xOffset += glyphSlot->bitmap.width + GLYPH_SPACING;
@@ -134,6 +154,7 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 			glyphs[i - ASCII_START].glyphLeft   = glyphSlot->bitmap_left;
 			glyphs[i - ASCII_START].glyphTop    = glyphSlot->bitmap_top;
 			glyphs[i - ASCII_START].xOffset     = xOffset;
+			glyphs[i - ASCII_START].yOffset     = 0;
 
 			//Increment the x offset
 			xOffset += glyphSlot->bitmap.width + GLYPH_SPACING;
@@ -148,76 +169,222 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 
 		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, 1); //VK_IMAGE_LAYOUT_UNDEFINED is initial layout (from createImage)
 		Vulkan::copyBufferToImage(stagingBuffer, textureVkImage, static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+		Vulkan::transitionImageLayout(textureVkImage, format, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, 1);
 
 	    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
 	    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);
-		VkImageView textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+		VkImageView textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 0, 1);
 
 		texture = new Texture(width, height, textureVkImage, textureVkImageMemory, textureVkImageView, parameters);
 	}
 
 	FT_Done_Face(face);
+
+	renderedSize = size * RENDER_SCALE;
+}
+
+void Font::setupSDF(std::string path, unsigned int size, TextureParameters parameters) {
+	this->size = size;
+
+	//Open the file
+	std::filebuf fileBuffer;
+	fileBuffer.open(path, std::ios::in);
+	std::istream istream(&fileBuffer);
+
+	if (! istream.good())
+		Logger::log("Failed to load font from the path " + path, "Font", LogType::Error);
+
+	while (! istream.eof()) {
+		std::string line;
+		std::stringstream lineStream;
+		std::getline(istream, line);
+		lineStream << line;
+
+		std::string info;
+		lineStream >> info;
+
+		if (info == "info") {
+			std::vector<std::string> split = utils_string::strSplit(line, " ");
+			for (unsigned int i = 0; i < split.size(); ++i) {
+				if (utils_string::strStartsWith(split[i], "size="))
+					renderedSize = utils_string::strToUInt(utils_string::substring(split[i], 5, split[i].length()));
+			}
+		}
+
+		if (info == "char") {
+			//Character ID
+			uint32_t charID = nextValuePair(&lineStream);
+
+			//Character properties
+			glyphs[charID].glyphLeft   = nextValuePair(&lineStream);
+			glyphs[charID].glyphTop    = nextValuePair(&lineStream);
+			glyphs[charID].glyphWidth  = nextValuePair(&lineStream);
+			glyphs[charID].glyphHeight = nextValuePair(&lineStream);
+			glyphs[charID].xOffset     = nextValuePair(&lineStream);
+			glyphs[charID].yOffset     = nextValuePair(&lineStream);
+			glyphs[charID].advanceX    = nextValuePair(&lineStream);
+			glyphs[charID].advanceY    = nextValuePair(&lineStream);
+			glyphs[charID].page        = nextValuePair(&lineStream);
+		}
+	}
+
+	//Load the texture
+	texture = Texture::loadTexture(utils_string::replaceAll(path, ".fnt", ".png"), parameters);
+
+	//Setup the descriptor set
+	descriptorSetSDFText = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_SDF_TEXT));
+	descriptorSetSDFText->setup();
+
+	//Assign the default values for the rendering parameters
+	sdfTextParameters.smoothing = 0.1f;
+	sdfTextParameters.outline = 0.0f;
+	sdfTextParameters.outlineColour = Colour::BLACK;
+	sdfTextParameters.shadow = 0.0f;
+	sdfTextParameters.shadowSmoothing = 0.2f;
+	sdfTextParameters.shadowColour = Colour(Colour::BLACK, 0.8f);
+	sdfTextParameters.shadowOffset = Vector2f(5.0f / texture->getWidth(), 5.0f / texture->getHeight());
+
+	updateSDFParameters();
+}
+
+int32_t Font::nextValuePair(std::stringstream* stream) {
+	std::string pair;
+	*stream >> pair;
+	uint32_t spos = pair.find("=");
+	std::string value = pair.substr(spos + 1);
+	int32_t val = std::stoi(value);
+	return val;
+}
+
+void Font::bindDescriptorSets() {
+	if (sdf)
+		descriptorSetSDFText->bind();
 }
 
 void Font::assignMeshData(MeshData* data, std::string text, bool billboarded) {
-	//The current x and y positions
-	float currentX = 0.0f;
-	float currentY = 0.0f;
+	if (sdf) {
+		float w = texture->getWidth();
 
-	if (billboarded) {
-		currentX = -getWidth(text) / 2.0f;
-		currentY = getHeight(text) / 2.0f;
-	}
+		//The current x and y positions
+		float currentX = 0.0f;
+		float currentY = 0.0f;
 
-	unsigned int newLineCount = 0;
-	//Go through each character in the text
-	for (unsigned int i = 0; i < text.length(); ++i) {
-		//Check for a new line escape character
-		if (text.compare(i, 1, "\n") == 0) {
-			++newLineCount;
-			//Go to a new line
-			currentX = 0.0f;
-			currentY += texture->getHeight();
+		if (billboarded) {
+			currentX = -getWidth(text) / 2.0f;
+			currentY = getHeight(text) / 2.0f;
+		}
 
-			if (billboarded)
-				currentX = -getWidth(text) / 2;
-		} else {
-			//Get the character data for the current character
-			GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
+		unsigned int newLineCount = 0;
+		//Go through each character in the text
+		for (unsigned int i = 0; i < text.length(); ++i) {
+			//Check for a new line escape character
+			if (text.compare(i, 1, "\n") == 0) {
+				++newLineCount;
+				//Go to a new line
+				currentX = 0.0f;
+				currentY += size;
 
-			//The positions used for the vertices
-			float xPos = currentX + info.glyphLeft;
-			float yPos = currentY - (info.glyphHeight + (info.glyphTop - info.glyphHeight));
+				if (billboarded)
+					currentX = -getWidth(text) / 2;
+			} else {
+				//Get the character data for the current character
+				GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
 
-			float width = info.glyphWidth;
-			float height = info.glyphHeight;
 
-			data->addPosition(Vector3f(xPos, yPos, 0.0f));
-			data->addPosition(Vector3f(xPos + width, yPos, 0.0f));
-			data->addPosition(Vector3f(xPos + width, yPos + height, 0.0f));
-			data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
+				if (info.glyphWidth == 0)
+					info.glyphWidth = renderedSize;
 
-			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()), 0.0f));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()), 0.0f));
-			data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()), (info.glyphHeight / (float) texture->getHeight())));
-			data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()), (info.glyphHeight / (float) texture->getHeight())));
+				float charw = ((float) (info.glyphWidth) / renderedSize) * size;
+				float dimx  = 1.0f * charw;
+				float charh = ((float) (info.glyphHeight) / renderedSize) * size;
+				float dimy  = 1.0f * charh;
 
-			unsigned int ip = (i - newLineCount) * 4;
+				float us = info.glyphLeft / w;
+				float ue = (info.glyphLeft + info.glyphWidth) / w;
+				float ts = info.glyphTop / w;
+				float te = (info.glyphTop + info.glyphHeight) / w;
 
-			data->addIndex(ip + 0);
-			data->addIndex(ip + 1);
-			data->addIndex(ip + 2);
-			data->addIndex(ip + 3);
-			data->addIndex(ip + 0);
-			data->addIndex(ip + 2);
+				float xo = (info.xOffset / renderedSize) * size;
+				float yo = (info.yOffset / renderedSize) * size;
 
-			currentX += (info.advanceX / 64.0f);
+				data->addPosition(Vector3f(currentX + dimx + xo, currentY + dimy + yo, 0.0f));
+				data->addPosition(Vector3f(currentX + xo, currentY + dimy + yo, 0.0f));
+				data->addPosition(Vector3f(currentX + xo, currentY + yo, 0.0f));
+				data->addPosition(Vector3f(currentX + dimx + xo, currentY + yo, 0.0f));
+
+				data->addTextureCoord(Vector2f(ue, te));
+				data->addTextureCoord(Vector2f(us, te));
+				data->addTextureCoord(Vector2f(us, ts));
+				data->addTextureCoord(Vector2f(ue, ts));
+
+				unsigned int ip = (i - newLineCount) * 4;
+
+				data->addIndex(ip + 0);
+				data->addIndex(ip + 1);
+				data->addIndex(ip + 2);
+				data->addIndex(ip + 2);
+				data->addIndex(ip + 3);
+				data->addIndex(ip + 0);
+
+				currentX += (info.advanceX / renderedSize) * size;
+			}
+		}
+	} else {
+		//The current x and y positions
+		float currentX = 0.0f;
+		float currentY = 0.0f;
+
+		if (billboarded) {
+			currentX = -getWidth(text) / 2.0f;
+			currentY = getHeight(text) / 2.0f;
+		}
+
+		unsigned int newLineCount = 0;
+		//Go through each character in the text
+		for (unsigned int i = 0; i < text.length(); ++i) {
+			//Check for a new line escape character
+			if (text.compare(i, 1, "\n") == 0) {
+				++newLineCount;
+				//Go to a new line
+				currentX = 0.0f;
+				currentY += texture->getHeight();
+
+				if (billboarded)
+					currentX = -getWidth(text) / 2;
+			} else {
+				//Get the character data for the current character
+				GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
+
+				//The positions used for the vertices
+				float xPos = currentX + info.glyphLeft;
+				float yPos = currentY - (info.glyphHeight + (info.glyphTop - info.glyphHeight));
+
+				float width = info.glyphWidth;
+				float height = info.glyphHeight;
+
+				data->addPosition(Vector3f(xPos, yPos, 0.0f));
+				data->addPosition(Vector3f(xPos + width, yPos, 0.0f));
+				data->addPosition(Vector3f(xPos + width, yPos + height, 0.0f));
+				data->addPosition(Vector3f(xPos, yPos + height, 0.0f));
+
+				data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()), (info.yOffset / (float) texture->getHeight())));
+				data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()), (info.yOffset / (float) texture->getHeight())));
+				data->addTextureCoord(Vector2f(((info.xOffset + info.glyphWidth) / (float) texture->getWidth()), ((info.yOffset + info.glyphHeight) / (float) texture->getHeight())));
+				data->addTextureCoord(Vector2f((info.xOffset / (float) texture->getWidth()), ((info.yOffset + info.glyphHeight) / (float) texture->getHeight())));
+
+				unsigned int ip = (i - newLineCount) * 4;
+
+				data->addIndex(ip + 0);
+				data->addIndex(ip + 1);
+				data->addIndex(ip + 2);
+				data->addIndex(ip + 3);
+				data->addIndex(ip + 0);
+				data->addIndex(ip + 2);
+
+				currentX += (info.advanceX / 64.0f);
+			}
 		}
 	}
-}
-
-void Font::destroy() {
-	delete texture;
 }
 
 float Font::getWidth(std::string text) {
@@ -281,3 +448,7 @@ void Font::destroyFreeType() {
 	FT_Done_FreeType(ftLibrary);
 }
 
+
+void Font::updateSDFParameters() {
+	descriptorSetSDFText->getUBO(0)->update(&sdfTextParameters, 0, sizeof(ShaderBlock_SDFText));
+}

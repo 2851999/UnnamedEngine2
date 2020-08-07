@@ -16,16 +16,17 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_TILEMAP_H_
-#define CORE_RENDER_TILEMAP_H_
+#pragma once
 
 #include "RenderData.h"
 #include "ShaderInterface.h"
 #include "TextureAtlas.h"
+#include "Material.h"
+#include "GraphicsPipeline.h"
 
-/*****************************************************************************
- * The TilemapLayer class
- *****************************************************************************/
+ /*****************************************************************************
+  * The TilemapLayer class
+  *****************************************************************************/
 
 class TilemapLayer {
 private:
@@ -34,6 +35,9 @@ private:
 
 	/* The tileset used in rendering this map */
 	TextureAtlas* tileset;
+
+	/* Model matrix for rendering */
+	Matrix4f modelMatrix;
 
 	/* The number of rows and columns of tiles */
 	unsigned int layerColumns;
@@ -50,32 +54,36 @@ private:
 	bool visible;
 
 	/* The data passed to OpenGL about the tilemap */
-	std::vector<unsigned int> mapIndices;   //This stores the indices for the vertices of the tiles
-	std::vector<GLfloat> mapVertices; 		//This stores the position's of the vertices of the tiles
-	std::vector<GLfloat> mapTextureCoords;  //This stores the data for the texture coordinates of the tiles
-	std::vector<GLfloat> mapVisibility;     //This stores the data for the visibility of the tiles
+	std::vector<unsigned int> mapIndices; //This stores the indices for the vertices of the tiles
+	std::vector<float> mapVertices; 	  //This stores the position's of the vertices of the tiles
+	std::vector<float> mapTextureCoords;  //This stores the data for the texture coordinates of the tiles
+	std::vector<float> mapVisibility;     //This stores the data for the visibility of the tiles
 
 	/* The render data used for rendering */
 	RenderData* renderData = NULL;
 
-	/* The VBO's for OpenGL */
-	VBO<unsigned int>* vboIndices = NULL;
-	VBO<GLfloat>* vboVertices = NULL;
-	VBO<GLfloat>* vboTextureCoords = NULL;
-	VBO<GLfloat>* vboVisibility = NULL;
+	/* The material of this layer used for rendering */
+	Material* material;
+
+	/* The IBO */
+	IBO* ibo = NULL;
+
+	/* The VBO's */
+	VBO<float>* vboVertices      = NULL;
+	VBO<float>* vboTextureCoords = NULL;
+	VBO<float>* vboVisibility    = NULL;
 
 	/* The shader used for rendering */
-	Shader* shader = NULL;
-
-	/* UBO and data structure for updating core shader values */
-	ShaderBlock_Core shaderCoreData;
-	UBO* shaderCoreUBO;
+	RenderShader* shader = NULL;
 
 	/* States whether this layer is editable */
 	bool editable;
 public:
+	/* Location for the visibiliy attribute in the shader */
+	static const unsigned int ATTRIBUTE_LOCATION_VISIBILITY;
+
 	/* The constructor */
-	TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int> &data, bool visible, bool editable, GLenum usage);
+	TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int columns, unsigned int rows, unsigned int tileWidth, unsigned int tileHeight, std::vector<unsigned int>& data, bool visible, bool editable, DataUsage usage);
 
 	/* The destructor */
 	virtual ~TilemapLayer();
@@ -131,9 +139,12 @@ private:
 	/* The width and height of the tiles */
 	unsigned int tileWidth;
 	unsigned int tileHeight;
+
+	/* Graphics pipeline for rendering */
+	GraphicsPipeline* graphicsPipeline;
 public:
 	/* The constructor */
-	Tilemap(unsigned int gridWidth, unsigned int gridHeight, unsigned int tileWidth, unsigned int tileHeight) : gridWidth(gridWidth), gridHeight(gridHeight), tileWidth(tileWidth), tileHeight(tileHeight) {}
+	Tilemap(unsigned int gridWidth, unsigned int gridHeight, unsigned int tileWidth, unsigned int tileHeight);
 
 	/* The destructor */
 	virtual ~Tilemap();
@@ -165,7 +176,5 @@ public:
 	/* Method used to load a tileset from a file */
 	static TextureAtlas* loadTileset(std::string path, std::string name);
 	/* Method used to load a tile map from a file */
-	static Tilemap* loadTilemap(std::string path, std::string name, bool editable = false, GLenum usage = GL_STATIC_DRAW);
+	static Tilemap* loadTilemap(std::string path, std::string name, bool editable = false);
 };
-
-#endif /* CORE_RENDER_TILEMAP_H_ */

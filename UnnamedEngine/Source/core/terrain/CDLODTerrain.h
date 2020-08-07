@@ -49,9 +49,8 @@ private:
 	/* Range multiplier to help resolve seams between nodes */
 	const float RANGE_MULTIPLIER = 1.25f;
 
-	/* The UBO for the terrain data in the shader and an instance of its data structure */
-	ShaderBlock_Terrain shaderTerrainData;
-	UBO* shaderTerrainUBO;
+	/* Selection list of nodes to be rendered (Assigned in update) */
+	std::vector<CDLODQuadTreeNode*> selectionList;
 
 //	Texture* texture1;
 //	Texture* texture2;
@@ -64,7 +63,10 @@ public:
 	/* The destructor */
 	virtual ~CDLODTerrain();
 
-	/* The method used to render this terrain */
+	/* Method used to update this terrain */
+	virtual void update() override;
+
+	/* Method used to render this terrain */
 	virtual void render() override;
 
 	/* Method used to get the height at a particular location (in world coordinates) */

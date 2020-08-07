@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_FRUSTUM_H_
-#define CORE_RENDER_FRUSTUM_H_
+#pragma once
 
 #include "../core/Vector.h"
 #include "../core/Matrix.h"
@@ -64,4 +63,3 @@ public:
 	bool AABBInFrustum(Vector3f min, Vector3f max);
 };
 
-#endif /* CORE_RENDER_FRUSTUM_H_ */

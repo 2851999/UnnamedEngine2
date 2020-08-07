@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef BASEENGINETEST2D_H_
-#define BASEENGINETEST2D_H_
+#pragma once
 
 #include "../core/BaseEngine.h"
 #include "../core/render/Camera.h"
@@ -52,6 +51,8 @@ private:
 	GUISlider* horizontalSlider;
 	GUITextBox* textBox;
 	GUIGroup* radioCheckBoxGroup;
+
+	//GraphicsPipeline* test;
 public:
 	virtual ~Test() {}
 
@@ -81,8 +82,11 @@ public:
 
 void Test::initialise() {
 	getSettings().windowTitle = "Unnamed Engine " + Engine::Version;
-//	getSettings().videoVSync = false;
-//	getSettings().videoMaxFPS = 0;
+	getSettings().videoVSync = 0;
+	getSettings().videoMaxFPS = 0;
+	getSettings().videoVulkan = true;
+	getSettings().debugShowInformation = true;
+	getSettings().debugVkValidationLayersEnabled = true;
 
 //	Settings& settings = getSettings();
 //	settings.windowTitle = "Test";
@@ -96,7 +100,7 @@ void Test::created() {
 	camera = new Camera2D(Matrix4f().initOrthographic(0, getSettings().windowWidth, getSettings().windowHeight, 0, -1, 1));
 	camera->update();
 
-	GUIComponentRenderer::DEFAULT_FONT = new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(GL_NEAREST));
+	GUIComponentRenderer::DEFAULT_FONT = new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(TextureParameters::Filter::NEAREST));
 
 	panel = new GUIPanel();
 
@@ -143,12 +147,10 @@ void Test::created() {
 	horizontalSlider->setPosition(100, 400);
 
 	textBox = new GUITextBox(Colour::WHITE, 200, 20);
-	textBox->setFont(new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(GL_NEAREST)));
+	textBox->setFont(new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(TextureParameters::Filter::NEAREST)));
 	textBox->setTextColour(Colour::BLACK);
-	textBox->setDefaultTextFont(new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(GL_NEAREST)));
-	textBox->setDefaultTextColour(Colour::GREY);
 	textBox->setPosition(20, 300);
-	textBox->setDefaultText("Enter something");
+	textBox->setDefaultText("Enter something", Colour::GREY, new Font("resources/fonts/ARIAL.TTF", 22, TextureParameters().setFilter(TextureParameters::Filter::NEAREST)));
 	textBox->setBorder(new GUIBorder(textBox, 1.0f, Colour::LIGHT_BLUE));
 	textBox->selection->setColour(Colour(Colour::LIGHT_BLUE, 0.2f));
 
@@ -191,6 +193,9 @@ void Test::created() {
 //	for (MLElement& elem : document.getRoot().getChildren())
 //		std::cout << elem.getName() << std::endl;
 	//document.save("C:/Users/Joel/Desktop/Test.xml");
+
+	//For now need some pipeline to use camera's view
+	//test = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GUI), Renderer::getDefaultRenderPass());
 }
 //#include <iostream>
 void Test::update() {
@@ -200,10 +205,11 @@ void Test::update() {
 }
 
 void Test::render() {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_TEXTURE_2D);
-
 	//utils_gl::setupAlphaBlendingMSAA();
+	//test->bind();
+	//camera->useView();
+
+	//utils_gl::enableWireframe();
 
 	panel->render();
 }
@@ -211,6 +217,6 @@ void Test::render() {
 void Test::destroy() {
 	delete camera;
 	delete panel;
+	//delete test;
 }
 
-#endif /* BASEENGINETEST2D_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_UTILS_H_
-#define UTILS_UTILS_H_
+#pragma once
 
 #include <string>
 #include <sstream>
@@ -55,7 +54,7 @@ namespace utils_string {
 	std::string strJoin(const std::vector<std::string>& text, char delimeter);
 	std::string strJoin(const std::vector<std::string>& text, const std::string& delimeter);
 
-	inline std::string substring(const std::string &s, int begin, int end) {
+	inline std::string substring(const std::string &s, unsigned int begin, unsigned int end) {
 		return s.substr(begin, end - begin);
 	}
 
@@ -236,4 +235,3 @@ namespace utils_controller {
 	int findController(int index, std::string name);
 }
 
-#endif /* UTILS_UTILS_H_ */

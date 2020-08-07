@@ -16,12 +16,12 @@
  *
  *****************************************************************************/
 
-#ifndef BASEENGINETEST3D_H_
-#define BASEENGINETEST3D_H_
+#pragma once
 
 #include "BaseTest3D.h"
 
 #include <iostream>
+#include <functional>
 
 #include "../core/render/Renderer.h"
 
@@ -42,16 +42,17 @@ public:
 };
 
 void Test::onInitialise() {
-
+	getSettings().videoVulkan = true;
+	getSettings().debugVkValidationLayersEnabled = false;
 }
 
 void Test::onCreated() {
-//	Mesh* modelA = resourceLoader.loadModel("sphere.obj");
+	//	Mesh* modelA = resourceLoader.loadModel("sphere.obj");
 	Mesh* modelA = resourceLoader.loadModel("plane.obj");
 	Mesh* modelB = resourceLoader.loadModel("sphere.obj");
 
 	objectA = new PhysicsObject3D(modelA, Renderer::SHADER_MATERIAL);
-//	objectA->setCollider(new SphereCollider(objectA, modelA->getBoundingSphereRadius()));
+	//	objectA->setCollider(new SphereCollider(objectA, modelA->getBoundingSphereRadius()));
 	objectA->setCollider(new PlaneCollider3D(objectA, Vector3f(1.0f, 0.0f, 0.0f)));
 	objectA->setRotation(0.0f, 0.0f, 45.0f);
 	objectB = new PhysicsObject3D(modelB, Renderer::SHADER_MATERIAL);
@@ -64,9 +65,11 @@ void Test::onCreated() {
 	renderScene->add(objectB);
 	physicsScene->add(objectB);
 
+	//renderScene->addLight((new Light(Light::TYPE_DIRECTIONAL))->setDirection(0.2, -1.0, 0.2)->setDiffuseColour(Colour::WHITE));
+	//renderScene->enableLighting();
 	renderScene->disableLighting();
 
-	physicsScene->setCollisionCallback(std::bind(onCollision, this, 0, 0));
+	physicsScene->setCollisionCallback(std::bind(&Test::onCollision, this, 0, 0));
 
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
@@ -84,16 +87,9 @@ void Test::onUpdate() {
 }
 
 void Test::onRender() {
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	glEnable(GL_TEXTURE_2D);
-//	glEnable(GL_DEPTH_TEST);
-//
-//	glEnable(GL_MULTISAMPLE_ARB);
-//	glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB);
+
 }
 
 void Test::onDestroy() {
 
 }
-
-#endif /* UTILS_BASEENGINETEST3D_H_ */

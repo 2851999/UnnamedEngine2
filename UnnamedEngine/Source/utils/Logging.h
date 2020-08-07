@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_LOGGING_H_
-#define UTILS_LOGGING_H_
+#pragma once
 
 #include <iostream>
 
@@ -88,4 +87,3 @@ public:
 	}
 };
 
-#endif /* UTILS_LOGGING_H_ */

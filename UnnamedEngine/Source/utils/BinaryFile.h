@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_BINARYFILE_H_
-#define UTILS_BINARYFILE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -27,12 +26,12 @@
 #include "../core/Matrix.h"
 
 /*****************************************************************************
- * The BianryFile class helps to read/write from/to a binary file
+ * The BianaryFile class helps to read/write from/to a binary file
  *****************************************************************************/
 
 class BinaryFile {
 private:
-	/* The path if the file */
+	/* The path of the file */
 	std::string path;
 
 	/* The input/output streams */
@@ -88,4 +87,3 @@ private:
 };
 
 
-#endif /* UTILS_BINARYFILE_H_ */

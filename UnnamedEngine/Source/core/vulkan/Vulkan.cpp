@@ -23,24 +23,29 @@
 
 #include "../render/Mesh.h"
 #include "../../utils/Logging.h"
+#include "../render/DescriptorSet.h"
+#include "../render/RenderPass.h"
 
 #include <limits>
+#include <array>
 
 /*****************************************************************************
  * The Vulkan class
  *****************************************************************************/
 
-VkInstance                   Vulkan::instance;
-VkSurfaceKHR                 Vulkan::windowSurface;
-VulkanDevice*                Vulkan::device;
-VulkanSwapChain*             Vulkan::swapChain;
-VulkanRenderPass*            Vulkan::renderPass;
-VkCommandPool                Vulkan::commandPool;
-std::vector<VkCommandBuffer> Vulkan::commandBuffers;
-std::vector<VkSemaphore>     Vulkan::imageAvailableSemaphores;
-std::vector<VkSemaphore>     Vulkan::renderFinishedSemaphores;
-std::vector<VkFence>         Vulkan::inFlightFences;
-unsigned int                 Vulkan::currentFrame = 0;
+VkInstance                                        Vulkan::instance;
+VkSurfaceKHR                                      Vulkan::windowSurface;
+VulkanDevice*                                     Vulkan::device;
+VulkanSwapChain*                                  Vulkan::swapChain;
+VkCommandPool                                     Vulkan::commandPool;
+std::vector<VkCommandBuffer>                      Vulkan::commandBuffers;
+VkCommandBuffer                                   Vulkan::overrideCommandBuffer = VK_NULL_HANDLE;
+std::vector<VkSemaphore>                          Vulkan::imageAvailableSemaphores;
+std::vector<VkSemaphore>                          Vulkan::renderFinishedSemaphores;
+std::vector<VkFence>                              Vulkan::inFlightFences;
+unsigned int                                      Vulkan::currentFrame = 0;
+std::vector<Vulkan::DescriptorSetUpdateInfo>      Vulkan::descriptorSetUpdateQueue;
+std::vector<Vulkan::VulkanBufferObjectUpdateInfo> Vulkan::vulkanBufferObjectUpdateQueue;
 
 bool Vulkan::initialise(Window* window) {
 	//Initialise Vulkan
@@ -86,9 +91,6 @@ bool Vulkan::initialise(Window* window) {
 	//Create the swap chain
 	swapChain = new VulkanSwapChain(device, window->getSettings());
 
-	//Create the render pass
-	renderPass = new VulkanRenderPass(swapChain);
-
 	//Create the command buffers
 	createCommandBuffers();
 
@@ -107,7 +109,6 @@ void Vulkan::destroy() {
 
 	destroyCommandPool();
 
-	delete renderPass;
 	delete swapChain;
 	delete device;
 
@@ -182,11 +183,8 @@ void Vulkan::destroyCommandPool() {
 }
 
 void Vulkan::createCommandBuffers() {
-	//Obtain the list of framebuffers in the swap chain
-	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
-
-	//Need to allocate the same number of command buffers as framebuffers
-	commandBuffers.resize(swapChainFramebuffers.size());
+	//Need to allocate the same number of command buffers as swap chain images (and therefore number of framebuffers)
+	commandBuffers.resize(swapChain->getImageCount());
 
 	VkCommandBufferAllocateInfo allocInfo = {};
 	allocInfo.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -230,17 +228,18 @@ void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, ui
 	if (vkAllocateMemory(device->getLogical(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
 		Logger::log("Failed to allocate image memory", "Vulkan", LogType::Error);
 
-	vkBindImageMemory(device->getLogical(), image, imageMemory, 0);
+	if (vkBindImageMemory(device->getLogical(), image, imageMemory, 0) != VK_SUCCESS)
+		Logger::log("Failed to bind device memory to image", "Vulkan", LogType::Error);
 }
 
-VkImageView Vulkan::createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels, uint32_t layerCount) {
-	VkImageViewCreateInfo viewInfo = {};
+VkImageView Vulkan::createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t baseMipLevel, uint32_t layerCount) {
+	VkImageViewCreateInfo viewInfo ={};
 	viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image    = image;
 	viewInfo.viewType = viewType;
 	viewInfo.format   = format;
-	viewInfo.subresourceRange.aspectMask     = aspectFlags;
-	viewInfo.subresourceRange.baseMipLevel   = 0;
+	viewInfo.subresourceRange.aspectMask     = aspectMask;
+	viewInfo.subresourceRange.baseMipLevel   = baseMipLevel;
 	viewInfo.subresourceRange.levelCount     = mipLevels;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount     = layerCount;
@@ -425,6 +424,12 @@ void Vulkan::destroySyncObjects() {
 	}
 }
 
+void Vulkan::update() {
+	//Update descriptor sets and VulkanBufferObjects
+	updateDescriptorSetQueue();
+	updateVulkanBufferObjectQueue();
+}
+
 void Vulkan::startDraw() {
 	//Aquire the next swap chain image
 	vkAcquireNextImageKHR(device->getLogical(), swapChain->getInstance(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &currentFrame); //Image index is next in chain
@@ -436,9 +441,6 @@ void Vulkan::startDraw() {
 	//------------------------------------------------------------------------------------------------------
 	vkResetCommandBuffer(commandBuffers[currentFrame], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 
-	//Obtain the list of framebuffers in the swap chain
-	std::vector<VkFramebuffer>& swapChainFramebuffers = renderPass->getSwapChainFramebuffers();
-
 	VkCommandBufferBeginInfo beginInfo = {};
 	beginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	beginInfo.flags            = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
@@ -446,28 +448,9 @@ void Vulkan::startDraw() {
 
 	if (vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS)
 		Logger::log("Failed to begin recording command buffer", "Vulkan", LogType::Error);
-
-	VkRenderPassBeginInfo renderPassInfo = {};
-	renderPassInfo.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass  = renderPass->getInstance();
-	renderPassInfo.framebuffer = swapChainFramebuffers[currentFrame];
-
-	renderPassInfo.renderArea.offset = {0, 0};
-	renderPassInfo.renderArea.extent = swapChain->getExtent();
-
-	std::array<VkClearValue, 2> clearValues = {};
-	clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
-	clearValues[1].depthStencil = { 1.0f, 0 }; //1.0 is far view plane, 0.0 is near view plane
-
-	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-	renderPassInfo.pClearValues = clearValues.data();
-
-	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void Vulkan::stopDraw() {
-	vkCmdEndRenderPass(commandBuffers[currentFrame]);
-
 	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
 		Logger::log("Failed to record command buffer", "Vulkan", LogType::Error);
 	//-------------------------------------------------------------------------------------------
@@ -509,6 +492,107 @@ void Vulkan::stopDraw() {
 
 	//vkAcquireNextImageKHR semaphore signalled will be the one with this index (so must increase before it is called again)
 	currentFrame = (currentFrame + 1) % swapChain->getImageCount();
+}
+
+bool Vulkan::updateDescriptorSetFrame(DescriptorSetUpdateInfo& info) {
+	//Update the set for the current frame
+	info.set->updateVk(info.nextUpdateFrame);
+
+	//Reduce the number of updates left by 1
+	info.updatesLeft--;
+	info.nextUpdateFrame = (info.nextUpdateFrame + 1) % swapChain->getImageCount();
+
+	return info.updatesLeft <= 0;
+}
+
+void Vulkan::updateDescriptorSet(DescriptorSet* set) {
+	//Setup the structure for the queue
+	DescriptorSetUpdateInfo info;
+	info.set             = set;
+	info.nextUpdateFrame = getCurrentFrame();
+	info.updatesLeft     = getSwapChain()->getImageCount();
+
+	//Add the set to the update queue
+	descriptorSetUpdateQueue.push_back(info);
+}
+
+void Vulkan::updateDescriptorSetQueue() {
+	//Indices of data to be removed
+	unsigned int removeEnd = 0;
+	//Go through the descriptor sets
+	for (unsigned int i = 0; i < descriptorSetUpdateQueue.size(); ++i) {
+		//Update the current set, and prepare to remove it if finished updating
+		if (updateDescriptorSetFrame(descriptorSetUpdateQueue[i])) {
+			descriptorSetUpdateQueue[i].set->removedFromUpdateQueue();
+			removeEnd++;
+		}
+	}
+	//Remove all finished updates from the queue
+	if (removeEnd > 0)
+		descriptorSetUpdateQueue.erase(descriptorSetUpdateQueue.begin(), descriptorSetUpdateQueue.begin() + removeEnd);
+}
+
+void Vulkan::removeFromDescriptorSetQueue(DescriptorSet* set) {
+	//Remove all occurences of the descriptor set from the queue
+	unsigned int i = 0;
+	while (i < descriptorSetUpdateQueue.size()) {
+		if (descriptorSetUpdateQueue[i].set == set)
+			descriptorSetUpdateQueue.erase(descriptorSetUpdateQueue.begin() + i);
+		else
+			++i;
+	}
+}
+
+void Vulkan::removeFromVulkanBufferObjectQueue(VulkanBufferObject* instance) {
+	//Remove all occurences of the descriptor set from the queue
+	unsigned int i = 0;
+	while (i < vulkanBufferObjectUpdateQueue.size()) {
+		if (vulkanBufferObjectUpdateQueue[i].instance == instance)
+			vulkanBufferObjectUpdateQueue.erase(vulkanBufferObjectUpdateQueue.begin() + i);
+		else
+			++i;
+	}
+}
+
+void Vulkan::updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size) {
+	//Setup the structure for the queue
+	VulkanBufferObjectUpdateInfo info;
+	info.instance        = instance;
+	info.data            = data;
+	info.offset          = offset;
+	info.size            = size;
+	info.nextUpdateFrame = getNextFrame();
+	info.updatesLeft     = getSwapChain()->getImageCount();
+
+	//Add the set to the update queue
+	vulkanBufferObjectUpdateQueue.push_back(info);
+}
+
+bool Vulkan::updateVulkanBufferObjectFrame(VulkanBufferObjectUpdateInfo& info) {
+	//Update the set for the current frame
+	info.instance->updateFrame(info.data, info.offset, info.size);
+
+	//Reduce the number of updates left by 1
+	info.updatesLeft--;
+	info.nextUpdateFrame = (info.nextUpdateFrame + 1) % swapChain->getImageCount();
+
+	return info.updatesLeft <= 0;
+}
+
+void Vulkan::updateVulkanBufferObjectQueue() {
+	//Indices of data to be removed
+	unsigned int removeEnd = 0;
+	//Go through the descriptor sets
+	for (unsigned int i = 0; i < vulkanBufferObjectUpdateQueue.size(); ++i) {
+		//Update the current set, and prepare to remove it if finished updating
+		if (updateVulkanBufferObjectFrame(vulkanBufferObjectUpdateQueue[i])) {
+			vulkanBufferObjectUpdateQueue[i].instance->removedFromUpdateQueue();
+			removeEnd++;
+		}
+	}
+	//Remove all finished updates from the queue
+	if (removeEnd > 0)
+		vulkanBufferObjectUpdateQueue.erase(vulkanBufferObjectUpdateQueue.begin(), vulkanBufferObjectUpdateQueue.begin() + removeEnd);
 }
 
 VkSampleCountFlagBits Vulkan::getMaxUsableSampleCount(unsigned int targetSamples) {

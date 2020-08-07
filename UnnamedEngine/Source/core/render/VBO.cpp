@@ -42,14 +42,14 @@ void VBO<T>::setup(unsigned int binding) {
 	//Check whether using Vulkan or OpenGL
 	if (! BaseEngine::usingVulkan()) {
 		//Get OpenGL to generate the buffer
-		glGenBuffers(1, &buffer);
+		glGenBuffers(1, &bufferGL);
 		//Bind the buffer
-		bind();
+		bindGL();
 		//Pass the data to OpenGL
 		if (data.size() > 0)
-			glBufferData(target, size, &data.front(), usage);
+			glBufferData(GL_ARRAY_BUFFER, size, &data.front(), Renderer::convertToGL(usage));
 		else
-			glBufferData(target, size, NULL, usage);
+			glBufferData(GL_ARRAY_BUFFER, size, NULL, Renderer::convertToGL(usage));
 	} else
 		vulkanAttributeDescriptions.resize(attributes.size());
 
@@ -91,18 +91,12 @@ void VBO<T>::setup(unsigned int binding) {
 			setupAttribute(binding, i);
 	}
 	if (BaseEngine::usingVulkan()) {
-		VkBufferUsageFlags usageVulkan;
-		if (target == GL_ARRAY_BUFFER) {
-			usageVulkan = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		} else if (target == GL_ELEMENT_ARRAY_BUFFER)
-			usageVulkan = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-
 		//Calculate the correct stride if it hasn't been assigned (In OpenGL stride == 0 means tightly packed, but in Vulkan require offset in bytes to next element)
 		if (attributes.size() == 1)
 			stride = sizeof(T) *  attributes[0].size;
 
 		//Create the Vulkan buffer
-		vulkanBuffer = new VulkanBuffer(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageVulkan);
+		vulkanBuffer = new VulkanBufferObject(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, usage == DataUsage::STATIC, usage != DataUsage::STATIC); //Assume wont be updated if static
 
 		//Assign the vertex input binding description
 		vulkanVertexInputBindingDescription.binding   = binding; //like glVertexAttrib binding
@@ -121,9 +115,9 @@ void VBO<T>::setupAttribute(unsigned int binding, unsigned int index) {
 			//Enable that vertex attribute array and setup its pointer
 			glEnableVertexAttribArray(attribute.location);
 			if (attribute.type == GL_UNSIGNED_INT || attribute.type == GL_INT)
-				glVertexAttribIPointer(attribute.location, attribute.size, attribute.type, stride, (void*) attribute.offset);
+				glVertexAttribIPointer(attribute.location, attribute.size, attribute.type, stride, (static_cast<const char*>(0) + attribute.offset));
 			else
-				glVertexAttribPointer(attribute.location, attribute.size, attribute.type, GL_FALSE, stride, (void*) attribute.offset);
+				glVertexAttribPointer(attribute.location, attribute.size, attribute.type, GL_FALSE, stride, (static_cast<const char*>(0) + attribute.offset));
 		}
 	} else {
 		//Setup the attribute description for the attribute
@@ -158,10 +152,10 @@ void VBO<T>::setupAttribute(unsigned int binding, unsigned int index) {
 template <typename T>
 void VBO<T>::startRendering() {
 	if (! BaseEngine::usingVulkan()) {
-		bind();
+		bindGL();
 
 		//Enable the vertex attribute arrays
-		for (unsigned int i = 0; i < attributes.size(); i++) {
+		for (unsigned int i = 0; i < attributes.size(); ++i) {
 			glEnableVertexAttribArray(attributes[i].location);
 			//Check for instancing
 			if (instanced)
@@ -174,27 +168,42 @@ template <typename T>
 void VBO<T>::stopRendering() {
 	if (! BaseEngine::usingVulkan()) {
 		//Disable the vertex attribute arrays
-		for (unsigned int i = 0; i < attributes.size(); i++)
+		for (unsigned int i = 0; i < attributes.size(); ++i)
 			glDisableVertexAttribArray(attributes[i].location);
 	}
 }
 
 template <typename T>
-void VBO<T>::update() {
+void VBO<T>::updateFrame() {
 	if (! BaseEngine::usingVulkan()) {
-		bind();
-		glBufferData(target, data.size() * sizeof(data[0]), &data.front(), usage);
+		bindGL();
+		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), data.data(), Renderer::convertToGL(usage));
 	} else
-		//Copy the data into the buffer
-		vulkanBuffer->copyData(data.data(), 0, data.size() * sizeof(T));
+		vulkanBuffer->updateFrame(data.data(), 0, data.size() * sizeof(T));
 }
 
 template <typename T>
-void VBO<T>::updateStream(GLsizeiptr size) {
+void VBO<T>::update() {
 	if (! BaseEngine::usingVulkan()) {
-		bind();
+		bindGL();
+		glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(T), data.data(), Renderer::convertToGL(usage));
+	} else
+		vulkanBuffer->update(data.data(), 0, data.size() * sizeof(T));
+}
+
+template <typename T>
+void VBO<T>::updateStream(uint32_t size) {
+	if (! BaseEngine::usingVulkan()) {
+		bindGL();
 		//Buffer orphaning
-		glBufferData(target, this->size, NULL, usage);
-		glBufferSubData(target, 0, size, &data.front());
+		glBufferData(GL_ARRAY_BUFFER, this->size, NULL, Renderer::convertToGL(usage));
+		glBufferSubData(GL_ARRAY_BUFFER, 0, size, &data.front());
+	} else {
+		//MAY BE BETTER WAY
+
+		vulkanBuffer->updateFrame(data.data(), 0, size);
 	}
 }
+
+template class VBO<float>;
+template class VBO<unsigned int>;

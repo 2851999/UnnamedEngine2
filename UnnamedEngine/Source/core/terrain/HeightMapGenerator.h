@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_TERRAIN_HEIGHTMAPGENERATOR_H_
-#define CORE_TERRAIN_HEIGHTMAPGENERATOR_H_
+#pragma once
 
 #include "../../utils/SimplexNoise.h"
 
@@ -57,4 +56,3 @@ public:
 	inline double getScale() { return scale; }
 };
 
-#endif /* CORE_TERRAIN_HEIGHTMAPGENERATOR_H_ */

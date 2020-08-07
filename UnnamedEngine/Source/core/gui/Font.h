@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_FONT_H_
-#define CORE_GUI_FONT_H_
+#pragma once
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -31,8 +30,8 @@
 class Font : public Resource {
 private:
 	/* The starting/ending ASCII codes used when creating a font */
-	static const unsigned int ASCII_START = 32;
-	static const unsigned int ASCII_END   = 126;
+	static const unsigned int ASCII_START = 0;
+	static const unsigned int ASCII_END   = 255;
 
 	/* A spacing value (in pixels) to separate glyphs in the bitmap image */
 	static const unsigned int GLYPH_SPACING = 1;
@@ -49,27 +48,51 @@ private:
 		float glyphLeft;
 		float glyphTop;
 		float xOffset;
+		float yOffset;
+		uint32_t page; //SDF
 	} glyphs[(ASCII_END - ASCII_START) + 1];
 
-	/* The texture this font */
+	/* States whether this font is a signed distance field */
+	bool sdf = false;
+
+	/* The size this font should be */
+	float size;
+
+	/* The rendered size of the font */
+	float renderedSize;
+
+	/* The texture of this font */
 	Texture* texture;
+
+	/* Descriptor set for SDF text rendering */
+	DescriptorSet* descriptorSetSDFText = NULL;
+
+	/* Stores various SDF text rendering parameters */
+	ShaderBlock_SDFText sdfTextParameters;
 
 	/* The method used to setup this Font instance given the font name and size */
 	void setup(std::string path, unsigned int size, TextureParameters parameters);
+
+	/* Method to setup this Font instance for an SDF font - uses files exported from https://github.com/libgdx/libgdx/wiki/Hiero */
+	void setupSDF(std::string path, unsigned int size, TextureParameters parameters);
+
+	/* Method used for reading FNT file */
+	int32_t nextValuePair(std::stringstream* stream);
 public:
 	/* Render scale used to render font at a higher size and then down scale later */
 	static const float RENDER_SCALE;
 
-	/* The constructors */
-	Font(std::string path, unsigned int size = 18, TextureParameters parameters = TextureParameters().setClamp(GL_CLAMP_TO_EDGE).setFilter(GL_NEAREST)) { setup(path, size, parameters); }
-	/* The destructors */
-	virtual ~Font() {} //Destroy should be called when resource is released
+	/* Constructor */
+	Font(std::string path, unsigned int size = 18, TextureParameters parameters = TextureParameters().setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE).setFilter(TextureParameters::Filter::NEAREST));
+
+	/* Destructor */
+	virtual ~Font();
+
+	/* Binds the necessary descriptor sets for rendering with this font */
+	void bindDescriptorSets();
 
 	/* Method to assign a MeshData instance to render some text */
 	void assignMeshData(MeshData* data, std::string text, bool billboarded);
-
-	/* Method used to release all of the resources this font holds */
-	void destroy() override;
 
 	/* Methods used to get the width/height of text rendered with this font */
 	float getWidth(std::string text);
@@ -82,6 +105,32 @@ public:
 
 	/* Setters and getters */
 	inline Texture* getTexture() { return texture; }
+
+	/* Returns the scale this font should be rendered with */
+	inline float getScale() { return size / renderedSize; }
+
+	/* Returns whether this font uses signed distance fields */
+	inline bool usesSDF() { return sdf; }
+
+	/* Method used to update the SDF descriptor set (Should be called after changing one of the SDF rendering parameters) */
+	void updateSDFParameters();
+
+	/* Setters and getters for SDF font parameters */
+	inline void setSDFOutlineColour(Colour colour) { sdfTextParameters.outlineColour = colour; }
+	inline void setSDFShadowColour(Colour colour) { sdfTextParameters.shadowColour = colour; }
+	inline void setSDFSmoothing(float smoothing) { sdfTextParameters.smoothing = smoothing; }
+	inline void setSDFOutline(float outline) { sdfTextParameters.outline = outline; }
+	inline void setSDFShadow(bool shadow) { sdfTextParameters.shadow = shadow ? 1.0f : 0.0f; }
+	inline void setSDFShadowSmoothing(float shadowSmoothing) { sdfTextParameters.shadowSmoothing = shadowSmoothing; }
+	//'shadowOffset' here is in pixels in relation to the supplied font texture
+	inline void setSDFShadowOffset(Vector2f shadowOffset) { sdfTextParameters.shadowOffset = Vector2f(shadowOffset.getX() / texture->getWidth(), shadowOffset.getY() / texture->getHeight()); }
+
+	inline Colour getSDFOutlineColour() { return sdfTextParameters.outlineColour; }
+	inline Colour getSDFShadowColour() { return sdfTextParameters.shadowColour; }
+	inline float getSDFSmoothing() { return sdfTextParameters.smoothing; }
+	inline float getSDFOutline() { return sdfTextParameters.outline; }
+	inline bool getSDFShadow() { return sdfTextParameters.shadow > 0.0f; }
+	inline float getSDFShadowSmoothing() { return sdfTextParameters.shadowSmoothing; }
+	inline Vector2f getSDFShadowOffset() { return Vector2f(sdfTextParameters.shadowOffset.getX() * texture->getWidth(), sdfTextParameters.shadowOffset.getY() * texture->getHeight()); }
 };
 
-#endif /* CORE_GUI_FONT_H_ */

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef UTILS_DEBUGCAMERA_H_
-#define UTILS_DEBUGCAMERA_H_
+#pragma once
 
 #include "../core/input/InputBindings.h"
 #include "../core/render/Camera.h"
@@ -92,4 +91,3 @@ public:
 
 };
 
-#endif /* UTILS_DEBUGCAMERA_H_ */

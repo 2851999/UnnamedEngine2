@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_MESH_H_
-#define CORE_RENDER_MESH_H_
+#pragma once
 
 #include "Colour.h"
 #include "Material.h"
@@ -26,7 +25,7 @@
 #include "Skinning.h"
 #include "VBO.h"
 #include "../Sphere.h"
-#include "../vulkan/VulkanGraphicsPipeline.h"
+#include "GraphicsPipeline.h"
 
 /*****************************************************************************
  * The MeshData class stores information about a mesh
@@ -85,15 +84,15 @@ private:
 	unsigned int numDimensions = 0;
 
 	/* Keeps track of the number of each value stored */
-	unsigned int numPositions  = 0;
-	unsigned int numColours    = 0;
+	unsigned int numPositions     = 0;
+	unsigned int numColours       = 0;
 	unsigned int numTextureCoords = 0;
-	unsigned int numNormals    = 0;
-	unsigned int numTangents   = 0;
-	unsigned int numBitangents = 0;
-	unsigned int numIndices    = 0;
+	unsigned int numNormals       = 0;
+	unsigned int numTangents      = 0;
+	unsigned int numBitangents    = 0;
+	unsigned int numIndices       = 0;
 
-	unsigned int numBones      = 0;
+	unsigned int numBones         = 0;
 
 	/* The sub data instances */
 	std::vector<SubData> subData;
@@ -109,15 +108,26 @@ public:
 	static const unsigned int DIMENSIONS_2D = 2;
 	static const unsigned int DIMENSIONS_3D = 3;
 
+	/* Types of data */
+	enum DataType {
+		POSITION      = 1,
+		TEXTURE_COORD = 2,
+		NORMAL        = 3,
+		TANGENT       = 4,
+		BITANGENT     = 5,
+		BONE_ID       = 6,
+		BONE_WEIGHT   = 7
+	};
+
 	/* Flags */
 	enum Flag {
 		NONE = 0,
-		SEPARATE_POSITIONS  = 1,
-		SEPARATE_COLOURS    = 2,
+		SEPARATE_POSITIONS      = 1,
+		SEPARATE_COLOURS        = 2,
 		SEPARATE_TEXTURE_COORDS = 4,
-		SEPARATE_NORMALS    = 8,
-		SEPARATE_TANGENTS   = 16,
-		SEPARATE_BITANGENTS = 32
+		SEPARATE_NORMALS        = 8,
+		SEPARATE_TANGENTS       = 16,
+		SEPARATE_BITANGENTS     = 32
 	};
 
 	MeshData(unsigned int numDimensions, Flag flags = Flag::NONE) {
@@ -165,6 +175,9 @@ public:
 		data.materialIndex = materialIndex;
 		addSubData(data);
 	}
+
+	/* Method used to remove a sub data structure */
+	inline void removeSubData(unsigned int index) { subData.erase(subData.begin() + index); }
 
 	/* Methods to remove data */
 	inline void clearPositions()     { positions.clear();     numPositions     = 0; }
@@ -219,6 +232,10 @@ public:
 	inline bool hasSubData() { return subData.size() > 0; }
 	inline unsigned int getSubDataCount() { return subData.size(); }
 	inline SubData& getSubData(unsigned int index) { return subData[index]; }
+
+	/* Static method to construct vertex input bindings and attributes given the
+	   required data and whether they should be separated from vboOthers */
+	static GraphicsPipeline::VertexInputData computeVertexInputData(unsigned int numDimensions, std::vector<DataType> requiredData, Flag flags);
 private:
 	/* The flags being used */
 	Flag flags = Flag::NONE;
@@ -240,31 +257,22 @@ private:
 	/* The shader used when assigning attribute locations */
 	RenderShader* setupShader = NULL;
 
-	/* The various Vertex Buffer Objects for this mesh */
-	VBO<GLfloat>* vboPositions     = NULL;
-	VBO<GLfloat>* vboColours       = NULL;
-	VBO<GLfloat>* vboTextureCoords = NULL;
-	VBO<GLfloat>* vboNormals       = NULL;
-	VBO<GLfloat>* vboTangents      = NULL;
-	VBO<GLfloat>* vboBitangents    = NULL;
-	VBO<unsigned int>* vboIndices  = NULL;
-	VBO<GLfloat>* vboOthers        = NULL;
+	/* The various VBOs for this mesh */
+	VBO<float>*        vboPositions     = NULL;
+	VBO<float>*        vboColours       = NULL;
+	VBO<float>*        vboTextureCoords = NULL;
+	VBO<float>*        vboNormals       = NULL;
+	VBO<float>*        vboTangents      = NULL;
+	VBO<float>*        vboBitangents    = NULL;
+	VBO<unsigned int>* vboBoneIDs       = NULL;
+	VBO<float>*        vboBoneWeights   = NULL;
+	VBO<float>*        vboOthers        = NULL;
 
-	VBO<unsigned int>* vboBoneIDs = NULL;
-	VBO<GLfloat>*  vboBoneWeights = NULL;
+	/* IBO for this mesh (May be NULL if not indexed) */
+	IBO* ibo = NULL;
 
-	/* Usage of each VBO, the default is GL_STATIC_DRAW */
-	GLenum usagePositions     = GL_STATIC_DRAW;
-	GLenum usageColours       = GL_STATIC_DRAW;
-	GLenum usageTextureCoords = GL_STATIC_DRAW;
-	GLenum usageNormals       = GL_STATIC_DRAW;
-	GLenum usageTangents      = GL_STATIC_DRAW;
-	GLenum usageBitangents    = GL_STATIC_DRAW;
-	GLenum usageOthers        = GL_STATIC_DRAW;
-	GLenum usageIndices       = GL_STATIC_DRAW;
-
-	/* The number of vertices that this class stores data about */
-	int numVertices = 0;
+	/* The number of vertices/indices used for rendering */
+	int count = 0;
 
 	/* Used to identify whether Mesh is indexed */
 	bool hasIndices = false;
@@ -274,7 +282,7 @@ public:
 	virtual ~MeshRenderData() { destroy(); }
 
 	/* Sets up for rendering */
-	void setup(MeshData* data, std::vector<Material*>& materials);
+	void setup(MeshData* data, std::vector<Material*>& materials, DataUsage vboUsage = DataUsage::STATIC);
 
 	/* Method to render using the data */
 	void render();
@@ -329,7 +337,7 @@ public:
 	virtual ~Mesh();
 
 	/* Method called to setup this mesh for rendering */
-	void setup(RenderShader* renderShader);
+	void setup(RenderShader* renderShader, DataUsage vboUsage = DataUsage::STATIC);
 
 	/* Method called to update the animation of this mesh */
 	void updateAnimation(float deltaSeconds);
@@ -389,12 +397,19 @@ public:
 	/* Method used to create a MeshData instance for a textured quad (rectangle/square in this case) given its width and height */
 	static MeshData* createQuad(float width, float height, Texture* texture, MeshData::Flag flags = MeshData::NONE);
 
+	/* Method used to create a MeshData instance for a quad wireframe, given its 4 corners (Use with GL_LINES) */
+	static MeshData* createQuadWireframe(Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, MeshData::Flag flags = MeshData::NONE);
+	/* Method used to create a MeshData instance for a quad wireframe (rectangle/square in this case) given its width and height (Use with GL_LINES) */
+	static MeshData* createQuadWireframe(float width, float height, MeshData::Flag flags = MeshData::NONE);
+
 	/* Method used to add the required data for a quad to a MeshData instance given its 4 corners */
 	static void addQuadData(MeshData* data, Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4);
 	/* Method used to add the required data for a textured quad to a MeshData instance given its 4 corners */
 	static void addQuadData(MeshData* data, Vector2f v1, Vector2f v2, Vector2f v3, Vector2f v4, Texture* texture);
 	/* Method used to add the indices for a quad to a MeshData instance */
 	static void addQuadI(MeshData* data);
+	/* Method used to add the indices for a quad wireframe to a MeshData instance */
+	static void addQuadIWireframe(MeshData* data);
 	/* Method used to add the texture coordinates for a quad to a MeshData instance */
 	static void addQuadT(MeshData* data, float top, float left, float bottom, float right);
 
@@ -423,4 +438,3 @@ public:
 	static void addCubeI(MeshData* data);
 };
 
-#endif /* CORE_RENDER_MESH_H_ */

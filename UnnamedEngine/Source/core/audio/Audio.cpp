@@ -24,7 +24,7 @@
 #include "../Window.h"
 #include "../../utils/Logging.h"
 
-#define _MSC_VER //Seems to conflict with Vulkan header (so define after including window)
+//#define _MSC_VER //Seems to conflict with Vulkan header (so define after including window)
 #include <stb/stb_vorbis.h>
 
 /*****************************************************************************

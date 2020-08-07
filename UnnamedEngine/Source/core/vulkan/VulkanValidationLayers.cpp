@@ -28,7 +28,9 @@
  *****************************************************************************/
 
 std::vector<const char*> VulkanValidationLayers::validationLayers = {
-		"VK_LAYER_LUNARG_standard_validation"
+		"VK_LAYER_KHRONOS_validation"
+		//VK_LAYER_LUNARG_standard_validation
+		//"VK_LAYER_LUNARG_api_dump"
 };
 
 VkDebugUtilsMessengerEXT VulkanValidationLayers::debugMessenger;

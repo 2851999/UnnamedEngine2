@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_TRANSFORM_H_
-#define CORE_TRANSFORM_H_
+#pragma once
 
 #include "Matrix.h"
 #include "Quaternion.h"
@@ -217,4 +216,3 @@ public:
 	inline Transform* getChild(unsigned int i) { return children.at(i); }
 };
 
-#endif /* CORE_TRANSFORM_H_ */

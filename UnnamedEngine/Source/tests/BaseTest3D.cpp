@@ -38,15 +38,15 @@ void BaseTest3D::initialise() {
 }
 
 void BaseTest3D::created() {
-	TextureParameters::DEFAULT_FILTER = GL_LINEAR_MIPMAP_LINEAR;
+	TextureParameters::DEFAULT_FILTER = TextureParameters::Filter::LINEAR_MIPMAP_LINEAR;
 
 	InputBindings* bindings = new InputBindings();
 	bindings->load(resourceLoader.getPath() + "config/Controller.xml", getWindow()->getInputManager());
 
-	camera = new DebugCamera(80.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
+	camera = new DebugCamera(90.0f, getSettings().windowAspectRatio, 0.1f, 100.0f, bindings);
 
 	physicsScene = new PhysicsScene3D();
-	renderScene = new RenderScene3D();
+	renderScene = new RenderScene(false, false, false, false, false);
 
 	soundSystem = new SoundSystem();
 	soundSystem->createListener(camera);
@@ -61,21 +61,26 @@ void BaseTest3D::created() {
 void BaseTest3D::update() {
 	onUpdate();
 
+	profiler.update(getFPS());
 	camera->update(getDeltaSeconds());
 	physicsScene->update(getDeltaSeconds());
 
 	soundSystem->update();
 }
 
-void BaseTest3D::render() {
-	utils_gl::setupSimple3DView(true);
+void BaseTest3D::renderOffscreen() {
+	if (renderScene->hasObjects())
+		renderScene->renderOffscreen();
+	onRenderOffscreen();
+}
 
+void BaseTest3D::render() {
 	if (renderScene->hasObjects())
 		renderScene->render();
 
-	onRender();
+	camera->render(); //In case of deferred rendering forward rendered objects should be rendered after the deferred
 
-	camera->useView(); //In case of deferred rendering forward rendered objects should be rendered after the deferred
+	onRender();
 }
 
 void BaseTest3D::destroy() {
@@ -89,4 +94,11 @@ void BaseTest3D::destroy() {
 void BaseTest3D::onKeyPressed(int key) {
 	if (key == GLFW_KEY_ESCAPE)
 		requestClose();
+	else if (key == GLFW_KEY_P)
+		startProfile(5.0f);
+}
+
+void BaseTest3D::profilerCallback(DebugProfiler::Result result) {
+	//Output the result
+	DebugProfiler::printResult(result);
 }

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef EXPERIMENTAL_BILLBOARD_H_
-#define EXPERIMENTAL_BILLBOARD_H_
+#pragma once
 
 #include "../core/Object.h"
 #include "../core/render/Renderer.h"
@@ -55,4 +54,3 @@ public:
 };
 
 
-#endif /* EXPERIMENTAL_BILLBOARD_H_ */

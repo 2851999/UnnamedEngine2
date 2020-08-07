@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_PARTICLES_PARTICLEEMITTER_H_
-#define CORE_PARTICLES_PARTICLEEMITTER_H_
+#pragma once
 
 #include "ParticleSystem.h"
 #include "../Object.h"
@@ -70,7 +69,7 @@ public:
 	void reset();
 
 	/* The method used to update this emitter and emit any required particles */
-	void update(float delta);
+	void update(float delta, Vector3f cameraPosition);
 
 	/* Method used to emit a set number of particles before becoming no longer active */
 	void emitParticles(unsigned int count);
@@ -93,6 +92,3 @@ public:
 	/* The constructor */
 	SphericalParticleEmitter(float particleMaxSpeed = 2.0f) : particleMaxSpeed(particleMaxSpeed) {}
 };
-
-
-#endif /* CORE_PARTICLES_PARTICLEEMITTER_H_ */

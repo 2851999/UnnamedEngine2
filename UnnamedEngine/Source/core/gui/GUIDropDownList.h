@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUIDROPDOWNLIST_H_
-#define CORE_GUI_GUIDROPDOWNLIST_H_
+#pragma once
 
 #include "GUIDropDownMenu.h"
 
@@ -28,7 +27,7 @@
 class GUIDropDownList : public GUIDropDownMenu {
 private:
 	/* The overlay */
-	GameObject2D* overlay = NULL;
+	GUIComponentRenderer* overlay = NULL;
 
 	/* The overlay texture (when closed - or for both if the second one isn't
 	 * assigned) */
@@ -48,7 +47,7 @@ public:
 	GUIDropDownList(GUIButton* menuButton, Texture* overlayClosedTexture, Texture* overlayOpenedTexture = NULL);
 
 	/* The destructor */
-	virtual ~GUIDropDownList() {}
+	virtual ~GUIDropDownList();
 
 	/* Called when a component is clicked */
 	virtual void onComponentClicked(GUIComponent* component) override;
@@ -63,4 +62,3 @@ public:
 	inline std::string getSelection() { return menuButton->getText(); }
 };
 
-#endif /* CORE_GUI_GUIDROPDOWNLIST_H_ */

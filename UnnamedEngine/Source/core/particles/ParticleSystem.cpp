@@ -36,21 +36,25 @@ const GLfloat ParticleSystem::vertexBufferData[] = {
 	 0.5f, 0.5f, 0.0f
 };
 
+/* Locations for the attributes in the shader */
+const unsigned int ParticleSystem::ATTRIBUTE_LOCATION_POSITION_DATA = 7;
+const unsigned int ParticleSystem::ATTRIBUTE_LOCATION_COLOUR        = 8;
+const unsigned int ParticleSystem::ATTRIBUTE_LOCATION_TEXTURE_DATA  = 9;
+
 ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticles) : emitter(emitter), maxParticles(maxParticles) {
 	//Assign the emitter's system
 	emitter->setParticleSystem(this);
 	//Generate the OpenGL VBO's
 	std::vector<GLfloat> data;
-	for (unsigned int i = 0; i < 12u; i++)
+	for (unsigned int i = 0; i < 12u; ++i)
 		data.push_back(vertexBufferData[i]);
 
-	renderData = new RenderData(GL_TRIANGLE_STRIP, 4);
+	renderData = new RenderData(4);
 
-	RenderShader* renderShader = Renderer::getRenderShader(Renderer::SHADER_PARTICLE);
-	shader = renderShader->getShader();
+	shader = Renderer::getRenderShader(Renderer::SHADER_PARTICLE_SYSTEM);
 
-	vboVertices = new VBO<GLfloat>(GL_ARRAY_BUFFER, sizeof(vertexBufferData), data, GL_STREAM_DRAW, true);
-	vboVertices->addAttribute(shader->getAttributeLocation("Position"), 3, 0);
+	vboVertices = new VBO<float>(sizeof(vertexBufferData), data, DataUsage::STATIC, false);
+	vboVertices->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, 3, 0);
 	renderData->addVBO(vboVertices);
 
 	//Assign the data about the particles
@@ -58,24 +62,32 @@ ParticleSystem::ParticleSystem(ParticleEmitter* emitter, unsigned int maxParticl
 	particleColourData.resize(maxParticles * 4);
 	particleTextureData.resize(maxParticles * 4);
 
-	vboPositionSizeData = new VBO<GLfloat>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(GLfloat), particlePositionSizeData, GL_STREAM_DRAW, true);
-	vboPositionSizeData->addAttribute(shader->getAttributeLocation("PositionsData"), 4, 1);
+	vboPositionSizeData = new VBO<float>(maxParticles * 4 * sizeof(float), particlePositionSizeData, DataUsage::STREAM, true);
+	vboPositionSizeData->addAttribute(ATTRIBUTE_LOCATION_POSITION_DATA, 4, 1);
 	renderData->addVBO(vboPositionSizeData);
 
-	vboColours = new VBO<GLfloat>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(GLfloat), particleColourData, GL_STREAM_DRAW, true);
-	vboColours->addAttribute(shader->getAttributeLocation("Colour"), 4, 1);
+	vboColours = new VBO<float>(maxParticles * 4 * sizeof(float), particleColourData, DataUsage::STREAM, true);
+	vboColours->addAttribute(ATTRIBUTE_LOCATION_COLOUR, 4, 1);
 	renderData->addVBO(vboColours);
 
-	vboTextureData = new VBO<GLfloat>(GL_ARRAY_BUFFER, maxParticles * 4 * sizeof(GLfloat), particleTextureData, GL_STREAM_DRAW, true);
-	vboTextureData->addAttribute(shader->getAttributeLocation("TextureData"), 4, 1);
+	vboTextureData = new VBO<float>(maxParticles * 4 * sizeof(float), particleTextureData, DataUsage::STREAM, true);
+	vboTextureData->addAttribute(ATTRIBUTE_LOCATION_TEXTURE_DATA, 4, 1);
 	renderData->addVBO(vboTextureData);
 
 	particles.resize(maxParticles);
 
-	renderData->setup(renderShader);
+	renderData->setup(shader);
 
-	//Get the UBO for the billboarding
-	shaderBillboardUBO = Renderer::getShaderInterface()->getUBO(ShaderInterface::BLOCK_BILLBOARD);
+	//Setup the material
+	material = new Material();
+	material->setup();
+
+	//Setup the billboard descriptor set
+	descriptorSetBillboard = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_BILLBOARD));
+	descriptorSetBillboard->setup();
+
+	//Create the graphics pipeline for rendering
+	graphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_PARTICLE_SYSTEM), Renderer::getDefaultRenderPass());
 }
 
 ParticleSystem::~ParticleSystem() {
@@ -86,6 +98,9 @@ ParticleSystem::~ParticleSystem() {
 	if (emitter)
 		delete emitter;
 
+	delete graphicsPipeline;
+	delete descriptorSetBillboard;
+	delete material;
 	delete renderData;
 	delete vboTextureData;
 	delete vboColours;
@@ -107,8 +122,6 @@ void ParticleSystem::reset() {
 }
 
 void ParticleSystem::update(float delta, Vector3f cameraPosition) {
-	//Update the particle emitter
-	emitter->update(delta);
 	//Reset the particle count
 	particleCount = 0;
 	//The offset for the indices of the current particle
@@ -174,43 +187,47 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 			}
 		}
 	}
-	//Sort the particles
+
+	//Update the particle emitter
+	emitter->update(delta, cameraPosition);
+
+	//Sort the particles after emitting new particles to ensure the new ones have the right order for rendering
 	std::sort(particles.begin(), particles.end());
+
+	//Assign the data for the billboarding
+
+	//Get the camera's view matrix used in getting the 'right' and 'up' vectors
+	Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
+
+	//Assign the uniforms for the particle shader
+	shaderBillboardData.ue_cameraRight = Vector4f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2), 0.0f);
+	shaderBillboardData.ue_cameraUp = Vector4f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2), 0.0f);
+
+	shaderBillboardData.ue_projectionViewMatrix = (Renderer::getCamera()->getProjectionViewMatrix());
 }
 
 void ParticleSystem::render() {
 	if (particleCount > 0) {
+		//Update the UBO
+		descriptorSetBillboard->getUBO(0)->updateFrame(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
+
+		//Update the paricle data
 		vboPositionSizeData->updateStream(particleCount * sizeof(GLfloat) * 4);
 		vboColours->updateStream(particleCount * sizeof(GLfloat) * 4);
 		vboTextureData->updateStream(particleCount * sizeof(GLfloat) * 4);
 
-		//Use the shader
-		shader->use();
+		//Use the graphics pipeline
+		graphicsPipeline->bind();
 
-		//Get the camera's view matrix used in getting the 'right' and 'up' vectors
-		Matrix4f matrix = Renderer::getCamera()->getViewMatrix();
-
-		//Assign the uniforms for the particle shader
-		shaderBillboardData.ue_cameraRight = Vector4f(matrix.get(0, 0), matrix.get(0, 1), matrix.get(0, 2), 0.0f);
-		shaderBillboardData.ue_cameraUp = Vector4f(matrix.get(1, 0), matrix.get(1, 1), matrix.get(1, 2), 0.0f);
-
-		shaderBillboardData.ue_projectionViewMatrix = (Renderer::getCamera()->getProjectionViewMatrix());
-
-		shaderBillboardUBO->update(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
-
-		if (textureAtlas)
-			shader->setUniformi("Texture", Renderer::bindTexture(textureAtlas->getTexture()));
-		else
-			shader->setUniformi("Texture", Renderer::bindTexture(Renderer::getBlankTexture()));
+		//Bind the billboard descriptor set
+		descriptorSetBillboard->bind();
 
 		//Draw the instances of the particles
 		renderData->setNumInstances(particleCount);
-		renderData->render();
 
-		Renderer::unbindTexture();
-
-		//Finished with the shader
-		shader->stopUsing();
+		//Render
+		Matrix4f matrix = Matrix4f().initIdentity();
+		Renderer::render(renderData, matrix, material);
 	}
 }
 
@@ -240,4 +257,10 @@ unsigned int ParticleSystem::findUnusedParticle() {
 
 Particle& ParticleSystem::getParticle(unsigned int index) {
 	return particles[index];
+}
+
+void ParticleSystem::setTextureAtlas(TextureAtlas* textureAtlas) {
+	this->textureAtlas = textureAtlas;
+	material->setDiffuse(textureAtlas->getTexture());
+	material->update();
 }

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_TERRAIN_CDLODQUADTREE_H_
-#define CORE_TERRAIN_CDLODQUADTREE_H_
+#pragma once
 
 #include "CDLODHeightMap.h"
 
@@ -50,12 +49,21 @@ private:
 	CDLODQuadTreeNode* children[4];
 
 	//GameObject3D* debugMesh;
+
+	/* Descriptor set for this node */
+	DescriptorSet* descriptorSetTerrain;
+
+	/* Data structure for the shader */
+	ShaderBlock_Terrain shaderTerrainData;
 public:
 	/* The constructor */
-	CDLODQuadTreeNode(CDLODHeightMap* heightMap, float nodeSize, int lod, float x, float z);
+	CDLODQuadTreeNode(CDLODHeightMap* heightMap, float meshSize, float nodeSize, int lod, float x, float z);
 
 	/* The destructor */
 	virtual ~CDLODQuadTreeNode();
+
+	/* Method to update this node and its descriptor set */
+	void update();
 
 	/* Method to select the nodes to render */
 	bool LODSelect(std::vector<int> ranges, int lodLevel, Camera3D* camera, std::vector<CDLODQuadTreeNode*>& selectionList);
@@ -72,6 +80,6 @@ public:
 	inline float getZ() { return z; }
 	inline float getSize() { return size; } //* 1.1f; }
 	inline float getRange() { return currentRange; }
+	inline DescriptorSet* getDescriptorSet() { return descriptorSetTerrain; }
 };
 
-#endif /* CORE_TERRAIN_CDLODQUADTREE_H_ */

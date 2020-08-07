@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- *   Copyright 2016 Joel Davies
+ *   Copyright 2020 Joel Davies
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,140 +16,123 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_FBO_H_
-#define CORE_RENDER_FBO_H_
+#pragma once
 
+#include <map>
+
+#include "Framebuffer.h"
 #include "Texture.h"
 
-/*****************************************************************************
- * The FramebufferStore class stores the data required create a texture
- * attachment for an FBO
- *****************************************************************************/
+class RenderPass;
 
-class FramebufferStore : public Texture {
-protected:
-	/* Various pieces of data */
-	GLint   internalFormat;
-	GLenum  format;
-	GLenum  type;
-	GLenum  attachment;
+ /*****************************************************************************
+  * The FramebufferAttachment class is used for storing attachment data for an
+  * FBO
+  *****************************************************************************/
 
-	GLuint  rbo;
+class FramebufferAttachment : public Texture {
 public:
-	/* The constructors */
-	FramebufferStore(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum attachment, GLuint filter, GLuint clamp, bool shouldClamp) :
-			Texture(0, TextureParameters(target, filter, clamp, shouldClamp)) {
-		this->internalFormat = internalFormat;
-		setWidth(width);
-		setHeight(height);
-		this->format = format;
-		this->type = type;
-		this->attachment = attachment;
+	enum class Type {
+		COLOUR_TEXTURE, COLOUR_CUBEMAP, DEPTH_TEXTURE, DEPTH, DEPTH_CUBEMAP
+	};
+private:
+	/* Type of attachment this is */
+	Type type;
 
-		this->rbo = 0;
-	}
+	/* The number of samples of this store */
+	unsigned int samples;
 
-	FramebufferStore(GLenum target, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, GLenum attachment) : FramebufferStore(target, internalFormat, width, height, format, type, attachment, GL_LINEAR, GL_CLAMP_TO_EDGE, false) {}
+	/* The number of mipmaps that must be avaiable for storing data in this texture */
+	unsigned int numStorageMipMaps;
 
-	/* The destructor */
-	virtual ~FramebufferStore() {
-		destroy();
-	}
+	/* The format of this store */
+	VkFormat vulkanFormat;
 
-	virtual void destroy() override {
-		if (getHandle() != 0)
-			Texture::destroy();
-		if (rbo != 0)
-			glDeleteRenderbuffers(1, &rbo);
-	}
+	/* Aspect mask used for this store */
+	VkImageAspectFlags vulkanAspectMask;
 
-	/* The method used to setup this texture */
-	virtual void setup(GLuint fboTarget, bool multisample);
+	/* The final layout required for this attachment */
+	VkImageLayout vulkanFinalLayout;
 
-	/* Setters and getters */
-	inline GLint getInternalFormat() { return internalFormat; }
-	inline GLenum getFormat() { return format; }
-	inline GLenum getType() { return type; }
-	inline GLenum getAttachment() { return attachment; }
+	/* Render buffer object (For OpenGL) */
+	GLuint glRBO;
+
+	/* States whether this attachment has been setup */
+	bool beenSetup = false;
+
+	/* Image views for rendering to different mip maps (if necessary) */
+	std::map<uint32_t, VkImageView> vulkanMipMapImageViews;
+public:
+	/* Constructor */
+	FramebufferAttachment(uint32_t width, uint32_t height, Type type, TextureParameters textureParameters = TextureParameters(), unsigned int samples = 0, unsigned int numStorageMipMaps = 0);
+
+	/* Destructor */
+	virtual ~FramebufferAttachment();
+
+	/* Method to setup this attachment for use with an FBO, given the index of the 
+	   current colour attachment in the FBO (used for OpenGL) */
+	void setup(unsigned int indexOfColourAttachment);
+
+	/* Method to setup this attachment for use with an FBO */
+	void setupFBO(unsigned int indexOfColourAttachment, int mipLevel); //If mipLevel == -1, assumed should use default image view
+
+	/* Method to obtain the attachment description of this attachment for Vulkan */
+	VkAttachmentDescription getVkAttachmentDescription(bool clearOnLoad);
+
+	/* Getters */
+	inline Type getType() { return type; }
+	inline bool hasBeenSetup() { return beenSetup; }
+	VkImageView& getVkImageViewMipMap(int mipMap) { return (mipMap == -1) ? getVkImageView() : vulkanMipMapImageViews.at(static_cast<uint32_t>(mipMap)); }
 };
 
 /*****************************************************************************
- * The FramebufferStoreCubemap class stores the data required create a cubemap
- * attachment for an FBO
+ * The FramebufferAttachmentInfo structure is used for storing
+ * information about an attachment and how it should be used
  *****************************************************************************/
-
-class FramebufferStoreCubemap : public FramebufferStore {
-public:
-	/* The constructors */
-	FramebufferStoreCubemap(GLint internalFormat, GLsizei size, GLenum format, GLenum type, GLenum attachment, GLuint filter, GLuint clamp, bool shouldClamp) : FramebufferStore(GL_TEXTURE_CUBE_MAP, internalFormat, size, size, format, type, attachment, filter, clamp, shouldClamp) {}
-
-	virtual ~FramebufferStoreCubemap() {}
-
-	/* The method used to setup this texture */
-	void setup(GLuint fboTarget, bool multisample) override;
+struct FramebufferAttachmentInfo {
+	FramebufferAttachment* attachment;
+	bool                   clearOnLoad;
+	int                    mipLevel     = -1;   //Mip level to render to using the FBO
+	bool                   shouldDelete = true; //Used to ensure if a new attachment is supplied to FBO, then it will delete it when destroyed, otherwise assumes it could be used elsewhere
 };
 
-/*****************************************************************************
- * The FBO class creates a Frame Buffer Object (FBO) using
- * texture attachments defined above
- *****************************************************************************/
+ /*****************************************************************************
+  * The FBO class manages a frambuffer and its attachments for rendering
+  *****************************************************************************/
 
 class FBO {
 private:
-	/* The framebuffer */
-	GLuint framebuffer;
+	/* The width and height of the framebuffer to be used */
+	uint32_t width;
+	uint32_t height;
 
-	/* The framebuffer target */
-	GLuint target;
+	/* The framebuffer */
+	Framebuffer* framebuffer = NULL;
+
+	/* The FBO for OpenGL */
+	GLuint glFBO;
 
 	/* The attachments */
-	std::vector<FramebufferStore*> stores;
+	std::vector<FramebufferAttachmentInfo> attachments;
 
-	/* States whether this FBO should use multisampling */
-	bool multisample;
+	/* Attachment descriptions for this FBO */
+	std::vector<VkAttachmentDescription> vulkanAttachmentDescriptions;
 public:
-	/* The constructor */
-	FBO(GLuint target, bool multisample = false) {
-		this->framebuffer = 0;
-		this->target = target;
-		this->multisample = multisample;
-	}
+	/* Constructor */
+	FBO(uint32_t width, uint32_t height, std::vector<FramebufferAttachmentInfo> attachments);
 
-	/* The destructor */
-	virtual ~FBO() {
-		for (unsigned int i = 0; i < stores.size(); i++)
-			delete stores[i];
-		stores.clear();
-	}
+	/* Destructor */
+	virtual ~FBO();
 
-	/* Method used to attach a texture */
-	inline void attach(FramebufferStore* texture) { stores.push_back(texture); }
-
-	/* The method used to setup this FBO */
-	void setup();
-
-	/* Copies the contents of a part of this FBO to another FBO */
-	void copyTo(unsigned int fboHandle, GLenum sourceMode, GLenum destMode, int sourceWidth, int sourceHeight, int destX, int destY, int destWidth, int destHeight, GLbitfield mask);
-
-	/* Copies the contents of a particular frambuffer store in this framebuffer to another */
-	void copyTo(FBO* fbo, unsigned int sourceStoreIndex, unsigned int destStoreIndex);
-
-	/* Copies the contents of a particular framebuffer store in this framebuffer to the screen */
-	void copyToScreen(unsigned int sourceStoreIndex, int x, int y, int width, int height);
-
-	/* Returns the framebuffer texture at a given index */
-	inline FramebufferStore* getFramebufferStore(unsigned int index) { return stores[index]; }
-
-	/* Binds this framebuffer */
-	inline void bind() { glBindFramebuffer(target, framebuffer); }
-
-	/* Unbinds this framebuffer */
-	inline void unbind() { glBindFramebuffer(target, 0); }
+	/* Method to setup this FBO for use (should be called after attaching all required attachments) */
+	void setup(RenderPass* renderPass);
 
 	/* Getters */
-	inline GLuint getHandle() { return framebuffer; }
+	inline uint32_t getWidth() { return width; }
+	inline uint32_t getHeight() { return height; }
+	inline Framebuffer* getFramebuffer() { return framebuffer; }
+	inline GLenum getGLFBO() { return glFBO; }
+	inline std::vector<VkAttachmentDescription>& getVkAttachmentDescriptions() { return vulkanAttachmentDescriptions; }
+	inline FramebufferAttachment* getAttachment(unsigned int index) { return attachments[index].attachment; }
+	inline unsigned int getAttachmentCount() { return attachments.size(); }
 };
-
-
-
-#endif /* CORE_RENDER_FBO_H_ */

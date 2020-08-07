@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_GUI_GUIBUTTON_H_
-#define CORE_GUI_GUIBUTTON_H_
+#pragma once
 
 #include "GUIComponent.h"
 
@@ -43,4 +42,3 @@ protected:
 	virtual void onChangeState() override;
 };
 
-#endif /* CORE_GUI_GUIBUTTON_H_ */

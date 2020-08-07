@@ -16,11 +16,12 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_SHADERINTERFACE_H_
-#define CORE_RENDER_SHADERINTERFACE_H_
+#pragma once
 
 #include "UBO.h"
 #include "Skinning.h"
+#include "DescriptorSet.h"
+#include "RenderShader.h"
 
 /*****************************************************************************
  * Various structures for data in shaders (must follow std140 layout rules)
@@ -28,14 +29,17 @@
 
 //https://stackoverflow.com/questions/7451476/opengl-uniform-buffer-std140-layout-a-driver-bug-or-did-i-misunderstand-the-spe
 
-struct ShaderBlock_Core {
-	Matrix4f ue_mvpMatrix;
-	Matrix4f ue_modelMatrix;
+struct ShaderBlock_Camera {
 	Matrix4f ue_viewMatrix;
 	Matrix4f ue_projectionMatrix;
-	Matrix4f ue_normalMatrix;
 
 	Vector4f ue_cameraPosition;
+};
+
+struct ShaderBlock_Model {
+	Matrix4f ue_mvpMatrix;
+	Matrix4f ue_modelMatrix;
+	Matrix4f ue_normalMatrix;
 };
 
 struct ShaderBlock_Material {
@@ -59,7 +63,7 @@ struct ShaderBlock_Skinning {
 	Matrix4f ue_bones[Skeleton::SKINNING_MAX_BONES];
 	int ue_useSkinning;
 
-	void updateUseSkinning(UBO* ubo) { ubo->update(&ue_useSkinning, sizeof(ue_bones), sizeof(ue_useSkinning)); };
+	void updateUseSkinning(UBO* ubo) { ubo->updateFrame(&ue_useSkinning, sizeof(ue_bones), sizeof(ue_useSkinning)); };
 };
 
 struct ShaderStruct_Light {
@@ -83,7 +87,7 @@ struct ShaderStruct_Light {
 	float padding2[2];
 };
 
-struct ShaderBlock_Lighting {
+struct ShaderBlock_LightBatch {
 	ShaderStruct_Light ue_lights[6];
 	Matrix4f ue_lightSpaceMatrix[6];
 
@@ -102,17 +106,18 @@ struct ShaderBlock_Terrain {
 	float ue_size;
 };
 
-struct ShaderBlock_GammaCorrection {
+struct ShaderBlock_GammaCorrectionFXAA {
+	Vector2f inverseTextureSize;
 	int gammaCorrect;
 	float exposureIn;
+	int fxaa;
 };
 
-struct ShaderBlock_PBREnvMapGen {
-	Matrix4f projection;
-	Matrix4f view;
+struct ShaderBlock_PBRGenEnvMap {
+	Matrix4f projectionViewMatrices[6];
 };
 
-struct ShaderBlock_PBRPrefilterMapGen {
+struct ShaderBlock_PBRGenPrefilterMap {
 	float envMapSize;
 	float roughness;
 };
@@ -134,6 +139,20 @@ struct ShaderBlock_ShadowCubemap {
 	Vector4f lightPos;
 };
 
+struct ShaderBlock_SDFText {
+	Vector4f outlineColour;
+	Vector4f shadowColour;
+	float smoothing;
+	float outline;
+	float shadow;
+	float shadowSmoothing;
+	Vector2f shadowOffset;
+};
+
+struct ShaderBlock_GaussianBlur {
+	bool horizontal;
+};
+
 /*****************************************************************************
  * The ShaderInterface class handles data transfer to shaders via UBO's
  *****************************************************************************/
@@ -149,63 +168,86 @@ public:
 		unsigned int binding;
 	};
 private:
-	/* Map storing UBO information */
-	std::unordered_map<unsigned int, UBOInfo> ubosInfo;
-	/* Map used to store UBO's with keys for accessing them */
-	std::unordered_map<unsigned int, UBO*> ubos;
-	/* UBO's used for Vulkan (Have multiple of same key) */
-	std::vector<UBO*> ubosVk;
+	/* Map storing descriptor set layouts */
+	std::unordered_map<unsigned int, DescriptorSetLayout*> descriptorSetLayouts;
+
+	/* Returns a descriptor set layout instance given it's ID (returns NULL
+	   if the ID does not exist) */
+	DescriptorSetLayout* createDescriptorSetLayout(unsigned int layout);
 public:
+	/* Set numbers used for specific kinds of descriptor sets*/
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_CAMERA      = 0;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_MATERIAL    = 1;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_MODEL       = 2;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH = 3;
+	static const unsigned int DESCRIPTOR_SET_NUMBER_PER_SCENE       = 4;
+
+	/* IDs for descriptor set layouts */
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_CAMERA                      = 0;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_MATERIAL                    = 1;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL                       = 2;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_LIGHT_BATCH                 = 3;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_MODEL_SKINNING              = 4;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_SHADOW_CUBEMAP              = 5;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAMMA_CORRECTION_FXAA       = 6;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_LIGHTING           = 7;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BASIC_PBR_DEFERRED_LIGHTING = 8;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_DEFERRED_PBR_SSR            = 9;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD                   = 10;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_TERRAIN                     = 11;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT             = 12;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_ENVIRONMENT_NO_DEFERRED = 13;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_SDF_TEXT                    = 14;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_BILLBOARD_SDF_TEXT          = 15;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_EQUI_TO_CUBE_MAP    = 16;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP      = 17;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP       = 18;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR               = 19;
+
 	/* The locations for attributes in the shaders */
-	static const unsigned int ATTRIBUTE_LOCATION_POSITION;
-	static const unsigned int ATTRIBUTE_LOCATION_TEXTURE_COORD;
-	static const unsigned int ATTRIBUTE_LOCATION_NORMAL;
-	static const unsigned int ATTRIBUTE_LOCATION_TANGENT;
-	static const unsigned int ATTRIBUTE_LOCATION_BITANGENT;
-	static const unsigned int ATTRIBUTE_LOCATION_BONE_IDS;
-	static const unsigned int ATTRIBUTE_LOCATION_BONE_WEIGHTS;
+	static const unsigned int ATTRIBUTE_LOCATION_POSITION      = 0;
+	static const unsigned int ATTRIBUTE_LOCATION_TEXTURE_COORD = 1;
+	static const unsigned int ATTRIBUTE_LOCATION_NORMAL        = 2;
+	static const unsigned int ATTRIBUTE_LOCATION_TANGENT       = 3;
+	static const unsigned int ATTRIBUTE_LOCATION_BITANGENT     = 4;
+	static const unsigned int ATTRIBUTE_LOCATION_BONE_IDS      = 5;
+	static const unsigned int ATTRIBUTE_LOCATION_BONE_WEIGHTS  = 6;
 
 	/* The ids for particular shader blocks */
-	static const unsigned int BLOCK_CORE;
-	static const unsigned int BLOCK_MATERIAL;
-	static const unsigned int BLOCK_SKINNING;
-	static const unsigned int BLOCK_LIGHTING;
-	static const unsigned int BLOCK_TERRAIN;
-	static const unsigned int BLOCK_GAMMA_CORRECTION;
-	static const unsigned int BLOCK_PBR_ENV_MAP_GEN;
-	static const unsigned int BLOCK_PBR_PREFILTER_MAP_GEN;
-	static const unsigned int BLOCK_PBR_LIGHTING_CORE;
-	static const unsigned int BLOCK_BILLBOARD;
-	static const unsigned int BLOCK_SHADOW_CUBEMAP;
+	static const unsigned int BLOCK_PBR_ENV_MAP_GEN        = 8;
+	static const unsigned int BLOCK_PBR_PREFILTER_MAP_GEN  = 9;
+	static const unsigned int BLOCK_PBR_LIGHTING_CORE      = 10;
 
 	/* Binding locations for shader blocks */
-	static const unsigned int UBO_BINDING_LOCATION_CORE;
-	static const unsigned int UBO_BINDING_LOCATION_MATERIAL;
-	static const unsigned int UBO_BINDING_LOCATION_SKINNING;
-	static const unsigned int UBO_BINDING_LOCATION_LIGHTING;
-	static const unsigned int UBO_BINDING_LOCATION_TERRAIN;
-	static const unsigned int UBO_BINDING_LOCATION_GAMMA_CORRECTION;
-	static const unsigned int UBO_BINDING_LOCATION_PBR_ENV_MAP_GEN;
-	static const unsigned int UBO_BINDING_LOCATION_PBR_PREFILTER_MAP_GEN;
-	static const unsigned int UBO_BINDING_LOCATION_PBR_LIGHTING_CORE;
-	static const unsigned int UBO_BINDING_LOCATION_BILLBOARD;
-	static const unsigned int UBO_BINDING_LOCATION_SHADOW_CUBEMAP;
+	static const unsigned int UBO_BINDING_LOCATION_CAMERA                 = 1;
+	static const unsigned int UBO_BINDING_LOCATION_MODEL                  = 2;
+	static const unsigned int UBO_BINDING_LOCATION_MATERIAL               = 3;
+	static const unsigned int UBO_BINDING_LOCATION_SKINNING               = 4;
+	static const unsigned int UBO_BINDING_LOCATION_LIGHT_BATCH            = 5;
+	static const unsigned int UBO_BINDING_LOCATION_TERRAIN                = 6;
+	static const unsigned int UBO_BINDING_LOCATION_GAMMA_CORRECTION_FXAA  = 7;
+	static const unsigned int UBO_BINDING_LOCATION_GEN_PBR_ENV_MAP        = 8;
+	static const unsigned int UBO_BINDING_LOCATION_GEN_PBR_PREFILTER_MAP  = 9;
+	static const unsigned int UBO_BINDING_LOCATION_PBR_LIGHTING_CORE      = 10;
+	static const unsigned int UBO_BINDING_LOCATION_BILLBOARD              = 11;
+	static const unsigned int UBO_BINDING_LOCATION_SHADOW_CUBEMAP         = 12;
+	static const unsigned int UBO_BINDING_LOCATION_SDF_TEXT               = 4;
+	static const unsigned int UBO_BINDING_LOCATION_GAUSSIAN_BLUR          = 7;
 
 	/* Constructor */
-	ShaderInterface();
+	ShaderInterface() {}
 
 	/* Destructor */
 	virtual ~ShaderInterface();
 
-	/* Method to add a UBO to this interface */
-	void add(unsigned int id, unsigned int size, unsigned int usage, unsigned int binding);
+	/* Method to add a descriptor set layout to this interface */
+	void add(unsigned int id, DescriptorSetLayout* layout);
 
-	/* Method to add required UBO's and data to a particular RenderData instance ready for rendering with a particular shader */
-	void setup(RenderData* renderData, unsigned int shaderID);
+	/* Sets up a render shader for use (e.g. adds required DescriptorSetLayout instances) */
+	void setup(unsigned int shaderID, RenderShader* renderShader);
 
-	/* Method to obtain a UBO from this interface (Should only call once per object - for Vulkan this will return a new UBO each time) */
-	UBO* getUBO(unsigned int id);
+	/* Method used to obtain a descriptor set layout from this interface */
+	DescriptorSetLayout* getDescriptorSetLayout(unsigned int id);
 };
 
 
-#endif /* CORE_RENDER_SHADERINTERFACE_H_ */

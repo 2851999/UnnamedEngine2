@@ -36,6 +36,54 @@ MLAttribute::MLAttribute(std::string name, std::string data) {
 	this->data = data;
 }
 
+Vector2f MLAttribute::getDataAsVector2f() {
+	Vector2f vector;
+
+	//Remove the parentheses and split up the string by a comma
+	std::vector<std::string> values = utils_string::strSplit(data.substr(1, data.length() - 2), ',');
+	//Check the size
+	if (values.size() == 2) {
+		//Go through and assign the vector values
+		for (unsigned int i = 0; i < values.size(); ++i)
+			vector[i] = utils_string::strToFloat(values[i]);
+	} else
+		Logger::log("Invalid format to convert to Vector2f " + this->data, "MLAttribute", LogType::Error);
+
+	return vector;
+}
+
+Vector3f MLAttribute::getDataAsVector3f() {
+	Vector3f vector;
+
+	//Remove the parentheses and split up the string by a comma
+	std::vector<std::string> values = utils_string::strSplit(data.substr(1, data.length() - 2), ',');
+	//Check the size
+	if (values.size() == 3) {
+		//Go through and assign the vector values
+		for (unsigned int i = 0; i < values.size(); ++i)
+			vector[i] = utils_string::strToFloat(values[i]);
+	} else
+		Logger::log("Invalid format to convert to Vector3f " + this->data, "MLAttribute", LogType::Error);
+
+	return vector;
+}
+
+Vector4f MLAttribute::getDataAsVector4f() {
+	Vector4f vector;
+
+	//Remove the parentheses and split up the string by a comma
+	std::vector<std::string> values = utils_string::strSplit(data.substr(1, data.length() - 2), ',');
+	//Check the size
+	if (values.size() == 4) {
+		//Go through and assign the vector values
+		for (unsigned int i = 0; i < values.size(); ++i)
+			vector[i] = utils_string::strToFloat(values[i]);
+	} else
+		Logger::log("Invalid format to convert to Vector4f " + this->data, "MLAttribute", LogType::Error);
+
+	return vector;
+}
+
 std::string MLAttribute::toString() {
 	return name + "=\"" + data + "\"";
 }

@@ -16,17 +16,19 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_VBO_H_
-#define CORE_RENDER_VBO_H_
+#pragma once
 
 #include <GL/glew.h>
 
-#include "Shader.h"
+#include "RenderShader.h"
 #include "../vulkan/VulkanBuffer.h"
+#include "DataUsage.h"
 
 /*****************************************************************************
  * The VBO class is used to manage a vertex buffer object
  *****************************************************************************/
+
+enum class DataUsage;
 
 template <typename T>
 class VBO {
@@ -45,20 +47,22 @@ public:
 		GLuint type;
 	};
 private:
-	/* Various pieces of data for OpenGL */
-	GLuint                buffer;
-	GLenum                target;
-	GLsizeiptr            size;
-	std::vector<T>&       data;
-	GLenum                usage;
+	/* Buffer handle for OpenGL */
+	GLuint bufferGL = 0;
+
+	/* The Vulkan buffer for this VBO */
+	VulkanBufferObject* vulkanBuffer = NULL;
+
+	/* Data for this VBO */
+	uint32_t        size;
+	std::vector<T>& data;
+	DataUsage       usage;
 
 	/* The stride for data in this VBO */
-	unsigned int          stride = 0;
+	unsigned int    stride = 0;
 
-	bool                  instanced;
-
-	/* The bulkan buffer for use with Vulkan */
-	VulkanBuffer* vulkanBuffer = NULL;
+	/* States whether this VBO will be used in instanced rendering */
+	bool            instanced;
 
 	/* The attributes this VBO supplies */
 	std::vector<Attribute> attributes;
@@ -68,24 +72,21 @@ private:
 	std::vector<VkVertexInputAttributeDescription> vulkanAttributeDescriptions;
 public:
 	/* The constructors */
-	VBO(GLenum target, GLsizeiptr size, std::vector<T>& data, GLenum usage, bool instanced = false) :
-		buffer(0), target(target), size(size), data(data), usage(usage), instanced(instanced) {}
+	VBO(uint32_t size, std::vector<T>& data, DataUsage usage, bool instanced = false) :
+		size(size), data(data), usage(usage), instanced(instanced) {}
 
 	/* The destructor */
 	virtual ~VBO() {
-		if (buffer > 0)
-			glDeleteBuffers(1, &buffer);
-		if (vulkanBuffer != NULL) {
-			delete vulkanBuffer;
-			vulkanBuffer = NULL;
-		}
+		if (bufferGL > 0)
+			glDeleteBuffers(1, &bufferGL);
+		delete vulkanBuffer;
 	}
 
 	/* Various OpenGL methods */
-	inline void bind() { glBindBuffer(target, buffer); }
+	inline void bindGL() { glBindBuffer(GL_ARRAY_BUFFER, bufferGL); }
 
 	/* Used to add an attribute */
-	void addAttributeWithType(GLuint type, GLint location, GLint size, GLuint divisor = 0);
+	void addAttributeWithType(GLuint type, GLint location, int size, GLuint divisor = 0);
 	inline void addAttribute(int location, int size, unsigned int divisor = 0) { addAttributeWithType(GL_FLOAT, location, size, divisor); }
 
 	/* Used to create and setup this VBO */
@@ -100,16 +101,12 @@ public:
 
 	/* Methods used to update the VBO's data */
 	void update();
-	void updateStream(GLsizeiptr size);
+	void updateFrame();
+	void updateStream(uint32_t size);
 
 	/* Setters and getters */
 	inline std::vector<T>& getData() { return data; }
-	inline VulkanBuffer* getVkBuffer() { return vulkanBuffer; }
+	inline VulkanBuffer* getVkCurrentBuffer() { return vulkanBuffer->getCurrentBuffer(); }
 	inline VkVertexInputBindingDescription getVkBindingDescription() { return vulkanVertexInputBindingDescription; }
 	inline std::vector<VkVertexInputAttributeDescription> getVkAttributeDescriptions() { return vulkanAttributeDescriptions; }
 };
-
-template class VBO<GLfloat>;
-template class VBO<unsigned int>;
-
-#endif /* CORE_RENDER_VBO_H_ */

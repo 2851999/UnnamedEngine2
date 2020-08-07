@@ -98,7 +98,8 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 				if (currentMesh->HasTextureCoords(0)) {
 					aiVector3D& textureCoord = currentMesh->mTextureCoords[0][i];
 					currentData->addTextureCoord(Vector2f(textureCoord.x, textureCoord.y));
-				}
+				} else
+					currentData->addTextureCoord(Vector2f()); //For Vulkan want to keep same material data -> requires texture coordinates even if not used
 				//Add the normals data if it exists
 				if (currentMesh->HasNormals()) {
 					aiVector3D& normal = currentMesh->mNormals[i];
@@ -112,6 +113,9 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 						//Add the bitangent data
 						aiVector3D& bitangent = currentMesh->mBitangents[i];
 						currentData->addBitangent(Vector3f(bitangent.x, bitangent.y, bitangent.z));
+					} else {
+						currentData->addTangent(Vector3f()); //For Vulkan want to keep same material data -> requires tangents/bitangents even if not used
+						currentData->addBitangent(Vector3f());
 					}
 				}
 			}
@@ -308,7 +312,7 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 		return mesh;
 	} else {
 		//Log an error as Assimp didn't manage to load the model correctly
-		Logger::log("The model '" + path + fileName + "' could not be loaded", "Mesh", LogType::Error);
+		Logger::log("The model '" + path + fileName + "' could not be loaded. Assimp: " + utils_string::str(aiGetErrorString()), "Mesh", LogType::Error);
 		return NULL;
 	}
 }
@@ -747,6 +751,8 @@ Mesh* MeshLoader::loadEngineModel(std::string path, std::string fileName) {
 
 	//Create the mesh
 	Mesh* mesh = new Mesh(data);
+	//Delete the default material created in the mesh
+	delete mesh->getMaterial();
 	mesh->setSkeleton(skeleton);
 	mesh->setMaterials(materials);
 	mesh->setCullingEnabled(true);

@@ -16,8 +16,7 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_RENDER_SHADER_H_
-#define CORE_RENDER_SHADER_H_
+#pragma once
 
 #include "../Window.h"
 #include <unordered_map>
@@ -25,7 +24,6 @@
 #include "Colour.h"
 #include "../Matrix.h"
 #include "../Resource.h"
-#include "GraphicsState.h"
 
 /*****************************************************************************
  * The Shader class handles a shader program
@@ -49,6 +47,7 @@ private:
 
 	/* The shader modules for Vulkan */
 	VkShaderModule vertexShaderModule   = VK_NULL_HANDLE;
+	VkShaderModule geometryShaderModule = VK_NULL_HANDLE;
 	VkShaderModule fragmentShaderModule = VK_NULL_HANDLE;
 
 	/* Loads and returns an included file */
@@ -68,7 +67,8 @@ public:
 	Shader() {}
 	Shader(GLint vertexShader, GLint fragmentShader) : Shader(vertexShader, -1, fragmentShader) {}
 	Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader);
-	Shader(VkShaderModule vertexShaderModule, VkShaderModule fragmentShaderModule);
+	Shader(VkShaderModule vertexShaderModule, VkShaderModule fragmentShaderModule) : Shader(vertexShaderModule, VK_NULL_HANDLE, fragmentShaderModule) {}
+	Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShader, VkShaderModule fragmentShaderModule);
 	virtual ~Shader();
 
 	/* Various shader functions */
@@ -76,7 +76,6 @@ public:
 	void detach(GLuint shader);
 	void use();
 	void stopUsing();
-	virtual void destroy() override;
 	void addUniform(std::string id, std::string name);
 	void addAttribute(std::string id, std::string name);
 
@@ -85,6 +84,7 @@ public:
 	GLint getAttributeLocation(std::string id);
 
 	VkShaderModule& getVkVertexShaderModule() { return vertexShaderModule; }
+	VkShaderModule& getVkGeometryShaderModule() { return geometryShaderModule; }
 	VkShaderModule& getVkFragmentShaderModule() { return fragmentShaderModule; }
 
 	/* Various methods to assign values */
@@ -110,71 +110,19 @@ public:
 
 	/* Methods used to load a shader */
 	static void loadShaderSource(std::string path, std::vector<std::string> &fileText, ShaderSource &source, unsigned int uboBindingOffset = 0);
-	static ShaderSource loadShaderSource(std::string path, unsigned int uboBindingOffset = 0);
-	static Shader* loadShader(std::string path);
+	static ShaderSource loadShaderSource(std::string path, unsigned int uboBindingOffset = 0, std::string preSource = "");
+	static Shader* loadShader(std::string path, std::vector<std::string> defines = {});
 
 	/* Methods to read a shader and output all of the complete files for that shader (with all includes replaced as requested) - these
 	 * will not include mapped uniforms since they are intended for compilation to SPIR-V */
-	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
-	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0);
+	static void outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0, std::string preSource = "");
+	static void outputCompleteShaderFiles(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset = 0, std::string preSource = "");
 
-	/* Utility method to use given glslValidator.exe path to compile a shader from the engine to SPIR-V */
-	static void compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath);
+	/* Utility method to use given glslValidator.exe path to compile a shader from the engine to SPIR-V 
+	   Also takes a list of things to define in the shader before compiling e.g. "SKINNING" would place
+	   "#define SKINNING" in the shader before compiling */
+	static void compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath, std::vector<std::string> defines = {});
 
 	/* Utility method to use the above method to compile an engine shader and place it in the appropriate location */
-	static void compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath);
+	static void compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath, std::vector<std::string> defines = {});
 };
-
-/*****************************************************************************
- * The RenderShader class handles a Shader for rendering
- *****************************************************************************/
-
-class RenderShader {
-private:
-	/* The id for this RenderShader */
-	unsigned int id;
-
-	/* The shaders used for forward rendering - will always use the last
-	 * shader that was added for rendering to allow them to be overridden */
-	std::vector<Shader*> forwardShaders;
-
-	/* The shaders used for the geometry pass of deferred rendering */
-	std::vector<Shader*> deferredGeomShaders;
-
-	/* Boolean that states whether the deferred geometry shader should be used */
-	bool useDeferredGeom = false;
-
-	/* The graphics state this shader uses */
-	GraphicsState* graphicsState;
-public:
-	/* Various constructors */
-	RenderShader(unsigned int id, Shader* forwardShader, Shader* deferredGeomShader);
-
-	/* Descructor */
-	virtual ~RenderShader();
-
-	/* Methods used to add/remove a forward shader */
-	void addForwardShader(Shader* forwardShader);
-	void removeForwardShader(Shader* forwardShader);
-	void removeLastForwardShader();
-
-	/* Methods used to add/remove a deferred geometry shader */
-	void addDeferredGeomShader(Shader* deferredGeomShader);
-	void removeDeferredGeomShader(Shader* deferredGeomShader);
-	void removeLastDeferredGeomShader();
-
-	/* The method used to get the shader that should be used */
-	Shader* getShader();
-
-	/* The method used to get the forward and deferred geometry shaders */
-	inline Shader* getForwardShader() { return forwardShaders.back(); }
-	inline Shader* getDeferredGeomShader() { return deferredGeomShaders.back(); }
-
-	inline void useGeometryShader(bool use) { useDeferredGeom = use; }
-
-	/* Getters */
-	unsigned int getID() { return id; }
-	GraphicsState* getGraphicsState() { return graphicsState; }
-};
-
-#endif /* CORE_RENDER_SHADER_H_ */

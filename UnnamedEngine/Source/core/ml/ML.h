@@ -16,12 +16,12 @@
  *
  *****************************************************************************/
 
-#ifndef CORE_ML_ML_H_
-#define CORE_ML_ML_H_
+#pragma once
 
 #include <string>
 #include <vector>
 
+#include "../Vector.h"
 #include "../../utils/Utils.h"
 
 /*****************************************************************************
@@ -44,6 +44,9 @@ public:
 	inline int  		getDataAsInt()   { return utils_string::strToInt(data);   }
 	inline bool 		getDataAsBool()  { return utils_string::strToBool(data);  }
 	inline float 		getDataAsFloat() { return utils_string::strToFloat(data); }
+	Vector2f            getDataAsVector2f();
+	Vector3f            getDataAsVector3f();
+	Vector4f            getDataAsVector4f();
 
 	/* Various setters and getters */
 	inline void setName(std::string name) { this->name = name; }
@@ -166,4 +169,3 @@ public:
 	MLElement getDocumentRoot();
 };
 
-#endif /* CORE_ML_ML_H_ */

@@ -25,7 +25,7 @@
  * The UBO class
  *****************************************************************************/
 
-UBO::UBO(void* data, unsigned int size, GLenum usage, unsigned int blockBinding) {
+UBO::UBO(void* data, unsigned int size, DataUsage usage, unsigned int blockBinding) {
 	this->size = size;
 	this->blockBinding = blockBinding;
 
@@ -34,7 +34,7 @@ UBO::UBO(void* data, unsigned int size, GLenum usage, unsigned int blockBinding)
 		//Setup the UBO
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-		glBufferData(GL_UNIFORM_BUFFER, size, data, usage);
+		glBufferData(GL_UNIFORM_BUFFER, size, data, Renderer::convertToGL(usage));
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		glBindBufferBase(GL_UNIFORM_BUFFER, blockBinding, buffer);
@@ -43,20 +43,32 @@ UBO::UBO(void* data, unsigned int size, GLenum usage, unsigned int blockBinding)
 		this->blockBinding += VULKAN_BINDING_OFFSET;
 
 		//Setup the buffer for Vulkan
-		vulkanBuffers.resize(Vulkan::getSwapChain()->getImageCount());
-
-		for (unsigned int i = 0; i < Vulkan::getSwapChain()->getImageCount(); ++i)
-			vulkanBuffers[i] = new VulkanBuffer(size, Vulkan::getDevice(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, false);
+		vulkanBuffer = new VulkanBufferObject(size, Vulkan::getDevice(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, false, true); //Always allow UBO's to be updated
 	}
 }
 
 UBO::~UBO() {
 	if (buffer > 0)
 		glDeleteBuffers(1, &buffer);
-	else if (vulkanBuffers.size() > 0) {
-		for (VulkanBuffer* buffer : vulkanBuffers)
-			delete buffer;
-		vulkanBuffers.clear();
+	else if (vulkanBuffer) {
+		delete vulkanBuffer;
+	}
+}
+
+void UBO::bindGL() {
+	//Bind the buffer
+	glBindBufferBase(GL_UNIFORM_BUFFER, blockBinding, buffer);
+}
+
+void UBO::updateFrame(void* data, unsigned int offset, unsigned int size) {
+	//Check whether using Vulkan or OpenGL
+	if (! BaseEngine::usingVulkan()) {
+		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	} else {
+		//Update the current buffer
+		vulkanBuffer->updateFrame(data, offset, size);
 	}
 }
 
@@ -66,10 +78,9 @@ void UBO::update(void* data, unsigned int offset, unsigned int size) {
 		glBindBuffer(GL_UNIFORM_BUFFER, buffer);
 		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-	} else {
+	} else
 		//Update the current buffer
-		vulkanBuffers[Vulkan::getCurrentFrame()]->copyData(data, offset, size);
-	}
+		vulkanBuffer->update(data, offset, size);
 }
 
 VkWriteDescriptorSet UBO::getVkWriteDescriptorSet(unsigned int frame, const VkDescriptorSet descriptorSet, const VkDescriptorBufferInfo* bufferInfo) {

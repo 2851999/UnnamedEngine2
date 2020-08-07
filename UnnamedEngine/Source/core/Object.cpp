@@ -38,20 +38,17 @@ GameObject::~GameObject() {
 
 void GameObject::render() {
 	if (hasMesh()) {
-		if (! shouldCull()) {
-			if (! BaseEngine::usingVulkan())
-				renderShader->getShader()->use();
+		if (! shouldCull())
 			Renderer::render(mesh, getModelMatrix(), renderShader);
-		}
 	}
 }
 
-void GameObject::setMesh(Mesh* mesh, RenderShader* shader) {
+void GameObject::setMesh(Mesh* mesh, RenderShader* shader, DataUsage vboUsage) {
 	if (this->mesh != NULL)
 		delete this->mesh;
 	this->mesh = mesh;
 	if (shader) {
-		mesh->setup(shader);
+		mesh->setup(shader, vboUsage);
 		this->renderShader = shader;
 	}
 }
@@ -106,9 +103,8 @@ Vector3f GameObject3D::getSize() {
 }
 
 bool GameObject3D::shouldCull(Frustum& frustum) {
-	if (hasMesh() && getMesh()->cullingEnabled()) {
+	if (hasMesh() && getMesh()->cullingEnabled())
 		return ! frustum.sphereInFrustum(cullingCentre, getMesh()->getBoundingSphereRadius() * getScale().max());
-	}
 	return false;
 }
 
