@@ -232,25 +232,6 @@ void Vulkan::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, ui
 		Logger::log("Failed to bind device memory to image", "Vulkan", LogType::Error);
 }
 
-VkImageView Vulkan::createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t layerCount) {
-	VkImageViewCreateInfo viewInfo ={};
-	viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image    = image;
-	viewInfo.viewType = viewType;
-	viewInfo.format   = format;
-	viewInfo.subresourceRange.aspectMask     = aspectMask;
-	viewInfo.subresourceRange.baseMipLevel   = 0;
-	viewInfo.subresourceRange.levelCount     = mipLevels;
-	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount     = layerCount;
-
-	VkImageView imageView;
-	if (vkCreateImageView(device->getLogical(), &viewInfo, nullptr, &imageView) != VK_SUCCESS)
-		Logger::log("Failed to create image view", "Vulkan", LogType::Error);
-
-	return imageView;
-}
-
 VkImageView Vulkan::createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t baseMipLevel, uint32_t layerCount) {
 	VkImageViewCreateInfo viewInfo ={};
 	viewInfo.sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -541,12 +522,36 @@ void Vulkan::updateDescriptorSetQueue() {
 	//Go through the descriptor sets
 	for (unsigned int i = 0; i < descriptorSetUpdateQueue.size(); ++i) {
 		//Update the current set, and prepare to remove it if finished updating
-		if (updateDescriptorSetFrame(descriptorSetUpdateQueue[i]))
+		if (updateDescriptorSetFrame(descriptorSetUpdateQueue[i])) {
+			descriptorSetUpdateQueue[i].set->removedFromUpdateQueue();
 			removeEnd++;
+		}
 	}
 	//Remove all finished updates from the queue
 	if (removeEnd > 0)
 		descriptorSetUpdateQueue.erase(descriptorSetUpdateQueue.begin(), descriptorSetUpdateQueue.begin() + removeEnd);
+}
+
+void Vulkan::removeFromDescriptorSetQueue(DescriptorSet* set) {
+	//Remove all occurences of the descriptor set from the queue
+	unsigned int i = 0;
+	while (i < descriptorSetUpdateQueue.size()) {
+		if (descriptorSetUpdateQueue[i].set == set)
+			descriptorSetUpdateQueue.erase(descriptorSetUpdateQueue.begin() + i);
+		else
+			++i;
+	}
+}
+
+void Vulkan::removeFromVulkanBufferObjectQueue(VulkanBufferObject* instance) {
+	//Remove all occurences of the descriptor set from the queue
+	unsigned int i = 0;
+	while (i < vulkanBufferObjectUpdateQueue.size()) {
+		if (vulkanBufferObjectUpdateQueue[i].instance == instance)
+			vulkanBufferObjectUpdateQueue.erase(vulkanBufferObjectUpdateQueue.begin() + i);
+		else
+			++i;
+	}
 }
 
 void Vulkan::updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size) {
@@ -580,8 +585,10 @@ void Vulkan::updateVulkanBufferObjectQueue() {
 	//Go through the descriptor sets
 	for (unsigned int i = 0; i < vulkanBufferObjectUpdateQueue.size(); ++i) {
 		//Update the current set, and prepare to remove it if finished updating
-		if (updateVulkanBufferObjectFrame(vulkanBufferObjectUpdateQueue[i]))
+		if (updateVulkanBufferObjectFrame(vulkanBufferObjectUpdateQueue[i])) {
+			vulkanBufferObjectUpdateQueue[i].instance->removedFromUpdateQueue();
 			removeEnd++;
+		}
 	}
 	//Remove all finished updates from the queue
 	if (removeEnd > 0)

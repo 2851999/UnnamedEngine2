@@ -172,49 +172,11 @@ void Texture::create() {
 	glGenTextures(1, &texture);
 }
 
-void Texture::setupVk(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout) {
-	//Create the image
-	Vulkan::createImage(width, height, 1, 1, samples, format, VK_IMAGE_TILING_OPTIMAL, usage, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
-	//Create the image view
-	textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, aspectMask, 1, 1);
-	//Create the sampler
-	VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
-	samplerInfo.maxLod = 1.0f;
-	samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE; //For depth
-
-	if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
-		Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
-
-	//Setup the descriptor info
-	imageInfo.imageLayout = imageLayout;
-	imageInfo.imageView = textureVkImageView;
-	imageInfo.sampler = textureVkSampler;
-}
-
-void Texture::setupCubemapVk(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout) {
-	//Create the image
-	Vulkan::createImage(width, height, 1, 6, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
-	//Create the image view
-	textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_CUBE, format, aspectMask, 1, 6);
-	//Create the sampler
-	VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
-	samplerInfo.maxLod = 1.0f;
-	samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE; //For depth
-
-	if (vkCreateSampler(Vulkan::getDevice()->getLogical(), &samplerInfo, nullptr, &textureVkSampler) != VK_SUCCESS)
-		Logger::log("Failed to create texture sampler", "Texture", LogType::Error);
-
-	//Setup the descriptor info
-	imageInfo.imageLayout = imageLayout;
-	imageInfo.imageView = textureVkImageView;
-	imageInfo.sampler = textureVkSampler;
-}
-
 void Texture::setupVk(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits samples, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout) {
 	//Create the image
 	Vulkan::createImage(width, height, mipLevels, 1, samples, format, VK_IMAGE_TILING_OPTIMAL, usage, 0, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
 	//Create the image view
-	textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, aspectMask, mipLevels, 1);
+	textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, aspectMask, mipLevels, 0, 1);
 	//Create the sampler
 	VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
 	samplerInfo.maxLod = 1.0f;
@@ -233,7 +195,7 @@ void Texture::setupCubemapVk(uint32_t width, uint32_t height, uint32_t mipLevels
 	//Create the image
 	Vulkan::createImage(width, height, mipLevels, 6, VK_SAMPLE_COUNT_1_BIT, format, VK_IMAGE_TILING_OPTIMAL, usage, VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureVkImage, textureVkImageMemory);
 	//Create the image view
-	textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_CUBE, format, aspectMask, mipLevels, 6);
+	textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_CUBE, format, aspectMask, mipLevels, 0, 6);
 	//Create the sampler
 	VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
 	samplerInfo.maxLod = 1.0f;
@@ -317,7 +279,7 @@ Texture::Texture(void* imageData, unsigned int numComponents, int width, int hei
 			generateMipmapsVk(); //Transitions image to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL here
 
 		//Create the image view
-		textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, 1);
+		textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels, 0, 1);
 
 		//------------------------------------------------------CREATE THE SAMPLER------------------------------------------------------
 		VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
@@ -711,7 +673,7 @@ Cubemap::Cubemap(std::string path, std::vector<std::string> faces) : Texture() {
 				//Free the loaded image data
 				Texture::freeTexture(textureData[i]);
 
-		    textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_CUBE, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 6);
+		    textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_CUBE, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 0, 6);
 
 			VkSamplerCreateInfo samplerInfo = parameters.getVkSamplerCreateInfo();
 			samplerInfo.maxLod = static_cast<float>(1);

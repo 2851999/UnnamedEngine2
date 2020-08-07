@@ -56,6 +56,9 @@ private:
 	/* Boolean that states whether SSR should be used or not */
 	bool ssr;
 
+	/* Boolean that states whether bloom should be used or not */
+	bool bloom;
+
 	/* Boolean that states whether post processing should be used or not */
 	bool postProcessing;
 
@@ -85,17 +88,35 @@ private:
 	GraphicsPipeline* pipelineGammaCorrectionFXAA;
 	GraphicsPipeline* pipelineDeferredLighting;
 	GraphicsPipeline* pipelineDeferredLightingBlend;
+	GraphicsPipeline* pipelineGaussianBlur1;
+	GraphicsPipeline* pipelineGaussianBlur2;
+	GraphicsPipeline* pipelineBloomCombine;
 	GraphicsPipeline* pipelineDeferredSSR;
 
 	/* Meshes for rendering to the screen */
 	Mesh* screenTextureMesh;
 	Mesh* deferredRenderingScreenTextureMesh;
+	Mesh* bloomSSRScreenTextureMesh; //Renders to SSR pass with bloom info
+	/* These render to the gaussian blur pass, where
+	   1 - uses attachment from lighting framebuffer
+	   2 - uses attachment from gaussianBlur1RenderPass1
+	   3 - uses attachment from gaussianBlur1RenderPass2 */
+	Mesh* gaussianBlurBloomScreenTextureMesh1;
+	Mesh* gaussianBlurBloomScreenTextureMesh2;
+	Mesh* gaussianBlurBloomScreenTextureMesh3;
 
 	/* Graphics pipeline for rendering the final quad */
 	GraphicsPipeline* pipelineFinal;
 
 	/* Deferred geometry render pass */
 	RenderPass* deferredGeometryRenderPass = NULL;
+
+	/* Bloom render pass -> rendering to normal/bright textures */
+	RenderPass* deferredBloomRenderPass = NULL;
+
+	/* Render passes for gaussian blur */
+	RenderPass* gaussianBlur1RenderPass = NULL;
+	RenderPass* gaussianBlur2RenderPass = NULL;
 
 	/* SSR render pass */
 	RenderPass* deferredPBRSSRRenderPass = NULL;
@@ -106,8 +127,18 @@ private:
 	/* Descriptor set for the geometry buffer */
 	DescriptorSet* descriptorSetGeometryBuffer;
 
-	/* Descriptor set for the geometry buffer SSR */
+	/* Descriptor sets for gaussian blur */
+	ShaderBlock_GaussianBlur gaussianBlurData[2];
+	DescriptorSet* descriptorSetsGaussianBlur[2];
+
+	/* Number of blurs to execute for bloom */
+	unsigned int gaussianBlurAmount = 6;
+
+	/* Descriptor set for the geometry buffer to be used for the SSR shader*/
 	DescriptorSet* descriptorSetGeometryBufferSSR;
+
+	/* Returns a MeshData* instance for rendering to the screen */
+	MeshData* createScreenMeshData();
 
 	/* Method used to render this scene (Ignoring any post processing) */
 	void renderScene();
@@ -116,7 +147,7 @@ public:
 	static const unsigned int NUM_LIGHTS_IN_BATCH = 6;
 
 	/* Constructor */
-	RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing, PBREnvironment* pbrEnvironment = NULL);
+	RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool postProcessing, PBREnvironment* pbrEnvironment = NULL);
 
 	/* Destructor */
 	virtual ~RenderScene();

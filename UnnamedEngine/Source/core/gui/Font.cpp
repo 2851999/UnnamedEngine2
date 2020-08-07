@@ -173,7 +173,7 @@ void Font::setup(std::string path, unsigned int size, TextureParameters paramete
 
 	    vkDestroyBuffer(Vulkan::getDevice()->getLogical(), stagingBuffer, nullptr);
 	    vkFreeMemory(Vulkan::getDevice()->getLogical(), stagingBufferMemory, nullptr);
-		VkImageView textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 1);
+		VkImageView textureVkImageView = Vulkan::createImageView(textureVkImage, VK_IMAGE_VIEW_TYPE_2D, format, VK_IMAGE_ASPECT_COLOR_BIT, 1, 0, 1);
 
 		texture = new Texture(width, height, textureVkImage, textureVkImageMemory, textureVkImageView, parameters);
 	}

@@ -25,7 +25,7 @@
 
 #include "../BaseEngine.h"
 
-RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing, PBREnvironment* pbrEnvironment) : deferred(deferred), pbr(pbr), ssr(ssr), postProcessing(postProcessing), pbrEnvironment(pbrEnvironment) {
+RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool postProcessing, PBREnvironment* pbrEnvironment) : deferred(deferred), pbr(pbr), ssr(ssr), bloom(bloom), postProcessing(postProcessing), pbrEnvironment(pbrEnvironment) {
 	//Create the FBO for rendering offscreen
 	uint32_t width = Window::getCurrentInstance()->getSettings().windowWidth;
 	uint32_t height = Window::getCurrentInstance()->getSettings().windowHeight;
@@ -55,13 +55,7 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing,
 		pipelineGammaCorrectionFXAA = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GAMMA_CORRECTION_FXAA), Renderer::getDefaultRenderPass());
 
 		//Setup the screen texture mesh
-		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+		MeshData* meshData = createScreenMeshData();
 		screenTextureMesh = new Mesh(meshData);
 		screenTextureMesh->getMaterial()->setDiffuse(postProcessingRenderPass->getFBO()->getAttachment(0));
 
@@ -105,21 +99,78 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing,
 		descriptorSetGeometryBuffer->setup();
 
 		//Setup the screen texture mesh
-		MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-		meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-		meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+		MeshData* meshData = createScreenMeshData();
 		deferredRenderingScreenTextureMesh = new Mesh(meshData);
 		deferredRenderingScreenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+
+		if (bloom) {
+			FBO* bloomFBO = new FBO(width, height, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
+				//FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), false }
+			});
+
+			deferredBloomRenderPass = new RenderPass(bloomFBO);
+
+			FBO* gaussianBlur1FBO = new FBO(width, height, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true }//,
+				//FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), false }
+			});
+
+			FBO* gaussianBlur2FBO = new FBO(width, height, {
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true }//,
+				//FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), false }
+			});
+
+			gaussianBlur1RenderPass = new RenderPass(gaussianBlur1FBO);
+			gaussianBlur2RenderPass = new RenderPass(gaussianBlur2FBO);
+
+			pipelineGaussianBlur1 = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GAUSSIAN_BLUR), gaussianBlur1RenderPass);
+			pipelineGaussianBlur2 = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_GAUSSIAN_BLUR), gaussianBlur2RenderPass);
+
+			//Setup the screen texture meshes
+			MeshData* meshData1 = createScreenMeshData();
+			gaussianBlurBloomScreenTextureMesh1 = new Mesh(meshData1);
+			gaussianBlurBloomScreenTextureMesh1->getMaterial()->setDiffuse(deferredBloomRenderPass->getFBO()->getAttachment(1)); //Bright texture
+
+			gaussianBlurBloomScreenTextureMesh1->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+
+			MeshData* meshData2 = createScreenMeshData();
+			gaussianBlurBloomScreenTextureMesh2 = new Mesh(meshData2);
+			gaussianBlurBloomScreenTextureMesh2->getMaterial()->setDiffuse(gaussianBlur1RenderPass->getFBO()->getAttachment(0)); //Bright texture
+
+			gaussianBlurBloomScreenTextureMesh2->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+
+			MeshData* meshData3 = createScreenMeshData();
+			gaussianBlurBloomScreenTextureMesh3 = new Mesh(meshData3);
+			gaussianBlurBloomScreenTextureMesh3->getMaterial()->setDiffuse(gaussianBlur2RenderPass->getFBO()->getAttachment(0)); //Bright texture
+
+			gaussianBlurBloomScreenTextureMesh3->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+
+			gaussianBlurData[0].horizontal = true;
+			gaussianBlurData[1].horizontal = false;
+
+			descriptorSetsGaussianBlur[0] = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR));
+			descriptorSetsGaussianBlur[0]->getUBO(0)->update(&gaussianBlurData[0], 0, sizeof(ShaderBlock_GaussianBlur));
+			descriptorSetsGaussianBlur[0]->setup();
+
+			descriptorSetsGaussianBlur[1] = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR));
+			descriptorSetsGaussianBlur[1]->getUBO(0)->update(&gaussianBlurData[1], 0, sizeof(ShaderBlock_GaussianBlur));
+			descriptorSetsGaussianBlur[1]->setup();
+
+			MeshData* meshData4 = createScreenMeshData();
+			bloomSSRScreenTextureMesh = new Mesh(meshData4);
+			bloomSSRScreenTextureMesh->getMaterial()->setAmbient(((gaussianBlurAmount % 2) == 1) ? gaussianBlur1RenderPass->getFBO()->getAttachment(0) : gaussianBlur2RenderPass->getFBO()->getAttachment(0));
+			bloomSSRScreenTextureMesh->getMaterial()->setDiffuse(deferredBloomRenderPass->getFBO()->getAttachment(0));
+
+			bloomSSRScreenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+		}
 
 		if (ssr) {
 
 			FBO* ssrFBO = new FBO(width, height, {
-				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },
-				FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), false }
+				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },//
+				//FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), false }
 			});
 
 			deferredPBRSSRRenderPass = new RenderPass(ssrFBO);
@@ -134,8 +185,15 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool postProcessing,
 			pipelineDeferredSSR = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_DEFERRED_PBR_SSR), postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass());
 		}
 
-		pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? (pbrEnvironment ? Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING) : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
-		pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? (pbrEnvironment ? Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND) : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+		if (bloom) {
+			pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbrEnvironment ? Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLOOM : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLOOM), deferredBloomRenderPass);
+			pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbrEnvironment ? Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLOOM_BLEND : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLOOM_BLEND), deferredBloomRenderPass);
+
+			pipelineBloomCombine = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_BLOOM), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+		} else {
+			pipelineDeferredLighting = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? (pbrEnvironment ? Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING) : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+			pipelineDeferredLightingBlend = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(pbr ? (pbrEnvironment ? Renderer::GRAPHICS_PIPELINE_PBR_DEFERRED_LIGHTING_BLEND : Renderer::GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLEND) : Renderer::GRAPHICS_PIPELINE_DEFERRED_LIGHTING_BLEND), ssr ? deferredPBRSSRRenderPass : (postProcessing ? postProcessingRenderPass : Renderer::getDefaultRenderPass()));
+		}
 	}
 
 	if (pbrEnvironment) {
@@ -162,6 +220,22 @@ RenderScene::~RenderScene() {
 		delete descriptorSetGeometryBuffer;
 		delete deferredGeometryRenderPass;
 		delete deferredRenderingScreenTextureMesh;
+
+		if (bloom) {
+			delete pipelineBloomCombine;
+
+			delete deferredBloomRenderPass;
+			delete gaussianBlur1RenderPass;
+			delete gaussianBlur2RenderPass;
+			delete pipelineGaussianBlur1;
+			delete pipelineGaussianBlur2;
+			delete gaussianBlurBloomScreenTextureMesh1;
+			delete gaussianBlurBloomScreenTextureMesh2;
+			delete gaussianBlurBloomScreenTextureMesh3;
+			delete descriptorSetsGaussianBlur[0];
+			delete descriptorSetsGaussianBlur[1];
+			delete bloomSSRScreenTextureMesh;
+		}
 
 		if (ssr) {
 			delete deferredPBRSSRRenderPass;
@@ -328,7 +402,62 @@ void RenderScene::renderOffscreen() {
 
 		deferredGeometryRenderPass->end();
 
-		if (ssr) {
+		if (bloom) {
+			//Render the lighting
+			deferredBloomRenderPass->begin();
+
+			renderScene();
+
+			deferredBloomRenderPass->end();
+
+			//Perform blur
+			bool firstIteration;
+			unsigned int currentIndex = 0;
+			RenderPass* renderPassCurrent = gaussianBlur1RenderPass;
+			GraphicsPipeline* pipelineCurrent = pipelineGaussianBlur1;
+			DescriptorSet* descriptorSetCurrent = descriptorSetsGaussianBlur[0];
+			Mesh* screenTextureMeshCurrent = gaussianBlurBloomScreenTextureMesh1;
+
+			Matrix4f identityMatrix = Matrix4f().initIdentity();
+
+			for (unsigned int i = 0; i < gaussianBlurAmount; ++i) {
+
+				renderPassCurrent->begin();
+				pipelineCurrent->bind();
+				descriptorSetCurrent->bind();
+
+				Renderer::render(screenTextureMeshCurrent, identityMatrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+
+				renderPassCurrent->end();
+
+				currentIndex++;
+
+				if (currentIndex >= 2)
+					currentIndex = 0;
+
+				if (currentIndex == 0) {
+					renderPassCurrent = gaussianBlur1RenderPass;
+					pipelineCurrent = pipelineGaussianBlur1;
+					descriptorSetCurrent = descriptorSetsGaussianBlur[0];
+					screenTextureMeshCurrent = gaussianBlurBloomScreenTextureMesh3;
+				} else if (currentIndex == 1) {
+					renderPassCurrent = gaussianBlur2RenderPass;
+					pipelineCurrent = pipelineGaussianBlur2;
+					descriptorSetCurrent = descriptorSetsGaussianBlur[1];
+					screenTextureMeshCurrent = gaussianBlurBloomScreenTextureMesh2;
+				}
+			}
+
+			if (ssr) {
+				deferredPBRSSRRenderPass->begin();
+
+				pipelineBloomCombine->bind();
+
+				Renderer::render(bloomSSRScreenTextureMesh, identityMatrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+
+				deferredPBRSSRRenderPass->end();
+			}
+		} else if (ssr) {
 			//Render the lighting
 			deferredPBRSSRRenderPass->begin();
 
@@ -346,8 +475,12 @@ void RenderScene::renderOffscreen() {
 		if (ssr) {
 			pipelineDeferredSSR->bind();
 			descriptorSetGeometryBufferSSR->bind();
-			Matrix4f matrix = Matrix4f().initIdentity();
-			Renderer::render(deferredRenderingScreenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+			Matrix4f identityMatrix = Matrix4f().initIdentity();
+			Renderer::render(deferredRenderingScreenTextureMesh, identityMatrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+		} else if (bloom) {
+			pipelineBloomCombine->bind();
+			Matrix4f identityMatrix = Matrix4f().initIdentity();
+			Renderer::render(bloomSSRScreenTextureMesh, identityMatrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 		} else {
 			renderScene();
 		}
@@ -497,6 +630,10 @@ void RenderScene::render() {
 			descriptorSetGeometryBufferSSR->bind();
 			Matrix4f matrix = Matrix4f().initIdentity();
 			Renderer::render(deferredRenderingScreenTextureMesh, matrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+		}  else if (bloom) {
+			pipelineBloomCombine->bind();
+			Matrix4f identityMatrix = Matrix4f().initIdentity();
+			Renderer::render(bloomSSRScreenTextureMesh, identityMatrix, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 		} else {
 			renderScene();
 		}
@@ -510,4 +647,15 @@ void RenderScene::setPostProcessingParameters(bool gammaCorrection, bool fxaa, f
 	shaderGammaCorrectionFXAAData.exposureIn   = exposureIn;
 
 	descriptorSetGammaCorrectionFXAA->getUBO(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
+}
+
+MeshData* RenderScene::createScreenMeshData() {
+	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+	return meshData;
 }

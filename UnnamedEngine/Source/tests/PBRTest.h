@@ -57,8 +57,8 @@ void Test::onInitialise() {
 	getSettings().videoVSync = false;
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
-	getSettings().videoResolution = VideoResolution::RES_720p;
-	getSettings().videoVulkan = true;
+	getSettings().videoResolution = VideoResolution::RES_1080p;
+	getSettings().videoVulkan = false;
 	getSettings().debugVkValidationLayersEnabled = true;
 	//getSettings().videoRefreshRate = 144;
 	//getSettings().windowFullscreen = true;
@@ -71,6 +71,7 @@ void Test::onInitialise() {
 
 void Test::onCreated() {
 	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("pbr/GenEquiToCube", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("pbr/GenIrradianceMap", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("pbr/GenPrefilterMap", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
@@ -79,8 +80,14 @@ void Test::onCreated() {
 	//Shader::compileEngineShaderToSPIRV("pbr/PBRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
 	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
 	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_BLOOM" });
+	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_BLOOM" });
+	//Shader::compileEngineShaderToSPIRV("postprocessing/GaussianBlur", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("postprocessing/BloomShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	//Logger::stopFileOutput();
 
@@ -104,12 +111,12 @@ void Test::onCreated() {
 	pbrRenderShader = Renderer::getRenderShader(Renderer::SHADER_LIGHTING);
 	pbrRenderShaderSkinning = Renderer::getRenderShader(Renderer::SHADER_LIGHTING_SKINNING);
 
-	scene = new RenderScene(deferred, true, true, true, environment);
+	scene = new RenderScene(deferred, true, true, true, true, environment);
 	scene->setPostProcessingParameters(true, true, 0.5f);
 
-	//light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 
-	light0 = (new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
+	//light0 = (new Light(Light::TYPE_SPOT, Vector3f(0.5f, 5.0f, 2.0f), true))->setDirection(0.1f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f));
 
 	utils_random::initialise();
 	/*
@@ -183,14 +190,14 @@ void Test::onCreated() {
 	mit1->update();
 	scene->add(mit1);
 
-	Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
+	//Mesh* mesh2 = MeshLoader::loadModel("C:/UnnamedEngine/models/plane/", "plane2.obj");
 
-	GameObject3D* model2 = new GameObject3D(mesh2, pbrRenderShader);
-	model2->setPosition(0.0f, 1.5f, 0.0f);
-	model2->update();
-	model2->getMesh()->getMaterial(1)->setDiffuse(environment->getBRDFLUTTexture());
-	model2->getMesh()->getMaterial(1)->update();
-	scene->add(model2);
+	//GameObject3D* model2 = new GameObject3D(mesh2, pbrRenderShader);
+	//model2->setPosition(0.0f, 1.5f, 0.0f);
+	//model2->update();
+	//model2->getMesh()->getMaterial(1)->setDiffuse(environment->getBRDFLUTTexture());
+	//model2->getMesh()->getMaterial(1)->update();
+	//scene->add(model2);
 
 
 	//	GameObject3D* testObject = new GameObject3D(resourceLoader.loadPBRModel("pbr/", "Cerberus_LP.FBX"), pbrRenderShader);

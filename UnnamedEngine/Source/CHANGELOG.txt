@@ -1,4 +1,75 @@
 --------------------------------------------------------------
+Release 2 | Beta 2 | Development 5 (V0.5.5)
+
+* Added bloom when using Vulkan
+
+* Changed ShaderInterface to only create
+  DescriptorSetLayout's when needed
+* Changed RenderPass so more FBO configurations can be used
+
+* Fixed bug: Had output data in ShadowCubemapShader.vs that
+             was not used in ShadowCubemapShader.gs
+* Fixed bug: ParticleEmitter emitted new particles that
+             would be rendered over all others in a
+			 ParticleSystem
+* Fixed bug: Default value of 'maxCharacters' in Text was
+             not assigned
+* Fixed bug: Crash when using Vulkan and trying to update
+             a Sprite layer created with 'addMaxLayers'
+* Fixed bug: Deletion of a DescriptorSet/VulkanBufferObject
+             being updated using a queue in Vulkan caused a
+			 crash
+
+* Some cleanup
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 4 | Experimental 5
+
+* Changed RenderPass so more FBO configurations can be used
+
+* Fixed bug: ParticleEmitter emitted new particles that
+             would be rendered over all others in a
+			 ParticleSystem
+* Fixed bug: Default value of 'maxCharacters' in Text was
+             not assigned
+* Fixed bug: Crash when using Vulkan and trying to update
+             a Sprite layer created with 'addMaxLayers'
+* Fixed bug: Deletion of a DescriptorSet/VulkanBufferObject
+             being updated using a queue in Vulkan caused a
+			 crash
+
+* Some cleanup
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 4 | Experimental 4
+
+* Changed ShaderInterface to only create
+  DescriptorSetLayout's when needed
+
+* Fixed bug: Had output data in ShadowCubemapShader.vs that
+             was not used in ShadowCubemapShader.gs
+
+* Some cleanup
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 4 | Experimental 3
+
+* Added bloom when using Vulkan
+
+* Fixed bug: Bloom would not work without SSR
+* Fixed bug: Bloom would not work without post processing
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 4 | Experimental 2
+
+* Readed bloom when using OpenGL
+
+-------------------------------------------------------------
+Release 2 | Beta 2 | Development 4 | Experimental 1
+
+* Started readding bloom
+
+--------------------------------------------------------------
 Release 2 | Beta 2 | Development 4 (V0.5.4)
 
 * Added 'textureParameters' to the FramebufferAttachment

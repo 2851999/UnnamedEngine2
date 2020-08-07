@@ -141,8 +141,6 @@ public:
 	static void createCommandBuffers(); //(Destroyed with command pool)
 
 	static void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkImageCreateFlags flags, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t layerCount);
-
 	static VkImageView createImageView(VkImage image, VkImageViewType viewType, VkFormat format, VkImageAspectFlags aspectMask, uint32_t mipLevels, uint32_t baseMipLevel, uint32_t layerCount);
 
 	static void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels, uint32_t layerCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE); //Pass VK_NULL_HANDLE for command buffer to let this method create one
@@ -168,8 +166,14 @@ public:
 	/* Method to update a descriptor set */
 	static void updateDescriptorSet(DescriptorSet* set);
 
+	/* Method to remove all occurences of a descriptor set from the update queue */
+	static void removeFromDescriptorSetQueue(DescriptorSet* set);
+
 	/* Method to update a VulkanBufferObject */
 	static void updateVulkanBufferObject(VulkanBufferObject* instance, void* data, unsigned int offset, unsigned int size);
+
+	/* Method to remove all occurences of a VulkanBufferObject from the update queue */
+	static void removeFromVulkanBufferObjectQueue(VulkanBufferObject* instance);
 
 	/* Method to obtain the maximum number of samples supported that is closest to a requested number */
 	static VkSampleCountFlagBits getMaxUsableSampleCount(unsigned int targetSamples);

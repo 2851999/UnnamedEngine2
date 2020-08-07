@@ -35,7 +35,7 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 
 	if (maxCharacters == 0)
 		//Use the default number
-		maxCharacters = DEFAULT_MAX_CHARACTERS;
+		this->maxCharacters = DEFAULT_MAX_CHARACTERS;
 
 	//The shader type to use
 	unsigned int shaderType;
@@ -58,13 +58,13 @@ Text::Text(Font* font, Colour colour, unsigned int maxCharacters, bool billboard
 	else {
 		meshData = new MeshData(3, MeshData::SEPARATE_POSITIONS | MeshData::SEPARATE_TEXTURE_COORDS);
 
-		unsigned int numPositions = maxCharacters * 12;
-		unsigned int numTextureCoords = maxCharacters * 8;
-		unsigned int numIndices = maxCharacters * 6;
+		unsigned int numPositions = this->maxCharacters * 12;
+		unsigned int numTextureCoords = this->maxCharacters * 8;
+		unsigned int numIndices = this->maxCharacters * 6;
 		meshData->getPositions().resize(numPositions);
 		meshData->getTextureCoords().resize(numTextureCoords);
 		meshData->getIndices().resize(numIndices);
-		meshData->setNumPositions(maxCharacters);
+		meshData->setNumPositions(this->maxCharacters);
 		meshData->setNumTextureCoords(numTextureCoords);
 		meshData->setNumIndices(numIndices);
 	}
@@ -124,7 +124,7 @@ void Text::update(std::string text) {
 		getMesh()->getRenderData()->updateTextureCoords();
 		getMesh()->getRenderData()->updateIndices(data);
 	} else
-		Logger::log("Cannot update text as the requested text exceeds the maximum number of characters", "Text", LogType::Warning);
+		Logger::log("Cannot update text as the requested text exceeds the maximum number of characters, 'text' = " + text, "Text", LogType::Warning);
 }
 
 void Text::update(std::string text, Vector2f position) {

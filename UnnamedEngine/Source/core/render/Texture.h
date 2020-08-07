@@ -154,12 +154,6 @@ public:
 	void create();
 
 	/* Method to setup this texture for Vulkan (used to create image for RenderPass) */
-	void setupVk(uint32_t width, uint32_t height, VkSampleCountFlagBits samples, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-	/* Method to setup this texture for Vulkan for a cubemap (used to create image for RenderPass) */
-	void setupCubemapVk(uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-	/* Method to setup this texture for Vulkan (used to create image for RenderPass) */
 	void setupVk(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits samples, VkFormat format, VkImageUsageFlags usage, VkImageAspectFlags aspectMask, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	/* Method to setup this texture for Vulkan for a cubemap (used to create image for RenderPass) */

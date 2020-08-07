@@ -67,7 +67,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 
 	//Load the texture for the equirectangular map ensuring it's the right way up
 	Texture::setFlipVerticallyOnLoad(true);
-	Texture* texture = Texture::loadTexturef(path, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, true));
+	Texture* texture = Texture::loadTexturef(path, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::LINEAR, TextureParameters::AddressMode::CLAMP_TO_EDGE, false)); //Vulkan has no float SRGB format so false to make both similar
 	Texture::setFlipVerticallyOnLoad(false);
 
 	//---------------------------------- RENDER ENVIRONMENT CUBEMAP FROM EQUIRECTANGULAR MAP ----------------------------------
@@ -76,6 +76,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	environmentCubemapTextureParameters.setMinFilter(TextureParameters::Filter::LINEAR);
 	environmentCubemapTextureParameters.setMagFilter(TextureParameters::Filter::LINEAR);
 	environmentCubemapTextureParameters.setAddressMode(TextureParameters::AddressMode::CLAMP_TO_EDGE);
+	environmentCubemapTextureParameters.setSRGB(true);
 
 	FramebufferAttachment* environmentCubemap = new FramebufferAttachment(ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, FramebufferAttachment::Type::COLOUR_CUBEMAP, environmentCubemapTextureParameters, 1);
 	//environmentCubemap->getParameters().preventGenerateMipMaps(); //MUST NOT HAVE OTHERWISE CUBEMAP INCOMPLETE

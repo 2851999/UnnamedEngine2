@@ -1,3 +1,6 @@
+#version 420
+
+#define UE_DEFERRED_LIGHTING
 #include "PBRLightingCore.fs"
 
 layout(set = 4, binding = 0) uniform sampler2D ue_gPosition;
@@ -6,6 +9,10 @@ layout(set = 4, binding = 2) uniform sampler2D ue_gAlbedo;
 layout(set = 4, binding = 3) uniform sampler2D ue_gMetalnessAO;
 
 layout(location = 0) out vec4 ue_FragColour;
+
+#ifdef UE_BLOOM
+layout(location = 1) out vec4 ue_FragColourBright;
+#endif
 
 void main() {
 	vec3 fragPosition = texture(ue_gPosition, ue_frag_textureCoord).rgb;
@@ -29,4 +36,13 @@ void main() {
     vec3 colour = ueGetLightingPBR(normal, fragPosition, albedo.rgb, metalness, roughness, ao, fragPosLightSpace);
 	
 	ue_FragColour = vec4(colour, albedo.a);
+
+		//Bloom
+#ifdef UE_BLOOM
+	float brightness = dot(albedo.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if (brightness > 1.0) {
+		ue_FragColourBright = vec4(albedo.rgb, 1.0);
+	} else
+		ue_FragColourBright = vec4(0.0, 0.0, 0.0, 1.0);
+#endif
 }

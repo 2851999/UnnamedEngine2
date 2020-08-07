@@ -36,6 +36,10 @@ private:
 
 	/* The RenderShader used when rendering */
 	RenderShader* renderShader;
+
+	/* States whether this object is currently within the queue to be
+	   rendered in Vulkan*/
+	bool m_isInRenderQueue = false;
 protected:
 	/* Transform for this object */
 	Transform* transform = new Transform();

@@ -112,7 +112,7 @@ void Test::created() {
 
 	currentExposure = 0.5f;
 	exposureChangeDir = 1.0f;
-	renderScene = new RenderScene(true, true, false, true);
+	renderScene = new RenderScene(true, true, false, false, true);
 	renderScene->setPostProcessingParameters(true, true, currentExposure);
 
 	//renderScene->disableLighting();
