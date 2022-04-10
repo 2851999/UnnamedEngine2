@@ -36,7 +36,7 @@ vec3 binarySearch(inout vec3 dir, inout vec3 hitCoord, inout float dDepth) {
 		
 		vec4 depthValue = texture(ue_gPosition, projectedCoord.xy).xyzw;
 		//Value is initially in world space, so convert to view space
-		depthValue = ue_viewMatrix * depthValue;
+		depthValue = ue_viewMatrix * vec4(depthValue.xyz, 1.0);
 		//depthValue.xyz /= depthValue.w;
 		//depthValue.xyz = depthValue.xyz * 0.5 + 0.5;
 		depth = depthValue.z;
@@ -83,7 +83,7 @@ vec4 rayMarch(vec3 dir, inout vec3 hitCoord, out float dDepth) {
 		
 		vec4 depthValue = texture(ue_gPosition, projectedCoord.xy).xyzw;
 		//Value is initially in world space, so convert to view space
-		depthValue = ue_viewMatrix * depthValue;
+		depthValue = ue_viewMatrix * vec4(depthValue.xyz, 1.0);
 		//depthValue.xyz /= depthValue.w;
 		//depthValue.xyz = depthValue.xyz * 0.5 + 0.5;
 		depth = depthValue.z;
