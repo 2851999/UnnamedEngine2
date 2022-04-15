@@ -1,4 +1,17 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 0 | Experimental 2
+
+* Added Colour::BROWN & PURPLE
+* Added compileEngineShader(s)ToSPIRV methods to Renderer
+  for compiling engine shaders to SPIRV
+
+* Fixed bug: Duplicate assignment of a matrix element in
+  Quaternion::toRotationMatrix
+* Fixed bug: Billboarded SDF text did not face the camera
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 0 | Experimental 1
 
 * Fixed bug: SSR was incorrect when moving

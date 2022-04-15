@@ -239,10 +239,11 @@ void Sprite::update() {
 
 void Sprite::startAnimation(std::string name) {
 	//Check whether the animation exists
-	if (animations.count(name) > 0) {
+	auto animationIt = animations.find(name);
+	if (animationIt != animations.end()) {
 		//Assign the current animation
 		currentAnimationName = name;
-		currentAnimation = animations.at(name);
+		currentAnimation = animationIt->second;
 		//Start the current animation
 		currentAnimation->start();
 	} else

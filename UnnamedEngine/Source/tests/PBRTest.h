@@ -141,7 +141,7 @@ void Test::onCreated() {
 	//	plane->update();
 	//	scene->add(plane);
 
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; ++i) {
 		GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
 		Material* material = sphere->getMesh()->getMaterial(1);
 

@@ -46,7 +46,7 @@ private:
 	/* The main window instance */
 	Window* window;
 	/* Used to request the game loop to stop */
-	bool   closeRequested = false;
+	bool closeRequested = false;
 
 	/* Used to keep track of and limit the FPS */
 	FPSCalculator fpsCalculator;

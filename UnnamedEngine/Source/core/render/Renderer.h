@@ -236,4 +236,13 @@ public:
 
 	/* Method used to convert 'DataUsage' into the OpenGL equivalent */
 	static GLenum convertToGL(DataUsage usage);
+
+	/* Method to compile a shader to SPIRV for use with Vulkan */
+	static void compileEngineShaderToSPIRV(unsigned int id, std::string glslangValidatorPath);
+
+	/* Method to compile all possible shaders to SPIRV for use with Vulkan */
+	static void compileEngineShadersToSPIRV(std::string glslangValidatorPath);
+
+	/* Method to compile currently loaded engine shaders to SPIRV for use with Vulkan */
+	static void compileLoadedEngineShadersToSPIRV(std::string glslValidatorPath);
 };

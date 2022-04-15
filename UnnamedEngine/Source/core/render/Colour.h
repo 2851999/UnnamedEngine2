@@ -33,8 +33,10 @@ public:
 	static const Colour LIGHT_GREY;
 	static const Colour RED;
 	static const Colour ORANGE;
+	static const Colour BROWN;
 	static const Colour YELLOW;
 	static const Colour PINK;
+	static const Colour PURPLE;
 	static const Colour GREEN;
 	static const Colour BLUE;
 	static const Colour LIGHT_BLUE;

@@ -42,9 +42,10 @@ KeyboardShortcut::~KeyboardShortcut() {
 
 void KeyboardShortcut::onKeyPressed(int code) {
 	//Check whether one of the keys has the same key code
-	if (keys.count(code) > 0)
+	auto keyIt = keys.find(code);
+	if (keyIt != keys.end())
 		//Update it's state
-		keys.at(code) = true;
+		keyIt->second = true;
 	//Only make completed = true when all of the keys states are also true
 	completed = true;
 	for (auto& iterator : keys)
@@ -53,9 +54,10 @@ void KeyboardShortcut::onKeyPressed(int code) {
 
 void KeyboardShortcut::onKeyReleased(int code) {
 	//Check whether one of the keys has the same key code
-	if (keys.count(code) > 0) {
+	auto keyIt = keys.find(code);
+	if (keyIt != keys.end()) {
 		//Update it's state
-		keys.at(code) = false;
+		keyIt->second = false;
 		//Completed is now definitely false
 		completed = false;
 	}

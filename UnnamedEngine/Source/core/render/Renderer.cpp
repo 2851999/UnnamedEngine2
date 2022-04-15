@@ -425,7 +425,7 @@ void Renderer::addRenderShader(RenderShader* renderShader) {
 }
 
 void Renderer::addGraphicsPipelineQueue(unsigned int id, GraphicsPipeline* pipeline) {
-	if (queuePipelines.count(id) == 0)
+	if (queuePipelines.find(id) == queuePipelines.end())
 		queuePipelines.insert(std::pair<unsigned int, std::vector<GraphicsPipeline*>>(id, { pipeline }));
 	else
 		queuePipelines.at(id).push_back(pipeline);
@@ -441,9 +441,10 @@ GraphicsPipeline* Renderer::getGraphicsPipelineQueue(unsigned int id) {
 }
 
 RenderShader* Renderer::getRenderShader(unsigned int id) {
-	if (loadedRenderShaders.count(id) > 0)
-		return loadedRenderShaders.at(id);
-	else if (unloadedShaders.count(id) > 0) {
+	auto loadedShaderIt = loadedRenderShaders.find(id);
+	if (loadedShaderIt != loadedRenderShaders.end())
+		return loadedShaderIt->second;
+	else if (unloadedShaders.find(id) != unloadedShaders.end()) {
 		//Load the render shader then return it
 		loadRenderShader(id);
 		return loadedRenderShaders.at(id);
@@ -454,9 +455,11 @@ RenderShader* Renderer::getRenderShader(unsigned int id) {
 }
 
 GraphicsPipelineLayout* Renderer::getGraphicsPipelineLayout(unsigned int id) {
-	if (loadedGraphicsPipelineLayouts.count(id) > 0)
-		return loadedGraphicsPipelineLayouts.at(id);
-	else if (unloadedGraphicsPipelineLayouts.count(id) > 0) {
+	//Return the layout if already loaded, otherwise load it
+	auto loadedGraphicsPipelineLayoutIt = loadedGraphicsPipelineLayouts.find(id);
+	if (loadedGraphicsPipelineLayoutIt != loadedGraphicsPipelineLayouts.end())
+		return loadedGraphicsPipelineLayoutIt->second;
+	else if (unloadedGraphicsPipelineLayouts.find(id) != unloadedGraphicsPipelineLayouts.end()) {
 		//Create the layout then return it
 		UnloadedGraphicsPipelineLayoutInfo info = unloadedGraphicsPipelineLayouts.at(id);
 		GraphicsPipelineLayout* layout = new GraphicsPipelineLayout(getRenderShader(info.renderShader), info.vertexInputData, info.colourBlendState, info.depthState, info.cullState, info.viewportFlippedVk);
@@ -479,4 +482,25 @@ GLenum Renderer::convertToGL(DataUsage usage) {
 		default:
 			return GL_STATIC_DRAW;
 	}
+}
+
+void Renderer::compileEngineShaderToSPIRV(unsigned int id, std::string glslangValidatorPath) {
+	//Obtain the shader info
+	auto unloadedShaderIt = unloadedShaders.find(id);
+	if (unloadedShaderIt != unloadedShaders.end())
+		Shader::compileEngineShaderToSPIRV(unloadedShaderIt->second.path, glslangValidatorPath, unloadedShaderIt->second.defines);
+	else
+		Logger::log("The RenderShader with the id '" + utils_string::str(id) + "' could not be found", "Renderer", LogType::Error);
+}
+
+void Renderer::compileEngineShadersToSPIRV(std::string glslangValidatorPath) {
+	//Go through all unloaded engine shaders and compile them
+	for (auto& it : unloadedShaders)
+		Shader::compileEngineShaderToSPIRV(it.second.path, glslangValidatorPath, it.second.defines);
+}
+
+void Renderer::compileLoadedEngineShadersToSPIRV(std::string glslangValidatorPath) {
+	//Go through and compile all currently loaded shaders
+	for (auto& it : loadedRenderShaders)
+		Renderer::compileEngineShaderToSPIRV(it.first, glslangValidatorPath);
 }

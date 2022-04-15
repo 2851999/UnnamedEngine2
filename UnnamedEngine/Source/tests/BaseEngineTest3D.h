@@ -66,9 +66,13 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
+	//Renderer::compileEngineShadersToSPIRV("C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+
 	//Shader::compileEngineShaderToSPIRV("ParticleShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("FontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
 
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);

@@ -128,19 +128,21 @@ void Shader::addAttribute(std::string id, std::string name) {
 }
 
 GLint Shader::getUniformLocation(std::string id) {
-	if (! uniforms.count(id)) {
+	auto uniformIt = uniforms.find(id);
+	if (uniformIt == uniforms.end()) {
 		//Logger::log("The uniform with the id '" + id + "' was not added", "Shader", Logger::LogType::Debug);
 		return -1;
 	} else
-		return uniforms.at(id);
+		return uniformIt->second;
 }
 
 GLint Shader::getAttributeLocation(std::string id) {
-	if (! attributes.count(id)) {
+	auto attributeIt = attributes.find(id);
+	if (attributeIt == attributes.end()) {
 		Logger::log("The attribute with the id '" + id + "' was not added", "Shader", LogType::Debug);
 		return -1;
 	} else
-		return attributes.at(id);
+		return attributeIt->second;
 }
 
 void Shader::setUniformi(std::string id, GLuint value) {
