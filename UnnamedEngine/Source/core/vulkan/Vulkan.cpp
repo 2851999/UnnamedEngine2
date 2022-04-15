@@ -53,7 +53,7 @@ bool Vulkan::initialise(Window* window) {
 		Logger::log("Required validation layers are not supported", "Vulkan", LogType::Error);
 		return false;
 	}
-	//Add the required extensions
+	//Add the required extensions and features
 	VulkanExtensions::addRequired();
 	//Create the Vulkan instance
 	if (! createInstance()) {

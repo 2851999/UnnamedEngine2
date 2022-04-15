@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 0 | Experimental 3
+
+* Added 'videoRaytracing' setting (highly experimental, for
+  Vulkan only)
+
+* Updated to VulkanSDK 1.3.204
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 0 | Experimental 2
 
 * Added Colour::BROWN & PURPLE

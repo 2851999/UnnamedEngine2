@@ -31,9 +31,15 @@ private:
 
 	/* Stores all the requested device extensions to use */
 	static std::vector<const char*> deviceExtensions;
+
+	/* Stores the extensions required for raytracing */
+	static std::vector<const char*> raytracingExtensions;
 public:
 	/* Adds the default extensions required */
 	static void addRequired();
+
+	/* Adds an extension to the list of requested ones */
+	static void addExtension(const char* extension);
 
 	/* Returns whether the device extensions required are supported by a particular device */
 	static bool checkSupport(VkPhysicalDevice device);

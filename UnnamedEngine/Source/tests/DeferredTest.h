@@ -70,27 +70,29 @@ void Test::initialise() {
 }
 
 void Test::created() {
-	//Shader::compileEngineShaderToSPIRV("FontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("FontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("MaterialShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("FramebufferShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("postprocessing/GammaCorrectionFXAAShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLightingGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
-	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLightingGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
-	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	std::string glslandValidatorPath = "C:/VulkanSDK/1.3.204.1/Bin/glslangValidator.exe";
+
+	//Shader::compileEngineShaderToSPIRV("FontShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("FontSDFShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("MaterialShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("lighting/LightingShader", glslandValidatorPath, { "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRShader", glslandValidatorPath, { "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("FramebufferShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("lighting/ShadowMapShader", glslandValidatorPath, { "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("lighting/ShadowCubemapShader", glslandValidatorPath, { "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("postprocessing/GammaCorrectionFXAAShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLightingGeometry", glslandValidatorPath, { "UE_GEOMETRY_ONLY" });
+	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLightingGeometry", glslandValidatorPath, { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("lighting/DeferredLighting", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", glslandValidatorPath, { "UE_GEOMETRY_ONLY" });
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredGeometry", glslandValidatorPath, { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", glslandValidatorPath);
 
 	InputBindings* bindings = new InputBindings();
 	bindings->load("C:/UnnamedEngine/config/Controller.xml", getWindow()->getInputManager());

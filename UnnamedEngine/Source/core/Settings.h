@@ -67,6 +67,7 @@ struct Settings {
 	Vector2i     videoResolution  = VideoResolution::RES_DEFAULT;
 	unsigned int videoMaxFPS      = 60;
 	bool         videoVulkan      = false;
+	bool         videoRaytracing  = true;
 
 	/* Various audio settings */
 	unsigned int audioSoundEffectVolume = 100;
