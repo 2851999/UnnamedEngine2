@@ -16,11 +16,10 @@
  *
  *****************************************************************************/
 
-#include "tests/PBRTest.h"
+#include "tests/BaseEngineTest3D.h"
 
 #include "utils/Utils.h"
 //#include "examples/basic/BasicRendering3D.h"
-//#include "examples/asteroids/AsteroidsGame.h"
 
 int main(int argc, char** argv) {
 	/*if (argc == 2) {
@@ -32,8 +31,6 @@ int main(int argc, char** argv) {
 
 	Test test;
 	test.create();
-//	AsteroidsGame asteroids;
-//	asteroids.create();
 
 //	Tutorial tutorial;
 //	tutorial.create();

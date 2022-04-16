@@ -56,8 +56,10 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
-	Shader::compileEngineShaderToSPIRV("terrain/Terrain", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	Shader::compileEngineShaderToSPIRV("terrain/DeferredTerrainGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
+	std::string glslandValidatorPath = "C:/VulkanSDK/1.3.204.1/Bin/glslangValidator.exe";
+
+	//Shader::compileEngineShaderToSPIRV("terrain/Terrain", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("terrain/DeferredTerrainGeometry", glslandValidatorPath, { "UE_GEOMETRY_ONLY" });
 
 	camera->setProjectionMatrix(Matrix4f().initPerspective(80.0f, getSettings().windowAspectRatio, 0.01f, 1000.0f));
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));

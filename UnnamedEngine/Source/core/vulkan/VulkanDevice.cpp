@@ -20,6 +20,7 @@
 
 #include "Vulkan.h"
 #include "VulkanExtensions.h"
+#include "VulkanFeatures.h"
 #include "VulkanValidationLayers.h"
 #include "../../utils/Logging.h"
 
@@ -51,14 +52,12 @@ VulkanDevice::VulkanDevice(VkPhysicalDevice& physicalDevice) {
 		queueCreateInfos.push_back(queueCreateInfo);
 	}
 
-	VkPhysicalDeviceFeatures deviceFeatures = {};
-	//Request anisotropic filtering (support must be checked in 'isDeviceSuitable')
-	deviceFeatures.samplerAnisotropy = VK_TRUE;
-	deviceFeatures.geometryShader    = VK_TRUE;
-
 	//Obtain the required validation layers and device extensions
 	std::vector<const char*>& validationLayers = VulkanValidationLayers::getLayers();
-	std::vector<const char*>& deviceExtensions = VulkanExtensions::getDeviceExtentions();
+	std::vector<const char*>& deviceExtensions = VulkanExtensions::getRequiredDeviceExtentions();
+	//Required device features
+	VkPhysicalDeviceFeatures& deviceFeatures   = VulkanFeatures::getRequiredDeviceFeatures();
+	std::vector<void*>& requiredDeviceFeatures = VulkanFeatures::getRequiredDeviceFeatures2();
 
 	//Info for logical device creation
 	VkDeviceCreateInfo createInfo = {};
@@ -69,9 +68,19 @@ VulkanDevice::VulkanDevice(VkPhysicalDevice& physicalDevice) {
 	createInfo.enabledExtensionCount   = static_cast<uint32_t>(deviceExtensions.size());
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
+	//Link the pNext of the feature structures together
+	VkPhysicalDeviceFeatures2 physicalDeviceFeatures2 = {};
+	if (requiredDeviceFeatures.size() > 0) {
+		physicalDeviceFeatures2.sType    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+		physicalDeviceFeatures2.features = deviceFeatures;
+		physicalDeviceFeatures2.pNext    = VulkanFeatures::setupPNext(requiredDeviceFeatures);
+		createInfo.pEnabledFeatures      = nullptr;
+		createInfo.pNext                 = &physicalDeviceFeatures2;
+	}
+
 	//Not required in recent Vulkan implementations (as no distinction between instance and device validation layers)
 	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled) {
-		createInfo.enabledLayerCount   = static_cast<uint32_t>(deviceExtensions.size());
+		createInfo.enabledLayerCount   = static_cast<uint32_t>(validationLayers.size());
 		createInfo.ppEnabledLayerNames = validationLayers.data();
 	} else
 		createInfo.enabledLayerCount   = 0;
@@ -289,11 +298,8 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) {
 		swapChainSupportAdequate = (! swapChainSupportDetails.formats.empty()) && (! swapChainSupportDetails.presentModes.empty());
 	}
 
-	VkPhysicalDeviceFeatures supportedFeatures;
-	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
-
 	//Return the result
-	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && queueFamilies.isComplete() && extensionsSupported && swapChainSupportAdequate && supportedFeatures.samplerAnisotropy && supportedFeatures.geometryShader;
+	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && queueFamilies.isComplete() && extensionsSupported && swapChainSupportAdequate && VulkanFeatures::checkSupport(device);
 }
 
 VulkanDeviceQueueFamilies VulkanDevice::findQueueFamilies(VkPhysicalDevice device) {

@@ -124,12 +124,12 @@ void Light::update() {
 		shadowCubemapData.lightPos = Vector4f(pos, 0.0f);
 
 		//Assign each of the transform matrices
-		shadowCubemapData.shadowMatrices[0] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(1.0f, 0.0f, 0.0f), Vector3f(0.0f, -1.0f, 0.0f));
-		shadowCubemapData.shadowMatrices[1] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(-1.0f, 0.0f, 0.0f), Vector3f(0.0f, -1.0f, 0.0f));
-		shadowCubemapData.shadowMatrices[2] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 1.0f, 0.0f), Vector3f(0.0f, 0.0f, 1.0f));
-		shadowCubemapData.shadowMatrices[3] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, -1.0f, 0.0f), Vector3f(0.0f, 0.0f, -1.0f));
-		shadowCubemapData.shadowMatrices[4] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, 1.0f), Vector3f(0.0f, -1.0f, 0.0f));
-		shadowCubemapData.shadowMatrices[5] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(0.0f, 0.0f, -1.0f), Vector3f(0.0f, -1.0f, 0.0f));
+		shadowCubemapData.shadowMatrices[0] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f( 1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f));
+		shadowCubemapData.shadowMatrices[1] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f(-1.0f,  0.0f,  0.0f), Vector3f(0.0f, -1.0f,  0.0f));
+		shadowCubemapData.shadowMatrices[2] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f( 0.0f,  1.0f,  0.0f), Vector3f(0.0f,  0.0f,  1.0f));
+		shadowCubemapData.shadowMatrices[3] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f( 0.0f, -1.0f,  0.0f), Vector3f(0.0f,  0.0f, -1.0f));
+		shadowCubemapData.shadowMatrices[4] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f( 0.0f,  0.0f,  1.0f), Vector3f(0.0f, -1.0f,  0.0f));
+		shadowCubemapData.shadowMatrices[5] = getProjectionMatrix() * Matrix4f().initLookAt(pos, pos + Vector3f( 0.0f,  0.0f, -1.0f), Vector3f(0.0f, -1.0f,  0.0f));
 	} else if (type == TYPE_SPOT && shadowMapRenderPass) {
 		//The position of the spot light
 		Vector3f pos = getPosition();
@@ -163,16 +163,16 @@ void Light::useView() {
 }
 
 void Light::setUniforms(ShaderStruct_Light& lightData) {
-	lightData.type = type;
-	lightData.position = Vector4f(getPosition(), 0.0f);
-	lightData.direction = Vector4f(direction, 0.0f);
-	lightData.diffuseColour = Vector4f(diffuseColour, 0.0f);
+	lightData.type           = type;
+	lightData.position       = Vector4f(getPosition(), 0.0f);
+	lightData.direction      = Vector4f(direction, 0.0f);
+	lightData.diffuseColour  = Vector4f(diffuseColour, 0.0f);
 	lightData.specularColour = Vector4f(specularColour, 0.0f);
-	lightData.constant = constant;
-	lightData.linear = linear;
-	lightData.quadratic = quadratic;
-	lightData.innerCutoff = innerCutoff;
-	lightData.outerCutoff = outerCutoff;
-	lightData.useShadowMap = hasShadowMap();
+	lightData.constant       = constant;
+	lightData.linear         = linear;
+	lightData.quadratic      = quadratic;
+	lightData.innerCutoff    = innerCutoff;
+	lightData.outerCutoff    = outerCutoff;
+	lightData.useShadowMap   = hasShadowMap();
 }
 

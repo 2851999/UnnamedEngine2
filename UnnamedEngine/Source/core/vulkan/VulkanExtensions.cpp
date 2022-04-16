@@ -28,10 +28,24 @@
  * The VulkanExtensions class
  *****************************************************************************/
 
-std::vector<const char*> VulkanExtensions::extensions;
+std::vector<const char*> VulkanExtensions::requiredExtensions;
 
-std::vector<const char*> VulkanExtensions::deviceExtensions = {
-		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+std::vector<const char*> VulkanExtensions::requiredDeviceExtensions = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
+
+std::vector<const char*> VulkanExtensions::requiredRaytracingExtensions = {
+	//Ray tracing extensions
+	VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
+	VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
+	//Required by VK_KHR_acceleration_structure
+	VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+	VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME,
+	VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+	//Required by VK_KHR_ray_tracing_pipeline
+	VK_KHR_SPIRV_1_4_EXTENSION_NAME,
+	//Required by VK_KHR_spirv_1_4,
+	VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME
 };
 
 void VulkanExtensions::addRequired() {
@@ -40,11 +54,18 @@ void VulkanExtensions::addRequired() {
 	const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
 	//Assign the extensions
-	extensions = std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
+	requiredExtensions = std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+	if (Window::getCurrentInstance()->getSettings().videoRaytracing)
+		requiredDeviceExtensions.insert(std::end(requiredDeviceExtensions), std::begin(requiredRaytracingExtensions), std::end(requiredRaytracingExtensions));
 
 	//Check if validation layers are also required
 	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled)
-		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+}
+
+void VulkanExtensions::addRequiredExtension(const char* extension) {
+	requiredExtensions.push_back(extension);
 }
 
 bool VulkanExtensions::checkSupport(VkPhysicalDevice device) {
@@ -56,7 +77,7 @@ bool VulkanExtensions::checkSupport(VkPhysicalDevice device) {
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &deviceExtensionCount, availbleDeviceExtensions.data());
 
 	//Create set of required extensions and remove ones that are available (check list)
-	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+	std::set<std::string> requiredExtensions(requiredDeviceExtensions.begin(), requiredDeviceExtensions.end());
 
 	for (const auto& deviceExtension : availbleDeviceExtensions)
 		requiredExtensions.erase(deviceExtension.extensionName);

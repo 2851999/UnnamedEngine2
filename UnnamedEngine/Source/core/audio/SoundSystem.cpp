@@ -28,7 +28,7 @@ void SoundSystem::addSequence(std::string key, std::vector<std::string>& sourceK
 	//The list of audio sources to use
 	std::vector<AudioSource*> sequenceSources;
 	//Assign the sources
-	for (unsigned int i = 0; i < sourceKeys.size(); i++)
+	for (unsigned int i = 0; i < sourceKeys.size(); ++i)
 		sequenceSources.push_back(getSource(sourceKeys[i]));
 	//Create and add the sequence
 	sequences.insert(std::pair<std::string, AudioSequence*>(key, new AudioSequence(sequenceSources, loop, playInterval)));
@@ -108,7 +108,7 @@ void SoundSystem::fadeOutSequence(std::string key, float fadeTime) {
 
 void SoundSystem::pauseAll() {
 	//Go through all playing audio
-	for (unsigned int i = 0; i < playingSequences.size(); i++)
+	for (unsigned int i = 0; i < playingSequences.size(); ++i)
 		playingSequences[i]->pause();
 	for (unsigned int i = 0; i < playing.size(); i++)
 		playing[i]->pause();
@@ -116,7 +116,7 @@ void SoundSystem::pauseAll() {
 
 void SoundSystem::resumeAll() {
 	//Go through all playing audio
-	for (unsigned int i = 0; i < playingSequences.size(); i++)
+	for (unsigned int i = 0; i < playingSequences.size(); ++i)
 		playingSequences[i]->resume();
 	for (unsigned int i = 0; i < playing.size(); i++)
 		playing[i]->resume();
@@ -124,10 +124,10 @@ void SoundSystem::resumeAll() {
 
 void SoundSystem::stopAll() {
 	//Go through all playing audio
-	for (unsigned int i = 0; i < playingSequences.size(); i++)
+	for (unsigned int i = 0; i < playingSequences.size(); ++i)
 		playingSequences[i]->stop();
 	playingSequences.clear();
-	for (unsigned int i = 0; i < playing.size(); i++)
+	for (unsigned int i = 0; i < playing.size(); ++i)
 		playing[i]->stop();
 	playing.clear();
 }
@@ -137,7 +137,7 @@ void SoundSystem::update() {
 	if (listener != NULL)
 		listener->update();
 	//Go through the sequences
-	for (unsigned int a = 0; a < playingSequences.size(); a++) {
+	for (unsigned int a = 0; a < playingSequences.size(); ++a) {
 		//Check to see whether the sequence
 		if (playingSequences.at(a)->isPlayingOrPaused())
 			//Update the sequence
@@ -146,7 +146,7 @@ void SoundSystem::update() {
 			playingSequences.erase(playingSequences.begin() + a);
 	}
 	//Go through the sources
-	for (unsigned int a = 0; a < playing.size(); a++) {
+	for (unsigned int a = 0; a < playing.size(); ++a) {
 		//Check to see whether the source is still playing
 		if (playing.at(a)->isPlayingOrPaused())
 			//Update the source

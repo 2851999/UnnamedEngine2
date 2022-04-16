@@ -385,8 +385,9 @@ DescriptorSetLayout* ShaderInterface::createDescriptorSetLayout(unsigned int id)
 }
 
 DescriptorSetLayout* ShaderInterface::getDescriptorSetLayout(unsigned int id) {
-	if (descriptorSetLayouts.count(id) > 0)
-		return descriptorSetLayouts.at(id);
+	auto descriptorSetLayoutIt = descriptorSetLayouts.find(id);
+	if (descriptorSetLayoutIt != descriptorSetLayouts.end())
+		return descriptorSetLayoutIt->second;
 	else {
 		//Attempt to create one
 		DescriptorSetLayout* layout = createDescriptorSetLayout(id);

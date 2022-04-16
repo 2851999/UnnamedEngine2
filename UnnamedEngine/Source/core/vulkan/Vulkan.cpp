@@ -19,6 +19,7 @@
 #include "Vulkan.h"
 
 #include "VulkanExtensions.h"
+#include "VulkanFeatures.h"
 #include "VulkanValidationLayers.h"
 
 #include "../render/Mesh.h"
@@ -53,8 +54,11 @@ bool Vulkan::initialise(Window* window) {
 		Logger::log("Required validation layers are not supported", "Vulkan", LogType::Error);
 		return false;
 	}
-	//Add the required extensions
+
+	//Add the required extensions and features
 	VulkanExtensions::addRequired();
+	VulkanFeatures::addRequired();
+
 	//Create the Vulkan instance
 	if (! createInstance()) {
 		Logger::log("Vulkan instance could not be created", "Vulkan", LogType::Error);
@@ -132,7 +136,7 @@ bool Vulkan::createInstance() {
 	createInfo.pApplicationInfo = &appInfo;
 
 	//Obtain the required extensions
-	std::vector<const char*>& requiredExtensions = VulkanExtensions::getExtentions();
+	std::vector<const char*>& requiredExtensions = VulkanExtensions::getRequiredExtentions();
 
 	createInfo.enabledExtensionCount   = static_cast<uint32_t>(requiredExtensions.size());
 	createInfo.ppEnabledExtensionNames = requiredExtensions.data();
