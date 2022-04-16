@@ -28,13 +28,13 @@
  * The VulkanExtensions class
  *****************************************************************************/
 
-std::vector<const char*> VulkanExtensions::extensions;
+std::vector<const char*> VulkanExtensions::requiredExtensions;
 
-std::vector<const char*> VulkanExtensions::deviceExtensions = {
+std::vector<const char*> VulkanExtensions::requiredDeviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-std::vector<const char*> VulkanExtensions::raytracingExtensions = {
+std::vector<const char*> VulkanExtensions::requiredRaytracingExtensions = {
 	//Ray tracing extensions
 	VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME,
 	VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME,
@@ -54,18 +54,18 @@ void VulkanExtensions::addRequired() {
 	const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
 	//Assign the extensions
-	extensions = std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
+	requiredExtensions = std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
 	if (Window::getCurrentInstance()->getSettings().videoRaytracing)
-		deviceExtensions.insert(std::end(deviceExtensions), std::begin(raytracingExtensions), std::end(raytracingExtensions));
+		requiredDeviceExtensions.insert(std::end(requiredDeviceExtensions), std::begin(requiredRaytracingExtensions), std::end(requiredRaytracingExtensions));
 
 	//Check if validation layers are also required
 	if (Window::getCurrentInstance()->getSettings().debugVkValidationLayersEnabled)
-		extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 }
 
-void VulkanExtensions::addExtension(const char* extension) {
-	extensions.push_back(extension);
+void VulkanExtensions::addRequiredExtension(const char* extension) {
+	requiredExtensions.push_back(extension);
 }
 
 bool VulkanExtensions::checkSupport(VkPhysicalDevice device) {
@@ -77,7 +77,7 @@ bool VulkanExtensions::checkSupport(VkPhysicalDevice device) {
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &deviceExtensionCount, availbleDeviceExtensions.data());
 
 	//Create set of required extensions and remove ones that are available (check list)
-	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+	std::set<std::string> requiredExtensions(requiredDeviceExtensions.begin(), requiredDeviceExtensions.end());
 
 	for (const auto& deviceExtension : availbleDeviceExtensions)
 		requiredExtensions.erase(deviceExtension.extensionName);

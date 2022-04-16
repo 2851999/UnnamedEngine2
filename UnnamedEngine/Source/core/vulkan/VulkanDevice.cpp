@@ -20,6 +20,7 @@
 
 #include "Vulkan.h"
 #include "VulkanExtensions.h"
+#include "VulkanFeatures.h"
 #include "VulkanValidationLayers.h"
 #include "../../utils/Logging.h"
 
@@ -44,41 +45,19 @@ VulkanDevice::VulkanDevice(VkPhysicalDevice& physicalDevice) {
 	for (uint32_t queueFamily : uniqueQueueFamilies) {
 		//Setup the queue create info
 		VkDeviceQueueCreateInfo queueCreateInfo = {};
-		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 		queueCreateInfo.queueFamilyIndex = queueFamily;
-		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.queueCount       = 1;
 		queueCreateInfo.pQueuePriorities = &queuePriority;
 		queueCreateInfos.push_back(queueCreateInfo);
 	}
 
-	VkPhysicalDeviceFeatures deviceFeatures = {};
-	//Request anisotropic filtering (support must be checked in 'isDeviceSuitable')
-	deviceFeatures.samplerAnisotropy = VK_TRUE;
-	deviceFeatures.geometryShader = VK_TRUE;
-
-	VkPhysicalDeviceBufferDeviceAddressFeatures enabledBufferDeviceAddressFeatures = {};
-	VkPhysicalDeviceRayTracingPipelineFeaturesKHR enabledRayTracingPipelineFeatures = {};
-	VkPhysicalDeviceAccelerationStructureFeaturesKHR enabledAccelerationStructureFeatures = {};
-
 	//Obtain the required validation layers and device extensions
 	std::vector<const char*>& validationLayers = VulkanValidationLayers::getLayers();
-	std::vector<const char*>& deviceExtensions = VulkanExtensions::getDeviceExtentions();
+	std::vector<const char*>& deviceExtensions = VulkanExtensions::getRequiredDeviceExtentions();
 	//Required device features
-	std::vector<void*> requiredDeviceFeatures = {};
-
-	if (Window::getCurrentInstance()->getSettings().videoRaytracing) {
-		enabledBufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
-		enabledBufferDeviceAddressFeatures.bufferDeviceAddress = VK_TRUE;
-		requiredDeviceFeatures.push_back(&enabledBufferDeviceAddressFeatures);
-
-		enabledRayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
-		enabledRayTracingPipelineFeatures.rayTracingPipeline = VK_TRUE;
-		requiredDeviceFeatures.push_back(&enabledRayTracingPipelineFeatures);
-
-		enabledAccelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-		enabledAccelerationStructureFeatures.accelerationStructure = VK_TRUE;
-		requiredDeviceFeatures.push_back(&enabledAccelerationStructureFeatures);
-	}
+	VkPhysicalDeviceFeatures& deviceFeatures   = VulkanFeatures::getRequiredDeviceFeatures();
+	std::vector<void*>& requiredDeviceFeatures = VulkanFeatures::getRequiredDeviceFeatures2();
 
 	//Info for logical device creation
 	VkDeviceCreateInfo createInfo = {};
@@ -89,24 +68,12 @@ VulkanDevice::VulkanDevice(VkPhysicalDevice& physicalDevice) {
 	createInfo.enabledExtensionCount   = static_cast<uint32_t>(deviceExtensions.size());
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-	//Structure to help linking the pNext of features
-	struct FeatureHeader {
-		VkStructureType sType;
-		void* pNext;
-	};
-
 	//Link the pNext of the feature structures together
 	VkPhysicalDeviceFeatures2 physicalDeviceFeatures2 = {};
 	if (requiredDeviceFeatures.size() > 0) {
-		for (unsigned int i = 0; i < requiredDeviceFeatures.size(); ++i) {
-			auto* header = reinterpret_cast<FeatureHeader*>(requiredDeviceFeatures[i]);
-			//Assign the pNext to the next feature in the list provided it is not the last
-			header->pNext = i < requiredDeviceFeatures.size() - 1 ? requiredDeviceFeatures[i + 1] : nullptr;
-		}
-
 		physicalDeviceFeatures2.sType    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 		physicalDeviceFeatures2.features = deviceFeatures;
-		physicalDeviceFeatures2.pNext    = requiredDeviceFeatures[0];
+		physicalDeviceFeatures2.pNext    = VulkanFeatures::setupPNext(requiredDeviceFeatures);
 		createInfo.pEnabledFeatures      = nullptr;
 		createInfo.pNext                 = &physicalDeviceFeatures2;
 	}
@@ -331,11 +298,8 @@ bool VulkanDevice::isDeviceSuitable(VkPhysicalDevice device) {
 		swapChainSupportAdequate = (! swapChainSupportDetails.formats.empty()) && (! swapChainSupportDetails.presentModes.empty());
 	}
 
-	VkPhysicalDeviceFeatures supportedFeatures;
-	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
-
 	//Return the result
-	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && queueFamilies.isComplete() && extensionsSupported && swapChainSupportAdequate && supportedFeatures.samplerAnisotropy && supportedFeatures.geometryShader;
+	return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && queueFamilies.isComplete() && extensionsSupported && swapChainSupportAdequate && VulkanFeatures::checkSupport(device);
 }
 
 VulkanDeviceQueueFamilies VulkanDevice::findQueueFamilies(VkPhysicalDevice device) {

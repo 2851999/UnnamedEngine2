@@ -26,28 +26,28 @@
 
 class VulkanExtensions {
 private:
-	/* Stores all the requested extensions to use */
-	static std::vector<const char*> extensions;
+	/* Stores all the required extensions */
+	static std::vector<const char*> requiredExtensions;
 
-	/* Stores all the requested device extensions to use */
-	static std::vector<const char*> deviceExtensions;
+	/* Stores all the required device extensions */
+	static std::vector<const char*> requiredDeviceExtensions;
 
 	/* Stores the extensions required for raytracing */
-	static std::vector<const char*> raytracingExtensions;
+	static std::vector<const char*> requiredRaytracingExtensions;
 public:
 	/* Adds the default extensions required */
 	static void addRequired();
 
 	/* Adds an extension to the list of requested ones */
-	static void addExtension(const char* extension);
+	static void addRequiredExtension(const char* extension);
 
 	/* Returns whether the device extensions required are supported by a particular device */
 	static bool checkSupport(VkPhysicalDevice device);
 
 	/* Returns a list of the required extensions */
-	static std::vector<const char*>& getExtentions() { return extensions; }
+	static std::vector<const char*>& getRequiredExtentions() { return requiredExtensions; }
 
 	/* Returns a list of the required device extensions */
-	static std::vector<const char*>& getDeviceExtentions() { return deviceExtensions; }
+	static std::vector<const char*>& getRequiredDeviceExtentions() { return requiredDeviceExtensions; }
 };
 

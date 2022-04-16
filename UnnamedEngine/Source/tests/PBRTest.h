@@ -58,7 +58,7 @@ void Test::onInitialise() {
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
-	getSettings().videoVulkan = false;
+	getSettings().videoVulkan = true;
 	getSettings().debugVkValidationLayersEnabled = true;
 	//getSettings().videoRefreshRate = 144;
 	//getSettings().windowFullscreen = true;

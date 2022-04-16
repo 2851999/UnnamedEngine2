@@ -1,8 +1,18 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 0 | Experimental 4
+
+* Added VulkanFeatures
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 0 | Experimental 3
 
 * Added 'videoRaytracing' setting (highly experimental, for
   Vulkan only)
+
+* Fixed bug: Crash when adding more than one extension
+             while validation layers are enabled
 
 * Updated to VulkanSDK 1.3.204
 
