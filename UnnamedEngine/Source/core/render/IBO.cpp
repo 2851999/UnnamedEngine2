@@ -41,9 +41,14 @@ void IBO::setup() {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, NULL, Renderer::convertToGL(usage));
 	}
 
-	if (BaseEngine::usingVulkan())
+	if (BaseEngine::usingVulkan()) {
+		VkBufferUsageFlags usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+		if (Window::getCurrentInstance()->getSettings().videoRaytracing)
+			usageFlags = usageFlags | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+
 		//Create the Vulkan buffer
-		vulkanBuffer = new VulkanBufferObject(data.data(), sizeof(unsigned int) * data.size(), Vulkan::getDevice(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, usage == DataUsage::STATIC, usage != DataUsage::STATIC); //Assume wont be updated if static
+		vulkanBuffer = new VulkanBufferObject(data.data(), sizeof(unsigned int) * data.size(), Vulkan::getDevice(), usageFlags, usage == DataUsage::STATIC, usage != DataUsage::STATIC); //Assume wont be updated if static
+	}
 }
 
 void IBO::startRendering() {

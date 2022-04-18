@@ -302,6 +302,10 @@ public:
 	/* Setters and getters */
 	inline RenderData* getRenderData() { return renderData; }
 	inline RenderShader* getSetupShader() { return setupShader; }
+
+	/* Experimental methods for Vulkan raytracing */
+	inline VBO<float>* getVBOOthers() { return vboOthers; }
+	inline IBO* getIBO() { return ibo; }
 };
 
 /*****************************************************************************

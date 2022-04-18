@@ -87,6 +87,9 @@ private:
        in Vulkan*/
 	bool m_isInUpdateQueue = false;
 
+	/* Experimental stuff for raytracing */
+	bool raytracing;
+
 	/* Method used to update this descriptor set for Vulkan (This method updates for
 	   all internal descriptor sets and as such should not be used during rendering) */
 	void updateAllVk();
@@ -107,11 +110,17 @@ public:
 	/* Method used to update this set for a certain frame (for Vulkan) */
 	void updateVk(unsigned int frame);
 
+	/* Method used to update this set for a certain frame (for Vulkan raytracing) */
+	void updateVkRaytracing(VkAccelerationStructureKHR* raytracingTLAS, VkImageView raytracingOutputImage);
+
 	/* Method used to update this descriptor set */
 	void update();
 
 	/* Method used to bind this descriptor set */
 	void bind();
+
+	/* Same as above but used for raytracing */
+	void bind(VkPipelineBindPoint bindPoint, VkPipelineLayout pipelineLayout);
 
 	/* Method used to unbind this descriptor set (For textures in OpenGL) */
 	void unbind();
@@ -145,6 +154,9 @@ private:
 	/* The set number of this set (corresponds to layout(set) in Vulkan shaders) */
 	unsigned int setNumber;
 
+	/* Temporary setting for setting up for raytracing */
+	bool raytracing;
+
 	/* UBOs required in this layout*/
 	std::vector<UBOInfo> ubos;
 
@@ -158,7 +170,7 @@ private:
 	void setupVk();
 public:
 	/* Constructor */
-	DescriptorSetLayout(unsigned int setNumber) : setNumber(setNumber) {}
+	DescriptorSetLayout(unsigned int setNumber, bool raytracing = false) : setNumber(setNumber), raytracing(raytracing) {}
 
 	/* Destructor */
 	virtual ~DescriptorSetLayout();
@@ -182,6 +194,7 @@ public:
 
 	/* Getters */
 	inline unsigned int getSetNumber() { return setNumber; }
+	inline bool getRaytracing() { return raytracing; }
 	inline std::vector<UBOInfo>& getUBOs() { return ubos; }
 	inline std::vector<DescriptorSet::TextureBindingInfo>& getTextureBindings() { return textureBindings; }
 	inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout; }

@@ -52,9 +52,6 @@ private:
 
 	/* Loads and returns an included file */
 	static std::vector<std::string> loadInclude(std::string path, std::string line);
-
-	/* Method to read a file (used for Vulkan shaders) */
-	static std::vector<char> readFile(const std::string& path);
 public:
 	/* The ShaderSource struct stores information about Shader source code */
 	struct ShaderSource {
@@ -125,4 +122,7 @@ public:
 
 	/* Utility method to use the above method to compile an engine shader and place it in the appropriate location */
 	static void compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath, std::vector<std::string> defines = {});
+
+	/* Method to read a file (used for Vulkan shaders) */
+	static std::vector<char> readFile(const std::string& path);
 };

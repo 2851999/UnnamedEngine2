@@ -146,18 +146,20 @@ void BaseEngine::create() {
 
 			renderOffscreen();
 
-			//Start the default RenderPass
-			Renderer::getDefaultRenderPass()->begin();
-			render();
+			if (!getSettings().videoRaytracing) {
+				//Start the default RenderPass
+				Renderer::getDefaultRenderPass()->begin();
+				render();
 
-			if (getSettings().debugShowInformation)
-				renderDebugInfo();
+				if (getSettings().debugShowInformation)
+					renderDebugInfo();
 
-			if (getSettings().debugConsoleEnabled)
-				renderDebugConsole();
+				if (getSettings().debugConsoleEnabled)
+					renderDebugConsole();
 
-			//Stop the default RenderPass
-			Renderer::getDefaultRenderPass()->end();
+				//Stop the default RenderPass
+				Renderer::getDefaultRenderPass()->end();
+			}
 
 			if (getSettings().videoVulkan)
 				Vulkan::stopDraw();

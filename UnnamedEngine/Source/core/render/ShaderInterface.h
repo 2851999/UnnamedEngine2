@@ -203,6 +203,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP      = 17;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP       = 18;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR               = 19;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_RAYTRACING                  = 20;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION      = 0;

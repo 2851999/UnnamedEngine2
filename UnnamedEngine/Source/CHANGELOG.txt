@@ -1,4 +1,32 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 1 | Experimental 1
+
+* Added RaytracingTest
+
+* Started looking into adding raytracing
+
+-------------------------------------------------------------
+Release 3 | Beta 0 | Development 1 (V0.5.6)
+
+* Added VulkanFeatures
+* Added Colour::BROWN & PURPLE
+* Added compileEngineShader(s)ToSPIRV methods to Renderer
+  for compiling engine shaders to SPIRV
+* Added 'videoRaytracing' setting (highly experimental, for
+  Vulkan only)
+
+* Fixed bug: Duplicate assignment of a matrix element in
+  Quaternion::toRotationMatrix
+* Fixed bug: Billboarded SDF text did not face the camera
+* Fixed bug: SSR was incorrect when moving
+* Fixed bug: Crash when adding more than one extension
+             while validation layers are enabled
+
+* Some cleanup
+
+* Updated to VulkanSDK 1.3.204
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 0 | Experimental 4
 
 * Added VulkanFeatures

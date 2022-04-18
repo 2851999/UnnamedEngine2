@@ -374,6 +374,10 @@ DescriptorSetLayout* ShaderInterface::createDescriptorSetLayout(unsigned int id)
 			layout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
 			layout->addUBO(sizeof(ShaderBlock_GaussianBlur), DataUsage::STATIC, UBO_BINDING_LOCATION_GAUSSIAN_BLUR);
 			break;
+		case DESCRIPTOR_SET_DEFAULT_RAYTRACING:
+			//Default raytracing (experimental)
+			layout = new DescriptorSetLayout(1, true);
+			break;
 	}
 
 	//Setup the layout if found
