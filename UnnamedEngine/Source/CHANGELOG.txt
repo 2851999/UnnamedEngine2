@@ -1,4 +1,23 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 1 | Experimental 2
+
+* Added RaytracingPipeline
+* Added 'additionalVkUsageFlags' to IBO, VBO and RenderData
+  setup methods as well as a boolean 'raytracing' to
+  MeshRenderData for assigning these flags so they are setup
+  to be used in the creation of a BLAS/TLAS
+* Added ability to add a storage texture/accleration
+  structure to a DescriptorSet (used for raytracing)
+* Added 'loadExternalFunction' to Vulkan
+* Added various extension methods used for raytracing in
+  VulkanExtensions
+
+* Modified RaytracingTest to work with models with more
+  than one material
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 1 | Experimental 1
 
 * Added RaytracingTest

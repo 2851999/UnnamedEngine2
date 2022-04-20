@@ -27,7 +27,7 @@
   * The IBO class
   *****************************************************************************/
 
-void IBO::setup() {
+void IBO::setup(VkBufferUsageFlags additionalVkUsageFlags) {
 	//Check whether using Vulkan or OpenGL
 	if (! BaseEngine::usingVulkan()) {
 		//Get OpenGL to generate the buffer
@@ -42,9 +42,7 @@ void IBO::setup() {
 	}
 
 	if (BaseEngine::usingVulkan()) {
-		VkBufferUsageFlags usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-		if (Window::getCurrentInstance()->getSettings().videoRaytracing)
-			usageFlags = usageFlags | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+		VkBufferUsageFlags usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | additionalVkUsageFlags;
 
 		//Create the Vulkan buffer
 		vulkanBuffer = new VulkanBufferObject(data.data(), sizeof(unsigned int) * data.size(), Vulkan::getDevice(), usageFlags, usage == DataUsage::STATIC, usage != DataUsage::STATIC); //Assume wont be updated if static

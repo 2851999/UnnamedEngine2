@@ -24,17 +24,17 @@
 #include "../BaseEngine.h"
 #include "../vulkan/Vulkan.h"
 #include "../../utils/Logging.h"
+#include "../../utils/VulkanUtils.h"
 
  /*****************************************************************************
   * The DescriptorSet class
   *****************************************************************************/
 
-DescriptorSet::DescriptorSet(DescriptorSetLayout* layout) : layout(layout) {
+DescriptorSet::DescriptorSet(DescriptorSetLayout* layout, bool raytracing) : layout(layout), raytracing(raytracing) {
 	//Obtain the UBO and texture info required from the layout
 	std::vector<DescriptorSetLayout::UBOInfo> ubosInfo = layout->getUBOs();
 	textureBindings = layout->getTextureBindings();
-
-	raytracing = layout->getRaytracing();
+	std::vector<unsigned int> asBindingsVector = layout->getAccelerationStructureBindings();
 
 	//Add the required UBOs and textures
 	for (DescriptorSetLayout::UBOInfo& uboInfo : ubosInfo) {
@@ -55,6 +55,12 @@ DescriptorSet::DescriptorSet(DescriptorSetLayout* layout) : layout(layout) {
 
 			textures.push_back(info);
 		}
+	}
+
+	asBindings.resize(asBindingsVector.size());
+	for (unsigned int i = 0; i < asBindings.size(); ++i) {
+		asBindings[i].binding = asBindingsVector[i];
+		asBindings[i].accelerationStructure = VK_NULL_HANDLE;
 	}
 }
 
@@ -87,24 +93,24 @@ void DescriptorSet::setupVk() {
 	}
 
 	for (unsigned int i = 0; i < textures.size(); ++i) {
-		VkDescriptorPoolSize poolSize;
-		poolSize.type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
-		poolSizes.push_back(poolSize);
+		if (textureBindings[i].type == TextureType::STORAGE_IMAGE) {
+			VkDescriptorPoolSize poolSize;
+			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
+			poolSizes.push_back(poolSize);
+		} else {
+			VkDescriptorPoolSize poolSize;
+			poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			poolSize.descriptorCount = static_cast<uint32_t>(1);
+			poolSizes.push_back(poolSize);
+		}
 	}
 
-	if (raytracing) {
-		numDescriptorSets = 1;
-
+	for (unsigned int i = 0; i < asBindings.size(); ++i) {
 		VkDescriptorPoolSize poolSize;
-		poolSize.type = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-		poolSize.descriptorCount = 1;
+		poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		poolSize.descriptorCount = static_cast<uint32_t>(1);
 		poolSizes.push_back(poolSize);
-
-		VkDescriptorPoolSize poolSize2;
-		poolSize2.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		poolSize2.descriptorCount = 1;
-		poolSizes.push_back(poolSize2);
 	}
 
 	//Create the descriptor pool (Should minimise number created later)
@@ -158,19 +164,49 @@ void DescriptorSet::updateAllVk() {
 
 		//Textures
 		for (TextureBindingInfo& textureBindingInfo : textureBindings) {
-			VkWriteDescriptorSet textureWrite;
-			textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			textureWrite.dstSet           = vulkanDescriptorSets[i];
-			textureWrite.dstBinding       = textureBindingInfo.binding;
-			textureWrite.dstArrayElement  = 0;
-			textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			textureWrite.descriptorCount  = textureBindingInfo.numTextures;
-			textureWrite.pBufferInfo      = nullptr;
-			textureWrite.pImageInfo       = textureBindingInfo.textures.data();
-			textureWrite.pTexelBufferView = nullptr;
-			textureWrite.pNext            = nullptr;
+			if (textureBindingInfo.type == TextureType::STORAGE_IMAGE) {
+				//Information about the storage image
+				VkDescriptorImageInfo storageImageDescriptor{};
+				storageImageDescriptor.imageView = textureBindingInfo.textures[0].imageView;
+				storageImageDescriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-			descriptorWrites.push_back(textureWrite);
+				//Write descriptor set for the storage image
+				VkWriteDescriptorSet textureWrite = utils_vulkan::initWriteDescriptorSet(
+					VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+					vulkanDescriptorSets[0],
+					1 //dstBinding should match layout
+				);
+				textureWrite.descriptorCount = 1;
+				textureWrite.pImageInfo = &storageImageDescriptor;
+
+				descriptorWrites.push_back(textureWrite);
+			} else {
+				VkWriteDescriptorSet textureWrite = utils_vulkan::initWriteDescriptorSet(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, vulkanDescriptorSets[i], textureBindingInfo.binding);
+				textureWrite.descriptorCount = textureBindingInfo.numTextures;
+				textureWrite.pImageInfo = textureBindingInfo.textures.data();
+
+				descriptorWrites.push_back(textureWrite);
+			}
+		}
+
+		//Acceleration structures
+		for (AccelerationStructureInfo& asInfo : asBindings) {
+			//Information about the TLAS binding
+			VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
+			descriptorAccelerationStructureInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+			descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
+			descriptorAccelerationStructureInfo.pAccelerationStructures = asInfo.accelerationStructure;
+
+			//Write descriptor set description, needs to use pNext to link the above
+			VkWriteDescriptorSet asWrite = utils_vulkan::initWriteDescriptorSet(
+				VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR,
+				vulkanDescriptorSets[0],
+				asInfo.binding //dstBinding should match layout
+			);
+			asWrite.descriptorCount = 1;
+			asWrite.pNext = &descriptorAccelerationStructureInfo;
+
+			descriptorWrites.push_back(asWrite);
 		}
 
 		//Update the descriptor sets
@@ -195,63 +231,52 @@ void DescriptorSet::updateVk(unsigned int frame) {
 
 	//Textures
 	for (TextureBindingInfo& textureBindingInfo : textureBindings) {
-		VkWriteDescriptorSet textureWrite;
-		textureWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		textureWrite.dstSet           = vulkanDescriptorSets[frame];
-		textureWrite.dstBinding       = textureBindingInfo.binding;
-		textureWrite.dstArrayElement  = 0;
-		textureWrite.descriptorType   = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		textureWrite.descriptorCount  = textureBindingInfo.numTextures;
-		textureWrite.pBufferInfo      = nullptr;
-		textureWrite.pImageInfo       = textureBindingInfo.textures.data();
-		textureWrite.pTexelBufferView = nullptr;
-		textureWrite.pNext            = nullptr;
+		if (textureBindingInfo.type == TextureType::STORAGE_IMAGE) {
+			//Information about the storage image
+			VkDescriptorImageInfo storageImageDescriptor{};
+			storageImageDescriptor.imageView = textureBindingInfo.textures[0].imageView;;
+			storageImageDescriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-		descriptorWrites.push_back(textureWrite);
+			//Write descriptor set for the storage image
+			VkWriteDescriptorSet textureWrite = utils_vulkan::initWriteDescriptorSet(
+				VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+				vulkanDescriptorSets[0],
+				1 //dstBinding should match layout
+			);
+			textureWrite.descriptorCount = 1;
+			textureWrite.pImageInfo      = &storageImageDescriptor;
+
+			descriptorWrites.push_back(textureWrite);
+		} else {
+			VkDescriptorType descriptorType = textureBindingInfo.type == TextureType::STORAGE_IMAGE ? VK_DESCRIPTOR_TYPE_STORAGE_IMAGE : VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
+			VkWriteDescriptorSet textureWrite = utils_vulkan::initWriteDescriptorSet(descriptorType, vulkanDescriptorSets[frame], textureBindingInfo.binding);
+			textureWrite.descriptorCount = textureBindingInfo.numTextures;
+			textureWrite.pImageInfo = textureBindingInfo.textures.data();
+
+			descriptorWrites.push_back(textureWrite);
+		}
 	}
 
-	//Update the descriptor sets
-	vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
-}
+	//Acceleration structures
+	for (AccelerationStructureInfo& asInfo : asBindings) {
+		//Information about the TLAS binding
+		VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
+		descriptorAccelerationStructureInfo.sType                      = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+		descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
+		descriptorAccelerationStructureInfo.pAccelerationStructures    = asInfo.accelerationStructure;
 
-void DescriptorSet::updateVkRaytracing(VkAccelerationStructureKHR* raytracingTLAS, VkImageView raytracingOutputImage) {
-	//Contains parameters for the write operations of the descriptor set
-	std::vector<VkWriteDescriptorSet> descriptorWrites = {};
+		//Write descriptor set description, needs to use pNext to link the above
+		VkWriteDescriptorSet asWrite = utils_vulkan::initWriteDescriptorSet(
+			VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR,
+			vulkanDescriptorSets[0],
+			asInfo.binding //dstBinding should match layout
+		);
+		asWrite.descriptorCount = 1;
+		asWrite.pNext           = &descriptorAccelerationStructureInfo;
 
-	//Information about the TLAS binding
-	VkWriteDescriptorSetAccelerationStructureKHR descriptorAccelerationStructureInfo{};
-	descriptorAccelerationStructureInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
-	descriptorAccelerationStructureInfo.accelerationStructureCount = 1;
-	descriptorAccelerationStructureInfo.pAccelerationStructures = raytracingTLAS;
-
-	//Write descriptor set description, needs to use pNext to link the above
-	VkWriteDescriptorSet asWrite{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-	asWrite.descriptorType = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-	asWrite.dstSet          = vulkanDescriptorSets[0];
-	asWrite.dstBinding      = 0; //Should match layout
-	asWrite.descriptorCount = 1;
-	asWrite.pNext           = &descriptorAccelerationStructureInfo;
-
-	descriptorWrites.push_back(asWrite);
-
-	//Information about the storage image
-	VkDescriptorImageInfo storageImageDescriptor{};
-	storageImageDescriptor.imageView = raytracingOutputImage;
-	storageImageDescriptor.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-
-	//Write descriptor set for the storage image
-	VkWriteDescriptorSet textureWrite{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-	textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-	textureWrite.dstSet           = vulkanDescriptorSets[0];
-	textureWrite.dstBinding       = 1; //Should match layout
-	textureWrite.dstArrayElement  = 0;
-	textureWrite.descriptorCount  = 1;
-	textureWrite.pBufferInfo      = nullptr;
-	textureWrite.pImageInfo       = &storageImageDescriptor;
-	textureWrite.pTexelBufferView = nullptr;
-	textureWrite.pNext            = nullptr;
-
-	descriptorWrites.push_back(textureWrite);
+		descriptorWrites.push_back(asWrite);
+	}
 
 	//Update the descriptor sets
 	vkUpdateDescriptorSets(Vulkan::getDevice()->getLogical(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
@@ -333,7 +358,7 @@ void DescriptorSetLayout::setupVk() {
 		if (Window::getCurrentInstance()->getSettings().videoRaytracing)
 			uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_RAYGEN_BIT_KHR;
 		else
-			uboLayoutBinding.stageFlags         = VK_SHADER_STAGE_ALL_GRAPHICS; //VK_SHADER_STAGE_ALL_GRAPHICS
+			uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS; //VK_SHADER_STAGE_ALL_GRAPHICS
 		uboLayoutBinding.pImmutableSamplers = nullptr; //Optional
 
 		bindings.push_back(uboLayoutBinding);
@@ -341,37 +366,34 @@ void DescriptorSetLayout::setupVk() {
 
 	//Go through the required textures
 	for (unsigned int i = 0; i < textureBindings.size(); ++i) {
+		VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		VkPipelineStageFlags stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+
+		if (textureBindings[i].type == DescriptorSet::TextureType::STORAGE_IMAGE) {
+			descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			stageFlags     = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+		}
+
 		//Setup the binding and add it
 		VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
 		samplerLayoutBinding.binding            = textureBindings[i].binding;
-		samplerLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		samplerLayoutBinding.descriptorType     = descriptorType;
 		samplerLayoutBinding.descriptorCount    = textureBindings[i].numTextures;
-		samplerLayoutBinding.stageFlags         = VK_SHADER_STAGE_ALL_GRAPHICS; //Should only use whats necessary, but for terrain need access in vertex shader as well
+		samplerLayoutBinding.stageFlags         = stageFlags; //Should only use whats necessary, but for terrain need access in vertex shader as well
 		samplerLayoutBinding.pImmutableSamplers = nullptr;
 
 		bindings.push_back(samplerLayoutBinding);
 	}
 
-	if (raytracing) {
-		//Setup the accleration structure binding
+	for (unsigned int i = 0; i < asBindings.size(); ++i) {
 		VkDescriptorSetLayoutBinding asBinding = {};
-		asBinding.binding            = 0;
+		asBinding.binding            = asBindings[i];
 		asBinding.descriptorType     = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 		asBinding.descriptorCount    = 1;
 		asBinding.stageFlags         = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-		asBinding.pImmutableSamplers = nullptr; //Optional
+		asBinding.pImmutableSamplers = nullptr;
 
 		bindings.push_back(asBinding);
-
-		//Setup the output image binding
-		VkDescriptorSetLayoutBinding outputLayoutBinding = {};
-		outputLayoutBinding.binding            = 1;
-		outputLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		outputLayoutBinding.descriptorCount    = 1;
-		outputLayoutBinding.stageFlags         = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-		outputLayoutBinding.pImmutableSamplers = nullptr;
-
-		bindings.push_back(outputLayoutBinding);
 	}
 
 	//Create info for the descriptor set layout

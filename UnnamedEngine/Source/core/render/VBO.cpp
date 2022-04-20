@@ -38,7 +38,7 @@ void VBO<T>::addAttributeWithType(GLuint type, GLint location, GLint size, GLuin
 }
 
 template <typename T>
-void VBO<T>::setup(unsigned int binding) {
+void VBO<T>::setup(unsigned int binding, VkBufferUsageFlags additionalVkUsageFlags) {
 	//Check whether using Vulkan or OpenGL
 	if (! BaseEngine::usingVulkan()) {
 		//Get OpenGL to generate the buffer
@@ -95,9 +95,7 @@ void VBO<T>::setup(unsigned int binding) {
 		if (attributes.size() == 1)
 			stride = sizeof(T) *  attributes[0].size;
 
-		VkBufferUsageFlags usageFlags = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		if (Window::getCurrentInstance()->getSettings().videoRaytracing)
-			usageFlags = usageFlags | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+		VkBufferUsageFlags usageFlags = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | additionalVkUsageFlags;
 
 		//Create the Vulkan buffer
 		vulkanBuffer = new VulkanBufferObject(data.data(), sizeof(T) * data.size(), Vulkan::getDevice(), usageFlags, usage == DataUsage::STATIC, usage != DataUsage::STATIC); //Assume wont be updated if static

@@ -41,4 +41,21 @@ namespace utils_vulkan {
 		description.offset   = offset;
 		return description;
 	}
+
+	inline VkPipelineShaderStageCreateInfo initPipelineShaderStageCreateInfo(VkShaderStageFlagBits stage, VkShaderModule module, const char* pName) {
+		VkPipelineShaderStageCreateInfo createInfo{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+		createInfo.stage  = stage;
+		createInfo.module = module;
+		createInfo.pName  = pName;
+		return createInfo;
+	}
+
+	/* Returns a partially completed VkWriteDescriptorSet structure (missing pBufferInfo/pImageInfo/pNext and descriptorCount) */
+	inline VkWriteDescriptorSet initWriteDescriptorSet(VkDescriptorType descriptorType, VkDescriptorSet dstSet, uint32_t dstBinding) {
+		VkWriteDescriptorSet writeDescriptorSet{ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+		writeDescriptorSet.descriptorType = descriptorType;
+		writeDescriptorSet.dstSet         = dstSet;
+		writeDescriptorSet.dstBinding     = dstBinding;
+		return writeDescriptorSet;
+	}
 }

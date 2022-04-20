@@ -376,7 +376,9 @@ DescriptorSetLayout* ShaderInterface::createDescriptorSetLayout(unsigned int id)
 			break;
 		case DESCRIPTOR_SET_DEFAULT_RAYTRACING:
 			//Default raytracing (experimental)
-			layout = new DescriptorSetLayout(1, true);
+			layout = new DescriptorSetLayout(1);
+			layout->addAccelerationStructure(0);
+			layout->addStorageTexture(1);
 			break;
 	}
 

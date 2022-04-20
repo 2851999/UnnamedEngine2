@@ -32,7 +32,7 @@ RenderData::~RenderData() {
 	delete descriptorSetModel;
 }
 
-void RenderData::setup(RenderShader* renderShader) {
+void RenderData::setup(RenderShader* renderShader, VkBufferUsageFlags additionalVkUsageFlags) {
 	//HACK TO ALLOW PBREnvironment to work
 	if (renderShader->getID() != Renderer::SHADER_PBR_GEN_EQUI_TO_CUBE_MAP &&
 		renderShader->getID() != Renderer::SHADER_PBR_GEN_IRRADIANCE_MAP &&
@@ -56,7 +56,7 @@ void RenderData::setup(RenderShader* renderShader) {
 
 	//Go through each VBO and set it up
 	for (unsigned int i = 0; i < vbosFloat.size(); ++i) {
-		vbosFloat[i]->setup(i);
+		vbosFloat[i]->setup(i, additionalVkUsageFlags);
 		vbosFloat[i]->startRendering();
 
 		if (BaseEngine::usingVulkan()) {
@@ -70,7 +70,7 @@ void RenderData::setup(RenderShader* renderShader) {
 	}
 
 	for (unsigned int i = 0; i < vbosUInteger.size(); ++i) {
-		vbosUInteger[i]->setup(vbosFloat.size() + i);
+		vbosUInteger[i]->setup(vbosFloat.size() + i, additionalVkUsageFlags);
 		vbosUInteger[i]->startRendering();
 
 		if (BaseEngine::usingVulkan()) {
@@ -85,7 +85,7 @@ void RenderData::setup(RenderShader* renderShader) {
 
 	//Now setup the indices VBO if assigned
 	if (ibo) {
-		ibo->setup();
+		ibo->setup(additionalVkUsageFlags);
 		ibo->startRendering();
 	}
 

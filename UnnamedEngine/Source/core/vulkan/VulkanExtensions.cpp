@@ -48,6 +48,19 @@ std::vector<const char*> VulkanExtensions::requiredRaytracingExtensions = {
 	VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME
 };
 
+PFN_vkGetBufferDeviceAddressKHR VulkanExtensions::loaded_vkGetBufferDeviceAddressKHR;
+PFN_vkCreateAccelerationStructureKHR VulkanExtensions::loaded_vkCreateAccelerationStructureKHR;
+PFN_vkDestroyAccelerationStructureKHR VulkanExtensions::loaded_vkDestroyAccelerationStructureKHR;
+PFN_vkGetAccelerationStructureBuildSizesKHR VulkanExtensions::loaded_vkGetAccelerationStructureBuildSizesKHR;
+PFN_vkGetAccelerationStructureDeviceAddressKHR VulkanExtensions::loaded_vkGetAccelerationStructureDeviceAddressKHR;
+PFN_vkCmdBuildAccelerationStructuresKHR VulkanExtensions::loaded_vkCmdBuildAccelerationStructuresKHR;
+PFN_vkBuildAccelerationStructuresKHR VulkanExtensions::loaded_vkBuildAccelerationStructuresKHR;
+PFN_vkCmdTraceRaysKHR VulkanExtensions::loaded_vkCmdTraceRaysKHR;
+PFN_vkGetRayTracingShaderGroupHandlesKHR VulkanExtensions::loaded_vkGetRayTracingShaderGroupHandlesKHR;
+PFN_vkCreateRayTracingPipelinesKHR VulkanExtensions::loaded_vkCreateRayTracingPipelinesKHR;
+PFN_vkCmdCopyAccelerationStructureKHR VulkanExtensions::loaded_vkCmdCopyAccelerationStructureKHR;
+PFN_vkCmdWriteAccelerationStructuresPropertiesKHR VulkanExtensions::loaded_vkCmdWriteAccelerationStructuresPropertiesKHR;
+
 void VulkanExtensions::addRequired() {
 	//Obtain the extensions required by GLFW
 	uint32_t glfwExtensionCount;
@@ -66,6 +79,22 @@ void VulkanExtensions::addRequired() {
 
 void VulkanExtensions::addRequiredExtension(const char* extension) {
 	requiredExtensions.push_back(extension);
+}
+
+void VulkanExtensions::loadExtensionMethods() {
+	if (Window::getCurrentInstance()->getSettings().videoRaytracing) {
+		loaded_vkGetBufferDeviceAddressKHR = Vulkan::loadExternalFunction<PFN_vkGetBufferDeviceAddressKHR>("vkGetBufferDeviceAddressKHR");
+		loaded_vkCreateAccelerationStructureKHR = Vulkan::loadExternalFunction<PFN_vkCreateAccelerationStructureKHR>("vkCreateAccelerationStructureKHR");
+		loaded_vkDestroyAccelerationStructureKHR = Vulkan::loadExternalFunction<PFN_vkDestroyAccelerationStructureKHR>("vkDestroyAccelerationStructureKHR");
+		loaded_vkGetAccelerationStructureBuildSizesKHR = Vulkan::loadExternalFunction<PFN_vkGetAccelerationStructureBuildSizesKHR>("vkGetAccelerationStructureBuildSizesKHR");
+		loaded_vkGetAccelerationStructureDeviceAddressKHR = Vulkan::loadExternalFunction<PFN_vkGetAccelerationStructureDeviceAddressKHR>("vkGetAccelerationStructureDeviceAddressKHR");
+		loaded_vkCmdBuildAccelerationStructuresKHR = Vulkan::loadExternalFunction<PFN_vkCmdBuildAccelerationStructuresKHR>("vkCmdBuildAccelerationStructuresKHR");;
+		loaded_vkCmdTraceRaysKHR = Vulkan::loadExternalFunction<PFN_vkCmdTraceRaysKHR>("vkCmdTraceRaysKHR");
+		loaded_vkGetRayTracingShaderGroupHandlesKHR = Vulkan::loadExternalFunction<PFN_vkGetRayTracingShaderGroupHandlesKHR>("vkGetRayTracingShaderGroupHandlesKHR");
+		loaded_vkCreateRayTracingPipelinesKHR = Vulkan::loadExternalFunction<PFN_vkCreateRayTracingPipelinesKHR>("vkCreateRayTracingPipelinesKHR");
+		loaded_vkCmdCopyAccelerationStructureKHR = Vulkan::loadExternalFunction<PFN_vkCmdCopyAccelerationStructureKHR>("vkCmdCopyAccelerationStructureKHR");
+		loaded_vkCmdWriteAccelerationStructuresPropertiesKHR = Vulkan::loadExternalFunction<PFN_vkCmdWriteAccelerationStructuresPropertiesKHR>("vkCmdWriteAccelerationStructuresPropertiesKHR");
+	}
 }
 
 bool VulkanExtensions::checkSupport(VkPhysicalDevice device) {

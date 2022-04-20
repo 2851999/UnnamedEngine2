@@ -282,7 +282,7 @@ public:
 	virtual ~MeshRenderData() { destroy(); }
 
 	/* Sets up for rendering */
-	void setup(MeshData* data, std::vector<Material*>& materials, DataUsage vboUsage = DataUsage::STATIC);
+	void setup(MeshData* data, std::vector<Material*>& materials, DataUsage vboUsage = DataUsage::STATIC, bool raytracing = false);
 
 	/* Method to render using the data */
 	void render();
@@ -333,6 +333,10 @@ private:
 
 	/* Boolean that states whether this mesh should be culled where possible */
 	bool culling = false;
+
+	/* Boolean that states whether this mesh will be used to create acceleration
+	   strucures for raytracing in Vulkan */
+	bool raytracing = false;
 public:
 	/* The constructor */
 	Mesh(MeshData* data);
@@ -348,6 +352,10 @@ public:
 
 	/* Method to add a material */
 	inline void addMaterial(Material* material) { materials.push_back(material); }
+
+	/* Method that should be called before setup if this mesh will be used in the creation
+	   of acceleration structures for Vulkan raytracing */
+	inline void enableRaytracing() { this->raytracing = true; }
 
 	/* The setters and getters */
 	inline void setMatrix(const Matrix4f& transform) { this->transform = transform; }

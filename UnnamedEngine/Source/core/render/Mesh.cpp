@@ -281,9 +281,12 @@ MeshRenderData::MeshRenderData(MeshData* data, RenderShader* renderShader) {
 	renderData = new RenderData(count);
 }
 
-void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, DataUsage vboUsage) {
+void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, DataUsage vboUsage, bool raytracing) {
 	//The shader used for the setup
 	Shader* shader = setupShader->getShader();
+
+	//Additional usage flags required for raytracing setup
+	VkBufferUsageFlags additionalVkUsageFlags = raytracing ? (VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR) : 0;
 
 	//Setup positions
 	if (data->hasPositions() && data->separatePositions()) {
@@ -355,11 +358,11 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, Da
 
 	//Setup bones
 	if (data->hasBones()) {
-		vboBoneIDs = new VBO<unsigned int>(data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), DataUsage::STATIC);
+		vboBoneIDs = new VBO<unsigned int>(data->getBoneIDs().size() * sizeof(data->getBoneIDs()[0]), data->getBoneIDs(), DataUsage::STATIC, additionalVkUsageFlags);
 		vboBoneIDs->addAttributeWithType(GL_INT, ShaderInterface::ATTRIBUTE_LOCATION_BONE_IDS, 4);
 		renderData->addVBO(vboBoneIDs);
 
-		vboBoneWeights = new VBO<float>(data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), DataUsage::STATIC);
+		vboBoneWeights = new VBO<float>(data->getBoneWeights().size() * sizeof(data->getBoneWeights()[0]), data->getBoneWeights(), DataUsage::STATIC, additionalVkUsageFlags);
 		vboBoneWeights->addAttribute(ShaderInterface::ATTRIBUTE_LOCATION_BONE_WEIGHTS, 4);
 		renderData->addVBO(vboBoneWeights);
 	}
@@ -375,7 +378,7 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, Da
 		material->setup();
 
 	//Setup the render data
-	renderData->setup(setupShader);
+	renderData->setup(setupShader, additionalVkUsageFlags);
 }
 
 void MeshRenderData::render() {
@@ -538,7 +541,7 @@ Mesh::~Mesh() {
 
 void Mesh::setup(RenderShader* renderShader, DataUsage vboUsage) {
 	this->renderData = new MeshRenderData(this->data, renderShader);
-	this->renderData->setup(data, materials, vboUsage);
+	this->renderData->setup(data, materials, vboUsage, raytracing);
 }
 
 void Mesh::updateAnimation(float deltaSeconds) {

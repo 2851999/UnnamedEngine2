@@ -64,6 +64,7 @@ bool Vulkan::initialise(Window* window) {
 		Logger::log("Vulkan instance could not be created", "Vulkan", LogType::Error);
 		return false;
 	}
+
 	//Create the debug messenger (If validation layers are enabled)
 	VulkanValidationLayers::createDebugMessenger();
 	//Create the window surface
@@ -80,6 +81,9 @@ bool Vulkan::initialise(Window* window) {
 		Logger::log("Failed to create a VulkanDevice", "Vulkan", LogType::Error);
 		return false;
 	}
+
+	//Load any extension methods
+	VulkanExtensions::loadExtensionMethods();
 
 	//Use MSAA?
 	if (window->getSettings().videoSamples > 0) {
@@ -729,6 +733,12 @@ void Vulkan::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
 	endSingleTimeCommands(commandBuffer);
+}
+
+uint64_t Vulkan::getBufferDeviceAddress(VkBuffer buffer) {
+	VkBufferDeviceAddressInfoKHR bufferDeviceAI{ VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
+	bufferDeviceAI.buffer = buffer;
+	return VulkanExtensions::vkGetBufferDeviceAddressKHR(device->getLogical(), &bufferDeviceAI);
 }
 
 uint32_t Vulkan::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
