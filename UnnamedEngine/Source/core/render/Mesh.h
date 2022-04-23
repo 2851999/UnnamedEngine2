@@ -158,7 +158,11 @@ public:
 	void addBoneData(unsigned int boneID, float boneWeight);
 
 	inline void addMaterialIndex(unsigned int materialIndex) { materialIndices.push_back(materialIndex); }
-	inline void addOffsetIndex(unsigned int baseIndex, unsigned int baseVertex) { offsetIndices.push_back(baseIndex); offsetIndices.push_back(baseVertex); }
+	inline void addOffsetIndex(unsigned int baseIndex, unsigned int baseVertex) {
+		//Want to store offset in primitves (triangles in this case)
+		offsetIndices.push_back(baseIndex / 3);
+		offsetIndices.push_back(baseVertex);
+	}
 
 	inline void setRenderMode(GLenum mode) { this->renderMode = mode; }
 	inline void setNumPositions(unsigned int numPositions) { this->numPositions = numPositions; }

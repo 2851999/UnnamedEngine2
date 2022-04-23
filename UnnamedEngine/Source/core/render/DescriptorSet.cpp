@@ -20,6 +20,7 @@
 
 #include "Texture.h"
 #include "UBO.h"
+#include "SSBO.h"
 #include "Renderer.h"
 #include "../BaseEngine.h"
 #include "../vulkan/Vulkan.h"
@@ -32,15 +33,22 @@
 
 DescriptorSet::DescriptorSet(DescriptorSetLayout* layout, bool raytracing) : layout(layout), raytracing(raytracing) {
 	//Obtain the UBO and texture info required from the layout
-	std::vector<DescriptorSetLayout::UBOInfo> ubosInfo = layout->getUBOs();
+	std::vector<DescriptorSetLayout::BufferInfo> ubosInfo = layout->getUBOs();
+	std::vector<DescriptorSetLayout::BufferInfo> ssbosInfo = layout->getSSBOs();
 	textureBindings = layout->getTextureBindings();
 	std::vector<unsigned int> asBindingsVector = layout->getAccelerationStructureBindings();
 
-	//Add the required UBOs and textures
-	for (DescriptorSetLayout::UBOInfo& uboInfo : ubosInfo) {
+	//Add the required UBOs, SSBOs and textures
+	for (DescriptorSetLayout::BufferInfo& uboInfo : ubosInfo) {
 		UBO* ubo = new UBO(NULL, uboInfo.size, uboInfo.usage, uboInfo.binding);
 
 		ubos.push_back(ubo);
+	}
+
+	for (DescriptorSetLayout::BufferInfo& ssboInfo : ssbosInfo) {
+		SSBO* ssbo = new SSBO(NULL, ssboInfo.size, ssboInfo.usage, ssboInfo.binding);
+
+		ssbos.push_back(ssbo);
 	}
 
 	for (unsigned int j = 0; j < textureBindings.size(); ++j) {
@@ -72,6 +80,8 @@ DescriptorSet::~DescriptorSet() {
 		Vulkan::removeFromDescriptorSetQueue(this);
 	for (UBO* ubo : ubos)
 		delete ubo;
+	for (SSBO* ssbo : ssbos)
+		delete ssbo;
 	ubos.clear();
 }
 
@@ -88,6 +98,13 @@ void DescriptorSet::setupVk() {
 	for (unsigned int i = 0; i < ubos.size(); ++i) {
 		VkDescriptorPoolSize poolSize;
 		poolSize.type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
+		poolSizes.push_back(poolSize);
+	}
+
+	for (unsigned int i = 0; i < ssbos.size(); ++i) {
+		VkDescriptorPoolSize poolSize;
+		poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
 		poolSizes.push_back(poolSize);
 	}
@@ -162,6 +179,10 @@ void DescriptorSet::updateAllVk() {
 		for (UBO* ubo : ubos)
 			descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(i, vulkanDescriptorSets[i], ubo->getVkBuffer(i)->getBufferInfo()));
 
+		//SSBOs
+		for (SSBO* ssbo : ssbos)
+			descriptorWrites.push_back(ssbo->getVkWriteDescriptorSet(i, vulkanDescriptorSets[i], ssbo->getVkBuffer(i)->getBufferInfo()));
+
 		//Textures
 		for (TextureBindingInfo& textureBindingInfo : textureBindings) {
 			if (textureBindingInfo.type == TextureType::STORAGE_IMAGE) {
@@ -228,6 +249,10 @@ void DescriptorSet::updateVk(unsigned int frame) {
 	//UBOs
 	for (UBO* ubo : ubos)
 		descriptorWrites.push_back(ubo->getVkWriteDescriptorSet(frame, vulkanDescriptorSets[frame], ubo->getVkBuffer(frame)->getBufferInfo()));
+
+	//SSBOs
+	for (SSBO* ssbo : ssbos)
+		descriptorWrites.push_back(ssbo->getVkWriteDescriptorSet(frame, vulkanDescriptorSets[frame], ssbo->getVkBuffer(frame)->getBufferInfo()));
 
 	//Textures
 	for (TextureBindingInfo& textureBindingInfo : textureBindings) {
@@ -297,12 +322,17 @@ void DescriptorSet::bind() {
 		//Bind the descriptor set for Vulkan
 		vkCmdBindDescriptorSets(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, Renderer::getCurrentGraphicsPipeline()->getLayout()->getVkInstance(), layout->getSetNumber(), 1, &vulkanDescriptorSets[Vulkan::getCurrentFrame()], 0, nullptr);
 	else {
-		//Need to bind the appropriate UBOs and textures for OpenGL
+		//Need to bind the appropriate UBOs, SSBOs and textures for OpenGL
 
 		//UBOs
 		for (UBO* ubo : ubos)
 			//Bind the UBO for use
 			ubo->bindGL();
+
+		//SSBOs
+		for (SSBO* ssbo : ssbos)
+			//Bind the SSBO for use
+			ssbo->bindGL();
 
 		//Textures
 		for (TextureInfo& info : textures) {
@@ -355,22 +385,40 @@ void DescriptorSetLayout::setupVk() {
 		uboLayoutBinding.binding            = ubos[i].binding + UBO::VULKAN_BINDING_OFFSET; //Apply offset for Vulkan (Caused access violation without)
 		uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		uboLayoutBinding.descriptorCount    = 1;
+		//TODO: Add way of modifying stage flags
 		if (Window::getCurrentInstance()->getSettings().videoRaytracing) {
 			uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-
-			//TODO: REMOVE THIS
-			//      NEED EITHER STORAGE BUFFER CLASS OR WAY TO SPECIFY THIS
-			if (ubos[i].binding == 2) {
-				//Assume this is model data storage buffer
-				uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-
-				uboLayoutBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
-			}
 		} else
 			uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS; //VK_SHADER_STAGE_ALL_GRAPHICS
 		uboLayoutBinding.pImmutableSamplers = nullptr; //Optional
 
 		bindings.push_back(uboLayoutBinding);
+	}
+
+	//Go through the required SSBOs
+	for (unsigned int i = 0; i < ssbos.size(); ++i) {
+		//Setup the binding and add it
+		VkDescriptorSetLayoutBinding ssboLayoutBinding = {};
+		ssboLayoutBinding.binding = ssbos[i].binding + SSBO::VULKAN_BINDING_OFFSET; //Apply offset for Vulkan (Caused access violation without)
+		ssboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		ssboLayoutBinding.descriptorCount = 1;
+		if (Window::getCurrentInstance()->getSettings().videoRaytracing) {
+			ssboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+
+			//TODO: REMOVE THIS
+			//      NEED EITHER STORAGE BUFFER CLASS OR WAY TO SPECIFY THIS
+			if (ssbos[i].binding == 2) {
+				//Assume this is model data storage buffer
+				ssboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+
+				ssboLayoutBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+			}
+		}
+		else
+			ssboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS; //VK_SHADER_STAGE_ALL_GRAPHICS
+		ssboLayoutBinding.pImmutableSamplers = nullptr; //Optional
+
+		bindings.push_back(ssboLayoutBinding);
 	}
 
 	//Go through the required textures

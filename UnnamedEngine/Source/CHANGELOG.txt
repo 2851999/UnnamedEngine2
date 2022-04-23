@@ -1,4 +1,11 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 1 | Experimental 6
+
+* Added SSBO
+
+* Added ability to add SSBOs to DescriptorSet's
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 1 | Experimental 5
 
 * Improved fix for material colours in RaytracingTest

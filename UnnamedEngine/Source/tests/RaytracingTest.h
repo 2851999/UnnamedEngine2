@@ -625,6 +625,8 @@ void Test::setupModelData() {
 		VulkanBuffer* materialDataBuffer = new VulkanBuffer(materialData.data(), materialData.size() * sizeof(ShaderBlock_Material), Vulkan::getDevice(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, false);
 		materialDataBuffers.push_back(materialDataBuffer);
 
+		unsigned int pos = 0;
+
 		for (unsigned int i = 0; i < model->getMesh()->getData()->getSubDataCount(); ++i) {
 
 			ModelData data = {};
@@ -633,22 +635,25 @@ void Test::setupModelData() {
 			data.matIndexBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getMaterialIndicesBuffer()->getInstance());
 			data.matDataBufferAddress = Vulkan::getBufferDeviceAddress(materialDataBuffer->getInstance());
 
-			//TODO: Cleanup and potentially try using offset into data in mesh otherwise could move material index here too instead of having per vertex
-			std::vector<unsigned int> offsetIndicesBufferData;
-			//Need per primitive
-			for (unsigned int j = 0; j < model->getMesh()->getData()->getSubData(i).count / 3; ++j) {
-				offsetIndicesBufferData.push_back(model->getMesh()->getData()->getSubData(i).baseIndex / 3);
-				offsetIndicesBufferData.push_back(model->getMesh()->getData()->getSubData(i).baseVertex);
-				//std::cout << model->getMesh()->getData()->getSubData(i).baseIndex << std::endl;
-			}
+			////TODO: Cleanup and potentially try using offset into data in mesh otherwise could move material index here too instead of having per vertex
+			//std::vector<unsigned int> offsetIndicesBufferData;
+			////Need per primitive
+			//for (unsigned int j = 0; j < model->getMesh()->getData()->getSubData(i).count / 3; ++j) {
+			//	offsetIndicesBufferData.push_back(model->getMesh()->getData()->getSubData(i).baseIndex / 3);
+			//	offsetIndicesBufferData.push_back(model->getMesh()->getData()->getSubData(i).baseVertex);
+			//	//std::cout << model->getMesh()->getData()->getSubData(i).baseIndex << std::endl;
+			//}
 
-			VulkanBuffer* offsetIndicesBuffer = new VulkanBuffer(offsetIndicesBufferData.data(), offsetIndicesBufferData.size() * sizeof(unsigned int), Vulkan::getDevice(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, false);
-			offsetDataBuffers.push_back(offsetIndicesBuffer);
+			//VulkanBuffer* offsetIndicesBuffer = new VulkanBuffer(offsetIndicesBufferData.data(), offsetIndicesBufferData.size() * sizeof(unsigned int), Vulkan::getDevice(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, false);
+			//offsetDataBuffers.push_back(offsetIndicesBuffer);
 
 			//TODO: Make this change depending on SubData
-			data.offsetIndicesBufferAddress = Vulkan::getBufferDeviceAddress(offsetIndicesBuffer->getInstance());
+			data.offsetIndicesBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getOffsetIndicesBuffer()->getInstance()) + pos;
 
 			sceneModelData.push_back(data);
+
+			//Offset buffer address position to point at correct data (gl_PrimitiveID in shader resets to 0 for each subdata/material)
+			pos += (model->getMesh()->getData()->getSubData(i).count / 3) * 2 * sizeof(model->getMesh()->getData()->getOffsetIndices()[0]);
 		}
 	}
 }
@@ -746,7 +751,7 @@ void Test::onCreated() {
 		rtDescriptorSetLayout = new DescriptorSetLayout(1);
 		rtDescriptorSetLayout->addAccelerationStructure(0);
 		rtDescriptorSetLayout->addStorageTexture(1);
-		rtDescriptorSetLayout->addUBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2);
+		rtDescriptorSetLayout->addSSBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2);
 		rtDescriptorSetLayout->setup();
 
 		raytracingDescriptorSet = new DescriptorSet(rtDescriptorSetLayout, true);
@@ -754,7 +759,7 @@ void Test::onCreated() {
 		raytracingDescriptorSet->setAccclerationStructure(0, &tlas.accel);
 		raytracingDescriptorSet->setupVk();
 
-		raytracingDescriptorSet->getUBO(0)->update(sceneModelData.data(), 0, sceneModelData.size() * sizeof(sceneModelData[0]));
+		raytracingDescriptorSet->getSSBO(0)->update(sceneModelData.data(), 0, sceneModelData.size() * sizeof(sceneModelData[0]));
 
 		createRtPipeline();
 

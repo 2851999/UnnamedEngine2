@@ -20,6 +20,7 @@
 
 #include "Texture.h"
 #include "UBO.h"
+#include "SSBO.h"
 
 class DescriptorSetLayout;
 
@@ -81,6 +82,9 @@ private:
 	/* The UBOs within this descriptor set */
 	std::vector<UBO*> ubos;
 
+	/* The SSBOs within this descriptor set */
+	std::vector<SSBO*> ssbos;
+
 	/* The textures within this descriptor set */
 	std::vector<TextureInfo> textures;
 
@@ -140,7 +144,9 @@ public:
 	inline void setAccclerationStructure(unsigned int index, VkAccelerationStructureKHR* accelerationStructure) { asBindings[index].accelerationStructure = accelerationStructure; }
 
 	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
+	inline SSBO* getSSBO(unsigned int index) { return ssbos[index]; }
 	inline unsigned int getNumUBOs() { return ubos.size(); }
+	inline unsigned int getNumSSBOs() { return ssbos.size(); }
 	inline Texture* getTexture(unsigned int index) { return textures[index].texture; }
 
 	/* Called when this instance is removed from the update queue */
@@ -156,7 +162,7 @@ public:
 class DescriptorSetLayout {
 public:
 	/* Stucture for storing information about a UBO */
-	struct UBOInfo {
+	struct BufferInfo {
 		unsigned int size;
 		DataUsage    usage;
 		unsigned int binding;
@@ -166,7 +172,10 @@ private:
 	unsigned int setNumber;
 
 	/* UBOs required in this layout*/
-	std::vector<UBOInfo> ubos;
+	std::vector<BufferInfo> ubos;
+
+	/* The SSBOs required in this layout */
+	std::vector<BufferInfo> ssbos;
 
 	/* Texture bindings required in this layout, specified using their binding number */
 	std::vector<DescriptorSet::TextureBindingInfo> textureBindings;
@@ -203,11 +212,13 @@ public:
 	inline void addTextureCube(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_CUBE, binding, 1); }
 	inline void addStorageTexture(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::STORAGE_IMAGE, binding, 1); }
 	inline void addUBO(unsigned int size, DataUsage usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
+	inline void addSSBO(unsigned int size, DataUsage usage, unsigned int binding) { ssbos.push_back({ size, usage, binding }); }
 	inline void addAccelerationStructure(unsigned int binding) { asBindings.push_back(binding); }
 
 	/* Getters */
 	inline unsigned int getSetNumber() { return setNumber; }
-	inline std::vector<UBOInfo>& getUBOs() { return ubos; }
+	inline std::vector<BufferInfo>& getUBOs() { return ubos; }
+	inline std::vector<BufferInfo>& getSSBOs() { return ssbos; }
 	inline std::vector<DescriptorSet::TextureBindingInfo>& getTextureBindings() { return textureBindings; }
 	inline std::vector<unsigned int>& getAccelerationStructureBindings() { return asBindings;  }
 	inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout; }
