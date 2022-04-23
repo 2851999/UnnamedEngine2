@@ -65,6 +65,9 @@ public:
 
 		/* The actual textures within this binding */
 		std::vector<VkDescriptorImageInfo> textures;
+
+		//States in what pipeline stage it should be accessible (Vulkan)
+		VkPipelineStageFlags shaderStageFlags;
 	};
 
 	/* Structure for storing information about a VkAccelerationStructure */
@@ -79,11 +82,8 @@ private:
 	/* The layout of this descriptor set */
 	DescriptorSetLayout* layout;
 
-	/* The UBOs within this descriptor set */
-	std::vector<UBO*> ubos;
-
-	/* The SSBOs within this descriptor set */
-	std::vector<SSBO*> ssbos;
+	/* The ShaderBuffers within this descriptor set */
+	std::vector<ShaderBuffer*> shaderBuffers;
 
 	/* The textures within this descriptor set */
 	std::vector<TextureInfo> textures;
@@ -143,10 +143,8 @@ public:
 	inline void setTexture(unsigned int index, Texture* texture) { textures[index].texture = texture; }
 	inline void setAccclerationStructure(unsigned int index, VkAccelerationStructureKHR* accelerationStructure) { asBindings[index].accelerationStructure = accelerationStructure; }
 
-	inline UBO* getUBO(unsigned int index) { return ubos[index]; }
-	inline SSBO* getSSBO(unsigned int index) { return ssbos[index]; }
-	inline unsigned int getNumUBOs() { return ubos.size(); }
-	inline unsigned int getNumSSBOs() { return ssbos.size(); }
+	inline ShaderBuffer* getShaderBuffer(unsigned int index) { return shaderBuffers[index]; }
+	inline unsigned int getNumShaderBuffers() { return shaderBuffers.size(); }
 	inline Texture* getTexture(unsigned int index) { return textures[index].texture; }
 
 	/* Called when this instance is removed from the update queue */
@@ -161,27 +159,33 @@ public:
  *****************************************************************************/
 class DescriptorSetLayout {
 public:
-	/* Stucture for storing information about a UBO */
+	/* Stucture for storing information about a ShaderBuffer */
 	struct BufferInfo {
-		unsigned int size;
-		DataUsage    usage;
+		ShaderBuffer::Type type;
+		unsigned int       size;
+		DataUsage          usage;
+		unsigned int       binding;
+		//States in what shader stage it should be accessible (Vulkan)
+		VkShaderStageFlags shaderStageFlags;
+	};
+
+	/* Structure for storing information about an acceleration strcutrue*/
+	struct ASInfo {
 		unsigned int binding;
+		VkShaderStageFlags shaderStageFlags;
 	};
 private:
 	/* The set number of this set (corresponds to layout(set) in Vulkan shaders) */
 	unsigned int setNumber;
 
-	/* UBOs required in this layout*/
-	std::vector<BufferInfo> ubos;
-
-	/* The SSBOs required in this layout */
-	std::vector<BufferInfo> ssbos;
+	/* ShaderBuffers required in this layout*/
+	std::vector<BufferInfo> shaderBuffers;
 
 	/* Texture bindings required in this layout, specified using their binding number */
 	std::vector<DescriptorSet::TextureBindingInfo> textureBindings;
 
 	/* Acceleration structure bindings required in this layout */
-	std::vector<unsigned int> asBindings;
+	std::vector<ASInfo> asBindings;
 
 	/* The descriptor set layout instance for Vulkan*/
 	VkDescriptorSetLayout vulkanDescriptorSetLayout = VK_NULL_HANDLE;
@@ -199,28 +203,29 @@ public:
 	void setup();
 
 	/* Method to add a texture binding */
-	inline void addTextureBinding(DescriptorSet::TextureType type, unsigned int binding, unsigned int numTextures) {
+	inline void addTextureBinding(DescriptorSet::TextureType type, unsigned int binding, unsigned int numTextures, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_ALL_GRAPHICS) {
 		DescriptorSet::TextureBindingInfo bindingInfo;
-		bindingInfo.type        = type;
-		bindingInfo.binding     = binding;
-		bindingInfo.numTextures = numTextures;
+		bindingInfo.type             = type;
+		bindingInfo.binding          = binding;
+		bindingInfo.numTextures      = numTextures;
+		bindingInfo.shaderStageFlags = shaderStageFlags;
 		textureBindings.push_back(bindingInfo);
 	}
 
 	/* Methods to add UBOs and Textures to this layout */
-	inline void addTexture2D(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, binding, 1); }
-	inline void addTextureCube(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_CUBE, binding, 1); }
-	inline void addStorageTexture(unsigned int binding) { addTextureBinding(DescriptorSet::TextureType::STORAGE_IMAGE, binding, 1); }
-	inline void addUBO(unsigned int size, DataUsage usage, unsigned int binding) { ubos.push_back({ size, usage, binding }); }
-	inline void addSSBO(unsigned int size, DataUsage usage, unsigned int binding) { ssbos.push_back({ size, usage, binding }); }
-	inline void addAccelerationStructure(unsigned int binding) { asBindings.push_back(binding); }
+	inline void addTexture2D(unsigned int binding, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_ALL_GRAPHICS) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, binding, 1, shaderStageFlags); }
+	inline void addTextureCube(unsigned int binding, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_ALL_GRAPHICS) { addTextureBinding(DescriptorSet::TextureType::TEXTURE_CUBE, binding, 1, shaderStageFlags); }
+	inline void addStorageTexture(unsigned int binding, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_ALL_GRAPHICS) { addTextureBinding(DescriptorSet::TextureType::STORAGE_IMAGE, binding, 1, shaderStageFlags); }
+	inline void addShaderBuffer(ShaderBuffer::Type type, unsigned int size, DataUsage usage, unsigned int binding, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_ALL_GRAPHICS) { shaderBuffers.push_back({ type, size, usage, binding, shaderStageFlags }); }
+	inline void addUBO(unsigned int size, DataUsage usage, unsigned int binding, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_ALL_GRAPHICS) { addShaderBuffer(ShaderBuffer::Type::UBO, size, usage, binding, shaderStageFlags); }
+	inline void addSSBO(unsigned int size, DataUsage usage, unsigned int binding, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_ALL_GRAPHICS) { addShaderBuffer(ShaderBuffer::Type::SSBO, size, usage, binding, shaderStageFlags); }
+	inline void addAccelerationStructure(unsigned int binding, VkShaderStageFlags shaderStageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR) { asBindings.push_back({ binding, shaderStageFlags }); }
 
 	/* Getters */
 	inline unsigned int getSetNumber() { return setNumber; }
-	inline std::vector<BufferInfo>& getUBOs() { return ubos; }
-	inline std::vector<BufferInfo>& getSSBOs() { return ssbos; }
+	inline std::vector<BufferInfo>& getShaderBuffers() { return shaderBuffers; }
 	inline std::vector<DescriptorSet::TextureBindingInfo>& getTextureBindings() { return textureBindings; }
-	inline std::vector<unsigned int>& getAccelerationStructureBindings() { return asBindings;  }
+	inline std::vector<ASInfo>& getAccelerationStructureBindings() { return asBindings;  }
 	inline VkDescriptorSetLayout& getVkLayout() { return vulkanDescriptorSetLayout; }
 };
 

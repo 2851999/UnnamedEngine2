@@ -731,9 +731,8 @@ void Test::onCreated() {
 	camera->update(getDeltaSeconds());
 
 	if (getSettings().videoRaytracing) {
-		for (unsigned int i = 0; i < model1->getMesh()->getData()->getSubDataCount(); ++i) {
+		for (unsigned int i = 0; i < model1->getMesh()->getData()->getSubDataCount(); ++i)
 			modelInstances.push_back({ Matrix4f().initIdentity(), i });
-		}
 		//modelInstances.push_back({ Matrix4f().initIdentity(), 1 });
 
 		modelObjects.push_back(model1);
@@ -749,9 +748,9 @@ void Test::onCreated() {
 
 		//TODO: Move into shader interface - but need to add way of adding UBO to layout without the size (bascially don't autocreate the UBO)
 		rtDescriptorSetLayout = new DescriptorSetLayout(1);
-		rtDescriptorSetLayout->addAccelerationStructure(0);
-		rtDescriptorSetLayout->addStorageTexture(1);
-		rtDescriptorSetLayout->addSSBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2);
+		rtDescriptorSetLayout->addAccelerationStructure(0, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+		rtDescriptorSetLayout->addStorageTexture(1, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+		rtDescriptorSetLayout->addSSBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 		rtDescriptorSetLayout->setup();
 
 		raytracingDescriptorSet = new DescriptorSet(rtDescriptorSetLayout, true);
@@ -759,7 +758,7 @@ void Test::onCreated() {
 		raytracingDescriptorSet->setAccclerationStructure(0, &tlas.accel);
 		raytracingDescriptorSet->setupVk();
 
-		raytracingDescriptorSet->getSSBO(0)->update(sceneModelData.data(), 0, sceneModelData.size() * sizeof(sceneModelData[0]));
+		raytracingDescriptorSet->getShaderBuffer(0)->update(sceneModelData.data(), 0, sceneModelData.size() * sizeof(sceneModelData[0]));
 
 		createRtPipeline();
 

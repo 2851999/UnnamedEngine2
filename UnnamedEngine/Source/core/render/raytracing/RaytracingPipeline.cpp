@@ -18,7 +18,7 @@
 
 #include "RaytracingPipeline.h"
 
-#include "../Renderer.h";
+#include "../Renderer.h"
 #include "../../vulkan/Vulkan.h"
 #include "../../vulkan/VulkanExtensions.h"
 #include "../../../utils/VulkanUtils.h"

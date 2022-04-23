@@ -97,7 +97,7 @@ void CDLODQuadTreeNode::update() {
 	shaderTerrainData.ue_range = getRange();
 
 	//Update the UBO
-	descriptorSetTerrain->getUBO(0)->updateFrame(&shaderTerrainData, 0, sizeof(ShaderBlock_Terrain));
+	descriptorSetTerrain->getShaderBuffer(0)->updateFrame(&shaderTerrainData, 0, sizeof(ShaderBlock_Terrain));
 }
 
 bool CDLODQuadTreeNode::LODSelect(std::vector<int> ranges, int lodLevel, Camera3D* camera, std::vector<CDLODQuadTreeNode*>& selectionList) {

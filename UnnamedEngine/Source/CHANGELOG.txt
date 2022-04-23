@@ -1,4 +1,16 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 1 | Experimental 7
+
+* Added ShaderBuffer
+
+* Added a way to assign VkShaderStageFlags in
+  DescriptorSetLayout
+
+* Renamed UBOs/SSBOs in DescriptorSet to just ShaderBuffer's
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 1 | Experimental 6
 
 * Added SSBO

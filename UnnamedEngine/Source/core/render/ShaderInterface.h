@@ -63,7 +63,7 @@ struct ShaderBlock_Skinning {
 	Matrix4f ue_bones[Skeleton::SKINNING_MAX_BONES];
 	int ue_useSkinning;
 
-	void updateUseSkinning(UBO* ubo) { ubo->updateFrame(&ue_useSkinning, sizeof(ue_bones), sizeof(ue_useSkinning)); };
+	void updateUseSkinning(ShaderBuffer* ubo) { ubo->updateFrame(&ue_useSkinning, sizeof(ue_bones), sizeof(ue_useSkinning)); };
 };
 
 struct ShaderStruct_Light {

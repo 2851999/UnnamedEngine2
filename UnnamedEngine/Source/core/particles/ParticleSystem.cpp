@@ -209,7 +209,7 @@ void ParticleSystem::update(float delta, Vector3f cameraPosition) {
 void ParticleSystem::render() {
 	if (particleCount > 0) {
 		//Update the UBO
-		descriptorSetBillboard->getUBO(0)->updateFrame(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
+		descriptorSetBillboard->getShaderBuffer(0)->updateFrame(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
 
 		//Update the paricle data
 		vboPositionSizeData->updateStream(particleCount * sizeof(GLfloat) * 4);

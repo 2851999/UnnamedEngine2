@@ -452,5 +452,5 @@ void Font::destroyFreeType() {
 
 
 void Font::updateSDFParameters() {
-	descriptorSetSDFText->getUBO(0)->update(&sdfTextParameters, 0, sizeof(ShaderBlock_SDFText));
+	descriptorSetSDFText->getShaderBuffer(0)->update(&sdfTextParameters, 0, sizeof(ShaderBlock_SDFText));
 }

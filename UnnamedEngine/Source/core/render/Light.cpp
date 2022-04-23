@@ -155,7 +155,7 @@ void Light::useView() {
 	//Bind the shadow cubemap if needed
 	if (shadowCubemapDescriptorSet) {
 		//Update the descriptor set
-		shadowCubemapDescriptorSet->getUBO(0)->updateFrame(&shadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
+		shadowCubemapDescriptorSet->getShaderBuffer(0)->updateFrame(&shadowCubemapData, 0, sizeof(ShaderBlock_ShadowCubemap));
 
 		shadowCubemapDescriptorSet->bind();
 	} else

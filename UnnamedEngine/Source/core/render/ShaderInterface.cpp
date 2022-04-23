@@ -236,12 +236,15 @@ DescriptorSetLayout* ShaderInterface::createDescriptorSetLayout(unsigned int id)
 	//DescriptorSetLayout to return
 	DescriptorSetLayout* layout = NULL;
 
+	//Shader stage flags (for Vulkan RT)
+	VkShaderStageFlags shaderRTStageFlags = Window::getCurrentInstance()->getSettings().videoRaytracing ? (VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_RAYGEN_BIT_KHR) : VK_SHADER_STAGE_ALL_GRAPHICS;
+
 	//Assign the layout based on the ID
 	switch (id) {
 		case DESCRIPTOR_SET_DEFAULT_CAMERA:
 			//Camera
 			layout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_CAMERA);
-			layout->addUBO(sizeof(ShaderBlock_Camera), DataUsage::STATIC, UBO_BINDING_LOCATION_CAMERA);
+			layout->addUBO(sizeof(ShaderBlock_Camera), DataUsage::STATIC, UBO_BINDING_LOCATION_CAMERA, shaderRTStageFlags);
 			break;
 		case DESCRIPTOR_SET_DEFAULT_MATERIAL:
 			//Material
