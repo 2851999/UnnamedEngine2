@@ -28,6 +28,7 @@ class VulkanFeatures {
 private:
 	/* Various structures defining required device features */
 	static VkPhysicalDeviceFeatures                         requiredDeviceFeatures;
+	static VkPhysicalDeviceVulkan11Features                 requiredDeviceVK11Features;
 	static VkPhysicalDeviceBufferDeviceAddressFeatures      featuresBufferDeviceAddress;
 	static VkPhysicalDeviceRayTracingPipelineFeaturesKHR    featuresRayTracingPipeline;
 	static VkPhysicalDeviceAccelerationStructureFeaturesKHR featuresAccelerationStructureFeatures;

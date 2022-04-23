@@ -444,12 +444,7 @@ GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, Graph
 		for (auto& it : renderShader->getDescriptorSetLayouts())
 			layouts.push_back(it.second->getVkLayout());
 
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo ={};
-		pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount         = static_cast<uint32_t>(layouts.size()); //Optional
-		pipelineLayoutInfo.pSetLayouts            = layouts.data(); //Optional
-		pipelineLayoutInfo.pushConstantRangeCount = 0; //Optional
-		pipelineLayoutInfo.pPushConstantRanges    = nullptr; //Optional
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo = utils_vulkan::initPipelineLayoutCreateInfo(static_cast<uint32_t>(layouts.size()), layouts.data());
 
 		if (vkCreatePipelineLayout(Vulkan::getDevice()->getLogical(), &pipelineLayoutInfo, nullptr, &vulkanPipelineLayout) != VK_SUCCESS)
 			Logger::log("Failed to create pipeline layout", "RenderPipeline", LogType::Error);

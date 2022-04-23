@@ -58,4 +58,13 @@ namespace utils_vulkan {
 		writeDescriptorSet.dstBinding     = dstBinding;
 		return writeDescriptorSet;
 	}
+
+	inline VkPipelineLayoutCreateInfo initPipelineLayoutCreateInfo(uint32_t setLayoutCount, const VkDescriptorSetLayout* pSetLayouts, uint32_t pushConstantRangeCount = 0, const VkPushConstantRange* pPushConstantRanges = nullptr) {
+		VkPipelineLayoutCreateInfo createInfo{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+		createInfo.setLayoutCount         = setLayoutCount;
+		createInfo.pSetLayouts            = pSetLayouts;
+		createInfo.pushConstantRangeCount = pushConstantRangeCount;
+		createInfo.pPushConstantRanges    = pPushConstantRanges;
+		return createInfo;
+	}
 }

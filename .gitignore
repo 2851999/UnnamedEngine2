@@ -51,3 +51,12 @@
 /UnnamedEngine/resources/shaders/raytracing/raygen.rgen.spv
 /UnnamedEngine/resources/shaders/raytracing/miss.rmiss.spv
 /UnnamedEngine/resources/shaders/raytracing/closesthit.rchit.spv
+/UnnamedEngine/resources/shaders/raytracing/2/raygen.rgen.spv
+/UnnamedEngine/resources/shaders/raytracing/2/miss.rmiss.spv
+/UnnamedEngine/resources/shaders/raytracing/2/compile.bat
+/UnnamedEngine/resources/shaders/raytracing/2/closesthit.rchit.spv
+/UnnamedEngine/resources/shaders/raytracing/2
+/UnnamedEngine/resources/shaders/raytracing/1/raygen.rgen.spv
+/UnnamedEngine/resources/shaders/raytracing/1/miss.rmiss.spv
+/UnnamedEngine/resources/shaders/raytracing/1/compile.bat
+/UnnamedEngine/resources/shaders/raytracing/1/closesthit.rchit.spv

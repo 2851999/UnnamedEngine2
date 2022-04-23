@@ -129,6 +129,14 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 				for (int c = 0; c < 3; ++c)
 					//Add the indices for the current face
 					currentData->addIndex(currentFace.mIndices[c]);
+
+				//Add material indices if needed for raytracing
+				//TODO: Add a different boolean for this
+				if (Window::getCurrentInstance()->getSettings().videoRaytracing) {
+					std::cout << currentMesh->mMaterialIndex << std::endl;
+					currentData->addMaterialIndex(currentMesh->mMaterialIndex);
+					currentData->addOffsetIndex(numIndices, numVertices);
+				}
 			}
 
 			//Add a sub data instance

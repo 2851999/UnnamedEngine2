@@ -80,6 +80,9 @@ private:
 	std::vector<unsigned int>   boneIDs;
 	std::vector<float> 		    boneWeights;
 
+	std::vector<unsigned int> materialIndices;
+	std::vector<unsigned int> offsetIndices;
+
 	/* Various data about how the data is stored */
 	unsigned int numDimensions = 0;
 
@@ -154,6 +157,9 @@ public:
 
 	void addBoneData(unsigned int boneID, float boneWeight);
 
+	inline void addMaterialIndex(unsigned int materialIndex) { materialIndices.push_back(materialIndex); }
+	inline void addOffsetIndex(unsigned int baseIndex, unsigned int baseVertex) { offsetIndices.push_back(baseIndex); offsetIndices.push_back(baseVertex); }
+
 	inline void setRenderMode(GLenum mode) { this->renderMode = mode; }
 	inline void setNumPositions(unsigned int numPositions) { this->numPositions = numPositions; }
 	inline void setNumColours(unsigned int numColours) { this->numColours = numColours; }
@@ -197,38 +203,44 @@ public:
 	inline bool separateBitangents()    { return flags & Flag::SEPARATE_BITANGENTS;     }
 
 	/* Methods to check whether data has been given */
-	inline bool hasPositions()     { return numPositions > 0;     }
-	inline bool hasColours()       { return numColours > 0;       }
-	inline bool hasTextureCoords() { return numTextureCoords > 0; }
-	inline bool hasNormals()       { return numNormals > 0;       }
-	inline bool hasTangents()      { return numTangents > 0;      }
-	inline bool hasBitangents()    { return numBitangents > 0;    }
-	inline bool hasOthers()        { return others.size() > 0;    }
-	inline bool hasIndices()       { return numIndices > 0;       }
-	inline bool hasBones()         { return numBones > 0;         }
+	inline bool hasPositions()       { return numPositions > 0;           }
+	inline bool hasColours()         { return numColours > 0;             }
+	inline bool hasTextureCoords()   { return numTextureCoords > 0;       }
+	inline bool hasNormals()         { return numNormals > 0;             }
+	inline bool hasTangents()        { return numTangents > 0;            }
+	inline bool hasBitangents()      { return numBitangents > 0;          }
+	inline bool hasOthers()          { return others.size() > 0;          }
+	inline bool hasIndices()         { return numIndices > 0;             }
+	inline bool hasBones()           { return numBones > 0;               }
+	inline bool hasMaterialIndices() { return materialIndices.size() > 0; }
+	inline bool hasOffsetIndices()   { return offsetIndices.size() > 0;   }
 
 	/* Methods to get the data */
-	GLenum       getRenderMode()       { return renderMode;       }
-	unsigned int getNumPositions()     { return numPositions;     }
-	unsigned int getNumColours()       { return numColours;       }
-	unsigned int getNumTextureCoords() { return numTextureCoords; }
-	unsigned int getNumNormals()       { return numNormals;       }
-	unsigned int getNumTangents()      { return numTangents;      }
-	unsigned int getNumBitangents()    { return numBitangents;    }
-	unsigned int getNumIndices()       { return numIndices;       }
-	unsigned int getNumBones()         { return numBones;         }
-	unsigned int getNumDimensions()    { return numDimensions;    }
+	GLenum       getRenderMode()         { return renderMode;               }
+	unsigned int getNumPositions()       { return numPositions;             }
+	unsigned int getNumColours()         { return numColours;               }
+	unsigned int getNumTextureCoords()   { return numTextureCoords;         }
+	unsigned int getNumNormals()         { return numNormals;               }
+	unsigned int getNumTangents()        { return numTangents;              }
+	unsigned int getNumBitangents()      { return numBitangents;            }
+	unsigned int getNumIndices()         { return numIndices;               }
+	unsigned int getNumBones()           { return numBones;                 }
+	unsigned int getNumMaterialIndices() { return materialIndices.size();   }
+	unsigned int getNumOffsetIndices()   { return offsetIndices.size() / 2; }
+	unsigned int getNumDimensions()      { return numDimensions;            }
 
-	std::vector<float>& getPositions()      { return positions;     }
-	std::vector<float>& getColours()        { return colours;       }
-	std::vector<float>& getTextureCoords()  { return textureCoords; }
-	std::vector<float>& getNormals()        { return normals;       }
-	std::vector<float>& getTangents()       { return tangents;      }
-	std::vector<float>& getBitangents()     { return bitangents;    }
-	std::vector<float>& getOthers()         { return others;        }
-	std::vector<unsigned int>& getIndices() { return indices;       }
-	std::vector<unsigned int>& getBoneIDs() { return boneIDs;       }
-	std::vector<float>& getBoneWeights()    { return boneWeights;   }
+	std::vector<float>& getPositions()          { return positions;       }
+	std::vector<float>& getColours()            { return colours;         }
+	std::vector<float>& getTextureCoords()      { return textureCoords;   }
+	std::vector<float>& getNormals()            { return normals;         }
+	std::vector<float>& getTangents()           { return tangents;        }
+	std::vector<float>& getBitangents()         { return bitangents;      }
+	std::vector<float>& getOthers()             { return others;          }
+	std::vector<unsigned int>& getIndices()     { return indices;         }
+	std::vector<unsigned int>& getBoneIDs()     { return boneIDs;         }
+	std::vector<float>& getBoneWeights()        { return boneWeights;     }
+	std::vector<unsigned int>& getMaterialIndices() { return materialIndices; }
+	std::vector<unsigned int>& getOffsetIndices()   { return offsetIndices;   }
 	inline bool hasSubData() { return subData.size() > 0; }
 	inline unsigned int getSubDataCount() { return subData.size(); }
 	inline SubData& getSubData(unsigned int index) { return subData[index]; }
@@ -268,6 +280,9 @@ private:
 	VBO<float>*        vboBoneWeights   = NULL;
 	VBO<float>*        vboOthers        = NULL;
 
+	VulkanBuffer* bufferMaterialIndices = NULL;
+	VulkanBuffer* bufferOffsetIndices   = NULL;
+
 	/* IBO for this mesh (May be NULL if not indexed) */
 	IBO* ibo = NULL;
 
@@ -305,6 +320,8 @@ public:
 
 	/* Experimental methods for Vulkan raytracing */
 	inline VBO<float>* getVBOOthers() { return vboOthers; }
+	inline VulkanBuffer* getMaterialIndicesBuffer() { return bufferMaterialIndices; }
+	inline VulkanBuffer* getOffsetIndicesBuffer() { return bufferOffsetIndices;  }
 	inline IBO* getIBO() { return ibo; }
 };
 

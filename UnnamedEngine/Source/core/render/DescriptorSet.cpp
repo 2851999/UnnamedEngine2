@@ -355,9 +355,18 @@ void DescriptorSetLayout::setupVk() {
 		uboLayoutBinding.binding            = ubos[i].binding + UBO::VULKAN_BINDING_OFFSET; //Apply offset for Vulkan (Caused access violation without)
 		uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		uboLayoutBinding.descriptorCount    = 1;
-		if (Window::getCurrentInstance()->getSettings().videoRaytracing)
+		if (Window::getCurrentInstance()->getSettings().videoRaytracing) {
 			uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-		else
+
+			//TODO: REMOVE THIS
+			//      NEED EITHER STORAGE BUFFER CLASS OR WAY TO SPECIFY THIS
+			if (ubos[i].binding == 2) {
+				//Assume this is model data storage buffer
+				uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+
+				uboLayoutBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+			}
+		} else
 			uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS; //VK_SHADER_STAGE_ALL_GRAPHICS
 		uboLayoutBinding.pImmutableSamplers = nullptr; //Optional
 

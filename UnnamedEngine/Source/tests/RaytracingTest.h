@@ -119,6 +119,28 @@ private:
 	MeshData* createScreenMeshData();
 
 	Texture* storageTexture;
+
+	//#pragma pack(show)
+	//#pragma pack(push, 1)
+	//#pragma pack(show)
+	struct ModelData {
+		VkDeviceAddress vertexBufferAddress;
+		VkDeviceAddress indexBufferAddress;
+		VkDeviceAddress matIndexBufferAddress;
+		VkDeviceAddress matDataBufferAddress;
+		VkDeviceAddress offsetIndicesBufferAddress;
+	};
+	//#pragma pack(pop)
+
+	//Raytracing descriptor set layout
+	DescriptorSetLayout* rtDescriptorSetLayout;
+
+	std::vector<ModelData> sceneModelData;
+	//Now need either UBO/Vulkan buffer that can be added to a descriptor set (use type VK_BUFFER_USAGE_STORAGE_BUFFER_BIT)
+
+	std::vector<VulkanBuffer*> materialDataBuffers; //One per mesh
+
+	void setupModelData();
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -173,6 +195,8 @@ Test::BLASInput Test::objectToVkGeometryKHR(Mesh* mesh) {
 	triangles.vertexData.deviceAddress = vertexAddress;
 	triangles.vertexStride             = mesh->getRenderData()->getVBOOthers()->getVkBindingDescription().stride;
 
+	std::cout << mesh->getRenderData()->getVBOOthers()->getVkBindingDescription().stride << std::endl;
+
 	//Describe the index buffer
 	triangles.indexType               = VK_INDEX_TYPE_UINT32;
 	triangles.indexData.deviceAddress = indexAddress;
@@ -202,9 +226,29 @@ Test::BLASInput Test::objectToVkGeometryKHR(Mesh* mesh) {
 		offset.primitiveOffset = (current.baseIndex * sizeof(unsigned int)); //Offset in indices (in bytes)
 		offset.transformOffset = 0;
 
+		std::cout << "HELLO" << std::endl;
+		std::cout << current.baseVertex << std::endl;
+		std::cout << current.baseIndex << std::endl;
+
 		input.asGeometry.emplace_back(asGeom);
 		input.asBuildOffsetInfo.emplace_back(offset);
 	}
+
+	//Define the above data data as containing opaque triangles
+	//VkAccelerationStructureGeometryKHR asGeom{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+	//asGeom.geometryType       = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+	//asGeom.flags              = VK_GEOMETRY_OPAQUE_BIT_KHR;
+	//asGeom.geometry.triangles = triangles;
+
+	////For now the entire array will be used to build the BLAS
+	//VkAccelerationStructureBuildRangeInfoKHR offset;
+	//offset.firstVertex     = 0; //Vertex offset
+	//offset.primitiveCount  = numTriangles;
+	//offset.primitiveOffset = 0;
+	//offset.transformOffset = 0;
+
+	//input.asGeometry.emplace_back(asGeom);
+	//input.asBuildOffsetInfo.emplace_back(offset);
 
 	return input;
 }
@@ -570,13 +614,36 @@ void Test::createStorageImage() {
 	storageTexture = new Texture(Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, storageImage.image, storageImage.memory, storageImage.view);
 }
 
+void Test::setupModelData() {
+	//Go through each object
+	for (GameObject3D* model : modelObjects) {
+		//Add all material from this model
+		std::vector<ShaderBlock_Material> materialData;
+
+		for (Material* mat : model->getMesh()->getMaterials())
+			materialData.push_back(mat->getShaderData());
+
+		VulkanBuffer* materialDataBuffer = new VulkanBuffer(materialData.data(), materialData.size() * sizeof(ShaderBlock_Material), Vulkan::getDevice(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, false);
+		materialDataBuffers.push_back(materialDataBuffer);
+
+		ModelData data = {};
+		data.vertexBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getVBOOthers()->getVkCurrentBuffer()->getInstance());
+		data.indexBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getIBO()->getVkCurrentBuffer()->getInstance());
+		data.matIndexBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getMaterialIndicesBuffer()->getInstance());
+		data.matDataBufferAddress = Vulkan::getBufferDeviceAddress(materialDataBuffer->getInstance());
+		data.offsetIndicesBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getOffsetIndicesBuffer()->getInstance());
+
+		sceneModelData.push_back(data);
+	}
+}
+
 /* Creates the raytracing pipeline */
 void Test::createRtPipeline() {
-	VkShaderModule raygenShader     = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/raygen.rgen.spv"));
-	VkShaderModule missShader       = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/miss.rmiss.spv"));
-	VkShaderModule closestHitShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/closesthit.rchit.spv"));
+	VkShaderModule raygenShader     = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/2/raygen.rgen.spv"));
+	VkShaderModule missShader       = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/2/miss.rmiss.spv"));
+	VkShaderModule closestHitShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/2/closesthit.rchit.spv"));
 
-	rtPipeline = new RaytracingPipeline(rtProperties, raygenShader, missShader, closestHitShader);
+	rtPipeline = new RaytracingPipeline(rtProperties, raygenShader, missShader, closestHitShader, rtDescriptorSetLayout);
 
 	//Shader modules not needed anymore
 	vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), raygenShader, nullptr);
@@ -620,7 +687,8 @@ void Test::onCreated() {
 	//Mesh* mesh1 = resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj");
 	//Mesh* mesh1 = resourceLoader.loadModel("bob/", "bob_lamp_update.model");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "buddha.obj");
-	Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
+	//Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
+	Mesh* mesh1 = resourceLoader.loadModel("", "cube-coloured.obj");
 	mesh1->enableRaytracing();
 
 	model1 = new GameObject3D(mesh1, Renderer::SHADER_MATERIAL);
@@ -647,12 +715,23 @@ void Test::onCreated() {
 
 		createTLAS();
 
+		setupModelData();
+
 		createStorageImage();
 
-		raytracingDescriptorSet = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_RAYTRACING), true);
+		//TODO: Move into shader interface - but need to add way of adding UBO to layout without the size (bascially don't autocreate the UBO)
+		rtDescriptorSetLayout = new DescriptorSetLayout(1);
+		rtDescriptorSetLayout->addAccelerationStructure(0);
+		rtDescriptorSetLayout->addStorageTexture(1);
+		rtDescriptorSetLayout->addUBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2);
+		rtDescriptorSetLayout->setup();
+
+		raytracingDescriptorSet = new DescriptorSet(rtDescriptorSetLayout, true);
 		raytracingDescriptorSet->setTexture(0, storageTexture);
 		raytracingDescriptorSet->setAccclerationStructure(0, &tlas.accel);
 		raytracingDescriptorSet->setupVk();
+
+		raytracingDescriptorSet->getUBO(0)->update(sceneModelData.data(), 0, sceneModelData.size() * sizeof(sceneModelData[0]));
 
 		createRtPipeline();
 
@@ -718,7 +797,11 @@ void Test::onDestroy() {
 		Vulkan::waitDeviceIdle();
 
 		delete raytracingDescriptorSet;
+		delete rtDescriptorSetLayout;
 		delete rtPipeline;
+
+		for (unsigned int i = 0; i < materialDataBuffers.size(); ++i)
+			delete materialDataBuffers[i];
 
 		delete storageTexture;
 

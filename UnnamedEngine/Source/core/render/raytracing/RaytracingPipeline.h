@@ -20,6 +20,7 @@
 
 #include "../../Window.h"
 
+#include "../DescriptorSet.h"
 #include "../../vulkan/VulkanBuffer.h"
 
  /*****************************************************************************
@@ -78,7 +79,7 @@ private:
 	void createRtShaderBindingTable();
 public:
 	/* Constructor */
-	RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracingProperties, VkShaderModule raygenShader, VkShaderModule missShader, VkShaderModule closestHitShader);
+	RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracingProperties, VkShaderModule raygenShader, VkShaderModule missShader, VkShaderModule closestHitShader, DescriptorSetLayout* rtLayout);
 
 	/* Desctructor */
 	virtual ~RaytracingPipeline();

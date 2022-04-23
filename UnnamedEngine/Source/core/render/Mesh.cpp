@@ -367,6 +367,14 @@ void MeshRenderData::setup(MeshData* data, std::vector<Material*>& materials, Da
 		renderData->addVBO(vboBoneWeights);
 	}
 
+	//Setup material IDs
+	if (data->hasMaterialIndices())
+		bufferMaterialIndices = new VulkanBuffer(data->getMaterialIndices().data(), data->getMaterialIndices().size() * sizeof(data->getMaterialIndices()[0]), Vulkan::getDevice(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, true);
+
+	//Setup offset indices
+	if (data->hasOffsetIndices())
+		bufferOffsetIndices = new VulkanBuffer(data->getOffsetIndices().data(), data->getOffsetIndices().size() * sizeof(data->getOffsetIndices()[0]), Vulkan::getDevice(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, true);
+
 	//Check to see whether indices are needed
 	if (data->hasIndices()) {
 		ibo = new IBO(data->getNumIndices() * sizeof(data->getIndices()[0]), data->getIndices(), vboUsage);
@@ -513,6 +521,8 @@ void MeshRenderData::destroy() {
 	delete vboBoneIDs;
 	delete vboBoneWeights;
 	delete vboOthers;
+	delete bufferMaterialIndices;
+	delete bufferOffsetIndices;
 	delete ibo;
 }
 

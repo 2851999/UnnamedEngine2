@@ -27,6 +27,7 @@
   *****************************************************************************/
 
 VkPhysicalDeviceFeatures                         VulkanFeatures::requiredDeviceFeatures                = {};
+VkPhysicalDeviceVulkan11Features                 VulkanFeatures::requiredDeviceVK11Features            = {};
 VkPhysicalDeviceBufferDeviceAddressFeatures      VulkanFeatures::featuresBufferDeviceAddress           = {};
 VkPhysicalDeviceRayTracingPipelineFeaturesKHR    VulkanFeatures::featuresRayTracingPipeline            = {};
 VkPhysicalDeviceAccelerationStructureFeaturesKHR VulkanFeatures::featuresAccelerationStructureFeatures = {};
@@ -40,6 +41,9 @@ void VulkanFeatures::addRequired() {
 
 	//Setup and add the required features (support must be checked in 'checkDeviceSupport')
 	if (Window::getCurrentInstance()->getSettings().videoRaytracing) {
+		//Required for using GL_EXT_shader_explicit_arithmetic_types_int64 in shaders
+		requiredDeviceFeatures.shaderInt64 = VK_TRUE;
+
 		featuresBufferDeviceAddress.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 		featuresBufferDeviceAddress.bufferDeviceAddress = VK_TRUE;
 		requiredDeviceFeatures2.push_back(&featuresBufferDeviceAddress);
@@ -63,23 +67,25 @@ bool VulkanFeatures::checkSupport(VkPhysicalDevice& device) {
 
 	//Setup and query the supported features that require use of pNext
 	if (Window::getCurrentInstance()->getSettings().videoRaytracing) {
+		VkPhysicalDeviceVulkan11Features                 enabledVK11Features                  = {};
 		VkPhysicalDeviceBufferDeviceAddressFeatures      enabledBufferDeviceAddressFeatures   = {};
 		VkPhysicalDeviceRayTracingPipelineFeaturesKHR    enabledRayTracingPipelineFeatures    = {};
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR enabledAccelerationStructureFeatures = {};
 
+		enabledVK11Features.sType                  = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
 		enabledBufferDeviceAddressFeatures.sType   = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 		enabledRayTracingPipelineFeatures.sType    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 		enabledAccelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
 
 		//Required device features
-		std::vector<void*> requiredDeviceFeatures = { &enabledBufferDeviceAddressFeatures, &enabledRayTracingPipelineFeatures, &enabledAccelerationStructureFeatures };
+		std::vector<void*> requiredDeviceFeatures = { &enabledVK11Features, &enabledBufferDeviceAddressFeatures, &enabledRayTracingPipelineFeatures, &enabledAccelerationStructureFeatures };
 
 		VkPhysicalDeviceFeatures2 supportedFeatures2 = {};
 		supportedFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 		supportedFeatures2.pNext = VulkanFeatures::setupPNext(requiredDeviceFeatures);
 		vkGetPhysicalDeviceFeatures2(device, &supportedFeatures2);
 
-		featuresSupported = featuresSupported && enabledBufferDeviceAddressFeatures.bufferDeviceAddress && enabledRayTracingPipelineFeatures.rayTracingPipeline && enabledAccelerationStructureFeatures.accelerationStructure;
+		featuresSupported = featuresSupported && supportedFeatures.shaderInt64 && enabledBufferDeviceAddressFeatures.bufferDeviceAddress && enabledRayTracingPipelineFeatures.rayTracingPipeline && enabledAccelerationStructureFeatures.accelerationStructure;
 	}
 
 	return featuresSupported;
