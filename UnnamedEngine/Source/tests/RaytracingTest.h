@@ -40,11 +40,8 @@ private:
 		uint32_t modelIndex;
 	};
 
-	std::vector<GameObject3D*> modelObjects;
+	std::vector<Mesh*> modelObjects;
 	std::vector<ModelInstance> modelInstances;
-
-	GameObject3D* model1;
-	GameObject3D* model2;
 
 	VkPhysicalDeviceRayTracingPipelinePropertiesKHR rtProperties{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_PROPERTIES_KHR };
 
@@ -210,45 +207,45 @@ Test::BLASInput Test::objectToVkGeometryKHR(Mesh* mesh) {
 	BLASInput input{};
 
 	//Go through each sub data
-	for (unsigned int i = 0; i < mesh->getData()->getSubDataCount(); ++i) {
-		MeshData::SubData& current = mesh->getData()->getSubData(i);
+	//for (unsigned int i = 0; i < mesh->getData()->getSubDataCount(); ++i) {
+	//	MeshData::SubData& current = mesh->getData()->getSubData(i);
 
-		//Define the above data data as containing opaque triangles
-		VkAccelerationStructureGeometryKHR asGeom{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
-		asGeom.geometryType       = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-		asGeom.flags              = VK_GEOMETRY_OPAQUE_BIT_KHR;
-		asGeom.geometry.triangles = triangles;
+	//	//Define the above data data as containing opaque triangles
+	//	VkAccelerationStructureGeometryKHR asGeom{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+	//	asGeom.geometryType       = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+	//	asGeom.flags              = VK_GEOMETRY_OPAQUE_BIT_KHR;
+	//	asGeom.geometry.triangles = triangles;
 
-		//For now the entire array will be used to build the BLAS
-		VkAccelerationStructureBuildRangeInfoKHR offset;
-		offset.firstVertex     = current.baseVertex; //Vertex offset
-		offset.primitiveCount  = current.count / 3;  //Number of triangles - this * 3 indices are consumed
-		offset.primitiveOffset = (current.baseIndex * sizeof(unsigned int)); //Offset in indices (in bytes)
-		offset.transformOffset = 0;
+	//	//For now the entire array will be used to build the BLAS
+	//	VkAccelerationStructureBuildRangeInfoKHR offset;
+	//	offset.firstVertex     = current.baseVertex; //Vertex offset
+	//	offset.primitiveCount  = current.count / 3;  //Number of triangles - this * 3 indices are consumed
+	//	offset.primitiveOffset = (current.baseIndex * sizeof(unsigned int)); //Offset in indices (in bytes)
+	//	offset.transformOffset = 0;
 
-		std::cout << "HELLO" << std::endl;
-		std::cout << current.baseVertex << std::endl;
-		std::cout << current.baseIndex << std::endl;
+	//	std::cout << "HELLO" << std::endl;
+	//	std::cout << current.baseVertex << std::endl;
+	//	std::cout << current.baseIndex << std::endl;
 
-		input.asGeometry.emplace_back(asGeom);
-		input.asBuildOffsetInfo.emplace_back(offset);
-	}
+	//	input.asGeometry.emplace_back(asGeom);
+	//	input.asBuildOffsetInfo.emplace_back(offset);
+	//}
 
 	//Define the above data data as containing opaque triangles
-	//VkAccelerationStructureGeometryKHR asGeom{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
-	//asGeom.geometryType       = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
-	//asGeom.flags              = VK_GEOMETRY_OPAQUE_BIT_KHR;
-	//asGeom.geometry.triangles = triangles;
+	VkAccelerationStructureGeometryKHR asGeom{ VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_KHR };
+	asGeom.geometryType       = VK_GEOMETRY_TYPE_TRIANGLES_KHR;
+	asGeom.flags              = VK_GEOMETRY_OPAQUE_BIT_KHR;
+	asGeom.geometry.triangles = triangles;
 
-	////For now the entire array will be used to build the BLAS
-	//VkAccelerationStructureBuildRangeInfoKHR offset;
-	//offset.firstVertex     = 0; //Vertex offset
-	//offset.primitiveCount  = numTriangles;
-	//offset.primitiveOffset = 0;
-	//offset.transformOffset = 0;
+	//For now the entire array will be used to build the BLAS
+	VkAccelerationStructureBuildRangeInfoKHR offset;
+	offset.firstVertex     = 0; //Vertex offset
+	offset.primitiveCount  = numTriangles;
+	offset.primitiveOffset = 0;
+	offset.transformOffset = 0;
 
-	//input.asGeometry.emplace_back(asGeom);
-	//input.asBuildOffsetInfo.emplace_back(offset);
+	input.asGeometry.emplace_back(asGeom);
+	input.asBuildOffsetInfo.emplace_back(offset);
 
 	return input;
 }
@@ -259,8 +256,8 @@ void Test::createAllBLAS() {
 	std::vector<BLASInput> allBLAS;
 	//Create the BLASInput instances - assume one BLAS per model for now
 	allBLAS.reserve(modelObjects.size());
-	for (GameObject3D* model : modelObjects)
-		allBLAS.emplace_back(objectToVkGeometryKHR(model->getMesh()));
+	for (Mesh* mesh : modelObjects)
+		allBLAS.emplace_back(objectToVkGeometryKHR(mesh));
 
 	//Create the BLAS instances using the above input
 	buildBLAS(allBLAS, VK_BUILD_ACCELERATION_STRUCTURE_PREFER_FAST_TRACE_BIT_KHR); //| VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_COMPACTION_BIT_KHR);
@@ -616,22 +613,24 @@ void Test::createStorageImage() {
 
 void Test::setupModelData() {
 	//Go through each object
-	for (GameObject3D* model : modelObjects) {
+	for (Mesh* mesh : modelObjects) {
 		//Add all material from this model
 		std::vector<ShaderBlock_Material> materialData;
 
-		for (Material* mat : model->getMesh()->getMaterials())
+		//TODO: Need to add mat index offset as well so index in shader gives index in total materials
+		//      (enables multiple objects to work)
+		for (Material* mat : mesh->getMaterials())
 			materialData.push_back(mat->getShaderData());
 
 		VulkanBuffer* materialDataBuffer = new VulkanBuffer(materialData.data(), materialData.size() * sizeof(ShaderBlock_Material), Vulkan::getDevice(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, false);
 		materialDataBuffers.push_back(materialDataBuffer);
 
 		ModelData data = {};
-		data.vertexBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getVBOOthers()->getVkCurrentBuffer()->getInstance());
-		data.indexBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getIBO()->getVkCurrentBuffer()->getInstance());
-		data.matIndexBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getMaterialIndicesBuffer()->getInstance());
+		data.vertexBufferAddress = Vulkan::getBufferDeviceAddress(mesh->getRenderData()->getVBOOthers()->getVkCurrentBuffer()->getInstance());
+		data.indexBufferAddress = Vulkan::getBufferDeviceAddress(mesh->getRenderData()->getIBO()->getVkCurrentBuffer()->getInstance());
+		data.matIndexBufferAddress = Vulkan::getBufferDeviceAddress(mesh->getRenderData()->getMaterialIndicesBuffer()->getInstance());
 		data.matDataBufferAddress = Vulkan::getBufferDeviceAddress(materialDataBuffer->getInstance());
-		data.offsetIndicesBufferAddress = Vulkan::getBufferDeviceAddress(model->getMesh()->getRenderData()->getOffsetIndicesBuffer()->getInstance());
+		data.offsetIndicesBufferAddress = Vulkan::getBufferDeviceAddress(mesh->getRenderData()->getOffsetIndicesBuffer()->getInstance());
 
 		sceneModelData.push_back(data);
 	}
@@ -688,11 +687,23 @@ void Test::onCreated() {
 	//Mesh* mesh1 = resourceLoader.loadModel("bob/", "bob_lamp_update.model");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "buddha.obj");
 	//Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
-	Mesh* mesh1 = resourceLoader.loadModel("", "cube-coloured.obj");
-	mesh1->enableRaytracing();
+	//Mesh* mesh1 = resourceLoader.loadModel("", "cube-coloured.obj");
 
-	model1 = new GameObject3D(mesh1, Renderer::SHADER_MATERIAL);
-	model1->update();
+	//modelObjects = MeshLoader::loadAssimpModelSeparate("C:/UnnamedEngine/models/", "cube-coloured.obj", false);
+	modelObjects = MeshLoader::loadAssimpModelSeparate("C:/UnnamedEngine/models/box/", "CornellBox-Glossy.obj", false);
+	//modelObjects = MeshLoader::loadAssimpModelSeparate("C:/UnnamedEngine/models/crytek-sponza/", "sponza.obj", false);
+
+	for (unsigned int i = 0; i < modelObjects.size(); ++i) {
+		modelObjects[i]->enableRaytracing();
+		modelObjects[i]->setup(Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
+
+		modelInstances.push_back({ Matrix4f().initIdentity(), i });
+	}
+
+	//mesh1->enableRaytracing();
+
+	//model1 = new GameObject3D(mesh1, Renderer::SHADER_MATERIAL);
+	//model1->update();
 
 	//Mesh* mesh2 = resourceLoader.loadModel("", "cube.obj");
 	//mesh2->enableRaytracing();
@@ -705,10 +716,10 @@ void Test::onCreated() {
 	camera->update(getDeltaSeconds());
 
 	if (getSettings().videoRaytracing) {
-		modelInstances.push_back({ Matrix4f().initIdentity(), 0 });
+		//modelInstances.push_back({ Matrix4f().initIdentity(), 0 });
 		//modelInstances.push_back({ Matrix4f().initIdentity(), 1 });
 
-		modelObjects.push_back(model1);
+		//modelObjects.push_back(model1);
 		//modelObjects.push_back(model2);
 
 		createAllBLAS();
@@ -782,7 +793,7 @@ void Test::onRender() {
 	if (!getSettings().videoRaytracing) {
 		materialPipeline->bind();
 		camera->useView();
-		model1->render();
+		//model1->render();
 	} else {
 		//screenRenderPipeline->bind();
 		//camera->useView();
@@ -792,7 +803,9 @@ void Test::onRender() {
 }
 
 void Test::onDestroy() {
-	delete model1;
+	//delete model1;
+	for (Mesh* mesh : modelObjects)
+		delete mesh;
 	if (getSettings().videoRaytracing) {
 		Vulkan::waitDeviceIdle();
 
