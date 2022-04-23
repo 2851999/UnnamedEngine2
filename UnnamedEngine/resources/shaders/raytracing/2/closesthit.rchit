@@ -65,12 +65,12 @@ void main() {
   const uint vertexOffset = offsets.y;
 
   //Indices of the triangle
-  ivec3 ind = indices.i[gl_PrimitiveID];
+  ivec3 ind = indices.i[gl_PrimitiveID + indexOffset];
 
   //Vertices of the triangle
-  Vertex v0 = vertices.v[ind.x];
-  Vertex v1 = vertices.v[ind.y];
-  Vertex v2 = vertices.v[ind.z];
+  Vertex v0 = vertices.v[ind.x + vertexOffset];
+  Vertex v1 = vertices.v[ind.y + vertexOffset];
+  Vertex v2 = vertices.v[ind.z + vertexOffset];
 
   const vec3 barycentrics = vec3(1.0 - attribs.x - attribs.y, attribs.x, attribs.y);
 
@@ -83,11 +83,12 @@ void main() {
   const vec3 worldNrm = normalize(vec3(normal * gl_WorldToObjectEXT));  //Transforming to world space
 
   //Material of the object
-  int matIndex = matIndices.i[gl_PrimitiveID];
+  int matIndex = matIndices.i[gl_PrimitiveID + indexOffset];
   UEMaterial mat = materials.m[matIndex];
   
   //hitValue = vec3(worldPos);
+  //hitValue = vec3(worldPos);
   //hitValue = vec3(worldNrm);
-  hitValue = vec3(materials.m[0].diffuseColour);
+  hitValue = vec3(mat.diffuseColour);
   //hitValue = vec3(gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT);
 }
