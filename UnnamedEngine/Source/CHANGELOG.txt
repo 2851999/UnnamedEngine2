@@ -1,4 +1,11 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 2 | Experimental 4
+
+* Added RaytracedScene
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 2 | Experimental 3
 
 * Adding basic PBR to RenderTest
