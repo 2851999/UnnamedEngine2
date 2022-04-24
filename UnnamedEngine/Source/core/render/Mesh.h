@@ -174,7 +174,6 @@ public:
 	inline void setNumIndices(unsigned int numIndices) { this->numIndices = numIndices; }
 	inline void setNumBones(unsigned int numBones) { this->numBones = numBones; }
 
-
 	/* Methods used to add a sub data structure */
 	inline void addSubData(SubData& data) { subData.push_back(data); }
 	inline void addSubData(unsigned int baseIndex, unsigned int baseVertex, unsigned int count, unsigned int materialIndex = 0) {

@@ -1,4 +1,9 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 1 | Experimental 8
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 1 | Experimental 7
 
 * Added ShaderBuffer

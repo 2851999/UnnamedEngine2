@@ -74,9 +74,6 @@ public:
 	/* Static method called to read a file and load a model's meshes using Assimp */
 	static Mesh* loadAssimpModel(std::string path, std::string fileName, bool pbr, bool genNormals = true);
 
-	/* Static method called to read a file and load a model's meshes using Assimp keeping Mesh's separate */
-	static std::vector<Mesh*> loadAssimpModelSeparate(std::string path, std::string fileName, bool pbr, bool genNormals = true);
-
 	/* Static method called to write a model to a file in a custom engine format */
 	static void saveEngineModel(std::string path, std::string fileName, Mesh* mesh);
 

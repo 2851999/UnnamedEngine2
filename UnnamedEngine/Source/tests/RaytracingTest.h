@@ -446,8 +446,8 @@ void Test::cmdCompactBLAS(VkCommandBuffer cmdBuf, std::vector<uint32_t> indices,
 		VkCopyAccelerationStructureInfoKHR copyInfo{ VK_STRUCTURE_TYPE_COPY_ACCELERATION_STRUCTURE_INFO_KHR };
 
 		std::cout << "HELLO" << std::endl;
-		std::cout << buildAs[idx].buildInfo.dstAccelerationStructure << std::endl;
-		std::cout << buildAs[idx].as.accel << std::endl;
+		//std::cout << buildAs[idx].buildInfo.dstAccelerationStructure << std::endl;
+		//std::cout << buildAs[idx].as.accel << std::endl;
 
 		copyInfo.src = buildAs[idx].buildInfo.dstAccelerationStructure;
 		copyInfo.dst = buildAs[idx].as.accel;
@@ -652,6 +652,10 @@ void Test::setupModelData() {
 
 			sceneModelData.push_back(data);
 
+
+			//std::cout << model->getMesh()->getData()->getSubData(i).baseIndex << std::endl;
+			//std::cout << model->getMesh()->getData()->getSubData(i).baseVertex << std::endl;
+
 			//Offset buffer address position to point at correct data (gl_PrimitiveID in shader resets to 0 for each subdata/material)
 			pos += (model->getMesh()->getData()->getSubData(i).count / 3) * 2 * sizeof(model->getMesh()->getData()->getOffsetIndices()[0]);
 		}
@@ -706,7 +710,7 @@ void Test::onCreated() {
 
 	//Mesh* mesh1 = resourceLoader.loadModel("", "cube.obj");
 	//Mesh* mesh1 = resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj");
-	//Mesh* mesh1 = resourceLoader.loadModel("bob/", "bob_lamp_update.model");
+	//Mesh* mesh1 = resourceLoader.loadModel("bob/", "bob_lamp_update.blend");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "buddha.obj");
 	Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "cube-coloured.obj");
