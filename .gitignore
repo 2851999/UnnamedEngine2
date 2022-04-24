@@ -60,3 +60,7 @@
 /UnnamedEngine/resources/shaders/raytracing/1/miss.rmiss.spv
 /UnnamedEngine/resources/shaders/raytracing/1/compile.bat
 /UnnamedEngine/resources/shaders/raytracing/1/closesthit.rchit.spv
+/UnnamedEngine/resources/shaders/raytracing/3/raygen.rgen.spv
+/UnnamedEngine/resources/shaders/raytracing/3/miss.rmiss.spv
+/UnnamedEngine/resources/shaders/raytracing/3/compile.bat
+/UnnamedEngine/resources/shaders/raytracing/3/closesthit.rchit.spv

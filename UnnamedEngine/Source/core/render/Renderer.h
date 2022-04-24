@@ -107,6 +107,7 @@ public:
 	static const unsigned int SHADER_BILLBOARDED_FONT_SDF                           = 38;
 	static const unsigned int SHADER_GAUSSIAN_BLUR                                  = 39;
 	static const unsigned int SHADER_BLOOM                                          = 40;
+	static const unsigned int SHADER_TEXTURE_PASSTHROUGH                            = 41;
 
 	/* The names of default pipelines created for the engine */
 	static const unsigned int GRAPHICS_PIPELINE_MATERIAL                                      = 1;
@@ -162,6 +163,7 @@ public:
 	static const unsigned int GRAPHICS_PIPELINE_PBR_GEN_BRDF_INTEGRATION_MAP                  = 51;
 	static const unsigned int GRAPHICS_PIPELINE_GAUSSIAN_BLUR                                 = 52;
 	static const unsigned int GRAPHICS_PIPELINE_BLOOM                                         = 53;
+	static const unsigned int GRAPHICS_PIPELINE_TEXTURE_PASSTHROUGH                           = 54;
 
 	/* Methods used to add/remove a camera to use for rendering - the renderer
 	 * uses the last camera added when rendering */

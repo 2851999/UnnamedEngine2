@@ -113,6 +113,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_BILLBOARDED_FONT_SDF, "billboard/BillboardedFontSDFShader");
 	addRenderShader(SHADER_GAUSSIAN_BLUR, "postprocessing/GaussianBlur");
 	addRenderShader(SHADER_BLOOM, "postprocessing/BloomShader");
+	addRenderShader(SHADER_TEXTURE_PASSTHROUGH, "postprocessing/TexturePassthrough");
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -214,7 +215,7 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLOOM_BLEND, SHADER_BASIC_PBR_DEFERRED_LIGHTING_BLOOM, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_PBR_SSR, SHADER_DEFERRED_PBR_SSR, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SPRITE, SHADER_MATERIAL, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, true);
-	
+
 	GraphicsPipeline::VertexInputData tilemapVertexInputData;
 	tilemapVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, 0, VK_FORMAT_R32G32_SFLOAT, 0));
 	tilemapVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(0, 2 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
@@ -263,7 +264,7 @@ void Renderer::initialise() {
 
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GAUSSIAN_BLUR, SHADER_GAUSSIAN_BLUR, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BLOOM, SHADER_BLOOM, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, false);
-
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TEXTURE_PASSTHROUGH, SHADER_TEXTURE_PASSTHROUGH, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, true);
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();

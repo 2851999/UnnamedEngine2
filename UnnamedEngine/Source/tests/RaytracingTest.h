@@ -160,7 +160,7 @@ void Test::onInitialise() {
 	getSettings().videoSamples = 0;
 	getSettings().videoVulkan = true;
 	getSettings().videoRaytracing = true;
-	getSettings().debugShowInformation = false;
+	getSettings().debugShowInformation = true;
 	getSettings().debugVkValidationLayersEnabled = true;
 }
 
@@ -604,7 +604,7 @@ void Test::createStorageImage() {
 
 	//Transition the image into a suitable layout
 	VkCommandBuffer cmdBuf = Vulkan::beginSingleTimeCommands();
-	Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL, 1, 1, cmdBuf);
+	Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, 1, cmdBuf);
 	Vulkan::endSingleTimeCommands(cmdBuf);
 
 	//Create the instance for storing the above
@@ -705,6 +705,8 @@ void Test::onCreated() {
 
 	//Renderer::compileEngineShaderToSPIRV(Renderer::SHADER_MATERIAL, glslandValidatorPath);
 
+	Renderer::compileEngineShaderToSPIRV(Renderer::SHADER_TEXTURE_PASSTHROUGH, glslandValidatorPath);
+
 	if (getSettings().videoRaytracing)
 		initRaytracing();
 
@@ -774,7 +776,13 @@ void Test::onCreated() {
 		//screenTextureMesh->getMaterial()->setDiffuse(storageTexture);
 		//screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_MATERIAL));
 
-		//screenRenderPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), Renderer::getDefaultRenderPass());
+		screenRenderPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_TEXTURE_PASSTHROUGH), Renderer::getDefaultRenderPass());
+
+		MeshData* meshData = createScreenMeshData();
+		screenTextureMesh = new Mesh(meshData);
+		screenTextureMesh->getMaterial()->setDiffuse(storageTexture);
+
+		screenTextureMesh->setup(Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 	} else
 		materialPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_MATERIAL), Renderer::getDefaultRenderPass());
 }
@@ -785,25 +793,28 @@ void Test::onUpdate() {
 
 void Test::onRenderOffscreen() {
 	if (getSettings().videoRaytracing) {
-		//Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, 1, 1, Vulkan::getCurrentCommandBuffer());
+		Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, 1, 1, Vulkan::getCurrentCommandBuffer());
+
 
 		//Raytrace
 		raytrace();
 
-		//Copy ouput to swap chain (ensuring correct image layouts are used)
-		Vulkan::transitionImageLayout(Vulkan::getSwapChain()->getCurrentImage(Vulkan::getCurrentFrame()), Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, 1, Vulkan::getCurrentCommandBuffer());
-		Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, 1, Vulkan::getCurrentCommandBuffer());
+		Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, 1, Vulkan::getCurrentCommandBuffer());
 
-		VkImageCopy copyRegion{};
-		copyRegion.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
-		copyRegion.srcOffset      = { 0, 0, 0 };
-		copyRegion.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
-		copyRegion.dstOffset      = { 0, 0, 0 };
-		copyRegion.extent         = { Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 1 };
-		vkCmdCopyImage(Vulkan::getCurrentCommandBuffer(), storageImage.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, Vulkan::getSwapChain()->getCurrentImage(Vulkan::getCurrentFrame()), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+		////Copy ouput to swap chain (ensuring correct image layouts are used)
+		//Vulkan::transitionImageLayout(Vulkan::getSwapChain()->getCurrentImage(Vulkan::getCurrentFrame()), Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, 1, Vulkan::getCurrentCommandBuffer());
+		//Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1, 1, Vulkan::getCurrentCommandBuffer());
 
-		Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, 1, 1, Vulkan::getCurrentCommandBuffer());
-		Vulkan::transitionImageLayout(Vulkan::getSwapChain()->getCurrentImage(Vulkan::getCurrentFrame()), Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1, 1, Vulkan::getCurrentCommandBuffer());
+		//VkImageCopy copyRegion{};
+		//copyRegion.srcSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+		//copyRegion.srcOffset      = { 0, 0, 0 };
+		//copyRegion.dstSubresource = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1 };
+		//copyRegion.dstOffset      = { 0, 0, 0 };
+		//copyRegion.extent         = { Window::getCurrentInstance()->getSettings().windowWidth, Window::getCurrentInstance()->getSettings().windowHeight, 1 };
+		//vkCmdCopyImage(Vulkan::getCurrentCommandBuffer(), storageImage.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, Vulkan::getSwapChain()->getCurrentImage(Vulkan::getCurrentFrame()), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
+
+		//Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, 1, 1, Vulkan::getCurrentCommandBuffer());
+		//Vulkan::transitionImageLayout(Vulkan::getSwapChain()->getCurrentImage(Vulkan::getCurrentFrame()), Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 1, 1, Vulkan::getCurrentCommandBuffer());
 		
 		//Vulkan::transitionImageLayout(storageImage.image, Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1, 1, Vulkan::getCurrentCommandBuffer());
 	}
@@ -815,10 +826,11 @@ void Test::onRender() {
 		camera->useView();
 		//model1->render();
 	} else {
-		//screenRenderPipeline->bind();
+		screenRenderPipeline->bind();
 		//camera->useView();
-		//Matrix4f identity = Matrix4f().initIdentity();
-		//Renderer::render(screenTextureMesh, identity, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+		Matrix4f identity = Matrix4f().initIdentity();
+
+		Renderer::render(screenTextureMesh, identity, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
 	}
 }
 
@@ -839,6 +851,9 @@ void Test::onDestroy() {
 
 		delete storageTexture;
 
+		delete screenTextureMesh;
+		delete screenRenderPipeline;
+
 		//Destroy the TLAS
 		VulkanExtensions::vkDestroyAccelerationStructureKHR(Vulkan::getDevice()->getLogical(), tlas.accel, nullptr);
 		delete tlas.buffer;
@@ -856,12 +871,12 @@ void Test::onKeyPressed(int key) {
 }
 
 MeshData* Test::createScreenMeshData() {
-	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_3D);
-	meshData->addPosition(Vector3f(-1.0f, 1.0f, 0.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-	meshData->addPosition(Vector3f(-1.0f, -1.0f, 0.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
-	meshData->addPosition(Vector3f(1.0f, -1.0f, 0.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-	meshData->addPosition(Vector3f(-1.0f, 1.0f, 0.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
-	meshData->addPosition(Vector3f(1.0f, -1.0f, 0.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
-	meshData->addPosition(Vector3f(1.0f, 1.0f, 0.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
+	MeshData* meshData = new MeshData(MeshData::DIMENSIONS_2D);
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(-1.0f, -1.0f)); meshData->addTextureCoord(Vector2f(0.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(-1.0f, 1.0f));  meshData->addTextureCoord(Vector2f(0.0f, 1.0f));
+	meshData->addPosition(Vector2f(1.0f, -1.0f));  meshData->addTextureCoord(Vector2f(1.0f, 0.0f));
+	meshData->addPosition(Vector2f(1.0f, 1.0f));   meshData->addTextureCoord(Vector2f(1.0f, 1.0f));
 	return meshData;
 }

@@ -1,4 +1,39 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 2 | Experimental 1
+
+* Added SHADER_TEXTURE_PASSTHROUGH shader and
+  GRAPHICS_PIPELINE_TEXTURE_PASSTHROUGH graphics pipeline
+
+* Modfied RaytracingTest to render the raytracing result
+  the right way up using rasterised rendering
+
+-------------------------------------------------------------
+Release 3 | Beta 0 | Development 2 (V0.5.7)
+
+* Added RaytracingTest
+* Added RaytracingPipeline
+* Added SSBO
+* Added ShaderBuffer
+* Added 'additionalVkUsageFlags' to IBO, VBO and RenderData
+  setup methods as well as a boolean 'raytracing' to
+  MeshRenderData for assigning these flags so they are setup
+  to be used in the creation of a BLAS/TLAS
+* Added ability to add storage textures/acceleration
+  structures to a DescriptorSet (used for raytracing)
+* Added 'loadExternalFunction' to Vulkan
+* Added various extension methods used for raytracing in
+  VulkanExtensions
+* Added 'materialIndices' to MeshData for storing material
+  indexes for use when raytracing
+* Added ability to add SSBOs to DescriptorSet's
+* Added a way to assign VkShaderStageFlags in
+  DescriptorSetLayout
+
+* Renamed UBOs/SSBOs in DescriptorSet to just ShaderBuffer's
+
+* Started looking into adding raytracing
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 1 | Experimental 8
 
 * Some cleanup
