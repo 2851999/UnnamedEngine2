@@ -40,29 +40,17 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 	
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
-		VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
-		vertShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		vertShaderStageInfo.stage  = VK_SHADER_STAGE_VERTEX_BIT;
-		vertShaderStageInfo.module = renderShader->getShader()->getVkVertexShaderModule();
-		vertShaderStageInfo.pName  = "main"; //Entry point
+		VkPipelineShaderStageCreateInfo vertShaderStageInfo = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, renderShader->getShader()->getVkVertexShaderModule(), "main"); //"main" is the entry point
 
 		//pSpecializationInfo can be used to specify values for shader constants - faster than using if statements
 		//default set to nullptr
 
-		VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
-		fragShaderStageInfo.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		fragShaderStageInfo.stage  = VK_SHADER_STAGE_FRAGMENT_BIT;
-		fragShaderStageInfo.module = renderShader->getShader()->getVkFragmentShaderModule();
-		fragShaderStageInfo.pName  = "main";
+		VkPipelineShaderStageCreateInfo fragShaderStageInfo = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, renderShader->getShader()->getVkFragmentShaderModule(), "main");
 
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
 		if (renderShader->getShader()->getVkGeometryShaderModule() != VK_NULL_HANDLE) {
-			VkPipelineShaderStageCreateInfo geomShaderStageInfo = {};
-			geomShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-			geomShaderStageInfo.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
-			geomShaderStageInfo.module = renderShader->getShader()->getVkGeometryShaderModule();
-			geomShaderStageInfo.pName = "main";
+			VkPipelineShaderStageCreateInfo geomShaderStageInfo = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_GEOMETRY_BIT, renderShader->getShader()->getVkGeometryShaderModule(), "main");
 
 			shaderStages = { vertShaderStageInfo, geomShaderStageInfo, fragShaderStageInfo };
 		} else
@@ -456,12 +444,7 @@ GraphicsPipelineLayout::GraphicsPipelineLayout(RenderShader* renderShader, Graph
 		for (auto& it : renderShader->getDescriptorSetLayouts())
 			layouts.push_back(it.second->getVkLayout());
 
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo ={};
-		pipelineLayoutInfo.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount         = static_cast<uint32_t>(layouts.size()); //Optional
-		pipelineLayoutInfo.pSetLayouts            = layouts.data(); //Optional
-		pipelineLayoutInfo.pushConstantRangeCount = 0; //Optional
-		pipelineLayoutInfo.pPushConstantRanges    = nullptr; //Optional
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo = utils_vulkan::initPipelineLayoutCreateInfo(static_cast<uint32_t>(layouts.size()), layouts.data());
 
 		if (vkCreatePipelineLayout(Vulkan::getDevice()->getLogical(), &pipelineLayoutInfo, nullptr, &vulkanPipelineLayout) != VK_SUCCESS)
 			Logger::log("Failed to create pipeline layout", "RenderPipeline", LogType::Error);

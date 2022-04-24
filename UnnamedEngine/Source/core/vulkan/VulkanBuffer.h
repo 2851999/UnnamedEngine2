@@ -59,6 +59,7 @@ public:
 
 	/* Setters and getters */
 	VkBuffer& getInstance() { return instance; }
+	VkDeviceMemory& getDeviceMemory() { return bufferMemory;  }
 	const VkDescriptorBufferInfo* getBufferInfo() { return &bufferInfo; } //Require const here otherwise seems to give an occasional error with offset = 0x1b
 	VkDeviceSize& getSize() { return size; }
 };

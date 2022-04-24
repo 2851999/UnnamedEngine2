@@ -58,7 +58,7 @@ public:
 	inline void bindGL() { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferGL); }
 
 	/* Used to create and setup this IBO */
-	void setup();
+	void setup(VkBufferUsageFlags additionalVkUsageFlags = 0);
 
 	/* Methods used to setup this VBO just before/after rendering */
 	void startRendering();

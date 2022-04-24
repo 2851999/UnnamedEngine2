@@ -94,7 +94,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	ShaderBlock_PBRGenEnvMap genEnvMapData;
 	for (unsigned int i = 0; i < 6; ++i)
 		genEnvMapData.projectionViewMatrices[i] = captureProjection * captureViews[i];
-	descriptorSetEquiToCubeMap->getUBO(0)->updateFrame(&genEnvMapData, 0, sizeof(ShaderBlock_PBRGenEnvMap));
+	descriptorSetEquiToCubeMap->getShaderBuffer(0)->updateFrame(&genEnvMapData, 0, sizeof(ShaderBlock_PBRGenEnvMap));
 
 	descriptorSetEquiToCubeMap->setup();
 
@@ -136,7 +136,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 	DescriptorSet* descriptorSetIrradianceMap = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP));
 	descriptorSetIrradianceMap->setTexture(0, environmentCubemap);
 
-	descriptorSetIrradianceMap->getUBO(0)->updateFrame(&genEnvMapData, 0, sizeof(ShaderBlock_PBRGenEnvMap));
+	descriptorSetIrradianceMap->getShaderBuffer(0)->updateFrame(&genEnvMapData, 0, sizeof(ShaderBlock_PBRGenEnvMap));
 
 	descriptorSetIrradianceMap->setup();
 
@@ -175,7 +175,7 @@ PBREnvironment* PBREnvironment::loadAndGenerate(std::string path) {
 		prefilterMapGenDatas[mip].roughness = ((float) mip) / ((float) (maxMipLevels - 1));
 
 		DescriptorSet* descriptorSetPrefilterMap = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP));
-		descriptorSetPrefilterMap->getUBO(0)->updateFrame(&prefilterMapGenDatas[mip], 0, sizeof(ShaderBlock_PBRGenPrefilterMap));
+		descriptorSetPrefilterMap->getShaderBuffer(0)->updateFrame(&prefilterMapGenDatas[mip], 0, sizeof(ShaderBlock_PBRGenPrefilterMap));
 		descriptorSetPrefilterMap->setup();
 
 		renderPassesPrefilterMap.push_back(renderPassPrefilterMap);

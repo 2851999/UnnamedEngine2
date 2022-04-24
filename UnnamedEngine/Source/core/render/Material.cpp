@@ -61,14 +61,14 @@ void Material::setDefault(bool pbr) {
 
 void Material::setup() {
 	//Update the material UBO
-	descriptorSet->getUBO(0)->update(&shaderData, 0, sizeof(ShaderBlock_Material));
+	descriptorSet->getShaderBuffer(0)->update(&shaderData, 0, sizeof(ShaderBlock_Material));
 	//Setup the descriptor set
 	descriptorSet->setup();
 }
 
 void Material::update() {
 	//Update the material UBO
-	descriptorSet->getUBO(0)->update(&shaderData, 0, sizeof(ShaderBlock_Material));
+	descriptorSet->getShaderBuffer(0)->update(&shaderData, 0, sizeof(ShaderBlock_Material));
 	//Update the descriptor set
 	descriptorSet->update();
 }

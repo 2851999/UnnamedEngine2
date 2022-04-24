@@ -207,6 +207,13 @@ public:
 	   one for rendering is used instead */
 	static inline void setOverrideCommandBuffer(VkCommandBuffer commandBuffer) { overrideCommandBuffer = commandBuffer; }
 
+	/* Returns the device address of a vulkan buffer (Requires VK_KHR_buffer_device_address) */
+	static uint64_t getBufferDeviceAddress(VkBuffer buffer);
+
+	/* Loads and returns an extension function */
+	template<typename T>
+	static inline T loadExternalFunction(const char* pName) { return reinterpret_cast<T>(vkGetDeviceProcAddr(device->getLogical(), pName)); }
+
 	/* Getters */
 	static inline VkInstance& getInstance() { return instance; }
 	static inline VkSurfaceKHR& getWindowSurface() { return windowSurface; }

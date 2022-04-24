@@ -67,7 +67,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanDevice* device, Settings& settings) {
 	createInfo.imageColorSpace  = swapSurfaceFormat.colorSpace;
 	createInfo.imageExtent      = extent;
 	createInfo.imageArrayLayers = 1; //Number of layers each image consists of (always 1 unless VR/stereoscopic 3D)
-	createInfo.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	createInfo.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT; //VK_IMAGE_USAGE_TRANSFER_DST_BIT only here due to raytracing
 
 	uint32_t queueFamilyIndices[] = { queueFamilies.graphicsFamilyIndex, queueFamilies.presentFamilyIndex };
 

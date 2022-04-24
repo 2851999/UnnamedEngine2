@@ -285,10 +285,10 @@ void Renderer::stopUsingMaterial(Material* material) {
 
 void Renderer::render(RenderData* renderData, Matrix4f& modelMatrix, Material* material) {
 	//Obtain the required UBO's for rendering
-	UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
-	UBO* shaderSkinningUBO = NULL;
-	if (renderData->getDescriptorSet()->getNumUBOs() > 1 && renderData->getDescriptorSet()->getUBO(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
-		shaderSkinningUBO = renderData->getDescriptorSet()->getUBO(1);
+	ShaderBuffer* shaderModelUBO = renderData->getDescriptorSet()->getShaderBuffer(0);
+	ShaderBuffer* shaderSkinningUBO = NULL;
+	if (renderData->getDescriptorSet()->getNumShaderBuffers() > 1 && renderData->getDescriptorSet()->getShaderBuffer(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
+		shaderSkinningUBO = renderData->getDescriptorSet()->getShaderBuffer(1);
 
 	renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
 	renderData->getShaderBlock_Model().ue_modelMatrix = modelMatrix;
@@ -315,10 +315,10 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		RenderData* renderData = mesh->getRenderData()->getRenderData();
 
 		//Obtain the required UBO's for rendering
-		UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
-		UBO* shaderSkinningUBO = NULL;
-		if (renderData->getDescriptorSet()->getNumUBOs() > 1 && renderData->getDescriptorSet()->getUBO(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
-			shaderSkinningUBO = renderData->getDescriptorSet()->getUBO(1);
+		ShaderBuffer* shaderModelUBO = renderData->getDescriptorSet()->getShaderBuffer(0);
+		ShaderBuffer* shaderSkinningUBO = NULL;
+		if (renderData->getDescriptorSet()->getNumShaderBuffers() > 1 && renderData->getDescriptorSet()->getShaderBuffer(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
+			shaderSkinningUBO = renderData->getDescriptorSet()->getShaderBuffer(1);
 
 		renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
 		renderData->getShaderBlock_Model().ue_modelMatrix = modelMatrix;

@@ -169,7 +169,7 @@ void Text::queuedRender() {
 		shaderBillboardData.ue_projectionViewMatrix = (Renderer::getCamera()->getProjectionViewMatrix());
 
 		//Update the UBO
-		descriptorSetBillboard->getUBO(0)->updateFrame(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
+		descriptorSetBillboard->getShaderBuffer(0)->updateFrame(&shaderBillboardData, 0, sizeof(ShaderBlock_Billboard));
 		descriptorSetBillboard->bind();
 	}
 
