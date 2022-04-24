@@ -1,0 +1,67 @@
+#version 460
+#extension GL_EXT_ray_tracing : enable
+
+//TLAS
+layout(binding = 0, set = 1) uniform accelerationStructureEXT tlas;
+//Storage image
+layout(binding = 1, set = 1, rgba8) uniform image2D image;
+
+//Camera stuff
+layout(std140, set = 0, binding = 21) uniform UECameraData {
+	mat4 ue_viewMatrix;
+	mat4 ue_projectionMatrix;
+	
+	vec4 ue_cameraPosition;
+};
+
+struct RayPayload {
+	vec3 hitValue;
+	int depth;
+	vec3 attenuation;
+};
+
+//Hit payload
+layout(location = 0) rayPayloadEXT RayPayload rayPayload;
+
+void main()  {
+	//gl_LaunchIDEXT contains the integer coordinates of the pixel being rendered
+	//gl_LaunchSizeEXT contains the image size provided when calling traceRayEXT
+
+	//Compute the floating point pixel coordinates
+	const vec2 pixelCenter = vec2(gl_LaunchIDEXT.xy) + vec2(0.5);
+	const vec2 inUV = pixelCenter/vec2(gl_LaunchSizeEXT.xy);
+	vec2 d = inUV * 2.0 - 1.0;
+
+	//Apply inverse transforms of the view and projection matrix to get the origin and direction of the ray
+	vec4 origin = inverse(ue_viewMatrix) * vec4(0.0, 0.0, 0.0, 1.0);
+	vec4 target = inverse(ue_projectionMatrix) * vec4(d.x, d.y, 1.0, 1.0) ;
+	vec4 direction = inverse(ue_viewMatrix) * vec4(normalize(target.xyz), 0.0) ;
+
+	//Consider all geometry as opaque
+	uint  rayFlags = gl_RayFlagsOpaqueEXT;
+	//Min and max distance for intersections - useful for reducing raytracing cost
+	float tMin = 0.001;
+	float tMax = 10000.0;
+
+    rayPayload.hitValue = vec3(0.0);
+	rayPayload.depth = 0;
+	rayPayload.attenuation = vec3(1.0, 1.0, 1.0);
+
+	//Trace a ray
+    traceRayEXT(tlas,          //TLAS
+	            rayFlags,      //rayFlags
+				0xFF,          //culling mask - binary and with instance mask and skips intersection if result is 0 (currently using 0xFF in generation as well
+				0,             //sbtRecordOffset
+				0,             //sbtRecordStride
+				0,             //missIndex
+				origin.xyz,    //ray origin
+				tMin,          //min range
+				direction.xyz, //direction
+				tMax,          //max range
+				0              //payload location = 0
+	);
+
+	//Store the hitValue in the image
+	imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(rayPayload.hitValue, 0.0));
+	//imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(vec3(1.0, 1.0, 1.0), 0.0));
+}

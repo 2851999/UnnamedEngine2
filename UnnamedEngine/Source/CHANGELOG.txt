@@ -1,8 +1,14 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 2 | Experimental 3
+
+* Adding basic PBR to RenderTest
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 2 | Experimental 2
 
 * Added ability to assign multiple miss shaders in
   RaytracingPipeline
+* Added raytraced reflections to RaytracingTest
 
 * Some cleanup
 

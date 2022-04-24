@@ -664,10 +664,10 @@ void Test::setupModelData() {
 
 /* Creates the raytracing pipeline */
 void Test::createRtPipeline() {
-	VkShaderModule raygenShader     = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/3/raygen.rgen.spv"));
-	VkShaderModule missShader       = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/3/miss.rmiss.spv"));
-	VkShaderModule shadowMissShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/3/shadow.rmiss.spv"));
-	VkShaderModule closestHitShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/3/closesthit.rchit.spv"));
+	VkShaderModule raygenShader     = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/6/raygen.rgen.spv"));
+	VkShaderModule missShader       = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/6/miss.rmiss.spv"));
+	VkShaderModule shadowMissShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/6/shadow.rmiss.spv"));
+	VkShaderModule closestHitShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/6/closesthit.rchit.spv"));
 
 	rtPipeline = new RaytracingPipeline(rtProperties, raygenShader, { missShader, shadowMissShader }, closestHitShader, rtDescriptorSetLayout);
 
@@ -716,7 +716,8 @@ void Test::onCreated() {
 	//Mesh* mesh1 = resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj");
 	//Mesh* mesh1 = resourceLoader.loadModel("bob/", "bob_lamp_update.blend");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "buddha.obj");
-	Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
+	//Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
+	Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-test.obj");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "cube-coloured.obj");
 
 	//modelObjects = MeshLoader::loadAssimpModelSeparate("C:/UnnamedEngine/models/", "cube-coloured.obj", false);
