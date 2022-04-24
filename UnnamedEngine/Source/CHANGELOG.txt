@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 2 | Experimental 2
+
+* Added ability to assign multiple miss shaders in
+  RaytracingPipeline
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 2 | Experimental 1
 
 * Added SHADER_TEXTURE_PASSTHROUGH shader and

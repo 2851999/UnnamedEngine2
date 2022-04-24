@@ -41,6 +41,10 @@ struct UEMaterial {
 
 //Hit payload
 layout(location = 0) rayPayloadInEXT vec3 hitValue;
+
+//Hit payload for shadow rays
+layout(location = 1) rayPayloadEXT bool isShadowed;
+
 hitAttributeEXT vec2 attribs;
 
 layout(buffer_reference, scalar) buffer Vertices { Vertex v[]; };   //Positions of a model
@@ -49,10 +53,12 @@ layout(buffer_reference, scalar) buffer MatIndices { int i[]; };       //Materia
 layout(buffer_reference, scalar) buffer Materials { UEMaterial m[]; }; //Array of all materials on a model
 layout(buffer_reference, scalar) buffer OffsetIndices { uvec2 i[]; };
 
+layout(set = 1, binding = 0) uniform accelerationStructureEXT tlas;
 layout(set = 1, binding = 22, scalar) buffer ModelData_ { ModelData i[]; } modelData;
 
 
-vec3 lightPosition = vec3(0, 1.0, 0);
+//vec3 lightPosition = vec3(0.0, 1.0, 0.0);
+vec3 lightPosition = vec3(0.20607, 0.799975, 1.32652);
 float lightIntensity = 1;
 float lightDistance = 100;
 uint lightType = 0;
@@ -124,8 +130,43 @@ void main() {
 	}
 
 	vec3 diffuse = computeDiffuse(mat, L, worldNorm);
+
+	vec3 specular = vec3(0.0);
 	float attenuation = 1.0;
-	vec3 specular = computeSpecular(mat, gl_WorldRayDirectionEXT, L, worldNorm);
+
+	//Trace shadow rays only if the light is visible from the surface (light is infront of it)
+	if (dot(worldNorm, L) > 0.0) {
+		float tMin = 0.001;
+		float tMax = lightDistance;
+		vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT;
+		vec3 rayDir = L;
+		uint rayFlags = gl_RayFlagsTerminateOnFirstHitEXT     //Don't invoke hit shader
+						| gl_RayFlagsOpaqueEXT                //As not invoking hit shader, treat all objects as opaque
+						| gl_RayFlagsSkipClosestHitShaderEXT; //Stop after first hit
+
+		//Assume shadowed unless shadow miss shader invoked
+		isShadowed = true;
+
+		//Trace a ray
+		traceRayEXT(tlas,          //TLAS
+					rayFlags,      //rayFlags
+					0xFF,          //culling mask - binary and with instance mask and skips intersection if result is 0 (currently using 0xFF in generation as well
+					0,             //sbtRecordOffset
+					0,             //sbtRecordStride
+					1,             //missIndex - 1 now since shadow miss shader has index 1
+					origin.xyz,    //ray origin
+					tMin,          //min range
+					rayDir,        //direction
+					tMax,          //max range
+					1              //payload location = 1 (isShadowed)
+		);
+
+		if (isShadowed) {
+			attenuation = 0.3;
+		} else {
+			specular = computeSpecular(mat, gl_WorldRayDirectionEXT, L, worldNorm);
+		}
+	}
 
 	//Normals wont display if negative so check using *-1!!!
 	
@@ -133,7 +174,7 @@ void main() {
 	//hitValue = vec3(vertexOffset / 8);
 	//hitValue = vec3(gl_PrimitiveID / 8.0);
 	//hitValue = vec3(mat.diffuseColour);
+	//hitValue = vec3(isShadowed);
 	hitValue = vec3(lightIntensity * attenuation * (diffuse + specular));
-	//hitValue = vec3(lightIntensity * attenuation * (diffuse + specular));
 	//hitValue = vec3(gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT);
 }

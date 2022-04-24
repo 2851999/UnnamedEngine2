@@ -664,15 +664,17 @@ void Test::setupModelData() {
 
 /* Creates the raytracing pipeline */
 void Test::createRtPipeline() {
-	VkShaderModule raygenShader     = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/2/raygen.rgen.spv"));
-	VkShaderModule missShader       = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/2/miss.rmiss.spv"));
-	VkShaderModule closestHitShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/2/closesthit.rchit.spv"));
+	VkShaderModule raygenShader     = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/3/raygen.rgen.spv"));
+	VkShaderModule missShader       = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/3/miss.rmiss.spv"));
+	VkShaderModule shadowMissShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/3/shadow.rmiss.spv"));
+	VkShaderModule closestHitShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/3/closesthit.rchit.spv"));
 
-	rtPipeline = new RaytracingPipeline(rtProperties, raygenShader, missShader, closestHitShader, rtDescriptorSetLayout);
+	rtPipeline = new RaytracingPipeline(rtProperties, raygenShader, { missShader, shadowMissShader }, closestHitShader, rtDescriptorSetLayout);
 
 	//Shader modules not needed anymore
 	vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), raygenShader, nullptr);
 	vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), missShader, nullptr);
+	vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), shadowMissShader, nullptr);
 	vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), closestHitShader, nullptr);
 }
 
@@ -754,7 +756,7 @@ void Test::onCreated() {
 
 		//TODO: Move into shader interface - but need to add way of adding UBO to layout without the size (bascially don't autocreate the UBO)
 		rtDescriptorSetLayout = new DescriptorSetLayout(1);
-		rtDescriptorSetLayout->addAccelerationStructure(0, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+		rtDescriptorSetLayout->addAccelerationStructure(0, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 		rtDescriptorSetLayout->addStorageTexture(1, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
 		rtDescriptorSetLayout->addSSBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 		rtDescriptorSetLayout->setup();
@@ -788,7 +790,7 @@ void Test::onCreated() {
 }
 
 void Test::onUpdate() {
-	
+	//std::cout << camera->getPosition().toString() << std::endl;
 }
 
 void Test::onRenderOffscreen() {

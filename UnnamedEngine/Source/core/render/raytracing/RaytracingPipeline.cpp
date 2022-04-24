@@ -29,52 +29,18 @@
   * The RaytracingPipeline class
   *****************************************************************************/
 
-RaytracingPipeline::RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracingProperties, VkShaderModule raygenShader, VkShaderModule missShader, VkShaderModule closestHitShader, DescriptorSetLayout* rtLayout) : rtProperties(raytracingProperties) {
-	//enum StageIndices {
-	//	eRaygen,
-	//	eMiss,
-	//	eClosestHit,
-	//	eShaderGroupCount
-	//};
+RaytracingPipeline::RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracingProperties, VkShaderModule raygenShader, std::vector<VkShaderModule> missShaders, VkShaderModule closestHitShader, DescriptorSetLayout* rtLayout) : rtProperties(raytracingProperties) {
+	numMissShaders = missShaders.size();
+	
+	//One raygen/closestHit, potentially multiple miss shaders
+	unsigned int numShaders = 2 + numMissShaders;
 
-	////All stages
-	//std::vector<VkPipelineShaderStageCreateInfo> stages{};
-	//stages.resize(eShaderGroupCount);
-	//VkPipelineShaderStageCreateInfo stage{ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-	//stage.pName = "main";  //All the same entry point
-	////Raygen
-	//stage.module = Shader::createVkShaderModule(Shader::readFile("resources/shaders/spv/raytrace.rgen.spv"));
-	//stage.stage = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-	//stages[eRaygen] = stage;
-	////Miss
-	//stage.module = Shader::createVkShaderModule(Shader::readFile("resources/shaders/spv/raytrace.rmiss.spv"));
-	//stage.stage = VK_SHADER_STAGE_MISS_BIT_KHR;
-	//stages[eMiss] = stage;
-	////The second miss shader is invoked when a shadow ray misses the geometry. It simply indicates that no occlusion has been found
-	//stage.module = Shader::createVkShaderModule(Shader::readFile("resources/shaders/spv/raytraceShadow.rmiss.spv"));
-	//stage.stage = VK_SHADER_STAGE_MISS_BIT_KHR;
-	//stages[eMiss] = stage;
-	////Hit Group - Closest Hit
-	//stage.module = Shader::createVkShaderModule(Shader::readFile("resources/shaders/spv/raytrace.rchit.spv"));
-	//stage.stage = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
-	//stages[eClosestHit] = stage;
-
-	enum StageIndices {
-		eRaygen,
-		eMiss,
-		eClosestHit,
-		eShaderGroupCount
-	};
+	//Current index to assign shaders
+	unsigned int currentIndex = 0;
 
 	//All stages
 	std::vector<VkPipelineShaderStageCreateInfo> stages{};
-	stages.resize(eShaderGroupCount);
-	//Raygen
-	stages[eRaygen] = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_RAYGEN_BIT_KHR, raygenShader, "main");
-	//Miss
-	stages[eMiss] = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_MISS_BIT_KHR, missShader, "main");
-	//Hit Group - Closest Hit
-	stages[eClosestHit] = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, closestHitShader, "main");
+	stages.resize(numShaders);
 
 	//Shader groups
 	VkRayTracingShaderGroupCreateInfoKHR group{ VK_STRUCTURE_TYPE_RAY_TRACING_SHADER_GROUP_CREATE_INFO_KHR };
@@ -83,21 +49,31 @@ RaytracingPipeline::RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropert
 	group.generalShader = VK_SHADER_UNUSED_KHR;
 	group.intersectionShader = VK_SHADER_UNUSED_KHR;
 
+
 	//Raygen
 	group.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
-	group.generalShader = eRaygen;
+	group.generalShader = currentIndex;
 	shaderGroups.push_back(group);
+
+	stages[currentIndex++] = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_RAYGEN_BIT_KHR, raygenShader, "main");
 
 	//Miss
-	group.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
-	group.generalShader = eMiss;
-	shaderGroups.push_back(group);
+	for (unsigned int i = 0; i < missShaders.size(); ++i) {
+		group.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_GENERAL_KHR;
+		group.generalShader = currentIndex;
+		shaderGroups.push_back(group);
 
-	//closest hit shader
+		stages[currentIndex++] = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_MISS_BIT_KHR, missShaders[i], "main");
+	}
+
+	//Closest hit shader
 	group.type = VK_RAY_TRACING_SHADER_GROUP_TYPE_TRIANGLES_HIT_GROUP_KHR;
 	group.generalShader = VK_SHADER_UNUSED_KHR;
-	group.closestHitShader = eClosestHit;
+	group.closestHitShader = currentIndex;
 	shaderGroups.push_back(group);
+
+	//Hit Group - Closest Hit
+	stages[currentIndex++] = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, closestHitShader, "main");
 
 	////Push constants
 	//VkPushConstantRange pushConstant{ VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR, 0, sizeof(PushConstantRay) };
@@ -124,7 +100,7 @@ RaytracingPipeline::RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropert
 	rayPipelineInfo.pGroups = shaderGroups.data();
 
 	//Ray depth cannot exceed rtProperties.maxRayRecursionDepth
-	rayPipelineInfo.maxPipelineRayRecursionDepth = 1;
+	rayPipelineInfo.maxPipelineRayRecursionDepth = 2;
 	rayPipelineInfo.layout = pipelineLayout;
 
 	//Create the raytracing pipeline
@@ -135,9 +111,8 @@ RaytracingPipeline::RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropert
 
 void RaytracingPipeline::createRtShaderBindingTable() {
 	//Number of each shader
-	uint32_t missCount{ 1 };
 	uint32_t hitCount{ 1 };
-	auto     handleCount = 1 + missCount + hitCount; //Always only 1 raygen shader
+	auto     handleCount = 1 + numMissShaders + hitCount; //Always only 1 raygen shader
 	uint32_t handleSize = rtProperties.shaderGroupHandleSize;
 
 	//Need to use align_up here as there is no guarentee the alignment corresponds to the handle or group size
@@ -148,7 +123,7 @@ void RaytracingPipeline::createRtShaderBindingTable() {
 	rgenRegion.stride = align_up(handleSizeAligned, rtProperties.shaderGroupBaseAlignment);
 	rgenRegion.size = rgenRegion.stride;  //This member of pRayGenShaderBindingTable must be equal to its stride member
 	missRegion.stride = handleSizeAligned;
-	missRegion.size = align_up(missCount * handleSizeAligned, rtProperties.shaderGroupBaseAlignment);
+	missRegion.size = align_up(numMissShaders * handleSizeAligned, rtProperties.shaderGroupBaseAlignment);
 	hitRegion.stride = handleSizeAligned;
 	hitRegion.size = align_up(hitCount * handleSizeAligned, rtProperties.shaderGroupBaseAlignment);
 
@@ -185,7 +160,7 @@ void RaytracingPipeline::createRtShaderBindingTable() {
 
 	//Miss
 	pData = pSBTBuffer + rgenRegion.size;
-	for (uint32_t c = 0; c < missCount; ++c) {
+	for (uint32_t c = 0; c < numMissShaders; ++c) {
 		memcpy(pData, getHandle(handleIdx++), handleSize);
 		pData += missRegion.stride;
 	}

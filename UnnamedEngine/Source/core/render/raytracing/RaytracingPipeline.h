@@ -77,9 +77,12 @@ private:
        - All shaders must be accessible at once when raytracing
 	     This allows the corect shader to be selected at runtime */
 	void createRtShaderBindingTable();
+
+	/* Number of particular kinds of raytracing shader */
+	uint32_t numMissShaders = 0;
 public:
 	/* Constructor */
-	RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracingProperties, VkShaderModule raygenShader, VkShaderModule missShader, VkShaderModule closestHitShader, DescriptorSetLayout* rtLayout);
+	RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracingProperties, VkShaderModule raygenShader, std::vector<VkShaderModule> missShaders, VkShaderModule closestHitShader, DescriptorSetLayout* rtLayout);
 
 	/* Desctructor */
 	virtual ~RaytracingPipeline();
