@@ -75,8 +75,8 @@ void Test::onCreated() {
 	//Mesh* mesh1 = resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj");
 	//Mesh* mesh1 = resourceLoader.loadModel("bob/", "bob_lamp_update.blend");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "buddha.obj");
-	//Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
-	Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-test.obj");
+	Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
+	//Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-test.obj");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "cube-coloured.obj");
 
 	//modelObjects = MeshLoader::loadAssimpModelSeparate("C:/UnnamedEngine/models/", "cube-coloured.obj", false);
@@ -102,10 +102,10 @@ void Test::onCreated() {
 	camera->setPosition(Vector3f(1.0f, 2.0f, 4.0f));
 	camera->update(getDeltaSeconds());
 
-	VkShaderModule raygenShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/6/raygen.rgen.spv"));
-	VkShaderModule missShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/6/miss.rmiss.spv"));
-	VkShaderModule shadowMissShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/6/shadow.rmiss.spv"));
-	VkShaderModule closestHitShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/6/closesthit.rchit.spv"));
+	VkShaderModule raygenShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/raygen.rgen.spv"));
+	VkShaderModule missShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/miss.rmiss.spv"));
+	VkShaderModule shadowMissShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/shadow.rmiss.spv"));
+	VkShaderModule closestHitShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/closesthit.rchit.spv"));
 
 	rtScene->setup(raygenShader, { missShader, shadowMissShader }, closestHitShader);
 

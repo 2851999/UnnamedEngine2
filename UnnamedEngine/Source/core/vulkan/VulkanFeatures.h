@@ -31,7 +31,8 @@ private:
 	static VkPhysicalDeviceVulkan11Features                 requiredDeviceVK11Features;
 	static VkPhysicalDeviceBufferDeviceAddressFeatures      featuresBufferDeviceAddress;
 	static VkPhysicalDeviceRayTracingPipelineFeaturesKHR    featuresRayTracingPipeline;
-	static VkPhysicalDeviceAccelerationStructureFeaturesKHR featuresAccelerationStructureFeatures;
+	static VkPhysicalDeviceAccelerationStructureFeaturesKHR featuresAccelerationStructure;
+	static VkPhysicalDeviceShaderClockFeaturesKHR           featuresShaderClock;
 
 	/* List of the required features */
 	static std::vector<void*> requiredDeviceFeatures2;

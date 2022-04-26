@@ -1,0 +1,96 @@
+#version 460
+#extension GL_EXT_ray_tracing : enable
+#extension GL_ARB_shader_clock : enable
+#extension GL_GOOGLE_include_directive : enable
+
+#include "sampling.glsl"
+
+//TLAS
+layout(binding = 0, set = 1) uniform accelerationStructureEXT tlas;
+//Storage image
+layout(binding = 1, set = 1, rgba8) uniform image2D image;
+
+//Camera stuff
+layout(std140, set = 0, binding = 21) uniform UECameraData {
+	mat4 ue_viewMatrix;
+	mat4 ue_projectionMatrix;
+	
+	vec4 ue_cameraPosition;
+};
+
+struct RayPayload {
+	vec3 hitValue;
+	uint seed;
+	uint depth;
+	vec3 rayOrigin;
+	vec3 rayDirection;
+	vec3 weight;
+};
+
+//Hit payload
+layout(location = 0) rayPayloadEXT RayPayload rayPayload;
+
+layout(push_constant) uniform PushConstants {
+	int frame;
+} pushConstants;
+
+void main()  {
+  	//Generate a random number
+  	uint seed = tea(gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x + gl_LaunchIDEXT.x, int(clockARB()));
+
+	//Compute the floating point pixel coordinates
+	const vec2 pixelCenter = vec2(gl_LaunchIDEXT.xy) + vec2(0.5);
+	const vec2 inUV = pixelCenter/vec2(gl_LaunchSizeEXT.xy);
+	vec2 d = inUV * 2.0 - 1.0;
+
+	//Apply inverse transforms of the view and projection matrix to get the origin and direction of the ray
+	vec4 origin = inverse(ue_viewMatrix) * vec4(0.0, 0.0, 0.0, 1.0);
+	vec4 target = inverse(ue_projectionMatrix) * vec4(d.x, d.y, 1.0, 1.0) ;
+	vec4 direction = inverse(ue_viewMatrix) * vec4(normalize(target.xyz), 0.0) ;
+
+	//Consider all geometry as opaque
+	uint  rayFlags = gl_RayFlagsOpaqueEXT;
+	//Min and max distance for intersections - useful for reducing raytracing cost
+	float tMin = 0.001;
+	float tMax = 10000.0;
+
+    rayPayload.hitValue = vec3(0.0);
+	rayPayload.depth = 0;
+	rayPayload.seed = seed;
+	rayPayload.rayOrigin    = origin.xyz;
+  	rayPayload.rayDirection = direction.xyz;
+  	rayPayload.weight       = vec3(0);
+
+
+	vec3 currentWeight = vec3(1);
+  	vec3 hitValue      = vec3(0);
+
+	for(; rayPayload.depth < 10; rayPayload.depth++) {
+		//Trace a ray
+		traceRayEXT(tlas,                    //TLAS
+					rayFlags,                //rayFlags
+					0xFF,                    //culling mask - binary and with instance mask and skips intersection if result is 0 (currently using 0xFF in generation as well
+					0,                       //sbtRecordOffset
+					0,                       //sbtRecordStride
+					0,                       //missIndex
+					rayPayload.rayOrigin,    //ray origin
+					tMin,                    //min range
+					rayPayload.rayDirection, //direction
+					tMax,                    //max range
+					0                        //payload location = 0
+		);
+
+		//Add to the latest raytracing result to the hit value
+		hitValue      += rayPayload.hitValue * currentWeight;
+		currentWeight *= rayPayload.weight;
+	}
+
+	//Store the hitValue in the image
+	//If have had previous frames accumulate rather than replace in the output image
+	if (pushConstants.frame > 0) {
+		float a = 1.0 / float(pushConstants.frame + 1);
+		vec3 previousColour = imageLoad(image, ivec2(gl_LaunchIDEXT.xy)).xyz;
+		imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(mix(previousColour, hitValue, a), 1.0));
+	} else
+		imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(hitValue, 1.0));
+}

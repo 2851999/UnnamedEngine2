@@ -75,16 +75,16 @@ RaytracingPipeline::RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropert
 	//Hit Group - Closest Hit
 	stages[currentIndex++] = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR, closestHitShader, "main");
 
-	////Push constants
-	//VkPushConstantRange pushConstant{ VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR, 0, sizeof(PushConstantRay) };
+	//Push constants
+	VkPushConstantRange pushConstant{ VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR, 0, sizeof(RTPushConstants) };
 
 	//Descriptor sets for the pipeline - one for the camera (set 0) and anoher for the TLAS/storage image
 	//Needs to be in order of set numbers
 	std::vector<VkDescriptorSetLayout> rtDescSetLayouts = { Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_CAMERA)->getVkLayout(), rtLayout->getVkLayout()};
 
 	VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = utils_vulkan::initPipelineLayoutCreateInfo(static_cast<uint32_t>(rtDescSetLayouts.size()), rtDescSetLayouts.data());
-	//pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-	//pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstant;
+	pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+	pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstant;
 
 
 	//Create the pipeline layout
@@ -182,7 +182,10 @@ RaytracingPipeline::~RaytracingPipeline() {
 	vkDestroyPipelineLayout(Vulkan::getDevice()->getLogical(), pipelineLayout, nullptr);
 }
 
-void RaytracingPipeline::bind() {
+void RaytracingPipeline::bind(const RTPushConstants* pushConstants) {
+	//Assign the push constants
+	vkCmdPushConstants(Vulkan::getCurrentCommandBuffer(), pipelineLayout, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR | VK_SHADER_STAGE_MISS_BIT_KHR, 0, sizeof(RTPushConstants), pushConstants);
+
 	//Bind the pipeline
 	vkCmdBindPipeline(Vulkan::getCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, pipeline);
 }

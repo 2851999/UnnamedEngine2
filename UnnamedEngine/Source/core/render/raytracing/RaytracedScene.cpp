@@ -560,11 +560,14 @@ void RaytracedScene::setup(VkShaderModule raygenShader, std::vector<VkShaderModu
 }
 
 void RaytracedScene::raytrace(Camera3D* camera) {
+	//Update the current frame
+	updateFrame(camera);
+
 	//Transition the storage texture layout ready for modifying
 	Vulkan::transitionImageLayout(storageTexture->getVkImage(), Vulkan::getSwapChain()->getSurfaceFormat(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL, 1, 1, Vulkan::getCurrentCommandBuffer());
 
 	//Bind the RT pipeline and camera/rt descriptor sets
-	rtPipeline->bind();
+	rtPipeline->bind(&rtPushConstants);
 
 	//TODO: Remove these methods
 	camera->getDescriptorSet()->bind(VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR, rtPipeline->getLayout());
@@ -583,6 +586,21 @@ void RaytracedScene::renderOutput() {
 	Matrix4f identity = Matrix4f().initIdentity();
 
 	Renderer::render(screenRenderMesh, identity, Renderer::getRenderShader(Renderer::SHADER_FRAMEBUFFER));
+}
+
+void RaytracedScene::updateFrame(Camera3D* camera) {
+	Matrix4f& currentMatrix = camera->getViewMatrix();
+
+	//Check for a change of the camera's view matrix
+	if (memcmp(lastViewMatrix.data(), currentMatrix.data(), sizeof(Matrix4f)) != 0) {
+		//Reset the frame as the camera has moved
+		rtPushConstants.frame = -1;
+
+		lastViewMatrix = currentMatrix;
+	}
+
+	//Increment the current frame
+	rtPushConstants.frame++;
 }
 
 MeshData* RaytracedScene::createScreenMeshData() {

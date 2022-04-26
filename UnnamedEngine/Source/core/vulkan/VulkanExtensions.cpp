@@ -45,7 +45,9 @@ std::vector<const char*> VulkanExtensions::requiredRaytracingExtensions = {
 	//Required by VK_KHR_ray_tracing_pipeline
 	VK_KHR_SPIRV_1_4_EXTENSION_NAME,
 	//Required by VK_KHR_spirv_1_4,
-	VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME
+	VK_KHR_SHADER_FLOAT_CONTROLS_EXTENSION_NAME,
+	//Required for random number generation in shaders
+	VK_KHR_SHADER_CLOCK_EXTENSION_NAME
 };
 
 PFN_vkGetBufferDeviceAddressKHR VulkanExtensions::loaded_vkGetBufferDeviceAddressKHR;

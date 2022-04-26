@@ -36,18 +36,7 @@ private:
 	VkPipeline pipeline = VK_NULL_HANDLE;
 
 	//TODO: Cleanup and comment below
-
-	// Push constant structure for the ray tracer
-	struct PushConstantRay {
-		Vector4f clearColor;
-		Vector3f lightPosition;
-		float    lightIntensity;
-		int      lightType;
-	};
-
 	VkPhysicalDeviceRayTracingPipelinePropertiesKHR rtProperties;
-
-	PushConstantRay pcRay;
 
 	std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups;
 
@@ -81,6 +70,11 @@ private:
 	/* Number of particular kinds of raytracing shader */
 	uint32_t numMissShaders = 0;
 public:
+	/* Push constants for the shaders */
+	struct RTPushConstants {
+		int frame;
+	};
+
 	/* Constructor */
 	RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracingProperties, VkShaderModule raygenShader, std::vector<VkShaderModule> missShaders, VkShaderModule closestHitShader, DescriptorSetLayout* rtLayout);
 
@@ -88,7 +82,7 @@ public:
 	virtual ~RaytracingPipeline();
 
 	/* Binds the pipeline */
-	void bind();
+	void bind(const RTPushConstants* pushConstants);
 
 	/* Getters */
 	inline VkPipelineLayout& getLayout() { return pipelineLayout; }

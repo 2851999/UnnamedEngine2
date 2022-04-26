@@ -93,6 +93,14 @@ private:
 	GraphicsPipeline* screenRenderPipeline;
 	Mesh*             screenRenderMesh;
 
+	/* Push constants for the shader */
+	RaytracingPipeline::RTPushConstants rtPushConstants = {
+		-1
+	};
+
+	/* View matrix for keeping track of camera movement */
+	Matrix4f lastViewMatrix;
+
 	/* Creates a BLASInput from a given mesh and subdata (For materials create one BLAS for each SubData for now) 
 	  * Currently assume:
 	  *	- not separating the vertex data into separate VBO's
@@ -142,6 +150,9 @@ private:
 
 	/* Sets up all of the data required by shaders for raytracing the scene */
 	void setupModelData();
+
+	/* Updates the push constants (for counting the frame and resetting when the camera moves) */
+	void updateFrame(Camera3D* camera);
 
 	/* Returns a MeshData* instance for rendering to the screen */
 	MeshData* createScreenMeshData();
