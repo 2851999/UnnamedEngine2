@@ -41,9 +41,10 @@ Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 }
 
 Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShaderModule, VkShaderModule fragmentShaderModule) {
-	this->vertexShaderModule = vertexShaderModule;
-	this->geometryShaderModule = geometryShaderModule;
-	this->fragmentShaderModule = fragmentShaderModule;
+	attach(vertexShaderModule, VK_SHADER_STAGE_VERTEX_BIT);
+	if (geometryShaderModule != VK_NULL_HANDLE)
+		attach(geometryShaderModule, VK_SHADER_STAGE_GEOMETRY_BIT);
+	attach(fragmentShaderModule, VK_SHADER_STAGE_FRAGMENT_BIT);
 }
 
 Shader::~Shader() {
@@ -55,10 +56,8 @@ Shader::~Shader() {
 		attachedShaders.clear();
 	} else {
 		//Destroy the shader modules
-		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
-		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
-		if (geometryShaderModule != VK_NULL_HANDLE)
-			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), geometryShaderModule, nullptr);
+		for (VulkanShaderModule& shaderModule : vulkanShaderModules)
+			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), shaderModule.shaderModule, nullptr);
 	}
 }
 
@@ -86,6 +85,10 @@ void Shader::attach(GLuint shader) {
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
 		Logger::log("Error validating shader program " + utils_string::str(error), "Shader", LogType::Error);
 	}
+}
+
+void Shader::attach(VkShaderModule shaderModule, VkShaderStageFlagBits shaderStageFlags) {
+	vulkanShaderModules.push_back({ shaderModule, shaderStageFlags });
 }
 
 void Shader::detach(GLuint shader) {

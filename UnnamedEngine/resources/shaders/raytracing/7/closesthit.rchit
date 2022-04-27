@@ -14,7 +14,8 @@ struct ModelData {
 	uint64_t indexBufferAddress;
 	uint64_t matIndexBufferAddress;
 	uint64_t matDataBufferAddress;
-  uint64_t offsetIndicesBufferAddress;
+  	uint64_t offsetIndicesBufferAddress;
+	int textureOffset;
 };
 
 struct Vertex {
@@ -29,6 +30,7 @@ struct UEMaterial {
 	vec4 ambientColour;
 	vec4 diffuseColour;
 	vec4 specularColour;
+	vec4 emissiveColour;
 	
 	bool hasAmbientTexture;
 	bool hasDiffuseTexture;
@@ -37,6 +39,7 @@ struct UEMaterial {
 	bool hasShininessTexture;
 	bool hasNormalMap;
 	bool hasParallaxMap;
+	bool hasEmissiveTexture;
 	
 	float parallaxScale;
 	float shininess;
@@ -66,6 +69,13 @@ layout(buffer_reference, scalar) buffer Materials { UEMaterial m[]; }; //Array o
 layout(buffer_reference, scalar) buffer OffsetIndices { uvec2 i[]; };
 
 layout(set = 1, binding = 0) uniform accelerationStructureEXT tlas;
+layout(set = 1, binding = 2) uniform sampler2D ambientTextures[];
+layout(set = 1, binding = 3) uniform sampler2D diffuseTextures[];
+layout(set = 1, binding = 4) uniform sampler2D specularTextures[];
+layout(set = 1, binding = 5) uniform sampler2D shininessTextures[];
+layout(set = 1, binding = 6) uniform sampler2D normalMaps[];
+layout(set = 1, binding = 7) uniform sampler2D parallaxMaps[];
+layout(set = 1, binding = 8) uniform sampler2D emissiveTextures[];
 layout(set = 1, binding = 22, scalar) buffer ModelData_ { ModelData i[]; } modelData;
 
 layout(push_constant) uniform PushConstants {
@@ -79,9 +89,9 @@ float lightIntensity = 1;
 float lightDistance = 100;
 uint lightType = 0;
 
-float lightConstant  = 0.0f;
-float lightLinear    = 0.0f;
-float lightQuadratic = 1.0f;
+float lightConstant  = 0.0;
+float lightLinear    = 0.0;
+float lightQuadratic = 1.0;
 vec3 lightDiffuseColour = vec3(23.47, 21.31, 20.79);
 vec3 ue_lightAmbient = vec3(0.03, 0.03, 0.03);
 
@@ -329,17 +339,28 @@ void main() {
 	const vec3 normal = v0.normal * barycentrics.x + v1.normal * barycentrics.y + v2.normal * barycentrics.z;
 	const vec3 worldNorm = normalize(vec3(normal * gl_WorldToObjectEXT));  //Transforming to world space
 
+	const vec2 textureCoord = v0.textureCoord * barycentrics.x + v1.textureCoord * barycentrics.y + v2.textureCoord * barycentrics.z;
+
 	//Material of the object
 	int matIndex = matIndices.i[gl_PrimitiveID + indexOffset];
+	int textureIndex = matIndex + modelResource.textureOffset;
 	UEMaterial mat = materials.m[matIndex];
 
 	vec3 albedo = mat.diffuseColour.rgb;
+
+	if (mat.hasDiffuseTexture)
+		albedo *= texture(diffuseTextures[nonuniformEXT(textureIndex)], textureCoord).xyz;
+
 	float metalness = mat.ambientColour.r;
 	float roughness = mat.shininess;
 	float ao = mat.specularColour.r;
 
-	//TODO: CHANGE THIS
-	vec3 emittance = albedo / 1.4;
+	vec3 emittance = mat.emissiveColour.xyz;
+
+	if (mat.hasEmissiveTexture)
+		emittance *= texture(emissiveTextures[nonuniformEXT(textureIndex)], textureCoord).xyz;
+
+	//emittance = mix(emittance, albedo, 0.01);
 
 	//Generate the next ray in a random direction
 	vec3 tangent, bitangent;
@@ -352,7 +373,7 @@ void main() {
 
 	//Compute the BRDF for this ray
   	float cos_theta = dot(rayDirection, worldNorm);
- 	vec3  BRDF      = mat.diffuseColour.xyz / SAMPLING_PI;
+ 	vec3  BRDF      = albedo / SAMPLING_PI;
 
 
 	///////////////// VERY SKETCHY TEST
@@ -398,31 +419,31 @@ void main() {
 	///////////////////////////////////
 
 	//Reflection
-	if (mat.shininess > 0.1) {
-		//Reflect
-		//rayDirection = reflect(rayPayload.rayDirection, worldNorm);
+	// if (mat.shininess > 0.1) {
+	// 	//Reflect
+	// 	//rayDirection = reflect(rayPayload.rayDirection, worldNorm);
 
-		//Refract
-		float refractionIndex = 1.1;
+	// 	//Refract
+	// 	float refractionIndex = 1.1;
 
-		float dirDotNorm = dot(rayPayload.rayDirection, worldNorm);
+	// 	float dirDotNorm = dot(rayPayload.rayDirection, worldNorm);
 
-		vec3 normalOut = dirDotNorm > 0 ? -worldNorm : worldNorm;
-		float nit = dirDotNorm > 0 ? refractionIndex : 1.0 / refractionIndex;
-		float cosine = dirDotNorm > 0 ? refractionIndex * dirDotNorm : -dirDotNorm;
-		vec3 refracted = refract(rayPayload.rayDirection, normalOut, nit);
+	// 	vec3 normalOut = dirDotNorm > 0 ? -worldNorm : worldNorm;
+	// 	float nit = dirDotNorm > 0 ? refractionIndex : 1.0 / refractionIndex;
+	// 	float cosine = dirDotNorm > 0 ? refractionIndex * dirDotNorm : -dirDotNorm;
+	// 	vec3 refracted = refract(rayPayload.rayDirection, normalOut, nit);
 
 
-		float reflectionProb = refracted != vec3(0) ? schlick(cosine, refractionIndex) : 1;
+	// 	float reflectionProb = refracted != vec3(0) ? schlick(cosine, refractionIndex) : 1;
 
-		if (rand(rayPayload.seed) < reflectionProb)
-			rayDirection = reflect(rayPayload.rayDirection, worldNorm);
-		else
-			rayDirection = refracted;
+	// 	if (rand(rayPayload.seed) < reflectionProb)
+	// 		rayDirection = reflect(rayPayload.rayDirection, worldNorm);
+	// 	else
+	// 		rayDirection = refracted;
 
-		//Make clearer
-		BRDF *= 1.25;
-	}
+	// 	//Make clearer
+	// 	BRDF *= 1.25;
+	// }
 
 	rayPayload.rayOrigin    = rayOrigin;
   	rayPayload.rayDirection = rayDirection;

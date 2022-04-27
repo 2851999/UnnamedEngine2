@@ -46,12 +46,12 @@ RaytracedScene::~RaytracedScene() {
 	delete screenRenderPipeline;
 
 	//Destroy the TLAS
-	VulkanExtensions::vkDestroyAccelerationStructureKHR(Vulkan::getDevice()->getLogical(), tlas.accel, nullptr);
+	VulkanExtensions::vkDestroyAccelerationStructureKHR(device->getLogical(), tlas.accel, nullptr);
 	delete tlas.buffer;
 
 	//Go through and destroy the BLAS instances
 	for (unsigned int i = 0; i < blas.size(); ++i) {
-		VulkanExtensions::vkDestroyAccelerationStructureKHR(Vulkan::getDevice()->getLogical(), blas[i].accel, nullptr);
+		VulkanExtensions::vkDestroyAccelerationStructureKHR(device->getLogical(), blas[i].accel, nullptr);
 		delete blas[i].buffer;
 	}
 }
@@ -140,7 +140,7 @@ void RaytracedScene::buildBLAS(const std::vector<BLASInput>& input, VkBuildAccel
 			maxPrimCount[tt] = input[idx].asBuildOffsetInfo[tt].primitiveCount;  //Number of primitives/triangles
 
 		//Obtain the required size for the current BLAS
-		VulkanExtensions::vkGetAccelerationStructureBuildSizesKHR(Vulkan::getDevice()->getLogical(), VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildAs[idx].buildInfo, maxPrimCount.data(), &buildAs[idx].sizeInfo);
+		VulkanExtensions::vkGetAccelerationStructureBuildSizesKHR(device->getLogical(), VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR, &buildAs[idx].buildInfo, maxPrimCount.data(), &buildAs[idx].sizeInfo);
 
 		//Size needed for the acceleration structure
 		asTotalSize += buildAs[idx].sizeInfo.accelerationStructureSize;
@@ -150,7 +150,7 @@ void RaytracedScene::buildBLAS(const std::vector<BLASInput>& input, VkBuildAccel
 	}
 
 	//Create the scratch buffer and obtain its device address
-	VulkanBuffer* scratchBuffer = new VulkanBuffer(maxScratchSize, Vulkan::getDevice(), VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, false);
+	VulkanBuffer* scratchBuffer = new VulkanBuffer(maxScratchSize, device, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, false);
 	VkDeviceAddress scratchAddress = Vulkan::getBufferDeviceAddress(scratchBuffer->getInstance());
 
 	//Allocate a query pool for storing the needed size for every BLAS compaction.
@@ -169,7 +169,7 @@ void RaytracedScene::buildBLAS(const std::vector<BLASInput>& input, VkBuildAccel
 		VkQueryPoolCreateInfo qpCreateInfo{ VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO };
 		qpCreateInfo.queryCount = numBlas;
 		qpCreateInfo.queryType  = VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_KHR;
-		vkCreateQueryPool(Vulkan::getDevice()->getLogical(), &qpCreateInfo, nullptr, &queryPool);
+		vkCreateQueryPool(device->getLogical(), &qpCreateInfo, nullptr, &queryPool);
 	}
 
 	//Batching creation/compaction of BLAS to allow staying in restricted amount of memory
@@ -214,14 +214,14 @@ void RaytracedScene::buildBLAS(const std::vector<BLASInput>& input, VkBuildAccel
 
 	//Cleanup
 	if (queryPool)
-		vkDestroyQueryPool(Vulkan::getDevice()->getLogical(), queryPool, nullptr);
+		vkDestroyQueryPool(device->getLogical(), queryPool, nullptr);
 	delete scratchBuffer;
 }
 
 void RaytracedScene::cmdCreateBLAS(VkCommandBuffer cmdBuf, std::vector<uint32_t> indices, std::vector<BuildAccelerationStructure>& buildAs, VkDeviceAddress scratchAddress, VkQueryPool queryPool) {
 	//Reset the query pool for querying the compaction size
 	if (queryPool)
-		vkResetQueryPool(Vulkan::getDevice()->getLogical(), queryPool, 0, static_cast<uint32_t>(indices.size()));
+		vkResetQueryPool(device->getLogical(), queryPool, 0, static_cast<uint32_t>(indices.size()));
 	uint32_t queryCount{ 0 };
 
 	//Go through each BLAS to create
@@ -232,11 +232,11 @@ void RaytracedScene::cmdCreateBLAS(VkCommandBuffer cmdBuf, std::vector<uint32_t>
 		createInfo.size = buildAs[idx].sizeInfo.accelerationStructureSize;  //Will be used to allocate memory
 
 		//Create a buffer to store the acceleration structure and assign it in the create info
-		buildAs[idx].as.buffer = new VulkanBuffer(createInfo.size, Vulkan::getDevice(), VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, false);
+		buildAs[idx].as.buffer = new VulkanBuffer(createInfo.size, device, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, false);
 		createInfo.buffer = buildAs[idx].as.buffer->getInstance();
 
 		//Create the BLAS
-		VulkanExtensions::vkCreateAccelerationStructureKHR(Vulkan::getDevice()->getLogical(), &createInfo, nullptr, &buildAs[idx].as.accel);
+		VulkanExtensions::vkCreateAccelerationStructureKHR(device->getLogical(), &createInfo, nullptr, &buildAs[idx].as.accel);
 
 		//Setup the additional build info required for building the BLAS (the rest is done in buildBLAS)
 		buildAs[idx].buildInfo.dstAccelerationStructure  = buildAs[idx].as.accel; //Where to store the acceleration structure
@@ -279,10 +279,10 @@ void RaytracedScene::cmdCompactBLAS(VkCommandBuffer cmdBuf, std::vector<uint32_t
 		asCreateInfo.type = VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
 
 		//Create a buffer to store the new AS
-		buildAs[idx].as.buffer = new VulkanBuffer(asCreateInfo.size, Vulkan::getDevice(), VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, false);
+		buildAs[idx].as.buffer = new VulkanBuffer(asCreateInfo.size, device, VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, false);
 		asCreateInfo.buffer = buildAs[idx].as.buffer->getInstance();
 		//Create the compacted BLAS
-		VulkanExtensions::vkCreateAccelerationStructureKHR(Vulkan::getDevice()->getLogical(), &asCreateInfo, nullptr, &buildAs[idx].as.accel);
+		VulkanExtensions::vkCreateAccelerationStructureKHR(device->getLogical(), &asCreateInfo, nullptr, &buildAs[idx].as.accel);
 
 		//Copy the original BLAS to a compact version
 		VkCopyAccelerationStructureInfoKHR copyInfo{ VK_STRUCTURE_TYPE_COPY_ACCELERATION_STRUCTURE_INFO_KHR };
@@ -477,15 +477,26 @@ void RaytracedScene::setupModelData() {
 
 	//Go through each object and add the material data
 	for (GameObject3D* object : objects) {
-		for (Material* mat : object->getMesh()->getMaterials())
+		for (Material* mat : object->getMesh()->getMaterials()) {
 			materialData.push_back(mat->getShaderData());
+
+			texturesAmbient.push_back(mat->getAmbientTexture());
+			texturesDiffuse.push_back(mat->getDiffuseTexture());
+			texturesSpecular.push_back(mat->getSpecularTexture());
+			texturesShininess.push_back(mat->getShininessTexture());
+			texturesNormalMap.push_back(mat->getNormalMap());
+			texturesParallaxMap.push_back(mat->getParallaxMap());
+			texturesEmissive.push_back(mat->getEmissiveTexture());
+		}
 	}
 
 	//Create the material data buffer
 	materialDataBuffer = new VulkanBuffer(materialData.data(), materialData.size() * sizeof(ShaderBlock_Material), device, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, false);
 
-	//Current offset for offsetting the materials device address
+	//Current offset for offsetting the materials device address and textures
+	//TODO: Can combine these
 	unsigned int materialOffset = 0;
+	unsigned int textureOffset = 0;
 
 	//Go through each object
 	for (GameObject3D* object : objects) {
@@ -494,7 +505,7 @@ void RaytracedScene::setupModelData() {
 		MeshRenderData* renderData = mesh->getRenderData();
 
 		//Current offset for offsetting the offsets device address
-		unsigned int offsetOffset   = 0;
+		unsigned int offsetOffset = 0;
 
 		//Create a model data for each SubData instance (one BLAS is created for each)
 		for (unsigned int i = 0; i < mesh->getData()->getSubDataCount(); ++i) {
@@ -514,6 +525,7 @@ void RaytracedScene::setupModelData() {
 			//Assign the offset indices buffer
 			//Offset depending on the subdata that came before it (ensures can use gl_PrimitiveID to access the correct offsets)
 			data.offsetIndicesBufferAddress = Vulkan::getBufferDeviceAddress(renderData->getOffsetIndicesBuffer()->getInstance()) + offsetOffset;
+			data.textureOffset = textureOffset;
 
 			//Add the model data
 			sceneModelData.push_back(data);
@@ -521,12 +533,13 @@ void RaytracedScene::setupModelData() {
 			//Offset buffer address position to point at correct data (gl_PrimitiveID in shader resets to 0 for each subdata/material)
 			offsetOffset += (mesh->getData()->getSubData(i).count / 3) * 2 * sizeof(mesh->getData()->getOffsetIndices()[0]);
 		}
-		//Offset material buffer address
+		//Increase the material buffer address and texture offset
 		materialOffset += mesh->getNumMaterials() * sizeof(ShaderBlock_Material);
+		textureOffset += mesh->getNumMaterials();
 	}
 }
 
-void RaytracedScene::setup(VkShaderModule raygenShader, std::vector<VkShaderModule> missShaders, VkShaderModule closestHitShader) {
+void RaytracedScene::setup(Shader* rtShader) {
 	//Setup the acceleration structures, model data and create the storage texture
 	setupAllBLAS();
 	setupTLAS();
@@ -538,18 +551,43 @@ void RaytracedScene::setup(VkShaderModule raygenShader, std::vector<VkShaderModu
 	rtDescriptorSetLayout = new DescriptorSetLayout(1);
 	rtDescriptorSetLayout->addAccelerationStructure(0, VK_SHADER_STAGE_RAYGEN_BIT_KHR | VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	rtDescriptorSetLayout->addStorageTexture(1, VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 2, texturesAmbient.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 3, texturesDiffuse.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 4, texturesSpecular.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 5, texturesShininess.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 6, texturesNormalMap.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 7, texturesParallaxMap.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 8, texturesEmissive.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	rtDescriptorSetLayout->addSSBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	rtDescriptorSetLayout->setup();
 
 	rtDescriptorSet = new DescriptorSet(rtDescriptorSetLayout, true);
 	rtDescriptorSet->setTexture(0, storageTexture);
+	
+	//Add all of the textures
+	unsigned int index = 1;
+	for (unsigned int i = 0; i < texturesAmbient.size(); ++i)
+		rtDescriptorSet->setTexture(index++, texturesAmbient[i]);
+	for (unsigned int i = 0; i < texturesDiffuse.size(); ++i)
+		rtDescriptorSet->setTexture(index++, texturesDiffuse[i]);
+	for (unsigned int i = 0; i < texturesSpecular.size(); ++i)
+		rtDescriptorSet->setTexture(index++, texturesSpecular[i]);
+	for (unsigned int i = 0; i < texturesShininess.size(); ++i)
+		rtDescriptorSet->setTexture(index++, texturesShininess[i]);
+	for (unsigned int i = 0; i < texturesNormalMap.size(); ++i)
+		rtDescriptorSet->setTexture(index++, texturesNormalMap[i]);
+	for (unsigned int i = 0; i < texturesParallaxMap.size(); ++i)
+		rtDescriptorSet->setTexture(index++, texturesParallaxMap[i]);
+	for (unsigned int i = 0; i < texturesEmissive.size(); ++i)
+		rtDescriptorSet->setTexture(index++, texturesEmissive[i]);
+
 	rtDescriptorSet->setAccclerationStructure(0, &tlas.accel);
 	rtDescriptorSet->setupVk();
 
 	rtDescriptorSet->getShaderBuffer(0)->update(sceneModelData.data(), 0, sceneModelData.size() * sizeof(sceneModelData[0]));
 
 	//Create the raytracing pipeline
-	rtPipeline = new RaytracingPipeline(rtDeviceProperties, raygenShader, missShaders, closestHitShader, rtDescriptorSetLayout);
+	rtPipeline = new RaytracingPipeline(rtDeviceProperties, rtShader, rtDescriptorSetLayout);
 
 	//Setup for rendering the output to the screen
 	screenRenderPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_TEXTURE_PASSTHROUGH), Renderer::getDefaultRenderPass());

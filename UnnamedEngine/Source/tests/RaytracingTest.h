@@ -39,6 +39,7 @@ private:
 	GameObject3D* model2;
 
 	RaytracedScene* rtScene;
+	Shader* rtShader;
 public:
 	virtual void onInitialise() override;
 	virtual void onCreated() override;
@@ -72,10 +73,11 @@ void Test::onCreated() {
 	rtScene = new RaytracedScene();
 
 	//Mesh* mesh1 = resourceLoader.loadModel("", "cube.obj");
-	//Mesh* mesh1 = resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj");
+	Mesh* mesh1 = resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj");
+	//Mesh* mesh1 = resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere2.obj");
 	//Mesh* mesh1 = resourceLoader.loadModel("bob/", "bob_lamp_update.blend");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "buddha.obj");
-	Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
+	//Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-Glossy.obj");
 	//Mesh* mesh1 = resourceLoader.loadPBRModel("box/", "CornellBox-test.obj");
 	//Mesh* mesh1 = resourceLoader.loadModel("", "cube-coloured.obj");
 
@@ -86,34 +88,43 @@ void Test::onCreated() {
 	mesh1->enableRaytracing();
 
 	model1 = new GameObject3D(mesh1, Renderer::SHADER_MATERIAL);
+	model1->setScale(0.15f, 0.15f, 0.15f);
 	model1->update();
 
-	Mesh* mesh2 = resourceLoader.loadModel("", "cube-coloured.obj");
+	//Mesh* mesh2 = resourceLoader.loadModel("", "cube-coloured.obj");
+	Mesh* mesh2 = resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere3.obj");
 	mesh2->enableRaytracing();
 
 	model2 = new GameObject3D(mesh2, Renderer::SHADER_MATERIAL);
+	model2->setScale(3.0f, 3.0f, 3.0f);
 	model2->setPosition(3.0f, 0.0f, 0.0f);
 	model2->update();
 
 	rtScene->add(model1);
 	rtScene->add(model2);
 
+	//for (unsigned int i = 0; i < 20; ++i) {
+	//	Mesh* newMesh = resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj");
+	//	newMesh->getMaterial(1)->setEmissive(Colour(utils_random::randomFloat(0.0f, 100.0f), utils_random::randomFloat(0.0f, 100.0f), utils_random::randomFloat(0.0f, 100.0f)));
+	//	newMesh->enableRaytracing();
+	//	GameObject3D* newModel = new GameObject3D(newMesh, Renderer::SHADER_MATERIAL);
+	//	newModel->setPosition(utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f));
+	//	newModel->update();
+
+	//	rtScene->add(newModel);
+	//}
+
 	camera->setFlying(true);
 	camera->setPosition(Vector3f(1.0f, 2.0f, 4.0f));
 	camera->update(getDeltaSeconds());
 
-	VkShaderModule raygenShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/raygen.rgen.spv"));
-	VkShaderModule missShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/miss.rmiss.spv"));
-	VkShaderModule shadowMissShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/shadow.rmiss.spv"));
-	VkShaderModule closestHitShader = Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/closesthit.rchit.spv"));
+	rtShader = new Shader();
+	rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/raygen.rgen.spv")), VK_SHADER_STAGE_RAYGEN_BIT_KHR);
+	rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/miss.rmiss.spv")), VK_SHADER_STAGE_MISS_BIT_KHR);
+	rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/shadow.rmiss.spv")), VK_SHADER_STAGE_MISS_BIT_KHR);
+	rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/closesthit.rchit.spv")), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 
-	rtScene->setup(raygenShader, { missShader, shadowMissShader }, closestHitShader);
-
-	//Shader modules not needed anymore
-	vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), raygenShader, nullptr);
-	vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), missShader, nullptr);
-	vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), shadowMissShader, nullptr);
-	vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), closestHitShader, nullptr);
+	rtScene->setup(rtShader);
 }
 
 void Test::onUpdate() {
@@ -130,6 +141,7 @@ void Test::onRender() {
 
 void Test::onDestroy() {
 	delete rtScene;
+	delete rtShader;
 	delete model1;
 	delete model2;
 }

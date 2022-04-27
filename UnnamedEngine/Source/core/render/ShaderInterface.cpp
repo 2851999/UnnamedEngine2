@@ -259,6 +259,7 @@ DescriptorSetLayout* ShaderInterface::createDescriptorSetLayout(unsigned int id)
 			layout->addTexture2D(3);
 			layout->addTexture2D(4);
 			layout->addTexture2D(5);
+			layout->addTexture2D(6);
 
 			layout->addUBO(sizeof(ShaderBlock_Material), DataUsage::STATIC, UBO_BINDING_LOCATION_MATERIAL);
 			break;

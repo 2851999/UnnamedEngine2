@@ -32,6 +32,12 @@
 class VulkanRenderShader;
 
 class Shader : public Resource {
+public:
+	/* Structure for storing a shader module and its stage for Vulkan */
+	struct VulkanShaderModule {
+		VkShaderModule        shaderModule;
+		VkShaderStageFlagBits shaderStageFlags;
+	};
 private:
 	static Shader* currentShader;
 
@@ -46,9 +52,7 @@ private:
 	std::unordered_map<std::string, GLint> attributes;
 
 	/* The shader modules for Vulkan */
-	VkShaderModule vertexShaderModule   = VK_NULL_HANDLE;
-	VkShaderModule geometryShaderModule = VK_NULL_HANDLE;
-	VkShaderModule fragmentShaderModule = VK_NULL_HANDLE;
+	std::vector<VulkanShaderModule> vulkanShaderModules;
 
 	/* Loads and returns an included file */
 	static std::vector<std::string> loadInclude(std::string path, std::string line);
@@ -70,6 +74,7 @@ public:
 
 	/* Various shader functions */
 	void attach(GLuint shader);
+	void attach(VkShaderModule shaderModule, VkShaderStageFlagBits shaderStageFlags);
 	void detach(GLuint shader);
 	void use();
 	void stopUsing();
@@ -80,9 +85,7 @@ public:
 	GLint getUniformLocation(std::string id);
 	GLint getAttributeLocation(std::string id);
 
-	VkShaderModule& getVkVertexShaderModule() { return vertexShaderModule; }
-	VkShaderModule& getVkGeometryShaderModule() { return geometryShaderModule; }
-	VkShaderModule& getVkFragmentShaderModule() { return fragmentShaderModule; }
+	std::vector<VulkanShaderModule>& getVulkanShaderModules() { return vulkanShaderModules; }
 
 	/* Various methods to assign values */
 	void setUniformi(std::string id, GLuint value);

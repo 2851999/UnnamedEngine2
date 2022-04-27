@@ -332,6 +332,7 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 	material->setAmbient(loadAssimpTexture(path, mat, aiTextureType_AMBIENT));
 	material->setDiffuse(loadAssimpTexture(path, mat, aiTextureType_DIFFUSE, loadDiffuseTexturesAsSRGB));
 	material->setSpecular(loadAssimpTexture(path, mat, aiTextureType_SPECULAR));
+	material->setEmissive(loadAssimpTexture(path, mat, aiTextureType_EMISSIVE));
 
 	if (pbr)
 		material->setShininess(loadAssimpTexture(path, mat, aiTextureType_SHININESS)); //No standard way of using this for phong shading
@@ -349,6 +350,7 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 	material->setAmbient(loadAssimpColour(mat, AI_MATKEY_COLOR_AMBIENT));
 	material->setDiffuse(loadAssimpColour(mat, AI_MATKEY_COLOR_DIFFUSE));
 	material->setSpecular(loadAssimpColour(mat, AI_MATKEY_COLOR_SPECULAR));
+	material->setEmissive(loadAssimpColour(mat, AI_MATKEY_COLOR_EMISSIVE));
 
 	float value;
 	if ((mat->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS) && value != 0.0f) {

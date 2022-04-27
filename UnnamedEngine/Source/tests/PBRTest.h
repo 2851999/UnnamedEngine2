@@ -72,6 +72,8 @@ void Test::onInitialise() {
 void Test::onCreated() {
 	std::string glslandValidatorPath = "C:/VulkanSDK/1.3.204.1/Bin/glslangValidator.exe";
 
+	//Renderer::compileEngineShadersToSPIRV(glslandValidatorPath);
+
 	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", glslandValidatorPath);
 	//Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", glslandValidatorPath);
 	//Shader::compileEngineShaderToSPIRV("pbr/GenEquiToCube", glslandValidatorPath);

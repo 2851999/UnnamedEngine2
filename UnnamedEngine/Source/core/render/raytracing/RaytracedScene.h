@@ -56,6 +56,7 @@ private:
 		VkDeviceAddress matIndexBufferAddress;
 		VkDeviceAddress matDataBufferAddress;
 		VkDeviceAddress offsetIndicesBufferAddress;
+		int textureOffset;
 	};
 
 	/* Physical device (Used frequently so keep a pointer here) */
@@ -100,6 +101,15 @@ private:
 
 	/* View matrix for keeping track of camera movement */
 	Matrix4f lastViewMatrix;
+
+	/* Lists of all textures */
+	std::vector<Texture*> texturesAmbient;
+	std::vector<Texture*> texturesDiffuse;
+	std::vector<Texture*> texturesSpecular;
+	std::vector<Texture*> texturesShininess;
+	std::vector<Texture*> texturesNormalMap;
+	std::vector<Texture*> texturesParallaxMap;
+	std::vector<Texture*> texturesEmissive;
 
 	/* Creates a BLASInput from a given mesh and subdata (For materials create one BLAS for each SubData for now) 
 	  * Currently assume:
@@ -167,7 +177,7 @@ public:
 	inline void add(GameObject3D* object) { objects.push_back(object); }
 
 	/* Method for setting up this scene ready for rendering (should be called after all objects in it are added) */
-	void setup(VkShaderModule raygenShader, std::vector<VkShaderModule> missShaders, VkShaderModule closestHitShader);
+	void setup(Shader* rtShader);
 
 	/* Performs raytracing (also ensures layout of storage texture is correct for using it in a shader) */
 	void raytrace(Camera3D* camera);

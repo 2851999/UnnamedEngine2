@@ -40,21 +40,15 @@ GraphicsPipeline::GraphicsPipeline(GraphicsPipelineLayout* layout, RenderPass* r
 	
 	//Check if using Vulkan
 	if (BaseEngine::usingVulkan()) {
-		VkPipelineShaderStageCreateInfo vertShaderStageInfo = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_VERTEX_BIT, renderShader->getShader()->getVkVertexShaderModule(), "main"); //"main" is the entry point
-
 		//pSpecializationInfo can be used to specify values for shader constants - faster than using if statements
 		//default set to nullptr
 
-		VkPipelineShaderStageCreateInfo fragShaderStageInfo = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_FRAGMENT_BIT, renderShader->getShader()->getVkFragmentShaderModule(), "main");
-
+		//Place to store shader stage info for the pipeline
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
-		if (renderShader->getShader()->getVkGeometryShaderModule() != VK_NULL_HANDLE) {
-			VkPipelineShaderStageCreateInfo geomShaderStageInfo = utils_vulkan::initPipelineShaderStageCreateInfo(VK_SHADER_STAGE_GEOMETRY_BIT, renderShader->getShader()->getVkGeometryShaderModule(), "main");
-
-			shaderStages = { vertShaderStageInfo, geomShaderStageInfo, fragShaderStageInfo };
-		} else
-			shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
+		//Add the shader stages
+		for (Shader::VulkanShaderModule shaderModule : renderShader->getShader()->getVulkanShaderModules())
+			shaderStages.push_back(utils_vulkan::initPipelineShaderStageCreateInfo(shaderModule.shaderStageFlags, shaderModule.shaderModule, "main"));
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

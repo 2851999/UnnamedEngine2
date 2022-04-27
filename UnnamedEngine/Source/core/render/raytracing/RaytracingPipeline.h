@@ -35,31 +35,30 @@ private:
 	/* The pipeline */
 	VkPipeline pipeline = VK_NULL_HANDLE;
 
-	//TODO: Cleanup and comment below
+	/* Stores the raytracing capabilities of the physical device */
 	VkPhysicalDeviceRayTracingPipelinePropertiesKHR rtProperties;
 
-	std::vector<VkRayTracingShaderGroupCreateInfoKHR> shaderGroups;
+	/* Shader used with this pipeline */
+	Shader* rtShader;
 
+	/* Number of particular kinds of raytracing shader */
+	uint32_t numRaygenShaders     = 0;
+	uint32_t numMissShaders       = 0;
+	uint32_t numClosestHitShaders = 0;
+
+	/* Buffer for storing the shader binding table*/
 	VulkanBuffer* rtSBTBuffer;
+
+	/* Regions of the SBT used when raytracing */
 	VkStridedDeviceAddressRegionKHR rgenRegion{};
 	VkStridedDeviceAddressRegionKHR missRegion{};
 	VkStridedDeviceAddressRegionKHR hitRegion{};
 	VkStridedDeviceAddressRegionKHR callRegion{};
 
-	template <class integral>
-	constexpr bool is_aligned(integral x, size_t a) noexcept {
-		return (x & (integral(a) - 1)) == 0;
-	}
-
 	/* Used when building the SBT */
-	template <class integral>
-	constexpr integral align_up(integral x, size_t a) noexcept {
-		return integral((x + (integral(a) - 1)) & ~integral(a - 1));
-	}
-
-	template <class integral>
-	constexpr integral align_down(integral x, size_t a) noexcept {
-		return integral(x & ~integral(a - 1));
+	template <class T>
+	constexpr T align_up(T x, size_t a) noexcept {
+		return T((x + (T(a) - 1)) & ~T(a - 1));
 	}
 
 	/* Create the shader binding table
@@ -67,8 +66,9 @@ private:
 	     This allows the corect shader to be selected at runtime */
 	void createRtShaderBindingTable();
 
-	/* Number of particular kinds of raytracing shader */
-	uint32_t numMissShaders = 0;
+	/* Counts the number of each kind of shader module in the shader ready for building the SBT 
+	   NOTE: All shader modules should be added to the shader in the order raygen, miss, closestHit */
+	void countShaderTypes();
 public:
 	/* Push constants for the shaders */
 	struct RTPushConstants {
@@ -76,7 +76,7 @@ public:
 	};
 
 	/* Constructor */
-	RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracingProperties, VkShaderModule raygenShader, std::vector<VkShaderModule> missShaders, VkShaderModule closestHitShader, DescriptorSetLayout* rtLayout);
+	RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropertiesKHR raytracingProperties, Shader* rtShader, DescriptorSetLayout* rtLayout);
 
 	/* Desctructor */
 	virtual ~RaytracingPipeline();
