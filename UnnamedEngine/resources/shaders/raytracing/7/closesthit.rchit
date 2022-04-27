@@ -449,4 +449,8 @@ void main() {
   	rayPayload.rayDirection = rayDirection;
   	rayPayload.hitValue     = emittance;
   	rayPayload.weight       = BRDF * cos_theta / p;
+
+	//Stop if have hit a light source
+	if (emittance.x > 0.0 || emittance.y > 0.0 || emittance.z > 0.0)
+		rayPayload.depth = 1000;
 }

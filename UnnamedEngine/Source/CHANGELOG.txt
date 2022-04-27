@@ -1,4 +1,13 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 2 | Experimental 7
+
+* Added methods to Shader for compiling/loading multiple
+  shader module file with different names into one
+  shader (useful for Vulkan raytracing)
+
+* Added loadEngineShader methods to Shader
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 2 | Experimental 6
 
 * Added texture support to RaytracedScene

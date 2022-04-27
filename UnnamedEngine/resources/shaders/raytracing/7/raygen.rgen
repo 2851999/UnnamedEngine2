@@ -11,7 +11,7 @@ layout(binding = 0, set = 1) uniform accelerationStructureEXT tlas;
 layout(binding = 1, set = 1, rgba8) uniform image2D image;
 
 //Camera stuff
-layout(std140, set = 0, binding = 21) uniform UECameraData {
+layout(std140, set = 0, binding = 1) uniform UECameraData {
 	mat4 ue_viewMatrix;
 	mat4 ue_projectionMatrix;
 	
@@ -52,7 +52,7 @@ void main()  {
 	uint  rayFlags = gl_RayFlagsOpaqueEXT;
 	//Min and max distance for intersections - useful for reducing raytracing cost
 	float tMin = 0.001;
-	float tMax = 10000.0;
+	float tMax = 100.0;
 
     rayPayload.hitValue = vec3(0.0);
 	rayPayload.depth = 0;
