@@ -60,6 +60,8 @@ namespace utils_string {
 
 	std::string replaceAll(const std::string &s, const std::string &old, const std::string &replacement);
 	std::string remove(const std::string &s, const std::string &substr);
+
+	bool contains(const std::string& s);
 };
 
 #include <cmath>
@@ -153,6 +155,9 @@ namespace utils_file {
 
 	/* Returns whether the specified path is a directory */
 	bool isDirectory(std::string path);
+
+	/* Creates any directories needed for writing a file */
+	void createNeededDirectories(std::string filePath);
 }
 
 /*****************************************************************************

@@ -66,15 +66,15 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
-	std::string glslandValidatorPath = "C:/VulkanSDK/1.3.204.1/Bin/glslangValidator.exe";
+	std::string glslangValidatorPath = "C:/VulkanSDK/1.3.204.1/Bin/glslangValidator.exe";
 
-	//Renderer::compileEngineShadersToSPIRV(glslandValidatorPath);
+	//Renderer::compileEngineShadersToSPIRV(glslangValidatorPath);
 
-	//Shader::compileEngineShaderToSPIRV("ParticleShader", glslandValidatorPath);
-	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontShader", glslandValidatorPath);
-	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontSDFShader", glslandValidatorPath);
-	//Shader::compileEngineShaderToSPIRV("FontShader", glslandValidatorPath);
-	//Shader::compileEngineShaderToSPIRV("FontSDFShader", glslandValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("ParticleShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontSDFShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("FontShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("FontSDFShader", glslangValidatorPath);
 
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);

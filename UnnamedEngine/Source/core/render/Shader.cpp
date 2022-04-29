@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <boost/filesystem.hpp>
 
 #include "../BaseEngine.h"
 #include "../vulkan/Vulkan.h"
@@ -41,13 +42,14 @@ Shader::Shader(GLint vertexShader, GLint geometryShader, GLint fragmentShader) {
 }
 
 Shader::Shader(VkShaderModule vertexShaderModule, VkShaderModule geometryShaderModule, VkShaderModule fragmentShaderModule) {
-	this->vertexShaderModule = vertexShaderModule;
-	this->geometryShaderModule = geometryShaderModule;
-	this->fragmentShaderModule = fragmentShaderModule;
+	attach(vertexShaderModule, VK_SHADER_STAGE_VERTEX_BIT);
+	if (geometryShaderModule != VK_NULL_HANDLE)
+		attach(geometryShaderModule, VK_SHADER_STAGE_GEOMETRY_BIT);
+	attach(fragmentShaderModule, VK_SHADER_STAGE_FRAGMENT_BIT);
 }
 
 Shader::~Shader() {
-	if (!BaseEngine::usingVulkan()) {
+	if (! BaseEngine::usingVulkan()) {
 		glDeleteProgram(program);
 		//Go through each attached shader and delete them
 		for (unsigned int i = 0; i < attachedShaders.size(); i++)
@@ -55,10 +57,8 @@ Shader::~Shader() {
 		attachedShaders.clear();
 	} else {
 		//Destroy the shader modules
-		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), vertexShaderModule, nullptr);
-		vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), fragmentShaderModule, nullptr);
-		if (geometryShaderModule != VK_NULL_HANDLE)
-			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), geometryShaderModule, nullptr);
+		for (VulkanShaderModule& shaderModule : vulkanShaderModules)
+			vkDestroyShaderModule(Vulkan::getDevice()->getLogical(), shaderModule.shaderModule, nullptr);
 	}
 }
 
@@ -86,6 +86,10 @@ void Shader::attach(GLuint shader) {
 		glGetProgramInfoLog(program, sizeof(error), NULL, error);
 		Logger::log("Error validating shader program " + utils_string::str(error), "Shader", LogType::Error);
 	}
+}
+
+void Shader::attach(VkShaderModule shaderModule, VkShaderStageFlagBits shaderStageFlags) {
+	vulkanShaderModules.push_back({ shaderModule, shaderStageFlags });
 }
 
 void Shader::detach(GLuint shader) {
@@ -458,9 +462,69 @@ Shader* Shader::loadShader(std::string path, std::vector<std::string> defines) {
 	}
 }
 
+Shader* Shader::loadShaderNames(std::string path, std::vector<std::string> fileNames, std::vector<std::string> defines) {
+	//The extra code to add on at the start
+	std::string preSource = "";
+
+	for (std::string& define : defines)
+		preSource += "#define " + define + "\n";
+
+	//Check whether using Vulkan
+	if (! BaseEngine::usingVulkan()) {
+		Logger::log("You should not use loadShader(std::string path, std::vector<std::string> fileNames, std::vector<std::string> define) outside of Vulkan", "Shader", LogType::Error);
+	} else {
+		//Create the shader
+		Shader* shader = new Shader();
+
+		//Add the modules
+		for (std::string fileName : fileNames) {
+			//Figure out the type based on the end of the file name
+			VkShaderStageFlagBits shaderStageFlags;
+
+			if (utils_string::strEndsWith(fileName, "_vert"))
+				shaderStageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+			else if (utils_string::strEndsWith(fileName, "_frag"))
+				shaderStageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+			else if (utils_string::strEndsWith(fileName, "_geom"))
+				shaderStageFlags = VK_SHADER_STAGE_GEOMETRY_BIT;
+			else if (utils_string::strEndsWith(fileName, ".rgen"))
+				shaderStageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+			else if (utils_string::strEndsWith(fileName, ".rmiss"))
+				shaderStageFlags = VK_SHADER_STAGE_MISS_BIT_KHR;
+			else if (utils_string::strEndsWith(fileName, ".rchit"))
+				shaderStageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+			else
+				Logger::log("Unsupported file extension for '" + fileName + "'", "Shader", LogType::Error);
+
+			//Attach the shader module
+			shader->attach(createVkShaderModule(readFile(path + fileName + ".spv")), shaderStageFlags);
+		}
+
+		return shader;
+	}
+	return NULL;
+}
+
+Shader* Shader::loadEngineShader(std::string path, std::vector<std::string> defines) {
+	if (! BaseEngine::usingVulkan())
+		return loadShader("resources/shaders/" + path, defines);
+	else
+		return loadShader("resources/shaders-vulkan/" + path, defines);
+}
+
+Shader* Shader::loadEngineShaderNames(std::string path, std::vector<std::string> fileNames, std::vector<std::string> defines) {
+	if (! BaseEngine::usingVulkan())
+		return loadShaderNames("resources/shaders/" + path, fileNames, defines);
+	else
+		return loadShaderNames("resources/shaders-vulkan/" + path, fileNames, defines);
+}
+
 void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputPath, unsigned int uboBindingOffset, std::string preSource) {
 	//Load the source
 	ShaderSource shaderSource = loadShaderSource(inputPath, uboBindingOffset, preSource);
+
+	//Create any needed directories if they don't already exist
+	utils_file::createNeededDirectories(outputPath);
 
 	//Write the shader source
 	utils_file::writeFile(outputPath, shaderSource.source);
@@ -479,6 +543,15 @@ void Shader::outputCompleteShaderFiles(std::string inputPath, std::string output
 		outputCompleteShaderFile(inputPath + ".fs", outputPath + "_complete.frag", uboBindingOffset, preSource);
 }
 
+void Shader::outputCompleteShaderFiles(std::string inputPath, std::string outputPath, std::vector<std::string> fileNames, unsigned int uboBindingOffset, std::string preSource) {
+	for (std::string fileName : fileNames) {
+		//Split by extension
+		std::vector<std::string> split = utils_string::strSplitLast(fileName, ".");
+		//Output file e.g. raygen.rgen -> raygen_complete.rgen
+		outputCompleteShaderFile(inputPath + fileName, outputPath + split[0] + "_complete." + split[1], uboBindingOffset, preSource);
+	}
+}
+
 void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::string glslangValidatorPath, std::vector<std::string> defines) {
 	//The extra code to add on at the start
 	std::string preSource = "";
@@ -487,7 +560,7 @@ void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::
 		preSource += "#define " + define + "\n";
 
 	//Output the complete shader file
-	outputCompleteShaderFiles(inputPath, outputPath, UBO::VULKAN_BINDING_OFFSET, preSource);
+	outputCompleteShaderFiles(inputPath, outputPath, ShaderBuffer::VULKAN_BINDING_OFFSET, preSource);
 
 	//Now compile each shader (if they exist)
 	if (utils_file::isFile(outputPath + "_complete.vert"))
@@ -498,6 +571,26 @@ void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::
 		std::system((glslangValidatorPath + " -V " + outputPath + "_complete.frag -o " + outputPath + "_frag.spv").c_str());
 }
 
+void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::vector<std::string> fileNames, std::string glslangValidatorPath, std::vector<std::string> defines) {
+	//The extra code to add on at the start
+	std::string preSource = "";
+
+	for (std::string& define : defines)
+		preSource += "#define " + define + "\n";
+
+	//Output the complete shader file
+	outputCompleteShaderFiles(inputPath, outputPath, fileNames, ShaderBuffer::VULKAN_BINDING_OFFSET, preSource);
+
+	//Now compile each shader
+	for (std::string fileName : fileNames) {
+		//Split by extension
+		std::vector<std::string> split = utils_string::strSplitLast(fileName, ".");
+
+		//Output file e.g. raygen_complete.rgen -> raygen.rgen.spv
+		std::system((glslangValidatorPath + " --target-env vulkan1.2 -V " + outputPath + split[0] + "_complete." + split[1] + " -o " + outputPath + fileName + ".spv").c_str());
+	}
+}
+
 void Shader::compileEngineShaderToSPIRV(std::string path, std::string glslangValidatorPath, std::vector<std::string> defines) {
 	//Extra part of file name (for Vulkan)
 	std::string extraName = "";
@@ -506,4 +599,9 @@ void Shader::compileEngineShaderToSPIRV(std::string path, std::string glslangVal
 
 	//Add the prefix's to get the input and output paths
 	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path + extraName, glslangValidatorPath, defines);
+}
+
+void Shader::compileEngineShaderToSPIRV(std::string path, std::vector<std::string> fileNames, std::string glslangValidatorPath, std::vector<std::string> defines) {
+	//Add the prefix's to get the input and output paths
+	compileToSPIRV("resources/shaders/" + path, "resources/shaders-vulkan/" + path, fileNames, glslangValidatorPath, defines);
 }

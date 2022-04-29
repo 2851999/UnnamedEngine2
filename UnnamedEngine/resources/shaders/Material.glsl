@@ -3,6 +3,7 @@ struct UEMaterial {
 	vec4 ambientColour;
 	vec4 diffuseColour;
 	vec4 specularColour;
+	vec4 emissiveColour;
 	
 	bool hasAmbientTexture;
 	bool hasDiffuseTexture;
@@ -11,6 +12,7 @@ struct UEMaterial {
 	bool hasShininessTexture;
 	bool hasNormalMap;
 	bool hasParallaxMap;
+	bool hasEmissiveTexture;
 	
 	float parallaxScale;
 	float shininess;
@@ -28,3 +30,4 @@ layout(set = 1, binding = 2) uniform sampler2D ue_material_specularTexture;
 layout(set = 1, binding = 3) uniform sampler2D ue_material_shininessTexture;
 layout(set = 1, binding = 4) uniform sampler2D ue_material_normalMap;
 layout(set = 1, binding = 5) uniform sampler2D ue_material_parallaxMap;
+layout(set = 1, binding = 6) uniform sampler2D ue_material_emissiveTexture;

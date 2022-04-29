@@ -46,6 +46,7 @@ struct ShaderBlock_Material {
 	Vector4f ambientColour;
 	Vector4f diffuseColour;
 	Vector4f specularColour;
+	Vector4f emissiveColour;
 
 	int hasAmbientTexture;
 	int hasDiffuseTexture;
@@ -54,6 +55,7 @@ struct ShaderBlock_Material {
 	int hasShininessTexture;
 	int hasNormalMap;
 	int hasParallaxMap;
+	int hasEmissiveTexture;
 
 	float parallaxScale;
 	float shininess;

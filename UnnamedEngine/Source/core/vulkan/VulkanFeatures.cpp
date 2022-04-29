@@ -26,11 +26,13 @@
   * The VulkanFeatures class
   *****************************************************************************/
 
-VkPhysicalDeviceFeatures                         VulkanFeatures::requiredDeviceFeatures                = {};
-VkPhysicalDeviceVulkan11Features                 VulkanFeatures::requiredDeviceVK11Features            = {};
-VkPhysicalDeviceBufferDeviceAddressFeatures      VulkanFeatures::featuresBufferDeviceAddress           = {};
-VkPhysicalDeviceRayTracingPipelineFeaturesKHR    VulkanFeatures::featuresRayTracingPipeline            = {};
-VkPhysicalDeviceAccelerationStructureFeaturesKHR VulkanFeatures::featuresAccelerationStructureFeatures = {};
+VkPhysicalDeviceFeatures                         VulkanFeatures::requiredDeviceFeatures        = {};
+VkPhysicalDeviceVulkan11Features                 VulkanFeatures::requiredDeviceVK11Features    = {};
+VkPhysicalDeviceBufferDeviceAddressFeatures      VulkanFeatures::featuresBufferDeviceAddress   = {};
+VkPhysicalDeviceRayTracingPipelineFeaturesKHR    VulkanFeatures::featuresRayTracingPipeline    = {};
+VkPhysicalDeviceAccelerationStructureFeaturesKHR VulkanFeatures::featuresAccelerationStructure = {};
+VkPhysicalDeviceShaderClockFeaturesKHR           VulkanFeatures::featuresShaderClock           = {};
+VkPhysicalDeviceDescriptorIndexingFeatures       VulkanFeatures::featuresDescriptorIndexing    = {};
 
 std::vector<void*> VulkanFeatures::requiredDeviceFeatures2 = {};
 
@@ -52,9 +54,18 @@ void VulkanFeatures::addRequired() {
 		featuresRayTracingPipeline.rayTracingPipeline = VK_TRUE;
 		requiredDeviceFeatures2.push_back(&featuresRayTracingPipeline);
 
-		featuresAccelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
-		featuresAccelerationStructureFeatures.accelerationStructure = VK_TRUE;
-		requiredDeviceFeatures2.push_back(&featuresAccelerationStructureFeatures);
+		featuresAccelerationStructure.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+		featuresAccelerationStructure.accelerationStructure = VK_TRUE;
+		requiredDeviceFeatures2.push_back(&featuresAccelerationStructure);
+
+		featuresShaderClock.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR;
+		featuresShaderClock.shaderSubgroupClock = VK_TRUE;
+		requiredDeviceFeatures2.push_back(&featuresShaderClock);
+
+		featuresDescriptorIndexing.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+		featuresDescriptorIndexing.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+		featuresDescriptorIndexing.runtimeDescriptorArray                    = VK_TRUE;
+		requiredDeviceFeatures2.push_back(&featuresDescriptorIndexing);
 	}
 }
 
@@ -71,21 +82,25 @@ bool VulkanFeatures::checkSupport(VkPhysicalDevice& device) {
 		VkPhysicalDeviceBufferDeviceAddressFeatures      enabledBufferDeviceAddressFeatures   = {};
 		VkPhysicalDeviceRayTracingPipelineFeaturesKHR    enabledRayTracingPipelineFeatures    = {};
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR enabledAccelerationStructureFeatures = {};
+		VkPhysicalDeviceShaderClockFeaturesKHR           enabledShaderClockFeatures           = {};
+		VkPhysicalDeviceDescriptorIndexingFeatures       enabledDescriptorIndexingFeatures    = {};
 
 		enabledVK11Features.sType                  = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
 		enabledBufferDeviceAddressFeatures.sType   = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
 		enabledRayTracingPipelineFeatures.sType    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
 		enabledAccelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+		enabledShaderClockFeatures.sType           = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR;
+		enabledDescriptorIndexingFeatures.sType    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
 
 		//Required device features
-		std::vector<void*> requiredDeviceFeatures = { &enabledVK11Features, &enabledBufferDeviceAddressFeatures, &enabledRayTracingPipelineFeatures, &enabledAccelerationStructureFeatures };
+		std::vector<void*> requiredDeviceFeatures = { &enabledVK11Features, &enabledBufferDeviceAddressFeatures, &enabledRayTracingPipelineFeatures, &enabledAccelerationStructureFeatures, &enabledShaderClockFeatures, &enabledDescriptorIndexingFeatures };
 
 		VkPhysicalDeviceFeatures2 supportedFeatures2 = {};
 		supportedFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 		supportedFeatures2.pNext = VulkanFeatures::setupPNext(requiredDeviceFeatures);
 		vkGetPhysicalDeviceFeatures2(device, &supportedFeatures2);
 
-		featuresSupported = featuresSupported && supportedFeatures.shaderInt64 && enabledBufferDeviceAddressFeatures.bufferDeviceAddress && enabledRayTracingPipelineFeatures.rayTracingPipeline && enabledAccelerationStructureFeatures.accelerationStructure;
+		featuresSupported = featuresSupported && supportedFeatures.shaderInt64 && enabledBufferDeviceAddressFeatures.bufferDeviceAddress && enabledRayTracingPipelineFeatures.rayTracingPipeline && enabledAccelerationStructureFeatures.accelerationStructure && enabledShaderClockFeatures.shaderSubgroupClock && enabledDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing && enabledDescriptorIndexingFeatures.runtimeDescriptorArray;
 	}
 
 	return featuresSupported;
