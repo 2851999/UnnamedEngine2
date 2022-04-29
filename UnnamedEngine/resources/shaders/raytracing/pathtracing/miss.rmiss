@@ -1,14 +1,7 @@
 #version 460
 #extension GL_EXT_ray_tracing : enable
 
-struct RayPayload {
-	vec3 hitValue;
-	uint seed;
-	uint depth;
-	vec3 rayOrigin;
-	vec3 rayDirection;
-	vec3 weight;
-};
+#include "raypayload.glsl"
 
 //Hit payload
 layout(location = 0) rayPayloadInEXT RayPayload rayPayload;

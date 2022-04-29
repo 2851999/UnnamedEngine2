@@ -146,6 +146,10 @@ namespace utils_string {
 		   str.erase(start, substr.length());
 		return str;
 	}
+
+	bool contains(const std::string& s) {
+		return s.find(s) != std::string::npos;
+	}
 }
 
 /*****************************************************************************
@@ -244,6 +248,22 @@ namespace utils_file {
 	/* Returns whether the specified path is a directory */
 	bool isDirectory(std::string path) {
 		return boost::filesystem::is_directory(path.c_str());
+	}
+
+	/* Creates any directories needed for writing a file */
+	void createNeededDirectories(std::string filePath) {
+		//Split the string by the last / (if it is present)
+		std::string directories = "";
+		if (utils_string::contains("/"))
+			directories = utils_string::strSplitLast(filePath, "/")[0];
+		else if (utils_string::contains("\\"))
+			directories = utils_string::strSplitLast(filePath, "\\")[0];
+
+		//Create any needed directories
+		if (directories != "" && ! doesExist(directories)) {
+			if (! boost::filesystem::create_directories(directories))
+				Logger::log("Failed to create needed directories", "utils_file", LogType::Error);
+		}
 	}
 }
 

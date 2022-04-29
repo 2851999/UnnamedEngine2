@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <boost/filesystem.hpp>
 
 #include "../BaseEngine.h"
 #include "../vulkan/Vulkan.h"
@@ -522,6 +523,9 @@ void Shader::outputCompleteShaderFile(std::string inputPath, std::string outputP
 	//Load the source
 	ShaderSource shaderSource = loadShaderSource(inputPath, uboBindingOffset, preSource);
 
+	//Create any needed directories if they don't already exist
+	utils_file::createNeededDirectories(outputPath);
+
 	//Write the shader source
 	utils_file::writeFile(outputPath, shaderSource.source);
 }
@@ -581,8 +585,6 @@ void Shader::compileToSPIRV(std::string inputPath, std::string outputPath, std::
 	for (std::string fileName : fileNames) {
 		//Split by extension
 		std::vector<std::string> split = utils_string::strSplitLast(fileName, ".");
-
-		std::cout << glslangValidatorPath + " --target-env vulkan1.2 -V " + outputPath + split[0] + "_complete." + split[1] + " -o " + outputPath + fileName + ".spv" << std::endl;
 
 		//Output file e.g. raygen_complete.rgen -> raygen.rgen.spv
 		std::system((glslangValidatorPath + " --target-env vulkan1.2 -V " + outputPath + split[0] + "_complete." + split[1] + " -o " + outputPath + fileName + ".spv").c_str());

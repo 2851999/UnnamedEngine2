@@ -22,6 +22,7 @@
 #include "../../vulkan/Vulkan.h"
 #include "../../vulkan/VulkanExtensions.h"
 #include "../../../utils/VulkanUtils.h"
+#include "../../../utils/Logging.h"
 
 #include <cassert>
 
@@ -109,7 +110,8 @@ RaytracingPipeline::RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropert
 	rayPipelineInfo.pGroups    = shaderGroups.data();
 
 	//Ray depth cannot exceed rtProperties.maxRayRecursionDepth
-	rayPipelineInfo.maxPipelineRayRecursionDepth = 2;
+	const unsigned int requestedRecursionDepth = 2;
+	rayPipelineInfo.maxPipelineRayRecursionDepth = utils_maths::min(rtProperties.maxRayRecursionDepth, requestedRecursionDepth);
 	rayPipelineInfo.layout = pipelineLayout;
 
 	//Create the raytracing pipeline
@@ -119,10 +121,12 @@ RaytracingPipeline::RaytracingPipeline(VkPhysicalDeviceRayTracingPipelinePropert
 }
 
 void RaytracingPipeline::createRtShaderBindingTable() {
+	if (numRaygenShaders > 1)
+		Logger::log("Only one raygen shader can be used at a time", "RaytracingPipeline", LogType::Error);
+
 	//Number of each shader
-	uint32_t hitCount{ 1 };
-	auto     handleCount = 1 + numMissShaders + hitCount; //Always only 1 raygen shader
-	uint32_t handleSize = rtProperties.shaderGroupHandleSize;
+	auto     handleCount = numRaygenShaders + numMissShaders + numClosestHitShaders; //Always only 1 raygen shader
+	uint32_t handleSize  = rtProperties.shaderGroupHandleSize;
 
 	//Need to use align_up here as there is no guarentee the alignment corresponds to the handle or group size
 	//Hardware with a smaller handle size than alignment can end up interleaving some shaderRecordEXT data without
@@ -134,7 +138,7 @@ void RaytracingPipeline::createRtShaderBindingTable() {
 	missRegion.stride = handleSizeAligned;
 	missRegion.size   = align_up(numMissShaders * handleSizeAligned, rtProperties.shaderGroupBaseAlignment);
 	hitRegion.stride  = handleSizeAligned;
-	hitRegion.size    = align_up(hitCount * handleSizeAligned, rtProperties.shaderGroupBaseAlignment);
+	hitRegion.size    = align_up(numClosestHitShaders * handleSizeAligned, rtProperties.shaderGroupBaseAlignment);
 
 	//Obtain the shader group handles
 	uint32_t dataSize = handleCount * handleSize;
@@ -176,7 +180,7 @@ void RaytracingPipeline::createRtShaderBindingTable() {
 
 	//Hit
 	pData = pSBTBuffer + rgenRegion.size + missRegion.size;
-	for (uint32_t c = 0; c < hitCount; ++c) {
+	for (uint32_t c = 0; c < numClosestHitShaders; ++c) {
 		memcpy(pData, getHandle(handleIdx++), handleSize);
 		pData += hitRegion.stride;
 	}

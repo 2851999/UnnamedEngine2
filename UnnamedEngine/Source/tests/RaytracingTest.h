@@ -70,6 +70,10 @@ void Test::onCreated() {
 
 	//Renderer::compileEngineShaderToSPIRV(Renderer::SHADER_TEXTURE_PASSTHROUGH, glslangValidatorPath);
 
+	//Shader::compileEngineShaderToSPIRV("raytracing/material/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" }, glslangValidatorPath);
+	Shader::compileEngineShaderToSPIRV("raytracing/pathtracing/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" }, glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("raytracing/lighting/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
+
 	//Shader::compileEngineShaderToSPIRV("raytracing/7/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
 
 	rtScene = new RaytracedScene();
@@ -120,7 +124,10 @@ void Test::onCreated() {
 	camera->setPosition(Vector3f(1.0f, 2.0f, 4.0f));
 	camera->update(getDeltaSeconds());
 
-	rtShader = Shader::loadEngineShaderNames("raytracing/7/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" });
+	//rtShader = Shader::loadEngineShaderNames("raytracing/7/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" });
+	//rtShader = Shader::loadEngineShaderNames("raytracing/material/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" });
+	rtShader = Shader::loadEngineShaderNames("raytracing/pathtracing/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" });
+	//rtShader = Shader::loadEngineShaderNames("raytracing/lighting/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit"});
 
 	//rtShader = new Shader();
 	//rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/raygen.rgen.spv")), VK_SHADER_STAGE_RAYGEN_BIT_KHR);

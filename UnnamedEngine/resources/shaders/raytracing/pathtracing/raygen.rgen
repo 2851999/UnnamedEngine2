@@ -5,34 +5,11 @@
 
 #include "sampling.glsl"
 
-//TLAS
-layout(binding = 0, set = 1) uniform accelerationStructureEXT tlas;
-//Storage image
-layout(binding = 1, set = 1, rgba8) uniform image2D image;
-
-//Camera stuff
-layout(std140, set = 0, binding = 1) uniform UECameraData {
-	mat4 ue_viewMatrix;
-	mat4 ue_projectionMatrix;
-	
-	vec4 ue_cameraPosition;
-};
-
-struct RayPayload {
-	vec3 hitValue;
-	uint seed;
-	uint depth;
-	vec3 rayOrigin;
-	vec3 rayDirection;
-	vec3 weight;
-};
+#include "../raygen.glsl"
+#include "raypayload.glsl"
 
 //Hit payload
 layout(location = 0) rayPayloadEXT RayPayload rayPayload;
-
-layout(push_constant) uniform PushConstants {
-	int frame;
-} pushConstants;
 
 void main()  {
   	//Generate a random number

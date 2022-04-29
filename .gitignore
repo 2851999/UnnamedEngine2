@@ -84,3 +84,16 @@
 /UnnamedEngine/resources/shaders/raytracing/7/raygen.rgen.spv
 /UnnamedEngine/resources/shaders/raytracing/7/miss.rmiss.spv
 /UnnamedEngine/resources/shaders/raytracing/7/closesthit.rchit.spv
+/UnnamedEngine/zlib1.dll
+/UnnamedEngine/turbojpeg.dll
+/UnnamedEngine/libpng16.dll
+/UnnamedEngine/jpeg62.dll
+/UnnamedEngine/Irrlicht.dll
+/UnnamedEngine/bz2.dll
+/UnnamedEngine/brotlienc.dll
+/UnnamedEngine/brotlidec.dll
+/UnnamedEngine/brotlicommon.dll
+/UnnamedEngine/boost_system-vc143-mt-x64-1_79.dll
+/UnnamedEngine/boost_filesystem-vc143-mt-x64-1_79.dll
+/UnnamedEngine/boost_atomic-vc143-mt-x64-1_79.dll
+/UnnamedEngine/assimp-vc143-mt.dll
