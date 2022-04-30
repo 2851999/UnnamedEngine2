@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../Renderer.h"
+#include "../Light.h"
 #include "RaytracingPipeline.h"
 
  /*****************************************************************************
@@ -111,6 +112,22 @@ private:
 	std::vector<Texture*> texturesParallaxMap;
 	std::vector<Texture*> texturesEmissive;
 
+	/* States whether lighting data should be given to the shader */
+	bool lighting;
+
+	/* Lights in this scene */
+	std::vector<Light*> lights;
+
+	/* Structure for storing lighting information for the scene */
+	struct ShaderBlock_RaytracedLighting {
+		ShaderStruct_Light ue_lights[20];
+		Vector4f ue_lightAmbient;
+		int ue_numLights;
+	};
+
+	/* Lighting data for the scene */
+	ShaderBlock_RaytracedLighting rtLightingData;
+
 	/* Creates a BLASInput from a given mesh and subdata (For materials create one BLAS for each SubData for now) 
 	  * Currently assume:
 	  *	- not separating the vertex data into separate VBO's
@@ -168,13 +185,16 @@ private:
 	MeshData* createScreenMeshData();
 public:
 	/* Constructor */
-	RaytracedScene();
+	RaytracedScene(bool lighting = false);
 
 	/* Destructor */
 	virtual ~RaytracedScene();
 
 	/* Method for adding an object to this scene */
 	inline void add(GameObject3D* object) { objects.push_back(object); }
+
+	/* Adds a light to the scene */
+	inline void addLight(Light* light) { lights.push_back(light); }
 
 	/* Method for setting up this scene ready for rendering (should be called after all objects in it are added) */
 	void setup(Shader* rtShader, Camera3D* camera);

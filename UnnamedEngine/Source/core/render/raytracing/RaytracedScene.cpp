@@ -27,7 +27,7 @@
   * The RaytracedScene class
   *****************************************************************************/
 
-RaytracedScene::RaytracedScene() {
+RaytracedScene::RaytracedScene(bool lighting) : lighting(lighting) {
 	//Obtain the current physical device and information about its raytracing capabilities
 	this->device = Vulkan::getDevice();
 
@@ -35,6 +35,9 @@ RaytracedScene::RaytracedScene() {
 }
 
 RaytracedScene::~RaytracedScene() {
+	for (unsigned int i = 0; i < lights.size(); ++i)
+		delete lights[i];
+
 	delete rtDescriptorSet;
 	delete rtDescriptorSetLayout;
 	delete rtPipeline;
@@ -560,6 +563,18 @@ void RaytracedScene::setup(Shader* rtShader, Camera3D* camera) {
 	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 8, texturesEmissive.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	rtDescriptorSetLayout->addTexture2D(14, VK_SHADER_STAGE_MISS_BIT_KHR);
 	rtDescriptorSetLayout->addSSBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+	if (lighting) {
+		//Add lighting info
+		rtDescriptorSetLayout->addUBO(lights.size() * sizeof(ShaderBlock_RaytracedLighting), DataUsage::STATIC, 3, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+
+		//Setup the lighting info
+		for (unsigned int i = 0; i < lights.size(); ++i) {
+			lights[i]->setUniforms(rtLightingData.ue_lights[i]);
+		}
+
+		rtLightingData.ue_lightAmbient = Colour(0.01f, 0.01f, 0.01f);
+		rtLightingData.ue_numLights = lights.size();
+	}
 	rtDescriptorSetLayout->setup();
 
 	rtDescriptorSet = new DescriptorSet(rtDescriptorSetLayout, true);
@@ -587,6 +602,10 @@ void RaytracedScene::setup(Shader* rtShader, Camera3D* camera) {
 	rtDescriptorSet->setupVk();
 
 	rtDescriptorSet->getShaderBuffer(0)->update(sceneModelData.data(), 0, sceneModelData.size() * sizeof(sceneModelData[0]));
+
+	if (lighting) {
+		rtDescriptorSet->getShaderBuffer(1)->update(&rtLightingData, 0, sizeof(ShaderBlock_RaytracedLighting));
+	}
 
 	//Create the raytracing pipeline
 	rtPipeline = new RaytracingPipeline(rtDeviceProperties, rtShader, rtDescriptorSetLayout);

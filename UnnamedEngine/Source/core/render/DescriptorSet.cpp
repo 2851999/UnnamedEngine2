@@ -101,20 +101,20 @@ void DescriptorSet::setupVk() {
 	for (unsigned int i = 0; i < textures.size(); ++i) {
 		if (textureBindings[i].type == TextureType::STORAGE_IMAGE) {
 			VkDescriptorPoolSize poolSize;
-			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
+			poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+			poolSize.descriptorCount = static_cast<uint32_t>(1);
 			poolSizes.push_back(poolSize);
 		} else {
 			VkDescriptorPoolSize poolSize;
-			poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-			poolSize.descriptorCount = static_cast<uint32_t>(1);
+			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			poolSize.descriptorCount = static_cast<uint32_t>(numSwapChainImages);
 			poolSizes.push_back(poolSize);
 		}
 	}
 
 	for (unsigned int i = 0; i < asBindings.size(); ++i) {
 		VkDescriptorPoolSize poolSize;
-		poolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		poolSize.type = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
 		poolSize.descriptorCount = static_cast<uint32_t>(1);
 		poolSizes.push_back(poolSize);
 	}
