@@ -539,7 +539,7 @@ void RaytracedScene::setupModelData() {
 	}
 }
 
-void RaytracedScene::setup(Shader* rtShader) {
+void RaytracedScene::setup(Shader* rtShader, Camera3D* camera) {
 	//Setup the acceleration structures, model data and create the storage texture
 	setupAllBLAS();
 	setupTLAS();
@@ -558,6 +558,7 @@ void RaytracedScene::setup(Shader* rtShader) {
 	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 6, texturesNormalMap.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 7, texturesParallaxMap.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 8, texturesEmissive.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+	rtDescriptorSetLayout->addTexture2D(14, VK_SHADER_STAGE_MISS_BIT_KHR);
 	rtDescriptorSetLayout->addSSBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	rtDescriptorSetLayout->setup();
 
@@ -580,6 +581,7 @@ void RaytracedScene::setup(Shader* rtShader) {
 		rtDescriptorSet->setTexture(index++, texturesParallaxMap[i]);
 	for (unsigned int i = 0; i < texturesEmissive.size(); ++i)
 		rtDescriptorSet->setTexture(index++, texturesEmissive[i]);
+	rtDescriptorSet->setTexture(index++, camera->getSkyBox()->getTexture());
 
 	rtDescriptorSet->setAccclerationStructure(0, &tlas.accel);
 	rtDescriptorSet->setupVk();

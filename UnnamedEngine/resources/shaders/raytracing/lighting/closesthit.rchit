@@ -261,7 +261,7 @@ vec3 ueGetLightingPBR(vec3 normal, vec3 fragPos, vec3 albedo, float metalness, f
 		vec3 rayDir = reflect(gl_WorldRayDirectionEXT, normal);
 		rayPayload.done = 0;
 		rayPayload.rayOrigin = origin;
-		rayPayload.rayDir = rayDir;
+		rayPayload.rayDirection = rayDir;
 	}
 
     return ambient + Lo;
@@ -313,28 +313,15 @@ void main() {
 	
 		mat3 tbnMatrix = mat3(-T, B, N);
 
-		normal = texture(normalMaps[nonuniformEXT(textureIndex)], textureCoord).rgb;
-		normal.y = 1 - normal.y;
-		normal = normalize(normal * 2.0 - 1.0);
-
-		normal = tbnMatrix * normal;
+		normal = tbnMatrix * ueGetMaterialNormal(textureIndex, textureCoord);
 	}
 
 	const vec3 worldNorm = normalize(vec3(normal * gl_WorldToObjectEXT));  //Transforming to world space
 
-	vec3 albedo = mat.diffuseColour.rgb;
-	float metalness = mat.ambientColour.r;
-	float roughness = mat.shininess;
-	float ao = mat.specularColour.r;
-
-	if (mat.hasDiffuseTexture)
-		albedo *= texture(diffuseTextures[nonuniformEXT(textureIndex)], textureCoord).xyz;
-	if (mat.hasAmbientTexture)
-		metalness *= texture(ambientTextures[nonuniformEXT(textureIndex)], textureCoord).r;
-	if (mat.hasShininessTexture)
-		metalness *= texture(shininessTextures[nonuniformEXT(textureIndex)], textureCoord).r;
-	if (mat.hasSpecularTexture)
-		metalness *= texture(specularTextures[nonuniformEXT(textureIndex)], textureCoord).r;
+	vec3 albedo = ueGetMaterialDiffuse(mat, textureIndex, textureCoord).rgb;
+	float metalness = ueGetMaterialAmbient(mat, textureIndex, textureCoord).r;
+	float roughness = ueGetMaterialShininess(mat, textureIndex, textureCoord);
+	float ao = ueGetMaterialSpecular(mat, textureIndex, textureCoord).r;
 
 	//Normals wont display if negative so check using *-1!!!
 	

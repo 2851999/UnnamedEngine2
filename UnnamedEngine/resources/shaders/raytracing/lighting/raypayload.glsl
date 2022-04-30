@@ -4,5 +4,5 @@ struct RayPayload {
 	int depth;
 	int done;
 	vec3 rayOrigin;
-	vec3 rayDir;
+	vec3 rayDirection;
 };

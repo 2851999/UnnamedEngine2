@@ -32,7 +32,7 @@ void main()  {
 	rayPayload.depth = 0;
 	rayPayload.done = 1;
 	rayPayload.rayOrigin = origin.xyz;
-	rayPayload.rayDir = direction.xyz;
+	rayPayload.rayDirection = direction.xyz;
 
 	vec3 hitValue = vec3(0.0);
 	vec3 attenuation = vec3(1.0, 1.0, 1.0);
@@ -61,7 +61,7 @@ void main()  {
 			break;
 
 		origin.xyz = rayPayload.rayOrigin;
-		direction.xyz = rayPayload.rayDir;
+		direction.xyz = rayPayload.rayDirection;
 		//Stop if reflective material isn't hit
 		rayPayload.done = 1;
 	}

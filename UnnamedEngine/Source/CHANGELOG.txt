@@ -1,4 +1,41 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 3 | Experimental 1
+
+* Added skyboxes to lighting and pathtracing raytracing
+  shaders via RenderScene
+
+* Some cleanup
+
+-------------------------------------------------------------
+Release 3 | Beta 0 | Development 3 (V0.5.8)
+
+* Added RaytracedScene
+* Added SHADER_TEXTURE_PASSTHROUGH shader and
+  GRAPHICS_PIPELINE_TEXTURE_PASSTHROUGH graphics pipeline
+* Added ability to assign multiple miss shaders in
+  RaytracingPipeline
+* Added raytraced reflections to raytracing shaders
+* Added basic PBR raytracing shaders
+* Added pathtracing shaders
+* Added emittance colours/textures
+* Added methods to Shader for compiling/loading multiple
+  shader module file with different names into one
+  shader (useful for Vulkan raytracing)
+* Added loadEngineShader methods to Shader
+* Added 'contains' method to utils_string
+* Added 'createNeededDirectories' method to utils_file
+
+
+* Modfied RaytracingTest to render the raytracing result
+  the right way up using rasterised rendering
+* Modified Shader to accept other types of VkShaderModule
+* Modified RaytracingPipeline to use Shader
+* Modified Shader to create any needed directories while
+  compiling shaders to SPIRV
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 2 | Experimental 8
 
 * Added 'contains' method to utils_string
@@ -44,7 +81,7 @@ Release 3 | Beta 0 | Development 2 | Experimental 4
 -------------------------------------------------------------
 Release 3 | Beta 0 | Development 2 | Experimental 3
 
-* Adding basic PBR to RenderTest
+* Added basic PBR to RenderTest
 
 -------------------------------------------------------------
 Release 3 | Beta 0 | Development 2 | Experimental 2

@@ -120,8 +120,8 @@ void Test::onCreated() {
 	//	rtScene->add(newModel);
 	//}
 
+	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
-	camera->setPosition(Vector3f(1.0f, 2.0f, 4.0f));
 	camera->update(getDeltaSeconds());
 
 	//rtShader = Shader::loadEngineShaderNames("raytracing/7/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" });
@@ -135,7 +135,7 @@ void Test::onCreated() {
 	//rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/shadow.rmiss.spv")), VK_SHADER_STAGE_MISS_BIT_KHR);
 	//rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/closesthit.rchit.spv")), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 
-	rtScene->setup(rtShader);
+	rtScene->setup(rtShader, camera);
 
 	//Shader::outputCompleteShaderFiles("resources/shaders/raytracing/7/", "resources/shaders/raytracing/7/", { "raygen.rgen" });
 	//Shader::compileToSPIRV("resources/shaders/raytracing/7/", "resources/shaders/raytracing/7/", { "raygen.rgen" }, glslangValidatorPath);

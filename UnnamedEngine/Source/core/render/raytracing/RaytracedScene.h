@@ -177,7 +177,7 @@ public:
 	inline void add(GameObject3D* object) { objects.push_back(object); }
 
 	/* Method for setting up this scene ready for rendering (should be called after all objects in it are added) */
-	void setup(Shader* rtShader);
+	void setup(Shader* rtShader, Camera3D* camera);
 
 	/* Performs raytracing (also ensures layout of storage texture is correct for using it in a shader) */
 	void raytrace(Camera3D* camera);
