@@ -20,6 +20,7 @@
 
 #include "../Renderer.h"
 #include "../Light.h"
+#include "../pbr/PBREnvironment.h"
 #include "RaytracingPipeline.h"
 
  /*****************************************************************************
@@ -128,6 +129,9 @@ private:
 	/* Lighting data for the scene */
 	ShaderBlock_RaytracedLighting rtLightingData;
 
+	/* PBREnvironment (Can be null) */
+	PBREnvironment* pbrEnvironment = NULL;
+
 	/* Creates a BLASInput from a given mesh and subdata (For materials create one BLAS for each SubData for now) 
 	  * Currently assume:
 	  *	- not separating the vertex data into separate VBO's
@@ -197,7 +201,7 @@ public:
 	inline void addLight(Light* light) { lights.push_back(light); }
 
 	/* Method for setting up this scene ready for rendering (should be called after all objects in it are added) */
-	void setup(Shader* rtShader, Camera3D* camera);
+	void setup(Shader* rtShader, Camera3D* camera, PBREnvironment* environment = NULL);
 
 	/* Performs raytracing (also ensures layout of storage texture is correct for using it in a shader) */
 	void raytrace(Camera3D* camera);

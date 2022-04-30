@@ -72,7 +72,8 @@ void Test::onCreated() {
 
 	//Shader::compileEngineShaderToSPIRV("raytracing/material/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" }, glslangValidatorPath);
 	//Shader::compileEngineShaderToSPIRV("raytracing/pathtracing/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" }, glslangValidatorPath);
-	Shader::compileEngineShaderToSPIRV("raytracing/basicpbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("raytracing/basicpbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
+	Shader::compileEngineShaderToSPIRV("raytracing/pbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
 
 	//Shader::compileEngineShaderToSPIRV("raytracing/7/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
 
@@ -103,14 +104,33 @@ void Test::onCreated() {
 
 	model2 = new GameObject3D(mesh2, Renderer::SHADER_MATERIAL);
 	model2->setScale(3.0f, 3.0f, 3.0f);
-	model2->setPosition(3.0f, 0.0f, 0.0f);
+	model2->setPosition(10.0f, 1.0f, 0.0f);
 	model2->update();
 
 	rtScene->add(model1);
 	rtScene->add(model2);
 
-	//rtScene->addLight((new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f)))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
-	rtScene->addLight((new Light(Light::TYPE_DIRECTIONAL, Vector3f()))->setDirection(0, -1.0f, 0.1f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
+	for (int i = 0; i < 16; ++i) {
+		GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), Renderer::SHADER_MATERIAL);
+		Material* material = sphere->getMesh()->getMaterial(1);
+
+		int x = i % 4;
+		int y = (int) (i / 4.0f);
+
+		sphere->setPosition(x * 2, y * 2, -0.5f);
+
+		material->setAlbedo(Colour(0.5f, 0.0f, 0.0f));
+		material->setMetalness(x * (1.0f / 3.0f));
+		material->setRoughness(utils_maths::clamp(y * (1.0f / 3.0f), 0.05f, 1.0f));
+		material->update();
+
+		sphere->update();
+
+		rtScene->add(sphere);
+	}
+
+	rtScene->addLight((new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f)))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f) * 10.0f));
+	//rtScene->addLight((new Light(Light::TYPE_DIRECTIONAL, Vector3f()))->setDirection(0, -1.0f, 0.1f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 
 	//for (unsigned int i = 0; i < 15; ++i) {
 	//	rtScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f))));
@@ -127,14 +147,18 @@ void Test::onCreated() {
 	//	rtScene->add(newModel);
 	//}
 
-	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
+	PBREnvironment* pbrEnvironment = PBREnvironment::loadAndGenerate(resourceLoader.getAbsPathTextures() + "PBR/Milkyway_small.hdr"); //Milkyway_small
+
+	//camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
+	camera->setSkyBox(new SkyBox(pbrEnvironment->getEnvironmentCubemap()));
 	camera->setFlying(true);
 	camera->update(getDeltaSeconds());
 
 	//rtShader = Shader::loadEngineShaderNames("raytracing/7/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" });
 	//rtShader = Shader::loadEngineShaderNames("raytracing/material/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" });
 	//rtShader = Shader::loadEngineShaderNames("raytracing/pathtracing/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" });
-	rtShader = Shader::loadEngineShaderNames("raytracing/basicpbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit"});
+	//rtShader = Shader::loadEngineShaderNames("raytracing/basicpbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit"});
+	rtShader = Shader::loadEngineShaderNames("raytracing/pbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" });
 
 	//rtShader = new Shader();
 	//rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/raygen.rgen.spv")), VK_SHADER_STAGE_RAYGEN_BIT_KHR);
@@ -142,7 +166,7 @@ void Test::onCreated() {
 	//rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/shadow.rmiss.spv")), VK_SHADER_STAGE_MISS_BIT_KHR);
 	//rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/closesthit.rchit.spv")), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 
-	rtScene->setup(rtShader, camera);
+	rtScene->setup(rtShader, camera, pbrEnvironment);
 
 	//Shader::outputCompleteShaderFiles("resources/shaders/raytracing/7/", "resources/shaders/raytracing/7/", { "raygen.rgen" });
 	//Shader::compileToSPIRV("resources/shaders/raytracing/7/", "resources/shaders/raytracing/7/", { "raygen.rgen" }, glslangValidatorPath);
@@ -163,8 +187,6 @@ void Test::onRender() {
 void Test::onDestroy() {
 	delete rtScene;
 	delete rtShader;
-	delete model1;
-	delete model2;
 }
 
 void Test::onKeyPressed(int key) {

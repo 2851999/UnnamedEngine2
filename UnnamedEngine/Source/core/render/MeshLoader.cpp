@@ -782,12 +782,14 @@ void MeshLoader::writeMaterial(BinaryFile& file, Material* material, std::string
 	file.writeVector4f(material->getAmbientColour());
 	file.writeVector4f(material->getDiffuseColour());
 	file.writeVector4f(material->getSpecularColour());
+	file.writeVector4f(material->getEmissiveColour());
 	writeTexture(file, material->getAmbientTexture(), path);
 	writeTexture(file, material->getDiffuseTexture(), path);
 	writeTexture(file, material->getSpecularTexture(), path);
 	writeTexture(file, material->getShininessTexture(), path);
 	writeTexture(file, material->getNormalMap(), path);
 	writeTexture(file, material->getParallaxMap(), path);
+	writeTexture(file, material->getEmissiveTexture(), path);
 	file.writeFloat(material->getParallaxScale());
 	file.writeFloat(material->getShininess());
 }
@@ -808,12 +810,15 @@ void MeshLoader::readMaterial(BinaryFile& file, std::vector<Material*>& material
 	material->setDiffuse(readVectorValue);
 	file.readVector4f(readVectorValue);
 	material->setSpecular(readVectorValue);
+	file.readVector4f(readVectorValue);
+	material->setEmissive(readVectorValue);
 	material->setAmbient(readTexture(file, path));
 	material->setDiffuse(readTexture(file, path, loadDiffuseTexturesAsSRGB));
 	material->setSpecular(readTexture(file, path));
 	material->setShininess(readTexture(file, path));
 	material->setNormalMap(readTexture(file, path));
 	material->setParallaxMap(readTexture(file, path));
+	material->setEmissive(readTexture(file, path));
 	float readFloatValue;
 	file.readFloat(readFloatValue);
 	material->setParallaxScale(readFloatValue);

@@ -35,12 +35,15 @@ RaytracedScene::RaytracedScene(bool lighting) : lighting(lighting) {
 }
 
 RaytracedScene::~RaytracedScene() {
-	for (unsigned int i = 0; i < lights.size(); ++i)
-		delete lights[i];
-
 	delete rtDescriptorSet;
 	delete rtDescriptorSetLayout;
 	delete rtPipeline;
+
+	for (unsigned int i = 0; i < lights.size(); ++i)
+		delete lights[i];
+
+	if (pbrEnvironment)
+		delete pbrEnvironment;
 
 	delete materialDataBuffer;
 	delete storageTexture;
@@ -57,6 +60,10 @@ RaytracedScene::~RaytracedScene() {
 		VulkanExtensions::vkDestroyAccelerationStructureKHR(device->getLogical(), blas[i].accel, nullptr);
 		delete blas[i].buffer;
 	}
+
+	//Delete all added objects
+	for (GameObject3D* object : objects)
+		delete object;
 }
 
 void RaytracedScene::initRaytracing() {
@@ -542,7 +549,10 @@ void RaytracedScene::setupModelData() {
 	}
 }
 
-void RaytracedScene::setup(Shader* rtShader, Camera3D* camera) {
+void RaytracedScene::setup(Shader* rtShader, Camera3D* camera, PBREnvironment* pbrEnvironment) {
+	//Assign the environment (may be NULL)
+	this->pbrEnvironment = pbrEnvironment;
+
 	//Setup the acceleration structures, model data and create the storage texture
 	setupAllBLAS();
 	setupTLAS();
@@ -561,6 +571,13 @@ void RaytracedScene::setup(Shader* rtShader, Camera3D* camera) {
 	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 6, texturesNormalMap.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 7, texturesParallaxMap.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	rtDescriptorSetLayout->addTextureBinding(DescriptorSet::TextureType::TEXTURE_2D, 8, texturesEmissive.size(), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+
+	if (pbrEnvironment) {
+		rtDescriptorSetLayout->addTextureCube(9, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+		rtDescriptorSetLayout->addTextureCube(10, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+		rtDescriptorSetLayout->addTexture2D(11, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
+	}
+
 	rtDescriptorSetLayout->addTexture2D(14, VK_SHADER_STAGE_MISS_BIT_KHR);
 	rtDescriptorSetLayout->addSSBO(sceneModelData.size() * sizeof(sceneModelData[0]), DataUsage::STATIC, 2, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 	if (lighting) {
@@ -596,6 +613,13 @@ void RaytracedScene::setup(Shader* rtShader, Camera3D* camera) {
 		rtDescriptorSet->setTexture(index++, texturesParallaxMap[i]);
 	for (unsigned int i = 0; i < texturesEmissive.size(); ++i)
 		rtDescriptorSet->setTexture(index++, texturesEmissive[i]);
+
+	if (pbrEnvironment) {
+		rtDescriptorSet->setTexture(index++, pbrEnvironment->getIrradianceCubemap());
+		rtDescriptorSet->setTexture(index++, pbrEnvironment->getPrefilterCubemap());
+		rtDescriptorSet->setTexture(index++, pbrEnvironment->getBRDFLUTTexture());
+	}
+
 	rtDescriptorSet->setTexture(index++, camera->getSkyBox()->getTexture());
 
 	rtDescriptorSet->setAccclerationStructure(0, &tlas.accel);

@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 3 | Experimental 3
+
+* Added pbr raytraced shaders for applying IBL
+
+* Fixed bug: .model files would not work with emissive
+             materials (they should be re-converted to work)
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 3 | Experimental 2
 
 * Added support for multiple lights of different types in
