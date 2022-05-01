@@ -74,9 +74,15 @@ vec3 ueCalculateLightPBR(UELight light, vec3 lightDirection, vec3 normal, vec3 v
 
 	//Trace shadow rays only if the light is visible from the surface (light is infront of it)
 	if (NdotL > 0.0) {
+		//Light distance required for knowning when to count a miss when lights are in between geometries
+		//e.g. point and spot lights
+		float lightDistance = 100;
+		if (light.type != 1)
+			lightDistance = length(light.position.xyz - fragPos);
+
 		float tMin = 0.001;
-		float tMax = 100;
-		vec3 origin = gl_WorldRayOriginEXT + gl_WorldRayDirectionEXT * gl_HitTEXT;
+		float tMax = lightDistance;
+		vec3 origin = fragPos;
 		vec3 rayDir = lightDirection;
 		uint rayFlags = gl_RayFlagsTerminateOnFirstHitEXT     //Don't invoke hit shader
 						| gl_RayFlagsOpaqueEXT                //As not invoking hit shader, treat all objects as opaque
@@ -92,7 +98,7 @@ vec3 ueCalculateLightPBR(UELight light, vec3 lightDirection, vec3 normal, vec3 v
 					0,             //sbtRecordOffset
 					0,             //sbtRecordStride
 					1,             //missIndex - 1 now since shadow miss shader has index 1
-					origin.xyz,    //ray origin
+					origin,        //ray origin
 					tMin,          //min range
 					rayDir,        //direction
 					tMax,          //max range

@@ -1,4 +1,12 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 3 | Experimental 4
+
+* Fixed bug: Point and spot light shadows were incorrect
+             in the PBR lighting shaders
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 3 | Experimental 3
 
 * Added pbr raytraced shaders for applying IBL

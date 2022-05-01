@@ -71,13 +71,14 @@ void Test::onCreated() {
 	//Renderer::compileEngineShaderToSPIRV(Renderer::SHADER_TEXTURE_PASSTHROUGH, glslangValidatorPath);
 
 	//Shader::compileEngineShaderToSPIRV("raytracing/material/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" }, glslangValidatorPath);
-	//Shader::compileEngineShaderToSPIRV("raytracing/pathtracing/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" }, glslangValidatorPath);
+	Shader::compileEngineShaderToSPIRV("raytracing/pathtracing/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" }, glslangValidatorPath);
 	//Shader::compileEngineShaderToSPIRV("raytracing/basicpbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
-	Shader::compileEngineShaderToSPIRV("raytracing/pbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("raytracing/pbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
 
 	//Shader::compileEngineShaderToSPIRV("raytracing/7/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" }, glslangValidatorPath);
 
-	rtScene = new RaytracedScene(true);
+	//rtScene = new RaytracedScene(true);
+	rtScene = new RaytracedScene(false);
 
 	//Mesh* mesh1 = resourceLoader.loadModel("", "cube.obj");
 	Mesh* mesh1 = resourceLoader.loadPBRModel("crytek-sponza/", "sponza.obj");
@@ -111,7 +112,9 @@ void Test::onCreated() {
 	rtScene->add(model2);
 
 	for (int i = 0; i < 16; ++i) {
-		GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), Renderer::SHADER_MATERIAL);
+		Mesh* mesh = resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj");
+		mesh->enableRaytracing();
+		GameObject3D* sphere = new GameObject3D(mesh, Renderer::SHADER_MATERIAL);
 		Material* material = sphere->getMesh()->getMaterial(1);
 
 		int x = i % 4;
@@ -129,8 +132,9 @@ void Test::onCreated() {
 		rtScene->add(sphere);
 	}
 
-	rtScene->addLight((new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f)))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f) * 10.0f));
+	//rtScene->addLight((new Light(Light::TYPE_POINT, Vector3f(0.5f, 5.0f, 2.0f)))->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f) * 10.0f));
 	//rtScene->addLight((new Light(Light::TYPE_DIRECTIONAL, Vector3f()))->setDirection(0, -1.0f, 0.1f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
+	//rtScene->addLight((new Light(Light::TYPE_SPOT, Vector3f(1.0f, 3.0f, 0.0f)))->setDirection(0.0f, -1.0f, 0.0f)->setInnerCutoffDegrees(25.0f)->setOuterCutoffDegrees(35.0f)->setDiffuseColour(Colour(23.47f, 21.31f, 20.79f)));
 
 	//for (unsigned int i = 0; i < 15; ++i) {
 	//	rtScene->addLight((new Light(Light::TYPE_POINT, Vector3f(utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f), utils_random::randomFloat(-10.0f, 10.0f)), false))->setDiffuseColour(Colour(utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f), utils_random::randomFloat(10.0f, 30.0f))));
@@ -156,9 +160,9 @@ void Test::onCreated() {
 
 	//rtShader = Shader::loadEngineShaderNames("raytracing/7/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" });
 	//rtShader = Shader::loadEngineShaderNames("raytracing/material/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" });
-	//rtShader = Shader::loadEngineShaderNames("raytracing/pathtracing/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" });
+	rtShader = Shader::loadEngineShaderNames("raytracing/pathtracing/", { "raygen.rgen", "miss.rmiss", "closesthit.rchit" });
 	//rtShader = Shader::loadEngineShaderNames("raytracing/basicpbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit"});
-	rtShader = Shader::loadEngineShaderNames("raytracing/pbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" });
+	//rtShader = Shader::loadEngineShaderNames("raytracing/pbr/", { "raygen.rgen", "miss.rmiss", "shadow.rmiss", "closesthit.rchit" });
 
 	//rtShader = new Shader();
 	//rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/raygen.rgen.spv")), VK_SHADER_STAGE_RAYGEN_BIT_KHR);
@@ -166,7 +170,8 @@ void Test::onCreated() {
 	//rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/shadow.rmiss.spv")), VK_SHADER_STAGE_MISS_BIT_KHR);
 	//rtShader->attach(Shader::createVkShaderModule(Shader::readFile("resources/shaders/raytracing/7/closesthit.rchit.spv")), VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR);
 
-	rtScene->setup(rtShader, camera, pbrEnvironment);
+	rtScene->setup(rtShader, camera);
+	//rtScene->setup(rtShader, camera, pbrEnvironment);
 
 	//Shader::outputCompleteShaderFiles("resources/shaders/raytracing/7/", "resources/shaders/raytracing/7/", { "raygen.rgen" });
 	//Shader::compileToSPIRV("resources/shaders/raytracing/7/", "resources/shaders/raytracing/7/", { "raygen.rgen" }, glslangValidatorPath);
