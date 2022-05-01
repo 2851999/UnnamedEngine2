@@ -68,30 +68,19 @@ void main() {
 	
 		mat3 tbnMatrix = mat3(-T, B, N);
 
-		normal = texture(normalMaps[nonuniformEXT(textureIndex)], textureCoord).rgb;
-		normal.y = 1 - normal.y;
-		normal = normalize(normal * 2.0 - 1.0);
-
-		normal = tbnMatrix * normal;
+		normal = tbnMatrix * ueGetMaterialNormal(textureIndex, textureCoord);
 	}
 
 	const vec3 worldNorm = normalize(vec3(normal * gl_WorldToObjectEXT));  //Transform to world space
 	// const vec3 worldTangent = normalize(vec3(tangent * gl_WorldToObjectEXT));  //Transform to world space
 	// const vec3 worldBitangent = normalize(vec3(bitangent * gl_WorldToObjectEXT));  //Transform to world space
 
-	vec3 albedo = mat.diffuseColour.rgb;
-
-	if (mat.hasDiffuseTexture)
-		albedo *= texture(diffuseTextures[nonuniformEXT(textureIndex)], textureCoord).xyz;
-
+	vec3 albedo = ueGetMaterialDiffuse(mat, textureIndex, textureCoord).rgb;
 	float metalness = mat.ambientColour.r;
 	float roughness = mat.shininess;
 	float ao = mat.specularColour.r;
 
-	vec3 emittance = mat.emissiveColour.xyz;
-
-	if (mat.hasEmissiveTexture)
-		emittance *= texture(emissiveTextures[nonuniformEXT(textureIndex)], textureCoord).xyz;
+	vec3 emittance = ueGetMaterialEmissive(mat, textureIndex, textureCoord);
 
 	//emittance = mix(emittance, albedo, 0.01);
 

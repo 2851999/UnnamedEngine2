@@ -67,3 +67,51 @@ vec2 ueFromBarycentric(vec2 vector1, vec2 vector2, vec2 vector3, vec3 barycentri
 vec3 ueFromBarycentric(vec3 vector1, vec3 vector2, vec3 vector3, vec3 barycentrics) {
 	return vector1 * barycentrics.x + vector2 * barycentrics.y + vector3 * barycentrics.z;
 }
+
+/* Various methods to get colours */
+vec3 ueGetMaterialAmbient(UEMaterial material, int textureIndex, vec2 textureCoord) {
+	vec3 ambientColour = vec3(material.ambientColour);
+	if (material.hasAmbientTexture)
+		ambientColour *= texture(ambientTextures[nonuniformEXT(textureIndex)], textureCoord).rgb;
+	return ambientColour;
+}
+
+vec4 ueGetMaterialDiffuse(UEMaterial material, int textureIndex, vec2 textureCoord) {
+	vec4 diffuseColour = material.diffuseColour;
+	if (material.hasDiffuseTexture) {
+		// vec4 tex = texture(ue_material.diffuseTexture, textureCoord);
+		// if (ue_material.diffuseTextureSRGB)
+		// 	tex = pow(tex, vec4(2.2));
+		// diffuseColour *= tex;
+		diffuseColour *= texture(diffuseTextures[nonuniformEXT(textureIndex)], textureCoord);
+	}
+	return diffuseColour;
+}
+
+vec3 ueGetMaterialSpecular(UEMaterial material, int textureIndex, vec2 textureCoord) {
+	vec3 specularColour = vec3(material.specularColour);
+	if (material.hasSpecularTexture)
+		specularColour *= texture(specularTextures[nonuniformEXT(textureIndex)], textureCoord).rgb;
+	return specularColour;
+}
+
+float ueGetMaterialShininess(UEMaterial material, int textureIndex, vec2 textureCoord) {
+	if (material.hasShininessTexture)
+		return texture(shininessTextures[nonuniformEXT(textureIndex)], textureCoord).r;
+	else
+		return material.shininess;
+}
+
+vec3 ueGetMaterialEmissive(UEMaterial material, int textureIndex, vec2 textureCoord) {
+	vec3 emissiveColour = vec3(material.emissiveColour);
+	if (material.hasEmissiveTexture)
+		emissiveColour *= texture(emissiveTextures[nonuniformEXT(textureIndex)], textureCoord).rgb;
+	return emissiveColour;
+}
+
+vec3 ueGetMaterialNormal(int textureIndex, vec2 textureCoord) {
+	vec3 normal = texture(normalMaps[nonuniformEXT(textureIndex)], textureCoord).rgb;
+	normal.y = 1 - normal.y;
+	normal = normalize(normal * 2.0 - 1.0);
+	return normal;
+}

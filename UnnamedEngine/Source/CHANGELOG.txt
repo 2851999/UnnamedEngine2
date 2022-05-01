@@ -1,4 +1,61 @@
 -------------------------------------------------------------
+Release 3 | Beta 0 | Development 4 (V0.5.9)
+
+* Added skyboxes to lighting and pathtracing raytracing
+  shaders via RenderScene
+* Added pbr raytraced shaders for applying IBL
+
+* Renamed lighting raytraced shader to basicpbr
+
+* Fixed bug: Raytraced lighting shader was incorrect
+* Fixed bug: Incorrect descriptor types were used in
+             DescriptorSet for images/acceleration
+             structures
+* Fixed bug: .model files would not work with emissive
+             materials (they should be re-converted to work)
+* Fixed bug: Point and spot light shadows were incorrect
+             in the raytracing PBR lighting shaders
+
+* Some cleanup
+
+-------------------------------------------------------------
+Release 3 | Beta 0 | Development 3 | Experimental 4
+
+* Fixed bug: Point and spot light shadows were incorrect
+             in the raytracing PBR lighting shaders
+
+* Some cleanup
+
+-------------------------------------------------------------
+Release 3 | Beta 0 | Development 3 | Experimental 3
+
+* Added pbr raytraced shaders for applying IBL
+
+* Fixed bug: .model files would not work with emissive
+             materials (they should be re-converted to work)
+
+-------------------------------------------------------------
+Release 3 | Beta 0 | Development 3 | Experimental 2
+
+* Added support for multiple lights of different types in
+  the raytraced lighting shader
+
+* Renamed lighting raytraced shader to basicpbr
+
+* Fixed bug: Raytraced lighting shader was incorrect
+* Fixed bug: Incorrect descriptor types were used in
+             DescriptorSet for images/acceleration
+             structures
+
+-------------------------------------------------------------
+Release 3 | Beta 0 | Development 3 | Experimental 1
+
+* Added skyboxes to lighting and pathtracing raytracing
+  shaders via RenderScene
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 3 (V0.5.8)
 
 * Added RaytracedScene
