@@ -23,6 +23,10 @@
 #include "RenderPass.h"
 #include "pbr/PBREnvironment.h"
 
+ /*****************************************************************************
+  * The RenderScene class handles the rendering of a set of objects
+  *****************************************************************************/
+
 class RenderScene {
 private:
 	/* Structure containing a batch of objects that need to be rendered, along with the GraphicsPipeline required to do it */

@@ -77,7 +77,7 @@ public:
 
 	/* Structure containing information about the culling state to be used */
 	struct CullState {
-		CullMode  mode      = CullMode::NONE;
+		CullMode mode       = CullMode::NONE;
 		FrontFace frontFace = FrontFace::COUNTER_CLOCKWISE;
 	};
 private:

@@ -125,7 +125,7 @@ public:
 	void removeController(Controller* controller);
 
 	/* Method used to check whether a controller with a certain index has been added */
-	inline bool hasController(int index) { return controllers.count(index) > 0; }
+	inline bool hasController(int index) { return controllers.find(index) != controllers.end(); }
 
 	/* Method used to release all of the controllers */
 	void releaseControllers();

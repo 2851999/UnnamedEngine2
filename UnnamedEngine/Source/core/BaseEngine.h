@@ -32,8 +32,8 @@ namespace Engine {
 	 * Version     - Should change every development version
 	 * DateCreated - Should change every development version
 	 */
-	const std::string Version     = "V0.5.5";
-	const std::string DateCreated = "07/08/2020";
+	const std::string Version     = "V0.5.9";
+	const std::string DateCreated = "01/05/2022";
 	const std::string Build       = "Beta";
 }
 
@@ -46,7 +46,7 @@ private:
 	/* The main window instance */
 	Window* window;
 	/* Used to request the game loop to stop */
-	bool   closeRequested = false;
+	bool closeRequested = false;
 
 	/* Used to keep track of and limit the FPS */
 	FPSCalculator fpsCalculator;

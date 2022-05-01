@@ -28,13 +28,13 @@ double HeightMapGenerator::noiseOctaves(int iterations, int x, int y, float pers
 	double maxAmplitude = 0;
 	double amplitude = 1;
 	double frequency = scale;
-	double noise = 0;
+	double noise     = 0;
 
 	for (int i = 0; i < iterations; i++) {
-		noise += noiseGen.noise(x * frequency, y * frequency) * amplitude;
+		noise        += noiseGen.noise(x * frequency, y * frequency) * amplitude;
 		maxAmplitude += amplitude;
-		amplitude *= persistence;
-		frequency *= 2;
+		amplitude    *= persistence;
+		frequency    *= 2;
 	}
 
 	noise /= maxAmplitude;

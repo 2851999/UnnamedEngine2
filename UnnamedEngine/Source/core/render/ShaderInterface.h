@@ -46,6 +46,7 @@ struct ShaderBlock_Material {
 	Vector4f ambientColour;
 	Vector4f diffuseColour;
 	Vector4f specularColour;
+	Vector4f emissiveColour;
 
 	int hasAmbientTexture;
 	int hasDiffuseTexture;
@@ -54,6 +55,7 @@ struct ShaderBlock_Material {
 	int hasShininessTexture;
 	int hasNormalMap;
 	int hasParallaxMap;
+	int hasEmissiveTexture;
 
 	float parallaxScale;
 	float shininess;
@@ -63,7 +65,7 @@ struct ShaderBlock_Skinning {
 	Matrix4f ue_bones[Skeleton::SKINNING_MAX_BONES];
 	int ue_useSkinning;
 
-	void updateUseSkinning(UBO* ubo) { ubo->updateFrame(&ue_useSkinning, sizeof(ue_bones), sizeof(ue_useSkinning)); };
+	void updateUseSkinning(ShaderBuffer* ubo) { ubo->updateFrame(&ue_useSkinning, sizeof(ue_bones), sizeof(ue_useSkinning)); };
 };
 
 struct ShaderStruct_Light {
@@ -203,6 +205,7 @@ public:
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_IRRADIANCE_MAP      = 17;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_PBR_GEN_PREFILTER_MAP       = 18;
 	static const unsigned int DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR               = 19;
+	static const unsigned int DESCRIPTOR_SET_DEFAULT_RAYTRACING                  = 20;
 
 	/* The locations for attributes in the shaders */
 	static const unsigned int ATTRIBUTE_LOCATION_POSITION      = 0;

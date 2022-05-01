@@ -66,7 +66,7 @@ public:
 	virtual ~RenderData();
 
 	/* The method used to setup this data for rendering */
-	void setup(RenderShader* renderShader);
+	void setup(RenderShader* renderShader, VkBufferUsageFlags additionalVkUsageFlags = 0);
 
 	/* Methods to add a UBO or Texture to this instance */
 	void addTexture(Texture* texture, unsigned int binding);

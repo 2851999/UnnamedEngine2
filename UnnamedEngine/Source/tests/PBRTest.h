@@ -58,7 +58,7 @@ void Test::onInitialise() {
 	getSettings().videoMaxFPS = 0;
 	getSettings().videoSamples = deferred ? 0 : 16;
 	getSettings().videoResolution = VideoResolution::RES_1080p;
-	getSettings().videoVulkan = false;
+	getSettings().videoVulkan = true;
 	getSettings().debugVkValidationLayersEnabled = true;
 	//getSettings().videoRefreshRate = 144;
 	//getSettings().windowFullscreen = true;
@@ -70,24 +70,28 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
-	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("pbr/GenEquiToCube", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("pbr/GenIrradianceMap", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("pbr/GenPrefilterMap", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("pbr/GenBRDFIntegrationMap", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("pbr/PBRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("pbr/PBRShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_SKINNING" });
-	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY" });
-	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredGeometry", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+	std::string glslangValidatorPath = "C:/VulkanSDK/1.3.204.1/Bin/glslangValidator.exe";
 
-	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Renderer::compileEngineShadersToSPIRV(glslangValidatorPath);
 
-	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_BLOOM" });
-	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe", { "UE_BLOOM" });
-	//Shader::compileEngineShaderToSPIRV("postprocessing/GaussianBlur", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("postprocessing/BloomShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	//Shader::compileEngineShaderToSPIRV("SkyBoxShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("postprocessing/SSRShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("pbr/GenEquiToCube", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("pbr/GenIrradianceMap", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("pbr/GenPrefilterMap", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("pbr/GenBRDFIntegrationMap", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("pbr/PBRShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("pbr/PBRShader", glslangValidatorPath, { "UE_SKINNING" });
+	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredGeometry", glslangValidatorPath, { "UE_GEOMETRY_ONLY" });
+	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredGeometry", glslangValidatorPath, { "UE_GEOMETRY_ONLY", "UE_SKINNING" });
+
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", glslangValidatorPath);
+
+	//Shader::compileEngineShaderToSPIRV("basicpbr/PBRDeferredLighting", glslangValidatorPath, { "UE_BLOOM" });
+	//Shader::compileEngineShaderToSPIRV("pbr/PBRDeferredLighting", glslangValidatorPath, { "UE_BLOOM" });
+	//Shader::compileEngineShaderToSPIRV("postprocessing/GaussianBlur", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("postprocessing/BloomShader", glslangValidatorPath);
 
 	//Logger::stopFileOutput();
 
@@ -141,7 +145,7 @@ void Test::onCreated() {
 	//	plane->update();
 	//	scene->add(plane);
 
-	for (int i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; ++i) {
 		GameObject3D* sphere = new GameObject3D(resourceLoader.loadPBRModel("SimpleSphere/", "SimpleSphere.obj"), pbrRenderShader);
 		Material* material = sphere->getMesh()->getMaterial(1);
 

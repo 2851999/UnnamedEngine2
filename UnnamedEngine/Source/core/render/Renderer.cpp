@@ -113,6 +113,7 @@ void Renderer::initialise() {
 	addRenderShader(SHADER_BILLBOARDED_FONT_SDF, "billboard/BillboardedFontSDFShader");
 	addRenderShader(SHADER_GAUSSIAN_BLUR, "postprocessing/GaussianBlur");
 	addRenderShader(SHADER_BLOOM, "postprocessing/BloomShader");
+	addRenderShader(SHADER_TEXTURE_PASSTHROUGH, "postprocessing/TexturePassthrough");
 
 	//Default colour blend state
 	GraphicsPipeline::ColourBlendState defaultBlendState;
@@ -214,7 +215,7 @@ void Renderer::initialise() {
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BASIC_PBR_DEFERRED_LIGHTING_BLOOM_BLEND, SHADER_BASIC_PBR_DEFERRED_LIGHTING_BLOOM, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaLightBlendState, postProcessDepthState, lightingCullState, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_DEFERRED_PBR_SSR, SHADER_DEFERRED_PBR_SSR, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, lightingCullState, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_SPRITE, SHADER_MATERIAL, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::SEPARATE_TEXTURE_COORDS), alphaBlendState, defaultDepthState, defaultCullState, true);
-	
+
 	GraphicsPipeline::VertexInputData tilemapVertexInputData;
 	tilemapVertexInputData.attributes.push_back(utils_vulkan::initVertexAttributeDescription(ShaderInterface::ATTRIBUTE_LOCATION_POSITION, 0, VK_FORMAT_R32G32_SFLOAT, 0));
 	tilemapVertexInputData.bindings.push_back(utils_vulkan::initVertexInputBindings(0, 2 * sizeof(float), VK_VERTEX_INPUT_RATE_VERTEX));
@@ -263,7 +264,7 @@ void Renderer::initialise() {
 
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_GAUSSIAN_BLUR, SHADER_GAUSSIAN_BLUR, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, false);
 	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_BLOOM, SHADER_BLOOM, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, false);
-
+	addGraphicsPipelineLayout(GRAPHICS_PIPELINE_TEXTURE_PASSTHROUGH, SHADER_TEXTURE_PASSTHROUGH, MeshData::computeVertexInputData(2, { MeshData::POSITION, MeshData::TEXTURE_COORD }, MeshData::NONE), alphaBlendState, postProcessDepthState, defaultCullState, true);
 
 	//Create the default render pass
 	defaultRenderPass = new RenderPass();
@@ -285,10 +286,10 @@ void Renderer::stopUsingMaterial(Material* material) {
 
 void Renderer::render(RenderData* renderData, Matrix4f& modelMatrix, Material* material) {
 	//Obtain the required UBO's for rendering
-	UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
-	UBO* shaderSkinningUBO = NULL;
-	if (renderData->getDescriptorSet()->getNumUBOs() > 1 && renderData->getDescriptorSet()->getUBO(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
-		shaderSkinningUBO = renderData->getDescriptorSet()->getUBO(1);
+	ShaderBuffer* shaderModelUBO = renderData->getDescriptorSet()->getShaderBuffer(0);
+	ShaderBuffer* shaderSkinningUBO = NULL;
+	if (renderData->getDescriptorSet()->getNumShaderBuffers() > 1 && renderData->getDescriptorSet()->getShaderBuffer(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
+		shaderSkinningUBO = renderData->getDescriptorSet()->getShaderBuffer(1);
 
 	renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
 	renderData->getShaderBlock_Model().ue_modelMatrix = modelMatrix;
@@ -315,10 +316,10 @@ void Renderer::render(Mesh* mesh, Matrix4f& modelMatrix, RenderShader* renderSha
 		RenderData* renderData = mesh->getRenderData()->getRenderData();
 
 		//Obtain the required UBO's for rendering
-		UBO* shaderModelUBO = renderData->getDescriptorSet()->getUBO(0);
-		UBO* shaderSkinningUBO = NULL;
-		if (renderData->getDescriptorSet()->getNumUBOs() > 1 && renderData->getDescriptorSet()->getUBO(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
-			shaderSkinningUBO = renderData->getDescriptorSet()->getUBO(1);
+		ShaderBuffer* shaderModelUBO = renderData->getDescriptorSet()->getShaderBuffer(0);
+		ShaderBuffer* shaderSkinningUBO = NULL;
+		if (renderData->getDescriptorSet()->getNumShaderBuffers() > 1 && renderData->getDescriptorSet()->getShaderBuffer(1)->getBinding() == ShaderInterface::UBO_BINDING_LOCATION_SKINNING + (BaseEngine::usingVulkan() ? UBO::VULKAN_BINDING_OFFSET : 0))
+			shaderSkinningUBO = renderData->getDescriptorSet()->getShaderBuffer(1);
 
 		renderData->getShaderBlock_Model().ue_mvpMatrix = (getCamera()->getProjectionViewMatrix() * modelMatrix);
 		renderData->getShaderBlock_Model().ue_modelMatrix = modelMatrix;
@@ -381,10 +382,7 @@ void Renderer::destroy() {
 using namespace utils_string;
 
 Shader* Renderer::loadEngineShader(UnloadedShaderInfo& shaderInfo) {
-	if (! BaseEngine::usingVulkan())
-		return Shader::loadShader("resources/shaders/" + shaderInfo.path, shaderInfo.defines);
-	else
-		return Shader::loadShader("resources/shaders-vulkan/" + shaderInfo.path, shaderInfo.defines);
+	return Shader::loadEngineShader(shaderInfo.path, shaderInfo.defines);
 }
 
 void Renderer::addRenderShader(unsigned int id, std::string forwardShaderPath, std::vector<std::string> defines) {
@@ -425,7 +423,7 @@ void Renderer::addRenderShader(RenderShader* renderShader) {
 }
 
 void Renderer::addGraphicsPipelineQueue(unsigned int id, GraphicsPipeline* pipeline) {
-	if (queuePipelines.count(id) == 0)
+	if (queuePipelines.find(id) == queuePipelines.end())
 		queuePipelines.insert(std::pair<unsigned int, std::vector<GraphicsPipeline*>>(id, { pipeline }));
 	else
 		queuePipelines.at(id).push_back(pipeline);
@@ -441,9 +439,10 @@ GraphicsPipeline* Renderer::getGraphicsPipelineQueue(unsigned int id) {
 }
 
 RenderShader* Renderer::getRenderShader(unsigned int id) {
-	if (loadedRenderShaders.count(id) > 0)
-		return loadedRenderShaders.at(id);
-	else if (unloadedShaders.count(id) > 0) {
+	auto loadedShaderIt = loadedRenderShaders.find(id);
+	if (loadedShaderIt != loadedRenderShaders.end())
+		return loadedShaderIt->second;
+	else if (unloadedShaders.find(id) != unloadedShaders.end()) {
 		//Load the render shader then return it
 		loadRenderShader(id);
 		return loadedRenderShaders.at(id);
@@ -454,9 +453,11 @@ RenderShader* Renderer::getRenderShader(unsigned int id) {
 }
 
 GraphicsPipelineLayout* Renderer::getGraphicsPipelineLayout(unsigned int id) {
-	if (loadedGraphicsPipelineLayouts.count(id) > 0)
-		return loadedGraphicsPipelineLayouts.at(id);
-	else if (unloadedGraphicsPipelineLayouts.count(id) > 0) {
+	//Return the layout if already loaded, otherwise load it
+	auto loadedGraphicsPipelineLayoutIt = loadedGraphicsPipelineLayouts.find(id);
+	if (loadedGraphicsPipelineLayoutIt != loadedGraphicsPipelineLayouts.end())
+		return loadedGraphicsPipelineLayoutIt->second;
+	else if (unloadedGraphicsPipelineLayouts.find(id) != unloadedGraphicsPipelineLayouts.end()) {
 		//Create the layout then return it
 		UnloadedGraphicsPipelineLayoutInfo info = unloadedGraphicsPipelineLayouts.at(id);
 		GraphicsPipelineLayout* layout = new GraphicsPipelineLayout(getRenderShader(info.renderShader), info.vertexInputData, info.colourBlendState, info.depthState, info.cullState, info.viewportFlippedVk);
@@ -479,4 +480,25 @@ GLenum Renderer::convertToGL(DataUsage usage) {
 		default:
 			return GL_STATIC_DRAW;
 	}
+}
+
+void Renderer::compileEngineShaderToSPIRV(unsigned int id, std::string glslangValidatorPath) {
+	//Obtain the shader info
+	auto unloadedShaderIt = unloadedShaders.find(id);
+	if (unloadedShaderIt != unloadedShaders.end())
+		Shader::compileEngineShaderToSPIRV(unloadedShaderIt->second.path, glslangValidatorPath, unloadedShaderIt->second.defines);
+	else
+		Logger::log("The RenderShader with the id '" + utils_string::str(id) + "' could not be found", "Renderer", LogType::Error);
+}
+
+void Renderer::compileEngineShadersToSPIRV(std::string glslangValidatorPath) {
+	//Go through all unloaded engine shaders and compile them
+	for (auto& it : unloadedShaders)
+		Shader::compileEngineShaderToSPIRV(it.second.path, glslangValidatorPath, it.second.defines);
+}
+
+void Renderer::compileLoadedEngineShadersToSPIRV(std::string glslangValidatorPath) {
+	//Go through and compile all currently loaded shaders
+	for (auto& it : loadedRenderShaders)
+		Renderer::compileEngineShaderToSPIRV(it.first, glslangValidatorPath);
 }

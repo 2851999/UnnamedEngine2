@@ -129,6 +129,13 @@ Mesh* MeshLoader::loadAssimpModel(std::string path, std::string fileName, bool p
 				for (int c = 0; c < 3; ++c)
 					//Add the indices for the current face
 					currentData->addIndex(currentFace.mIndices[c]);
+
+				//Add material indices if needed for raytracing
+				//TODO: Add a different boolean for this
+				if (Window::getCurrentInstance()->getSettings().videoRaytracing) {
+					currentData->addMaterialIndex(currentMesh->mMaterialIndex);
+					currentData->addOffsetIndex(numIndices, numVertices);
+				}
 			}
 
 			//Add a sub data instance
@@ -325,6 +332,7 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 	material->setAmbient(loadAssimpTexture(path, mat, aiTextureType_AMBIENT));
 	material->setDiffuse(loadAssimpTexture(path, mat, aiTextureType_DIFFUSE, loadDiffuseTexturesAsSRGB));
 	material->setSpecular(loadAssimpTexture(path, mat, aiTextureType_SPECULAR));
+	material->setEmissive(loadAssimpTexture(path, mat, aiTextureType_EMISSIVE));
 
 	if (pbr)
 		material->setShininess(loadAssimpTexture(path, mat, aiTextureType_SHININESS)); //No standard way of using this for phong shading
@@ -342,6 +350,7 @@ Material* MeshLoader::loadAssimpMaterial(std::string path, std::string fileName,
 	material->setAmbient(loadAssimpColour(mat, AI_MATKEY_COLOR_AMBIENT));
 	material->setDiffuse(loadAssimpColour(mat, AI_MATKEY_COLOR_DIFFUSE));
 	material->setSpecular(loadAssimpColour(mat, AI_MATKEY_COLOR_SPECULAR));
+	material->setEmissive(loadAssimpColour(mat, AI_MATKEY_COLOR_EMISSIVE));
 
 	float value;
 	if ((mat->Get(AI_MATKEY_SHININESS, value) == AI_SUCCESS) && value != 0.0f) {
@@ -773,12 +782,14 @@ void MeshLoader::writeMaterial(BinaryFile& file, Material* material, std::string
 	file.writeVector4f(material->getAmbientColour());
 	file.writeVector4f(material->getDiffuseColour());
 	file.writeVector4f(material->getSpecularColour());
+	file.writeVector4f(material->getEmissiveColour());
 	writeTexture(file, material->getAmbientTexture(), path);
 	writeTexture(file, material->getDiffuseTexture(), path);
 	writeTexture(file, material->getSpecularTexture(), path);
 	writeTexture(file, material->getShininessTexture(), path);
 	writeTexture(file, material->getNormalMap(), path);
 	writeTexture(file, material->getParallaxMap(), path);
+	writeTexture(file, material->getEmissiveTexture(), path);
 	file.writeFloat(material->getParallaxScale());
 	file.writeFloat(material->getShininess());
 }
@@ -799,12 +810,15 @@ void MeshLoader::readMaterial(BinaryFile& file, std::vector<Material*>& material
 	material->setDiffuse(readVectorValue);
 	file.readVector4f(readVectorValue);
 	material->setSpecular(readVectorValue);
+	file.readVector4f(readVectorValue);
+	material->setEmissive(readVectorValue);
 	material->setAmbient(readTexture(file, path));
 	material->setDiffuse(readTexture(file, path, loadDiffuseTexturesAsSRGB));
 	material->setSpecular(readTexture(file, path));
 	material->setShininess(readTexture(file, path));
 	material->setNormalMap(readTexture(file, path));
 	material->setParallaxMap(readTexture(file, path));
+	material->setEmissive(readTexture(file, path));
 	float readFloatValue;
 	file.readFloat(readFloatValue);
 	material->setParallaxScale(readFloatValue);

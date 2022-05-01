@@ -41,7 +41,7 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool pos
 		shaderGammaCorrectionFXAAData.exposureIn         = -1;
 		shaderGammaCorrectionFXAAData.fxaa               = false;
 
-		descriptorSetGammaCorrectionFXAA->getUBO(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
+		descriptorSetGammaCorrectionFXAA->getShaderBuffer(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
 
 		//Setup the offscreen render pass
 		FBO* fbo = new FBO(width, height, {
@@ -151,11 +151,11 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool pos
 			gaussianBlurData[1].horizontal = false;
 
 			descriptorSetsGaussianBlur[0] = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR));
-			descriptorSetsGaussianBlur[0]->getUBO(0)->update(&gaussianBlurData[0], 0, sizeof(ShaderBlock_GaussianBlur));
+			descriptorSetsGaussianBlur[0]->getShaderBuffer(0)->update(&gaussianBlurData[0], 0, sizeof(ShaderBlock_GaussianBlur));
 			descriptorSetsGaussianBlur[0]->setup();
 
 			descriptorSetsGaussianBlur[1] = new DescriptorSet(Renderer::getShaderInterface()->getDescriptorSetLayout(ShaderInterface::DESCRIPTOR_SET_DEFAULT_GAUSSIAN_BLUR));
-			descriptorSetsGaussianBlur[1]->getUBO(0)->update(&gaussianBlurData[1], 0, sizeof(ShaderBlock_GaussianBlur));
+			descriptorSetsGaussianBlur[1]->getShaderBuffer(0)->update(&gaussianBlurData[1], 0, sizeof(ShaderBlock_GaussianBlur));
 			descriptorSetsGaussianBlur[1]->setup();
 
 			MeshData* meshData4 = createScreenMeshData();
@@ -167,7 +167,6 @@ RenderScene::RenderScene(bool deferred, bool pbr, bool ssr, bool bloom, bool pos
 		}
 
 		if (ssr) {
-
 			FBO* ssrFBO = new FBO(width, height, {
 				FramebufferAttachmentInfo{ new FramebufferAttachment(width, height, FramebufferAttachment::Type::COLOUR_TEXTURE, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), true },//
 				//FramebufferAttachmentInfo{ BaseEngine::usingVulkan() ? Vulkan::getSwapChain()->getDepthAttachment() : new FramebufferAttachment(width, height, FramebufferAttachment::Type::DEPTH, TextureParameters(GL_TEXTURE_2D, TextureParameters::Filter::NEAREST, TextureParameters::AddressMode::CLAMP_TO_EDGE)), false }
@@ -532,7 +531,7 @@ void RenderScene::renderScene() {
 			shaderLightBatchData.ue_numLights = uniformNumLights;
 
 			//Update the light batch UBO
-			descriptorSetLightBatches[batchNumber]->getUBO(0)->updateFrame(&shaderLightBatchData, 0, sizeof(ShaderBlock_LightBatch));
+			descriptorSetLightBatches[batchNumber]->getShaderBuffer(0)->updateFrame(&shaderLightBatchData, 0, sizeof(ShaderBlock_LightBatch));
 
 			batchNumber++;
 		}
@@ -646,7 +645,7 @@ void RenderScene::setPostProcessingParameters(bool gammaCorrection, bool fxaa, f
 	shaderGammaCorrectionFXAAData.fxaa         = fxaa;
 	shaderGammaCorrectionFXAAData.exposureIn   = exposureIn;
 
-	descriptorSetGammaCorrectionFXAA->getUBO(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
+	descriptorSetGammaCorrectionFXAA->getShaderBuffer(0)->update(&shaderGammaCorrectionFXAAData, 0, sizeof(ShaderBlock_GammaCorrectionFXAA));
 }
 
 MeshData* RenderScene::createScreenMeshData() {

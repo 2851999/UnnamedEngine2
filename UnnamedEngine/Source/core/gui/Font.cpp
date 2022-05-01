@@ -402,14 +402,14 @@ float Font::getWidth(std::string text) {
 			//Get the character data for the current character
 			GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
 			//Add onto the width
-			lineWidth += (info.advanceX / 64);
+			lineWidth += sdf ? (info.advanceX / renderedSize) * size : (info.advanceX / 64);
 		}
 
 		//Find the maximum width
 		width = utils_maths::max(width, lineWidth);
 	}
 	//Return the width
-	return width * (1.0f / (float) RENDER_SCALE);
+	return sdf ? width : width * (1.0f / (float) RENDER_SCALE);
 }
 
 float Font::getHeight(std::string text) {
@@ -426,13 +426,15 @@ float Font::getHeight(std::string text) {
 			//Get the character data for the current character
 			GlyphInfo& info = glyphs[((int) text.at(i)) - ASCII_START];
 			//Assign the height
-			lineHeight = utils_maths::max(lineHeight, info.glyphHeight + (info.glyphTop - info.glyphHeight));
+			lineHeight = utils_maths::max(lineHeight, sdf ?
+				((float) (info.glyphHeight + info.yOffset) / renderedSize) * size :
+				info.glyphHeight + (info.glyphTop - info.glyphHeight));
 		}
 	}
 	if (height == 0)
 		height = lineHeight;
 	//Return the height
-	return height * (1.0f / (float) RENDER_SCALE);
+	return sdf ? height : height * (1.0f / (float) RENDER_SCALE);
 }
 
 
@@ -450,5 +452,5 @@ void Font::destroyFreeType() {
 
 
 void Font::updateSDFParameters() {
-	descriptorSetSDFText->getUBO(0)->update(&sdfTextParameters, 0, sizeof(ShaderBlock_SDFText));
+	descriptorSetSDFText->getShaderBuffer(0)->update(&sdfTextParameters, 0, sizeof(ShaderBlock_SDFText));
 }

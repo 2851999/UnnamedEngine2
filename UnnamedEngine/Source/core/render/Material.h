@@ -33,6 +33,7 @@
  * NORMAL -> NORMAL
  * SPECULAR -> AO
  * SHININESS -> ROUGHNESS
+ * EMITTANCE -> EMITTANCE (Only for Vulkan raytracing)
  *****************************************************************************/
 
 class Material {
@@ -61,6 +62,7 @@ public:
 	void setAmbient(Colour ambientColour) { shaderData.ambientColour = ambientColour; }
 	void setDiffuse(Colour diffuseColour) { shaderData.diffuseColour = diffuseColour; }
 	void setSpecular(Colour specularColour) { shaderData.specularColour = specularColour; }
+	void setEmissive(Colour emissiveColour) { shaderData.emissiveColour = emissiveColour; }
 	void setAmbient(Texture* ambientTexture) { descriptorSet->setTexture(0, ambientTexture); shaderData.hasAmbientTexture = ambientTexture != NULL; }
 	void setDiffuse(Texture* diffuseTexture) {
 		descriptorSet->setTexture(1, diffuseTexture);
@@ -72,18 +74,21 @@ public:
 	void setShininess(Texture* shininessTexture) { descriptorSet->setTexture(3, shininessTexture); shaderData.hasShininessTexture = shininessTexture != NULL; }
 	void setNormalMap(Texture* normalMap) { descriptorSet->setTexture(4, normalMap); shaderData.hasNormalMap = normalMap != NULL; }
 	void setParallaxMap(Texture* parallaxMap) { descriptorSet->setTexture(5, parallaxMap); shaderData.hasParallaxMap = parallaxMap != NULL; }
+	void setEmissive(Texture* emissiveTexture) { descriptorSet->setTexture(6, emissiveTexture); shaderData.hasEmissiveTexture = emissiveTexture != NULL; }
 	void setParallaxScale(float parallaxScale) { shaderData.parallaxScale = parallaxScale; }
 	void setShininess(float shininess) { shaderData.shininess = shininess; }
 
 	Colour getAmbientColour() { return shaderData.ambientColour; }
 	Colour getDiffuseColour() { return shaderData.diffuseColour; }
 	Colour getSpecularColour() { return shaderData.specularColour; }
+	Colour getEmissiveColour() { return shaderData.emissiveColour; }
 	Texture* getAmbientTexture() { return descriptorSet->getTexture(0); }
 	Texture* getDiffuseTexture() { return descriptorSet->getTexture(1); }
 	Texture* getSpecularTexture() { return descriptorSet->getTexture(2); }
 	Texture* getShininessTexture() { return descriptorSet->getTexture(3); }
 	Texture* getNormalMap() { return descriptorSet->getTexture(4); }
 	Texture* getParallaxMap() { return descriptorSet->getTexture(5); }
+	Texture* getEmissiveTexture() { return descriptorSet->getTexture(6); }
 	float getParallaxScale() { return shaderData.parallaxScale; }
 	float getShininess() { return shaderData.shininess; }
 

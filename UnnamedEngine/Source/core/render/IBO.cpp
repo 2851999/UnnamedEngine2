@@ -27,7 +27,7 @@
   * The IBO class
   *****************************************************************************/
 
-void IBO::setup() {
+void IBO::setup(VkBufferUsageFlags additionalVkUsageFlags) {
 	//Check whether using Vulkan or OpenGL
 	if (! BaseEngine::usingVulkan()) {
 		//Get OpenGL to generate the buffer
@@ -41,9 +41,12 @@ void IBO::setup() {
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, NULL, Renderer::convertToGL(usage));
 	}
 
-	if (BaseEngine::usingVulkan())
+	if (BaseEngine::usingVulkan()) {
+		VkBufferUsageFlags usageFlags = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | additionalVkUsageFlags;
+
 		//Create the Vulkan buffer
-		vulkanBuffer = new VulkanBufferObject(data.data(), sizeof(unsigned int) * data.size(), Vulkan::getDevice(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, usage == DataUsage::STATIC, usage != DataUsage::STATIC); //Assume wont be updated if static
+		vulkanBuffer = new VulkanBufferObject(data.data(), sizeof(unsigned int) * data.size(), Vulkan::getDevice(), usageFlags, usage == DataUsage::STATIC, usage != DataUsage::STATIC); //Assume wont be updated if static
+	}
 }
 
 void IBO::startRendering() {

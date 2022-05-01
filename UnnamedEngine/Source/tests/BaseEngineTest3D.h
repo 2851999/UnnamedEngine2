@@ -66,18 +66,24 @@ void Test::onInitialise() {
 }
 
 void Test::onCreated() {
-	//Shader::compileEngineShaderToSPIRV("ParticleShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
-	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontSDFShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	std::string glslangValidatorPath = "C:/VulkanSDK/1.3.204.1/Bin/glslangValidator.exe";
+
+	//Renderer::compileEngineShadersToSPIRV(glslangValidatorPath);
+
+	//Shader::compileEngineShaderToSPIRV("ParticleShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("billboard/BillboardedFontSDFShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("FontShader", glslangValidatorPath);
+	//Shader::compileEngineShaderToSPIRV("FontSDFShader", glslangValidatorPath);
 
 	camera->setSkyBox(new SkyBox(resourceLoader.getAbsPathTextures() + "skybox2/", ".jpg"));
 	camera->setFlying(true);
 
 	//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane.obj", false);
-	//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
+	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane2.obj", false);
 	//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "plane/", "plane3.obj", false);
-	//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh", false);
-	//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj", false);
+	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels() + "bob/", "bob_lamp_update.md5mesh", false);
+	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "teapot.obj", false);
 	//	MeshLoader::convertToEngineModel(resourceLoader.getAbsPathModels(), "gingerbreadman.dae", false);
 
 

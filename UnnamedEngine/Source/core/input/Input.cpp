@@ -60,7 +60,7 @@ void InputManager::addAvailableControllers() {
 		//Check that there is a controller at the current index
 		if (glfwJoystickPresent(i)) {
 			//Ensure this controller has not already been added
-			if (controllers.count(i) == 0)
+			if (controllers.find(i) == controllers.end())
 				//Add the controller
 				addController(new Controller(i));
 		}

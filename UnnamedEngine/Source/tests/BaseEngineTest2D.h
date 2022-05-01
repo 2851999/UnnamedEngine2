@@ -75,7 +75,9 @@ void Test::initialise() {
 }
 
 void Test::created() {
-	Shader::compileEngineShaderToSPIRV("TilemapShader", "C:/VulkanSDK/1.2.141.0/Bin/glslangValidator.exe");
+	std::string glslangValidatorPath = "C:/VulkanSDK/1.3.204.1/Bin/glslangValidator.exe";
+
+	Shader::compileEngineShaderToSPIRV("TilemapShader", glslangValidatorPath);
 
 	graphicsPipeline = new GraphicsPipeline(Renderer::getGraphicsPipelineLayout(Renderer::GRAPHICS_PIPELINE_SPRITE), Renderer::getDefaultRenderPass());
 

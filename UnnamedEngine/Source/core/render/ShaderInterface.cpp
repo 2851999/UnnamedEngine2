@@ -229,6 +229,10 @@ void ShaderInterface::setup(unsigned int shaderID, RenderShader* renderShader) {
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
 		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
+	} else if (shaderID == Renderer::SHADER_TEXTURE_PASSTHROUGH) {
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_CAMERA));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MATERIAL));
+		renderShader->add(getDescriptorSetLayout(DESCRIPTOR_SET_DEFAULT_MODEL));
 	}
 }
 
@@ -236,12 +240,15 @@ DescriptorSetLayout* ShaderInterface::createDescriptorSetLayout(unsigned int id)
 	//DescriptorSetLayout to return
 	DescriptorSetLayout* layout = NULL;
 
+	//Shader stage flags (for Vulkan RT)
+	VkShaderStageFlags shaderRTStageFlags = Window::getCurrentInstance()->getSettings().videoRaytracing ? (VK_SHADER_STAGE_ALL_GRAPHICS | VK_SHADER_STAGE_RAYGEN_BIT_KHR) : VK_SHADER_STAGE_ALL_GRAPHICS;
+
 	//Assign the layout based on the ID
 	switch (id) {
 		case DESCRIPTOR_SET_DEFAULT_CAMERA:
 			//Camera
 			layout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_CAMERA);
-			layout->addUBO(sizeof(ShaderBlock_Camera), DataUsage::STATIC, UBO_BINDING_LOCATION_CAMERA);
+			layout->addUBO(sizeof(ShaderBlock_Camera), DataUsage::STATIC, UBO_BINDING_LOCATION_CAMERA, shaderRTStageFlags);
 			break;
 		case DESCRIPTOR_SET_DEFAULT_MATERIAL:
 			//Material
@@ -252,6 +259,7 @@ DescriptorSetLayout* ShaderInterface::createDescriptorSetLayout(unsigned int id)
 			layout->addTexture2D(3);
 			layout->addTexture2D(4);
 			layout->addTexture2D(5);
+			layout->addTexture2D(6);
 
 			layout->addUBO(sizeof(ShaderBlock_Material), DataUsage::STATIC, UBO_BINDING_LOCATION_MATERIAL);
 			break;
@@ -374,6 +382,12 @@ DescriptorSetLayout* ShaderInterface::createDescriptorSetLayout(unsigned int id)
 			layout = new DescriptorSetLayout(DESCRIPTOR_SET_NUMBER_PER_LIGHT_BATCH);
 			layout->addUBO(sizeof(ShaderBlock_GaussianBlur), DataUsage::STATIC, UBO_BINDING_LOCATION_GAUSSIAN_BLUR);
 			break;
+		case DESCRIPTOR_SET_DEFAULT_RAYTRACING:
+			//Default raytracing (experimental)
+			layout = new DescriptorSetLayout(1);
+			layout->addAccelerationStructure(0);
+			layout->addStorageTexture(1);
+			break;
 	}
 
 	//Setup the layout if found
@@ -385,8 +399,9 @@ DescriptorSetLayout* ShaderInterface::createDescriptorSetLayout(unsigned int id)
 }
 
 DescriptorSetLayout* ShaderInterface::getDescriptorSetLayout(unsigned int id) {
-	if (descriptorSetLayouts.count(id) > 0)
-		return descriptorSetLayouts.at(id);
+	auto descriptorSetLayoutIt = descriptorSetLayouts.find(id);
+	if (descriptorSetLayoutIt != descriptorSetLayouts.end())
+		return descriptorSetLayoutIt->second;
 	else {
 		//Attempt to create one
 		DescriptorSetLayout* layout = createDescriptorSetLayout(id);

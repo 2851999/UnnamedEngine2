@@ -102,5 +102,8 @@ public:
 	inline unsigned int getImageCount() { return images.size(); }
 	inline Framebuffer* getDefaultFramebuffer(unsigned int currentFrame) { return defaultFramebuffers[currentFrame]; }
 	inline FramebufferAttachment* getDepthAttachment() { return depthAttachment; }
+
+	/* Used for raytracing */
+	inline VkImage getCurrentImage(int currentFrame) { return images[currentFrame]; }
 };
 

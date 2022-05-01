@@ -228,9 +228,10 @@ InputBindingAxis* InputBindings::createAxisBinding(std::string name) {
 
 InputBindingButton* InputBindings::getButtonBinding(std::string name) {
 	//Ensure that binding exists
-	if (buttonBindings.count(name) > 0)
+	auto buttonBindingIt = buttonBindings.find(name);
+	if (buttonBindingIt != buttonBindings.end())
 		//Return the binding
-		return buttonBindings.at(name);
+		return buttonBindingIt->second;
 	else {
 		//Log an error
 		Logger::log("No button binding with the name '" + name + "'", "InputBindings", LogType::Error);
@@ -241,9 +242,10 @@ InputBindingButton* InputBindings::getButtonBinding(std::string name) {
 
 InputBindingAxis* InputBindings::getAxisBinding(std::string name) {
 	//Ensure that binding exists
-	if (axisBindings.count(name) > 0)
+	auto axisBindingIt = axisBindings.find(name);
+	if (axisBindingIt != axisBindings.end())
 		//Return the binding
-		return axisBindings.at(name);
+		return axisBindingIt->second;
 	else {
 		//Log an error
 		Logger::log("No axis binding with the name '" + name + "'", "InputBindings", LogType::Error);

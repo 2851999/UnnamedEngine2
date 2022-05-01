@@ -86,10 +86,10 @@ TilemapLayer::TilemapLayer(std::string name, TextureAtlas* tileset, unsigned int
 					tileset->getSides(tileID - 1, top, left, bottom, right); //Take 1 to be the first tile
 
 				//Pad the texture, so a tiny part of the edge is not shown reducing bleeding artifacts
-				top += 0.5f / (float) tileset->getTexture()->getHeight();
+				top    += 0.5f / (float) tileset->getTexture()->getHeight();
 				bottom -= 0.5f / (float) tileset->getTexture()->getHeight();
-				left += 0.5f / (float) tileset->getTexture()->getWidth();
-				right -= 0.5f / (float) tileset->getTexture()->getWidth();
+				left   += 0.5f / (float) tileset->getTexture()->getWidth();
+				right  -= 0.5f / (float) tileset->getTexture()->getWidth();
 
 				if (! reduceTriangles) {
 					//Calculate the position in the data to assign (4 vertices per tile, each with 2 values)
