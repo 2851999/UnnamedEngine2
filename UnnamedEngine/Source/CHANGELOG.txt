@@ -1,8 +1,91 @@
 -------------------------------------------------------------
+Release 3 | Beta 1 | Development 0 | Experimental 1
+
+* Fixed bug: Validation layer warning for 'hostQueryReset'
+             when using RaytracedScene
+
+-------------------------------------------------------------
+Release 3 | Beta 1 (V0.5.9)
+
+* Added VulkanFeatures
+* Added RaytracingTest
+* Added RaytracingPipeline
+* Added SSBO
+* Added ShaderBuffer
+* Added RaytracedScene
+* Added Colour::BROWN & PURPLE
+* Added compileEngineShader(s)ToSPIRV methods to Renderer
+  for compiling engine shaders to SPIRV
+* Added 'videoRaytracing' setting (for Vulkan only)
+* Added 'additionalVkUsageFlags' to IBO, VBO and RenderData
+  setup methods as well as a boolean 'raytracing' to
+  MeshRenderData for assigning these flags so they are setup
+  to be used in the creation of a BLAS/TLAS
+* Added ability to add storage textures/acceleration
+  structures to a DescriptorSet (used for raytracing)
+* Added 'loadExternalFunction' to Vulkan
+* Added various extension methods used for raytracing in
+  VulkanExtensions
+* Added 'materialIndices' to MeshData for storing material
+  indices for use when raytracing
+* Added ability to add SSBOs to DescriptorSet's
+* Added a way to assign VkShaderStageFlags in
+  DescriptorSetLayout
+* Added SHADER_TEXTURE_PASSTHROUGH shader and
+  GRAPHICS_PIPELINE_TEXTURE_PASSTHROUGH graphics pipeline
+* Added raytraced lighting shaders (basicpbr & pbr for IBL)
+* Added pathtracing shaders
+* Added emittance colours/textures (.moddel files  should be
+  re-converted to work)
+* Added methods to Shader for compiling/loading multiple
+  shader module file with different names into one
+  shader (useful for Vulkan raytracing)
+* Added loadEngineShader methods to Shader
+* Added 'contains' method to utils_string
+* Added 'createNeededDirectories' method to utils_file
+
+* Renamed UBOs/SSBOs in DescriptorSet to just ShaderBuffer's
+
+* Modified Shader to accept other types of VkShaderModule
+* Modified Shader to create any needed directories while
+  compiling shaders to SPIRV
+
+* Fixed bug: Duplicate assignment of a matrix element in
+  Quaternion::toRotationMatrix
+* Fixed bug: Billboarded SDF text did not face the camera
+* Fixed bug: SSR was incorrect when moving
+* Fixed bug: Crash when adding more than one extension
+             while validation layers are enabled
+
+* Some cleanup
+
+* Updated to VulkanSDK 1.3.204
+
+-------------------------------------------------------------
+Release 3 | Beta 0 | Development 4 (V0.5.9)
+
+* Added skyboxes to lighting and pathtracing raytracing
+  shaders via RenderScene
+* Added pbr raytraced shaders for applying IBL
+
+* Renamed lighting raytraced shader to basicpbr
+
+* Fixed bug: Raytraced lighting shader was incorrect
+* Fixed bug: Incorrect descriptor types were used in
+             DescriptorSet for images/acceleration
+             structures
+* Fixed bug: .model files would not work with emissive
+             materials (they should be re-converted to work)
+* Fixed bug: Point and spot light shadows were incorrect
+             in the raytracing PBR lighting shaders
+
+* Some cleanup
+
+-------------------------------------------------------------
 Release 3 | Beta 0 | Development 3 | Experimental 4
 
 * Fixed bug: Point and spot light shadows were incorrect
-             in the PBR lighting shaders
+             in the raytracing PBR lighting shaders
 
 * Some cleanup
 

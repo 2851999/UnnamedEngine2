@@ -33,6 +33,7 @@ VkPhysicalDeviceRayTracingPipelineFeaturesKHR    VulkanFeatures::featuresRayTrac
 VkPhysicalDeviceAccelerationStructureFeaturesKHR VulkanFeatures::featuresAccelerationStructure = {};
 VkPhysicalDeviceShaderClockFeaturesKHR           VulkanFeatures::featuresShaderClock           = {};
 VkPhysicalDeviceDescriptorIndexingFeatures       VulkanFeatures::featuresDescriptorIndexing    = {};
+VkPhysicalDeviceHostQueryResetFeatures           VulkanFeatures::featuresHostQueryReset        = {};
 
 std::vector<void*> VulkanFeatures::requiredDeviceFeatures2 = {};
 
@@ -66,6 +67,10 @@ void VulkanFeatures::addRequired() {
 		featuresDescriptorIndexing.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
 		featuresDescriptorIndexing.runtimeDescriptorArray                    = VK_TRUE;
 		requiredDeviceFeatures2.push_back(&featuresDescriptorIndexing);
+
+		featuresHostQueryReset.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES;
+		featuresHostQueryReset.hostQueryReset = VK_TRUE;
+		requiredDeviceFeatures2.push_back(&featuresHostQueryReset);
 	}
 }
 
@@ -84,6 +89,7 @@ bool VulkanFeatures::checkSupport(VkPhysicalDevice& device) {
 		VkPhysicalDeviceAccelerationStructureFeaturesKHR enabledAccelerationStructureFeatures = {};
 		VkPhysicalDeviceShaderClockFeaturesKHR           enabledShaderClockFeatures           = {};
 		VkPhysicalDeviceDescriptorIndexingFeatures       enabledDescriptorIndexingFeatures    = {};
+		VkPhysicalDeviceHostQueryResetFeatures           enabledHostQueryResetFeatures        = {};
 
 		enabledVK11Features.sType                  = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
 		enabledBufferDeviceAddressFeatures.sType   = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
@@ -91,16 +97,17 @@ bool VulkanFeatures::checkSupport(VkPhysicalDevice& device) {
 		enabledAccelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
 		enabledShaderClockFeatures.sType           = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CLOCK_FEATURES_KHR;
 		enabledDescriptorIndexingFeatures.sType    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+		enabledHostQueryResetFeatures.sType        = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES;
 
 		//Required device features
-		std::vector<void*> requiredDeviceFeatures = { &enabledVK11Features, &enabledBufferDeviceAddressFeatures, &enabledRayTracingPipelineFeatures, &enabledAccelerationStructureFeatures, &enabledShaderClockFeatures, &enabledDescriptorIndexingFeatures };
+		std::vector<void*> requiredDeviceFeatures = { &enabledVK11Features, &enabledBufferDeviceAddressFeatures, &enabledRayTracingPipelineFeatures, &enabledAccelerationStructureFeatures, &enabledShaderClockFeatures, &enabledDescriptorIndexingFeatures, &enabledHostQueryResetFeatures };
 
 		VkPhysicalDeviceFeatures2 supportedFeatures2 = {};
 		supportedFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 		supportedFeatures2.pNext = VulkanFeatures::setupPNext(requiredDeviceFeatures);
 		vkGetPhysicalDeviceFeatures2(device, &supportedFeatures2);
 
-		featuresSupported = featuresSupported && supportedFeatures.shaderInt64 && enabledBufferDeviceAddressFeatures.bufferDeviceAddress && enabledRayTracingPipelineFeatures.rayTracingPipeline && enabledAccelerationStructureFeatures.accelerationStructure && enabledShaderClockFeatures.shaderSubgroupClock && enabledDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing && enabledDescriptorIndexingFeatures.runtimeDescriptorArray;
+		featuresSupported = featuresSupported && supportedFeatures.shaderInt64 && enabledBufferDeviceAddressFeatures.bufferDeviceAddress && enabledRayTracingPipelineFeatures.rayTracingPipeline && enabledAccelerationStructureFeatures.accelerationStructure && enabledShaderClockFeatures.shaderSubgroupClock && enabledDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing && enabledDescriptorIndexingFeatures.runtimeDescriptorArray && enabledHostQueryResetFeatures.hostQueryReset;
 	}
 
 	return featuresSupported;
